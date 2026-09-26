@@ -881,7 +881,7 @@ function clearPivotChoice() {
 }
 
 async function attemptDrop(col) {
-  if (gameOver || busy || !queue.length) return;
+  if (gameOver || busy || !queue.length || vsPaused) return;
   if (queue[0].type === 'hack' && queue[0].id === 'pivot') {
     if (pivotFrom !== null) {
       if (Math.abs(col - pivotFrom) !== 1) {
@@ -989,6 +989,7 @@ function finishTurn() {
   else if (timeUp) endGame('time');
   else if (vsLost) endGame('vs-lose');
   else if (cpuDown) endGame('win');
+  else if (pauseQueued) openPause();
   else if (breached) endGame('breached');
   else if (dealLimit() < Infinity && !queue.length) endGame('daily');
   else if (mode === 'puzzle') checkPuzzle();
@@ -1430,6 +1431,7 @@ function endGame(reason = 'trace') {
   if (mode === 'vs') {
     if (reason === 'trace') endings.trace = [`${CpuBoard.BOTS[vsBot].label} WINS`, `The ${vsName()} traced you first.`];
     Progress.vsResult(vsLevel, reason === 'win');
+    updatePauseBtn(); // (QUIT again)
     stopVs();
     holdCpu(false);
   }
@@ -1838,6 +1840,9 @@ let vsThem = 0;
 let vsCounted = 0;
 let stealPts = 0;
 let vsStarted = false; // START pressed on the setup overlay
+let vsPaused = false; // PAUSE: the board covered, the CPU's clock stopped
+let pauseQueued = false; // PAUSE pressed mid-drop: it opens once the drop finishes
+let restartQueued = false; // RESTART from PAUSE: the new match starts without the setup screen
 let cpuClock = 0;
 const cpuStatEl = document.getElementById('cpu-stat');
 const cpuFaceEl = document.getElementById('cpu-face'); // BOT, the CPU's face
@@ -1849,6 +1854,9 @@ function startVs() {
   cpuPending = 0;
   cpuDown = false;
   vsLost = false;
+  vsPaused = false;
+  pauseQueued = false;
+  document.getElementById('vs-pause').hidden = true;
   vsWhy = '';
   vsMe = vsThem = vsMode === 'tug' ? vsPool : 0;
   vsCounted = score;
@@ -1873,6 +1881,12 @@ function startVs() {
   const bits = seeded(hashString(`bytefall:vs:${vsSeed}:queue`)); // the same bits you get
   cpu = CpuBoard.create(vsLevel, rnd, () => 1 + Math.floor(bits() * CpuBoard.COLS), vsLayers ? BASE_INTERVAL : 0, vsBot, vsExploits);
   cpuFrames = []; // (a new match: nothing of the last one left to play)
+  if (restartQueued) { // RESTART from PAUSE: straight into the new match
+    restartQueued = false;
+    vsStarted = true;
+    vsSetupEl.hidden = true;
+    setTimeout(updateHud); // (the first bit shows)
+  }
   showVs();
 }
 function stopVs() {
@@ -2013,7 +2027,7 @@ setInterval(() => {
   const now = performance.now();
   const dt = now - lastCpuTick;
   lastCpuTick = now;
-  if (mode !== 'vs' || !cpu || !vsStarted || gameOver || cpuDown || vsLost || document.hidden || panelOpen()) return;
+  if (mode !== 'vs' || !cpu || !vsStarted || gameOver || cpuDown || vsLost || vsPaused || document.hidden || panelOpen()) return;
   cpuClock += dt;
   if (cpuClock >= cpu.delay) {
     cpuClock -= cpu.delay;
@@ -2157,6 +2171,25 @@ const BOT_LINES = {
   glitch: { think: '?#@', happy: 'H4H4', hit: 'ERR0R', worried: 'W4RN', dead: 'NULL', smug: 'G_G', annoyed: '-_-', devious: '>:)' },
 };
 let botFlash = null; // { mood, until }
+// Now and then its waiting (idle) and planning (think) faces take a variant: waiting BORED
+// (half-lidded, sighing) or TAPPING (glancing up, a foot tapping); planning SCAN (eyes sweeping
+// the board) or PONDER (looking up, a hand to its chin). The level's own face shows otherwise.
+const BOT_VARIANTS = { idle: ['', '', 'bored', 'tapping'], think: ['', 'scan', 'ponder'] };
+const BOT_VARIANT_LINES = { bored: 'ZZZ', tapping: 'YOUR MOVE', scan: 'CALC...', ponder: 'HMM...' };
+let botVariant = { mood: null, v: '', until: 0 };
+function botVariantFor(mood) {
+  const opts = BOT_VARIANTS[mood];
+  if (!opts) {
+    botVariant = { mood, v: '', until: 0 };
+    return '';
+  }
+  const now = performance.now();
+  if (botVariant.mood !== mood || now > botVariant.until) {
+    // (a new pick on each change of mood, and every 5-9s of a long wait)
+    botVariant = { mood, v: opts[Math.floor(Math.random() * opts.length)], until: now + 5000 + Math.random() * 4000 };
+  }
+  return botVariant.v;
+}
 // A new bot picked: the old one pixelates out, then the new one resolves in (0.25s each)
 let botSwapping = false;
 function swapBot() {
@@ -2182,15 +2215,19 @@ function botMood(flash = null, ms = 900) {
   if (flash) botFlash = { mood: flash, until: performance.now() + ms };
   let mood = 'idle';
   if (gameOver && vsStarted) mood = cpuDown ? 'dead' : 'smug';
+  else if (vsPaused) mood = 'paused'; // -_- : waiting for you to come back
   else if (botFlash && performance.now() < botFlash.until) mood = botFlash.mood;
   else if (cpu && Math.max(...cpu.columns().map((c) => c.length)) >= CpuBoard.ROWS - 1) mood = 'worried';
   else if (vsStarted && cpu && cpu.held()) mood = 'devious'; // holding an exploit: scheming
   else if (vsStarted && cpu && cpuClock > cpu.delay - 450) mood = 'think';
   cpuFaceEl.dataset.level = vsLevel;
   swapBot();
-  const say = mood === 'idle' ? BOT_REST[vsLevel] : BOT_LINES[vsBot][mood];
-  if (cpuFaceEl.dataset.mood !== mood || botSayEl.textContent !== say) {
+  const variant = botVariantFor(mood);
+  const say = variant ? BOT_VARIANT_LINES[variant] : mood === 'idle' ? BOT_REST[vsLevel] : mood === 'paused' ? "I'LL WAIT" : BOT_LINES[vsBot][mood];
+  if (cpuFaceEl.dataset.mood !== mood || (cpuFaceEl.dataset.variant || '') !== variant || botSayEl.textContent !== say) {
     cpuFaceEl.dataset.mood = mood;
+    if (variant) cpuFaceEl.dataset.variant = variant;
+    else delete cpuFaceEl.dataset.variant;
     botSayEl.textContent = say;
   }
 }
@@ -2201,6 +2238,7 @@ const vsSetupEl = document.getElementById('vs-setup');
 function startMatch() {
   if (mode !== 'vs' || vsStarted || gameOver) return;
   vsStarted = true;
+  showVs(); // (the play style card goes, PAUSE takes the corner)
   FX.burst([{ el: vsSetupEl, type: 'warning' }]);
   vsSetupEl.hidden = true;
   SFX.play('static');
@@ -2213,6 +2251,11 @@ const vsQuitBtn = document.getElementById('vs-quit');
 // QUIT: in a match, a second press (it turns red on the first) ends it and goes back to the VS
 // menu; on the VS menu, one press goes back to the previous mode
 function quitVs() {
+  if (vsStarted && !gameOver) { // in a match: PAUSE
+    if (busy) pauseQueued = true; // (once the drop finishes)
+    else openPause();
+    return;
+  }
   if (vsStarted) {
     requestReset(vsQuitBtn, 'TAP AGAIN TO QUIT'); // the new run starts at the VS menu
     return;
@@ -2226,6 +2269,68 @@ function quitVs() {
   resetNow();
 }
 vsQuitBtn.addEventListener('click', quitVs);
+
+// PAUSE (the lower-left corner in a match): the board is covered as on the setup screen and the
+// CPU's clock stops. RESUME carries on; RESTART (a new match, same options) and EXIT (back to the
+// setup screen) each take a second tap to confirm.
+const vsPauseEl = document.getElementById('vs-pause');
+function openPause() {
+  pauseQueued = false;
+  if (mode !== 'vs' || !vsStarted || gameOver || vsPaused) return;
+  vsPaused = true;
+  vsPauseEl.hidden = false;
+  vsPauseEl.style.animation = 'none';
+  void vsPauseEl.offsetWidth;
+  vsPauseEl.style.animation = '';
+  SFX.play('static');
+  botMood();
+  updatePauseBtn();
+}
+function resumeMatch() {
+  if (!vsPaused) return;
+  disarmReset();
+  vsPaused = false;
+  FX.burst([{ el: vsPauseEl, type: 'warning' }]);
+  vsPauseEl.hidden = true;
+  SFX.play('static');
+  botMood();
+  updatePauseBtn();
+}
+// RESTART / EXIT: the first tap arms (CONFIRM?), the second melts the board and starts over
+function pauseConfirm(btn, apply) {
+  if (!armed || armed.btn !== btn) {
+    armReset(btn, 'CONFIRM?');
+    return;
+  }
+  vsPauseEl.hidden = true; // (still paused: the CPU waits out the melt)
+  requestReset(btn, 'CONFIRM?', apply);
+}
+document.getElementById('pause-resume').addEventListener('click', resumeMatch);
+document.getElementById('pause-restart').addEventListener('click', (e) => pauseConfirm(e.currentTarget, () => { restartQueued = true; }));
+document.getElementById('pause-exit').addEventListener('click', (e) => pauseConfirm(e.currentTarget));
+document.addEventListener('keydown', (e) => {
+  if (mode !== 'vs' || (e.key !== 'Escape' && e.key !== 'p' && e.key !== 'P') || panelOpen()) return;
+  if (vsPaused) resumeMatch();
+  else if (vsStarted && !gameOver) quitVs();
+});
+// The corner button: PAUSE in a match, QUIT otherwise
+function updatePauseBtn() {
+  const pause = mode === 'vs' && vsStarted && !gameOver;
+  vsQuitBtn.classList.toggle('as-pause', pause);
+  vsQuitBtn.setAttribute('aria-label', pause ? 'Pause' : 'Quit VS');
+  vsQuitBtn.title = pause ? 'Pause' : 'Quit';
+}
+// Before START: the picked bot's play style over its board
+function showCpuDesc() {
+  const el = document.getElementById('cpu-desc');
+  el.hidden = mode !== 'vs' || vsStarted;
+  if (el.hidden) return;
+  const [kind, text] = CpuBoard.BOTS[vsBot].desc.split(' // ');
+  el.innerHTML = `<b>${kind}</b><span>${text}</span>`;
+  el.style.fontSize = '';
+  let size = parseFloat(getComputedStyle(el).fontSize);
+  while (el.scrollHeight > el.clientHeight + 1 && size > 7) el.style.fontSize = `${(size -= 0.5)}px`;
+}
 
 // The status line in the mode row's place, and how many stat rows the left column has
 function updateVsChrome() {
@@ -2322,6 +2427,8 @@ function showVs() {
   cpuFaceEl.hidden = !vs;
   if (vs) botMood();
   incomingEl.hidden = !vs || incoming === 0;
+  showCpuDesc();
+  updatePauseBtn();
   if (!vs) return;
   // ▼ 14 INCOMING, then a pip for each block (up to 32, in groups of 8)
   incomingEl.innerHTML = `<span>\u25BC ${incoming} INCOMING</span><span class="pips">${'<i></i>'.repeat(incoming)}</span>`;

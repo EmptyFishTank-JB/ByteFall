@@ -1069,7 +1069,19 @@ body.vs-mode .stat-best { display: none; }
 .difficulty#vs-levels button, #vs-layers-btn, #vs-exploits-btn { white-space: nowrap; padding-left: 8px; padding-right: 8px; }
 /* VS CPU: the opponent's mini board, the incoming-garbage badge, and a slimmer header */
 /* The CPU's board: a small copy of the grid with its numbers */
-.cpu-stat { cursor: zoom-in; user-select: none; -webkit-user-select: none; touch-action: none; }
+.cpu-stat { cursor: zoom-in; user-select: none; -webkit-user-select: none; touch-action: none; position: relative; }
+/* Before START: the picked bot's play style, a bordered see-through card over its board, the
+   text centered both ways (script.js shrinks it to fit) */
+.cpu-desc {
+  position: absolute; inset: 22px 6px 6px; z-index: 2; margin: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; overflow: hidden;
+  padding: 4px; border: 1px solid var(--fg-dim); border-radius: 3px;
+  background: color-mix(in srgb, var(--board-bg) 72%, transparent);
+  font-size: 10px; line-height: 1.35; letter-spacing: 0.5px; text-align: center; color: var(--fg);
+  pointer-events: none;
+}
+.cpu-desc[hidden] { display: none; }
+.cpu-desc b { color: var(--accent); font-weight: normal; letter-spacing: 1px; }
 .cpu-stat .sub { font-size: 10px; margin-top: 3px; }
 .cpu-stat.low .label { color: var(--danger); }
 .cpu-hint { display: block; margin-top: 2px; font-size: 8px; letter-spacing: 1px; color: var(--fg-dim); opacity: 0.7; }
@@ -1869,6 +1881,9 @@ header { margin-bottom: 6px; }
 .restart-icon, .quit-icon { left: 12px; }
 /* QUIT: dim like the exploit button beside it; red while pressed and while it waits to confirm */
 .quit-icon { color: var(--fg-dim); opacity: 0.6; touch-action: none; }
+/* In a match the corner button is PAUSE (two bars); otherwise QUIT */
+.quit-icon .pause-glyph, .quit-icon.as-pause .quit-glyph { display: none; }
+.quit-icon.as-pause .pause-glyph { display: block; }
 .exploit-icon { right: 12px; color: var(--fg-dim); opacity: 0.6; }
 .exploit-glyph { display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; line-height: 1; }
 .exploit-glyph svg { width: 20px; height: 20px; }
@@ -1995,10 +2010,10 @@ body.vs-mode .cpu-face:not([hidden]) { display: flex; flex-direction: column; al
 .cpu-bot .sweat { fill: var(--accent); }
 .cpu-bot .teeth { fill: var(--bot); }
 /* Resting (idle, and thinking): the level's face */
-.cpu-face:is([data-mood="idle"], [data-mood="think"])[data-level="easy"] :is(.eyes-happy, .mouth-smile),
-.cpu-face:is([data-mood="idle"], [data-mood="think"])[data-level="normal"] :is(.eyes-open, .mouth-smirk),
-.cpu-face:is([data-mood="idle"], [data-mood="think"])[data-level="hard"] :is(.eyes-angry, .mouth-frown),
-.cpu-face:is([data-mood="idle"], [data-mood="think"])[data-level="insane"] :is(.eyes-angry, .mouth-teeth, .teeth) { display: inline; }
+.cpu-face:is([data-mood="idle"], [data-mood="think"]):not([data-variant])[data-level="easy"] :is(.eyes-happy, .mouth-smile),
+.cpu-face:is([data-mood="idle"], [data-mood="think"]):not([data-variant])[data-level="normal"] :is(.eyes-open, .mouth-smirk),
+.cpu-face:is([data-mood="idle"], [data-mood="think"]):not([data-variant])[data-level="hard"] :is(.eyes-angry, .mouth-frown),
+.cpu-face:is([data-mood="idle"], [data-mood="think"]):not([data-variant])[data-level="insane"] :is(.eyes-angry, .mouth-teeth, .teeth) { display: inline; }
 .cpu-face[data-level="insane"] .eyes-angry { fill: var(--danger); filter: drop-shadow(0 0 1px var(--danger)); }
 .cpu-face[data-level="insane"][data-bot="glitch"] .eyes-angry { fill: var(--alarm-text); filter: drop-shadow(0 0 1px var(--alarm-text)); } /* (red on its red body) */
 /* Moments and endings */
@@ -2008,7 +2023,12 @@ body.vs-mode .cpu-face:not([hidden]) { display: flex; flex-direction: column; al
 .cpu-face[data-mood="dead"] :is(.eyes-x, .mouth-flat),
 .cpu-face[data-mood="smug"] :is(.eyes-squint, .mouth-smirk),
 .cpu-face[data-mood="annoyed"] :is(.eyes-annoyed, .mouth-under),
-.cpu-face[data-mood="devious"] :is(.eyes-devious, .mouth-grin) { display: inline; }
+.cpu-face[data-mood="devious"] :is(.eyes-devious, .mouth-grin),
+.cpu-face[data-mood="paused"] :is(.eyes-annoyed, .mouth-flat),
+.cpu-face[data-variant="bored"] :is(.eyes-squint, .mouth-flat),
+.cpu-face[data-variant="tapping"] :is(.eyes-open, .mouth-under),
+.cpu-face[data-variant="scan"] :is(.eyes-open, .mouth-flat),
+.cpu-face[data-variant="ponder"] :is(.eyes-open, .mouth-smirk) { display: inline; }
 .bot-say { font-size: 9px; letter-spacing: 1px; color: var(--fg-dim); min-height: 1em; white-space: nowrap; }
 .cpu-face[data-mood="happy"] .bot-say, .cpu-face[data-mood="smug"] .bot-say { color: var(--bot); }
 .cpu-face:is([data-mood="hit"], [data-mood="worried"], [data-mood="dead"]) .bot-say,
@@ -2016,8 +2036,25 @@ body.vs-mode .cpu-face:not([hidden]) { display: flex; flex-direction: column; al
 /* Idle: a bob and a blink; think: eyes darting; happy: hops; hit: shakes; worried: shivers and
    sweats; GLITCH's slices slip about all the time */
 .cpu-face[data-mood="idle"] .bot { animation: bot-bob 1.2s steps(2) infinite; }
-.cpu-face[data-mood="idle"] .eyes { animation: bot-blink 3.6s steps(1) infinite; transform-origin: 8px 7px; }
-.cpu-face[data-mood="think"] .eyes { animation: bot-look 0.8s steps(1) infinite; }
+.cpu-face[data-mood="idle"] .eyes { animation: bot-blink 3.7s steps(1) infinite; transform-origin: 8px 7px; }
+/* ...and glances around now and then: to each side and up at an angle */
+.cpu-face[data-mood="idle"]:not([data-variant]) .bot-face { animation: bot-glance 9s steps(1) infinite; }
+.cpu-face[data-mood="think"]:not([data-variant]) .eyes { animation: bot-look 0.8s steps(1) infinite; }
+/* Waiting variants. BORED: half-lidded, now and then a sigh (it sinks a pixel); TAPPING: looking
+   up from side to side, a foot tapping */
+.cpu-face[data-variant="bored"] .bot { animation: bot-sigh 3.2s steps(1) infinite; }
+.cpu-face[data-variant="tapping"] .bot-face { animation: bot-up-glance 2.4s steps(1) infinite; }
+.cpu-face[data-variant="tapping"] .eyes { animation: bot-blink 3.7s steps(1) infinite; transform-origin: 8px 7px; }
+.cpu-face[data-variant="tapping"] .leg-a { animation: bot-step 0.4s steps(1) infinite; }
+/* Planning variants. SCAN: eyes sweeping across the board; PONDER: looking up to the side, a
+   hand to its chin */
+.cpu-face[data-variant="scan"] .eyes { animation: bot-scan 0.9s steps(1) infinite; }
+.cpu-face[data-variant="ponder"] .bot-face { transform: translate(1px, -1px); }
+.cpu-face[data-variant="ponder"] .arm-r { transform: translateY(-2px); }
+.cpu-face[data-variant="ponder"] .eyes { animation: bot-blink 2.9s steps(1) infinite; transform-origin: 8px 7px; }
+/* PAUSED (-_-): mildly annoyed, waiting: a slow tap, a side-eye now and then */
+.cpu-face[data-mood="paused"] .leg-b { animation: bot-step 0.8s steps(1) infinite; }
+.cpu-face[data-mood="paused"] .bot-face { animation: bot-side-eye 5s steps(1) infinite; }
 .cpu-face[data-mood="happy"] .bot { animation: bot-hop 0.3s steps(2) infinite; }
 .cpu-face:is([data-mood="happy"], [data-mood="smug"]) .leg-a { animation: bot-step 0.3s steps(1) infinite; }
 .cpu-face[data-mood="hit"] .bot { animation: bot-shake 0.12s steps(2) infinite; }
@@ -2052,18 +2089,35 @@ body.vs-mode .cpu-face:not([hidden]) { display: flex; flex-direction: column; al
 @keyframes bot-bob { 0% { transform: translateY(0); } 100% { transform: translateY(-0.5px); } }
 @keyframes bot-blink { 0%, 92% { transform: scaleY(1); } 94% { transform: scaleY(0.15); } 97% { transform: scaleY(1); } }
 @keyframes bot-look { 0% { transform: translateX(-1px); } 50% { transform: translateX(1px); } }
+@keyframes bot-glance {
+  0% { transform: translate(0, 0); }
+  14% { transform: translate(-1px, 0); }
+  22% { transform: translate(0, 0); }
+  36% { transform: translate(1px, -1px); }
+  43% { transform: translate(0, 0); }
+  58% { transform: translate(1px, 0); }
+  66% { transform: translate(0, 0); }
+  80% { transform: translate(-1px, -1px); }
+  87% { transform: translate(0, 0); }
+}
+@keyframes bot-up-glance { 0% { transform: translate(-1px, -1px); } 50% { transform: translate(1px, -1px); } }
+@keyframes bot-scan { 0% { transform: translateX(-1px); } 25% { transform: translateX(0); } 50% { transform: translateX(1px); } 75% { transform: translateX(0); } }
+@keyframes bot-sigh { 0% { transform: translateY(0); } 70% { transform: translateY(1px); } 90% { transform: translateY(0); } }
+@keyframes bot-side-eye { 0% { transform: translate(0, 0); } 60% { transform: translate(-1px, 0); } 80% { transform: translate(0, 0); } }
 @keyframes bot-hop { 0% { transform: translateY(0); } 100% { transform: translateY(-1px); } }
 @keyframes bot-step { 0% { transform: translateY(0); } 50% { transform: translateY(-1px); } }
 @keyframes bot-shake { 0% { transform: translateX(-0.5px); } 100% { transform: translateX(0.5px); } }
 @keyframes bot-sweat { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(3px); opacity: 0; } }
 @keyframes bot-slip { 0%, 70% { transform: translateX(0); } 75% { transform: translateX(1px); } 85% { transform: translateX(-1px); } 90% { transform: translateX(0); } }
-@media (prefers-reduced-motion: reduce) { .cpu-face .bot, .cpu-face .eyes, .cpu-face .leg, .cpu-face .arm, .cpu-face .sweat, .cpu-face .slice-a, .cpu-face .slice-c { animation: none !important; } }
+@media (prefers-reduced-motion: reduce) { .cpu-face .bot, .cpu-face .bot-face, .cpu-face .eyes, .cpu-face .leg, .cpu-face .arm, .cpu-face .sweat, .cpu-face .slice-a, .cpu-face .slice-c { animation: none !important; } }
 /* VS: the win / loss banner shows over the boards without darkening them */
 body.vs-mode .overlay { background: transparent; }
 /* The opponent and level pickers: four buttons a row, on one line */
 .vs-setup .difficulty { flex-wrap: nowrap; gap: 4px; }
 .vs-setup .difficulty button { padding: 5px 6px; font-size: 11px; letter-spacing: 1px; white-space: nowrap; }
 .vs-setup #vs-options-row { gap: 6px; }
+.vs-pause .pause-row { gap: 8px; }
+.vs-pause .pause-row button { font-size: 12px; padding: 6px 14px; min-width: 9ch; }
 .vs-setup .difficulty.two-rows { flex-wrap: wrap; justify-content: center; max-width: 100%; }
 .vs-setup #vs-options-row button { font-size: 12px; padding: 6px 10px; }
 /* The game mode, and its target score or starting points: − TARGET 2,000 + (dimmed for CLASSIC) */

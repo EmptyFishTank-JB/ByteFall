@@ -21,10 +21,10 @@ const CpuBoard = (() => {
   // The bots: how each one weighs points against a risky board, extra blunders, and its speed
   // (a multiple of the level's delay; GLITCH's jumps around each move)
   const BOTS = {
-    bot: { label: 'BOT', pointsW: 1.5, riskW: 1, blunder: 0, speed: 1 },
-    grifter: { label: 'GRIFTER', pointsW: 3, riskW: 0.55, blunder: 0, speed: 1 },
-    bunker: { label: 'BUNKER', pointsW: 0.8, riskW: 1.8, blunder: 0, speed: 1.15 },
-    glitch: { label: 'GLITCH', pointsW: 1.5, riskW: 1, blunder: 0.08, speed: 0.8, erratic: true },
+    bot: { label: 'BOT', desc: 'BALANCED // Weighs points against risk and keeps a steady pace.', pointsW: 1.5, riskW: 1, blunder: 0, speed: 1 },
+    grifter: { label: 'GRIFTER', desc: 'GREEDY // Chases big chains and takes risks to get them.', pointsW: 3, riskW: 0.55, blunder: 0, speed: 1 },
+    bunker: { label: 'BUNKER', desc: 'DEFENSIVE // Keeps its board low and flat, and plays a little slower.', pointsW: 0.8, riskW: 1.8, blunder: 0, speed: 1.15 },
+    glitch: { label: 'GLITCH', desc: 'ERRATIC // Fast, with a pace that lurches move to move, and the odd slip.', pointsW: 1.5, riskW: 1, blunder: 0.08, speed: 0.8, erratic: true },
   };
 
   const clone = (columns) => columns.map((col) => col.map((cell) => cell && { ...cell }));
