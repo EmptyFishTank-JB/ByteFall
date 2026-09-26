@@ -2206,3 +2206,5 @@ body.player-open { overflow: hidden; }
 .mp-tracks button:disabled { cursor: default; color: rgba(var(--fg-rgb), 0.3); }
 .mp-tracks .need { margin-left: auto; font-size: 9px; letter-spacing: 0; color: var(--accent); }
 .mp-note { margin: 0; font-size: 10px; line-height: 1.5; text-align: center; color: var(--panel-text); opacity: 0.8; }
+/* OPEN MUSIC PLAYER: the same gap above the visualizer as between the menu's other buttons */
+.settings #open-player-btn { margin-bottom: 6px; }
