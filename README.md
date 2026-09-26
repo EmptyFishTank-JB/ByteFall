@@ -79,7 +79,7 @@ A drop earns at most one exploit, picked from the longest chain it set off.
 | DAILY | Four daily games, picked on a second row under the modes. Each is the same for everyone that UTC day, and each keeps a daily streak. **DECRYPT**: a fixed stack of 40 bits dealt from a seed of the date (Normal rules, the five standard exploits); it ends when the stack runs out. **PUZZLE**: a new puzzle every day (from `js/data/daily-puzzles.js`), harder through the week: Monday is 1 bit, Sunday 4 bits with layers; you get 4 tries a day (a try counts from its first drop); once it's solved or the tries are used up, later runs are practice. **BLITZ**: the same bits for everyone against a 60-second clock. **BREACH** (daily only): the board starts with a 3-row firewall of level 1 and 2 layers and you get 30 bits to break through; each layer broken is +25 and clearing the whole board is +1,000. For DECRYPT, BLITZ and BREACH your first run each day is the official score and later runs are practice. SHARE on the results screen (every daily game, win or lose; the puzzle shares one square per try) sends or copies your result |
 | BLITZ | Normal rules against a 2-minute clock that starts on your first drop (paused while the tab is hidden) |
 | ZEN | Normal rules with no encryption layers and no clock |
-| VS | VS CPU (`js/cpu.js`): you against a computer opponent at EASY / NORMAL / HARD / INSANE (faster and smarter up the levels; HARD unlocks after 5 wins on NORMAL, INSANE after 5 on HARD), played by one of four bots with their own look, lines and play style: BOT (balanced), GRIFTER (greedy: chases big chains, takes risks; 3 wins), BUNKER (defensive: low and flat, a little slower; 10 wins) and GLITCH (fast and erratic; 20 wins). The level sets the bot's resting face (EASY happy, NORMAL confident, HARD angry, INSANE red-eyed with bared teeth); switching bots pixelates one out and the next in. EXPLOITS: ON / OFF (setup screen) lets both sides use exploits: yours as in the other modes, and the CPU earns one with a chain of 3+ (WORM VIRUS on its tallest column, DICTIONARY ATTACK peeling every layer), wearing a devious grin while it holds one. Before START, a see-through card over the CPU's board describes the picked bot's play style. Toggling a setting gets a -_- from the bot; a locked bot or level shows a notice above the setup title, on Normal rules with the same bits in the same order. A setup screen over your board picks the level and, below it, LAYERS: ON / OFF (the usual layer row every 8 drops, on both boards); START bursts it apart and starts the CPU's clock, and it comes back after the win / loss screen. Every 30 points a drop scores sends one encrypted block (a one-peel layer hiding a random bit) onto the other board, falling from the top into random columns, one at a time, after its next move; your chains cancel blocks headed your way first, and only the rest go to the other side. At most 8 / 16 / 24 / 32 blocks (EASY / NORMAL / HARD / INSANE) can wait to land on either board; any sent past that are lost. Four game modes (setup screen, top row): CLASSIC (the first to overflow loses); ATTRITION (both start at 0, and the points from chain links 2x and up and NIBBLE bonuses also come off the other side's score; first to the target wins); DEATHMATCH (a straight race to the target score); TUG OF WAR (both start with the same points, and every point scored is taken from the other side; whoever runs out loses). The target (500 to 10,000, default 2,000) or starting points (500 to 5,000, default 1,000) are set with − / + in steps of 500. Blocks fly and overflowing loses in every mode. The incoming banner shows a small pip per block (groups of 8). In a match the header gives way to a VS. CPU title between the top icons (green VS., amber CPU), the level and layers line, your stats in a 2x2 grid of squares (SCORE, CHAIN / ENCRYPT IN, CURRENT, each value centered with its label centered above; a KEYLOGGER's preview splits the CURRENT square) and BOT (the CPU's face: a pixel chip with legs that idles, blinks and glances to the sides and up now and then, looks around before each move (waiting and planning each have two variants now and then: BORED / TAPPING, SCAN / PONDER), grins when it scores, flinches when your blocks land, sweats with a tall stack, and ends on X eyes or a smug GG), the CPU's board (with its numbers, playing each move back: bits falling, decrypting and layers peeling; press and hold it to see it full size over yours with all your board's effects), laid out so your board keeps its regular size and place; PAUSE (the lower-left corner, or Esc / P) in a match covers your board as the setup screen does and stops the CPU's clock (the bot waits, -_-, tapping a foot): RESUME, RESTART (a new match with the same options) and EXIT (back to the setup screen), the last two taking a second tap to confirm; a pause pressed mid-drop opens once the drop finishes. On the setup screen the corner is QUIT, and one press goes back to your previous mode (dragging off the button before letting go cancels a press). CURRENT shows [?] until START. The CPU pauses while a panel is open. RECORDS → STATS keeps wins and losses per level |
+| VS | VS CPU (`js/cpu.js`): you against a computer opponent at EASY / NORMAL / HARD / INSANE (faster and smarter up the levels; HARD unlocks at Lv 14, INSANE at Lv 46), played by one of four bots with their own look, lines and play style: BOT (balanced), GRIFTER (greedy: chases big chains, takes risks; Lv 6), BUNKER (defensive: low and flat, a little slower; Lv 17) and GLITCH (fast and erratic; Lv 33). The level sets the bot's resting face (EASY happy, NORMAL confident, HARD angry, INSANE red-eyed with bared teeth); switching bots pixelates one out and the next in. EXPLOITS: ON / OFF (setup screen) lets both sides use exploits: yours as in the other modes, and the CPU earns one with a chain of 3+ (WORM VIRUS on its tallest column, DICTIONARY ATTACK peeling every layer), wearing a devious grin while it holds one. Before START, a see-through card over the CPU's board describes the picked bot's play style. Toggling a setting gets a -_- from the bot; a locked bot or level shows a notice above the setup title, on Normal rules with the same bits in the same order. A setup screen over your board picks the level and, below it, LAYERS: ON / OFF (the usual layer row every 8 drops, on both boards); START bursts it apart and starts the CPU's clock, and it comes back after the win / loss screen. Every 30 points a drop scores sends one encrypted block (a one-peel layer hiding a random bit) onto the other board, falling from the top into random columns, one at a time, after its next move; your chains cancel blocks headed your way first, and only the rest go to the other side. At most 8 / 16 / 24 / 32 blocks (EASY / NORMAL / HARD / INSANE) can wait to land on either board; any sent past that are lost. Four game modes (setup screen, top row): CLASSIC (the first to overflow loses); ATTRITION (both start at 0, and the points from chain links 2x and up and NIBBLE bonuses also come off the other side's score; first to the target wins); DEATHMATCH (a straight race to the target score); TUG OF WAR (both start with the same points, and every point scored is taken from the other side; whoever runs out loses). The target (500 to 10,000, default 2,000) or starting points (500 to 5,000, default 1,000) are set with − / + in steps of 500. Blocks fly and overflowing loses in every mode. The incoming banner shows a small pip per block (groups of 8). In a match the header gives way to a VS. CPU title between the top icons (green VS., amber CPU), the level and layers line, your stats in a 2x2 grid of squares (SCORE, CHAIN / ENCRYPT IN, CURRENT, each value centered with its label centered above; a KEYLOGGER's preview splits the CURRENT square) and BOT (the CPU's face: a pixel chip with legs that idles, blinks and glances to the sides and up now and then, looks around before each move (waiting and planning each have two variants now and then: BORED / TAPPING, SCAN / PONDER), grins when it scores, flinches when your blocks land, sweats with a tall stack, and ends on X eyes or a smug GG), the CPU's board (with its numbers, playing each move back: bits falling, decrypting and layers peeling; press and hold it to see it full size over yours with all your board's effects), laid out so your board keeps its regular size and place; PAUSE (the lower-left corner, or Esc / P) in a match covers your board as the setup screen does and stops the CPU's clock (the bot waits, -_-, tapping a foot): RESUME, RESTART (a new match with the same options) and EXIT (back to the setup screen), the last two taking a second tap to confirm; a pause pressed mid-drop opens once the drop finishes. On the setup screen the corner is QUIT, and one press goes back to your previous mode (dragging off the button before letting go cancels a press). CURRENT shows [?] until START. The CPU pauses while a panel is open. RECORDS → STATS keeps wins and losses per level |
 | PUZZLE | 60 set boards (in `js/data/puzzles.js`): decrypt every block using exactly the bits given, in order. Solving one opens the next; the arrow buttons move between them. No new layers rise and no exploits drop; puzzle layers hide a fixed bit |
 
 Switching modes mid-run asks to confirm, like RESTART. Each mode keeps its
@@ -107,41 +107,67 @@ fresh when it moved to 8×8).
 Lv 1 to **Lv 80**. Lv 80's bar fills at 8,000 bits, so a full DECRYPTOR rank
 is exactly **1 kilobyte**. The level bar sits under the title.
 
+**Everything unlocks by level, within a rank.** Exploits, exploit slots, Hard
+mode, the VS CPU's levels and bots, tracks, themes and fonts each open at a
+level between Lv 2 and Lv 80, spread so a level or two always brings something:
+
+| Lv | Unlock | Lv | Unlock | Lv | Unlock |
+|---|---|---|---|---|---|
+| 2 | TRACK 02 | 27 | ANAGLYPH | 53 | LOGIC BOMB |
+| 3 | RNG | 29 | WORM VIRUS | 55 | TRACK 13 |
+| 4 | CIPHER | 30 | SLOT 3 | 57 | BYTESIZED |
+| 5 | SLOT 1 | 31 | TRACK 08 | 59 | HONEYPOT |
+| 6 | BOT: GRIFTER | 33 | BOT: GLITCH | 60 | SLOT 5 |
+| 7 | TRACK 03 | 34 | SYNTHWAVE | 62 | TRACK 14 |
+| 8 | BITFLIP | 35 | KEYLOGGER | 63 | GLYPH |
+| 9 | SHARE TECH MONO | 36 | TRACK 09 | 65 | DICTIONARY ATTACK |
+| 10 | HARD MODE | 39 | BITCOUNT | 68 | TRACK 15 |
+| 11 | TRACK 04 | 40 | TRACK 10 | 70 | RAINBOW TABLE |
+| 12 | AMBER CRT | 41 | PACKET SNIFFER | 72 | SPECTRUM |
+| 13 | BUFFER OVERFLOW | 43 | DOT MATRIX | 75 | SLOT 6 |
+| 14 | HARD CPU | 44 | TRACK 11 | 77 | TRACK 16 |
+| 15 | SLOT 2 | 45 | SLOT 4 | | |
+| 16 | TRACK 05 | 46 | INSANE CPU | | |
+| 17 | BOT: BUNKER | 47 | BACKDOOR | | |
+| 18 | TROJAN | 50 | TRACK 12 | | |
+| 19 | MONOCHROME | 52 | PAPER | | |
+| 20 | TRACK 06 | | | | |
+| 21 | PRESS START | | | | |
+| 23 | PIVOT | | | | |
+| 25 | TRACK 07 | | | | |
+
 **DECRYPTOR ranks** (the game's prestige). With Lv 80 full, RANK UP TO
 DECRYPTOR (in RECORDS → UNLOCKS, four presses) starts you again at Lv 1 one
-rank higher. Exploits and slots lock again, but DECRYPTOR N keeps N slots (up
-to 6) and the first N exploits for good, and the rest unlock sooner. Each rank
-also permanently unlocks the next theme.
+rank higher, and **everything locks again** to be unlocked by level once more.
+The one thing kept for good: DECRYPTOR N keeps N exploit slots (up to 6) from
+Lv 1, and the slots still to earn take the table's earliest slot levels (Lv 5,
+15, 30 ...). A theme, font, track or
+difficulty picked but locked again falls back to the default until it reopens.
 
-**Exploit slots (loadout).** Only exploits equipped in a slot are awarded.
-Slots unlock at Lv 5, 15, 30, 45, 60 and 75 (6 at most). Exploits unlock by
-level in this order: RNG (3), BITFLIP (8), BUFFER OVERFLOW (13), TROJAN (18),
-PIVOT (23), WORM VIRUS (29), KEYLOGGER (35), PACKET SNIFFER (41), BACKDOOR
-(47), LOGIC BOMB (53), HONEYPOT (59), DICTIONARY ATTACK (65), RAINBOW TABLE
-(70); with a
-rank's kept exploits, the rest move down this list. A new unlock drops
-into a free slot by itself; tap an exploit card to remove or equip it. The loadout
-is locked during a session: change it before the first drop or after the game ends. The
-daily games always use the five standard exploits, so they're the same for
-everyone.
+**Exploit slots (loadout).** Only exploits equipped in a slot are awarded. A new
+unlock drops into a free slot by itself; tap an exploit card to remove or equip
+it. The loadout is locked during a session: change it before the first drop or
+after the game ends. The daily games always use the five standard exploits, so
+they're the same for everyone.
 
-**Themes** unlock by DECRYPTOR rank, for good: CIPHER (1), AMBER CRT (2), MONOCHROME
-(3), ANAGLYPH (4), SYNTHWAVE (5), DOT MATRIX (6), PAPER (7), GLYPH (8),
-SPECTRUM (9).
+**Fonts** (SETTINGS → FONT): COURIER is the default. Each has an achievement for
+playing a full session in it (TECH SUPPORT, INSERT COIN, BIT BY BIT,
+BITE-SIZED). The font changes all the game's text (the particles and the dev
+page too); the fonts are bundled in `assets/fonts/` and scaled so the layout
+stays the same as in Courier.
 
-**Fonts** (SETTINGS → FONT) unlock by achievements earned, for good: COURIER is
-the default, SHARE TECH MONO opens at 10 achievements, PRESS START (Press Start
-2P) at 25, BITCOUNT (Bitcount Single) at 40 and BYTESIZED at 55. Each has an
-achievement for playing a full session in it (TECH SUPPORT, INSERT COIN, BIT BY
-BIT, BITE-SIZED). The font changes all the
-game's text (the particles and the dev page too); the fonts are bundled in
-`assets/fonts/` and scaled so the layout stays the same as in Courier.
+Tracks 11-16 are still to come. COLLECTOR, DJ and AUDIOPHILE need all 16
+tracks, so they open up once the last one is made.
 
-**Permanent unlocks:** Hard mode (score 2,000 on Normal) and tracks 02-16
-(125 / 350 / 800 / 1,600 / 3,000 / 5,000 / 7,500 / 11,000 / 15,000 / 20,000 / 26,000 /
-33,000 / 41,000 / 50,000 / 60,000 bits decrypted in total; 11-16 are still to come).
-COLLECTOR, DJ and AUDIOPHILE need all 16 tracks, so they open up once the last
-one is made.
+**VS matches aren't sessions.** The SESSIONS achievements, the "in one
+session" ones (SCORE, NO TOOLS, ZERO-DAY, SECOND WIND, CHAINED EXPLOITS, the
+full-session theme / font / track ones and the finish-on-a-score secrets) and
+RAGE QUIT count only the solo modes. VS has its own achievements: VS CPU (wins,
+levels, COUNTERSTRIKE, DDOS, FLAWLESS, and the hidden TILTED and AFK), VS BOTS
+(beat each bot, all of them, all of them on INSANE) and VS MODES AND SETTINGS
+(a win in each mode and all four, 10,000-point and 5,000-point wins, BANKRUPT,
+KNOCKOUT, BARE METAL, ARMS RACE, ZERO MERCY). Bits, chains, nibbles, layers and
+exploits run in VS still count toward everything else.
 
 The menu icon (lines / trophy, top left) opens three tabs, each its own card:
 **RULES**, **RECORDS** and **EXPLOITS**. RECORDS has level and DECRYPTOR rank,
@@ -333,3 +359,16 @@ with a cached older script (GitHub Pages lets browsers cache for 10 minutes).
   archived layers left out). Older versions: `bytefall-theme-v1.wav` is the
   original 16-bar theme loop, `bytefall-theme-v2.wav` the first 32-bar
   version, `sleep-mode-v1.wav` the first SLEEP MODE
+
+## To-do
+
+- **Interactive tutorial** (its own pass). A TUTORIAL button to the right of the
+  RULES title in the RULES card starts a tutorial match with a few set bits. A
+  banner explains each rule and asks the player to tap the area it names;
+  buttons and bits pulse while they're being talked about, and it explains
+  what just happened and how the points work. The RULES card stays as it is.
+- **First-time introduction** (later): a skippable intro screen that walks a
+  new player through the tutorial the first time they open the game.
+- **CPU exploit loadouts** (maybe): each bot with its own preferred exploits in VS.
+- **CORE DUMP (track 09)**: its trial layers still wait for picks.
+- **Sound effect themes**: on hold.

@@ -4,11 +4,10 @@
 // script.js reports what happens in a run; check() then returns anything newly earned.
 //
 // Levels: bits decrypted are XP, from Lv 1 to Lv 80. At Lv 80 the player can RANK UP to the
-// next DECRYPTOR rank: back to Lv 1, rank +1, and exploits lock again. Exploits (in EXPLOIT_ORDER)
-// and exploit slots unlock by level within a rank; DECRYPTOR N keeps N slots and the first N exploits
-// for good, and the rest unlock sooner. Only exploits equipped in a slot are awarded. Each
-// rank also permanently unlocks the next theme in THEME_ORDER. Tracks and Hard mode are
-// permanent unlocks and never reset.
+// next DECRYPTOR rank: back to Lv 1, rank +1, and everything locks again. Every unlock (exploits,
+// exploit slots, Hard mode, the VS CPU levels and bots, tracks, themes and fonts) comes at a level
+// within a rank. The one thing kept for good: DECRYPTOR N keeps N exploit slots (up to 6).
+// Only exploits equipped in a slot are awarded.
 const Progress = (() => {
   const KEY = 'bytefall-progress';
   const fresh = () => ({
@@ -35,7 +34,7 @@ const Progress = (() => {
     dailyStreak: 0, // consecutive days, up to lastDaily
     bestDailyStreak: 0,
     puzzles: {}, // puzzle index -> true once solved
-    earned: {}, // unlock id -> true, kept once earned
+    unlocksSeen: {}, // unlock id -> true once announced this rank
     achieved: {}, // achievement id -> true
     decryptor: 0, // DECRYPTOR rank
     xp: 0, // bits decrypted this rank
@@ -82,6 +81,14 @@ const Progress = (() => {
     secrets: {}, // hidden achievement id -> true (reported by script.js)
     vsWins: {}, // VS CPU: CPU level -> wins
     vsLosses: {}, // VS CPU: CPU level -> losses
+    vsMatches: 0, // VS matches finished
+    vsBotWins: {}, // bot id -> wins
+    vsBotLevelWins: {}, // 'bot:level' -> true once beaten
+    vsModeWins: {}, // VS game mode -> wins
+    vsFeats: {}, // one-off VS wins (BARE METAL, FLAWLESS and the like) -> true
+    vsBestCancel: 0, // most incoming blocks one attack cancelled
+    vsBestSent: 0, // most blocks sent at the CPU in one match
+    vsLossStreak: 0, // VS losses in a row
   });
 
   let d = fresh();
@@ -99,15 +106,12 @@ const Progress = (() => {
     try { return Number(localStorage.getItem(key)) || 0; } catch (e) { return 0; }
   };
 
-  // Credit players from before progression: anyone with a Hard score keeps Hard.
-  try {
-    if (best('hard') > 0) d.earned['mode-hard'] = true;
-  } catch (e) {}
-
-  // Tracks 02-10: each roughly 1.5-2.8x the last, so the early ones come quickly
-  // Bots to play in VS (BOT is free): [id, name, total wins to unlock]
-  const BOT_ORDER = [['grifter', 'GRIFTER', 3], ['bunker', 'BUNKER', 10], ['glitch', 'GLITCH', 20]];
-  const TRACK_BITS = [125, 350, 800, 1600, 3000, 5000, 7500, 11000, 15000, 20000, 26000, 33000, 41000, 50000, 60000]; // tracks 02-16
+  // The levels (within a rank) where everything unlocks, spread so each level or two brings
+  // something: exploits at EXPLOIT_LEVELS and slots at SLOT_LEVELS (below), and around them
+  // tracks 02-16, themes, fonts, Hard mode, and the VS CPU's levels and bots
+  // Bots to play in VS (BOT is free): [id, name, level]
+  const BOT_ORDER = [['grifter', 'GRIFTER', 6], ['bunker', 'BUNKER', 17], ['glitch', 'GLITCH', 33]];
+  const TRACK_LEVELS = [2, 7, 11, 16, 20, 25, 31, 36, 40, 44, 50, 55, 62, 68, 77]; // tracks 02-16
 
   const MAX_LEVEL = 80;
   // 100 bits (12.5 bytes) per level. Lv 80 starts at 7,900 bits and its bar fills at 8,000,
@@ -120,7 +124,7 @@ const Progress = (() => {
     return { level, into, need: BITS_PER_LEVEL, maxed: d.xp >= RANK_BITS, decryptor: d.decryptor, xp: Math.min(d.xp, RANK_BITS), rankBits: RANK_BITS };
   }
 
-  // Weakest first. After the ones a rank keeps, each unlocks at the next level in EXPLOIT_LEVELS.
+  // Weakest first, each at its level in EXPLOIT_LEVELS
   const EXPLOIT_ORDER = ['rng', 'bitflip', 'buffer-overflow', 'trojan', 'pivot', 'worm-virus', 'keylogger', 'packet-sniffer',
     'backdoor', 'logic-bomb', 'honeypot', 'dictionary-attack', 'rainbow-table'];
   const EXPLOIT_LEVELS = [3, 8, 13, 18, 23, 29, 35, 41, 47, 53, 59, 65, 70];
@@ -130,10 +134,7 @@ const Progress = (() => {
   let exploitNames = {}; // id -> name, from script.js
 
   function exploitInfo(id) {
-    const k = EXPLOIT_ORDER.indexOf(id);
-    const kept = Math.min(d.decryptor, EXPLOIT_ORDER.length);
-    if (k < kept) return { unlocked: true, kept: true, level: 0 };
-    const level = EXPLOIT_LEVELS[k - kept];
+    const level = EXPLOIT_LEVELS[EXPLOIT_ORDER.indexOf(id)];
     return { unlocked: Unlocks.hasFullAccess() || levelInfo().level >= level, kept: false, level };
   }
   function slotInfo() {
@@ -163,34 +164,26 @@ const Progress = (() => {
     }
   }
 
-  // Each DECRYPTOR rank permanently unlocks the next theme
-  const THEME_ORDER = [['cipher', 'CIPHER'], ['amber-crt', 'AMBER CRT'], ['monochrome', 'MONOCHROME'], ['anaglyph', 'ANAGLYPH'],
-    ['synthwave', 'SYNTHWAVE'], ['dot-matrix', 'DOT MATRIX'], ['paper', 'PAPER'], ['glyph', 'GLYPH'], ['spectrum', 'SPECTRUM']];
+  // Themes: [id, name, level]
+  const THEME_ORDER = [['cipher', 'CIPHER', 4], ['amber-crt', 'AMBER CRT', 12], ['monochrome', 'MONOCHROME', 19], ['anaglyph', 'ANAGLYPH', 27],
+    ['synthwave', 'SYNTHWAVE', 34], ['dot-matrix', 'DOT MATRIX', 43], ['paper', 'PAPER', 52], ['glyph', 'GLYPH', 63], ['spectrum', 'SPECTRUM', 72]];
 
-  // Pixel fonts (COURIER is free): [id, name, achievements needed]
-  const FONT_ORDER = [['share-tech', 'SHARE TECH MONO', 10], ['press-start', 'PRESS START', 25], ['bitcount', 'BITCOUNT', 40], ['bytesized', 'BYTESIZED', 55]];
+  // Pixel fonts (COURIER is free): [id, name, level]
+  const FONT_ORDER = [['share-tech', 'SHARE TECH MONO', 9], ['press-start', 'PRESS START', 21], ['bitcount', 'BITCOUNT', 39], ['bytesized', 'BYTESIZED', 57]];
 
-  // group: where it shows in the UNLOCKS list. value() / goal drive its tracker.
+  // group: where it shows in the UNLOCKS list; level: the level (within a rank) it unlocks at
+  const atLevel = (level) => ({ need: `Reach Lv ${level}`, value: () => levelInfo().level, goal: level, level });
   const UNLOCKS = [
-    { id: 'mode-hard', group: 'MODE', name: 'HARD MODE', need: 'Score 2,000 on Normal', value: () => best('normal'), goal: 2000 },
-    // VS CPU: the harder CPU levels and more bots, earned by beating it
-    { id: 'vs-hard', group: 'VS CPU', name: 'HARD CPU', need: 'Win 5 VS matches on Normal', value: () => d.vsWins.normal || 0, goal: 5 },
-    { id: 'vs-insane', group: 'VS CPU', name: 'INSANE CPU', need: 'Win 5 VS matches on Hard', value: () => d.vsWins.hard || 0, goal: 5 },
-    ...BOT_ORDER.map(([id, name, goal]) => ({
-      id: `bot-${id}`, group: 'VS CPU', name: `BOT: ${name}`, need: `Win ${goal} VS matches`, value: () => Object.values(d.vsWins).reduce((n, w) => n + w, 0), goal,
-    })),
-    ...TRACK_BITS.map((goal, i) => ({
-      id: `track-${i + 2}`, group: 'TRACKS', name: `TRACK ${String(i + 2).padStart(2, '0')}`,
-      need: `Decrypt ${goal.toLocaleString('en-US')} bits`, value: () => d.bits, goal,
-    })),
-    ...THEME_ORDER.map(([id, name], i) => ({
-      id: `theme-${id}`, group: 'THEMES', name, need: `Reach DECRYPTOR ${i + 1}`, value: () => d.decryptor, goal: i + 1,
-    })),
-    // Fonts unlock by achievements earned
-    ...FONT_ORDER.map(([id, name, goal]) => ({
-      id: `font-${id}`, group: 'FONTS', name, need: `Earn ${goal} achievements`, value: () => count(d.achieved), goal,
-    })),
+    { id: 'mode-hard', group: 'MODE', name: 'HARD MODE', ...atLevel(10) },
+    // VS CPU: the harder CPU levels and more bots
+    { id: 'vs-hard', group: 'VS CPU', name: 'HARD CPU', ...atLevel(14) },
+    { id: 'vs-insane', group: 'VS CPU', name: 'INSANE CPU', ...atLevel(46) },
+    ...BOT_ORDER.map(([id, name, level]) => ({ id: `bot-${id}`, group: 'VS CPU', name: `BOT: ${name}`, ...atLevel(level) })),
+    ...TRACK_LEVELS.map((level, i) => ({ id: `track-${i + 2}`, group: 'TRACKS', name: `TRACK ${String(i + 2).padStart(2, '0')}`, ...atLevel(level) })),
+    ...THEME_ORDER.map(([id, name, level]) => ({ id: `theme-${id}`, group: 'THEMES', name, ...atLevel(level) })),
+    ...FONT_ORDER.map(([id, name, level]) => ({ id: `font-${id}`, group: 'FONTS', name, ...atLevel(level) })),
   ];
+  const unlockById = Object.fromEntries(UNLOCKS.map((u) => [u.id, u]));
 
   const themeIds = UNLOCKS.filter((u) => u.group === 'THEMES').map((u) => u.id);
   const trackIds = UNLOCKS.filter((u) => u.group === 'TRACKS').map((u) => u.id);
@@ -338,6 +331,50 @@ const Progress = (() => {
       ['friday-13th', 'FRIDAY THE 13TH', 'Play on a Friday the 13th'],
       ['pi-day', 'PI DAY', 'Play on March 14'],
     ].map(([id, name, desc]) => ({ id, name, desc, value: () => (d.secrets[id] ? 1 : 0), goal: 1, hidden: true })),
+    // VS CPU
+    ...(() => {
+      const wins = () => Object.values(d.vsWins).reduce((n, w) => n + w, 0);
+      const feat = (id) => () => (d.vsFeats[id] ? 1 : 0);
+      const levelWin = (level) => () => d.vsWins[level] || 0;
+      const botWin = (bot) => () => d.vsBotWins[bot] || 0;
+      const BOTS = ['bot', 'grifter', 'bunker', 'glitch'];
+      const MODES = ['classic', 'attrition', 'deathmatch', 'tug'];
+      return [
+        { id: 'first-blood', name: 'FIRST BLOOD', desc: 'Win your first VS match', value: wins, goal: 1 },
+        { id: 'sparring-partner', name: 'SPARRING PARTNER', desc: 'Play 10 VS matches', value: () => d.vsMatches, goal: 10 },
+        { id: 'gladiator', name: 'GLADIATOR', desc: 'Win 25 VS matches', value: wins, goal: 25 },
+        { id: 'warlord', name: 'WARLORD', desc: 'Win 100 VS matches', value: wins, goal: 100 },
+        { id: 'easy-target', name: 'EASY TARGET', desc: 'Beat the EASY CPU', value: levelWin('easy'), goal: 1 },
+        { id: 'fair-fight', name: 'FAIR FIGHT', desc: 'Beat the NORMAL CPU', value: levelWin('normal'), goal: 1 },
+        { id: 'hard-reset', name: 'HARD RESET', desc: 'Beat the HARD CPU', value: levelWin('hard'), goal: 1 },
+        { id: 'insanity-check', name: 'INSANITY CHECK', desc: 'Beat the INSANE CPU', value: levelWin('insane'), goal: 1 },
+        { id: 'debugged', name: 'DEBUGGED', desc: 'Beat BOT', value: botWin('bot'), goal: 1 },
+        { id: 'outhustled', name: 'OUTHUSTLED', desc: 'Beat GRIFTER', value: botWin('grifter'), goal: 1 },
+        { id: 'bunker-buster', name: 'BUNKER BUSTER', desc: 'Beat BUNKER', value: botWin('bunker'), goal: 1 },
+        { id: 'patched', name: 'PATCHED', desc: 'Beat GLITCH', value: botWin('glitch'), goal: 1 },
+        { id: 'rogues-gallery', name: "ROGUES' GALLERY", desc: 'Beat every bot', value: () => BOTS.filter((b) => d.vsBotWins[b]).length, goal: BOTS.length },
+        { id: 'kill-9', name: 'KILL -9', desc: 'Beat every bot on INSANE', value: () => BOTS.filter((b) => d.vsBotLevelWins[`${b}:insane`]).length, goal: BOTS.length },
+        { id: 'stack-overflow', name: 'STACK OVERFLOW', desc: 'Win a CLASSIC VS match', value: () => d.vsModeWins.classic || 0, goal: 1 },
+        { id: 'war-of-attrition', name: 'WAR OF ATTRITION', desc: 'Win an ATTRITION VS match', value: () => d.vsModeWins.attrition || 0, goal: 1 },
+        { id: 'frag-limit', name: 'FRAG LIMIT', desc: 'Win a DEATHMATCH VS match', value: () => d.vsModeWins.deathmatch || 0, goal: 1 },
+        { id: 'rope-a-dope', name: 'ROPE-A-DOPE', desc: 'Win a TUG OF WAR VS match', value: () => d.vsModeWins.tug || 0, goal: 1 },
+        { id: 'multi-boot', name: 'MULTI-BOOT', desc: 'Win a VS match in every game mode', value: () => MODES.filter((m) => d.vsModeWins[m]).length, goal: MODES.length },
+        { id: 'long-haul', name: 'LONG HAUL', desc: 'Win an ATTRITION or DEATHMATCH to 10,000', value: feat('long-haul'), goal: 1 },
+        { id: 'heavyweight', name: 'HEAVYWEIGHT', desc: 'Win a TUG OF WAR starting at 5,000', value: feat('heavyweight'), goal: 1 },
+        { id: 'bankrupt', name: 'BANKRUPT', desc: 'Win an ATTRITION match with the CPU on 0 points', value: feat('bankrupt'), goal: 1 },
+        { id: 'knockout', name: 'KNOCKOUT', desc: 'Win an ATTRITION, DEATHMATCH or TUG OF WAR match by overflowing the CPU', value: feat('knockout'), goal: 1 },
+        { id: 'bare-metal', name: 'BARE METAL', desc: 'Win a VS match with ENCRYPTED LAYERS off', value: feat('bare-metal'), goal: 1 },
+        { id: 'arms-race', name: 'ARMS RACE', desc: 'Win a VS match with EXPLOITS on', value: feat('arms-race'), goal: 1 },
+        { id: 'zero-mercy', name: 'ZERO MERCY', desc: 'Beat the INSANE CPU with layers and exploits on', value: feat('zero-mercy'), goal: 1 },
+        { id: 'flawless', name: 'FLAWLESS', desc: 'Win a VS match without a single block landing on your board', value: feat('flawless'), goal: 1 },
+        { id: 'counterstrike', name: 'COUNTERSTRIKE', desc: 'Cancel 10 incoming blocks with one attack', value: () => d.vsBestCancel, goal: 10 },
+        { id: 'ddos', name: 'DDOS', desc: 'Send 50 encrypted blocks at the CPU in one match', value: () => d.vsBestSent, goal: 50 },
+      ];
+    })(),
+    ...[
+      ['tilted', 'TILTED', 'Lose 5 VS matches in a row'],
+      ['afk', 'AFK', 'Leave a VS match paused for 5 minutes'],
+    ].map(([id, name, desc]) => ({ id, name, desc, value: () => (d.secrets[id] ? 1 : 0), goal: 1, hidden: true })),
     // Impossible (or nearly): lifetime points. Listed on their own, outside the EARNED count.
     { id: '32-bit-overflow', name: '32-BIT OVERFLOW', desc: 'Decrypt 1,073,741,824 nibbles (2^32 bits)', value: () => d.nibbles, goal: 1073741824, impossible: true },
     { id: 'gigabyte', name: 'GIGABYTE', desc: 'Earn 8,000,000,000 points in total', value: () => d.points, goal: 8e9, impossible: true },
@@ -361,6 +398,9 @@ const Progress = (() => {
     ['LEVELS AND DECRYPTOR RANKS', ['lv-40', 'maxed-out', 'rollover', 'triple-crown', 'full-spectrum']],
     ['THEMES, FONTS AND MUSIC', ['collector', 'chameleon', 'tech-support', 'insert-coin', 'bit-by-bit', 'bite-sized', 'dj', 'audiophile', 'theme-park', 'channel-surfer', 'silent-running']],
     ['DATES AND TIMES', ['insomniac', 'birthday', 'friday-13th', 'pi-day']],
+    ['VS CPU', ['first-blood', 'sparring-partner', 'gladiator', 'warlord', 'easy-target', 'fair-fight', 'hard-reset', 'insanity-check', 'counterstrike', 'ddos', 'flawless', 'tilted', 'afk']],
+    ['VS BOTS', ['debugged', 'outhustled', 'bunker-buster', 'patched', 'rogues-gallery', 'kill-9']],
+    ['VS MODES AND SETTINGS', ['stack-overflow', 'war-of-attrition', 'frag-limit', 'rope-a-dope', 'multi-boot', 'long-haul', 'heavyweight', 'bankrupt', 'knockout', 'bare-metal', 'arms-race', 'zero-mercy']],
     ['SECRETS', ['konami']],
   ];
   const groupOf = {};
@@ -374,7 +414,8 @@ const Progress = (() => {
   const goalOf = (item) => (typeof item.goal === 'function' ? item.goal() : item.goal);
 
   function isUnlocked(id) {
-    return Unlocks.hasFullAccess() || !!d.earned[id];
+    const u = unlockById[id];
+    return Unlocks.hasFullAccess() || (!!u && levelInfo().level >= u.level);
   }
 
   // The current run, reset by startRun()
@@ -394,10 +435,11 @@ const Progress = (() => {
   // Marks newly met unlocks and achievements; returns them as [{ type, name }] (quiet: just record).
   function check(quiet = false) {
     const earned = [];
+    // (announced once per rank: they all lock again at RANK UP)
     for (const u of UNLOCKS) {
-      if (!d.earned[u.id] && u.value() >= goalOf(u)) {
-        d.earned[u.id] = true;
-        earned.push({ type: 'UNLOCKED', name: u.name });
+      if (!d.unlocksSeen[u.id] && isUnlocked(u.id)) {
+        d.unlocksSeen[u.id] = true;
+        if (!Unlocks.hasFullAccess()) earned.push({ type: 'UNLOCKED', name: u.name });
       }
     }
     const { level } = levelInfo();
@@ -429,9 +471,8 @@ const Progress = (() => {
     save();
     return quiet ? [] : earned;
   }
-  // Exploits and slots a rank starts with aren't announced
+  // The slots a rank starts with aren't announced
   const markKept = () => {
-    EXPLOIT_ORDER.forEach((id) => { if (exploitInfo(id).kept) d.exploitsSeen[id] = true; });
     d.slotsSeen = Math.max(d.slotsSeen, Math.min(d.decryptor, MAX_SLOTS));
   };
   markKept();
@@ -464,7 +505,7 @@ const Progress = (() => {
       save();
     },
     levelInfo,
-    // Lv 80 only: back to Lv 1 with exploits locked again; the next theme unlocks for good
+    // Lv 80 only: back to Lv 1 with everything locked again but one more kept exploit slot
     rankUp() {
       if (!levelInfo().maxed) return false;
       d.decryptor++;
@@ -472,6 +513,7 @@ const Progress = (() => {
       d.decryptorPoints = 0;
       d.lastLevel = 1;
       d.exploitsSeen = {};
+      d.unlocksSeen = {};
       d.slotsSeen = 0;
       d.equipped = [];
       markKept();
@@ -507,7 +549,7 @@ const Progress = (() => {
     drop() {
       if (!run.started) {
         run.started = true;
-        if (run.mode !== 'puzzle') d.games++; // puzzle retries don't count as sessions
+        if (run.mode !== 'puzzle' && run.mode !== 'vs') d.games++; // puzzle retries and VS matches aren't sessions
         if (run.daily) {
           playedDaily();
           const today = new Date().toISOString().slice(0, 10);
@@ -539,7 +581,7 @@ const Progress = (() => {
       if (run.dropBits > 0) run.clearStreak++;
       else if (!hack) run.clearStreak = 0;
       d.bestClearStreak = Math.max(d.bestClearStreak, run.clearStreak);
-      if (run.drops === 1 && run.dropBits > 0 && run.mode !== 'puzzle') d.firstDropClears++;
+      if (run.drops === 1 && run.dropBits > 0 && run.mode !== 'puzzle' && run.mode !== 'vs') d.firstDropClears++;
       d.bestDropBits = Math.max(d.bestDropBits, run.dropBits);
       d.bestDropBroken = Math.max(d.bestDropBroken, run.dropBroken);
       if (run.pivoted && run.dropBits > 0) d.pivotChains++;
@@ -559,6 +601,7 @@ const Progress = (() => {
     },
     // A session ended (not PUZZLE): reason 'trace', 'time' or 'daily'
     endRun({ score, reason, boardEmpty, track, theme, font, silent }) {
+      if (run.mode === 'vs') return; // (a VS match isn't a session: vsResult() has its own)
       if (score === 404) d.secrets['not-found'] = true;
       if (run.bits === 42) d.secrets['deep-thought'] = true;
       if (score >= 1000 && String(score) === [...String(score)].reverse().join('')) d.secrets.palindrome = true;
@@ -582,16 +625,38 @@ const Progress = (() => {
     // Hidden achievements script.js spots itself (KONAMI, OVERKILL and the like)
     secret(id) { d.secrets[id] = true; },
     breached() { d.breaches++; },
-    vsResult(level, won) {
-      const tally = won ? d.vsWins : d.vsLosses;
-      tally[level] = (tally[level] || 0) + 1;
+    // A VS match ended. m: { level, bot, mode, layers, exploits, won, target, pool, cpuPoints,
+    // overflow (the CPU overflowed), landed (blocks that landed on your board), sent }
+    vsResult(m) {
+      const tally = m.won ? d.vsWins : d.vsLosses;
+      tally[m.level] = (tally[m.level] || 0) + 1;
+      d.vsMatches++;
+      d.vsBestSent = Math.max(d.vsBestSent, m.sent);
+      d.vsLossStreak = m.won ? 0 : d.vsLossStreak + 1;
+      if (d.vsLossStreak >= 5) d.secrets.tilted = true;
+      if (!m.won) return;
+      d.vsBotWins[m.bot] = (d.vsBotWins[m.bot] || 0) + 1;
+      d.vsBotLevelWins[`${m.bot}:${m.level}`] = true;
+      d.vsModeWins[m.mode] = (d.vsModeWins[m.mode] || 0) + 1;
+      const feat = (id, yes) => { if (yes) d.vsFeats[id] = true; };
+      feat('long-haul', (m.mode === 'attrition' || m.mode === 'deathmatch') && m.target >= 10000);
+      feat('heavyweight', m.mode === 'tug' && m.pool >= 5000);
+      feat('bankrupt', m.mode === 'attrition' && m.cpuPoints === 0);
+      feat('knockout', m.mode !== 'classic' && m.overflow);
+      feat('bare-metal', !m.layers);
+      feat('arms-race', m.exploits);
+      feat('zero-mercy', m.level === 'insane' && m.layers && m.exploits);
+      feat('flawless', m.landed === 0);
     },
+    // One attack cancelled `n` blocks headed your way
+    vsCancelled(n) { d.vsBestCancel = Math.max(d.vsBestCancel, n); },
     dailyPuzzleSolved(weekday, tries) {
       if (weekday === 6) d.sundaySolves++;
       if (tries === 1) d.dailyFirstTries++;
     },
     // A live session thrown away with RESTART or a difficulty switch
     restarted() {
+      if (run.mode === 'vs') return;
       sittingRestarts++;
       if (sittingRestarts >= 10) d.rageQuit = 1;
     },
@@ -628,10 +693,11 @@ const Progress = (() => {
       d.exploits++;
       d.exploitUses[id] = (d.exploitUses[id] || 0) + 1;
       run.exploits++;
-      d.bestRunExploits = Math.max(d.bestRunExploits, run.exploits);
+      if (run.mode !== 'vs') d.bestRunExploits = Math.max(d.bestRunExploits, run.exploits);
       if (id === 'pivot') run.pivoted = true;
     },
     score(points) {
+      if (run.mode === 'vs') return; // (the SCORE achievements are for sessions)
       d.bestScore = Math.max(d.bestScore, points);
       if (run.mode === 'blitz' && !run.daily) d.bestBlitz = Math.max(d.bestBlitz, points);
       if (run.exploits === 0 && run.mode !== 'puzzle') d.bestNoToolsScore = Math.max(d.bestNoToolsScore, points);
@@ -648,7 +714,7 @@ const Progress = (() => {
     closeCall() {
       d.closeCalls++;
       run.closeCalls++;
-      d.bestRunCloseCalls = Math.max(d.bestRunCloseCalls, run.closeCalls);
+      if (run.mode !== 'vs') d.bestRunCloseCalls = Math.max(d.bestRunCloseCalls, run.closeCalls);
     },
     check,
   };

@@ -120,4 +120,35 @@ DATES AND TIMES,INSOMNIAC,Play between 2 and 4 AM,1,Standard,insomniac
 DATES AND TIMES,BIRTHDAY,"Play on September 23, ByteFall's birthday",1,Hidden,birthday
 DATES AND TIMES,FRIDAY THE 13TH,Play on a Friday the 13th,1,Hidden,friday-13th
 DATES AND TIMES,PI DAY,Play on March 14,1,Hidden,pi-day
+VS CPU,FIRST BLOOD,Win your first VS match,1,Standard,first-blood
+VS CPU,SPARRING PARTNER,Play 10 VS matches,10,Standard,sparring-partner
+VS CPU,GLADIATOR,Win 25 VS matches,25,Standard,gladiator
+VS CPU,WARLORD,Win 100 VS matches,100,Standard,warlord
+VS CPU,EASY TARGET,Beat the EASY CPU,1,Standard,easy-target
+VS CPU,FAIR FIGHT,Beat the NORMAL CPU,1,Standard,fair-fight
+VS CPU,HARD RESET,Beat the HARD CPU,1,Standard,hard-reset
+VS CPU,INSANITY CHECK,Beat the INSANE CPU,1,Standard,insanity-check
+VS CPU,COUNTERSTRIKE,Cancel 10 incoming blocks with one attack,10,Standard,counterstrike
+VS CPU,DDOS,Send 50 encrypted blocks at the CPU in one match,50,Standard,ddos
+VS CPU,FLAWLESS,Win a VS match without a single block landing on your board,1,Standard,flawless
+VS CPU,TILTED,Lose 5 VS matches in a row,1,Hidden,tilted
+VS CPU,AFK,Leave a VS match paused for 5 minutes,1,Hidden,afk
+VS BOTS,DEBUGGED,Beat BOT,1,Standard,debugged
+VS BOTS,OUTHUSTLED,Beat GRIFTER,1,Standard,outhustled
+VS BOTS,BUNKER BUSTER,Beat BUNKER,1,Standard,bunker-buster
+VS BOTS,PATCHED,Beat GLITCH,1,Standard,patched
+VS BOTS,ROGUES' GALLERY,Beat every bot,4,Standard,rogues-gallery
+VS BOTS,KILL -9,Beat every bot on INSANE,4,Standard,kill-9
+VS MODES AND SETTINGS,STACK OVERFLOW,Win a CLASSIC VS match,1,Standard,stack-overflow
+VS MODES AND SETTINGS,WAR OF ATTRITION,Win an ATTRITION VS match,1,Standard,war-of-attrition
+VS MODES AND SETTINGS,FRAG LIMIT,Win a DEATHMATCH VS match,1,Standard,frag-limit
+VS MODES AND SETTINGS,ROPE-A-DOPE,Win a TUG OF WAR VS match,1,Standard,rope-a-dope
+VS MODES AND SETTINGS,MULTI-BOOT,Win a VS match in every game mode,4,Standard,multi-boot
+VS MODES AND SETTINGS,LONG HAUL,"Win an ATTRITION or DEATHMATCH to 10,000",1,Standard,long-haul
+VS MODES AND SETTINGS,HEAVYWEIGHT,"Win a TUG OF WAR starting at 5,000",1,Standard,heavyweight
+VS MODES AND SETTINGS,BANKRUPT,Win an ATTRITION match with the CPU on 0 points,1,Standard,bankrupt
+VS MODES AND SETTINGS,KNOCKOUT,"Win an ATTRITION, DEATHMATCH or TUG OF WAR match by overflowing the CPU",1,Standard,knockout
+VS MODES AND SETTINGS,BARE METAL,Win a VS match with ENCRYPTED LAYERS off,1,Standard,bare-metal
+VS MODES AND SETTINGS,ARMS RACE,Win a VS match with EXPLOITS on,1,Standard,arms-race
+VS MODES AND SETTINGS,ZERO MERCY,Beat the INSANE CPU with layers and exploits on,1,Standard,zero-mercy
 SECRETS,KONAMI,Enter the Konami code,1,Hidden,konami

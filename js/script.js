@@ -1430,7 +1430,10 @@ function endGame(reason = 'trace') {
   };
   if (mode === 'vs') {
     if (reason === 'trace') endings.trace = [`${CpuBoard.BOTS[vsBot].label} WINS`, `The ${vsName()} traced you first.`];
-    Progress.vsResult(vsLevel, reason === 'win');
+    Progress.vsResult({
+      level: vsLevel, bot: vsBot, mode: vsMode, layers: vsLayers, exploits: vsExploits, won: reason === 'win',
+      target: vsTarget, pool: vsPool, cpuPoints: vsThem, overflow: !!cpu && cpu.isDead(), landed: vsLanded, sent: vsSent,
+    });
     updatePauseBtn(); // (QUIT again)
     stopVs();
     holdCpu(false);
@@ -1841,6 +1844,9 @@ let vsCounted = 0;
 let stealPts = 0;
 let vsStarted = false; // START pressed on the setup overlay
 let vsPaused = false; // PAUSE: the board covered, the CPU's clock stopped
+let vsPausedAt = 0; // (for AFK)
+let vsLanded = 0; // this match: blocks that landed on your board
+let vsSent = 0; // this match: blocks you sent at the CPU
 let pauseQueued = false; // PAUSE pressed mid-drop: it opens once the drop finishes
 let restartQueued = false; // RESTART from PAUSE: the new match starts without the setup screen
 let cpuClock = 0;
@@ -1856,6 +1862,8 @@ function startVs() {
   vsLost = false;
   vsPaused = false;
   pauseQueued = false;
+  vsLanded = 0;
+  vsSent = 0;
   document.getElementById('vs-pause').hidden = true;
   document.querySelector('.board-frame').classList.remove('paused');
   vsWhy = '';
@@ -1959,6 +1967,8 @@ function vsLose(why) {
 function sendToCpu(blocks) {
   const cancel = Math.min(blocks, incoming);
   incoming -= cancel;
+  if (cancel > 0) Progress.vsCancelled(cancel);
+  vsSent += blocks - cancel;
   cpuPending = Math.min(vsCap(), cpuPending + blocks - cancel);
   showVs();
 }
@@ -1979,6 +1989,7 @@ async function takeGarbage(n) {
     const c = open[Math.floor(Math.random() * open.length)];
     // Each block falls from the top (overflow) row into place, quickly, one at a time
     const block = newFirewall(1);
+    vsLanded++;
     for (let r = MAX_ROWS - 1; r > columns[c].length; r--) {
       render([], { row: r, col: c, cell: block });
       await sleep(11);
@@ -2279,6 +2290,7 @@ function openPause() {
   pauseQueued = false;
   if (mode !== 'vs' || !vsStarted || gameOver || vsPaused) return;
   vsPaused = true;
+  vsPausedAt = performance.now();
   vsPauseEl.classList.remove('closing');
   vsPauseEl.hidden = false;
   document.querySelector('.board-frame').classList.add('paused'); // (the pieces fade out)
@@ -2290,6 +2302,10 @@ function resumeMatch() {
   if (!vsPaused) return;
   disarmReset();
   vsPaused = false;
+  if (performance.now() - vsPausedAt >= 5 * 60 * 1000) {
+    Progress.secret('afk');
+    announce(Progress.check());
+  }
   // The options fade out and the pieces fade back in
   vsPauseEl.classList.add('closing');
   document.querySelector('.board-frame').classList.remove('paused');
@@ -2716,7 +2732,7 @@ function renderPlaylist() {
       btn.classList.add('locked');
       const need = document.createElement('span');
       need.className = 'need';
-      need.textContent = `${Progress.unlock(`track-${n + 1}`).goal.toLocaleString('en-US')} BITS`;
+      need.textContent = `LV ${Progress.unlock(`track-${n + 1}`).goal}`;
       btn.appendChild(need);
       btn.title = `${track.need} to unlock`;
     } else if (track) {
@@ -3092,7 +3108,7 @@ function renderRecords() {
     const row = recordRow({
       name: `LV ${lv.level} // DECRYPTOR ${lv.decryptor}`,
       desc: lv.maxed
-        ? 'A kilobyte decrypted. Rank up to the next DECRYPTOR rank to start again at Lv 1: exploits and slots lock again (you keep one more of each for good), and the next theme unlocks for good.'
+        ? 'A kilobyte decrypted. Rank up to the next DECRYPTOR rank to start again at Lv 1: everything locks again (exploits, slots, Hard mode, VS, tracks, themes and fonts) and unlocks again by level, but you keep one more exploit slot for good.'
         : `100 bits per level. Fill Lv 80 (${fmt(lv.xp)} / ${fmt(lv.rankBits)} bits, a kilobyte) to rank up to DECRYPTOR ${lv.decryptor + 1}.`,
       current: lv.maxed ? 1 : lv.into,
       goal: lv.maxed ? 1 : lv.need,
@@ -3112,7 +3128,7 @@ function renderRecords() {
       btn.className = 'rec-rankup';
       btn.textContent = `RANK UP TO DECRYPTOR ${lv.decryptor + 1}?`;
       // Each press arms the next warning (for a few seconds); the fourth one ranks up
-      const warnings = ['CONFIRM? EXPLOITS LOCK AGAIN', 'NO GOING BACK. ARE YOU SURE?', 'YES, ENCRYPT MY PROGRESS!!'];
+      const warnings = ['CONFIRM? EVERYTHING LOCKS AGAIN', 'NO GOING BACK. ARE YOU SURE?', 'YES, ENCRYPT MY PROGRESS!!'];
       let stage = 0;
       btn.addEventListener('click', () => {
         if (!armed || armed.btn !== btn) stage = 0;
@@ -3420,6 +3436,11 @@ function applyUnlocks() {
   const hardLocked = !Progress.isUnlocked('mode-hard');
   hardBtn.classList.toggle('locked', hardLocked);
   hardBtn.title = hardLocked ? `${Progress.unlock('mode-hard').need} to unlock` : '';
+  if (hardLocked && classicDifficulty === 'hard') { // (locked again by a RANK UP: the next session is Normal)
+    classicDifficulty = 'normal';
+    storage.set('bytefall-difficulty', 'normal');
+    document.querySelectorAll('#difficulty-row button').forEach((b) => b.classList.toggle('active', b.dataset.difficulty === 'normal'));
+  }
   Music.refreshUnlocks();
   refreshVsPicks();
   applyTheme();
