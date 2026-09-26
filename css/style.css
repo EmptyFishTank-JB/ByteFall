@@ -1145,8 +1145,8 @@ body.vs-mode .vs-status { display: flex; align-items: center; justify-content: c
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 16px;
+  gap: 10px;
+  padding: 12px 16px;
   text-align: center;
   background: var(--board-bg); /* with the defrag canvas (#vs-setup-bg) over it */
   isolation: isolate;
@@ -1235,6 +1235,12 @@ body.vs-mode .vs-status { font-size: 10px; white-space: nowrap; overflow: hidden
   pointer-events: none;
 }
 .incoming[hidden] { display: none; }
+/* ▼ 14 INCOMING, then a small square pip per block, in groups of 8 (up to 32) */
+.incoming:not([hidden]) { display: flex; align-items: center; gap: 6px; max-width: calc(100% - 8px); white-space: nowrap; }
+.incoming .pips { display: flex; flex-wrap: nowrap; gap: 1px; }
+.incoming .pips:empty { display: none; }
+.incoming .pips i { width: 3px; height: 3px; flex: none; background: currentColor; box-shadow: 0 0 3px var(--danger); }
+.incoming .pips i:nth-child(8n):not(:last-child) { margin-right: 2px; }
 body.vs-mode header #mode-info { display: none; }
 
 .new-best {
@@ -2057,7 +2063,15 @@ body.vs-mode .overlay { background: transparent; }
 /* The opponent and level pickers: four buttons a row, on one line */
 .vs-setup .difficulty { flex-wrap: nowrap; gap: 4px; }
 .vs-setup .difficulty button { padding: 5px 6px; font-size: 11px; letter-spacing: 1px; white-space: nowrap; }
-.vs-setup :is(#vs-layers-row, #vs-exploits-row) button { font-size: 12px; padding: 6px 10px; }
+.vs-setup #vs-options-row { gap: 6px; }
+.vs-setup .difficulty.two-rows { flex-wrap: wrap; justify-content: center; max-width: 100%; }
+.vs-setup #vs-options-row button { font-size: 12px; padding: 6px 10px; }
+/* The game mode, and its target score or starting points: − TARGET 2,000 + (dimmed for CLASSIC) */
+.vs-goal-row { display: flex; align-items: center; gap: 8px; }
+.vs-goal-row button { width: 26px; height: 24px; padding: 0; font-size: 14px; line-height: 1; letter-spacing: 0; }
+.vs-goal { min-width: 13ch; font-size: 12px; letter-spacing: 1px; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+.vs-goal-row.off { opacity: 0.35; }
+.vs-goal-row button:disabled { opacity: 0.35; cursor: default; }
 
 /* VS setup: a notice above the title (a locked bot or level), fading in and pulsing like the
    game's warnings, then bursting into pixels (script.js) */

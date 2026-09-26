@@ -38,11 +38,13 @@ const CpuBoard = (() => {
 
   // Resolves every chain on `columns` (changed in place). reveal() picks a bit for a layer
   // peeled open. record(frame), if given, gets each step for the preview to play back: the
-  // bits decrypting ({ pops }), then the board after ({ peeled }). Returns { points, chain, bits }.
+  // bits decrypting ({ pops }), then the board after ({ peeled }). Returns { points, chain, bits,
+  // extra }: extra is the points from chain links 2x and up plus the nibble bonus (ATTRITION steals them).
   function resolve(columns, reveal, record) {
     let chain = 0;
     let points = 0;
     let bits = 0;
+    let extra = 0;
     for (;;) {
       const grid = Array.from({ length: MAX_ROWS }, () => Array(COLS).fill(null));
       columns.forEach((col, c) => col.forEach((cell, r) => { grid[r][c] = cell; }));
@@ -57,7 +59,9 @@ const CpuBoard = (() => {
       if (!pops.length) break;
       chain++;
       bits += pops.length;
-      points += pops.reduce((n, [r, c]) => n + 10 + grid[r][c].val, 0) * chain;
+      const link = pops.reduce((n, [r, c]) => n + 10 + grid[r][c].val, 0) * chain;
+      points += link;
+      if (chain >= 2) extra += link;
       if (record) record({ pops, chain });
       const peeled = [];
       for (const [r, c] of pops) {
@@ -76,8 +80,8 @@ const CpuBoard = (() => {
       for (let c = 0; c < COLS; c++) columns[c] = columns[c].filter(Boolean);
       if (record) record({ settled: true }); // everything fallen into place
     }
-    points += Math.floor(bits / NIBBLE_BITS) * NIBBLE_BONUS;
-    return { points, chain, bits };
+    const bonus = Math.floor(bits / NIBBLE_BITS) * NIBBLE_BONUS;
+    return { points: points + bonus, chain, bits, extra: extra + bonus };
   }
 
   const overflowed = (columns) => columns.some((col) => col.length > ROWS);
@@ -117,6 +121,12 @@ const CpuBoard = (() => {
     let held = null; // an exploit waiting to be used
     let used = null; // the one used on the last move (for script.js to announce)
     let columns = Array.from({ length: COLS }, () => []);
+    let steal = 0; // the extra points since the last takeSteal()
+    const settle = () => {
+      const out = resolve(columns, reveal, record);
+      steal += out.extra;
+      return out;
+    };
     let current = bits();
     let upcoming = bits();
     let score = 0;
@@ -166,6 +176,12 @@ const CpuBoard = (() => {
         return out;
       },
       held: () => held,
+      // The extra points (chain links 2x and up, nibbles) scored since the last call
+      takeSteal() {
+        const out = steal;
+        steal = 0;
+        return out;
+      },
       used: () => used,
       step() {
         if (dead) return 0;
@@ -190,7 +206,7 @@ const CpuBoard = (() => {
               peeled.push([r, c]);
             }));
             record({ peeled });
-            score += resolve(columns, reveal, record).points;
+            score += settle().points;
             used = held;
           }
           if (used) held = null;
@@ -200,7 +216,7 @@ const CpuBoard = (() => {
         record({ fall: { col, row: columns[col].length, val: current } });
         columns[col].push({ type: 'number', val: current });
         record({ landed: [[columns[col].length - 1, col]] });
-        const first = resolve(columns, reveal, record);
+        const first = settle();
         let { points } = first;
         if (exploits && !held && first.chain >= 3) held = rnd() < 0.5 ? 'worm-virus' : 'dictionary-attack';
         drops++;
@@ -208,7 +224,7 @@ const CpuBoard = (() => {
           // A row of two-peel layers rises under every column
           for (const col of columns) col.unshift({ type: 'firewall', level: 2 });
           record({ rose: true });
-          points += resolve(columns, reveal, record).points;
+          points += settle().points;
         }
         score += points;
         current = upcoming;
@@ -229,7 +245,7 @@ const CpuBoard = (() => {
           landed.push([columns[c].length - 1, c]);
         }
         record({ landed, garbage: true });
-        const { points } = resolve(columns, reveal, record);
+        const { points } = settle();
         score += points;
         if (overflowed(columns)) dead = true;
         return points;

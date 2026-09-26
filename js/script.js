@@ -157,7 +157,7 @@ const MODES = {
     // Rising layers are optional in VS (the LAYERS toggle); both boards get them when on
     get noLayers() { return !vsLayers; },
     get noHacks() { return !vsExploits; }, // the EXPLOITS setting
-    info: () => `VS CPU // ${CpuBoard.BOTS[vsBot].label} // ${CpuBoard.LEVELS[vsLevel].label} // LAYERS ${vsLayers ? 'ON' : 'OFF'}: your chains send encrypted blocks onto the CPU's board, and its chains send them onto yours. Your chains cancel blocks headed your way first. The first to overflow loses. The CPU starts with your first drop.`,
+    info: () => `VS CPU // ${VS_MODES[vsMode].label} // ${CpuBoard.BOTS[vsBot].label} // ${CpuBoard.LEVELS[vsLevel].label} // LAYERS ${vsLayers ? 'ON' : 'OFF'}: your chains send encrypted blocks onto the CPU's board, and its chains send them onto yours. Your chains cancel blocks headed your way first. The first to overflow loses. The CPU starts with your first drop.`,
   },
   breach: {
     label: 'BREACH',
@@ -180,6 +180,30 @@ const TOP_MODES = ['classic', 'daily', 'blitz', 'zen', 'puzzle', 'vs'];
 let vsLevel = CpuBoard.LEVELS[storage.get('bytefall-vs-level')] ? storage.get('bytefall-vs-level') : 'normal';
 let vsBot = CpuBoard.BOTS[storage.get('bytefall-vs-bot')] ? storage.get('bytefall-vs-bot') : 'bot';
 // HARD and INSANE CPUs and the bots past BOT are unlocked by winning (progress.js's VS CPU group)
+const fmt = (n) => Number(n).toLocaleString('en-US'); // 12,345
+
+// VS game modes. CLASSIC: first to overflow loses. ATTRITION: both start at 0; points count up,
+// and chain links from 2x up plus NIBBLE bonuses also come off the other side; first to the
+// target wins. DEATHMATCH: a straight race to the target. TUG OF WAR: both start with a pool, and
+// every point scored is taken from the other side's; whoever runs out loses. Blocks fly in all of
+// them, and overflowing always loses.
+const VS_MODES = {
+  classic: { label: 'CLASSIC', note: "Your chains send encrypted blocks onto the CPU's board; its chains send them onto yours. First to overflow loses." },
+  attrition: { label: 'ATTRITION', note: 'Both start at 0. Chains of 2x and up and NIBBLEs also take their points from the other side. First to the target wins.' },
+  deathmatch: { label: 'DEATHMATCH', note: 'A race: first to the target score wins. Chains still send encrypted blocks, and overflowing still loses.' },
+  tug: { label: 'TUG OF WAR', note: 'Both start with the same points. Every point scored is taken from the other side. Run out and you lose.' },
+};
+const VS_TARGET = { min: 500, max: 10000, step: 500, start: 2000 }; // ATTRITION and DEATHMATCH
+const VS_POOL = { min: 500, max: 5000, step: 500, start: 1000 }; // TUG OF WAR, each side
+let vsMode = VS_MODES[storage.get('bytefall-vs-mode')] ? storage.get('bytefall-vs-mode') : 'classic';
+const storedStep = (key, range) => {
+  const n = Number(storage.get(key));
+  return n >= range.min && n <= range.max && n % range.step === 0 ? n : range.start;
+};
+let vsTarget = storedStep('bytefall-vs-target', VS_TARGET);
+let vsPool = storedStep('bytefall-vs-pool', VS_POOL);
+const vsModeText = () => (vsMode === 'classic' ? `LAYERS ${vsLayers ? 'ON' : 'OFF'}`
+  : vsMode === 'tug' ? `TUG OF WAR ${fmt(vsPool)}` : `${VS_MODES[vsMode].label} ${fmt(vsTarget)}`);
 const vsLevelOpen = (id) => (id === 'hard' || id === 'insane' ? Progress.isUnlocked(`vs-${id}`) : true);
 const vsBotOpen = (id) => id === 'bot' || Progress.isUnlocked(`bot-${id}`);
 if (!vsLevelOpen(vsLevel)) vsLevel = 'normal';
@@ -521,6 +545,36 @@ function fitBoard() {
   const ratio = frame.offsetHeight / frame.offsetWidth;
   const width = Math.max(MIN_BOARD, Math.min(cssMax, (viewportHeight() - pad - rest) / ratio));
   boardWrapEl.style.maxWidth = `${Math.floor(width)}px`;
+  fitVsSetup();
+}
+
+// The VS setup's button rows shrink to fit across the board, and its gaps close up when it
+// runs short of height (small phones, big fonts)
+function fitVsSetup() {
+  const el = document.getElementById('vs-setup');
+  if (el.hidden) return;
+  const room = el.clientWidth - 24;
+  const min = document.documentElement.dataset.font === 'press-start' ? 10 : 7; // (Press Start draws small)
+  el.querySelectorAll('.difficulty').forEach((row) => {
+    const btns = [...row.querySelectorAll('button')];
+    const shrink = (size, pad = '') => btns.forEach((b) => {
+      b.style.fontSize = size ? `${size}px` : '';
+      b.style.letterSpacing = size ? '0px' : '';
+      b.style.paddingLeft = b.style.paddingRight = pad;
+    });
+    row.classList.remove('two-rows');
+    shrink(0);
+    let size = parseFloat(getComputedStyle(btns[0]).fontSize);
+    while (row.scrollWidth > room && size > min) shrink((size -= 0.5));
+    if (row.scrollWidth > room) shrink(size, '3px'); // then tighter buttons
+    if (row.scrollWidth > room) { // still too wide at a readable size: two rows of two
+      row.classList.add('two-rows');
+      shrink(0);
+    }
+  });
+  el.style.gap = '';
+  let gap = parseFloat(getComputedStyle(el).rowGap);
+  while (el.scrollHeight > el.clientHeight && gap > 2) el.style.gap = `${(gap -= 1)}px`;
 }
 
 // The screen's real size. The installed app on Android can report a stale height at launch (and
@@ -745,7 +799,9 @@ function updateHud() {
     best = score;
     storage.set(bestKey(), String(best));
   }
-  scoreEl.textContent = score;
+  // (VS modes on points: the match points, with this drop's points counting up as they come)
+  scoreEl.textContent = mode === 'vs' && vsMode !== 'classic' && cpu
+    ? matchPoints(vsMe, vsThem, score - vsCounted, 0)[0] : score;
   bestEl.textContent = best;
   // VS before START: the first bit stays hidden, so a refresh or an option change can't be
   // used to fish for a good one
@@ -931,6 +987,7 @@ function finishTurn() {
   announce(Progress.check());
   if (overflowed()) endGame();
   else if (timeUp) endGame('time');
+  else if (vsLost) endGame('vs-lose');
   else if (cpuDown) endGame('win');
   else if (breached) endGame('breached');
   else if (dealLimit() < Infinity && !queue.length) endGame('daily');
@@ -1009,6 +1066,7 @@ function hackForChain(chain) {
 async function awardPackets(kind, count) {
   const packet = PACKETS[kind];
   score += count * packet.bonus;
+  stealPts += count * packet.bonus;
   if (kind === 'byte') Progress.bytes(count);
   else Progress.nibbles(count);
   updateHud();
@@ -1076,7 +1134,9 @@ async function resolveChains() {
     chain++;
     cleared += pops.length;
     Progress.decrypted(pops.map((p) => grid[p.row][p.col].val), chain);
-    score += pops.reduce((n, pos) => n + blockPoints(grid[pos.row][pos.col]), 0) * chain;
+    const linkPoints = pops.reduce((n, pos) => n + blockPoints(grid[pos.row][pos.col]), 0) * chain;
+    score += linkPoints;
+    if (chain >= 2) stealPts += linkPoints; // (VS ATTRITION takes these from the CPU too)
     chainEl.textContent = `${chain}x`;
 
     FX.burst(cellsAt([...pops, ...sprung]));
@@ -1364,7 +1424,8 @@ function endGame(reason = 'trace') {
     time: ["TIME'S UP", 'The connection timed out.'],
     daily: [mode === 'breach' ? 'BREACH COMPLETE' : 'DAILY COMPLETE', `All ${dealLimit()} bits dropped.`],
     breached: ['FIREWALL BREACHED', `Every block cleared. +${BREACH_CLEAR_BONUS}`],
-    win: ['YOU WIN', `The ${vsName()} overflowed first.`],
+    win: ['YOU WIN', vsWhy || `The ${vsName()} overflowed first.`],
+    'vs-lose': [`${CpuBoard.BOTS[vsBot].label} WINS`, vsWhy],
   };
   if (mode === 'vs') {
     if (reason === 'trace') endings.trace = [`${CpuBoard.BOTS[vsBot].label} WINS`, `The ${vsName()} traced you first.`];
@@ -1608,6 +1669,53 @@ document.querySelectorAll('#vs-bots button[data-bot]').forEach((btn) => {
   });
 });
 
+// VS game mode: CLASSIC, ATTRITION, DEATHMATCH, TUG OF WAR
+document.querySelectorAll('#vs-modes button[data-vsmode]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const next = btn.dataset.vsmode;
+    if (next === vsMode) return;
+    requestReset(btn, 'CONFIRM?', () => {
+      vsMode = next;
+      storage.set('bytefall-vs-mode', next);
+    });
+  });
+});
+// The target score (ATTRITION, DEATHMATCH) or starting points (TUG OF WAR): -/+ by 500
+function stepVsGoal(dir) {
+  if (vsStarted || vsMode === 'classic') return;
+  const tug = vsMode === 'tug';
+  const range = tug ? VS_POOL : VS_TARGET;
+  const now = tug ? vsPool : vsTarget;
+  const next = Math.min(range.max, Math.max(range.min, now + dir * range.step));
+  if (next === now) {
+    SFX.play('denied');
+    return;
+  }
+  SFX.play('click');
+  if (tug) {
+    vsPool = next;
+    storage.set('bytefall-vs-pool', String(next));
+  } else {
+    vsTarget = next;
+    storage.set('bytefall-vs-target', String(next));
+  }
+  startVs(); // (the match points start over from the new numbers)
+  applyModeUi();
+  updateHud();
+}
+document.getElementById('vs-goal-down').addEventListener('click', () => stepVsGoal(-1));
+document.getElementById('vs-goal-up').addEventListener('click', () => stepVsGoal(1));
+function showVsGoal() {
+  const tug = vsMode === 'tug';
+  const range = tug ? VS_POOL : VS_TARGET;
+  const now = tug ? vsPool : vsTarget;
+  const row = document.getElementById('vs-goal-row');
+  row.classList.toggle('off', vsMode === 'classic');
+  document.getElementById('vs-goal').textContent = vsMode === 'classic' ? 'NO TARGET' : `${tug ? 'START' : 'TARGET'} ${fmt(now)}`;
+  document.getElementById('vs-goal-down').disabled = vsMode === 'classic' || now <= range.min;
+  document.getElementById('vs-goal-up').disabled = vsMode === 'classic' || now >= range.max;
+}
+
 // DAILY's games: DECRYPT, PUZZLE, BLITZ, BREACH
 document.querySelectorAll('#daily-kinds button').forEach((btn) => {
   btn.addEventListener('click', () => {
@@ -1635,6 +1743,12 @@ function refreshVsPicks() {
     btn.classList.toggle('active', btn.dataset.bot === vsBot);
     btn.classList.toggle('locked', !vsBotOpen(btn.dataset.bot));
   });
+  document.querySelectorAll('#vs-modes button[data-vsmode]').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.vsmode === vsMode);
+  });
+  document.getElementById('vs-setup-note').textContent = VS_MODES[vsMode].note;
+  showVsGoal();
+  fitVsSetup();
 }
 
 function applyModeUi() {
@@ -1653,7 +1767,7 @@ function applyModeUi() {
   document.querySelectorAll('#vs-levels button[data-vs]').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.vs === vsLevel);
   });
-  vsLayersBtn.textContent = `ENCRYPTED LAYERS: ${vsLayers ? 'ON' : 'OFF'}`;
+  vsLayersBtn.textContent = `LAYERS: ${vsLayers ? 'ON' : 'OFF'}`;
   vsLayersBtn.classList.toggle('active', vsLayers);
   vsExploitsBtn.textContent = `EXPLOITS: ${vsExploits ? 'ON' : 'OFF'}`;
   vsExploitsBtn.classList.toggle('active', vsExploits);
@@ -1714,7 +1828,15 @@ const vsCap = () => VS_CAP[vsLevel] || 16;
 let cpu = null;
 let incoming = 0; // blocks headed for you
 let cpuPending = 0; // blocks headed for the CPU
-let cpuDown = false; // the CPU overflowed (the win shows once your drop finishes)
+let cpuDown = false; // the CPU lost (the win shows once your drop finishes)
+let vsLost = false; // you lost on points (the loss shows once your drop finishes)
+let vsWhy = ''; // the result's line, for a win or loss on points
+// Match points (every mode but CLASSIC, which shows the plain scores): yours and the CPU's.
+// vsCounted: your score already counted in; stealPts: the part of it ATTRITION takes from the CPU.
+let vsMe = 0;
+let vsThem = 0;
+let vsCounted = 0;
+let stealPts = 0;
 let vsStarted = false; // START pressed on the setup overlay
 let cpuClock = 0;
 const cpuStatEl = document.getElementById('cpu-stat');
@@ -1726,6 +1848,11 @@ function startVs() {
   incoming = 0;
   cpuPending = 0;
   cpuDown = false;
+  vsLost = false;
+  vsWhy = '';
+  vsMe = vsThem = vsMode === 'tug' ? vsPool : 0;
+  vsCounted = score;
+  stealPts = 0;
   cpuClock = 0;
   vsStarted = false;
   // The setup overlay: shown (popping back in) whenever a match hasn't started
@@ -1736,6 +1863,7 @@ function startVs() {
     void vsSetupEl.offsetWidth;
     vsSetupEl.style.animation = '';
   }
+  fitVsSetup();
   if (mode !== 'vs') {
     cpu = null;
     showVs();
@@ -1753,17 +1881,65 @@ function stopVs() {
 
 // Your attack, then the blocks still headed your way land
 async function vsAfterDrop(points) {
+  vsScored();
   sendToCpu(vsBlocks(points));
-  while (incoming > 0 && !overflowed() && !gameOver) {
+  while (incoming > 0 && !overflowed() && !gameOver && !vsLost && !cpuDown) {
     const n = Math.min(incoming, VS_MAX_BLOCKS);
     incoming -= n;
     showVs();
     const before = score;
     await takeGarbage(n);
     await resolveChains();
+    vsScored();
     sendToCpu(vsBlocks(score - before)); // a chain set off by the garbage counts as an attack too
   }
   showVs();
+}
+// Your points since the last count go into the match (ATTRITION, DEATHMATCH, TUG OF WAR)
+function vsScored() {
+  const points = score - vsCounted;
+  const steal = Math.min(stealPts, points);
+  vsCounted = score;
+  stealPts = 0;
+  [vsMe, vsThem] = matchPoints(vsMe, vsThem, points, steal);
+  vsCheck();
+  updateHud();
+}
+// The CPU's points into the match
+function cpuScored(points) {
+  const steal = Math.min(cpu.takeSteal(), points);
+  [vsThem, vsMe] = matchPoints(vsThem, vsMe, points, steal);
+  vsCheck();
+  updateHud();
+}
+// [scorer's, other side's] match points after the scorer scores `points` (`steal` of them
+// from chains and bonuses)
+function matchPoints(mine, theirs, points, steal) {
+  if (vsMode === 'attrition') return [mine + points, Math.max(0, theirs - steal)];
+  if (vsMode === 'tug') {
+    const take = Math.min(points, theirs);
+    return [mine + take, theirs - take];
+  }
+  return [mine + points, theirs];
+}
+// A win or loss on points: it shows once your drop (if one is playing) finishes
+function vsCheck() {
+  if (cpuDown || vsLost || mode !== 'vs') return;
+  const race = vsMode === 'attrition' || vsMode === 'deathmatch';
+  if (race && vsMe >= vsTarget) vsWin(`You reached ${fmt(vsTarget)} first.`);
+  else if (race && vsThem >= vsTarget) vsLose(`The ${vsName()} reached ${fmt(vsTarget)} first.`);
+  else if (vsMode === 'tug' && vsThem <= 0) vsWin(`The ${vsName()} ran out of points.`);
+  else if (vsMode === 'tug' && vsMe <= 0) vsLose(`The ${vsName()} took all your points.`);
+}
+function vsWin(why) {
+  cpuDown = true;
+  vsWhy = why;
+  if (!busy && !gameOver) endGame('win');
+}
+function vsLose(why) {
+  vsLost = true;
+  vsWhy = why;
+  if (!busy && !gameOver) endGame('vs-lose');
 }
 function sendToCpu(blocks) {
   const cancel = Math.min(blocks, incoming);
@@ -1805,6 +1981,7 @@ async function takeGarbage(n) {
 // One CPU move: it drops a bit, attacks, then takes the blocks headed its way
 function cpuMove() {
   const scored = cpu.step();
+  cpuScored(scored);
   sendToPlayer(vsBlocks(scored));
   if (scored > 0) botMood('happy', 1100);
   if (cpu.used()) {
@@ -1818,12 +1995,15 @@ function cpuMove() {
   if (cpuPending > 0 && !cpu.isDead()) {
     const n = Math.min(cpuPending, VS_MAX_BLOCKS);
     cpuPending -= n;
-    sendToPlayer(vsBlocks(cpu.takeGarbage(n)));
+    const scoredToo = cpu.takeGarbage(n);
+    cpuScored(scoredToo);
+    sendToPlayer(vsBlocks(scoredToo));
     botMood('hit', 900); // your blocks land on its board
   }
   queueCpuFrames();
-  if (cpu.isDead() && !cpuDown) {
+  if (cpu.isDead() && !cpuDown && !vsLost) {
     cpuDown = true;
+    vsWhy = '';
     if (!busy && !gameOver) endGame('win');
   }
 }
@@ -1833,7 +2013,7 @@ setInterval(() => {
   const now = performance.now();
   const dt = now - lastCpuTick;
   lastCpuTick = now;
-  if (mode !== 'vs' || !cpu || !vsStarted || gameOver || cpuDown || document.hidden || panelOpen()) return;
+  if (mode !== 'vs' || !cpu || !vsStarted || gameOver || cpuDown || vsLost || document.hidden || panelOpen()) return;
   cpuClock += dt;
   if (cpuClock >= cpu.delay) {
     cpuClock -= cpu.delay;
@@ -2050,7 +2230,7 @@ vsQuitBtn.addEventListener('click', quitVs);
 // The status line in the mode row's place, and how many stat rows the left column has
 function updateVsChrome() {
   const rows = [...document.querySelectorAll('.hud > .stat:not(.cpu-stat):not(.cpu-face), .hud > .hud-bits')].filter((el) => !el.hidden && getComputedStyle(el).display !== 'none').length;
-  document.getElementById('vs-status').textContent = `${CpuBoard.BOTS[vsBot].label} ${CpuBoard.LEVELS[vsLevel].label} // LAYERS ${vsLayers ? 'ON' : 'OFF'}`;
+  document.getElementById('vs-status').textContent = `${CpuBoard.BOTS[vsBot].label} ${CpuBoard.LEVELS[vsLevel].label} // ${vsModeText()}`;
   fitVsStatus();
   document.querySelector('.hud').style.setProperty('--vs-rows', rows);
 }
@@ -2143,9 +2323,11 @@ function showVs() {
   if (vs) botMood();
   incomingEl.hidden = !vs || incoming === 0;
   if (!vs) return;
-  incomingEl.textContent = `\u25BC ${incoming} INCOMING`;
-  // CPU // its score, and the blocks headed its way
-  document.getElementById('cpu-label').innerHTML = `CPU // <b class="cpu-score">${fmt(cpu.score())}</b>${cpuPending ? ` \u25BC${cpuPending}` : ''}`;
+  // ▼ 14 INCOMING, then a pip for each block (up to 32, in groups of 8)
+  incomingEl.innerHTML = `<span>\u25BC ${incoming} INCOMING</span><span class="pips">${'<i></i>'.repeat(incoming)}</span>`;
+  // CPU // its score (or match points), and the blocks headed its way
+  const cpuPts = vsMode === 'classic' ? cpu.score() : vsThem;
+  document.getElementById('cpu-label').innerHTML = `CPU // <b class="cpu-score">${fmt(cpuPts)}</b>${cpuPending ? ` \u25BC${cpuPending}` : ''}`;
   drawCpu();
 }
 
@@ -2748,7 +2930,6 @@ const recordsEl = document.getElementById('records');
 const recordsBodyEl = document.getElementById('records-body');
 let recordsTab = 'unlocks';
 let menuPane = 'rules';
-const fmt = (n) => Number(n).toLocaleString('en-US');
 // Bits decrypted as data, in decimal units: 1 kilobit = 1,000 bits, 1 kilobyte = 8,000 bits
 function fmtData(bits) {
   if (bits < 1000) return `${fmt(bits)} bits`;
