@@ -156,8 +156,6 @@ function startGridBackground(canvas, { defrag = true } = {}) {
 startGridBackground(document.getElementById('board-bg'));
 // VS setup: the defrag behind its options (the board's cells are covered)
 startGridBackground(document.getElementById('vs-setup-bg'));
-// VS PAUSE: the same, with the board covered
-startGridBackground(document.getElementById('vs-pause-bg'));
 // The HUD boxes (SCORE, CHAIN, NEW LAYER IN, CURRENT...): the starlight only
 document.querySelectorAll('.hud .stat:not(.cpu-stat):not(.cpu-face)').forEach((stat) => {
   const canvas = document.createElement('canvas');

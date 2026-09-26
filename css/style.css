@@ -2116,13 +2116,25 @@ body.vs-mode .overlay { background: transparent; }
 .vs-setup .difficulty { flex-wrap: nowrap; gap: 4px; }
 .vs-setup .difficulty button { padding: 5px 6px; font-size: 11px; letter-spacing: 1px; white-space: nowrap; }
 .vs-setup #vs-options-row { gap: 6px; }
+/* PAUSE: no cover of its own. The board's defrag keeps running behind; the pieces fade out
+   quickly and the pause options fade in over it */
+.vs-setup.vs-pause { background: transparent; animation: pause-in 0.18s ease-out; }
+.vs-pause.closing { animation: pause-out 0.15s ease-in forwards; }
+@keyframes pause-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pause-out { from { opacity: 1; } to { opacity: 0; } }
+.board-frame #board { transition: opacity 0.15s ease-out; }
+.board-frame.paused #board, .board-frame.paused .incoming { opacity: 0; pointer-events: none; }
 .vs-pause .pause-row { gap: 8px; }
 .vs-pause .pause-row button { font-size: 12px; padding: 6px 14px; min-width: 9ch; }
 .vs-setup .difficulty.two-rows { flex-wrap: wrap; justify-content: center; max-width: 100%; }
 .vs-setup #vs-options-row button { font-size: 12px; padding: 6px 10px; }
 /* The game mode, and its target score or starting points: − TARGET 2,000 + (dimmed for CLASSIC) */
 .vs-goal-row { display: flex; align-items: center; gap: 8px; }
-.vs-goal-row button { width: 26px; height: 24px; padding: 0; font-size: 14px; line-height: 1; letter-spacing: 0; }
+.vs-goal-row button {
+  width: 26px; height: 24px; padding: 0; font-family: inherit; font-size: 14px; line-height: 1; letter-spacing: 0;
+  background: transparent; border: 1px solid var(--fg); border-radius: 4px; color: var(--fg); cursor: pointer;
+}
+.vs-goal-row button:hover:not(:disabled) { background: rgba(var(--fg-rgb), 0.15); }
 .vs-goal { min-width: 13ch; font-size: 12px; letter-spacing: 1px; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
 .vs-goal-row.off { opacity: 0.35; }
 .vs-goal-row button:disabled { opacity: 0.35; cursor: default; }

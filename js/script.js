@@ -1857,6 +1857,7 @@ function startVs() {
   vsPaused = false;
   pauseQueued = false;
   document.getElementById('vs-pause').hidden = true;
+  document.querySelector('.board-frame').classList.remove('paused');
   vsWhy = '';
   vsMe = vsThem = vsMode === 'tug' ? vsPool : 0;
   vsCounted = score;
@@ -2278,10 +2279,9 @@ function openPause() {
   pauseQueued = false;
   if (mode !== 'vs' || !vsStarted || gameOver || vsPaused) return;
   vsPaused = true;
+  vsPauseEl.classList.remove('closing');
   vsPauseEl.hidden = false;
-  vsPauseEl.style.animation = 'none';
-  void vsPauseEl.offsetWidth;
-  vsPauseEl.style.animation = '';
+  document.querySelector('.board-frame').classList.add('paused'); // (the pieces fade out)
   SFX.play('static');
   botMood();
   updatePauseBtn();
@@ -2290,8 +2290,13 @@ function resumeMatch() {
   if (!vsPaused) return;
   disarmReset();
   vsPaused = false;
-  FX.burst([{ el: vsPauseEl, type: 'warning' }]);
-  vsPauseEl.hidden = true;
+  // The options fade out and the pieces fade back in
+  vsPauseEl.classList.add('closing');
+  document.querySelector('.board-frame').classList.remove('paused');
+  setTimeout(() => {
+    if (!vsPaused) vsPauseEl.hidden = true;
+    vsPauseEl.classList.remove('closing');
+  }, 150);
   SFX.play('static');
   botMood();
   updatePauseBtn();
@@ -2303,6 +2308,7 @@ function pauseConfirm(btn, apply) {
     return;
   }
   vsPauseEl.hidden = true; // (still paused: the CPU waits out the melt)
+  document.querySelector('.board-frame').classList.remove('paused'); // (the melt shows)
   requestReset(btn, 'CONFIRM?', apply);
 }
 document.getElementById('pause-resume').addEventListener('click', resumeMatch);
