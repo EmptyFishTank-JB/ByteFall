@@ -725,13 +725,15 @@ body.vs-mode .vs-title span { color: var(--accent); text-shadow: 0 0 8px var(--a
   animation: bit-hue var(--spin, 6s) linear var(--spin-delay, 0s) infinite var(--spin-dir, normal);
 }
 [data-theme="spectrum"] .cabinet,
-[data-theme="spectrum"] footer { animation: page-hue 48s linear infinite; }
+[data-theme="spectrum"] footer,
+[data-theme="spectrum"] .music-player .mp-inner > :not(.mp-viz) { animation: page-hue 48s linear infinite; }
 [data-theme="spectrum"] .cell.pop { animation: pop-out 0.16s ease-out forwards; }
 
 @media (prefers-reduced-motion: reduce) {
   [data-theme="spectrum"] .cell.disc,
   [data-theme="spectrum"] .cabinet,
-  [data-theme="spectrum"] footer { animation: none; }
+  [data-theme="spectrum"] footer,
+  [data-theme="spectrum"] .music-player .mp-inner > :not(.mp-viz) { animation: none; }
 }
 
 .cell.overflow {

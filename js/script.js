@@ -2764,12 +2764,12 @@ function renderPlaylist() {
 }
 
 const vizBtn = document.getElementById('viz-toggle');
-const playlistViz = createVisualizer(document.getElementById('playlist-viz'), Music.getAnalyser);
+// The small one has the styles that read at its height; the MUSIC PLAYER has them all
+const playlistViz = createVisualizer(document.getElementById('playlist-viz'), Music.getAnalyser, { modes: ['bars', 'wave', 'scope'] });
 
 function updateVizLabel() {
-  const next = playlistViz.mode === 'bars' ? 'wave' : 'bars';
-  vizBtn.setAttribute('aria-label', `Visualizer: ${playlistViz.mode}. Click to switch to ${next}.`);
-  vizBtn.title = `Switch to ${next}`;
+  vizBtn.setAttribute('aria-label', `Visualizer: ${playlistViz.name}. Click to switch.`);
+  vizBtn.title = `${playlistViz.name} (tap to switch)`;
 }
 vizBtn.addEventListener('click', () => {
   playlistViz.toggle();

@@ -54,6 +54,16 @@ function createBytefallTheme(ctx, out) {
   comp.ratio.value = 3;
   bus.connect(comp);
   comp.connect(out);
+  // Stereo width: drums, bass and the lead's middle stay centered; the pad's detuned pair
+  // splits left and right, the arp alternates sides, hats sit right, the tension saw left and
+  // the echoes come back from the right
+  const panner = (v, dest = bus) => {
+    const p = ctx.createStereoPanner();
+    p.pan.value = v;
+    p.connect(dest);
+    return p;
+  };
+  let arpSide = 1;
 
   // Dotted-8th echo for the arp and lead
   const delay = ctx.createDelay(1);
@@ -69,7 +79,7 @@ function createBytefallTheme(ctx, out) {
   delayTone.connect(feedback);
   feedback.connect(delay);
   delayTone.connect(wet);
-  wet.connect(bus);
+  wet.connect(panner(0.5));
 
   const noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
   const nd = noise.getChannelData(0);
@@ -127,7 +137,7 @@ function createBytefallTheme(ctx, out) {
     const dur = open ? 0.18 : 0.04;
     g.gain.setValueAtTime((open ? 0.05 : 0.035) * level, t);
     g.gain.exponentialRampToValueAtTime(0.001, t + dur);
-    src.connect(hp); hp.connect(g); g.connect(bus);
+    src.connect(hp); hp.connect(g); g.connect(panner(0.35));
     src.start(t, Math.random() * 0.5); src.stop(t + dur);
   }
 
@@ -160,7 +170,7 @@ function createBytefallTheme(ctx, out) {
         osc.type = 'sawtooth';
         osc.frequency.value = freq(m);
         osc.detune.value = cents;
-        osc.connect(lp);
+        osc.connect(panner(cents < 0 ? -0.7 : 0.7, lp));
         osc.start(t); osc.stop(t + dur);
       }
     }
@@ -174,7 +184,8 @@ function createBytefallTheme(ctx, out) {
     const g = ctx.createGain();
     g.gain.setValueAtTime(0.035 * (1 + 0.6 * bright), t);
     g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
-    osc.connect(lp); lp.connect(g); g.connect(bus); g.connect(delay);
+    arpSide = -arpSide;
+    osc.connect(lp); lp.connect(g); g.connect(panner(0.4 * arpSide)); g.connect(delay);
     osc.start(t); osc.stop(t + 0.13);
   }
 
@@ -187,7 +198,7 @@ function createBytefallTheme(ctx, out) {
     const g = ctx.createGain();
     g.gain.setValueAtTime(0.18 * level, t);
     g.gain.exponentialRampToValueAtTime(0.0005, t + STEP * 0.9);
-    osc.connect(lp); lp.connect(g); g.connect(bus);
+    osc.connect(lp); lp.connect(g); g.connect(panner(-0.45));
     osc.start(t); osc.stop(t + STEP);
   }
 
@@ -211,7 +222,7 @@ function createBytefallTheme(ctx, out) {
       osc.frequency.value = freq(m);
       osc.detune.value = cents;
       vibDepth.connect(osc.frequency);
-      osc.connect(lp);
+      osc.connect(panner(cents < 0 ? -0.3 : 0.3, lp));
       osc.start(t); osc.stop(t + dur + 0.1);
     }
     vib.start(t); vib.stop(t + dur + 0.1);

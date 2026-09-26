@@ -26,6 +26,16 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   let mode = modes[0];
   try { if (modes.includes(localStorage.getItem(MODE_KEY))) mode = localStorage.getItem(MODE_KEY); } catch (e) {}
 
+  // The signal's colors follow the theme: its bit color (hot parts in its accent), or under
+  // SPECTRUM a rainbow cycling like the bits (f: 0-1 across the bars, spokes or particles)
+  let rainbow = false;
+  let hue = 0;
+  let fgNow = '57, 255, 143';
+  let accentNow = '255, 209, 102';
+  const paint = (f, a, hot = false) => (rainbow
+    ? `hsla(${((hue + f * 360) % 360).toFixed(0)}, 100%, ${hot ? 72 : 62}%, ${a})`
+    : `rgba(${hot ? accentNow : fgNow}, ${a})`);
+
   function fit() {
     const dpr = window.devicePixelRatio || 1;
     const w = canvas.clientWidth;
@@ -68,9 +78,9 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
         const y = h - (seg + 1) * (SEGMENT + 1) + 1;
         if (seg < lit) {
           const hot = seg / segments;
-          g.fillStyle = hot > 0.8 ? `rgba(${accent}, 0.9)` : `rgba(${fg}, ${(0.55 + hot * 0.45).toFixed(2)})`;
+          g.fillStyle = hot > 0.8 ? paint(b / bars, 0.9, true) : paint(b / bars, (0.55 + hot * 0.45).toFixed(2));
         } else if (an && seg === cap && cap > 0) {
-          g.fillStyle = `rgba(${accent}, 0.75)`;
+          g.fillStyle = paint(b / bars, 0.75, true);
         } else {
           g.fillStyle = `rgba(${fg}, 0.08)`;
         }
@@ -102,8 +112,8 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
         const y = mid - wave[i] * gain * mid;
         if (i) g.lineTo(x, y); else g.moveTo(x, y);
       }
-      g.strokeStyle = `rgba(${fg}, 0.95)`;
-      g.shadowColor = `rgba(${fg}, 0.8)`;
+      g.strokeStyle = paint(0, 0.95);
+      g.shadowColor = paint(0, 0.8);
       g.shadowBlur = 6;
     } else {
       const t = now / 1000;
@@ -160,9 +170,10 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       g.strokeStyle = `rgba(${fg}, ${k === 5 ? 0.25 : 0.1})`;
       g.beginPath(); g.moveTo((w * k) / 10, 0); g.lineTo((w * k) / 10, h); g.stroke();
     }
-    for (let k = 1; k < 8; k++) {
-      g.strokeStyle = `rgba(${fg}, ${k === 4 ? 0.25 : 0.1})`;
-      g.beginPath(); g.moveTo(0, (h * k) / 8); g.lineTo(w, (h * k) / 8); g.stroke();
+    const rows = h < 60 ? 2 : 8; // (a short one: just the center line)
+    for (let k = 1; k < rows; k++) {
+      g.strokeStyle = `rgba(${fg}, ${k === rows / 2 ? 0.25 : 0.1})`;
+      g.beginPath(); g.moveTo(0, (h * k) / rows); g.lineTo(w, (h * k) / rows); g.stroke();
     }
     const mid = h / 2;
     g.beginPath();
@@ -185,9 +196,9 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     } else {
       g.moveTo(0, mid); g.lineTo(w, mid);
     }
-    g.strokeStyle = `rgba(${fg}, ${an ? 0.95 : 0.4})`;
+    g.strokeStyle = paint(0, an ? 0.95 : 0.4);
     g.lineWidth = 1.6;
-    g.shadowColor = `rgba(${fg}, 0.8)`;
+    g.shadowColor = paint(0, 0.8);
     g.shadowBlur = an ? 6 : 0;
     g.stroke();
     g.shadowBlur = 0;
@@ -218,16 +229,16 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       const level = radialLevels[b];
       const a = spin + (k / spokes) * Math.PI * 2 - Math.PI / 2;
       const len = 3 + level * room;
-      g.strokeStyle = level > 0.8 ? `rgba(${accent}, 0.95)` : `rgba(${fg}, ${(0.35 + level * 0.65).toFixed(2)})`;
+      g.strokeStyle = paint(k / spokes, level > 0.8 ? 0.95 : (0.35 + level * 0.65).toFixed(2), level > 0.8);
       g.beginPath();
       g.moveTo(cx + Math.cos(a) * r0, cy + Math.sin(a) * r0);
       g.lineTo(cx + Math.cos(a) * (r0 + len), cy + Math.sin(a) * (r0 + len));
       g.stroke();
     }
     g.lineWidth = 1.5;
-    g.strokeStyle = `rgba(${fg}, 0.6)`;
+    g.strokeStyle = paint(0.5, 0.6);
     g.beginPath(); g.arc(cx, cy, r0 - 4, 0, Math.PI * 2); g.stroke();
-    g.fillStyle = `rgba(${fg}, ${(0.05 + bass * 0.25).toFixed(2)})`;
+    g.fillStyle = paint(0.5, (0.05 + bass * 0.25).toFixed(2));
     g.beginPath(); g.arc(cx, cy, (r0 - 6) * (0.6 + 0.4 * bass), 0, Math.PI * 2); g.fill();
     g.lineCap = 'butt';
   }
@@ -268,11 +279,11 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       if (k) g.lineTo(x, y); else g.moveTo(x, y);
     }
     const grad = g.createRadialGradient(cx, cy, 0, cx, cy, size * 0.7);
-    grad.addColorStop(0, `rgba(${fg}, ${(0.25 + energy * 0.5).toFixed(2)})`);
-    grad.addColorStop(1, `rgba(${fg}, 0.02)`);
+    grad.addColorStop(0, paint(0, (0.25 + energy * 0.5).toFixed(2)));
+    grad.addColorStop(1, paint(0.35, 0.02));
     g.fillStyle = grad;
     g.fill();
-    g.strokeStyle = `rgba(${fg}, 0.7)`;
+    g.strokeStyle = paint(0, 0.7);
     g.lineWidth = 1.5;
     g.stroke();
     // New particles from the blob's edge, more and faster with more energy
@@ -281,7 +292,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       const a = Math.random() * Math.PI * 2;
       const r = radiusAt(a);
       const speed = 0.4 + energy * 3 + Math.random() * 1.2;
-      particles.push({ x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r, vx: Math.cos(a) * speed, vy: Math.sin(a) * speed, life: 1, hot: Math.random() < energy * 0.6 });
+      particles.push({ x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r, vx: Math.cos(a) * speed, vy: Math.sin(a) * speed, life: 1, hot: Math.random() < energy * 0.6, f: a / (Math.PI * 2) });
     }
     for (let k = particles.length - 1; k >= 0; k--) {
       const q = particles[k];
@@ -293,7 +304,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       q.x += -dy * 0.004; q.y += dx * 0.004;
       q.life -= 0.012;
       if (q.life <= 0 || q.x < -4 || q.y < -4 || q.x > w + 4 || q.y > h + 4) { particles.splice(k, 1); continue; }
-      g.fillStyle = `rgba(${q.hot ? accent : fg}, ${q.life.toFixed(2)})`;
+      g.fillStyle = paint(q.f, q.life.toFixed(2), q.hot);
       g.fillRect(q.x - 1, q.y - 1, 2, 2);
     }
   }
@@ -319,7 +330,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     g.moveTo(cx + r * 0.7, cy - r * 0.7); g.lineTo(cx - r * 0.7, cy + r * 0.7);
     g.stroke();
     g.fillStyle = `rgba(${fg}, 0.35)`;
-    g.font = '9px monospace';
+    g.font = `9px ${getComputedStyle(canvas).fontFamily}`;
     g.fillText('L', cx - r * 0.7 - 8, cy - r * 0.7 + 3);
     g.fillText('R', cx + r * 0.7 + 3, cy - r * 0.7 + 3);
     const pair = getStereo();
@@ -336,13 +347,17 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
         max = Math.max(max, Math.abs(wave[i]), Math.abs(vectorR[i]));
         lr += wave[i] * vectorR[i]; ll += wave[i] * wave[i]; rr += vectorR[i] * vectorR[i];
       }
-      loudness = Math.max(max, loudness * 0.97, 0.004);
-      const gain = Math.min(14, 0.9 / loudness) * r * 0.7;
-      g.fillStyle = `rgba(${fg}, 0.7)`;
+      // scaled by the average level (not the peaks), so the shape fills the scope
+      const rms = Math.sqrt((ll + rr) / (2 * wave.length));
+      vectorLevel += (Math.max(rms, 0.002) - vectorLevel) * 0.08;
+      const gain = Math.min(60, 0.22 / vectorLevel) * r;
+      g.fillStyle = paint(0, 0.7);
       for (let i = 0; i < wave.length; i += 2) {
-        const x = cx + (vectorR[i] - wave[i]) * gain * 0.7071;
-        const y = cy - (wave[i] + vectorR[i]) * gain * 0.7071;
-        g.fillRect(x, y, 1.5, 1.5);
+        let x = (vectorR[i] - wave[i]) * gain * 0.7071;
+        let y = -(wave[i] + vectorR[i]) * gain * 0.7071;
+        const d = Math.hypot(x, y);
+        if (d > r) { x *= r / d; y *= r / d; } // (loud peaks pinned to the edge)
+        g.fillRect(cx + x, cy + y, 1.5, 1.5);
       }
       const now = ll > 1e-9 && rr > 1e-9 ? lr / Math.sqrt(ll * rr) : 1;
       correlation += (now - correlation) * 0.15;
@@ -353,13 +368,14 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     g.fillStyle = `rgba(${fg}, 0.12)`;
     g.fillRect(16, y, w - 32, 5);
     const x = 16 + ((correlation + 1) / 2) * (w - 32);
-    g.fillStyle = correlation < 0 ? `rgba(${accent}, 0.95)` : `rgba(${fg}, 0.95)`;
+    g.fillStyle = paint((correlation + 1) / 2, 0.95, correlation < 0);
     g.fillRect(x - 2, y - 2, 4, 9);
     g.fillStyle = `rgba(${fg}, 0.45)`;
     g.fillText('-1', 0, y + 6);
     g.fillText('+1', w - 13, y + 6);
   }
   let vectorR = null;
+  let vectorLevel = 0.02; // a running average of the level, for the scale
 
   return {
     get mode() { return mode; },
@@ -375,6 +391,10 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     },
     draw(now = performance.now()) {
       const { w, h } = fit();
+      rainbow = document.documentElement.dataset.theme === 'spectrum';
+      hue = (now / 40) % 360;
+      fgNow = vizRgb('--fg-rgb', '57, 255, 143');
+      accentNow = vizRgb('--accent-rgb', '255, 209, 102');
       const an = getAnalyser();
       if (mode === 'wave') drawWave(an, w, h, now);
       else if (mode === 'scope') drawScope(an, w, h);

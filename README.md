@@ -360,6 +360,15 @@ with a cached older script (GitHub Pages lets browsers cache for 10 minutes).
   original 16-bar theme loop, `bytefall-theme-v2.wav` the first 32-bar
   version, `sleep-mode-v1.wav` the first SLEEP MODE
 
+## Stereo
+
+BYTEFALL THEME and SLEEP MODE are mixed in stereo: drums, bass and the lead
+stay centered; pads and detuned synth voices spread left and right, arps
+alternate sides, hats sit right, the tension saw / alarm left, echoes come back
+from the right, and SLEEP MODE's guitars are double-tracked hard left and right.
+The other tracks are still mono (the WAV renders in `assets/audio/` are mono
+mixdowns).
+
 ## Startup
 
 A fresh launch (the app or tab opened anew) always starts on CLASSIC, Normal.
@@ -369,7 +378,7 @@ A refresh, or coming back to the app or tab, carries on where you were.
 
 SETTINGS → PLAYLIST → **OPEN MUSIC PLAYER** opens the soundtrack on its own,
 over the whole page: every track plays as its full mix (all layers in,
-whatever the game was doing), with a big visualizer: tap it to cycle SPECTRUM (LED bars), WAVE, OSCILLOSCOPE (a few cycles held still on a rising zero crossing, over a graticule), RADIAL (spectrum bars around a ring that swells with the bass), PARTICLES (a liquid blob morphing with the spectrum, shedding particles as it gets louder) and VECTORSCOPE (left against right turned 45°, with a phase-correlation meter; the soundtrack is mono, so it's a vertical line at +1), its name shown top left,
+whatever the game was doing), with a big visualizer: tap it to cycle SPECTRUM (LED bars), WAVE, OSCILLOSCOPE (a few cycles held still on a rising zero crossing, over a graticule), RADIAL (spectrum bars around a ring that swells with the bass), PARTICLES (a liquid blob morphing with the spectrum, shedding particles as it gets louder) and VECTORSCOPE (left against right turned 45°, with a phase-correlation meter; tracks 01 and 02 are in stereo, the rest still mono, a vertical line at +1), its name shown top left. The visualizers follow the theme (its bit and accent colors; a cycling rainbow in SPECTRUM). The small one in SETTINGS has SPECTRUM, WAVE and OSCILLOSCOPE;
 PREVIOUS / PLAY-PAUSE / NEXT, REPEAT / SEQUENCE / SHUFFLE, the 16-slot track
 list (locked tracks show the level they open at) and BACKGROUND PLAY, so it can
 run on a phone with the screen off. Keys: Space plays / pauses, ← / → skip,
