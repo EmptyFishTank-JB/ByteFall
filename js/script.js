@@ -97,6 +97,15 @@ const storage = {
 
 // The EASY / NORMAL / HARD choice (CLASSIC mode). `difficulty` is the rules of the current
 // run: the classic choice in CLASSIC, Normal in every other mode.
+// A fresh launch (the app or tab opened anew, not a refresh or coming back to it) starts on
+// CLASSIC, Normal. (sessionStorage lasts as long as the tab or app window.)
+try {
+  if (!sessionStorage.getItem('bytefall-launched')) {
+    sessionStorage.setItem('bytefall-launched', '1');
+    storage.set('bytefall-mode', 'classic');
+    storage.set('bytefall-difficulty', 'normal');
+  }
+} catch (e) {}
 let classicDifficulty = DIFFICULTIES[storage.get('bytefall-difficulty')] ? storage.get('bytefall-difficulty') : 'normal';
 if (classicDifficulty === 'hard' && !Progress.isUnlocked('mode-hard')) classicDifficulty = 'normal';
 let difficulty = classicDifficulty;

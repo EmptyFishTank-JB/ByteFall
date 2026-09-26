@@ -132,6 +132,10 @@ function createCoreDump(ctx, out) {
     src.start(t, Math.random() * 0.5); src.stop(t + decay);
   }
 
+  // The blast beats (SEGFAULT and OVERFLOW) sit lower than the other drums: on phone speakers
+  // their clicks and snare noise buried the guitars
+  const BLAST = 0.55;
+
   // Tight enough for 16th-note double kick at 190 BPM
   function kick(t, level = 1) {
     const osc = ctx.createOscillator();
@@ -291,7 +295,7 @@ function createCoreDump(ctx, out) {
         if (base && s % 2 === 0) bass(t, m - 12, STEP * 1.8);
         if (base && !booting) {
           if ((firstPass ? bar === 2 : bar === 0) && s === 0) crash(t);
-          if (s % 2 === 0) { kick(t); ride(t); } else snare(t, 0.8);
+          if (s % 2 === 0) { kick(t, BLAST); ride(t, BLAST); } else snare(t, 0.8 * BLAST);
         }
         if (base && firstPass && i === 1 && s >= 8) snare(t, 0.3 + 0.7 * ((s - 8) / 7)); // roll into the blasts
         if (L.harmony > 0 && !booting) guitar(t, m + 7, STEP * 0.8, g * 0.55 * L.harmony); // fifths over the tremolo
@@ -325,7 +329,7 @@ function createCoreDump(ctx, out) {
           pulse(t, tones[(s * 2) % 12], STEP * 0.48, 0.045, 12);
           pulse(t + STEP / 2, tones[(s * 2 + 1) % 12], STEP * 0.48, 0.045, 12);
           if (i === 0 && s === 0) crash(t);
-          if (s % 2 === 0) { kick(t); ride(t); } else snare(t, 0.8);
+          if (s % 2 === 0) { kick(t, BLAST); ride(t, BLAST); } else snare(t, 0.8 * BLAST);
           if (s % 2 === 0) bass(t, SWEEP_CHORDS[i][0] - 24, STEP * 1.8);
         }
         if (base || solo === 'drive') guitar(t, SWEEP_CHORDS[i][0] - 12, STEP * 0.7, g * 0.7); // tremolo on the root

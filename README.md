@@ -336,7 +336,7 @@ with a cached older script (GitHub Pages lets browsers cache for 10 minutes).
   standby, signal, connected, hold). Unlocked at 7,500 bits.
 - `js/music/music-core-dump.js` — track 09, CORE DUMP: original 8-bit tech-death at
   190 BPM in A harmonic minor (distorted pulse-wave guitars: tremolo riffs,
-  gallop chugs and octave dives; square bass; noise-channel blast beats and a
+  gallop chugs and octave dives; square bass; noise-channel blast beats (mixed lower than the other drums) and a
   china cymbal; 32nd-note sweep arpeggios; segfault, stack trace, overflow,
   core dump). Unlocked at 11,000 bits.
 - `js/music/music-handshake.js` — track 10, HANDSHAKE: an original 8-bit battle theme
@@ -360,11 +360,16 @@ with a cached older script (GitHub Pages lets browsers cache for 10 minutes).
   original 16-bar theme loop, `bytefall-theme-v2.wav` the first 32-bar
   version, `sleep-mode-v1.wav` the first SLEEP MODE
 
+## Startup
+
+A fresh launch (the app or tab opened anew) always starts on CLASSIC, Normal.
+A refresh, or coming back to the app or tab, carries on where you were.
+
 ## Music player
 
 SETTINGS → PLAYLIST → **OPEN MUSIC PLAYER** opens the soundtrack on its own,
 over the whole page: every track plays as its full mix (all layers in,
-whatever the game was doing), with a big visualizer (tap it for bars / wave),
+whatever the game was doing), with a big visualizer: tap it to cycle SPECTRUM (LED bars), WAVE, OSCILLOSCOPE (a few cycles held still on a rising zero crossing, over a graticule), RADIAL (spectrum bars around a ring that swells with the bass), PARTICLES (a liquid blob morphing with the spectrum, shedding particles as it gets louder) and VECTORSCOPE (left against right turned 45°, with a phase-correlation meter; the soundtrack is mono, so it's a vertical line at +1), its name shown top left,
 PREVIOUS / PLAY-PAUSE / NEXT, REPEAT / SEQUENCE / SHUFFLE, the 16-slot track
 list (locked tracks show the level they open at) and BACKGROUND PLAY, so it can
 run on a phone with the screen off. Keys: Space plays / pauses, ← / → skip,

@@ -52,6 +52,7 @@ const Music = (() => {
   let fullMix = false;
   let ctx = null;
   let analyser = null;
+  let stereo = null; // [left, right] analysers
   let session = null; // per-play gain so stopped notes can't bleed into the next start
   let engine = null;
   let timer = null;
@@ -122,6 +123,17 @@ const Music = (() => {
         analyser.minDecibels = -90;
         analyser.maxDecibels = -34;
         analyser.connect(ctx.destination);
+        // Left and right on their own, for the vectorscope (a mono signal is copied to both
+        // sides, as the speakers play it)
+        const tap = ctx.createGain();
+        tap.channelCount = 2;
+        tap.channelCountMode = 'explicit';
+        tap.channelInterpretation = 'speakers';
+        const split = ctx.createChannelSplitter(2);
+        stereo = [ctx.createAnalyser(), ctx.createAnalyser()];
+        stereo.forEach((a, ch) => { a.fftSize = 1024; split.connect(a, ch); });
+        analyser.connect(tap);
+        tap.connect(split);
       }
       ctx.resume();
       openSession(1.5);
@@ -180,6 +192,7 @@ const Music = (() => {
     currentTrack: () => trackId,
     // The music's output analyser for the playlist visualizer; null when nothing is playing.
     getAnalyser: () => (timer ? analyser : null),
+    getStereo: () => (timer ? stereo : null),
     // Selecting a track always starts it, restarting playback if another was playing.
     play(id) {
       const track = TRACKS.find((t) => t.id === id);

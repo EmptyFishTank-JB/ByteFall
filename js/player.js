@@ -9,7 +9,12 @@
   const stateEl = document.getElementById('mp-state');
   const playBtn = document.getElementById('mp-play');
   const bgBtn = document.getElementById('mp-bg-btn');
-  const viz = createVisualizer(document.getElementById('mp-viz'), Music.getAnalyser, { bars: 40 });
+  const viz = createVisualizer(document.getElementById('mp-viz'), Music.getAnalyser, {
+    bars: 40, modes: ['bars', 'wave', 'scope', 'radial', 'fluid', 'vector'], key: 'bytefall-player-viz', getStereo: Music.getStereo,
+  });
+  const vizNameEl = document.getElementById('mp-viz-name');
+  const showVizName = () => { vizNameEl.textContent = `// ${viz.name}`; };
+  showVizName();
   const SLOTS = 16; // unmade tracks show as COMING SOON, as in the playlist
 
   const num = (n) => String(n + 1).padStart(2, '0');
@@ -123,7 +128,10 @@
     if (typeof updateBgPlayBtn === 'function') updateBgPlayBtn();
     render();
   });
-  document.getElementById('mp-viz-btn').addEventListener('click', () => viz.toggle());
+  document.getElementById('mp-viz-btn').addEventListener('click', () => {
+    viz.toggle();
+    showVizName();
+  });
   // SEQUENCE / SHUFFLE moving on by themselves: the display follows
   let shown = '';
   setInterval(() => {
