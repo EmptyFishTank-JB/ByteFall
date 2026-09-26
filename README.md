@@ -31,7 +31,7 @@ Mechanically it's a Drop7-style puzzle:
 index.html              the game page (GitHub Pages serves it from the root)
 manifest.webmanifest    the installed app's name, colors and icons
 css/style.css           all the styles and the themes
-js/                     the game: script.js (the game itself), progress.js (levels, unlocks,
+js/                     the game: script.js (the game itself), player.js (the music player), progress.js (levels, unlocks,
                         achievements, stats), unlocks.js, cpu.js (VS CPU), sfx.js, fx.js,
                         viz.js, grid-bg.js
 js/data/                puzzles.js, daily-puzzles.js
@@ -359,6 +359,17 @@ with a cached older script (GitHub Pages lets browsers cache for 10 minutes).
   archived layers left out). Older versions: `bytefall-theme-v1.wav` is the
   original 16-bar theme loop, `bytefall-theme-v2.wav` the first 32-bar
   version, `sleep-mode-v1.wav` the first SLEEP MODE
+
+## Music player
+
+SETTINGS → PLAYLIST → **OPEN MUSIC PLAYER** opens the soundtrack on its own,
+over the whole page: every track plays as its full mix (all layers in,
+whatever the game was doing), with a big visualizer (tap it for bars / wave),
+PREVIOUS / PLAY-PAUSE / NEXT, REPEAT / SEQUENCE / SHUFFLE, the 16-slot track
+list (locked tracks show the level they open at) and BACKGROUND PLAY, so it can
+run on a phone with the screen off. Keys: Space plays / pauses, ← / → skip,
+Esc closes. Where the browser offers them, the lock screen's media controls
+work too. The game waits underneath (a VS match pauses). Code: `js/player.js`.
 
 ## To-do
 

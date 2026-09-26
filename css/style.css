@@ -2147,3 +2147,62 @@ body.vs-mode .overlay { background: transparent; }
 /* Tablets and phones: no double-tap zoom (it threw the layout off on iPad) */
 html { touch-action: manipulation; }
 .cpu-stat { overflow: hidden; }
+
+/* MUSIC PLAYER: the soundtrack on its own, over the whole page (player.js) */
+.music-player {
+  position: fixed; inset: 0; z-index: 100; display: flex; justify-content: center;
+  overflow-y: auto; overscroll-behavior: contain;
+  background: radial-gradient(ellipse at center, var(--bg-center) 0%, var(--bg-solid) 100%);
+  animation: pause-in 0.2s ease-out;
+}
+.music-player[hidden] { display: none; }
+body.player-open { overflow: hidden; }
+.mp-inner {
+  display: flex; flex-direction: column; align-items: stretch; gap: 14px;
+  width: 100%; max-width: 520px; min-height: 100%; box-sizing: border-box;
+  padding: max(16px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom));
+}
+.mp-head { display: flex; align-items: center; justify-content: space-between; }
+.mp-title { margin: 0; font-size: 14px; letter-spacing: 3px; color: var(--accent); text-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5); }
+.mp-close {
+  width: 34px; height: 34px; padding: 0; font-family: inherit; font-size: 22px; line-height: 1;
+  background: transparent; color: var(--fg); border: 1px solid var(--fg-dim); border-radius: 4px; cursor: pointer;
+}
+.mp-viz {
+  display: block; width: 100%; height: min(38vh, 300px); padding: 0; cursor: pointer;
+  border: 1px solid var(--grid-line); border-radius: 6px; background: var(--inset-bg);
+}
+.mp-viz canvas { display: block; width: 100%; height: 100%; }
+.mp-now { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.mp-label { font-size: 10px; letter-spacing: 2px; color: var(--fg-dim); }
+.mp-track { font-size: 20px; letter-spacing: 2px; color: var(--fg); text-shadow: 0 0 8px rgba(var(--fg-rgb), 0.5); }
+.mp-transport { display: flex; justify-content: center; align-items: center; gap: 18px; }
+.mp-transport button {
+  display: grid; place-items: center; width: 48px; height: 48px; padding: 0; cursor: pointer;
+  background: transparent; color: var(--fg); border: 1px solid var(--fg-dim); border-radius: 50%;
+}
+.mp-transport button svg { width: 20px; height: 20px; }
+.mp-transport .mp-play { width: 64px; height: 64px; border-color: var(--fg); box-shadow: 0 0 12px rgba(var(--fg-rgb), 0.35); }
+.mp-transport .mp-play svg { width: 26px; height: 26px; }
+.mp-play .mp-icon-pause, .mp-play.playing .mp-icon-play { display: none; }
+.mp-play.playing .mp-icon-pause { display: block; }
+.mp-modes { display: flex; justify-content: center; gap: 6px; }
+.mp-modes button, .mp-bg {
+  font-family: inherit; font-size: 11px; letter-spacing: 1px; padding: 6px 10px; cursor: pointer;
+  background: transparent; color: var(--fg); border: 1px solid var(--fg); border-radius: 4px;
+}
+.mp-modes button.active { background: var(--fg); color: var(--bg-solid); }
+.mp-bg { align-self: center; color: var(--fg-dim); border-color: var(--grid-line); }
+.mp-bg.on { color: var(--fg); border-color: var(--fg-dim); }
+.mp-tracks { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
+@media (max-width: 360px) { .mp-tracks { grid-template-columns: 1fr; } }
+.mp-tracks button {
+  display: flex; align-items: center; gap: 6px; width: 100%; padding: 6px 8px; box-sizing: border-box;
+  font-family: inherit; font-size: 11px; letter-spacing: 1px; text-align: left; white-space: pre; overflow: hidden;
+  background: transparent; color: var(--fg); border: 1px solid var(--grid-line); border-radius: 4px; cursor: pointer;
+}
+.mp-tracks button.active { border-color: var(--fg); background: rgba(var(--fg-rgb), 0.12); }
+.mp-tracks button.playing { box-shadow: 0 0 8px rgba(var(--fg-rgb), 0.35); }
+.mp-tracks button:disabled { cursor: default; color: rgba(var(--fg-rgb), 0.3); }
+.mp-tracks .need { margin-left: auto; font-size: 9px; letter-spacing: 0; color: var(--accent); }
+.mp-note { margin: 0; font-size: 10px; line-height: 1.5; text-align: center; color: var(--panel-text); opacity: 0.8; }

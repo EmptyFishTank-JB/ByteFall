@@ -2990,7 +2990,7 @@ function showToast(text) {
   if (!toastShowing) nextToast();
 }
 // Pop-ups wait while RECORDS or SETTINGS is open (one already showing finishes above the panel)
-const panelOpen = () => !recordsEl.hidden || !settingsEl.hidden;
+const panelOpen = () => !recordsEl.hidden || !settingsEl.hidden || !document.getElementById('music-player').hidden;
 function nextToast() {
   toastShowing = toastQueue.length > 0;
   if (!toastShowing) return;

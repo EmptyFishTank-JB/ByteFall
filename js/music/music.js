@@ -48,6 +48,8 @@ const Music = (() => {
   } catch (e) {}
   let intensity = 0;
   let targetIntensity = 0;
+  let gameIntensity = 0; // what the game asks for; the MUSIC PLAYER's full mix overrides it
+  let fullMix = false;
   let ctx = null;
   let analyser = null;
   let session = null; // per-play gain so stopped notes can't bleed into the next start
@@ -217,7 +219,23 @@ const Music = (() => {
       else setTrack(TRACKS[0].id);
     },
     setIntensity(value) {
-      targetIntensity = Math.max(0, Math.min(1, value));
+      gameIntensity = Math.max(0, Math.min(1, value));
+      targetIntensity = fullMix ? 1 : gameIntensity;
+    },
+    // MUSIC PLAYER: every layer in, whatever the game is doing
+    setFullMix(on) {
+      fullMix = on;
+      targetIntensity = on ? 1 : gameIntensity;
+    },
+    isPlaying: () => !!timer,
+    // The next (dir 1) or previous (-1) playable track; NEXT in SHUFFLE picks one at random
+    skip(dir) {
+      const open = TRACKS.filter((t) => !isLocked(t));
+      if (!open.length) return;
+      const i = open.findIndex((t) => t.id === trackId);
+      const id = dir > 0 && mode === 'shuffle' ? nextTrackId() : open[(i + dir + open.length) % open.length].id;
+      this.play(id);
+      if (onTrackChange) onTrackChange(trackId);
     },
   };
 })();

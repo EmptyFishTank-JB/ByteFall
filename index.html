@@ -22,7 +22,7 @@
   } catch (e) {}
 </script>
 <title>BYTEFALL // decryption terminal</title>
-<link rel="stylesheet" href="css/style.css?v=161">
+<link rel="stylesheet" href="css/style.css?v=162">
 </head>
 <body>
   <main class="cabinet">
@@ -180,6 +180,7 @@
         <div id="font-list" class="theme-list font-list" role="group" aria-label="Font"></div>
         <p class="settings-note" id="font-note"></p>
         <p class="settings-title settings-section">// PLAYLIST</p>
+        <button type="button" id="open-player-btn" class="toggle-btn on">OPEN MUSIC PLAYER</button>
         <button type="button" id="viz-toggle" class="viz-toggle">
           <canvas id="playlist-viz" aria-hidden="true"></canvas>
         </button>
@@ -446,6 +447,43 @@
     <a class="dev-link" href="dev-tools/audio.html" title="Dev tools: audio compendium">&lt;/&gt; DEV</a>
   </footer>
 
+  <!-- MUSIC PLAYER: the soundtrack on its own (every layer in), over the whole page -->
+  <div id="music-player" class="music-player" hidden role="dialog" aria-label="Music player">
+    <div class="mp-inner">
+      <div class="mp-head">
+        <p class="mp-title">// MUSIC PLAYER</p>
+        <button type="button" class="mp-close" id="mp-close" aria-label="Close the music player">&times;</button>
+      </div>
+      <button type="button" class="mp-viz" id="mp-viz-btn" title="Switch the visualizer">
+        <canvas id="mp-viz" aria-hidden="true"></canvas>
+      </button>
+      <div class="mp-now">
+        <span class="mp-label" id="mp-state">NOW PLAYING // FULL MIX</span>
+        <span class="mp-track" id="mp-track">01 BYTEFALL THEME</span>
+      </div>
+      <div class="mp-transport">
+        <button type="button" id="mp-prev" aria-label="Previous track">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="4" y="5" width="3" height="14"/><path d="M20 5v14L8 12z"/></svg>
+        </button>
+        <button type="button" id="mp-play" class="mp-play" aria-label="Play">
+          <svg class="mp-icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg>
+          <svg class="mp-icon-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+        </button>
+        <button type="button" id="mp-next" aria-label="Next track">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="17" y="5" width="3" height="14"/><path d="M4 5v14l12-7z"/></svg>
+        </button>
+      </div>
+      <div class="mp-modes" id="mp-modes" role="group" aria-label="Play mode">
+        <button type="button" data-mode="repeat">REPEAT</button>
+        <button type="button" data-mode="sequence">SEQUENCE</button>
+        <button type="button" data-mode="shuffle">SHUFFLE</button>
+      </div>
+      <ol class="mp-tracks" id="mp-tracks"></ol>
+      <button type="button" id="mp-bg-btn" class="mp-bg">BACKGROUND PLAY: OFF</button>
+      <p class="mp-note">Every track plays with all its layers in. BACKGROUND PLAY keeps it going with the screen off or in another app.</p>
+    </div>
+  </div>
+
   <canvas id="board-fx" aria-hidden="true"></canvas>
   <div id="toast" class="toast" role="status" hidden></div>
 
@@ -461,26 +499,27 @@
     </div>
   </div>
 
-  <script src="js/unlocks.js?v=161"></script>
-  <script src="js/progress.js?v=161"></script>
-  <script src="js/sfx.js?v=161"></script>
-  <script src="js/music/music-bytefall-theme.js?v=161"></script>
-  <script src="js/music/music-sleep-mode.js?v=161"></script>
-  <script src="js/music/music-brute-force.js?v=161"></script>
-  <script src="js/music/music-deep-web.js?v=161"></script>
-  <script src="js/music/music-zero-day.js?v=161"></script>
-  <script src="js/music/music-system-restore.js?v=161"></script>
-  <script src="js/music/music-night-drive.js?v=161"></script>
-  <script src="js/music/music-standby-mode.js?v=161"></script>
-  <script src="js/music/music-core-dump.js?v=161"></script>
-  <script src="js/music/music-handshake.js?v=161"></script>
-  <script src="js/music/music.js?v=161"></script>
-  <script src="js/data/puzzles.js?v=161"></script>
-  <script src="js/data/daily-puzzles.js?v=161"></script>
-  <script src="js/cpu.js?v=161"></script>
-  <script src="js/fx.js?v=161"></script>
-  <script src="js/viz.js?v=161"></script>
-  <script src="js/script.js?v=161"></script>
-  <script src="js/grid-bg.js?v=161"></script>
+  <script src="js/unlocks.js?v=162"></script>
+  <script src="js/progress.js?v=162"></script>
+  <script src="js/sfx.js?v=162"></script>
+  <script src="js/music/music-bytefall-theme.js?v=162"></script>
+  <script src="js/music/music-sleep-mode.js?v=162"></script>
+  <script src="js/music/music-brute-force.js?v=162"></script>
+  <script src="js/music/music-deep-web.js?v=162"></script>
+  <script src="js/music/music-zero-day.js?v=162"></script>
+  <script src="js/music/music-system-restore.js?v=162"></script>
+  <script src="js/music/music-night-drive.js?v=162"></script>
+  <script src="js/music/music-standby-mode.js?v=162"></script>
+  <script src="js/music/music-core-dump.js?v=162"></script>
+  <script src="js/music/music-handshake.js?v=162"></script>
+  <script src="js/music/music.js?v=162"></script>
+  <script src="js/data/puzzles.js?v=162"></script>
+  <script src="js/data/daily-puzzles.js?v=162"></script>
+  <script src="js/cpu.js?v=162"></script>
+  <script src="js/fx.js?v=162"></script>
+  <script src="js/viz.js?v=162"></script>
+  <script src="js/script.js?v=162"></script>
+  <script src="js/grid-bg.js?v=162"></script>
+  <script src="js/player.js?v=162"></script>
 </body>
 </html>
