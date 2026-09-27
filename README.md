@@ -297,7 +297,8 @@ button is in the lower-right.
 
 **No scrolling.** On every screen (phones, the app and desktop) the footer sits
 inside SETTINGS and the game card fills the screen height, so the game page never
-scrolls. The header sits at the top of the card, level with the icons; the
+scrolls. The footer (it stays in the live app) has the copyright, then the build
+number (the page's own version), when it was last updated and the commit. The header sits at the top of the card, level with the icons; the
 board stays centered.
 
 RESTART and the difficulty buttons ask for a second press mid-run (RESTART
@@ -430,8 +431,7 @@ point. It counts toward nothing (no XP, stats, achievements or best score). Pop-
 ## Startup
 
 A fresh launch (the app or tab opened anew) opens on the START SCREEN (the studio,
-EMPTYFISHTANK PRESENTS, across the top; the copyright and the build number,
-from the page's own version, above the wanderers): a card
+EMPTYFISHTANK PRESENTS, across the top; the copyright above the wanderers): a card
 filling the screen with the starlight twinkling across it, the BYTEFALL title
 in the middle and a glowing START button below it, as far under the tagline as
 the tagline is under the title (measured letter to letter, in every font; `js/start.js`). A tap anywhere

@@ -1759,18 +1759,16 @@ footer p {
   margin: 4px auto;
 }
 
+/* Build, updated and commit: a line each */
 .footer-meta {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  column-gap: 10px;
+  flex-direction: column;
+  align-items: center;
   row-gap: 2px;
 }
 
 .meta-item { white-space: nowrap; }
-.meta-item + .meta-item::before { content: '\00b7'; margin-right: 10px; opacity: 0.6; }
 footer span { color: var(--fg); }
-footer p.accent { color: var(--accent); }
 
 .overlay {
   position: fixed;
@@ -2466,8 +2464,7 @@ html.page-twinkle .page-bg { display: block; }
 .remove-ads-link:hover { background: rgba(var(--accent-rgb), 0.1); }
 .remove-ads-link[hidden] { display: none; }
 
-/* START SCREEN credits: the studio at the top; the copyright and the build number above
-   the wanderers */
+/* START SCREEN credits: the studio at the top, the copyright above the wanderers */
 .start-studio {
   position: absolute; top: 28px; left: 0; right: 0; margin: 0; text-align: center;
   font-size: 11px; letter-spacing: 4px; color: var(--fg-dim);
@@ -2478,4 +2475,3 @@ html.page-twinkle .page-bg { display: block; }
   font-size: 9px; letter-spacing: 1px; line-height: 1.6; color: var(--fg-dim); opacity: 0.8;
 }
 .start-legal p { margin: 0; }
-.start-build { opacity: 0.7; }

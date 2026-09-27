@@ -3826,6 +3826,11 @@ function formatCentral(isoDate) {
   return `${date} ${hh}:${get('minute')} ${get('timeZoneName')}`;
 }
 
+// The build number: this page's own version (index.html's ?v= on this script)
+{
+  const build = document.currentScript && new URL(document.currentScript.src).searchParams.get('v');
+  document.getElementById('buildInfo').textContent = build || '\u2014';
+}
 fetch('https://api.github.com/repos/EmptyFishTank-JB/ByteFall/commits?sha=main&per_page=1')
   .then((r) => {
     if (!r.ok) throw new Error('bad response');
