@@ -2261,6 +2261,9 @@ body:not(.vs-mode) .hud .stat:not(.cpu-stat):not(.cpu-face) > .label {
 }
 .tut-banner[hidden] { display: none; }
 .tut-banner.bottom { top: auto; bottom: 30%; }
+/* Over an open menu: fixed at the bottom of the screen, above the menus */
+.tut-banner.float { position: fixed; top: auto; left: 50%; right: auto; bottom: 16px; width: min(460px, calc(100% - 32px)); transform: translateX(-50%); z-index: 60; max-height: 45vh; }
+.tut-banner.float.nudge { animation: none; }
 .tut-banner.nudge { animation: tut-nudge 0.3s ease-out; }
 @keyframes tut-nudge { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 .tut-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; font-size: 10px; letter-spacing: 2px; color: var(--accent); }
@@ -2274,8 +2277,10 @@ body:not(.vs-mode) .hud .stat:not(.cpu-stat):not(.cpu-face) > .label {
 }
 .tut-actions button:not(.tut-back) + button { background: transparent; color: var(--fg); }
 /* BACK: on the left, outlined */
-.tut-actions button.tut-back { margin-right: auto; background: transparent; color: var(--fg-dim); border-color: var(--grid-line); }
-.tut-pulse { position: relative; z-index: 3; animation: tut-pulse 0.9s ease-in-out infinite !important; }
+.tut-actions button.tut-back { margin-right: auto; background: transparent; color: var(--fg); border-color: var(--fg-dim); }
+.tut-pulse { z-index: 3; animation: tut-pulse 0.9s ease-in-out infinite !important; }
+/* (position only for the cells and drop buttons: the corner and top buttons keep theirs) */
+.cell.tut-pulse, .column-buttons button.tut-pulse { position: relative; }
 @keyframes tut-pulse {
   0%, 100% { box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.9), 0 0 6px rgba(var(--accent-rgb), 0.5); }
   50% { box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 1), 0 0 16px rgba(var(--accent-rgb), 0.9); }

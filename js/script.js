@@ -2927,7 +2927,7 @@ function setSettingsOpen(open) {
 
 settingsBtn.addEventListener('click', () => setSettingsOpen(settingsEl.hidden));
 document.addEventListener('pointerdown', (e) => {
-  if (!settingsEl.hidden && !settingsEl.contains(e.target) && !settingsBtn.contains(e.target)) setSettingsOpen(false);
+  if (!settingsEl.hidden && !settingsEl.contains(e.target) && !settingsBtn.contains(e.target) && !e.target.closest('.tut-banner')) setSettingsOpen(false);
 });
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !settingsEl.hidden) setSettingsOpen(false);
@@ -3004,7 +3004,7 @@ if (freeExploit.day !== localDay()) {
   saveFree();
   freeGrantedNow = true;
 }
-const freeAllowed = () => freeExploit.ready && !daily && mode !== 'puzzle' && mode !== 'vs';
+const freeAllowed = () => freeExploit.ready && !daily && mode !== 'puzzle' && mode !== 'vs' && mode !== 'tutorial';
 // Which one it'll be is picked once (so the button can show its icon), from the first five
 function freeExploitId() {
   const ids = Progress.exploitOrder().slice(0, 5);
@@ -3084,7 +3084,7 @@ function armExploit() {
   return true;
 }
 exploitBtn.addEventListener('click', () => {
-  if (mode === 'tutorial') { SFX.play('denied'); return; } // (the lessons use set bits)
+  if (mode === 'tutorial' && !Tutorial.allowsExploit()) { SFX.play('denied'); return; } // (only when the lesson says)
   if (armedHack) return; // armed: drop it
   if (nextExploit()) {
     if (!armExploit()) SFX.play('denied');
@@ -3447,6 +3447,7 @@ recordsEl.querySelectorAll('.records-tabs button').forEach((b) => {
   });
 });
 document.addEventListener('pointerdown', (e) => {
+  if (e.target.closest('.tut-banner')) return; // (the tutorial's banner talks about the open menu)
   if (!recordsEl.hidden && !recordsEl.contains(e.target) && !recordsBtn.contains(e.target)) setRecordsOpen(false);
 });
 document.addEventListener('keydown', (e) => {

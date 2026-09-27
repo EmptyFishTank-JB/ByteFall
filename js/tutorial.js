@@ -12,6 +12,9 @@ const Tutorial = (() => {
   // into; after it resolves, explain() adds to the banner and NEXT appears). pulse: selectors to
   // pulse; cells: [row, col] board cells to pulse; line: pulse the ======== line; place: 'bottom'
   // puts the banner under the board's middle instead of at its top.
+  // pass: the tapped control also does its own job (opens the menu, arms the exploit); pane: the
+  // menu open on that tab; closeMenus: the menus shut; held: exploits waiting in the button;
+  // float: the banner at the bottom of the screen, over any open menu.
   const STEPS = [
     {
       text: 'Welcome to BYTEFALL. Encrypted bits fall into this terminal, and you decrypt them by dropping each one into a column. This quick tutorial shows you how.',
@@ -19,16 +22,16 @@ const Tutorial = (() => {
     },
     {
       text: 'This is your CURRENT bit: the next one you drop. Its number is 3. Tap CURRENT.',
-      board: [[3], [5], [], [], [], [], []], bits: [3, 2], tap: '.stat-current',
+      board: [[], [], [], [], [3], [5], []], bits: [3, 2], tap: '.stat-current',
     },
     {
-      text: 'A bit decrypts when its number matches the length of the unbroken line it sits in, across or down. Drop the [3] into column 3: with the [3] and [5] there, it makes a line of 3 across.',
-      drop: 2, cells: [[0, 0], [0, 1]],
+      text: 'A bit decrypts when its number matches the length of the unbroken line it sits in, across or down. Any column works for any bit. Drop this [3] into column 7: beside the [3] and [5], it makes a line of 3 across.',
+      drop: 6, cells: [[0, 4], [0, 5]],
       explain: () => 'Both [3]s were in a line of 3, so both decrypted. The [5] is in a line of 1 now, so it stays.',
     },
     {
-      text: 'Lines count down too. Drop the [2] onto the [5] in column 2: it will sit in a column 2 tall.',
-      drop: 1, cells: [[0, 1]],
+      text: 'Lines count down too. Drop the [2] into column 6, on top of the [5]: it will sit in a column 2 tall.',
+      drop: 5, cells: [[0, 5]],
       explain: () => 'The [2] was in a line of 2 going down, so it decrypted.',
     },
     {
@@ -45,13 +48,13 @@ const Tutorial = (() => {
       tap: '#chain-stat',
     },
     {
-      text: 'This [=] is an ENCRYPTION LAYER. Decrypt a bit right beside it to peel it. Drop the [2] into column 2: it makes a line of 2 with the layer.',
-      board: [['L2:1'], [], [], [], [], [], []], bits: [2, 2], drop: 1, cells: [[0, 0]],
+      text: 'This [=] is an ENCRYPTION LAYER. Decrypt a bit right beside it to peel it. Drop the [2] into column 5, next to the layer: the two of them make a line of 2.',
+      board: [[], [], [], ['L2:1'], [], [], []], bits: [2, 2], drop: 4, cells: [[0, 3]],
       explain: () => 'The [2] decrypted and peeled the layer once: [=] is now cracked, [-].',
     },
     {
-      text: 'Once more. Drop the next [2] into column 2 to peel it again.',
-      drop: 1, cells: [[0, 0]],
+      text: 'Once more. Drop the next [2] into column 5 again to peel it a second time.',
+      drop: 4, cells: [[0, 3]],
       explain: () => 'The second peel broke the layer open and revealed the bit hidden under it: a [1], alone in a line of 1, so it decrypted too, as the chain’s second link.',
     },
     {
@@ -63,12 +66,41 @@ const Tutorial = (() => {
       tap: '#pulse-stat',
     },
     {
-      text: 'Chain 5 decrypts in one drop to earn an EXPLOIT: a tool that changes the board. They wait on this button. RULES and EXPLOITS in the menu tell you more.',
-      pulse: ['#exploit-btn'], next: true,
+      text: 'A chain of 5 decrypts in one drop earns an EXPLOIT: a tool that changes the board. Earned exploits are stored in the EXPLOIT button at the bottom right. You have one waiting: a WORM VIRUS. Tap the EXPLOIT button to arm it.',
+      board: [[], [], [6, 2, 7, 3], [], [], [], []], bits: [], held: ['worm-virus'], tap: '#exploit-btn', pass: true,
+    },
+    {
+      text: 'Armed: the WORM VIRUS is your CURRENT now, and it drops like a bit. Drop it into column 3, the tall one: it wipes out every block in that column.',
+      drop: 2, cells: [[0, 2], [1, 2], [2, 2], [3, 2]],
+      explain: () => 'The WORM VIRUS wiped out the whole column. Blocks wiped out by an exploit score a flat 10 each. Other exploits wipe an area, peel layers or change bits: each has its card in the EXPLOITS tab.',
+    },
+    {
+      text: 'Two buttons open the menus. Tap MENU, at the top left.',
+      board: EMPTY, bits: [], closeMenus: true, tap: '#records-btn', pass: true,
+    },
+    {
+      text: 'RULES: everything you just learned, written down, with the TUTORIAL button to come back here any time.',
+      pane: 'rules', pulse: ['.menu-tabs [data-pane="rules"]'], float: true, next: true,
+    },
+    {
+      text: 'RECORDS: your level and DECRYPTOR rank, every unlock with the level it opens at, every achievement with its progress, and your lifetime stats.',
+      pane: 'records', pulse: ['.menu-tabs [data-pane="records"]'], float: true, next: true,
+    },
+    {
+      text: 'EXPLOITS: your loadout. Only exploits placed in a slot can be earned in a game. Tap a card to put it in a free slot, or tap it again to take it out. More slots and exploits unlock as you level up, and the loadout is locked from a session’s first drop until it ends.',
+      pane: 'exploits', pulse: ['.menu-tabs [data-pane="exploits"]'], float: true, next: true,
+    },
+    {
+      text: 'Now tap SETTINGS, at the top right.',
+      closeMenus: true, tap: '#settings-btn', pass: true,
+    },
+    {
+      text: 'SETTINGS: sound and music, whether the drop buttons sit under or over the grid, vibration on phones, color THEMES and FONTS (more unlock as you level up), and the PLAYLIST, with the MUSIC PLAYER for listening on its own.',
+      float: true, next: true,
     },
     {
       text: 'That’s everything you need. Good luck, decryptor.',
-      done: true,
+      closeMenus: true, done: true,
     },
   ];
 
@@ -78,6 +110,7 @@ const Tutorial = (() => {
   let bannerEl = null;
   // How the board, bits, score and chain stood as each step began, so BACK can put it back
   let snapshots = [];
+  let scoreAtDrop = 0;
   const copyCells = (cols) => cols.map((col) => col.map((cell) => ({ ...cell })));
 
   const cur = () => STEPS[step];
@@ -96,9 +129,21 @@ const Tutorial = (() => {
     tapTarget = null;
   }
   function onTap(e) {
+    if (cur().pass) { // (the control does its own job too, then the lesson moves on)
+      setTimeout(() => go(step + 1), 0);
+      return;
+    }
     e.stopPropagation();
     SFX.play('click');
     go(step + 1);
+  }
+  // The menus as a step wants them: one open on a tab, or both shut
+  function menus(s) {
+    if (s.pane) setRecordsOpen(true, s.pane);
+    if (s.closeMenus) {
+      setRecordsOpen(false);
+      setSettingsOpen(false);
+    }
   }
 
   // Sets the board and bits of a step that has them
@@ -111,6 +156,11 @@ const Tutorial = (() => {
       }));
     }
     if (s.bits) queue = s.bits.map((val) => ({ type: 'number', val }));
+    if (s.held) {
+      heldHacks = [...s.held];
+      armedHack = null;
+    }
+    menus(s);
     render();
     updateHud();
   }
@@ -122,6 +172,10 @@ const Tutorial = (() => {
     const el = banner();
     el.hidden = false;
     el.classList.toggle('bottom', s.place === 'bottom');
+    // Over an open menu: the bottom of the screen, above everything
+    const home = s.float ? document.body : document.querySelector('.board-frame');
+    if (el.parentNode !== home) home.appendChild(el);
+    el.classList.toggle('float', !!s.float);
     el.innerHTML = '';
     const head = document.createElement('div');
     head.className = 'tut-head';
@@ -191,7 +245,10 @@ const Tutorial = (() => {
     step = n;
     if (step >= STEPS.length) return leave();
     setUp(cur());
-    snapshots[step] = { columns: copyCells(columns), queue: queue.map((b) => ({ ...b })), score, chain: chainEl.textContent };
+    snapshots[step] = {
+      columns: copyCells(columns), queue: queue.map((b) => ({ ...b })), score, chain: chainEl.textContent,
+      held: [...heldHacks], armed: armedHack,
+    };
     show();
   }
 
@@ -207,6 +264,9 @@ const Tutorial = (() => {
     queue = snap.queue.map((b) => ({ ...b }));
     score = snap.score;
     chainEl.textContent = snap.chain;
+    heldHacks = [...snap.held];
+    armedHack = snap.armed;
+    menus(STEPS[step]);
     render();
     updateHud();
     SFX.play('click');
@@ -216,6 +276,8 @@ const Tutorial = (() => {
   // Leaves the tutorial for the mode picked before it (or CLASSIC)
   function leave(to) {
     clearPulses();
+    setRecordsOpen(false);
+    setSettingsOpen(false);
     if (bannerEl) bannerEl.hidden = true;
     step = -1;
     if (to === 'classic') {
@@ -236,6 +298,7 @@ const Tutorial = (() => {
       else lines.push(`${link.vals.map((v) => `[${v}]`).join(' ')}  (${link.vals.map((v) => 10 + v).join(' + ')}) ×${link.chain} = ${link.points}`);
     }
     if (lines.length > 1) lines.push(`TOTAL +${total}`);
+    if (!lines.length) lines.push(`+${score - scoreAtDrop}`); // (an exploit's flat points)
     return lines;
   }
 
@@ -255,6 +318,7 @@ const Tutorial = (() => {
       const s = cur();
       if (s && s.drop === col && !dropped) {
         dropped = true;
+        scoreAtDrop = score;
         clearPulses();
         return true;
       }
@@ -283,5 +347,7 @@ const Tutorial = (() => {
     // Only the lesson's column can be pressed
     allows: (col) => { const s = cur(); return !!s && s.drop === col && !dropped; },
     active: () => step >= 0,
+    // The EXPLOIT button works only on the step that asks for it
+    allowsExploit: () => { const s = cur(); return !!s && s.tap === '#exploit-btn'; },
   };
 })();

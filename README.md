@@ -372,13 +372,19 @@ mixdowns).
 RULES → **TUTORIAL** (beside the title) starts a guided lesson on set boards
 with set bits (`js/tutorial.js`). A banner over the board explains each rule
 and asks you to tap what it names; whatever it's talking about pulses, and only
-the lesson's drop column can be pressed (the others dim). After each drop it
-says what happened and shows the points: each link's bits, (10 + number) × the
-chain, NIBBLE bonuses and the total. Thirteen steps: the terminal, CURRENT, a
-line across, a line down, SCORE, a chain with a NIBBLE, CHAIN, peeling a layer
-twice until it reveals its bit, the ======== line, ENCRYPT IN, exploits, then
-PLAY CLASSIC or RULES. BACK (from step 2 on) redoes the step just played, or before a drop goes to the step before, putting the board, bits, score and chain back as they were. EXIT leaves at any point. It counts toward nothing (no
-XP, stats, achievements or best score).
+the lesson's drop column can be pressed (the others dim). No lesson drops a bit
+into the column of its own number, so it never looks like it has to. After each
+drop it says what happened and shows the points: each link's bits, (10 +
+number) × the chain, NIBBLE bonuses and the total. Twenty steps: the terminal,
+CURRENT, a line across, a line down, SCORE, a chain with a NIBBLE, CHAIN,
+peeling a layer twice until it reveals its bit, the ======== line, ENCRYPT IN,
+an exploit (arm the WORM VIRUS waiting in the EXPLOIT button, then drop it on a
+tall column), the MENU button with its RULES, RECORDS and EXPLOITS (loadout)
+tabs, the SETTINGS button and what's in it, then PLAY CLASSIC or RULES. Over an
+open menu the banner moves to the bottom of the screen. BACK (from step 2 on)
+redoes the step just played, or before a drop goes to the step before, putting
+the board, bits, score, chain and exploit back as they were. EXIT leaves at any
+point. It counts toward nothing (no XP, stats, achievements or best score).
 
 ## Startup
 
