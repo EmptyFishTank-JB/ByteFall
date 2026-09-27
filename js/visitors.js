@@ -1,10 +1,13 @@
 // VISITORS: seasonal characters passing through the wanderers' lane (wanderers.js runs them).
 // HALLOWEEN (seasons.js): Frankenstein's monster, a mummy, the creature from the black lagoon,
-// Nosferatu, a floating ghost, a flock of bats and a crow or two. Every so often one comes by (one
-// at a time), crosses the card and goes; the monsters give a bot they pass a fright. Each can be
-// poked: FRANKENSTEIN roars and stomps, the MUMMY groans, the CREATURE gurgles and splashes,
-// NOSFERATU hisses and turns into bats, the GHOST says BOO (every bot near it jumps) and fades,
-// bats scatter and crows take off cawing.
+// Nosferatu, a floating ghost, a flock of bats, a crow or two and a spider on its thread; NOVEMBER:
+// a turkey (and the crows). Every so often one comes by (one visit at a time), crosses the card
+// and goes; the monsters give a bot they pass a fright. Each can be poked: FRANKENSTEIN roars and
+// stomps, the MUMMY groans, the CREATURE gurgles and splashes, NOSFERATU hisses and turns into
+// bats, the GHOST says BOO (every bot near it jumps) and fades, bats scatter, crows take off
+// cawing, the SPIDER scurries back up and the TURKEY gobbles and runs.
+// SCENERY: the scary tree a wanderer pushes onto the card (HALLOWEEN; makeTree, wanderers.js does
+// the pushing). It stays for the visit, behind everything else; poked, it creaks and a bat flies out.
 // Sprites are drawn as text: one letter a pixel (its color in `pal`, '.' left empty), in the bots'
 // own pixel size, facing right; a second frame (b) steps the legs, flaps the wings or ripples a hem.
 function createVisitors(api) {
@@ -42,6 +45,22 @@ function createVisitors(api) {
       pal: { k: '#4a3a5c', r: '#ff3b5c' },
       a: ['k.....k', 'kk.k.kk', '.kkkkk.', '..krk..'],
       b: ['.......', '..kkk..', 'kkkkkkk', 'k.krk.k'],
+    },
+    spider: {
+      pal: { k: '#3a2f48', l: '#5a4d6c', r: '#ff3b3b' },
+      a: ['..l...l..', '.l.kkk.l.', 'l.krkrk.l', '.lkkkkkl.', 'l.l...l.l'],
+      b: ['l.......l', '.llkkkll.', '..krkrk..', 'llkkkkkll', '..l...l..'],
+    },
+    turkey: {
+      pal: { o: '#c96a2b', r: '#a8322a', t: '#d9a35a', b: '#6b4226', h: '#8fa9c0', e: '#111111', y: '#f2b632', w: '#d62f2f' },
+      a: ['..ooo.......', '.orrro...hh.', 'orttto...hey', 'orttto...hw.', '.orttbbb.h..', '..obbbbbbh..', '..bbbbbbbb..', '...bbbbbbb..',
+        '....bbbbb...', '.....y.y....', '.....y.y....', '....yy.yy...'],
+      b: { 1: '.orrro......', 2: 'orttto......', 3: 'orttto......', 4: '.orttbbb....', 5: '..obbbbbbhh.', 6: '..bbbbbbbhey', 7: '...bbbbbbbw.',
+        9: '.....y..y...', 10: '....y...y...', 11: '...yy...yy..' },
+    },
+    tree: {
+      pal: { t: '#4a3528', T: '#2e2019', b: '#5e4634', e: '#ffb000', k: '#000000', m: '#120a06' },
+      a: ['......b............b....', '.......b..b.......b.....', '.......b.b.......b.b....', '.....b..b........b.b....', '.....b..b.......b..b...b', '.b...b...b......b...b.b.', '..b.b....b.....b....bb..', '...bb.....b....b....b...', '....b.....b...b....b....', '.....b.....b..b...b.....', '......b....b.b...b......', '.......b....Tt...b..bbb.', 'b.......b...Tt..bbbb...b', '.b.......b..Ttbb.......b', '..bb......bTt.b.........', '....bb.....Ttb..........', '......bb..Ttttt.........', '........bbTtttt.........', '..........Ttttt.........', '..........eettee........', '..........Tkttk.........', '..........Ttttt.........', '..........Tmttm.........', '..........Tmmmm.........', '..........Ttmmt.........', '..........Ttttt.........', '..........Ttttt.........', '.........Ttttttt........', '.........Ttmtttt........', '.........Ttttttt........', '.........Ttttttt........', '.........Ttttttt........', '.......ttTtttttttt......', '.....ttttTtttttttttt....'],
     },
     crow: {
       pal: { k: '#2c313b', K: '#4a5566', e: '#e0e0e0', o: '#8a8f98' },
@@ -89,8 +108,15 @@ function createVisitors(api) {
     ghost: { speed: 16, frameMs: 420, sway: 0, bob: 0, float: 12, monster: true, poke: 'boo' },
     bat: { speed: 55, frameMs: 120, fly: true, poke: 'scatter' },
     crow: { speed: 20, frameMs: 0, hop: true, poke: 'caw' },
+    spider: { speed: 40, frameMs: 260, poke: 'scurry' },
+    turkey: { speed: 16, frameMs: 280, sway: 1, poke: 'gobble' },
+    tree: { speed: 0, frameMs: 0, poke: 'creak' },
   };
-  const VISITS = ['frank', 'mummy', 'creature', 'nosferatu', 'ghost', 'bats', 'crows'];
+  // What each season sends (one visit at a time)
+  const VISITS = {
+    halloween: ['frank', 'mummy', 'creature', 'nosferatu', 'ghost', 'bats', 'crows', 'spider'],
+    november: ['turkey', 'turkey', 'crows'],
+  };
 
   let list = [];
   let nextVisit = performance.now() + rand(6000, 15000);
@@ -117,7 +143,7 @@ function createVisitors(api) {
     v.sayTimer = setTimeout(() => v.emote.classList.remove('show'), ms);
   }
   // One visit: a monster, the ghost, a flock of bats or a crow or two, in from either side
-  function visit(what = pick(VISITS)) {
+  function visit(what = pick(VISITS[Season.current()] || VISITS.halloween)) {
     const W = api.laneW();
     const fromLeft = Math.random() < 0.5;
     const dir = fromLeft ? 1 : -1;
@@ -129,10 +155,46 @@ function createVisitors(api) {
     } else if (what === 'crows') {
       const n = Math.random() < 0.6 ? 1 : 2;
       for (let k = 0; k < n; k++) add('crow', edge(20) - dir * k * 26, dir, { stopAt: rand(0.2, 0.7) * W + k * 20, life: rand(5000, 9000) });
-    } else add(what, edge(SPRITES[what].a[0].length * U), dir);
+    } else if (what === 'spider') { // (down from above on its thread, somewhere along the card)
+      const s = add('spider', rand(0.15, 0.8) * W, 1, { y: 110, hang: rand(12, 22), life: rand(3000, 5500), state: 'down' });
+      s.el.insertAdjacentHTML('afterbegin', '<i class="visitor-thread"></i>');
+    } else if (what === 'turkey') add('turkey', edge(12 * U), dir, { stopAt: rand(0.25, 0.65) * W, life: rand(2500, 4500) });
+    else add(what, edge(SPRITES[what].a[0].length * U), dir);
+  }
+
+  // The scary tree, for a wanderer to push in (wanderers.js): off the card until it's moved
+  let tree = null;
+  function makeTree(dir) {
+    tree = add('tree', -400, 1, { state: 'scenery' });
+    tree.el.classList.add('visitor-scenery');
+    tree.w = SPRITES.tree.a[0].length * U;
+    tree.dir = dir;
+    return tree;
+  }
+  function moveTree(t, x) {
+    t.x = x;
+    place(t);
   }
 
   function poke(v) {
+    if (v.kind === 'tree') { // (creaks, eyes flaring, and a bat flies out of it in the season)
+      say(v, 'creeeak', 1000);
+      v.el.classList.remove('v-creak');
+      void v.el.offsetWidth;
+      v.el.classList.add('v-creak');
+      if (Season.is('halloween')) add('bat', v.x + v.w / 2, pick([-1, 1]), { fly: 40, speed: rand(60, 90), bolt: true });
+      api.botEvent('tree-pokes');
+      return;
+    }
+    if (v.kind === 'spider') {
+      if (v.state === 'up') return;
+      api.botEvent('visitor-pokes');
+      say(v, '!', 700);
+      v.state = 'up';
+      v.climb = 130;
+      api.startle(v, 60); // (the bots near it don't like spiders)
+      return;
+    }
     if (v.state !== 'go' && v.state !== 'peck') return;
     api.botEvent('visitor-pokes');
     const k = KINDS[v.kind];
@@ -170,6 +232,13 @@ function createVisitors(api) {
     } else if (k.poke === 'caw') {
       say(v, 'CAW!', 900);
       v.state = 'fly';
+    } else if (k.poke === 'gobble') { // (a flustered shake, then off at a run)
+      say(v, 'GOBBLE!', 1000);
+      v.el.classList.add('v-shake');
+      setTimeout(() => v.el.classList.remove('v-shake'), 600);
+      v.state = 'go';
+      v.speed *= 3;
+      v.ran = true;
     }
   }
 
@@ -200,7 +269,8 @@ function createVisitors(api) {
 
   function frame(now, dt) {
     const W = api.laneW();
-    if (!list.length && now > nextVisit && typeof Season !== 'undefined' && Season.is('halloween')) {
+    const season = typeof Season !== 'undefined' && Season.current();
+    if (!list.some((v) => v.kind !== 'tree') && now > nextVisit && VISITS[season]) {
       visit();
       nextVisit = now + rand(20000, 45000);
     }
@@ -212,7 +282,24 @@ function createVisitors(api) {
         v.frame = 1 - v.frame;
         v.el.classList.toggle('step', !!v.frame);
       }
-      if (k.fly) { // (bats: a wavering line through the air)
+      if (v.kind === 'tree') {
+        // (scenery: pushed by a wanderer, or standing where it was left)
+      } else if (v.kind === 'spider') { // (down its thread, a dangle, back up)
+        if (v.state === 'down') {
+          v.y -= 38 * dt;
+          if (v.y <= v.hang) { v.y = v.hang; v.state = 'hang'; v.until = now + v.life; }
+        } else if (v.state === 'hang') {
+          v.y = v.hang + Math.sin(v.age / 380) * 2;
+          if (now > v.until) { v.state = 'up'; v.climb = 32; }
+        } else if (v.state === 'up') {
+          v.y += v.climb * dt;
+        }
+      } else if (v.kind === 'turkey') { // (struts in, pecks a while, struts on out)
+        if (v.state === 'go') {
+          v.x += v.dir * v.speed * dt;
+          if (!v.pecked && !v.ran && ((v.dir > 0 && v.x >= v.stopAt) || (v.dir < 0 && v.x <= W - v.stopAt))) { v.state = 'peck'; v.until = now + v.life; v.pecked = true; }
+        } else if (v.state === 'peck' && now > v.until) v.state = 'go';
+      } else if (k.fly) { // (bats: a wavering line through the air)
         v.x += v.dir * v.speed * dt;
         v.y = v.fly + Math.sin(v.age / 260 + v.phase) * 5 + (v.bolt ? v.age / 60 : 0);
       } else if (v.kind === 'crow') {
@@ -241,6 +328,7 @@ function createVisitors(api) {
         }
       }
       place(v);
+      if (v.kind === 'tree') continue; // (it stays)
       const w = v.el.offsetWidth || 30;
       if (v.x < -w - 40 || v.x > W + 40 || v.y > 140) v.gone = true;
     }
@@ -252,6 +340,7 @@ function createVisitors(api) {
   function clear() {
     list.forEach((v) => v.el.remove());
     list = [];
+    tree = null;
   }
-  return { frame, clear, visit, list: () => list };
+  return { frame, clear, visit, list: () => list, makeTree, moveTree, hasTree: () => !!tree };
 }

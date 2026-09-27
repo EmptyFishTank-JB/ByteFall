@@ -58,6 +58,7 @@ function createWanderers(lane, active = () => true) {
     el.querySelector('.bot-body').insertAdjacentHTML('afterend', `<g class="costume">${costume.svg}</g>`);
   }
   let partySeen = false;
+  let forcePush = false; // (the dev tests: the next arrival pushes the tree)
   const RADIUS = 110; // how near a pop, a decrypt or a bolt startles the others
   const HOP_MS = 360;
   const SIZE = 34;
@@ -151,8 +152,33 @@ function createWanderers(lane, active = () => true) {
     if (how < 0.25) { // (15%) arrives at a run, then stops to catch its breath
       w.running = true;
       w.winded = true;
+    } else if (visitors && typeof Season !== 'undefined' && Season.is('halloween') && !visitors.hasTree() && (forcePush || Math.random() < 0.15)) {
+      forcePush = false;
+      // HALLOWEEN: it arrives pushing the scary tree ahead of it, slowly, straining, and leaves it
+      // standing somewhere along the card (visitors.js's scenery)
+      const t = visitors.makeTree(w.dir);
+      w.pushing = t;
+      w.speed *= 0.6;
+      const W = laneW();
+      const treeX = rand(16, Math.max(16, W - t.w - 16));
+      w.x = w.dir > 0 ? -t.w - 4 - (SIZE - 6) : W + 4 + t.w - 6; // (the tree just off the card)
+      w.target = w.dir > 0 ? treeX - (SIZE - 6) : treeX + t.w - 6;
+      pushTree(w);
+      mood(w, 'strain');
+      botEvent('push-tree');
     }
     place(w);
+  }
+  // The tree just ahead of its pusher; letting go leaves it where it is
+  function pushTree(w) {
+    const t = w.pushing;
+    visitors.moveTree(t, w.dir > 0 ? w.x + SIZE - 6 : w.x - t.w + 6);
+  }
+  function letGo(w) {
+    if (!w.pushing) return;
+    w.pushing = null;
+    w.speed /= 0.6;
+    if (w.el.dataset.mood === 'strain') mood(w, 'idle');
   }
   // Those near a sudden pop, decrypt or bolt face it, startled (cutting any meeting short)
   // A meeting cut short leaves the partner out of range put out: -_-
@@ -175,6 +201,7 @@ function createWanderers(lane, active = () => true) {
           place(p);
         }
       }
+      letGo(o);
       mood(o, 'surprised', pick(['!', '!?', '?!']));
       o.state = 'idle';
       o.winded = o.running = false; // (a start stops a run: no catching its breath after)
@@ -190,6 +217,7 @@ function createWanderers(lane, active = () => true) {
   // (HARD and INSANE) never bolt: they go rabid (rabid()).
   function poke(w, now) {
     if (w.leaving || ['vanish', 'startled', 'poked'].includes(w.state)) return;
+    letGo(w);
     botEvent('pokes');
     if (w.partner) {
       botEvent('third-wheel');
@@ -349,6 +377,7 @@ function createWanderers(lane, active = () => true) {
     w.el.classList.toggle('running', w.state === 'walk' && w.running);
   }
   function walkTo(w, target, running = false) {
+    letGo(w);
     w.el.classList.remove('headshaking', 'snapping');
     w.target = target;
     w.dir = w.look = target > w.x ? 1 : -1;
@@ -364,6 +393,7 @@ function createWanderers(lane, active = () => true) {
   }
   // Spooked: a start (and a !), then off the card at a sprint; anyone near flinches
   function fright(w, now) {
+    letGo(w);
     mood(w, 'scared', pick(['!', '!!', '!?']));
     w.el.classList.remove('shaking', 'hopping', 'headshaking', 'snapping');
     w.state = 'startled';
@@ -412,7 +442,7 @@ function createWanderers(lane, active = () => true) {
       spawn(now);
       nextSpawn = now + rand(1500, 4500);
     } else if (staying.length > want && now > nextDepart) {
-      const w = staying.find((x) => x.state !== 'meet' && x.state !== 'poked' && x.state !== 'snack');
+      const w = staying.find((x) => x.state !== 'meet' && x.state !== 'poked' && x.state !== 'snack' && !x.pushing);
       if (w) {
         depart(w, now);
         nextDepart = now + rand(1200, 3000);
@@ -426,9 +456,19 @@ function createWanderers(lane, active = () => true) {
         const pace = w.running ? 3.4 : 1;
         const step = w.speed * pace * dt * (w.bot === 'glitch' && Math.random() < 0.08 ? 3 : 1); // (GLITCH lurches)
         w.x += w.dir * step;
+        if (w.pushing) pushTree(w);
         if ((w.dir > 0 && w.x >= w.target) || (w.dir < 0 && w.x <= w.target)) {
           w.x = w.target;
           if (w.leaving) { w.gone = true; continue; }
+          if (w.pushing) { // (the tree's in place: a breather, then on its way)
+            pushTree(w);
+            letGo(w);
+            w.state = 'idle';
+            w.until = now + rand(1800, 2600);
+            mood(w, 'tired', 'phew');
+            place(w);
+            continue;
+          }
           if (w.winded) { // (arrived at a run: out of breath)
             w.winded = false;
             w.running = false;
@@ -480,7 +520,7 @@ function createWanderers(lane, active = () => true) {
       for (let j = i + 1; j < walkers.length; j++) {
         const a = walkers[i];
         const b = walkers[j];
-        const busyWith = (w) => w.state === 'meet' || w.state === 'startled' || w.state === 'vanish' || w.state === 'poked' || w.state === 'snack' || w.leaving || w.winded
+        const busyWith = (w) => w.state === 'meet' || w.state === 'startled' || w.state === 'vanish' || w.state === 'poked' || w.state === 'snack' || w.pushing || w.leaving || w.winded
           || w.el.dataset.mood === 'tired' || w.el.dataset.mood === 'surprised';
         if (busyWith(a) || busyWith(b) || !inside(a) || !inside(b)) continue;
         if (Math.abs(a.x - b.x) > SIZE + 6 || now - a.metAt < 7000 || now - b.metAt < 7000) continue;
@@ -518,7 +558,7 @@ function createWanderers(lane, active = () => true) {
     requestAnimationFrame(frame);
   }
   start();
-  // (start: after being switched back on; list / startle / crowd / dress / visit / snack: for the dev tests)
-  return { start, list: () => walkers, startle: (w) => startle(w, performance.now()), crowd: (n) => { want = n; nextReroll = performance.now() + 60000; }, dress, visit: (what) => visitors && visitors.visit(what), snack: (w) => snack(w, performance.now()) };
+  // (start: after being switched back on; list / startle / crowd / dress / visit / snack / push: for the dev tests)
+  return { start, list: () => walkers, startle: (w) => startle(w, performance.now()), crowd: (n) => { want = n; nextReroll = performance.now() + 60000; }, dress, visit: (what) => visitors && visitors.visit(what), snack: (w) => snack(w, performance.now()), push: () => { forcePush = true; nextSpawn = 0; } };
 
 }

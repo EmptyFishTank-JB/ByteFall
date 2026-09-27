@@ -165,7 +165,9 @@ BOTS,HR WANTS A WORD,Poke 200 bots,200,Hidden,hr-wants-a-word
 BOTS,RABID,Poke a HARD or INSANE bot and get snapped at,1,Hidden,rabid
 BOTS,COSTUME PARTY,All four bots on screen at once in their Halloween costumes,1,Hidden,costume-party
 BOTS,SWEET TOOTH,Watch the bots eat 100 Halloween candies,100,Hidden,sweet-tooth
-BOTS,MONSTER MASH,"Meet all seven Halloween visitors: the monster, the mummy, the creature, Nosferatu, the ghost, the bats and the crows",7,Hidden,monster-mash
+BOTS,MONSTER MASH,"Meet all eight Halloween visitors: the monster, the mummy, the creature, Nosferatu, the ghost, the bats, the crows and the spider",8,Hidden,monster-mash
+BOTS,UPROOTED,Watch a bot push a scary tree onto the card,1,Hidden,uprooted
+BOTS,GOBBLE GOBBLE,Meet the November turkey,1,Hidden,gobble-gobble
 BOTS,DEVELOPER OPTIONS,Tap the VS CPU seven times in a row,1,Hidden,developer-options
 THANK YOU,INDIE SUPPORTER,Buy REMOVE ADS or FULL ACCESS in the STORE. Thank you for supporting an indie game!,1,Standard,indie-supporter
 SECRETS,KONAMI,Enter the Konami code,1,Hidden,konami

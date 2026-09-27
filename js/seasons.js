@@ -1,9 +1,11 @@
-// SEASONS: what time of year it is for the game's seasonal touches (wanderers.js's costumes, and
-// the visitors to come). By the player's own date: HALLOWEEN runs October 15 to 31. The dev page's
-// SEASON switch (bytefall-dev-season: auto / off / halloween), or ?season=halloween, forces one.
+// SEASONS: what time of year it is for the game's seasonal touches (wanderers.js's costumes and
+// snacks, visitors.js's visitors and scenery). By the player's own date: HALLOWEEN runs October 15
+// to 31, NOVEMBER the whole month. The dev page's SEASON switch (bytefall-dev-season: auto / off /
+// halloween / november), or ?season=halloween, forces one.
 const Season = (() => {
   const SEASONS = {
     halloween: (d) => d.getMonth() === 9 && d.getDate() >= 15,
+    november: (d) => d.getMonth() === 10,
   };
   function forced() {
     let v = new URLSearchParams(location.search).get('season');

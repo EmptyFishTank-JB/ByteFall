@@ -2536,3 +2536,20 @@ html.page-twinkle .page-bg { display: block; }
 @keyframes visitor-boo { 0% { scale: 1; } 40% { scale: 1.5; } 100% { scale: 1.2; } }
 .visitor.v-fade svg { transition: opacity 0.7s steps(5); opacity: 0; }
 .visitor.v-vanish svg { animation: walker-pix-out 0.45s steps(1) forwards; }
+
+/* BOT's ghost costume floats: two or three pixels off the ground, bobbing a pixel, feet hidden */
+.walker[data-costume="ghost"] .leg { display: none; }
+.walker[data-costume="ghost"]:not(.pop-in):not(.pix-out) .bot-swap { animation: ghost-float 1.8s steps(1) infinite; }
+@keyframes ghost-float { 0% { transform: translateY(-2px); } 50% { transform: translateY(-3px); } }
+/* Pushing the scary tree: straining */
+.cpu-face[data-mood="strain"] :is(.eyes-squint, .mouth-flat, .sweat) { display: inline; }
+/* SCENERY (visitors.js): behind everything in the lane, bots and visitors, but in front of the start
+   card's copyright line */
+.start-walkers { z-index: 0; }
+:is(.start-walkers, .game-walkers) .visitor-scenery { z-index: -1; }
+.visitor-tree svg { filter: drop-shadow(0 0 1px rgba(220, 225, 240, 0.3)); }
+.visitor-tree.v-creak svg { animation: visitor-shake 0.1s steps(1) 6 alternate; }
+.visitor-tree.v-creak svg rect[fill="#ffb000"] { fill: #ffe066; }
+/* The spider's silk thread, up out of sight */
+.visitor-thread { position: absolute; left: 50%; bottom: 60%; width: 1px; height: 160px; background: rgba(220, 225, 240, 0.45); pointer-events: none; }
+.visitor-spider svg { filter: drop-shadow(0 0 1px rgba(220, 225, 240, 0.45)); }

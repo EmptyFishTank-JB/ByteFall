@@ -505,27 +505,39 @@ switch, or `?season=halloween`, forces one or turns them OFF). **HALLOWEEN**
 (October 15 to 31): most wanderers (80%) arrive in costume, drawn in their own
 pixel grid over the body and under the face, so every face, hop and snap still
 shows: BUNKER is a pumpkin (its face the carved one), BOT a see-through bedsheet
-ghost (80% opaque), GRIFTER wears a witch's hat and GLITCH devil horns and a tail. All four
+ghost (80% opaque, floating two or three pixels off the ground and bobbing),
+GRIFTER wears a witch's hat and GLITCH devil horns and a tail. All four
 dressed up on screen at once earns the hidden COSTUME PARTY. A wanderer that
 stops sometimes has a snack (30%): one to three gummy drops (2x2 pixels, a
 random bright color), each pulled from its side and tossed in an arc over its
 head into its mouth (hopping pixel to pixel), a munch and a chew; SWEET TOOTH
 (hidden) for 100 of them.
 
-**Halloween visitors** (`js/visitors.js`) pass through the same lane, one visit
-at a time every 20 to 45 seconds, in from either side: FRANKENSTEIN'S MONSTER
-(lumbering, arm out), a MUMMY (shambling, a loose bandage swinging), the
-CREATURE from the black lagoon (waddling, dripping water), NOSFERATU (gliding),
-a see-through GHOST (floating), a flock of BATS (flapping across) and a CROW or
-two (hopping in, pecking, then flying off). They're drawn as pixel sprites in
-the bots' pixel size and sway and bob in whole pixels; they walk behind the
-bots, bats and crows over them. A monster passing a bot may give it a fright.
-Poke one: the monster roars and stomps (bots near it jump), the mummy groans
-and slows, the creature splashes, Nosferatu hisses and turns into three bats,
-the ghost says BOO (every bot near it jumps) and fades away, the bats scatter,
-the crow caws and takes off. MONSTER MASH (hidden): meet all seven. Coming next:
-a scary tree a wanderer pushes onto the card (in front of the start card's
-copyright line, behind everything else), then the other seasons.
+**Visitors** (`js/visitors.js`) pass through the same lane, one visit at a time
+every 20 to 45 seconds, in from either side. HALLOWEEN: FRANKENSTEIN'S MONSTER
+(lumbering, arm out), a MUMMY (shambling, a loose bandage swinging), the CREATURE
+from the black lagoon (waddling, dripping water), NOSFERATU (gliding), a
+see-through GHOST (floating), a flock of BATS (flapping across), a CROW or two
+(hopping in, pecking, then flying off) and a SPIDER (down on its silk thread
+somewhere along the card, a dangle, back up). NOVEMBER (the whole month; nothing
+holiday-specific): a TURKEY struts in, pecks a while and struts on (and the
+crows). They're pixel sprites in the bots' pixel size and sway and bob in whole
+pixels; they walk behind the bots, bats and crows over them. A monster passing a
+bot may give it a fright. Poke one: the monster roars and stomps (bots near it
+jump), the mummy groans and slows, the creature splashes, Nosferatu hisses and
+turns into three bats, the ghost says BOO (every bot near it jumps) and fades
+away, the bats scatter, the crow caws and takes off, the spider scurries back
+up (bots near it jump) and the turkey gobbles and runs. MONSTER MASH (hidden):
+meet all eight Halloween visitors; GOBBLE GOBBLE (hidden): meet the turkey.
+
+**Scenery.** HALLOWEEN: now and then (15% of arrivals, one at a time) a
+wanderer comes in pushing a SCARY TREE (a dead, gnarled tree with glowing eyes)
+ahead of it, slowly and straining, sweating; it leaves it standing somewhere
+along the card, says "phew" and wanders on. The tree stays for the visit, behind
+every bot and visitor but in front of the start card's copyright line. Poked or
+startled mid-push, the pusher lets go (the tree stays where it stopped) and
+reacts as usual. Poke the tree: it creaks, its eyes flare and a bat flies out.
+UPROOTED (hidden): see a tree pushed in.
 
 The same wanderers stroll along the bottom of the game card too, between the
 corner buttons (walking out from behind them), with everything above: meetings,
