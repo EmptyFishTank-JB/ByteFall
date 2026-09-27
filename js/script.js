@@ -2765,7 +2765,7 @@ function renderPlaylist() {
 
 const vizBtn = document.getElementById('viz-toggle');
 // The small one has the styles that read at its height; the MUSIC PLAYER has them all
-const playlistViz = createVisualizer(document.getElementById('playlist-viz'), Music.getAnalyser, { modes: ['bars', 'wave', 'scope'] });
+const playlistViz = createVisualizer(document.getElementById('playlist-viz'), Music.getAnalyser, { modes: ['bars', 'wave', 'scope', 'spectro', 'vu', 'plasma'] });
 
 function updateVizLabel() {
   vizBtn.setAttribute('aria-label', `Visualizer: ${playlistViz.name}. Click to switch.`);

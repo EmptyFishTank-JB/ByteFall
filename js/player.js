@@ -10,7 +10,7 @@
   const playBtn = document.getElementById('mp-play');
   const bgBtn = document.getElementById('mp-bg-btn');
   const viz = createVisualizer(document.getElementById('mp-viz'), Music.getAnalyser, {
-    bars: 40, modes: ['bars', 'wave', 'scope', 'radial', 'fluid', 'vector'], key: 'bytefall-player-viz', getStereo: Music.getStereo,
+    bars: 40, modes: ['bars', 'wave', 'scope', 'spectro', 'vu', 'radial', 'fluid', 'vector', 'matrix', 'bitgrid', 'terrain', 'plasma', 'tunnel'], key: 'bytefall-player-viz', getStereo: Music.getStereo,
   });
   const vizNameEl = document.getElementById('mp-viz-name');
   const showVizName = () => { vizNameEl.textContent = `// ${viz.name}`; };
