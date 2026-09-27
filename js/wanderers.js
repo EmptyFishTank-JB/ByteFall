@@ -3,7 +3,7 @@
 // strip along the card's bottom) for as long as active() says so, and returns { start, list,
 // startle }: start() brings them back after active() turned false.
 function createWanderers(lane, active = () => true) {
-  // One to three of the CPUs (never the same one twice at once) stroll along the bottom
+  // One to four of the CPUs (never the same one twice at once) stroll along the bottom
   // of the card, in from either side and back out again, looking the way they go. Now and then
   // one stops to idle; two that meet may stop a body's width apart (arms may overlap, nothing
   // more), face each other and pull faces. Sometimes one is spooked and bolts off the card, or
@@ -47,7 +47,7 @@ function createWanderers(lane, active = () => true) {
   let crewSeen = false;
   const rand = (a, b) => a + Math.random() * (b - a);
   let walkers = [];
-  let want = 1 + Math.floor(Math.random() * 3);
+  let want = 1 + Math.floor(Math.random() * 4);
   let nextSpawn = performance.now() + 400;
   let nextReroll = performance.now() + rand(8000, 15000);
   const laneW = () => lane.clientWidth;
@@ -241,11 +241,11 @@ function createWanderers(lane, active = () => true) {
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     if (now > nextReroll) {
-      want = 1 + Math.floor(Math.random() * 3);
+      want = 1 + Math.floor(Math.random() * 4);
       nextReroll = now + rand(8000, 15000);
     }
     const staying = walkers.filter((w) => !w.leaving);
-    if (!crewSeen && walkers.filter(inside).length >= 3) {
+    if (!crewSeen && walkers.filter(inside).length >= 4) { // (all four at once)
       crewSeen = true;
       botEvent('crew');
     }

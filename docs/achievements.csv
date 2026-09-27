@@ -159,7 +159,7 @@ BOTS,THIRD WHEEL,Poke a bot in the middle of a conversation,1,Standard,third-whe
 BOTS,MATCHMAKER,Watch two bots fall for each other on the start screen,1,Standard,matchmaker
 BOTS,JUMP SCARE,Watch a bot pop into view and startle another,1,Standard,jump-scare
 BOTS,NOW YOU SEE ME,Watch a bot decrypt itself away,1,Standard,now-you-see-me
-BOTS,FULL CREW,See three bots on the start screen at once,1,Standard,full-crew
+BOTS,FULL CREW,See all four bots on screen at once,1,Standard,full-crew
 BOTS,PERSONAL SPACE,Poke 100 bots,100,Hidden,personal-space
 BOTS,HR WANTS A WORD,Poke 200 bots,200,Hidden,hr-wants-a-word
 BOTS,DEVELOPER OPTIONS,Tap the VS CPU seven times in a row,1,Hidden,developer-options

@@ -388,7 +388,7 @@ const Progress = (() => {
         { id: 'matchmaker', name: 'MATCHMAKER', desc: 'Watch two bots fall for each other on the start screen', value: n('love-pair'), goal: 1 },
         { id: 'jump-scare', name: 'JUMP SCARE', desc: 'Watch a bot pop into view and startle another', value: n('jump-scare'), goal: 1 },
         { id: 'now-you-see-me', name: 'NOW YOU SEE ME', desc: 'Watch a bot decrypt itself away', value: n('vanish'), goal: 1 },
-        { id: 'full-crew', name: 'FULL CREW', desc: 'See three bots on the start screen at once', value: n('crew'), goal: 1 },
+        { id: 'full-crew', name: 'FULL CREW', desc: 'See all four bots on screen at once', value: n('crew'), goal: 1 },
         { id: 'personal-space', name: 'PERSONAL SPACE', desc: 'Poke 100 bots', value: n('pokes'), goal: 100, hidden: true },
         { id: 'hr-wants-a-word', name: 'HR WANTS A WORD', desc: 'Poke 200 bots', value: n('pokes'), goal: 200, hidden: true },
         { id: 'developer-options', name: 'DEVELOPER OPTIONS', desc: 'Tap the VS CPU seven times in a row', value: n('dev-taps'), goal: 1, hidden: true },

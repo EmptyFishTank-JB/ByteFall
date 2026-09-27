@@ -395,7 +395,7 @@ else lets the music begin (browsers need one) and leaves you on the screen.
 START (or Enter / Space) fades it to black, then fades into the game, which always starts on
 CLASSIC, Normal. The very first time the game is opened, it fades into the
 TUTORIAL instead (EXIT skips it). A refresh, or coming back to the app or tab,
-skips the start screen and carries on where you were. On the start screen one to three of the CPUs (BOT, GRIFTER, BUNKER, GLITCH;
+skips the start screen and carries on where you were. On the start screen one to four of the CPUs (BOT, GRIFTER, BUNKER, GLITCH;
 never two of the same) wander along the bottom of the card, looking the way
 they walk (eyes and mouth a pixel that way): in from either side, idling (now
 and then bored or tapping a foot), finding a free spot and heading back out.
@@ -423,8 +423,8 @@ frights, pop-ins, decrypts and pokes. SETTINGS → WANDERING BOTS turns them off
 **Bot achievements** (RECORDS, the BOTS group): POKE, BOO! (poke one so hard it
 runs), THE EYEBROW (a raised eyebrow from all four bots), THIRD WHEEL (poke one
 mid-conversation), MATCHMAKER (two fall for each other), JUMP SCARE (a pop-in
-startles another), NOW YOU SEE ME (one decrypts away), FULL CREW (three on the
-start screen at once), and hidden: PERSONAL SPACE (100 pokes), HR WANTS A WORD
+startles another), NOW YOU SEE ME (one decrypts away), FULL CREW (all four on
+screen at once), and hidden: PERSONAL SPACE (100 pokes), HR WANTS A WORD
 (200) and DEVELOPER OPTIONS (tap the VS CPU seven times in a row: "YOU ARE 3
 TAPS AWAY FROM BEING A DEVELOPER" ... "NO NEED. THERE IS NO DEV MODE HERE."). The faces include the CPU's moods plus SCARED, TIRED (panting),
 SURPRISED, LOVE (red heart eyes), DIZZY and LAUGH. The small faces come from
