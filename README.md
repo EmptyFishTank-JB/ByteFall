@@ -500,6 +500,18 @@ lunges with the jaw chomping ("SNAP!" / "CHOMP!"), then 35% of the time stomp
 off at a run, still angry, or glare a moment and wander on. One poked while half
 on the card reacts right there, peeking in.
 
+**Seasons** (`js/seasons.js`, by the player's own date; the dev page's SEASON
+switch, or `?season=halloween`, forces one or turns them OFF). **HALLOWEEN**
+(October 15 to 31): most wanderers (80%) arrive in costume, drawn in their own
+pixel grid over the body and under the face, so every face, hop and snap still
+shows: BUNKER is a pumpkin (its face the carved one), BOT a see-through bedsheet
+ghost, GRIFTER wears a witch's hat and GLITCH devil horns and a tail. All four
+dressed up on screen at once earns the hidden COSTUME PARTY. Coming in stages:
+Halloween visitors (a creature from the black lagoon, Nosferatu, Frankenstein's
+monster, a mummy, a floating ghost, bats, crows) and a scary tree a wanderer
+pushes onto the card (in front of the start card's copyright line, behind
+everything else), then the other seasons.
+
 The same wanderers stroll along the bottom of the game card too, between the
 corner buttons (walking out from behind them), with everything above: meetings,
 frights, pop-ins, decrypts and pokes. SETTINGS → WANDERING BOTS turns them off

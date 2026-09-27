@@ -34,6 +34,30 @@ function createWanderers(lane, active = () => true) {
   const canFeel = (w, m) => !(NEVER[w.bot] && NEVER[w.bot][m]) && !(m === 'love' && !LOVE_LEVELS.includes(w.el.dataset.level));
   const pairFits = (a, b, [ma, mb]) => canFeel(a, ma) && canFeel(b, mb)
     && (ma !== 'love' || LOVE_PARTNERS.includes(mb)) && (mb !== 'love' || LOVE_PARTNERS.includes(ma));
+  // SEASONAL COSTUMES (seasons.js says when): drawn in the bot's own 16x17 pixel grid, over its
+  // body and under its face (so the face shows through: the pumpkin's carved face; the ghost's
+  // sheet is see-through). Most arrive dressed up (80%). Colors in style.css ([data-costume]).
+  const px = (cells, cls) => cells.map(([x, y, w = 1, h = 1]) => `<rect class="${cls}" x="${x}" y="${y}" width="${w}" height="${h}"/>`).join('');
+  const COSTUMES = {
+    halloween: {
+      // BUNKER: a pumpkin (its body turns orange), darker ribs, a stem and a leaf
+      bunker: { id: 'pumpkin', svg: px([[3, 4, 1, 8], [12, 4, 1, 8], [8, 2, 1, 2], [8, 12]], 'c-rib') + px([[7, 0, 2, 2]], 'c-stem') + px([[9, 1, 2, 1]], 'c-leaf') },
+      // BOT: a see-through bedsheet ghost with a wavy hem (BOT shows under it, its face on top)
+      bot: { id: 'ghost', svg: px([[5, 0, 6, 1], [3, 1, 10, 1], [2, 2, 12, 1], [1, 3, 14, 11], [1, 14, 2, 1], [5, 14, 2, 1], [9, 14, 2, 1], [13, 14, 2, 1]], 'c-sheet') },
+      // GRIFTER: a witch's hat with an orange band and a bent tip
+      grifter: { id: 'witch', svg: px([[0, 2, 16, 1], [5, 0, 6, 1], [6, -1, 4, 1], [7, -2, 3, 1], [8, -3, 2, 1], [9, -4, 2, 1], [10, -5, 2, 1]], 'c-hat') + px([[5, 1, 6, 1]], 'c-band') },
+      // GLITCH: devil horns and a pointed tail
+      glitch: { id: 'devil', svg: px([[3, 2, 2, 1], [3, 1], [2, 0], [11, 2, 2, 1], [12, 1], [13, 0], [14, 12], [15, 11], [16, 10], [16, 9], [15, 8, 3, 1], [16, 7]], 'c-horn') },
+    },
+  };
+  function dress(el, bot, always = false) {
+    const season = typeof Season !== 'undefined' && Season.current();
+    const costume = season && COSTUMES[season] && COSTUMES[season][bot];
+    if (!costume || (!always && Math.random() >= 0.8)) return;
+    el.dataset.costume = costume.id;
+    el.querySelector('.bot-body').insertAdjacentHTML('afterend', `<g class="costume">${costume.svg}</g>`);
+  }
+  let partySeen = false;
   const RADIUS = 110; // how near a pop, a decrypt or a bolt startles the others
   const HOP_MS = 360;
   const SIZE = 34;
@@ -97,6 +121,7 @@ function createWanderers(lane, active = () => true) {
     const fromLeft = Math.random() < 0.5;
     const el = miniBot(bot, pick(LEVELS.filter((l) => !(NEVER_LEVEL[bot] || []).includes(l))));
     el.classList.add('walker');
+    dress(el, bot);
     const emote = document.createElement('span');
     emote.className = 'walker-emote';
     el.appendChild(emote);
@@ -319,6 +344,10 @@ function createWanderers(lane, active = () => true) {
       crewSeen = true;
       botEvent('crew');
     }
+    if (!partySeen && walkers.filter((w) => inside(w) && w.el.dataset.costume).length >= 4) { // (all four dressed up)
+      partySeen = true;
+      botEvent('costume-party');
+    }
     if (staying.length < want && now > nextSpawn) {
       spawn(now);
       nextSpawn = now + rand(1500, 4500);
@@ -427,7 +456,7 @@ function createWanderers(lane, active = () => true) {
     requestAnimationFrame(frame);
   }
   start();
-  // (start: after being switched back on; list / startle / crowd: for the dev tests)
-  return { start, list: () => walkers, startle: (w) => startle(w, performance.now()), crowd: (n) => { want = n; nextReroll = performance.now() + 60000; } };
+  // (start: after being switched back on; list / startle / crowd / dress: for the dev tests)
+  return { start, list: () => walkers, startle: (w) => startle(w, performance.now()), crowd: (n) => { want = n; nextReroll = performance.now() + 60000; }, dress };
 
 }

@@ -2486,3 +2486,18 @@ html.page-twinkle .page-bg { display: block; }
 @keyframes walker-lunge { 0% { transform: scale(1.22) translateY(1px); } 100% { transform: scale(1); } }
 .walker.snapping .mouth-teeth { transform-box: fill-box; transform-origin: 50% 0; animation: walker-jaw 0.2s steps(2) 3; }
 @keyframes walker-jaw { 0% { transform: scaleY(2); } 100% { transform: scaleY(0.5); } }
+
+/* SEASONAL COSTUMES on the wanderers (wanderers.js): drawn over the body, under the face; the
+   pumpkin and the ghost recolor the whole bot (its --bot color, glow and all) */
+.walker svg { overflow: visible; } /* (the witch's hat and the devil's tail reach past the grid) */
+.walker[data-costume="pumpkin"] { --bot: #ff8a1f; --bot-rgb: 255, 138, 31; }
+.walker[data-costume="pumpkin"] .c-rib { fill: #c4580a; }
+.walker[data-costume="pumpkin"] .c-stem { fill: #3f8f3a; }
+.walker[data-costume="pumpkin"] .c-leaf { fill: #6cc24a; }
+.walker[data-costume="ghost"] .costume { opacity: 0.55; filter: drop-shadow(0 0 1px rgba(238, 243, 242, 0.6)); } /* (see-through: BOT shows under it) */
+.walker[data-costume="ghost"] .c-sheet { fill: #eef3f2; }
+[data-theme="paper"] .walker[data-costume="ghost"] .costume { filter: drop-shadow(0 0 0.5px rgba(40, 30, 20, 0.6)); } /* (a white sheet on a light card) */
+.walker[data-costume="witch"] .c-hat { fill: #3b2455; }
+.walker[data-costume="witch"] .c-band { fill: #ff8a1f; }
+.walker[data-costume="witch"] .shape-grifter rect[y="1"] { display: none; } /* (its ear tips, under the hat) */
+.walker[data-costume="devil"] .c-horn { fill: #b0142a; filter: drop-shadow(0 0 0.6px rgba(255, 60, 80, 0.7)); }
