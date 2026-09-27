@@ -194,15 +194,16 @@ and achievements pop up as they happen (achievements stay up about 5.5 seconds, 
 reports each drop, decrypt, peel, byte, exploit and point to it.
 
 **Dev switches.** The `</>` dev page has UNLOCK EVERYTHING (like owning Full
-Access, for this browser; the game shows a DEV badge, a label only, behind the wanderers, while it's on), JUMP TO
+Access, for this browser; the game shows a DEV badge, a label only, level with the corner buttons and behind the wanderers, while it's on), JUMP TO
 LV 80 and +10 LEVELS for testing DECRYPTOR ranks, slots and exploit unlocks. With UNLOCK EVERYTHING on,
 press and hold any exploit card for 2 seconds to make it your next drop.
 AD BANNER PREVIEW (off by default; tap to step through 50, 60 and 90px, or add
-`?adpreview=60` to the URL) holds a grey strip at the bottom of the screen where
-a phone's banner ad would go. The
+`?adpreview=60` to the URL) holds a grey strip at the top of the screen (AD
+BANNER SPOT switches it to the bottom, or add `?adpos=bottom`) where a phone's
+banner ad would go. The
 game's height leaves the strip out, so the card, start screen, menus and music
-player all fit above it, the way they would with a real banner that resizes the
-page. When less than about 650px is left above the strip (a 360×640 phone, say),
+player all fit beside it, the way they would with a real banner that resizes the
+page. When less than about 650px is left beside the strip (a 360×640 phone, say),
 the board is at its smallest and the drop buttons start to crowd it.
 BACKGROUND (PLAIN by default, or `?twinkle`) switches what's behind the game
 card between the plain gradient and TWINKLE: the start screen's starlight

@@ -1509,11 +1509,12 @@ body.vs-mode header #mode-info { display: none; }
 
 /* Shown while the dev page's UNLOCK EVERYTHING switch is on */
 .dev-badge {
-  /* In the game card, centered, its bottom edge level with the corner buttons' */
+  /* In the game card, centered between the corner buttons and level with their middles (they're
+     30px tall, 10px up: their middles 25px up) */
   position: absolute;
   left: 50%;
-  bottom: 10px;
-  transform: translateX(-50%);
+  bottom: 25px;
+  transform: translate(-50%, 50%);
   z-index: 0; /* (under the wanderers, which come after it) */
   pointer-events: none;
   white-space: nowrap;
@@ -2401,7 +2402,7 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
 
 /* Dev: AD BANNER PREVIEW (script.js). The page's height (--app-h) already leaves the strip out; the
    transform makes the body the frame for fixed layers (start screen, overlays, particles), so they
-   stop above the strip too. The strip hangs just under the body. */
+   stay clear of the strip too. */
 html.ad-preview body { transform: translate(0, 0); }
 html.ad-preview #board-fx { height: 100%; }
 html:not(.ad-preview) .ad-preview-bar, .ad-preview-bar[hidden] { display: none; }
@@ -2411,6 +2412,9 @@ html:not(.ad-preview) .ad-preview-bar, .ad-preview-bar[hidden] { display: none; 
   background: #8a8a8a; color: #3a3a3a; border-top: 1px solid #b0b0b0;
   font: 11px/1 monospace; letter-spacing: 2px; pointer-events: none;
 }
+/* At the top (the default): the body moves down under the strip, which hangs just above it */
+html.ad-preview.ad-top body { margin-top: var(--ad-h); }
+html.ad-top .ad-preview-bar { top: auto; bottom: 100%; border-top: 0; border-bottom: 1px solid #b0b0b0; }
 
 /* Dev: TWINKLE BACKGROUND (grid-bg.js). The starlight twinkling across the whole screen behind the
    game card (and its menus), in place of the plain gradient */

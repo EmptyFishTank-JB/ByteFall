@@ -686,7 +686,7 @@ function lockButtons() {
 // 100dvh) from the smallest of the browser's measures, and re-checks it on every viewport event
 // plus a cheap poll, refitting the board whenever anything changed.
 // Dev: AD BANNER PREVIEW (dev tools: OFF by default, then 50 / 60 / 90px; or ?adpreview=60) holds
-// a grey strip at the bottom where a phone's banner ad would go. The game's height leaves it out, so
+// a grey strip at the top (or bottom) where a phone's banner ad would go. The game's height leaves it out, so
 // everything fits above it as it would with a real banner (the body becomes the frame for fixed
 // layers too). Re-read on coming back from the dev page, so it changes without a reload.
 let adPreviewH = 0;
@@ -697,6 +697,9 @@ function applyAdPreview() {
   const h = param !== null ? parseInt(param, 10) || 50 : flag === 'on' ? 50 : parseInt(flag, 10) || 0;
   adPreviewH = [50, 60, 90].includes(h) ? h : 0;
   document.documentElement.classList.toggle('ad-preview', adPreviewH > 0);
+  // (at the top of the screen by default; AD BANNER SPOT in dev tools, or ?adpos=bottom)
+  const pos = new URLSearchParams(location.search).get('adpos') || storage.get('bytefall-dev-adpos');
+  document.documentElement.classList.toggle('ad-top', pos !== 'bottom');
   document.documentElement.style.setProperty('--ad-h', `${adPreviewH}px`);
   if (adPreviewH && !adPreviewBar) {
     adPreviewBar = document.createElement('div');
