@@ -522,7 +522,7 @@ see-through GHOST (floating), a flock of BATS (flapping across), a CROW or two
 somewhere along the card, a dangle, back up). NOVEMBER (the whole month; nothing
 holiday-specific): a TURKEY struts in, pecks a while and struts on (and the
 crows). They're pixel sprites in the bots' pixel size and sway and bob in whole
-pixels; they walk behind the bots, bats and crows over them. A monster passing a
+pixels, on the same floor as the bots (their feet a pixel of the grid above the lane's edge); they walk behind the bots, bats and crows over them. A monster passing a
 bot may give it a fright. Poke one: the monster roars and stomps (bots near it
 jump), the mummy groans and slows, the creature splashes, Nosferatu hisses and
 turns into three bats, the ghost says BOO (every bot near it jumps) and fades
@@ -531,12 +531,12 @@ up (bots near it jump) and the turkey gobbles and runs. MONSTER MASH (hidden):
 meet all eight Halloween visitors; GOBBLE GOBBLE (hidden): meet the turkey.
 
 **Scenery.** HALLOWEEN: now and then (15% of arrivals, one at a time) a
-wanderer comes in pushing a SCARY TREE (a dead, gnarled tree with glowing eyes)
+wanderer comes in pushing a SCARY TREE (a dead, gnarled tree with black eyes and a frown)
 ahead of it, slowly and straining, sweating; it leaves it standing somewhere
 along the card, says "phew" and wanders on. The tree stays for the visit, behind
 every bot and visitor but in front of the start card's copyright line. Poked or
 startled mid-push, the pusher lets go (the tree stays where it stopped) and
-reacts as usual. Poke the tree: it creaks, its eyes flare and a bat flies out.
+reacts as usual. Poke the tree: it creaks and a bat flies out.
 UPROOTED (hidden): see a tree pushed in.
 
 The same wanderers stroll along the bottom of the game card too, between the

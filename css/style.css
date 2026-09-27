@@ -2549,7 +2549,6 @@ html.page-twinkle .page-bg { display: block; }
 :is(.start-walkers, .game-walkers) .visitor-scenery { z-index: -1; }
 .visitor-tree svg { filter: drop-shadow(0 0 1px rgba(220, 225, 240, 0.3)); }
 .visitor-tree.v-creak svg { animation: visitor-shake 0.1s steps(1) 6 alternate; }
-.visitor-tree.v-creak svg rect[fill="#ffb000"] { fill: #ffe066; }
 /* The spider's silk thread, up out of sight */
 .visitor-thread { position: absolute; left: 50%; bottom: 60%; width: 1px; height: 160px; background: rgba(220, 225, 240, 0.45); pointer-events: none; }
 .visitor-spider svg { filter: drop-shadow(0 0 1px rgba(220, 225, 240, 0.45)); }

@@ -7,7 +7,8 @@
 // bats, the GHOST says BOO (every bot near it jumps) and fades, bats scatter, crows take off
 // cawing, the SPIDER scurries back up and the TURKEY gobbles and runs.
 // SCENERY: the scary tree a wanderer pushes onto the card (HALLOWEEN; makeTree, wanderers.js does
-// the pushing). It stays for the visit, behind everything else; poked, it creaks and a bat flies out.
+// the pushing): black eyes and a frown. It stays for the visit, behind everything else; poked, it
+// creaks and a bat flies out.
 // Sprites are drawn as text: one letter a pixel (its color in `pal`, '.' left empty), in the bots'
 // own pixel size, facing right; a second frame (b) steps the legs, flaps the wings or ripples a hem.
 function createVisitors(api) {
@@ -59,8 +60,8 @@ function createVisitors(api) {
         9: '.....y..y...', 10: '....y...y...', 11: '...yy...yy..' },
     },
     tree: {
-      pal: { t: '#4a3528', T: '#2e2019', b: '#5e4634', e: '#ffb000', k: '#000000', m: '#120a06' },
-      a: ['......b............b....', '.......b..b.......b.....', '.......b.b.......b.b....', '.....b..b........b.b....', '.....b..b.......b..b...b', '.b...b...b......b...b.b.', '..b.b....b.....b....bb..', '...bb.....b....b....b...', '....b.....b...b....b....', '.....b.....b..b...b.....', '......b....b.b...b......', '.......b....Tt...b..bbb.', 'b.......b...Tt..bbbb...b', '.b.......b..Ttbb.......b', '..bb......bTt.b.........', '....bb.....Ttb..........', '......bb..Ttttt.........', '........bbTtttt.........', '..........Ttttt.........', '..........eettee........', '..........Tkttk.........', '..........Ttttt.........', '..........Tmttm.........', '..........Tmmmm.........', '..........Ttmmt.........', '..........Ttttt.........', '..........Ttttt.........', '.........Ttttttt........', '.........Ttmtttt........', '.........Ttttttt........', '.........Ttttttt........', '.........Ttttttt........', '.......ttTtttttttt......', '.....ttttTtttttttttt....'],
+      pal: { t: '#4a3528', T: '#2e2019', b: '#5e4634', k: '#000000', m: '#0a0604' }, // (black eyes, a frown)
+      a: ['......b............b....', '.......b..b.......b.....', '.......b.b.......b.b....', '.....b..b........b.b....', '.....b..b.......b..b...b', '.b...b...b......b...b.b.', '..b.b....b.....b....bb..', '...bb.....b....b....b...', '....b.....b...b....b....', '.....b.....b..b...b.....', '......b....b.b...b......', '.......b....Tt...b..bbb.', 'b.......b...Tt..bbbb...b', '.b.......b..Ttbb.......b', '..bb......bTt.b.........', '....bb.....Ttb..........', '......bb..Ttttt.........', '........bbTtttt.........', '..........Ttttt.........', '..........Tkttk.........', '..........Tkttk.........', '..........Ttttt.........', '..........Ttmmt.........', '..........Tmmmm.........', '..........Tmttm.........', '..........Ttttt.........', '..........Ttttt.........', '.........Ttttttt........', '.........Ttmtttt........', '.........Ttttttt........', '.........Ttttttt........', '.........Ttttttt........', '.......ttTtttttttt......', '.....ttttTtttttttttt....'],
     },
     crow: {
       pal: { k: '#2c313b', K: '#4a5566', e: '#e0e0e0', o: '#8a8f98' },
@@ -177,7 +178,7 @@ function createVisitors(api) {
   }
 
   function poke(v) {
-    if (v.kind === 'tree') { // (creaks, eyes flaring, and a bat flies out of it in the season)
+    if (v.kind === 'tree') { // (creaks, and a bat flies out of it in the season)
       say(v, 'creeeak', 1000);
       v.el.classList.remove('v-creak');
       void v.el.offsetWidth;
@@ -255,7 +256,9 @@ function createVisitors(api) {
   }
 
   // (the lumbering in whole pixels of the sprite's grid: a pixel's shuffle side to side and a
-  // pixel's bob, heights snapped to the grid too; no tilting)
+  // pixel's bob, heights snapped to the grid too; no tilting). FLOOR: the bots' feet rest a pixel
+  // of their grid above the lane's bottom edge, and every visitor stands on that same floor.
+  const FLOOR = U;
   function place(v) {
     const k = KINDS[v.kind];
     const t = v.age / 1000;
@@ -263,7 +266,7 @@ function createVisitors(api) {
     const shuffle = k.sway && going ? Math.round(Math.sin(t * 5 + v.phase)) * U : 0;
     const bob = k.bob && going ? Math.round(Math.abs(Math.sin(t * 5 + v.phase)) * k.bob) * U : 0;
     const y = Math.round(v.y / U) * U;
-    v.el.style.transform = `translate(${(v.x + shuffle).toFixed(1)}px, ${(-y - bob).toFixed(1)}px)`;
+    v.el.style.transform = `translate(${(v.x + shuffle).toFixed(1)}px, ${(-y - bob - FLOOR).toFixed(1)}px)`;
     v.el.firstChild.style.transform = `scaleX(${v.dir})`;
   }
 
