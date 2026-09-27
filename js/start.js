@@ -51,6 +51,12 @@
     ['happy', 'smug'], ['devious', 'devious'], ['love', 'surprised'], ['laugh', 'annoyed'], ['surprised', 'surprised'],
     ['laugh', 'laugh'], ['scared', 'devious'], ['dizzy', 'laugh'], ['love', 'love']];
   const EMOTES = ['!', '?', '!!', '...', '^^', '?!', '<3', 'haha', 'hm'];
+  // Faces each bot won't make, and what it makes instead (GLITCH is never happy or smitten)
+  const NEVER = { glitch: { happy: 'smug', love: 'devious', laugh: 'smug' } };
+  const NEVER_EMOTE = { glitch: ['<3', '^^', 'haha'] };
+  const NEVER_LEVEL = { glitch: ['easy'] }; // (EASY's resting face is a smile)
+  const RADIUS = 110; // how near a pop, a decrypt or a bolt startles the others
+  const HOP_MS = 360;
   const SIZE = 34;
   const ARM = Math.round(SIZE * 2 / 16); // (the arms: 2 of the face's 16 units each side)
   const APART = SIZE - ARM; // two side by side overlap by an arm's width at most
@@ -64,11 +70,12 @@
   let want = 1 + Math.floor(Math.random() * 3);
   let nextSpawn = performance.now() + 400;
   let nextReroll = performance.now() + rand(8000, 15000);
-  let nextFright = performance.now() + rand(12000, 25000);
   const laneW = () => lane.clientWidth;
   const inside = (w) => w.x >= 0 && w.x <= laneW() - SIZE;
 
   function mood(w, m, emote = '') {
+    m = (NEVER[w.bot] && NEVER[w.bot][m]) || m;
+    if (emote && (NEVER_EMOTE[w.bot] || []).includes(emote)) emote = '?!';
     w.el.dataset.mood = m;
     delete w.el.dataset.variant;
     w.emote.textContent = emote;
@@ -88,7 +95,7 @@
     if (!free.length) return;
     const bot = pick(free);
     const fromLeft = Math.random() < 0.5;
-    const el = miniBot(bot, pick(LEVELS));
+    const el = miniBot(bot, pick(LEVELS.filter((l) => !(NEVER_LEVEL[bot] || []).includes(l))));
     el.classList.add('walker');
     const emote = document.createElement('span');
     emote.className = 'walker-emote';
@@ -101,12 +108,62 @@
     };
     w.target = freeSpot(w);
     walkers.push(w);
-    // Some arrive at a run, then stop to catch their breath
-    if (Math.random() < 0.22) {
+    const how = Math.random();
+    if (how < 0.10) { // (10%) pops into view, pixelating in; those near turn to it, startled
+      w.x = w.target;
+      w.state = 'idle';
+      w.until = now + rand(900, 1500);
+      el.classList.add('pop-in');
+      setTimeout(() => el.classList.remove('pop-in'), 500);
+      place(w);
+      startle(w, now);
+      return;
+    }
+    if (how < 0.25) { // (15%) arrives at a run, then stops to catch its breath
       w.running = true;
       w.winded = true;
     }
     place(w);
+  }
+  // Those near a sudden pop, decrypt or bolt face it, startled (cutting any meeting short)
+  // A meeting cut short leaves the partner out of range put out: -_-
+  function startle(src, now) {
+    const near = (o) => o !== src && !o.leaving && o.state !== 'vanish' && o.state !== 'startled' && Math.abs(o.x - src.x) <= RADIUS;
+    for (const o of walkers) {
+      if (!near(o)) continue;
+      const p = o.partner;
+      if (p) {
+        o.partner = null;
+        p.partner = null;
+        if (!near(p)) { // (not startled itself: just annoyed its meeting was interrupted)
+          mood(p, 'annoyed', '-_-');
+          p.state = 'idle';
+          p.look = o.x > p.x ? 1 : -1;
+          p.until = now + rand(1200, 1700);
+          place(p);
+        }
+      }
+      mood(o, 'surprised', pick(['!', '!?', '?!']));
+      o.state = 'idle';
+      o.look = src.x > o.x ? 1 : -1;
+      o.until = now + rand(1100, 1700);
+      o.el.classList.remove('hopping');
+      place(o);
+    }
+  }
+  // Time to go: mostly a walk off the card; 15% a spooked bolt; 5% a pixelated decrypt
+  function depart(w, now) {
+    const r = Math.random();
+    if (r < 0.05) {
+      w.leaving = true;
+      w.state = 'vanish';
+      mood(w, 'idle');
+      w.el.classList.add('pix-out');
+      if (typeof FX !== 'undefined') setTimeout(() => FX.burst([{ el: w.el, type: 'warning' }]), 200);
+      setTimeout(() => { w.gone = true; }, 480);
+      startle(w, now);
+    } else if (r < 0.20) fright(w, now);
+    else leave(w);
   }
   function place(w) {
     w.el.style.transform = `translateX(${w.x.toFixed(1)}px)`;
@@ -129,15 +186,9 @@
   function fright(w, now) {
     mood(w, 'scared', pick(['!', '!!', '!?']));
     w.state = 'startled';
+    w.leaving = true; // (off it goes once the start is over)
     w.until = now + 450;
-    for (const o of walkers) {
-      if (o !== w && !o.leaving && Math.abs(o.x - w.x) < 110 && o.state !== 'meet') {
-        mood(o, 'surprised', '?');
-        o.state = 'idle';
-        o.look = w.x > o.x ? 1 : -1;
-        o.until = now + rand(1200, 1800);
-      }
-    }
+    startle(w, now);
   }
 
   let last = performance.now();
@@ -155,13 +206,7 @@
       nextSpawn = now + rand(1500, 4500);
     } else if (staying.length > want) {
       const w = staying.find((x) => x.state !== 'meet');
-      if (w) leave(w);
-    }
-    // Now and then one of them is spooked
-    if (now > nextFright) {
-      nextFright = now + rand(15000, 30000);
-      const calm = walkers.filter((w) => !w.leaving && inside(w) && w.state !== 'meet');
-      if (calm.length) fright(pick(calm), now);
+      if (w) depart(w, now);
     }
     for (const w of walkers) {
       if (w.state === 'walk') {
@@ -182,11 +227,19 @@
             w.state = 'idle';
             w.until = now + rand(900, 3200);
             mood(w, 'idle');
-            if (Math.random() < 0.35) w.el.dataset.variant = pick(['bored', 'tapping']);
+            if (Math.random() < 0.35) { // a hop or two, then on
+              const hops = Math.random() < 0.5 ? 1 : 2;
+              w.el.style.setProperty('--hops', hops);
+              w.el.classList.add('hopping');
+              setTimeout(() => w.el.classList.remove('hopping'), hops * HOP_MS + 50);
+              w.until = Math.max(w.until, now + hops * HOP_MS + 400);
+            } else if (Math.random() < 0.35) w.el.dataset.variant = pick(['bored', 'tapping']);
           }
         }
       } else if (w.state === 'startled') {
-        if (now > w.until) leave(w, true);
+        if (now > w.until) { w.leaving = false; leave(w, true); }
+      } else if (w.state === 'vanish') {
+        // (decrypting away)
       } else if (w.state === 'meet') {
         // Shuffle to a body's width apart, facing each other
         const o = w.partner;
@@ -198,12 +251,12 @@
         }
         if (now > w.until) {
           mood(w, 'idle');
-          if (now - w.born > 9000 && Math.random() < 0.35) leave(w);
+          if (now - w.born > 9000 && Math.random() < 0.35) depart(w, now);
           else walkTo(w, freeSpot(w));
         }
       } else if (now > w.until) {
         mood(w, 'idle');
-        if (now - w.born > 9000 && Math.random() < 0.35) leave(w);
+        if (now - w.born > 9000 && Math.random() < 0.35) depart(w, now);
         else walkTo(w, freeSpot(w));
       }
       place(w);
@@ -213,7 +266,8 @@
       for (let j = i + 1; j < walkers.length; j++) {
         const a = walkers[i];
         const b = walkers[j];
-        const busyWith = (w) => w.state === 'meet' || w.state === 'startled' || w.leaving || w.winded || w.el.dataset.mood === 'tired';
+        const busyWith = (w) => w.state === 'meet' || w.state === 'startled' || w.state === 'vanish' || w.leaving || w.winded
+          || w.el.dataset.mood === 'tired' || w.el.dataset.mood === 'surprised';
         if (busyWith(a) || busyWith(b) || !inside(a) || !inside(b)) continue;
         if (Math.abs(a.x - b.x) > SIZE + 6 || now - a.metAt < 7000 || now - b.metAt < 7000) continue;
         a.metAt = b.metAt = now;
@@ -237,6 +291,8 @@
     requestAnimationFrame(frame);
   }
   if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) requestAnimationFrame(frame);
+  // (for the dev tests: the wanderers and a startle)
+  window.startWalkers = { list: () => walkers, startle: (w) => startle(w, performance.now()) };
 
   screen.addEventListener('click', start);
   // While it's up, keys don't reach the game; Enter and Space start

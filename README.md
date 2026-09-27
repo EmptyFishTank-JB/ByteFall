@@ -399,10 +399,14 @@ never two of the same) wander along the bottom of the card, looking the way
 they walk (eyes and mouth a pixel that way): in from either side, idling (now
 and then bored or tapping a foot), finding a free spot and heading back out.
 Two that meet may stop no closer than an arm's overlap, face each other and
-pull faces (a mood each and a little emote). Every 15-30 seconds one gets
-spooked (scared, "!") and sprints off the card while any bot nearby flinches;
-about one arrival in five comes in at a run and stops, tired, to catch its
-breath. The faces include the CPU's moods plus SCARED, TIRED (panting),
+pull faces (a mood each and a little emote); a stop can bring a hop or two.
+Arrivals: 10% pop into view pixelated, 15% come in at a run and stop, tired, to
+catch their breath, the rest walk in. Departures: 5% decrypt away in a burst
+of pixels, 15% get spooked (scared, "!") and bolt, the rest walk off. A pop, a
+decrypt or a bolt startles every bot within 110px (surprised, facing it),
+cutting short any meeting there; a partner out of range is left -_-. Each bot
+keeps to its character: GLITCH is never happy, heart-eyed or laughing (nor
+shows EASY's smiling rest face). The faces include the CPU's moods plus SCARED, TIRED (panting),
 SURPRISED, LOVE (red heart eyes), DIZZY and LAUGH. The small faces come from
 `js/minibot.js`, a copy of the CPU's face for use anywhere.
 

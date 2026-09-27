@@ -2372,3 +2372,24 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
 .walker.running .bot { animation: bot-hop 0.14s steps(2) infinite; }
 .walker.running .leg-a { animation: bot-step 0.14s steps(1) infinite; }
 .walker.running .leg-b { animation: bot-step 0.14s steps(1) 0.07s infinite; }
+
+/* Wanderers: a hop or two (--hops), popping into view pixelated, and decrypting away */
+.svg-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+.walker.hopping .bot { animation: walker-hop 0.36s ease-out var(--hops, 1); }
+@keyframes walker-hop { 0%, 100% { transform: translateY(0); } 45% { transform: translateY(-3px); } }
+.walker.pop-in .bot-swap { animation: walker-pix-in 0.45s steps(1) forwards; }
+.walker.pix-out .bot-swap { animation: walker-pix-out 0.45s steps(1) forwards; }
+@keyframes walker-pix-in {
+  0% { filter: url(#mini-pix4) blur(0.2px); opacity: 0.3; }
+  33% { filter: url(#mini-pix4); opacity: 0.75; }
+  66% { filter: url(#mini-pix2); opacity: 1; }
+  100% { filter: none; opacity: 1; }
+}
+@keyframes walker-pix-out {
+  0% { filter: url(#mini-pix2); opacity: 1; }
+  33% { filter: url(#mini-pix4); opacity: 0.85; }
+  66% { filter: url(#mini-pix4) blur(0.15px); opacity: 0.5; }
+  100% { filter: url(#mini-pix4) blur(0.25px); opacity: 0; }
+}
+/* (the particles show over the start screen while it's up: a wanderer's decrypt burst) */
+.start-screen:not([hidden]) ~ #board-fx { z-index: 205; }
