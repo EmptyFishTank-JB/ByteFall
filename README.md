@@ -408,7 +408,8 @@ point. It counts toward nothing (no XP, stats, achievements or best score). Pop-
 
 A fresh launch (the app or tab opened anew) opens on the START SCREEN: a card
 filling the screen with the starlight twinkling across it, the BYTEFALL title
-in the middle and a glowing START button below (`js/start.js`). A tap anywhere
+in the middle and a glowing START button below it, as far under the tagline as
+the tagline is under the title (measured letter to letter, in every font; `js/start.js`). A tap anywhere
 else lets the music begin (browsers need one) and leaves you on the screen.
 START (or Enter / Space) fades it to black, then fades into the game, which always starts on
 CLASSIC, Normal. The very first time the game is opened, it fades into the
@@ -423,7 +424,11 @@ Arrivals: 10% pop into view pixelated, 15% come in at a run and stop, tired, to
 catch their breath, the rest walk in. Departures: 5% decrypt away in a burst
 of pixels, 15% get spooked (scared, "!") and bolt, the rest walk off. A pop, a
 decrypt or a bolt startles every bot within 110px (surprised, facing it),
-cutting short any meeting there; a partner out of range is left -_-. Each bot
+cutting short any meeting there; a partner out of range is left -_- (only bots
+on the card react: one still walking in keeps coming). Each picks a spot clear of
+the others standing or already headed somewhere, so even four at once on a
+narrow card stand apart; too many on the card leave one at a time. The game
+card's wanderers wait while the start screen covers it. Each bot
 keeps to its character: GLITCH is never happy, heart-eyed or laughing (nor
 shows EASY's smiling rest face); emotes fit the face (no <3 on a -_-), and the
 mad ones (HARD's angry and INSANE's red-eyed rest faces) and GLITCH never show

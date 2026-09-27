@@ -2771,7 +2771,9 @@ updateButtonsPos();
 // WANDERING BOTS: the CPUs strolling along the bottom of the game card (wanderers.js), on by default
 const wanderersBtn = document.getElementById('wanderers-btn');
 let wanderersOn = storage.get('bytefall-wanderers') !== 'off';
-const gameWalkers = createWanderers(document.getElementById('game-walkers'), () => wanderersOn);
+// (not while the start screen covers the card: start.js starts them when it goes)
+const startScreenUp = () => { const el = document.getElementById('start-screen'); return !!el && !el.hidden && !document.documentElement.classList.contains('no-start'); };
+const gameWalkers = createWanderers(document.getElementById('game-walkers'), () => wanderersOn && !startScreenUp());
 function updateWanderersBtn() {
   wanderersBtn.textContent = `WANDERING BOTS: ${wanderersOn ? 'ON' : 'OFF'}`;
   wanderersBtn.classList.toggle('on', wanderersOn);

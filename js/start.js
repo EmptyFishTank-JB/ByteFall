@@ -25,6 +25,7 @@
       black.classList.add('on');
       setTimeout(() => {
         screen.hidden = true;
+        if (typeof gameWalkers !== 'undefined') gameWalkers.start(); // (the game card's, held while this was up)
         if (firstTime()) {
           try { localStorage.setItem(INTRO_KEY, '1'); } catch (e) {}
           // The first open: straight into the tutorial (it can be left any time with EXIT)
@@ -48,6 +49,36 @@
 
   const startBtn = document.getElementById('start-btn');
   startBtn.addEventListener('click', start);
+
+  // START sits under the tagline as far as the tagline sits under the title, measured letter to
+  // letter (the drawn letters, not their line boxes, which differ from font to font)
+  const card = screen.querySelector('.start-card');
+  const title = screen.querySelector('.start-title h1');
+  const tagline = screen.querySelector('.start-tagline');
+  const measure = document.createElement('canvas').getContext('2d');
+  function ink(el) {
+    const cs = getComputedStyle(el);
+    measure.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    const m = measure.measureText(el.textContent);
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const baseline = range.getBoundingClientRect().top + m.fontBoundingBoxAscent;
+    return { top: baseline - m.actualBoundingBoxAscent, bottom: baseline + m.actualBoundingBoxDescent };
+  }
+  function placeStart() {
+    if (screen.hidden || !measure || !('fontBoundingBoxAscent' in TextMetrics.prototype)) return;
+    const head = ink(title);
+    const tag = ink(tagline);
+    const top = tag.bottom + (tag.top - head.bottom) - card.getBoundingClientRect().top - card.clientTop;
+    startBtn.style.top = `${Math.round(top)}px`;
+    startBtn.style.bottom = 'auto';
+  }
+  placeStart();
+  window.addEventListener('resize', placeStart);
+  if (document.fonts) {
+    document.fonts.ready.then(placeStart);
+    document.fonts.addEventListener('loadingdone', placeStart);
+  }
   // While it's up, keys don't reach the game; Enter and Space start
   document.addEventListener('keydown', (e) => {
     if (screen.hidden) return;

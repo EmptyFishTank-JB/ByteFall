@@ -50,7 +50,9 @@ function createWanderers(lane, active = () => true) {
   let want = 1 + Math.floor(Math.random() * 4);
   let nextSpawn = performance.now() + 400;
   let nextReroll = performance.now() + rand(8000, 15000);
-  const laneW = () => lane.clientWidth;
+  let nextDepart = 0; // (too many: they go one at a time, not all at once)
+  let width = lane.clientWidth; // (read once a frame: reading it between moves forces a layout)
+  const laneW = () => width;
   const inside = (w) => w.x >= 0 && w.x <= laneW() - SIZE;
 
   // emote: text to show, or true to pick one that fits the face (and the bot)
@@ -64,13 +66,27 @@ function createWanderers(lane, active = () => true) {
     w.emote.textContent = emote;
     w.emote.classList.toggle('show', !!emote);
   }
-  // A spot to stand that isn't on top of anyone standing still
+  // A spot to stand that isn't on top of anyone standing still or already headed somewhere (the
+  // first clear one of a few tries; in a crowd, the one with the most room)
   function freeSpot(w) {
-    for (let k = 0; k < 8; k++) {
-      const x = rand(12, laneW() - SIZE - 12);
-      if (!walkers.some((o) => o !== w && o.state !== 'walk' && Math.abs(o.x - x) < APART)) return x;
+    const taken = walkers.filter((o) => o !== w && !o.leaving).map((o) => (o.state === 'walk' ? o.target : o.x));
+    const hi = Math.max(12, laneW() - SIZE - 12);
+    let best = rand(12, hi);
+    let room = -1;
+    const roomAt = (x) => Math.min(Infinity, ...taken.map((t) => Math.abs(t - x)));
+    for (let k = 0; k < 16; k++) {
+      const x = rand(12, hi);
+      const r = roomAt(x);
+      if (r >= APART) return x;
+      if (r > room) { room = r; best = x; }
     }
-    return rand(12, laneW() - SIZE - 12);
+    // (a crowd on a narrow card: the spots just beside the others, then either end)
+    for (const x of [...taken.flatMap((t) => [t - APART, t + APART]), 12, hi]) {
+      if (x < 12 || x > hi) continue;
+      const r = roomAt(x);
+      if (r > room) { room = r; best = x; }
+    }
+    return best;
   }
 
   function spawn(now) {
@@ -115,7 +131,8 @@ function createWanderers(lane, active = () => true) {
   // Those near a sudden pop, decrypt or bolt face it, startled (cutting any meeting short)
   // A meeting cut short leaves the partner out of range put out: -_-
   function startle(src, now) {
-    const near = (o) => o !== src && !o.leaving && o.state !== 'vanish' && o.state !== 'startled' && Math.abs(o.x - src.x) <= RADIUS;
+    // (only those on the card: one still walking in doesn't freeze out of sight)
+    const near = (o) => o !== src && !o.leaving && o.state !== 'vanish' && o.state !== 'startled' && inside(o) && Math.abs(o.x - src.x) <= RADIUS;
     let startled = 0;
     for (const o of walkers) {
       if (!near(o)) continue;
@@ -134,6 +151,7 @@ function createWanderers(lane, active = () => true) {
       }
       mood(o, 'surprised', pick(['!', '!?', '?!']));
       o.state = 'idle';
+      o.winded = o.running = false; // (a start stops a run: no catching its breath after)
       o.look = src.x > o.x ? 1 : -1;
       o.until = now + rand(1100, 1700);
       o.el.classList.remove('hopping', 'shaking');
@@ -162,6 +180,7 @@ function createWanderers(lane, active = () => true) {
     const id = (w.pokeId = (w.pokeId || 0) + 1);
     const still = () => w.pokeId === id && w.state === 'poked' && !w.gone;
     w.state = 'poked';
+    w.winded = w.running = false;
     w.look = 0;
     w.until = now + 3000;
     mood(w, 'annoyed', pick(['hey!', '-_-', '!!']));
@@ -214,7 +233,9 @@ function createWanderers(lane, active = () => true) {
     w.dir = w.look = target > w.x ? 1 : -1;
     w.state = 'walk';
     w.running = running;
+    w.winded = false; // (only an arrival at a run ends out of breath)
     w.partner = null;
+    w.el.classList.remove('shaking');
   }
   function leave(w, running = false) {
     w.leaving = true;
@@ -223,6 +244,7 @@ function createWanderers(lane, active = () => true) {
   // Spooked: a start (and a !), then off the card at a sprint; anyone near flinches
   function fright(w, now) {
     mood(w, 'scared', pick(['!', '!!', '!?']));
+    w.el.classList.remove('shaking', 'hopping');
     w.state = 'startled';
     w.leaving = true; // (off it goes once the start is over)
     w.until = now + 450;
@@ -240,6 +262,11 @@ function createWanderers(lane, active = () => true) {
     }
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
+    width = lane.clientWidth;
+    if (!width) { // (its card is out of sight: wait, rather than walk to spots on a 0px lane)
+      requestAnimationFrame(frame);
+      return;
+    }
     if (now > nextReroll) {
       want = 1 + Math.floor(Math.random() * 4);
       nextReroll = now + rand(8000, 15000);
@@ -252,11 +279,16 @@ function createWanderers(lane, active = () => true) {
     if (staying.length < want && now > nextSpawn) {
       spawn(now);
       nextSpawn = now + rand(1500, 4500);
-    } else if (staying.length > want) {
-      const w = staying.find((x) => x.state !== 'meet');
-      if (w) depart(w, now);
+    } else if (staying.length > want && now > nextDepart) {
+      const w = staying.find((x) => x.state !== 'meet' && x.state !== 'poked');
+      if (w) {
+        depart(w, now);
+        nextDepart = now + rand(1200, 3000);
+      }
     }
     for (const w of walkers) {
+      // (the lane got narrower, say on a turn of the phone: whoever stands past its end steps in)
+      if (w.state !== 'walk' && !w.leaving && w.x > laneW() - SIZE) w.x = Math.max(0, laneW() - SIZE);
       if (w.state === 'walk') {
         const pace = w.running ? 3.4 : 1;
         const step = w.speed * pace * dt * (w.bot === 'glitch' && Math.random() < 0.08 ? 3 : 1); // (GLITCH lurches)
@@ -292,8 +324,8 @@ function createWanderers(lane, active = () => true) {
         // Shuffle to a body's width apart, facing each other
         const o = w.partner;
         if (o) {
-          const want = o.x + (w.x < o.x ? -APART : APART);
-          const gap = want - w.x;
+          const spot = Math.min(laneW() - SIZE, Math.max(0, o.x + (w.x < o.x ? -APART : APART))); // (never off the card)
+          const gap = spot - w.x;
           if (Math.abs(gap) > 0.5) w.x += Math.sign(gap) * Math.min(Math.abs(gap), 30 * dt);
           w.look = o.x > w.x ? 1 : -1;
         }
@@ -346,11 +378,12 @@ function createWanderers(lane, active = () => true) {
     if (running || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     running = true;
     last = performance.now();
+    width = lane.clientWidth;
     nextSpawn = last + 400;
     requestAnimationFrame(frame);
   }
   start();
-  // (start: after being switched back on; list / startle: for the dev tests)
-  return { start, list: () => walkers, startle: (w) => startle(w, performance.now()) };
+  // (start: after being switched back on; list / startle / crowd: for the dev tests)
+  return { start, list: () => walkers, startle: (w) => startle(w, performance.now()), crowd: (n) => { want = n; nextReroll = performance.now() + 60000; } };
 
 }
