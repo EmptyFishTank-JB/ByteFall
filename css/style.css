@@ -2400,6 +2400,11 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
 .game-walkers { position: absolute; left: 80px; right: 80px; bottom: 6px; height: 44px; pointer-events: none; z-index: 0;
   clip-path: inset(-60px 0 0 0); } /* (hidden past its sides, where they walk in and out behind the corner buttons; open above, for what they say) */
 .corner-btn { z-index: 1; }
+/* The drop buttons and the message under the grid: a layer over the wanderers' lane (bats, crows,
+   the spider's thread and the rest pass under them) */
+.column-buttons, .message-slot { position: relative; z-index: 2; }
+/* No tap box (highlight, focus ring, text selection) around a poked bot or visitor */
+:is(.start-walkers, .game-walkers) :is(.walker, .visitor) { -webkit-tap-highlight-color: transparent; outline: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 
 /* Dev: AD BANNER PREVIEW (script.js). The page's height (--app-h) already leaves the strip out; the
    transform makes the body the frame for fixed layers (start screen, overlays, particles), so they

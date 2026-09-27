@@ -593,7 +593,9 @@ through anything). Menorah, kinara and sign are never mirrored.
 The same wanderers stroll along the bottom of the game card too, between the
 corner buttons (walking out from behind them), with everything above: meetings,
 frights, pop-ins, decrypts and pokes. SETTINGS → WANDERING BOTS turns them off
-(on by default). The engine is `js/wanderers.js`, shared by both cards.
+(on by default). The engine is `js/wanderers.js`, shared by both cards. They
+pass under the drop buttons and the message line below the grid (bats, crows
+and the spider's thread included), and a poke leaves no tap box around them.
 
 **Bot achievements** (RECORDS, the BOTS group): POKE, BOO! (poke one so hard it
 runs), THE EYEBROW (a raised eyebrow from all four bots), THIRD WHEEL (poke one
