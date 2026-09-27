@@ -18,7 +18,7 @@ function createWanderers(lane, active = () => true) {
     happy: ['^^', '!'], hit: ['!', '?!'], worried: ['?', '...', '!'], smug: ['hm', '^^'], annoyed: ['...', 'hm', '-_-'],
     devious: ['hm', '...'], love: ['<3', '!'], surprised: ['!', '?', '?!'], laugh: ['haha', '^^'], scared: ['!', '!!'],
     dizzy: ['?', '...'], tired: ['...', 'phew', 'huff'], skeptic: ['?', 'hm', '...'],
-    angry: ['grr', '!!', '#@!'], snarl: ['GRRR', 'grr'],
+    angry: ['grr', '!!', '#@!'], snarl: ['GRRR', 'grr'], munch: ['nom', 'mmm', '*crunch*'],
   };
   // Faces each bot won't make, and what it makes instead (GLITCH is never happy or smitten)
   const NEVER = { glitch: { happy: 'smug', love: 'devious', laugh: 'smug' } };
@@ -156,9 +156,9 @@ function createWanderers(lane, active = () => true) {
   }
   // Those near a sudden pop, decrypt or bolt face it, startled (cutting any meeting short)
   // A meeting cut short leaves the partner out of range put out: -_-
-  function startle(src, now) {
+  function startle(src, now, radius = RADIUS) {
     // (only those on the card: one still walking in doesn't freeze out of sight)
-    const near = (o) => o !== src && !o.leaving && o.state !== 'vanish' && o.state !== 'startled' && inside(o) && Math.abs(o.x - src.x) <= RADIUS;
+    const near = (o) => o !== src && !o.leaving && o.state !== 'vanish' && o.state !== 'startled' && inside(o) && Math.abs(o.x - src.x) <= radius;
     let startled = 0;
     for (const o of walkers) {
       if (!near(o)) continue;
@@ -180,7 +180,7 @@ function createWanderers(lane, active = () => true) {
       o.winded = o.running = false; // (a start stops a run: no catching its breath after)
       o.look = src.x > o.x ? 1 : -1;
       o.until = now + rand(1100, 1700);
-      o.el.classList.remove('hopping', 'shaking', 'headshaking', 'snapping');
+      o.el.classList.remove('hopping', 'shaking', 'headshaking', 'snapping', 'chewing');
       place(o);
     }
     return startled;
@@ -274,6 +274,59 @@ function createWanderers(lane, active = () => true) {
     }, 1650);
   }
 
+  // HALLOWEEN: a snack. One to three gummy drops, each pulled from its side, tossed up and
+  // caught in its mouth, a quick chew, then on its way
+  const CANDY = ['#ff3b5c', '#ffb000', '#7cff6b', '#b36bff', '#3bd1ff', '#ff7ad9'];
+  function snack(w, now) {
+    const id = (w.snackId = (w.snackId || 0) + 1);
+    const still = () => w.snackId === id && w.state === 'snack' && !w.gone;
+    const n = 1 + Math.floor(Math.random() * 3);
+    w.state = 'snack';
+    w.look = 0;
+    w.until = now + n * 1250 + 400;
+    place(w);
+    for (let k = 0; k < n; k++) {
+      setTimeout(() => {
+        if (!still()) return;
+        const side = Math.random() < 0.5 ? -1 : 1;
+        const c = document.createElement('i');
+        c.className = 'walker-candy';
+        c.style.setProperty('--c', pick(CANDY));
+        w.el.appendChild(c);
+        // (in the walker's pixels: out at its side, then an arc up over its head and down into its
+        // mouth, hopping from pixel to pixel of its grid like everything else)
+        const U = 34 / 16;
+        const snap = (v) => Math.round(v / U) * U;
+        const hand = side > 0 ? 13 * U : 1 * U;
+        const mouth = [7 * U, 10 * U];
+        const frames = [
+          { transform: `translate(${hand}px, ${11 * U}px) scale(0)`, offset: 0 },
+          { transform: `translate(${hand}px, ${9 * U}px)`, offset: 0.2 },
+        ];
+        const N = 12;
+        for (let i = 1; i <= N; i++) { // (a curve through a point well over its head)
+          const t = i / N;
+          const x = hand + (mouth[0] - hand) * t;
+          const y = (1 - t) * (1 - t) * 9 * U + 2 * (1 - t) * t * (-9 * U) + t * t * mouth[1];
+          frames.push({ transform: `translate(${snap(x)}px, ${snap(y)}px)`, offset: 0.2 + 0.8 * t });
+        }
+        frames.forEach((f) => { f.easing = 'steps(1, end)'; });
+        const toss = c.animate(frames, { duration: 820, fill: 'forwards' });
+        toss.onfinish = () => {
+          c.remove();
+          if (!still()) return;
+          mood(w, 'munch', k === n - 1 ? true : '');
+          w.el.classList.add('chewing');
+          botEvent('candy');
+          setTimeout(() => {
+            w.el.classList.remove('chewing');
+            if (still()) mood(w, 'idle');
+          }, 380);
+        };
+      }, k * 1250);
+    }
+  }
+
   // Time to go: mostly a walk off the card; 15% a spooked bolt; 5% a pixelated decrypt
   function depart(w, now) {
     const r = Math.random();
@@ -319,6 +372,12 @@ function createWanderers(lane, active = () => true) {
     startle(w, now);
   }
 
+  // Seasonal visitors (visitors.js) share the lane
+  const visitors = typeof createVisitors === 'function' ? createVisitors({
+    lane, laneW: () => width, walkers: () => walkers, botEvent,
+    startle: (src, radius) => startle(src, performance.now(), radius),
+  }) : null;
+
   let last = performance.now();
   let running = false;
   function frame(now) {
@@ -326,6 +385,7 @@ function createWanderers(lane, active = () => true) {
       running = false;
       walkers.forEach((w) => w.el.remove());
       walkers = [];
+      if (visitors) visitors.clear();
       return;
     }
     const dt = Math.min(0.05, (now - last) / 1000);
@@ -352,7 +412,7 @@ function createWanderers(lane, active = () => true) {
       spawn(now);
       nextSpawn = now + rand(1500, 4500);
     } else if (staying.length > want && now > nextDepart) {
-      const w = staying.find((x) => x.state !== 'meet' && x.state !== 'poked');
+      const w = staying.find((x) => x.state !== 'meet' && x.state !== 'poked' && x.state !== 'snack');
       if (w) {
         depart(w, now);
         nextDepart = now + rand(1200, 3000);
@@ -380,7 +440,8 @@ function createWanderers(lane, active = () => true) {
             w.state = 'idle';
             w.until = now + rand(900, 3200);
             mood(w, 'idle');
-            if (Math.random() < 0.35) { // a hop or two, then on
+            if (typeof Season !== 'undefined' && Season.is('halloween') && Math.random() < 0.3) snack(w, now); // (candy!)
+            else if (Math.random() < 0.35) { // a hop or two, then on
               const hops = Math.random() < 0.5 ? 1 : 2;
               w.el.style.setProperty('--hops', hops);
               w.el.classList.add('hopping');
@@ -419,7 +480,7 @@ function createWanderers(lane, active = () => true) {
       for (let j = i + 1; j < walkers.length; j++) {
         const a = walkers[i];
         const b = walkers[j];
-        const busyWith = (w) => w.state === 'meet' || w.state === 'startled' || w.state === 'vanish' || w.state === 'poked' || w.leaving || w.winded
+        const busyWith = (w) => w.state === 'meet' || w.state === 'startled' || w.state === 'vanish' || w.state === 'poked' || w.state === 'snack' || w.leaving || w.winded
           || w.el.dataset.mood === 'tired' || w.el.dataset.mood === 'surprised';
         if (busyWith(a) || busyWith(b) || !inside(a) || !inside(b)) continue;
         if (Math.abs(a.x - b.x) > SIZE + 6 || now - a.metAt < 7000 || now - b.metAt < 7000) continue;
@@ -445,6 +506,7 @@ function createWanderers(lane, active = () => true) {
       if (w.gone) w.el.remove();
       return !w.gone;
     });
+    if (visitors) visitors.frame(now, dt);
     requestAnimationFrame(frame);
   }
   function start() {
@@ -456,7 +518,7 @@ function createWanderers(lane, active = () => true) {
     requestAnimationFrame(frame);
   }
   start();
-  // (start: after being switched back on; list / startle / crowd / dress: for the dev tests)
-  return { start, list: () => walkers, startle: (w) => startle(w, performance.now()), crowd: (n) => { want = n; nextReroll = performance.now() + 60000; }, dress };
+  // (start: after being switched back on; list / startle / crowd / dress / visit / snack: for the dev tests)
+  return { start, list: () => walkers, startle: (w) => startle(w, performance.now()), crowd: (n) => { want = n; nextReroll = performance.now() + 60000; }, dress, visit: (what) => visitors && visitors.visit(what), snack: (w) => snack(w, performance.now()) };
 
 }

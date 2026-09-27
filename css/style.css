@@ -2480,8 +2480,8 @@ html.page-twinkle .page-bg { display: block; }
 
 /* A mad wanderer poked (wanderers.js's rabid): a hard head shake, then snapping at you like a
    rabid dog, lunging forward with its jaw chomping open and shut */
-.walker.headshaking .bot { animation: walker-headshake 0.07s steps(2) 9; }
-@keyframes walker-headshake { 0% { transform: translateX(-1.5px) rotate(-5deg); } 100% { transform: translateX(1.5px) rotate(5deg); } }
+.walker.headshaking .bot { animation: walker-headshake 0.16s steps(2) 4; }
+@keyframes walker-headshake { 0% { transform: translateX(-1px); } 100% { transform: translateX(1px); } } /* (whole pixels of its grid, no tilt) */
 .walker.snapping .bot { transform-origin: 50% 80%; animation: walker-lunge 0.2s steps(2) 3; }
 @keyframes walker-lunge { 0% { transform: scale(1.22) translateY(1px); } 100% { transform: scale(1); } }
 .walker.snapping .mouth-teeth { transform-box: fill-box; transform-origin: 50% 0; animation: walker-jaw 0.2s steps(2) 3; }
@@ -2501,3 +2501,37 @@ html.page-twinkle .page-bg { display: block; }
 .walker[data-costume="witch"] .c-band { fill: #ff8a1f; }
 .walker[data-costume="witch"] .shape-grifter rect[y="1"] { display: none; } /* (its ear tips, under the hat) */
 .walker[data-costume="devil"] .c-horn { fill: #b0142a; filter: drop-shadow(0 0 0.6px rgba(255, 60, 80, 0.7)); }
+
+/* HALLOWEEN snacks (wanderers.js): a gummy drop tossed into the mouth, then a chew */
+.walker-candy {
+  position: absolute; left: 0; top: 0; width: calc(2 * 34px / 16); height: calc(2 * 34px / 16); pointer-events: none; /* (a 2x2 drop in the bots' pixels) */
+  background: var(--c); box-shadow: 0 0 3px var(--c);
+}
+.cpu-face[data-mood="munch"] :is(.eyes-squint, .mouth-o) { display: inline; }
+.cpu-face[data-mood="munch"]:is([data-level="hard"], [data-level="insane"]) .eyes-squint { display: none; }
+.cpu-face[data-mood="munch"]:is([data-level="hard"], [data-level="insane"]) .eyes-angry { display: inline; }
+.walker.chewing .mouth-o { transform-box: fill-box; transform-origin: 50% 0; animation: walker-chew 0.19s steps(1) 2; }
+@keyframes walker-chew { 0% { transform: scaleY(0.5); } 50% { transform: scaleY(1); } }
+
+/* VISITORS (visitors.js): seasonal characters in the wanderers' lane, behind the bots (bats and
+   crows over them); they sway and bob in whole pixels of their grid */
+:is(.start-walkers, .game-walkers) .visitor { position: absolute; left: 0; bottom: 0; z-index: 0; pointer-events: auto; cursor: pointer; touch-action: manipulation; will-change: transform; }
+:is(.start-walkers, .game-walkers) .walker { z-index: 1; }
+:is(.start-walkers, .game-walkers) :is(.visitor-bat, .visitor-crow) { z-index: 2; }
+.visitor svg { display: block; overflow: visible; }
+.visitor .f-b { display: none; }
+.visitor.step .f-a { display: none; }
+.visitor.step .f-b { display: inline; }
+.visitor-ghost svg { opacity: 0.6; filter: drop-shadow(0 0 2px rgba(242, 246, 255, 0.7)); }
+/* (the dark ones get a faint light edge, to show on the dark card) */
+:is(.visitor-nosferatu, .visitor-bat, .visitor-crow) svg { filter: drop-shadow(0 0 1px rgba(220, 225, 240, 0.45)); }
+.visitor-drip { position: absolute; top: 40%; width: 2px; height: 3px; background: #6fd3ff; box-shadow: 0 0 2px #6fd3ff; pointer-events: none; animation: visitor-drip 0.65s ease-in forwards; }
+@keyframes visitor-drip { to { transform: translate(var(--dx), var(--dy)); opacity: 0; } }
+.visitor.v-stomp svg { animation: visitor-stomp 0.14s steps(1) 5 alternate; }
+@keyframes visitor-stomp { 0% { translate: 0 calc(-2 * 34px / 16); } 100% { translate: 0 0; } }
+.visitor.v-wobble svg, .visitor.v-shake svg { animation: visitor-shake 0.09s steps(1) 8 alternate; }
+@keyframes visitor-shake { 0% { translate: calc(-1 * 34px / 16) 0; } 100% { translate: calc(34px / 16) 0; } }
+.visitor.v-boo svg { animation: visitor-boo 0.5s steps(3) forwards; }
+@keyframes visitor-boo { 0% { scale: 1; } 40% { scale: 1.5; } 100% { scale: 1.2; } }
+.visitor.v-fade svg { transition: opacity 0.7s steps(5); opacity: 0; }
+.visitor.v-vanish svg { animation: walker-pix-out 0.45s steps(1) forwards; }

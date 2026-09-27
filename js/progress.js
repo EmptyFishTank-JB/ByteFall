@@ -403,6 +403,8 @@ const Progress = (() => {
         { id: 'full-crew', name: 'FULL CREW', desc: 'See all four bots on screen at once', value: n('crew'), goal: 1 },
         { id: 'personal-space', name: 'PERSONAL SPACE', desc: 'Poke 100 bots', value: n('pokes'), goal: 100, hidden: true },
         { id: 'hr-wants-a-word', name: 'HR WANTS A WORD', desc: 'Poke 200 bots', value: n('pokes'), goal: 200, hidden: true },
+        { id: 'sweet-tooth', name: 'SWEET TOOTH', desc: 'Watch the bots eat 100 Halloween candies', value: n('candy'), goal: 100, hidden: true },
+        { id: 'monster-mash', name: 'MONSTER MASH', desc: 'Meet all seven Halloween visitors: the monster, the mummy, the creature, Nosferatu, the ghost, the bats and the crows', value: () => ['frank', 'mummy', 'creature', 'nosferatu', 'ghost', 'bats', 'crows'].filter((k) => (d.bots[`visit-${k}`] || 0) > 0).length, goal: 7, hidden: true },
         { id: 'costume-party', name: 'COSTUME PARTY', desc: 'All four bots on screen at once in their Halloween costumes', value: n('costume-party'), goal: 1, hidden: true },
         { id: 'rabid', name: 'RABID', desc: 'Poke a HARD or INSANE bot and get snapped at', value: n('bitten'), goal: 1, hidden: true },
         { id: 'developer-options', name: 'DEVELOPER OPTIONS', desc: 'Tap the VS CPU seven times in a row', value: n('dev-taps'), goal: 1, hidden: true },
@@ -436,7 +438,7 @@ const Progress = (() => {
     ['VS CPU', ['first-blood', 'sparring-partner', 'gladiator', 'warlord', 'easy-target', 'fair-fight', 'hard-reset', 'insanity-check', 'counterstrike', 'ddos', 'flawless', 'tilted', 'afk']],
     ['VS BOTS', ['debugged', 'outhustled', 'bunker-buster', 'patched', 'rogues-gallery', 'kill-9']],
     ['VS MODES AND SETTINGS', ['stack-overflow', 'war-of-attrition', 'frag-limit', 'rope-a-dope', 'multi-boot', 'long-haul', 'heavyweight', 'bankrupt', 'knockout', 'bare-metal', 'arms-race', 'zero-mercy']],
-    ['BOTS', ['poke', 'boo', 'the-eyebrow', 'third-wheel', 'matchmaker', 'jump-scare', 'now-you-see-me', 'full-crew', 'personal-space', 'hr-wants-a-word', 'rabid', 'costume-party', 'developer-options']],
+    ['BOTS', ['poke', 'boo', 'the-eyebrow', 'third-wheel', 'matchmaker', 'jump-scare', 'now-you-see-me', 'full-crew', 'personal-space', 'hr-wants-a-word', 'rabid', 'costume-party', 'sweet-tooth', 'monster-mash', 'developer-options']],
     ['THANK YOU', ['indie-supporter']],
     ['SECRETS', ['konami']],
   ];
