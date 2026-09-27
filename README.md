@@ -171,7 +171,7 @@ The menu icon (lines / trophy, top left) opens three tabs, each its own card:
 **RULES**, **RECORDS** and **EXPLOITS**. RECORDS has level and DECRYPTOR rank,
 every unlock and achievement with a progress tracker, and lifetime stats
 (UNLOCKS / ACHIEVEMENTS / STATS). New unlocks, level-ups
-and achievements pop up as they happen. Progress is saved in the browser
+and achievements pop up as they happen (achievements stay up about 5.5 seconds, like a console's, before crumbling; the rest about 2). Progress is saved in the browser
 (`bytefall-progress`).
 
 `js/progress.js` holds the stats, levels, unlocks and achievements; `js/script.js`
@@ -384,7 +384,7 @@ tabs, the SETTINGS button and what's in it, then PLAY CLASSIC or RULES. Over an
 open menu the banner moves to the bottom of the screen. BACK (from step 2 on)
 redoes the step just played, or before a drop goes to the step before, putting
 the board, bits, score, chain and exploit back as they were. EXIT leaves at any
-point. It counts toward nothing (no XP, stats, achievements or best score).
+point. It counts toward nothing (no XP, stats, achievements or best score). Pop-ups (a poke's achievement, say) show at the top of the screen during it, clear of the banner.
 
 ## Startup
 

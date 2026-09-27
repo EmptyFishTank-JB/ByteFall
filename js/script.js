@@ -3181,6 +3181,8 @@ exploitBtn.addEventListener('click', () => {
 // UNLOCKED / ACHIEVEMENT pop-ups, shown one at a time: each pops in, holds, bursts apart, and
 // only then does the next one show
 const TOAST_SHOW_MS = 2200;
+// Achievements stay up longer before they crumble, as on a console (about 5.5 seconds)
+const ACHIEVEMENT_SHOW_MS = 5500;
 const TOAST_GAP_MS = 1250; // the burst's longest particles live 1.2s
 const toastEl = document.getElementById('toast');
 const toastQueue = [];
@@ -3199,6 +3201,7 @@ function nextToast() {
     return;
   }
   const text = toastQueue.shift();
+  const showMs = text.startsWith('ACHIEVEMENT') ? ACHIEVEMENT_SHOW_MS : TOAST_SHOW_MS;
   toastEl.textContent = text;
   toastEl.hidden = false;
   placeToast();
@@ -3209,16 +3212,17 @@ function nextToast() {
     FX.burst([{ el: toastEl, type: 'warning' }]);
     toastEl.hidden = true;
     setTimeout(nextToast, TOAST_GAP_MS); // the next one waits until this one has crumbled away
-  }, TOAST_SHOW_MS);
+  }, showMs);
 }
 
 // Centers the pop-up over the overflow row, masking its blocks; falls back to
-// the top of the screen when the board isn't on screen
+// the top of the screen when the board isn't on screen, and in the TUTORIAL (whose banner sits
+// over the board's top rows)
 function placeToast() {
   const row = boardEl.querySelectorAll('.cell.overflow');
   const a = row[0] && row[0].getBoundingClientRect();
   const z = row.length && row[row.length - 1].getBoundingClientRect();
-  const onBoard = a && a.width > 0 && a.bottom > 0 && a.top < innerHeight;
+  const onBoard = a && a.width > 0 && a.bottom > 0 && a.top < innerHeight && mode !== 'tutorial';
   toastEl.classList.toggle('on-board', !!onBoard);
   toastEl.style.top = onBoard ? `${(a.top + a.bottom) / 2}px` : '';
   toastEl.style.left = onBoard ? `${(a.left + z.right) / 2}px` : '';
