@@ -151,8 +151,17 @@ START, BITCOUNT, BYTESIZED and ORBITRON (Matt McInerney's wide geometric
 capitals, bold for the numbers) unlock by level. Each has an achievement for
 playing a full session in it (TECH SUPPORT, INSERT COIN, BIT BY BIT,
 BITE-SIZED, IN ORBIT). The font changes all the game's text (the particles and the dev
-page too); the fonts are bundled in `assets/fonts/` and scaled so the layout
-stays the same as in Courier.
+page too) but never the layout: every button and display keeps the size and
+place it has in Courier. The fonts are bundled in `assets/fonts/` and set up by
+`js/fonts.js`, which measures the device's own Courier (Courier New, Liberation
+Mono, Droid Sans Mono... it varies) and scales each font so its capitals are the
+same height, sitting in the same place in a line as tall as Courier's (every
+line of text uses Courier's line height). The buttons sized by their label are
+measured in Courier and locked to that size (`lockButtons` in `js/script.js`),
+and so are the notes and descriptions above buttons. A label or note too wide
+for its space in a wider font (PRESS START, ORBITRON) closes up its letter
+spacing, then shrinks, until it fits. The FONT and THEME notes keep room for
+their longest text, so picking one never moves what's below.
 
 Tracks 11-16 are still to come. COLLECTOR, DJ and AUDIOPHILE need all 16
 tracks, so they open up once the last one is made.
@@ -185,7 +194,7 @@ and achievements pop up as they happen (achievements stay up about 5.5 seconds, 
 reports each drop, decrypt, peel, byte, exploit and point to it.
 
 **Dev switches.** The `</>` dev page has UNLOCK EVERYTHING (like owning Full
-Access, for this browser; the game shows a DEV badge while it's on), JUMP TO
+Access, for this browser; the game shows a DEV badge, a label only, behind the wanderers, while it's on), JUMP TO
 LV 80 and +10 LEVELS for testing DECRYPTOR ranks, slots and exploit unlocks. With UNLOCK EVERYTHING on,
 press and hold any exploit card for 2 seconds to make it your next drop.
 AD BANNER PREVIEW (off by default; tap to step through 50, 60 and 90px, or add
@@ -215,7 +224,8 @@ go back to the game, no reload needed.
   free exploit waits in the exploit button, marked FREE!.
   Arming it makes one of the first five exploits (RNG, BITFLIP, BUFFER OVERFLOW, TROJAN, WORM VIRUS) your next drop, even if you haven't unlocked it yet, so new players get to try them. It doesn't stack
   if unused, and it's hidden in DAILY and PUZZLE so those stay equal for
-  everyone.
+  everyone. Its notice (like every notification but achievements) waits until
+  you're past the start screen.
 - **Vibration:** on devices that support it (Android), drops, decrypts,
   exploits, new layers and game over give a short buzz. VIBRATION in
   settings turns it off; the option only appears where it works.

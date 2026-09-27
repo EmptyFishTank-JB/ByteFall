@@ -528,7 +528,9 @@ function alignHeader() {
   headerEl.style.removeProperty('--head-nudge');
   if (!document.body.classList.contains('cards-in-settings') || mode === 'vs') return;
   const cs = getComputedStyle(titleEl);
-  measureCtx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+  // (measured in COURIER: js/fonts.js puts every font's capitals where Courier's are, so the
+  // header sits in the same place whatever the font)
+  measureCtx.font = `${cs.fontWeight} ${cs.fontSize} 'Courier New', Courier, monospace`;
   const m = measureCtx.measureText(titleEl.textContent);
   if (!m.fontBoundingBoxAscent) return;
   const lineHeight = titleEl.getBoundingClientRect().height;
@@ -560,7 +562,7 @@ function fitBoard() {
   const ratio = frame.offsetHeight / frame.offsetWidth;
   const width = Math.max(MIN_BOARD, Math.min(cssMax, (viewportHeight() - pad - rest) / ratio));
   boardWrapEl.style.maxWidth = `${Math.floor(width)}px`;
-  fitVsSetup();
+  lockButtons(); // (fits the VS setup too)
 }
 
 // The VS setup's button rows shrink to fit across the board, and its gaps close up when it
@@ -569,7 +571,7 @@ function fitVsSetup() {
   const el = document.getElementById('vs-setup');
   if (el.hidden) return;
   const room = el.clientWidth - 24;
-  const min = document.documentElement.dataset.font === 'press-start' ? 10 : 7; // (Press Start draws small)
+  const min = 7; // (decided in COURIER, lockButtons: the same rows in every font)
   el.querySelectorAll('.difficulty').forEach((row) => {
     const btns = [...row.querySelectorAll('button')];
     const shrink = (size, pad = '') => btns.forEach((b) => {
@@ -590,6 +592,93 @@ function fitVsSetup() {
   el.style.gap = '';
   let gap = parseFloat(getComputedStyle(el).rowGap);
   while (el.scrollHeight > el.clientHeight && gap > 2) el.style.gap = `${(gap -= 1)}px`;  showCpuDesc(); // (the play style card over the CPU's board: fitted to the new layout too)
+}
+
+// FIXED BUTTONS: the buttons sized by their text keep the size they have in COURIER whatever the
+// font (js/fonts.js already keeps every font's line and letter heights), so switching fonts never
+// moves or resizes them. Each is measured in Courier and its size locked; a label wider than that
+// in another font closes up its letter spacing, then shrinks, until it fits. The same goes for
+// the lines of text above buttons (notes, descriptions): each keeps the height it has in
+// Courier, so a wider font wrapping onto another line can't push the buttons below it down.
+// Re-measured when the layout changes (fitBoard), a text changes, or one comes into view.
+const LOCKED_BUTTONS = '.modes button, .difficulty button, #vs-layers-btn, #vs-exploits-btn, #vs-start, #pause-resume, #overlay-restart-btn, #overlay-share-btn, .records-tabs button, #vs-goal';
+const LOCKED_TEXT = '#mode-info, .settings-note, .vs-setup-note, .vs-setup-msg, #overlay-note, footer p';
+function unfitButton(b) {
+  if (!('fitLs' in b.dataset)) return;
+  b.style.letterSpacing = b.dataset.fitLs;
+  b.style.fontSize = b.dataset.fitFs;
+  delete b.dataset.fitLs;
+  delete b.dataset.fitFs;
+}
+function fitButtonText(b) {
+  const cs = getComputedStyle(b);
+  const room = b.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  const range = document.createRange();
+  range.selectNodeContents(b);
+  // (in layout pixels: a panel popping in is scaled for a moment)
+  const scale = b.getBoundingClientRect().width / b.offsetWidth || 1;
+  const wide = () => range.getBoundingClientRect().width / scale > room + 0.5;
+  if (!wide()) return;
+  b.dataset.fitLs = b.style.letterSpacing;
+  b.dataset.fitFs = b.style.fontSize;
+  let ls = parseFloat(cs.letterSpacing) || 0;
+  while (wide() && ls > 0) b.style.letterSpacing = `${(ls = Math.max(0, ls - 0.5))}px`;
+  let size = parseFloat(cs.fontSize);
+  while (wide() && size > 6) b.style.fontSize = `${(size -= 0.5)}px`;
+}
+// (a block of text: tighter, then smaller, until it fits the height it has in Courier)
+function fitBlockText(t) {
+  const tall = () => t.scrollHeight > t.clientHeight + 1;
+  if (!tall()) return;
+  const cs = getComputedStyle(t);
+  t.dataset.fitLs = t.style.letterSpacing;
+  t.dataset.fitFs = t.style.fontSize;
+  let ls = parseFloat(cs.letterSpacing) || 0;
+  while (tall() && ls > 0) t.style.letterSpacing = `${(ls = Math.max(0, ls - 0.5))}px`;
+  let size = parseFloat(cs.fontSize);
+  while (tall() && size > 6) t.style.fontSize = `${(size -= 0.5)}px`;
+}
+function lockButtons() {
+  const shown = (el) => el.getClientRects().length;
+  const btns = [...document.querySelectorAll(LOCKED_BUTTONS)].filter(shown);
+  const texts = [...document.querySelectorAll(LOCKED_TEXT)].filter(shown);
+  for (const b of [...btns, ...texts]) {
+    unfitButton(b);
+    b.style.width = b.style.height = b.style.minWidth = b.style.maxWidth = '';
+    b.classList.add('ref-font');
+  }
+  fitVsSetup(); // (its rows decided in Courier too)
+  // (layout sizes, not getBoundingClientRect: a panel popping in is scaled for a moment)
+  const px = (el, side) => parseFloat(getComputedStyle(el)[side]);
+  const sizes = btns.map((b) => [px(b, 'width'), px(b, 'height')]);
+  const heights = texts.map((t) => px(t, 'height'));
+  btns.forEach((b, i) => {
+    // (min and max too: a min-width in ch, say, is the font's own and would win)
+    b.style.width = b.style.minWidth = b.style.maxWidth = `${sizes[i][0]}px`;
+    b.style.height = `${sizes[i][1]}px`;
+    b.classList.remove('ref-font');
+  });
+  texts.forEach((t, i) => {
+    t.style.height = `${heights[i]}px`;
+    t.classList.remove('ref-font');
+  });
+  btns.forEach(fitButtonText);
+  texts.forEach(fitBlockText);
+}
+{
+  let queued = false;
+  const relock = () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => { queued = false; lockButtons(); });
+  };
+  const seen = window.IntersectionObserver && new IntersectionObserver((entries) => { if (entries.some((e) => e.isIntersecting)) relock(); });
+  const text = new MutationObserver(relock);
+  document.querySelectorAll(`${LOCKED_BUTTONS}, ${LOCKED_TEXT}`).forEach((b) => {
+    if (seen) seen.observe(b);
+    text.observe(b, { childList: true, characterData: true, subtree: true });
+  });
+  if (document.fonts) document.fonts.addEventListener('loadingdone', relock);
 }
 
 // The screen's real size. The installed app on Android can report a stale height at launch (and
@@ -823,7 +912,9 @@ function dangerLevel() {
 function fitStatValues() {
   const labels = [...document.querySelectorAll('.hud .stat:not(.cpu-stat) .label')];
   const labelMin = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-min')) || 7;
-  for (const el of [scoreEl, bestEl, chainEl, pulseCounterEl, ...labels]) {
+  // (and the CURRENT / NEXT bits: "[5]" in a wide font can outgrow its square)
+  const bits = [...document.querySelectorAll('.hud .bit-sq')];
+  for (const el of [scoreEl, bestEl, chainEl, pulseCounterEl, ...bits, ...labels]) {
     el.style.fontSize = '';
     el.style.whiteSpace = '';
     if (!el.offsetParent) continue;
@@ -1807,7 +1898,7 @@ function refreshVsPicks() {
   });
   document.getElementById('vs-setup-note').textContent = VS_MODES[vsMode].note;
   showVsGoal();
-  fitVsSetup();
+  lockButtons();
 }
 
 function applyModeUi() {
@@ -1949,7 +2040,7 @@ function startVs() {
     void vsSetupEl.offsetWidth;
     vsSetupEl.style.animation = '';
   }
-  fitVsSetup();
+  lockButtons();
   if (mode !== 'vs') {
     cpu = null;
     showVs();
@@ -3229,7 +3320,15 @@ function nextToast() {
     setTimeout(nextToast, 250);
     return;
   }
-  const text = toastQueue.shift();
+  // While the start screen (or its fade to black) is up, only achievements show; notifications
+  // (DAILY BONUS and the like) wait for the game
+  const titleUp = startScreenUp() || document.getElementById('start-black').classList.contains('on');
+  const at = titleUp ? toastQueue.findIndex((t) => t.startsWith('ACHIEVEMENT')) : 0;
+  if (at < 0) {
+    setTimeout(nextToast, 250);
+    return;
+  }
+  const text = toastQueue.splice(at, 1)[0];
   const showMs = text.startsWith('ACHIEVEMENT') ? ACHIEVEMENT_SHOW_MS : TOAST_SHOW_MS;
   toastEl.textContent = text;
   toastEl.hidden = false;
