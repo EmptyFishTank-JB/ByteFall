@@ -903,6 +903,14 @@ function render(popped = [], falling = null) {
   boardEl.appendChild(layerLine(!gameOver && !MODES[mode].noLayers && pulseInterval - dropsSinceLastPulse === 1));
   updateColumnButtons();
   if (mode === 'tutorial') Tutorial.decorate(); // (its pulsing cells, redrawn with the board)
+  if (typeof placeGhost === 'function') placeGhost(); // (a bit being aimed stays in the top row)
+  // PIVOT waiting for a side: arrows in the top row over the two neighbors (as on the buttons)
+  if (pivotFrom !== null) {
+    for (const c of [pivotFrom - 1, pivotFrom + 1]) {
+      const cell = c >= 0 && c < COLS && boardEl.querySelector(`.cell[data-pos="${MAX_ROWS - 1},${c}"]`);
+      if (cell && !cell.textContent) { cell.textContent = c < pivotFrom ? '\u2190' : '\u2192'; cell.classList.add('pivot-arrow'); }
+    }
+  }
   Music.setIntensity(dangerLevel());
 }
 
@@ -1011,13 +1019,14 @@ function choosePivot(col) {
   pivotFrom = col;
   setMessage(`PIVOT // SWAP COLUMN ${col + 1} WITH \u2190 ${col} OR ${col + 2} \u2192`);
   SFX.play('click');
-  updateColumnButtons();
+  render(); // (the buttons and the top row's arrows)
 }
 function clearPivotChoice() {
   if (pivotFrom === null) return;
   pivotFrom = null;
   setMessage('');
-  updateColumnButtons();
+  if (busy) updateColumnButtons(); // (mid-drop the board is the drop's to draw)
+  else render();
 }
 
 async function attemptDrop(col) {
@@ -2870,6 +2879,108 @@ buttonsPosBtn.addEventListener('click', () => {
   updateButtonsPos();
 });
 updateButtonsPos();
+
+// DROP CONTROLS: BOTH (default), BUTTONS or COLUMNS. COLUMNS: touch (or click) and hold on the
+// grid and the bit appears in the top row over that column, following the thumb (or the cursor)
+// from column to column; letting go drops it there (let go well off the grid to call it off).
+// The tutorial keeps its buttons whatever this says (its lessons point at them).
+const dropCtlBtn = document.getElementById('drop-controls-btn');
+const DROP_CONTROLS = ['both', 'buttons', 'columns'];
+let dropControls = DROP_CONTROLS.includes(storage.get('bytefall-drop-controls')) ? storage.get('bytefall-drop-controls') : 'both';
+const columnsTouchable = () => dropControls !== 'buttons';
+function applyDropControls() {
+  const hide = dropControls === 'columns' && mode !== 'tutorial';
+  if (columnButtonsEl.classList.contains('by-columns') !== hide) {
+    columnButtonsEl.classList.toggle('by-columns', hide);
+    refit();
+  }
+  boardEl.classList.toggle('touch-drop', columnsTouchable());
+  buttonsPosBtn.hidden = hide;
+  if (buttonsPosBtn.nextElementSibling) buttonsPosBtn.nextElementSibling.hidden = hide;
+}
+function updateDropControls() {
+  dropCtlBtn.textContent = `DROP BY: ${dropControls.toUpperCase()}`;
+  applyDropControls();
+}
+dropCtlBtn.addEventListener('click', () => {
+  dropControls = DROP_CONTROLS[(DROP_CONTROLS.indexOf(dropControls) + 1) % DROP_CONTROLS.length];
+  storage.set('bytefall-drop-controls', dropControls);
+  updateDropControls();
+});
+updateDropControls();
+
+// Dragging a bit across the top row (COLUMNS). aim: the column it's over, or null
+let aim = null;
+let aimPointer = null;
+let aimGhost = null;
+function aimable(c) {
+  const btn = columnButtonsEl.children[c];
+  return !!btn && !btn.disabled && !(mode === 'vs' && !vsStarted) && !vsPaused && queue.length > 0 && pivotFrom === null;
+}
+// The column under x (past the grid's sides: the edge column)
+function columnAt(x) {
+  const top = [...boardEl.querySelectorAll('.cell.overflow')].slice(-COLS);
+  let best = 0;
+  let dist = Infinity;
+  top.forEach((cell, c) => {
+    const r = cell.getBoundingClientRect();
+    const d = Math.abs(x - (r.left + r.width / 2));
+    if (d < dist) { dist = d; best = c; }
+  });
+  return best;
+}
+// The bit shown over the aimed column, in the top row (redrawn with the board: render())
+function placeGhost() {
+  if (aim === null || !queue[0] || !aimable(aim)) { // (a full column, or not now: no bit shown)
+    if (aimGhost) aimGhost.remove();
+    return;
+  }
+  const cell = boardEl.querySelector(`.cell[data-pos="${MAX_ROWS - 1},${aim}"]`);
+  if (!cell) return;
+  if (!aimGhost || !aimGhost.isConnected) {
+    aimGhost = document.createElement('div');
+    boardEl.appendChild(aimGhost);
+  }
+  const piece = queue[0];
+  aimGhost.className = `cell drag-ghost ${piece.type === 'hack' ? 'hack' : 'disc'}`;
+  if (piece.type === 'hack') aimGhost.innerHTML = `[${iconHtml(piece.id)}]`;
+  else fillBit(aimGhost, piece.val);
+  Object.assign(aimGhost.style, { left: `${cell.offsetLeft}px`, top: `${cell.offsetTop}px`, width: `${cell.offsetWidth}px`, height: `${cell.offsetHeight}px` });
+}
+function setAim(c) {
+  if (c === aim) return;
+  aim = c;
+  placeGhost();
+  if (aim !== null && aimable(aim)) SFX.play('click');
+}
+function endAim() {
+  aim = null;
+  aimPointer = null;
+  if (aimGhost) aimGhost.remove();
+  aimGhost = null;
+}
+boardEl.addEventListener('pointerdown', (e) => {
+  if (!columnsTouchable() || aimPointer !== null || (e.pointerType === 'mouse' && e.button !== 0)) return;
+  if (gameOver || busy || !queue.length) return;
+  aimPointer = e.pointerId;
+  if (pivotFrom !== null) return; // (PIVOT's second pick: a tap on a neighbor column, no bit shown)
+  try { boardEl.setPointerCapture(e.pointerId); } catch (err) { /* (not capturable) */ }
+  setAim(columnAt(e.clientX));
+  e.preventDefault();
+});
+boardEl.addEventListener('pointermove', (e) => {
+  if (e.pointerId !== aimPointer || aim === null) return;
+  setAim(columnAt(e.clientX));
+});
+boardEl.addEventListener('pointerup', (e) => {
+  if (e.pointerId !== aimPointer) return;
+  const r = boardEl.getBoundingClientRect();
+  const off = e.clientX < r.left - 40 || e.clientX > r.right + 40 || e.clientY < r.top - 40 || e.clientY > r.bottom + 40;
+  const c = aim !== null ? aim : columnAt(e.clientX);
+  endAim();
+  if (!off) attemptDrop(c);
+});
+boardEl.addEventListener('pointercancel', (e) => { if (e.pointerId === aimPointer) endAim(); });
 
 // WANDERING BOTS: the CPUs strolling along the bottom of the game card (wanderers.js), on by default
 const wanderersBtn = document.getElementById('wanderers-btn');

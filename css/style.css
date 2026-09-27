@@ -2403,6 +2403,12 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
 /* The drop buttons and the message under the grid: a layer over the wanderers' lane (bats, crows,
    the spider's thread and the rest pass under them) */
 .column-buttons, .message-slot { position: relative; z-index: 2; }
+/* DROP BY: COLUMNS (script.js): no buttons; the grid takes the touch, and the bit being aimed
+   rides the top row over its column */
+.column-buttons.by-columns { display: none; }
+.board.touch-drop { touch-action: none; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+.board .cell.pivot-arrow { color: var(--accent); text-shadow: 0 0 6px var(--accent); }
+.board .drag-ghost { position: absolute; margin: 0; pointer-events: none; opacity: 0.9; z-index: 1; }
 /* The restart corner button is EXIT (back to the title card) until the first drop */
 .restart-icon .exit-glyph, .restart-icon.exit .restart-glyph { display: none; }
 .restart-icon.exit .exit-glyph { display: block; }
