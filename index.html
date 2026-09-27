@@ -24,19 +24,20 @@
   } catch (e) {}
 </script>
 <title>BYTEFALL // decryption terminal</title>
-<link rel="stylesheet" href="css/style.css?v=188">
+<link rel="stylesheet" href="css/style.css?v=191">
 </head>
 <body>
   <!-- START SCREEN (start.js): a fresh launch opens on the title over the twinkling starlight;
-       TAP TO START fades to black, then into the game (or the tutorial, the first time) -->
-  <div class="start-screen" id="start-screen" role="button" tabindex="0" aria-label="Tap to start">
+       START fades to black, then into the game (or the tutorial, the first time). A tap anywhere
+       else lets the music start (browsers need one) and leaves you on the screen -->
+  <div class="start-screen" id="start-screen">
     <div class="start-card">
       <canvas class="start-bg" id="start-bg" aria-hidden="true"></canvas>
       <div class="start-title">
         <h1>BYTE<span>FALL</span></h1>
         <p class="start-tagline">// DECRYPTION TERMINAL</p>
       </div>
-      <p class="start-tap">TAP TO START</p>
+      <button type="button" class="start-btn" id="start-btn">START</button>
     </div>
   </div>
   <div class="start-black" id="start-black" aria-hidden="true"></div>
@@ -347,6 +348,8 @@
                 <g class="mouth mouth-pant"><rect x="6" y="10" width="4" height="1"/><rect class="pant-low" x="6" y="11" width="4" height="1"/></g>
                 <g class="mouth mouth-wavy"><rect x="5" y="11" width="1" height="1"/><rect x="6" y="10" width="1" height="1"/><rect x="7" y="11" width="1" height="1"/><rect x="8" y="10" width="1" height="1"/><rect x="9" y="11" width="1" height="1"/><rect x="10" y="10" width="1" height="1"/></g>
                 <rect class="mouth mouth-o" x="7" y="10" width="2" height="2"/>
+                <!-- Skeptical: one eye narrowed under a low brow, the other wide under a raised one -->
+                <g class="eyes eyes-brow"><rect x="4" y="6" width="3" height="1"/><rect x="5" y="7" width="2" height="1"/><rect x="9" y="4" width="3" height="1"/><rect x="9" y="6" width="2" height="2"/></g>
               </g>
               <rect class="sweat" x="13" y="3" width="1" height="2"/>
               <g class="teeth"><rect x="6" y="10" width="1" height="1"/><rect x="8" y="10" width="1" height="1"/><rect x="10" y="10" width="1" height="1"/><rect x="7" y="11" width="1" height="1"/><rect x="9" y="11" width="1" height="1"/></g>
@@ -535,30 +538,30 @@
     </div>
   </div>
 
-  <script src="js/unlocks.js?v=188"></script>
-  <script src="js/progress.js?v=188"></script>
-  <script src="js/sfx.js?v=188"></script>
-  <script src="js/music/music-bytefall-theme.js?v=188"></script>
-  <script src="js/music/music-sleep-mode.js?v=188"></script>
-  <script src="js/music/music-brute-force.js?v=188"></script>
-  <script src="js/music/music-deep-web.js?v=188"></script>
-  <script src="js/music/music-zero-day.js?v=188"></script>
-  <script src="js/music/music-system-restore.js?v=188"></script>
-  <script src="js/music/music-night-drive.js?v=188"></script>
-  <script src="js/music/music-standby-mode.js?v=188"></script>
-  <script src="js/music/music-core-dump.js?v=188"></script>
-  <script src="js/music/music-handshake.js?v=188"></script>
-  <script src="js/music/music.js?v=188"></script>
-  <script src="js/data/puzzles.js?v=188"></script>
-  <script src="js/data/daily-puzzles.js?v=188"></script>
-  <script src="js/cpu.js?v=188"></script>
-  <script src="js/fx.js?v=188"></script>
-  <script src="js/viz.js?v=188"></script>
-  <script src="js/minibot.js?v=188"></script>
-  <script src="js/tutorial.js?v=188"></script>
-  <script src="js/script.js?v=188"></script>
-  <script src="js/grid-bg.js?v=188"></script>
-  <script src="js/player.js?v=188"></script>
-  <script src="js/start.js?v=188"></script>
+  <script src="js/unlocks.js?v=191"></script>
+  <script src="js/progress.js?v=191"></script>
+  <script src="js/sfx.js?v=191"></script>
+  <script src="js/music/music-bytefall-theme.js?v=191"></script>
+  <script src="js/music/music-sleep-mode.js?v=191"></script>
+  <script src="js/music/music-brute-force.js?v=191"></script>
+  <script src="js/music/music-deep-web.js?v=191"></script>
+  <script src="js/music/music-zero-day.js?v=191"></script>
+  <script src="js/music/music-system-restore.js?v=191"></script>
+  <script src="js/music/music-night-drive.js?v=191"></script>
+  <script src="js/music/music-standby-mode.js?v=191"></script>
+  <script src="js/music/music-core-dump.js?v=191"></script>
+  <script src="js/music/music-handshake.js?v=191"></script>
+  <script src="js/music/music.js?v=191"></script>
+  <script src="js/data/puzzles.js?v=191"></script>
+  <script src="js/data/daily-puzzles.js?v=191"></script>
+  <script src="js/cpu.js?v=191"></script>
+  <script src="js/fx.js?v=191"></script>
+  <script src="js/viz.js?v=191"></script>
+  <script src="js/minibot.js?v=191"></script>
+  <script src="js/tutorial.js?v=191"></script>
+  <script src="js/script.js?v=191"></script>
+  <script src="js/grid-bg.js?v=191"></script>
+  <script src="js/player.js?v=191"></script>
+  <script src="js/start.js?v=191"></script>
 </body>
 </html>

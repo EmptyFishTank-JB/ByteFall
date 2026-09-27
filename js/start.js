@@ -54,7 +54,7 @@
   const MOOD_EMOTES = {
     happy: ['^^', '!'], hit: ['!', '?!'], worried: ['?', '...', '!'], smug: ['hm', '^^'], annoyed: ['...', 'hm', '-_-'],
     devious: ['hm', '...'], love: ['<3', '!'], surprised: ['!', '?', '?!'], laugh: ['haha', '^^'], scared: ['!', '!!'],
-    dizzy: ['?', '...'], tired: ['...', 'phew', 'huff'],
+    dizzy: ['?', '...'], tired: ['...', 'phew', 'huff'], skeptic: ['?', 'hm', '...'],
   };
   // Faces each bot won't make, and what it makes instead (GLITCH is never happy or smitten)
   const NEVER = { glitch: { happy: 'smug', love: 'devious', laugh: 'smug' } };
@@ -119,6 +119,10 @@
     emote.className = 'walker-emote';
     el.appendChild(emote);
     lane.appendChild(el);
+    el.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      poke(w, performance.now());
+    });
     const w = {
       bot, el, emote, x: fromLeft ? -SIZE - 4 : laneW() + 4, dir: fromLeft ? 1 : -1, look: fromLeft ? 1 : -1,
       speed: (bot === 'glitch' ? rand(30, 48) : bot === 'bunker' ? rand(14, 22) : rand(20, 32)),
@@ -165,10 +169,51 @@
       o.state = 'idle';
       o.look = src.x > o.x ? 1 : -1;
       o.until = now + rand(1100, 1700);
-      o.el.classList.remove('hopping');
+      o.el.classList.remove('hopping', 'shaking');
       place(o);
     }
   }
+  // Poked by the player: 40% bolt off, startled; otherwise put out (-_-), it shakes itself off as
+  // if the touch left it dirty, then gives you a raised eyebrow before wandering on
+  function poke(w, now) {
+    if (w.leaving || ['vanish', 'startled', 'poked'].includes(w.state)) return;
+    if (w.partner) {
+      const p = w.partner;
+      w.partner = null;
+      p.partner = null;
+      mood(p, 'annoyed', true);
+      p.state = 'idle';
+      p.until = now + rand(1200, 1700);
+    }
+    if (Math.random() < 0.4) return fright(w, now);
+    const id = (w.pokeId = (w.pokeId || 0) + 1);
+    const still = () => w.pokeId === id && w.state === 'poked' && !w.gone;
+    w.state = 'poked';
+    w.look = 0;
+    w.until = now + 3000;
+    mood(w, 'annoyed', pick(['hey!', '-_-', '!!']));
+    place(w);
+    setTimeout(() => {
+      if (!still()) return;
+      mood(w, 'annoyed');
+      w.el.classList.add('shaking');
+      for (let k = 0; k < 8; k++) { // (a puff of dust)
+        const d = document.createElement('i');
+        d.className = 'walker-dust';
+        d.style.setProperty('--dx', `${rand(-18, 18).toFixed(0)}px`);
+        d.style.setProperty('--dy', `${rand(-16, 4).toFixed(0)}px`);
+        d.style.animationDelay = `${(k * 60).toFixed(0)}ms`;
+        w.el.appendChild(d);
+        setTimeout(() => d.remove(), 800 + k * 60);
+      }
+    }, 600);
+    setTimeout(() => {
+      if (!still()) return;
+      w.el.classList.remove('shaking');
+      mood(w, 'skeptic', true); // (the raised eyebrow, at you)
+    }, 1400);
+  }
+
   // Time to go: mostly a walk off the card; 15% a spooked bolt; 5% a pixelated decrypt
   function depart(w, now) {
     const r = Math.random();
@@ -185,7 +230,7 @@
   }
   function place(w) {
     w.el.style.transform = `translateX(${w.x.toFixed(1)}px)`;
-    w.el.dataset.look = w.look > 0 ? 'right' : 'left';
+    w.el.dataset.look = w.look > 0 ? 'right' : w.look < 0 ? 'left' : 'front'; // (front: at you)
     w.el.classList.toggle('walking', w.state === 'walk');
     w.el.classList.toggle('running', w.state === 'walk' && w.running);
   }
@@ -284,7 +329,7 @@
       for (let j = i + 1; j < walkers.length; j++) {
         const a = walkers[i];
         const b = walkers[j];
-        const busyWith = (w) => w.state === 'meet' || w.state === 'startled' || w.state === 'vanish' || w.leaving || w.winded
+        const busyWith = (w) => w.state === 'meet' || w.state === 'startled' || w.state === 'vanish' || w.state === 'poked' || w.leaving || w.winded
           || w.el.dataset.mood === 'tired' || w.el.dataset.mood === 'surprised';
         if (busyWith(a) || busyWith(b) || !inside(a) || !inside(b)) continue;
         if (Math.abs(a.x - b.x) > SIZE + 6 || now - a.metAt < 7000 || now - b.metAt < 7000) continue;
@@ -315,7 +360,8 @@
   // (for the dev tests: the wanderers and a startle)
   window.startWalkers = { list: () => walkers, startle: (w) => startle(w, performance.now()) };
 
-  screen.addEventListener('click', start);
+  const startBtn = document.getElementById('start-btn');
+  startBtn.addEventListener('click', start);
   // While it's up, keys don't reach the game; Enter and Space start
   document.addEventListener('keydown', (e) => {
     if (screen.hidden) return;
@@ -323,5 +369,5 @@
     e.preventDefault();
     if (e.key === 'Enter' || e.key === ' ') start();
   }, true);
-  screen.focus();
+  startBtn.focus({ preventScroll: true });
 })();

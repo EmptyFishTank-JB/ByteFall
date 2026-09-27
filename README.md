@@ -390,8 +390,9 @@ point. It counts toward nothing (no XP, stats, achievements or best score).
 
 A fresh launch (the app or tab opened anew) opens on the START SCREEN: a card
 filling the screen with the starlight twinkling across it, the BYTEFALL title
-in the middle and TAP TO START blinking below (`js/start.js`). A tap (or Enter
-/ Space) fades it to black, then fades into the game, which always starts on
+in the middle and a glowing START button below (`js/start.js`). A tap anywhere
+else lets the music begin (browsers need one) and leaves you on the screen.
+START (or Enter / Space) fades it to black, then fades into the game, which always starts on
 CLASSIC, Normal. The very first time the game is opened, it fades into the
 TUTORIAL instead (EXIT skips it). A refresh, or coming back to the app or tab,
 skips the start screen and carries on where you were. On the start screen one to three of the CPUs (BOT, GRIFTER, BUNKER, GLITCH;
@@ -409,7 +410,10 @@ keeps to its character: GLITCH is never happy, heart-eyed or laughing (nor
 shows EASY's smiling rest face); emotes fit the face (no <3 on a -_-), and the
 mad ones (HARD's angry and INSANE's red-eyed rest faces) and GLITCH never show
 the cheery ones (<3, ^^, haha); love comes only from the EASY and NORMAL faces,
-and never toward a worried, scared or put-out partner. The faces include the CPU's moods plus SCARED, TIRED (panting),
+and never toward a worried, scared or put-out partner. Tap a wanderer and it
+reacts: 40% of the time it's startled and bolts; otherwise it's put out (-_-,
+"hey!"), shakes itself off in a puff of dust as if the touch left it dirty, then
+turns to you with a raised eyebrow (the SKEPTIC face) before wandering on. The faces include the CPU's moods plus SCARED, TIRED (panting),
 SURPRISED, LOVE (red heart eyes), DIZZY and LAUGH. The small faces come from
 `js/minibot.js`, a copy of the CPU's face for use anywhere.
 
