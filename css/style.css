@@ -2397,7 +2397,8 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
 /* (achievement pop-ups show over the start screen too) */
 .start-screen:not([hidden]) ~ .toast { z-index: 206; }
 /* The game card's wanderers: along its bottom edge between the corner buttons, coming and going from behind them */
-.game-walkers { position: absolute; left: 80px; right: 80px; bottom: 6px; height: 44px; overflow: hidden; pointer-events: none; z-index: 0; }
+.game-walkers { position: absolute; left: 80px; right: 80px; bottom: 6px; height: 44px; pointer-events: none; z-index: 0;
+  clip-path: inset(-60px 0 0 0); } /* (hidden past its sides, where they walk in and out behind the corner buttons; open above, for what they say) */
 .corner-btn { z-index: 1; }
 
 /* Dev: AD BANNER PREVIEW (script.js). The page's height (--app-h) already leaves the strip out; the
@@ -2494,7 +2495,7 @@ html.page-twinkle .page-bg { display: block; }
 .walker[data-costume="pumpkin"] .c-rib { fill: #c4580a; }
 .walker[data-costume="pumpkin"] .c-stem { fill: #3f8f3a; }
 .walker[data-costume="pumpkin"] .c-leaf { fill: #6cc24a; }
-.walker[data-costume="ghost"] .costume { opacity: 0.55; filter: drop-shadow(0 0 1px rgba(238, 243, 242, 0.6)); } /* (see-through: BOT shows under it) */
+.walker[data-costume="ghost"] .costume { opacity: 0.8; filter: drop-shadow(0 0 1px rgba(238, 243, 242, 0.6)); } /* (see-through: BOT shows under it) */
 .walker[data-costume="ghost"] .c-sheet { fill: #eef3f2; }
 [data-theme="paper"] .walker[data-costume="ghost"] .costume { filter: drop-shadow(0 0 0.5px rgba(40, 30, 20, 0.6)); } /* (a white sheet on a light card) */
 .walker[data-costume="witch"] .c-hat { fill: #3b2455; }

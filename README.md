@@ -505,7 +505,7 @@ switch, or `?season=halloween`, forces one or turns them OFF). **HALLOWEEN**
 (October 15 to 31): most wanderers (80%) arrive in costume, drawn in their own
 pixel grid over the body and under the face, so every face, hop and snap still
 shows: BUNKER is a pumpkin (its face the carved one), BOT a see-through bedsheet
-ghost, GRIFTER wears a witch's hat and GLITCH devil horns and a tail. All four
+ghost (80% opaque), GRIFTER wears a witch's hat and GLITCH devil horns and a tail. All four
 dressed up on screen at once earns the hidden COSTUME PARTY. A wanderer that
 stops sometimes has a snack (30%): one to three gummy drops (2x2 pixels, a
 random bright color), each pulled from its side and tossed in an arc over its
