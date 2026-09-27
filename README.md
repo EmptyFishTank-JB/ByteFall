@@ -104,7 +104,7 @@ fresh when it moved to 8×8).
 ## Levels, DECRYPTOR ranks and unlocks
 
 **Levels.** Every bit you decrypt is XP: **100 bits (12.5 bytes) per level**,
-Lv 1 to **Lv 80**. Lv 80's bar fills at 8,000 bits, so a full DECRYPTOR rank
+from Lv 0 to **Lv 80**. Lv 80 comes at 8,000 bits, so a full DECRYPTOR rank
 is exactly **1 kilobyte**. The level bar sits under the title.
 
 **Everything unlocks by level, within a rank.** Exploits, exploit slots, Hard
@@ -133,10 +133,10 @@ level between Lv 2 and Lv 80, spread so a level or two always brings something:
 | 19 | MONOCHROME | 45 | SLOT 4 | 77 | TRACK 16 |
 
 **DECRYPTOR ranks** (the game's prestige). With Lv 80 full, RANK UP TO
-DECRYPTOR (in RECORDS → UNLOCKS, four presses) starts you again at Lv 1 one
+DECRYPTOR (in RECORDS → UNLOCKS, four presses) starts you again at Lv 0 one
 rank higher, and **everything locks again** to be unlocked by level once more.
 The one thing kept for good: DECRYPTOR N keeps N exploit slots (up to 6) from
-Lv 1, and the slots still to earn take the table's earliest slot levels (Lv 5,
+Lv 0, and the slots still to earn take the table's earliest slot levels (Lv 5,
 15, 30 ...). A theme, font, track or
 difficulty picked but locked again falls back to the default until it reopens.
 

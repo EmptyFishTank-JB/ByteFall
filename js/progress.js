@@ -3,8 +3,8 @@
 // (unlocks.js) unlocks everything straight away; otherwise it's earned by playing.
 // script.js reports what happens in a run; check() then returns anything newly earned.
 //
-// Levels: bits decrypted are XP, from Lv 1 to Lv 80. At Lv 80 the player can RANK UP to the
-// next DECRYPTOR rank: back to Lv 1, rank +1, and everything locks again. Every unlock (exploits,
+// Levels: bits decrypted are XP, from Lv 0 to Lv 80. At Lv 80 the player can RANK UP to the
+// next DECRYPTOR rank: back to Lv 0, rank +1, and everything locks again. Every unlock (exploits,
 // exploit slots, Hard mode, the VS CPU levels and bots, tracks, themes and fonts) comes at a level
 // within a rank. The one thing kept for good: DECRYPTOR N keeps N exploit slots (up to 6).
 // Only exploits equipped in a slot are awarded.
@@ -40,7 +40,7 @@ const Progress = (() => {
     xp: 0, // bits decrypted this rank
     decryptorPoints: 0, // points earned this rank
     equipped: [], // exploit ids in the loadout slots
-    lastLevel: 1, // for LEVEL UP announcements
+    lastLevel: 0, // for LEVEL UP announcements
     exploitsSeen: {}, // exploit id -> true once announced this rank
     slotsSeen: 0, // slots announced this rank
     firstDropClears: 0, // sessions where the first drop decrypted something
@@ -114,13 +114,13 @@ const Progress = (() => {
   const TRACK_LEVELS = [2, 7, 11, 16, 20, 25, 31, 36, 40, 44, 50, 55, 62, 68, 77]; // tracks 02-16
 
   const MAX_LEVEL = 80;
-  // 100 bits (12.5 bytes) per level. Lv 80 starts at 7,900 bits and its bar fills at 8,000,
-  // when RANK UP opens: a full DECRYPTOR rank is exactly 1 kilobyte.
+  // 100 bits (12.5 bytes) per level, from Lv 0. Lv 80 comes at 8,000 bits, when RANK UP opens:
+  // a full DECRYPTOR rank is exactly 1 kilobyte.
   const BITS_PER_LEVEL = 100;
   const RANK_BITS = MAX_LEVEL * BITS_PER_LEVEL;
   function levelInfo() {
-    const level = Math.min(MAX_LEVEL, Math.floor(d.xp / BITS_PER_LEVEL) + 1);
-    const into = Math.min(BITS_PER_LEVEL, d.xp - (level - 1) * BITS_PER_LEVEL);
+    const level = Math.min(MAX_LEVEL, Math.floor(d.xp / BITS_PER_LEVEL)); // (from Lv 0)
+    const into = level >= MAX_LEVEL ? BITS_PER_LEVEL : d.xp - level * BITS_PER_LEVEL;
     return { level, into, need: BITS_PER_LEVEL, maxed: d.xp >= RANK_BITS, decryptor: d.decryptor, xp: Math.min(d.xp, RANK_BITS), rankBits: RANK_BITS };
   }
 
@@ -228,7 +228,7 @@ const Progress = (() => {
     { id: 'daily-driver', name: 'DAILY DRIVER', desc: 'Play a Daily game 7 days in a row', value: () => d.bestDailyStreak, goal: 7 },
     { id: 'locksmith', name: 'LOCKSMITH', desc: 'Solve 10 puzzles', value: () => Object.keys(d.puzzles).length, goal: 10 },
     { id: 'master-key', name: 'MASTER KEY', desc: 'Solve every puzzle', value: () => Object.keys(d.puzzles).length, goal: () => puzzleCount },
-    { id: 'maxed-out', name: 'MAXED OUT', desc: 'Fill Lv 80 as DECRYPTOR 9', value: () => (d.decryptor >= 10 || (d.decryptor >= 9 && levelInfo().maxed) ? 1 : 0), goal: 1 },
+    { id: 'maxed-out', name: 'MAXED OUT', desc: 'Reach Lv 80 as DECRYPTOR 9', value: () => (d.decryptor >= 10 || (d.decryptor >= 9 && levelInfo().maxed) ? 1 : 0), goal: 1 },
     { id: 'rollover', name: 'ROLLOVER', desc: 'Rank up to DECRYPTOR 1', value: () => d.decryptor, goal: 1 },
     { id: 'full-spectrum', name: 'FULL SPECTRUM', desc: 'Unlock every theme', value: () => themeIds.filter(isUnlocked).length, goal: themeIds.length },
     // All 16 tracks: only tracks that exist count, so these wait until track 16 is made
@@ -506,13 +506,13 @@ const Progress = (() => {
       save();
     },
     levelInfo,
-    // Lv 80 only: back to Lv 1 with everything locked again but one more kept exploit slot
+    // Lv 80 only: back to Lv 0 with everything locked again but one more kept exploit slot
     rankUp() {
       if (!levelInfo().maxed) return false;
       d.decryptor++;
       d.xp = 0;
       d.decryptorPoints = 0;
-      d.lastLevel = 1;
+      d.lastLevel = 0;
       d.exploitsSeen = {};
       d.unlocksSeen = {};
       d.slotsSeen = 0;

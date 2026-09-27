@@ -101,7 +101,7 @@ PUZZLES,SAFECRACKER,Solve 30 puzzles,30,Standard,safecracker
 PUZZLES,MASTER KEY,Solve every puzzle,60,Standard,master-key
 PUZZLES,PICKPOCKET,Solve 5 puzzles in a row without failing one,5,Standard,pickpocket
 LEVELS AND DECRYPTOR RANKS,LV 40,Reach level 40,40,Standard,lv-40
-LEVELS AND DECRYPTOR RANKS,MAXED OUT,Fill Lv 80 as DECRYPTOR 9,1,Standard,maxed-out
+LEVELS AND DECRYPTOR RANKS,MAXED OUT,Reach Lv 80 as DECRYPTOR 9,1,Standard,maxed-out
 LEVELS AND DECRYPTOR RANKS,ROLLOVER,Rank up to DECRYPTOR 1,1,Standard,rollover
 LEVELS AND DECRYPTOR RANKS,TRIPLE CROWN,Reach DECRYPTOR 3,3,Standard,triple-crown
 LEVELS AND DECRYPTOR RANKS,FULL SPECTRUM,Unlock every theme,9,Standard,full-spectrum
