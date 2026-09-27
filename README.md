@@ -438,8 +438,11 @@ the tagline is under the title (measured letter to letter, in every font; `js/st
 else lets the music begin (browsers need one) and leaves you on the screen.
 START (or Enter / Space) fades it to black, then fades into the game, which always starts on
 CLASSIC, Normal. The very first time the game is opened, it fades into the
-TUTORIAL instead (EXIT skips it). A refresh, or coming back to the app or tab,
-skips the start screen and carries on where you were. On the start screen one to four of the CPUs (BOT, GRIFTER, BUNKER, GLITCH;
+TUTORIAL instead (EXIT skips it). A refresh puts you back where you were: on the start screen until START is
+pressed, then in the game with whatever was open still open (the MENU on its tab
+and sub-tab, scrolled where it was; SETTINGS; the MUSIC PLAYER) or the TUTORIAL
+at the step it was on, BACK still working (`js/place.js`). Coming back to the app
+or tab carries on where you were. On the start screen one to four of the CPUs (BOT, GRIFTER, BUNKER, GLITCH;
 never two of the same) wander along the bottom of the card, looking the way
 they walk (eyes and mouth a pixel that way): in from either side, idling (now
 and then bored or tapping a foot), finding a free spot and heading back out.

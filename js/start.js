@@ -19,6 +19,7 @@
   function start() {
     if (starting) return;
     starting = true;
+    try { sessionStorage.setItem('bytefall-started', '1'); } catch (e) {} // (a refresh now skips this screen)
     screen.classList.add('starting');
     SFX.play('static');
     setTimeout(() => {

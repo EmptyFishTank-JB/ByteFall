@@ -312,8 +312,14 @@ const Tutorial = (() => {
   function back() {
     if (busy) return;
     const to = dropped ? step : step - 1;
+    if (!snapshots[to]) return;
+    restore(to);
+    SFX.play('click');
+    show();
+  }
+  // (a step as it stood when it began: BACK, and a refresh picking the lesson up again)
+  function restore(to) {
     const snap = snapshots[to];
-    if (!snap) return;
     step = to;
     columns = copyCells(snap.columns);
     queue = snap.queue.map((b) => ({ ...b }));
@@ -324,9 +330,8 @@ const Tutorial = (() => {
     menus(STEPS[step]);
     render();
     updateHud();
-    SFX.play('click');
-    show();
   }
+  let resumeFrom = null; // (set by resumeAt: the next begin() picks up there)
 
   // Leaves the tutorial for the mode picked before it (or CLASSIC)
   function leave(to) {
@@ -362,7 +367,22 @@ const Tutorial = (() => {
     // Called by initGame when the mode is 'tutorial'
     begin() {
       snapshots = [];
+      const saved = resumeFrom;
+      resumeFrom = null;
+      if (saved && Array.isArray(saved.snapshots) && saved.snapshots[saved.step] && saved.step < STEPS.length) {
+        snapshots = saved.snapshots;
+        restore(saved.step);
+        show();
+        return;
+      }
       go(0);
+    },
+    // A refresh mid-lesson (place.js): where it stood, and how each step so far began (for BACK)
+    state() {
+      return step < 0 ? null : { step, snapshots: snapshots.slice(0, step + 1) };
+    },
+    resumeAt(saved) {
+      resumeFrom = saved;
     },
     // Called by initGame for every other mode
     end() {
