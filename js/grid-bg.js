@@ -141,7 +141,7 @@ function startGridBackground(canvas, { defrag = true, active } = {}) {
 
   let last = 0;
   function frame(now) {
-    if (now - last >= TICK_MS && (!active || active())) {
+    if (now - last >= TICK_MS && !document.documentElement.classList.contains('saver-on') && (!active || active())) { // (resting under the screen saver)
       last = now;
       tick(now);
     }

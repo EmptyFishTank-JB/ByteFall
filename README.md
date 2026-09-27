@@ -471,7 +471,22 @@ TUTORIAL instead (EXIT skips it). A refresh puts you back where you were: on the
 pressed, then in the game with whatever was open still open (the MENU on its tab
 and sub-tab, scrolled where it was; SETTINGS; the MUSIC PLAYER) or the TUTORIAL
 at the step it was on, BACK still working (`js/place.js`). Coming back to the app
-or tab carries on where you were. On the start screen one to four of the CPUs (BOT, GRIFTER, BUNKER, GLITCH;
+or tab carries on where you were.
+
+**BACK** (the phone's back button, or the browser's): outside a game it goes
+back to the start screen (through black, as it went in); from the start screen it
+leaves as usual. In a game it doesn't: an open panel (MENU, SETTINGS, the MUSIC
+PLAYER) closes, a VS match pauses, and a session under way stays put (`js/start.js`).
+
+**SCREEN SAVER** (`js/saver.js`; SETTINGS → SCREEN SAVER, on by default): after 90
+seconds without a touch or a key (never while a timed game runs: a BLITZ clock or
+a VS match), a quick pixelated fade (black blocks filling in, in a random order)
+to a black screen with the wanderers doing their thing, visitors, seasons and all,
+at a height that moves every minute (no burn-in). To save battery everything
+behind it rests: the background animations stop, the card's wanderers go, the
+menus and the player close; the music plays on. A bot can be poked as ever; a tap
+anywhere else, or a key, wakes it (the blocks breaking up, quicker), and that tap
+goes no further. On the start screen one to four of the CPUs (BOT, GRIFTER, BUNKER, GLITCH;
 never two of the same) wander along the bottom of the card, looking the way
 they walk (eyes and mouth a pixel that way): in from either side, idling (now
 and then bored or tapping a foot), finding a free spot and heading back out.

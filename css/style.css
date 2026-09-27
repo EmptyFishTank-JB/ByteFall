@@ -2548,3 +2548,12 @@ html.page-twinkle .page-bg { display: block; }
 /* The spider's silk thread, up out of sight */
 .visitor-thread { position: absolute; left: 50%; bottom: 60%; width: 1px; height: 160px; background: rgba(220, 225, 240, 0.45); pointer-events: none; }
 .visitor-spider svg { filter: drop-shadow(0 0 1px rgba(220, 225, 240, 0.45)); }
+
+/* SCREEN SAVER (saver.js): black, but for the wanderers, at a height that moves each minute */
+.saver { position: fixed; inset: 0; z-index: 300; background: #000; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.saver.fading { background: transparent; } /* (the blocks do the black while it fades) */
+.saver-pixels { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; }
+.saver:not(.fading) .saver-pixels { display: none; }
+.saver[hidden] { display: none; }
+.saver .saver-lane { top: var(--y, 60%); bottom: auto; left: 16px; right: 16px; }
+.saver-on .toast { z-index: 301; } /* (an achievement from a poke shows over it) */

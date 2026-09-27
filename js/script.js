@@ -2867,7 +2867,11 @@ const wanderersBtn = document.getElementById('wanderers-btn');
 let wanderersOn = storage.get('bytefall-wanderers') !== 'off';
 // (not while the start screen covers the card: start.js starts them when it goes)
 const startScreenUp = () => { const el = document.getElementById('start-screen'); return !!el && !el.hidden && !document.documentElement.classList.contains('no-start'); };
-const gameWalkers = createWanderers(document.getElementById('game-walkers'), () => wanderersOn && !startScreenUp());
+const gameWalkers = createWanderers(document.getElementById('game-walkers'), () => wanderersOn && !startScreenUp() && !document.documentElement.classList.contains('saver-on'));
+// A game under way (for BACK, start.js, and the screen saver, saver.js): a session with drops in
+// it, the tutorial, or a VS match; a timed one: a BLITZ clock or a VS match running (not paused)
+const inAGame = () => !gameOver && (mode === 'tutorial' || (mode === 'vs' ? vsStarted : Progress.runDrops() > 0));
+const timedRunning = () => !gameOver && ((mode === 'vs' && vsStarted && !vsPaused) || (mode === 'blitz' && Progress.runDrops() > 0));
 function updateWanderersBtn() {
   wanderersBtn.textContent = `WANDERING BOTS: ${wanderersOn ? 'ON' : 'OFF'}`;
   wanderersBtn.classList.toggle('on', wanderersOn);
