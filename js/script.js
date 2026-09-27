@@ -589,7 +589,7 @@ function fitVsSetup() {
   });
   el.style.gap = '';
   let gap = parseFloat(getComputedStyle(el).rowGap);
-  while (el.scrollHeight > el.clientHeight && gap > 2) el.style.gap = `${(gap -= 1)}px`;
+  while (el.scrollHeight > el.clientHeight && gap > 2) el.style.gap = `${(gap -= 1)}px`;  showCpuDesc(); // (the play style card over the CPU's board: fitted to the new layout too)
 }
 
 // The screen's real size. The installed app on Android can report a stale height at launch (and
@@ -2448,6 +2448,8 @@ function updatePauseBtn() {
   vsQuitBtn.setAttribute('aria-label', pause ? 'Pause' : 'Quit VS');
   vsQuitBtn.title = pause ? 'Pause' : 'Quit';
 }
+// (fitted again once a font finishes loading: it measures differently)
+if (document.fonts) document.fonts.addEventListener('loadingdone', () => showCpuDesc());
 // Before START: the picked bot's play style over its board
 function showCpuDesc() {
   const el = document.getElementById('cpu-desc');
@@ -2457,7 +2459,9 @@ function showCpuDesc() {
   el.innerHTML = `<b>${kind}</b><span>${text}</span>`;
   el.style.fontSize = '';
   let size = parseFloat(getComputedStyle(el).fontSize);
-  while (el.scrollHeight > el.clientHeight + 1 && size > 7) el.style.fontSize = `${(size -= 0.5)}px`;
+  const kindEl = el.querySelector('b');
+  const tooBig = () => el.scrollHeight > el.clientHeight + 1 || kindEl.getBoundingClientRect().width > el.clientWidth - 8;
+  while (tooBig() && size > 7) el.style.fontSize = `${(size -= 0.5)}px`;
 }
 
 // The status line in the mode row's place, and how many stat rows the left column has
@@ -2761,6 +2765,7 @@ const FONTS = [
   { id: 'press-start', label: 'PRESS START', desc: 'chunky 8-bit arcade pixels.' },
   { id: 'bitcount', label: 'BITCOUNT', desc: 'letters built from a grid of single bits.' },
   { id: 'bytesized', label: 'BYTESIZED', desc: 'tiny pixel type, for the hard-core.' },
+  { id: 'orbitron', label: 'ORBITRON', desc: 'wide geometric capitals from the space age, by Matt McInerney.' },
 ];
 const fontAvailable = (f) => f.id === 'courier' || Progress.isUnlocked(`font-${f.id}`);
 const fontListEl = document.getElementById('font-list');

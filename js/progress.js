@@ -169,7 +169,7 @@ const Progress = (() => {
     ['synthwave', 'SYNTHWAVE', 34], ['dot-matrix', 'DOT MATRIX', 43], ['paper', 'PAPER', 52], ['glyph', 'GLYPH', 63], ['spectrum', 'SPECTRUM', 72]];
 
   // Pixel fonts (COURIER is free): [id, name, level]
-  const FONT_ORDER = [['share-tech', 'SHARE TECH MONO', 9], ['press-start', 'PRESS START', 21], ['bitcount', 'BITCOUNT', 39], ['bytesized', 'BYTESIZED', 57]];
+  const FONT_ORDER = [['share-tech', 'SHARE TECH MONO', 9], ['press-start', 'PRESS START', 21], ['bitcount', 'BITCOUNT', 39], ['bytesized', 'BYTESIZED', 57], ['orbitron', 'ORBITRON', 66]];
 
   // group: where it shows in the UNLOCKS list; level: the level (within a rank) it unlocks at
   const atLevel = (level) => ({ need: `Reach Lv ${level}`, value: () => levelInfo().level, goal: level, level });
@@ -262,6 +262,7 @@ const Progress = (() => {
     { id: 'insert-coin', name: 'INSERT COIN', desc: 'Play a full session (10+ drops) in the PRESS START font', value: () => (d.fontsPlayed['press-start'] ? 1 : 0), goal: 1 },
     { id: 'bit-by-bit', name: 'BIT BY BIT', desc: 'Play a full session (10+ drops) in the BITCOUNT font', value: () => (d.fontsPlayed.bitcount ? 1 : 0), goal: 1 },
     { id: 'bite-sized', name: 'BITE-SIZED', desc: 'Play a full session (10+ drops) in the BYTESIZED font', value: () => (d.fontsPlayed.bytesized ? 1 : 0), goal: 1 },
+    { id: 'in-orbit', name: 'IN ORBIT', desc: 'Play a full session (10+ drops) in the ORBITRON font', value: () => (d.fontsPlayed.orbitron ? 1 : 0), goal: 1 },
     { id: 'dj', name: 'DJ', desc: 'Listen to all 16 tracks', value: () => count(d.tracksHeard), goal: ALL_TRACKS },
     { id: 'audiophile', name: 'AUDIOPHILE', desc: 'Play a full session (10+ drops) on all 16 tracks', value: () => count(d.tracksPlayed), goal: ALL_TRACKS },
     { id: 'chameleon', name: 'CHAMELEON', desc: 'Play a full session (10+ drops) in every theme', value: () => count(d.themesPlayed), goal: () => themeCount },
@@ -396,7 +397,7 @@ const Progress = (() => {
     ['DAILY', ['daily-driver', 'daily-grind', 'streak', 'century', 'daily-sweep', 'perfect-daily', 'breached', 'one-shot', 'sunday-best', 'stubborn', 'so-close']],
     ['PUZZLES', ['first-try', 'locksmith', 'safecracker', 'master-key', 'pickpocket']],
     ['LEVELS AND DECRYPTOR RANKS', ['lv-40', 'maxed-out', 'rollover', 'triple-crown', 'full-spectrum']],
-    ['THEMES, FONTS AND MUSIC', ['collector', 'chameleon', 'tech-support', 'insert-coin', 'bit-by-bit', 'bite-sized', 'dj', 'audiophile', 'theme-park', 'channel-surfer', 'silent-running']],
+    ['THEMES, FONTS AND MUSIC', ['collector', 'chameleon', 'tech-support', 'insert-coin', 'bit-by-bit', 'bite-sized', 'in-orbit', 'dj', 'audiophile', 'theme-park', 'channel-surfer', 'silent-running']],
     ['DATES AND TIMES', ['insomniac', 'birthday', 'friday-13th', 'pi-day']],
     ['VS CPU', ['first-blood', 'sparring-partner', 'gladiator', 'warlord', 'easy-target', 'fair-fight', 'hard-reset', 'insanity-check', 'counterstrike', 'ddos', 'flawless', 'tilted', 'afk']],
     ['VS BOTS', ['debugged', 'outhustled', 'bunker-buster', 'patched', 'rogues-gallery', 'kill-9']],

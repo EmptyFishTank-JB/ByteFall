@@ -5,17 +5,26 @@
 @font-face { font-family: 'Share Tech Mono'; src: url('../assets/fonts/share-tech-mono.woff2') format('woff2'); font-display: swap; size-adjust: 111%; }
 @font-face { font-family: 'Bitcount Single'; src: url('../assets/fonts/bitcount-single.woff2') format('woff2'); font-display: swap; }
 @font-face { font-family: 'Bytesized'; src: url('../assets/fonts/bytesized.woff2') format('woff2'); font-display: swap; size-adjust: 120%; }
+/* Orbitron (Matt McInerney, The League of Moveable Type): wide geometric capitals, scaled so the
+   game's all-caps text keeps about Courier's width; a real bold for the numbers */
+@font-face { font-family: 'Orbitron'; src: url('../assets/fonts/orbitron.woff2') format('woff2'); font-weight: 400; font-display: swap; size-adjust: 88%; }
+@font-face { font-family: 'Orbitron'; src: url('../assets/fonts/orbitron-bold.woff2') format('woff2'); font-weight: 700; font-display: swap; size-adjust: 88%; }
 :root { --font: 'Courier New', Courier, monospace; }
 :root[data-font="share-tech"] { --font: 'Share Tech Mono', 'Courier New', monospace; }
 :root[data-font="press-start"] { --font: 'Press Start 2P', 'Courier New', monospace; }
 :root[data-font="bitcount"] { --font: 'Bitcount Single', 'Courier New', monospace; }
 :root[data-font="bytesized"] { --font: 'Bytesized', 'Courier New', monospace; }
+:root[data-font="orbitron"] { --font: 'Orbitron', 'Courier New', monospace; }
+/* (already wide: its buttons drop the extra letter-spacing) */
+:root[data-font="orbitron"] :is(.difficulty, .modes) button { letter-spacing: 0; }
+:root[data-font="orbitron"] #daily-kinds button { font-size: 12px; padding-left: 7px; padding-right: 7px; }
 /* The font picker shows each name in its own font */
 [data-font-preview="courier"] { font-family: 'Courier New', Courier, monospace !important; }
 [data-font-preview="share-tech"] { font-family: 'Share Tech Mono', 'Courier New', monospace !important; }
 [data-font-preview="press-start"] { font-family: 'Press Start 2P', 'Courier New', monospace !important; }
 [data-font-preview="bitcount"] { font-family: 'Bitcount Single', 'Courier New', monospace !important; }
 [data-font-preview="bytesized"] { font-family: 'Bytesized', 'Courier New', monospace !important; }
+[data-font-preview="orbitron"] { font-family: 'Orbitron', 'Courier New', monospace !important; }
 /* PRESS START's small labels need a floor to stay readable */
 :root[data-font="press-start"] .lock-tag,
 :root[data-font="press-start"] .combo { font-size: 12px; }
@@ -1083,7 +1092,7 @@ body.vs-mode .stat-best { display: none; }
   pointer-events: none;
 }
 .cpu-desc[hidden] { display: none; }
-.cpu-desc b { color: var(--accent); font-weight: normal; letter-spacing: 1px; }
+.cpu-desc b { color: var(--accent); font-weight: normal; letter-spacing: 1px; white-space: nowrap; }
 .cpu-stat .sub { font-size: 10px; margin-top: 3px; }
 .cpu-stat.low .label { color: var(--danger); }
 .cpu-hint { display: block; margin-top: 2px; font-size: 8px; letter-spacing: 1px; color: var(--fg-dim); opacity: 0.7; }

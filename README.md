@@ -113,28 +113,24 @@ level between Lv 2 and Lv 80, spread so a level or two always brings something:
 
 | Lv | Unlock | Lv | Unlock | Lv | Unlock |
 |---|---|---|---|---|---|
-| 2 | TRACK 02 | 27 | ANAGLYPH | 53 | LOGIC BOMB |
-| 3 | RNG | 29 | WORM VIRUS | 55 | TRACK 13 |
-| 4 | CIPHER | 30 | SLOT 3 | 57 | BYTESIZED |
-| 5 | SLOT 1 | 31 | TRACK 08 | 59 | HONEYPOT |
-| 6 | BOT: GRIFTER | 33 | BOT: GLITCH | 60 | SLOT 5 |
-| 7 | TRACK 03 | 34 | SYNTHWAVE | 62 | TRACK 14 |
-| 8 | BITFLIP | 35 | KEYLOGGER | 63 | GLYPH |
-| 9 | SHARE TECH MONO | 36 | TRACK 09 | 65 | DICTIONARY ATTACK |
-| 10 | HARD MODE | 39 | BITCOUNT | 68 | TRACK 15 |
-| 11 | TRACK 04 | 40 | TRACK 10 | 70 | RAINBOW TABLE |
-| 12 | AMBER CRT | 41 | PACKET SNIFFER | 72 | SPECTRUM |
-| 13 | BUFFER OVERFLOW | 43 | DOT MATRIX | 75 | SLOT 6 |
-| 14 | HARD CPU | 44 | TRACK 11 | 77 | TRACK 16 |
-| 15 | SLOT 2 | 45 | SLOT 4 | | |
-| 16 | TRACK 05 | 46 | INSANE CPU | | |
-| 17 | BOT: BUNKER | 47 | BACKDOOR | | |
-| 18 | TROJAN | 50 | TRACK 12 | | |
-| 19 | MONOCHROME | 52 | PAPER | | |
-| 20 | TRACK 06 | | | | |
-| 21 | PRESS START | | | | |
-| 23 | PIVOT | | | | |
-| 25 | TRACK 07 | | | | |
+| 2 | TRACK 02 | 20 | TRACK 06 | 46 | INSANE CPU |
+| 3 | RNG | 21 | PRESS START | 47 | BACKDOOR |
+| 4 | CIPHER | 23 | PIVOT | 50 | TRACK 12 |
+| 5 | SLOT 1 | 25 | TRACK 07 | 52 | PAPER |
+| 6 | BOT: GRIFTER | 27 | ANAGLYPH | 53 | LOGIC BOMB |
+| 7 | TRACK 03 | 29 | WORM VIRUS | 55 | TRACK 13 |
+| 8 | BITFLIP | 30 | SLOT 3 | 57 | BYTESIZED |
+| 9 | SHARE TECH MONO | 31 | TRACK 08 | 59 | HONEYPOT |
+| 10 | HARD MODE | 33 | BOT: GLITCH | 60 | SLOT 5 |
+| 11 | TRACK 04 | 34 | SYNTHWAVE | 62 | TRACK 14 |
+| 12 | AMBER CRT | 35 | KEYLOGGER | 63 | GLYPH |
+| 13 | BUFFER OVERFLOW | 36 | TRACK 09 | 65 | DICTIONARY ATTACK |
+| 14 | HARD CPU | 39 | BITCOUNT | 66 | ORBITRON |
+| 15 | SLOT 2 | 40 | TRACK 10 | 68 | TRACK 15 |
+| 16 | TRACK 05 | 41 | PACKET SNIFFER | 70 | RAINBOW TABLE |
+| 17 | BOT: BUNKER | 43 | DOT MATRIX | 72 | SPECTRUM |
+| 18 | TROJAN | 44 | TRACK 11 | 75 | SLOT 6 |
+| 19 | MONOCHROME | 45 | SLOT 4 | 77 | TRACK 16 |
 
 **DECRYPTOR ranks** (the game's prestige). With Lv 80 full, RANK UP TO
 DECRYPTOR (in RECORDS → UNLOCKS, four presses) starts you again at Lv 1 one
@@ -150,9 +146,11 @@ it. The loadout is locked during a session: change it before the first drop or
 after the game ends. The daily games always use the five standard exploits, so
 they're the same for everyone.
 
-**Fonts** (SETTINGS → FONT): COURIER is the default. Each has an achievement for
+**Fonts** (SETTINGS → FONT): COURIER is the default; SHARE TECH MONO, PRESS
+START, BITCOUNT, BYTESIZED and ORBITRON (Matt McInerney's wide geometric
+capitals, bold for the numbers) unlock by level. Each has an achievement for
 playing a full session in it (TECH SUPPORT, INSERT COIN, BIT BY BIT,
-BITE-SIZED). The font changes all the game's text (the particles and the dev
+BITE-SIZED, IN ORBIT). The font changes all the game's text (the particles and the dev
 page too); the fonts are bundled in `assets/fonts/` and scaled so the layout
 stays the same as in Courier.
 
