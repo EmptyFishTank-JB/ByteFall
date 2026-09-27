@@ -43,7 +43,7 @@ function createWanderers(lane, active = () => true) {
       // BUNKER: a pumpkin (its body turns orange), darker ribs, a stem and a leaf
       bunker: { id: 'pumpkin', svg: px([[3, 4, 1, 8], [12, 4, 1, 8], [8, 2, 1, 2], [8, 12]], 'c-rib') + px([[7, 0, 2, 2]], 'c-stem') + px([[9, 1, 2, 1]], 'c-leaf') },
       // BOT: a see-through bedsheet ghost with a wavy hem (BOT shows under it, its face on top)
-      bot: { id: 'ghost', svg: px([[5, 0, 6, 1], [3, 1, 10, 1], [2, 2, 12, 1], [1, 3, 14, 11], [1, 14, 2, 1], [5, 14, 2, 1], [9, 14, 2, 1], [13, 14, 2, 1]], 'c-sheet') },
+      bot: { id: 'ghost', svg: px([[5, 0, 6, 1], [3, 1, 10, 1], [2, 2, 12, 1], [1, 3, 14, 10], [1, 13, 2, 1], [5, 13, 2, 1], [9, 13, 2, 1], [13, 13, 2, 1]], 'c-sheet') }, // (the hem a pixel up: its feet walk under it)
       // GRIFTER: a witch's hat with an orange band and a bent tip
       grifter: { id: 'witch', svg: px([[0, 2, 16, 1], [5, 0, 6, 1], [6, -1, 4, 1], [7, -2, 3, 1], [8, -3, 2, 1], [9, -4, 2, 1], [10, -5, 2, 1]], 'c-hat') + px([[5, 1, 6, 1]], 'c-band') },
       // GLITCH: devil horns and a pointed tail

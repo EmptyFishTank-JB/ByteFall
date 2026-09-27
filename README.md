@@ -505,7 +505,7 @@ switch, or `?season=halloween`, forces one or turns them OFF). **HALLOWEEN**
 (October 15 to 31): most wanderers (80%) arrive in costume, drawn in their own
 pixel grid over the body and under the face, so every face, hop and snap still
 shows: BUNKER is a pumpkin (its face the carved one), BOT a see-through bedsheet
-ghost (80% opaque, floating two or three pixels off the ground and bobbing),
+ghost (80% opaque; it still walks, its legs showing under the hem),
 GRIFTER wears a witch's hat and GLITCH devil horns and a tail. All four
 dressed up on screen at once earns the hidden COSTUME PARTY. A wanderer that
 stops sometimes has a snack (30%): one to three gummy drops (2x2 pixels, a
@@ -570,3 +570,38 @@ work too. The game waits underneath (a VS match pauses). Code: `js/player.js`.
 - **CPU exploit loadouts** (maybe): each bot with its own preferred exploits in VS.
 - **CORE DUMP (track 09)**: its trial layers still wait for picks.
 - **Sound effect themes**: on hold.
+
+### Seasonal stuff (ideas, by the player's own date)
+
+Done: **HALLOWEEN** (costumes, candy snacks, eight visitors, the scary tree) and
+**NOVEMBER** (the turkey, the crows). Each new season plugs into the same
+pieces: a date window in `js/seasons.js`, costumes (`wanderers.js`), visitors
+and scenery (`visitors.js`), a snack, a step on the dev page's SEASON switch,
+and a hidden achievement or two.
+
+- **NEW YEAR** (Dec 31 to Jan 1): fireworks bursting over the card now and then
+  (pixel bursts, the game's particle bursts), party hats and noisemakers
+  ("toot!"), confetti; at the player's local midnight the bots cheer HAPPY NEW
+  YEAR.
+- **LUNAR NEW YEAR** (a week from its date, which moves each year: a small table
+  of dates): a dragon dance crossing the card (a long, segmented dragon), red
+  lanterns pushed in as scenery, strings of firecrackers popping, red envelopes
+  as the snack, and the year's zodiac animal as a visitor.
+- **WINTER** (Dec 1 to 30): falling snow, knit hats and scarves, a snowman
+  pushed in (scenery), a penguin sliding across on its belly, hot cocoa as the
+  snack. Optional, if wanted: a decorated evergreen pushed in and Santa hats /
+  antlers.
+- **SPRING** (Mar 20 to Apr 30): a RABBIT hopping through, butterflies
+  fluttering across (like the bats), flower pots pushed in, spring showers (a
+  rain shower and a bot with an umbrella), chicks peeping after a hen.
+- **SUMMER** (Jun 21 to Aug 31): sunglasses and sun hats, ice cream as the snack
+  (it drips), a beach ball bouncing across, a crab scuttling sideways,
+  fireflies in the evening (the player's local time).
+- **AUTUMN / HARVEST** (Sep 22 to Oct 14): a SCARECROW as scenery (it stands on
+  its post, so pushed in like the tree; the crows land on it and fly off when a
+  bot comes by), falling leaves drifting down, pumpkins and hay bales.
+- **Small days** (the game already has achievements for some): FRIDAY THE 13TH
+  (a black cat crossing the card), PI DAY (the bots share a pie), the game's
+  birthday (party hats), leap day.
+- **HALLOWEEN, more**: a second costume per bot (skeleton, vampire cape, mummy
+  wraps, a black cat), more candy kinds (lollipops, wrapped candies).

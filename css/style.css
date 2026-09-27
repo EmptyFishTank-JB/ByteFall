@@ -2537,10 +2537,6 @@ html.page-twinkle .page-bg { display: block; }
 .visitor.v-fade svg { transition: opacity 0.7s steps(5); opacity: 0; }
 .visitor.v-vanish svg { animation: walker-pix-out 0.45s steps(1) forwards; }
 
-/* BOT's ghost costume floats: two or three pixels off the ground, bobbing a pixel, feet hidden */
-.walker[data-costume="ghost"] .leg { display: none; }
-.walker[data-costume="ghost"]:not(.pop-in):not(.pix-out) .bot-swap { animation: ghost-float 1.8s steps(1) infinite; }
-@keyframes ghost-float { 0% { transform: translateY(-2px); } 50% { transform: translateY(-3px); } }
 /* Pushing the scary tree: straining */
 .cpu-face[data-mood="strain"] :is(.eyes-squint, .mouth-flat, .sweat) { display: inline; }
 /* SCENERY (visitors.js): behind everything in the lane, bots and visitors, but in front of the start
