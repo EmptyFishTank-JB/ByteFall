@@ -756,6 +756,7 @@ function buildColumnButtons() {
 
 function updateColumnButtons() {
   updateFreeBtn();
+  if (dropCtlReady) applyDropControls(); // (the tutorial's buttons always work)
   const buttons = columnButtonsEl.querySelectorAll('button');
   buttons.forEach((btn, c) => {
     const target = pivotFrom !== null && Math.abs(c - pivotFrom) === 1;
@@ -2880,23 +2881,18 @@ buttonsPosBtn.addEventListener('click', () => {
 });
 updateButtonsPos();
 
-// DROP CONTROLS: BOTH (default), BUTTONS or COLUMNS. COLUMNS: touch (or click) and hold on the
-// grid and the bit appears in the top row over that column, following the thumb (or the cursor)
-// from column to column; letting go drops it there (let go well off the grid to call it off).
-// The tutorial keeps its buttons whatever this says (its lessons point at them).
+// DROP CONTROLS: BOTH (default), BUTTONS or COLUMNS. Touch (or click) and hold on the grid and
+// the bit appears in the top row over that column, following the thumb (or the cursor) from
+// column to column; letting go drops it there (let go well off the grid to call it off). The
+// buttons always show: under COLUMNS they're only labels (the one aimed at lights up), and the
+// tutorial keeps them working whatever this says (its lessons point at them).
 const dropCtlBtn = document.getElementById('drop-controls-btn');
 const DROP_CONTROLS = ['both', 'buttons', 'columns'];
 let dropControls = DROP_CONTROLS.includes(storage.get('bytefall-drop-controls')) ? storage.get('bytefall-drop-controls') : 'both';
 const columnsTouchable = () => dropControls !== 'buttons';
 function applyDropControls() {
-  const hide = dropControls === 'columns' && mode !== 'tutorial';
-  if (columnButtonsEl.classList.contains('by-columns') !== hide) {
-    columnButtonsEl.classList.toggle('by-columns', hide);
-    refit();
-  }
+  columnButtonsEl.classList.toggle('by-columns', dropControls === 'columns' && mode !== 'tutorial');
   boardEl.classList.toggle('touch-drop', columnsTouchable());
-  buttonsPosBtn.hidden = hide;
-  if (buttonsPosBtn.nextElementSibling) buttonsPosBtn.nextElementSibling.hidden = hide;
 }
 function updateDropControls() {
   dropCtlBtn.textContent = `DROP BY: ${dropControls.toUpperCase()}`;
@@ -2908,6 +2904,7 @@ dropCtlBtn.addEventListener('click', () => {
   updateDropControls();
 });
 updateDropControls();
+var dropCtlReady = true; // (var: updateColumnButtons can run before this, and sees it undefined)
 
 // Dragging a bit across the top row (COLUMNS). aim: the column it's over, or null
 let aim = null;
@@ -2931,6 +2928,7 @@ function columnAt(x) {
 }
 // The bit shown over the aimed column, in the top row (redrawn with the board: render())
 function placeGhost() {
+  [...columnButtonsEl.children].forEach((btn, c) => btn.classList.toggle('aimed', c === aim && aimable(c)));
   if (aim === null || !queue[0] || !aimable(aim)) { // (a full column, or not now: no bit shown)
     if (aimGhost) aimGhost.remove();
     return;
@@ -2956,6 +2954,7 @@ function setAim(c) {
 function endAim() {
   aim = null;
   aimPointer = null;
+  [...columnButtonsEl.children].forEach((btn) => btn.classList.remove('aimed'));
   if (aimGhost) aimGhost.remove();
   aimGhost = null;
 }
