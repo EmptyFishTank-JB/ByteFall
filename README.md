@@ -167,6 +167,13 @@ levels, COUNTERSTRIKE, DDOS, FLAWLESS, and the hidden TILTED and AFK), VS BOTS
 KNOCKOUT, BARE METAL, ARMS RACE, ZERO MERCY). Bits, chains, nibbles, layers and
 exploits run in VS still count toward everything else.
 
+**Streaks follow your local clock.** DAILY DRIVER, STREAK and CENTURY show your
+current daily streak, not your best: it lasts through the next local day and
+drops to 0 once a whole day passes with no Daily game (after midnight on the
+day you missed). DAILY SWEEP shows today's daily games and starts over at local
+midnight. Achievements for a run in a row (SURGICAL, PICKPOCKET) show your best
+run so far. Unearned rows in RECORDS say which kind of count they show.
+
 The menu icon (lines / trophy, top left) opens three tabs, each its own card:
 **RULES**, **RECORDS** and **EXPLOITS**. RECORDS has level and DECRYPTOR rank,
 every unlock and achievement with a progress tracker, and lifetime stats

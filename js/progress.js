@@ -73,7 +73,7 @@ const Progress = (() => {
     snakeEyes: 0, // lost with 0 points
     leet: 0, // finished on exactly 1,337
     bestClassicDrops: 0, // longest CLASSIC session, in drops
-    dailyDay: { date: '', kinds: {} }, // daily games played on the latest UTC day
+    dailyDay: { date: '', kinds: {} }, // daily games played on the latest local day
     dailySweeps: 0, // days all four daily games were played
     breaches: 0, // BREACH boards cleared
     sundaySolves: 0, // Sunday (hardest) daily puzzles solved
@@ -197,13 +197,18 @@ const Progress = (() => {
   let sittingThemes = 0; // theme changes since the page loaded
   let sittingTracks = 0; // tracks picked since the page loaded
   const count = (obj) => Object.keys(obj).length;
+  // A local calendar day as YYYY-MM-DD, `offset` days from today
+  const localDay = (offset = 0) => {
+    const t = new Date();
+    t.setDate(t.getDate() + offset);
+    return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+  };
   // The Daily streak as it stands today: back to 0 once a day has been missed (the streak
   // achievements track this, not the best one, so a missed day starts them over)
-  const currentStreak = () => {
-    const today = new Date().toISOString().slice(0, 10);
-    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-    return d.lastDaily === today || d.lastDaily === yesterday ? d.dailyStreak : 0;
-  };
+  // (days are the player's own: they turn over at local midnight)
+  const currentStreak = () => (d.lastDaily === localDay() || d.lastDaily === localDay(-1) ? d.dailyStreak : 0);
+  // The daily games played today, toward DAILY SWEEP (back to 0 at local midnight)
+  const kindsToday = () => (d.dailyDay.date === localDay() ? count(d.dailyDay.kinds) : 0);
 
   const ACHIEVEMENTS = [
     { id: 'first-contact', name: 'FIRST CONTACT', desc: 'Start your first session', value: () => d.games, goal: 1 },
@@ -233,7 +238,7 @@ const Progress = (() => {
     { id: 'ghost', name: 'GHOST', desc: 'Last 100 drops in one Hard session', value: () => d.bestHardDrops, goal: 100 },
     { id: 'clean-sweep', name: 'CLEAN SWEEP', desc: 'Clear the whole board after 10+ drops', value: () => d.sweeps, goal: 1 },
     { id: 'close-call', name: 'CLOSE CALL', desc: 'Decrypt your way back under the line', value: () => d.closeCalls, goal: 1 },
-    { id: 'daily-driver', name: 'DAILY DRIVER', desc: 'Play a Daily game 7 days in a row', value: currentStreak, goal: 7 },
+    { id: 'daily-driver', name: 'DAILY DRIVER', desc: 'Play a Daily game 7 days in a row', value: currentStreak, goal: 7, note: 'Progress shows your current streak; a missed day (at midnight) starts it over' },
     { id: 'locksmith', name: 'LOCKSMITH', desc: 'Solve 10 puzzles', value: () => Object.keys(d.puzzles).length, goal: 10 },
     { id: 'master-key', name: 'MASTER KEY', desc: 'Solve every puzzle', value: () => Object.keys(d.puzzles).length, goal: () => puzzleCount },
     { id: 'maxed-out', name: 'MAXED OUT', desc: 'Reach Lv 80 as DECRYPTOR 9', value: () => (d.decryptor >= 10 || (d.decryptor >= 9 && levelInfo().maxed) ? 1 : 0), goal: 1 },
@@ -243,7 +248,7 @@ const Progress = (() => {
     { id: 'collector', name: 'COLLECTOR', desc: 'Unlock all 16 music tracks', value: () => 1 + trackIds.slice(0, trackCount - 1).filter(isUnlocked).length, goal: ALL_TRACKS },
     // Skill
     { id: 'zero-day', name: 'ZERO-DAY', desc: 'Decrypt a bit with the first drop of a session', value: () => d.firstDropClears, goal: 1 },
-    { id: 'surgical', name: 'SURGICAL', desc: '20 drops in a row that each decrypt a bit (exploit drops skip)', value: () => d.bestClearStreak, goal: 20 },
+    { id: 'surgical', name: 'SURGICAL', desc: '20 drops in a row that each decrypt a bit (exploit drops skip)', value: () => d.bestClearStreak, goal: 20, note: 'Progress shows your best run so far' },
     { id: 'no-tools', name: 'NO TOOLS', desc: 'Score 2,000 in one session without running an exploit', value: () => d.bestNoToolsScore, goal: 2000 },
     { id: 'heap-spray', name: 'HEAP SPRAY', desc: 'Decrypt 15 bits with one drop', value: () => d.bestDropBits, goal: 15 },
     { id: 'full-stack', name: 'FULL STACK', desc: 'Fill a column to the line, then bring it back down to half height', value: () => d.fullStacks, goal: 1 },
@@ -254,10 +259,10 @@ const Progress = (() => {
     { id: 'blitzkrieg', name: 'BLITZKRIEG', desc: 'Score 3,000 in one Blitz', value: () => d.bestBlitz, goal: 3000 },
     { id: 'zen-master', name: 'ZEN MASTER', desc: 'Last 300 drops in one Zen session', value: () => d.bestZenDrops, goal: 300 },
     { id: 'daily-grind', name: 'DAILY GRIND', desc: 'Play the Daily on 30 different days', value: () => d.dailies, goal: 30 },
-    { id: 'streak', name: 'STREAK', desc: 'Play a Daily game 30 days in a row', value: currentStreak, goal: 30 },
+    { id: 'streak', name: 'STREAK', desc: 'Play a Daily game 30 days in a row', value: currentStreak, goal: 30, note: 'Progress shows your current streak; a missed day (at midnight) starts it over' },
     { id: 'perfect-daily', name: 'PERFECT DAILY', desc: 'Finish a Daily Decrypt with the board empty', value: () => d.perfectDailies, goal: 1 },
     { id: 'first-try', name: 'FIRST TRY', desc: 'Solve a puzzle on your first attempt', value: () => d.firstTries, goal: 1 },
-    { id: 'pickpocket', name: 'PICKPOCKET', desc: 'Solve 5 puzzles in a row without failing one', value: () => d.bestPuzzleStreak, goal: 5 },
+    { id: 'pickpocket', name: 'PICKPOCKET', desc: 'Solve 5 puzzles in a row without failing one', value: () => d.bestPuzzleStreak, goal: 5, note: 'Progress shows your best run so far' },
     // Exploits
     { id: 'time-bomb', name: 'TIME BOMB', desc: 'Wipe 5 blocks with one Logic Bomb blast', value: () => d.bestBombHits, goal: 5 },
     { id: 'sting', name: 'STING', desc: 'Spring a Honeypot', value: () => d.stings, goal: 1 },
@@ -297,12 +302,12 @@ const Progress = (() => {
     { id: '106473', name: '106473', desc: 'Decrypt 106,473 bits', value: () => d.bits, goal: 106473 },
     { id: 'lucky-sevens', name: 'LUCKY SEVENS', desc: 'Decrypt 1,000 [7]s', value: () => d.bitsByValue[7] || 0, goal: 1000 },
     { id: 'lightspeed', name: 'LIGHTSPEED', desc: 'Score 5,000 in one Blitz', value: () => d.bestBlitz, goal: 5000 },
-    { id: 'daily-sweep', name: 'DAILY SWEEP', desc: 'Play all four daily games on the same day', value: () => d.dailySweeps, goal: 1 },
+    { id: 'daily-sweep', name: 'DAILY SWEEP', desc: 'Play all four daily games on the same day', value: () => (d.dailySweeps ? 4 : kindsToday()), goal: 4, note: 'Progress shows today\u2019s games; it starts over at midnight' },
     { id: 'breached', name: 'BREACHED', desc: 'Clear the whole board in BREACH', value: () => d.breaches, goal: 1 },
     { id: 'one-shot', name: 'ONE SHOT', desc: 'Solve a daily puzzle on the first try', value: () => d.dailyFirstTries, goal: 1 },
     { id: 'sunday-best', name: 'SUNDAY BEST', desc: "Solve a Sunday daily puzzle (the week's hardest)", value: () => d.sundaySolves, goal: 1 },
     { id: 'safecracker', name: 'SAFECRACKER', desc: 'Solve 30 puzzles', value: () => count(d.puzzles), goal: 30 },
-    { id: 'century', name: 'CENTURY', desc: 'Play a Daily game 100 days in a row', value: currentStreak, goal: 100 },
+    { id: 'century', name: 'CENTURY', desc: 'Play a Daily game 100 days in a row', value: currentStreak, goal: 100, note: 'Progress shows your current streak; a missed day (at midnight) starts it over' },
     { id: 'triple-crown', name: 'TRIPLE CROWN', desc: 'Reach DECRYPTOR 3', value: () => d.decryptor, goal: 3 },
     // Nibbles (Easy and Normal: 4 bits decrypted by one drop)
     ...[
@@ -449,11 +454,11 @@ const Progress = (() => {
   let run = { difficulty: 'normal', mode: 'classic', drops: 0, started: false, bits: 0, chain: 0, bytes: 0 };
 
   // One Daily Decrypt per UTC day counts toward the streak
+  // (the player's local day: the streak turns over at their midnight)
   function playedDaily() {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = localDay();
     if (d.lastDaily === today) return;
-    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-    d.dailyStreak = d.lastDaily === yesterday ? d.dailyStreak + 1 : 1;
+    d.dailyStreak = d.lastDaily === localDay(-1) ? d.dailyStreak + 1 : 1;
     d.bestDailyStreak = Math.max(d.bestDailyStreak, d.dailyStreak);
     d.lastDaily = today;
     d.dailies++;
@@ -532,6 +537,7 @@ const Progress = (() => {
       save();
     },
     levelInfo,
+    dailyStreak: currentStreak, // (as it stands today, back to 0 after a missed day)
     // Lv 80 only: back to Lv 0 with everything locked again but one more kept exploit slot
     rankUp() {
       if (!levelInfo().maxed) return false;
@@ -580,7 +586,7 @@ const Progress = (() => {
         if (run.mode !== 'puzzle' && run.mode !== 'vs' && run.mode !== 'tutorial') d.games++; // puzzle retries, VS matches and the tutorial aren't sessions
         if (run.daily) {
           playedDaily();
-          const today = new Date().toISOString().slice(0, 10);
+          const today = localDay();
           if (d.dailyDay.date !== today) d.dailyDay = { date: today, kinds: {} };
           if (!d.dailyDay.kinds[run.mode]) {
             d.dailyDay.kinds[run.mode] = true;

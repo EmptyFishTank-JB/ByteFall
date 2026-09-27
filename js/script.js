@@ -3409,7 +3409,8 @@ function renderRecords() {
       for (const a of items) {
         // Hidden ones stay a mystery until earned
         const secret = a.hidden && !a.done;
-        list.appendChild(recordRow({ name: secret ? '???' : a.name, desc: secret ? 'Hidden: keep playing to find it' : a.desc, current: a.current, goal: a.goal, done: a.done }));
+        const desc = a.note && !a.done ? `${a.desc}. ${a.note}.` : a.desc; // (how its progress counts)
+        list.appendChild(recordRow({ name: secret ? '???' : a.name, desc: secret ? 'Hidden: keep playing to find it' : desc, current: a.current, goal: a.goal, done: a.done }));
       }
       return list;
     };
@@ -3452,7 +3453,7 @@ function renderRecords() {
       ['CLEAN SWEEPS', fmt(s.sweeps)],
       ['CLOSE CALLS', fmt(s.closeCalls)],
       ['DAILY DECRYPTS PLAYED', fmt(s.dailies)],
-      ['DAILY STREAK', `${fmt(s.lastDaily === todayKey() || s.lastDaily === new Date(Date.now() - 86400000).toISOString().slice(0, 10) ? s.dailyStreak : 0)} (best ${fmt(s.bestDailyStreak)})`],
+      ['DAILY STREAK', `${fmt(Progress.dailyStreak())} (best ${fmt(s.bestDailyStreak)})`],
       ['DAILY DECRYPT TODAY', storage.get(dailyPlayedKey('decrypt')) ? fmt(Number(storage.get(dailyKey('decrypt'))) || 0) : 'not played'],
       ['DATA DECRYPTED', fmtData(s.bits)],
       ['TOTAL POINTS', fmt(s.points)],

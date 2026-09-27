@@ -88,7 +88,7 @@ DAILY,DAILY DRIVER,Play a Daily game 7 days in a row,7,Standard,daily-driver
 DAILY,DAILY GRIND,Play the Daily on 30 different days,30,Standard,daily-grind
 DAILY,STREAK,Play a Daily game 30 days in a row,30,Standard,streak
 DAILY,CENTURY,Play a Daily game 100 days in a row,100,Standard,century
-DAILY,DAILY SWEEP,Play all four daily games on the same day,1,Standard,daily-sweep
+DAILY,DAILY SWEEP,Play all four daily games on the same day,4,Standard,daily-sweep
 DAILY,PERFECT DAILY,Finish a Daily Decrypt with the board empty,1,Standard,perfect-daily
 DAILY,BREACHED,Clear the whole board in BREACH,1,Standard,breached
 DAILY,ONE SHOT,Solve a daily puzzle on the first try,1,Standard,one-shot
