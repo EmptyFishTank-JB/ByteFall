@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="../js/fonts.js?v=204"></script>
+<script src="../js/fonts.js?v=205"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#020403">
@@ -235,9 +235,10 @@
 
   <section id="dev">
     <h2><span class="sec-num">00</span> Dev Switches</h2>
-    <p class="sec-desc">For testing in this browser only. UNLOCK EVERYTHING works like owning Full Access (Hard, every track, theme and exploit) without touching your saved progress, and the game shows a DEV badge while it's on. While it's on, press and hold any exploit card in the game for 2 seconds to make it your next drop, slotted or not. JUMP TO LV 80 and +10 LEVELS edit your saved progress so you can try levels, exploit slots and DECRYPTOR ranks quickly. AD BANNER PREVIEW (off by default) steps through 50, 60 and 90px: a grey strip where a phone's banner ad would sit, with everything fitted around it, to get a feel for the space. AD BANNER SPOT puts it at the TOP (the default) or BOTTOM of the screen. BACKGROUND switches what's behind the game card between the PLAIN gradient and the TWINKLE starlight. Both change as soon as you go back to the game.</p>
+    <p class="sec-desc">For testing in this browser only. UNLOCK EVERYTHING works like owning Full Access (Hard, every track, theme and exploit) without touching your saved progress, and the game shows a DEV badge while it's on (it owns Full Access in the STORE too). OWN REMOVE ADS previews owning just REMOVE ADS in the STORE (reload the game to see it). While it's on, press and hold any exploit card in the game for 2 seconds to make it your next drop, slotted or not. JUMP TO LV 80 and +10 LEVELS edit your saved progress so you can try levels, exploit slots and DECRYPTOR ranks quickly. AD BANNER PREVIEW (off by default) steps through 50, 60 and 90px: a grey strip where a phone's banner ad would sit, with everything fitted around it, to get a feel for the space. AD BANNER SPOT puts it at the TOP (the default) or BOTTOM of the screen. BACKGROUND switches what's behind the game card between the PLAIN gradient and the TWINKLE starlight. Both change as soon as you go back to the game.</p>
     <div class="dev-switches">
       <button type="button" id="dev-unlock">UNLOCK EVERYTHING: OFF</button>
+      <button type="button" id="dev-noads">OWN REMOVE ADS: OFF</button>
       <button type="button" id="dev-lv80">JUMP TO LV 80</button>
       <button type="button" id="dev-levels">+10 LEVELS</button>
       <button type="button" id="dev-adpreview">AD BANNER PREVIEW: OFF</button>
@@ -280,18 +281,18 @@
   <footer>GENERATED FROM SOURCE &mdash; NO AUDIO FILES, ALL SYNTHESIZED ON PLAY</footer>
 </div>
 
-<script src="../js/sfx.js?v=204"></script>
-<script src="../js/music/music-bytefall-theme.js?v=204"></script>
-<script src="../js/music/music-sleep-mode.js?v=204"></script>
-<script src="../js/music/music-brute-force.js?v=204"></script>
-<script src="../js/music/music-deep-web.js?v=204"></script>
-<script src="../js/music/music-zero-day.js?v=204"></script>
-<script src="../js/music/music-system-restore.js?v=204"></script>
-<script src="../js/music/music-night-drive.js?v=204"></script>
-<script src="../js/music/music-standby-mode.js?v=204"></script>
-<script src="../js/music/music-core-dump.js?v=204"></script>
-<script src="../js/music/music-handshake.js?v=204"></script>
-<script src="../js/viz.js?v=204"></script>
+<script src="../js/sfx.js?v=205"></script>
+<script src="../js/music/music-bytefall-theme.js?v=205"></script>
+<script src="../js/music/music-sleep-mode.js?v=205"></script>
+<script src="../js/music/music-brute-force.js?v=205"></script>
+<script src="../js/music/music-deep-web.js?v=205"></script>
+<script src="../js/music/music-zero-day.js?v=205"></script>
+<script src="../js/music/music-system-restore.js?v=205"></script>
+<script src="../js/music/music-night-drive.js?v=205"></script>
+<script src="../js/music/music-standby-mode.js?v=205"></script>
+<script src="../js/music/music-core-dump.js?v=205"></script>
+<script src="../js/music/music-handshake.js?v=205"></script>
+<script src="../js/viz.js?v=205"></script>
 <script>
 (() => {
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -808,6 +809,19 @@
       status.textContent = 'Saved. Go back to the game to see it.';
     });
     showPos();
+    const NA = 'bytefall-dev-noads';
+    const naBtn = document.getElementById('dev-noads');
+    const showNa = () => {
+      const on = get(NA) === 'on';
+      naBtn.textContent = `OWN REMOVE ADS: ${on ? 'ON' : 'OFF'}`;
+      naBtn.classList.toggle('on', on);
+    };
+    naBtn.addEventListener('click', () => {
+      set(NA, get(NA) === 'on' ? 'off' : 'on');
+      showNa();
+      status.textContent = 'Saved. Reload the game to see it.';
+    });
+    showNa();
     const TW = 'bytefall-dev-twinkle';
     const twBtn = document.getElementById('dev-twinkle');
     const showTw = () => {

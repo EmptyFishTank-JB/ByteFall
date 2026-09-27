@@ -601,8 +601,8 @@ function fitVsSetup() {
 // the lines of text above buttons (notes, descriptions): each keeps the height it has in
 // Courier, so a wider font wrapping onto another line can't push the buttons below it down.
 // Re-measured when the layout changes (fitBoard), a text changes, or one comes into view.
-const LOCKED_BUTTONS = '.modes button, .difficulty button, #vs-layers-btn, #vs-exploits-btn, #vs-start, #pause-resume, #overlay-restart-btn, #overlay-share-btn, .records-tabs button, #vs-goal';
-const LOCKED_TEXT = '#mode-info, .settings-note, .vs-setup-note, .vs-setup-msg, #overlay-note, footer p';
+const LOCKED_BUTTONS = '.modes button, .difficulty button, #vs-layers-btn, #vs-exploits-btn, #vs-start, #pause-resume, #overlay-restart-btn, #overlay-share-btn, .records-tabs button, #vs-goal, .menu-tabs button, .store-buy, .store-restore, .remove-ads-link';
+const LOCKED_TEXT = '#mode-info, .settings-note, .vs-setup-note, .vs-setup-msg, #overlay-note, footer p, .panel-store p';
 function unfitButton(b) {
   if (!('fitLs' in b.dataset)) return;
   b.style.letterSpacing = b.dataset.fitLs;
@@ -3357,6 +3357,14 @@ function placeToast() {
   toastEl.classList.toggle('on-board', !!onBoard);
   toastEl.style.top = onBoard ? `${(a.top + a.bottom) / 2}px` : '';
   toastEl.style.left = onBoard ? `${(a.left + z.right) / 2}px` : '';
+  // (on one line over the board: a wide font closes up, then shrinks, to stay on the screen)
+  toastEl.style.letterSpacing = toastEl.style.fontSize = '';
+  if (!onBoard) return;
+  let ls = parseFloat(getComputedStyle(toastEl).letterSpacing) || 0;
+  let size = parseFloat(getComputedStyle(toastEl).fontSize);
+  const wide = () => toastEl.scrollWidth > toastEl.clientWidth + 0.5;
+  while (wide() && ls > 0) toastEl.style.letterSpacing = `${(ls = Math.max(0, ls - 0.5))}px`;
+  while (wide() && size > 7) toastEl.style.fontSize = `${(size -= 0.5)}px`;
 }
 window.addEventListener('resize', () => toastEl.hidden || placeToast());
 window.addEventListener('scroll', () => toastEl.hidden || placeToast(), { passive: true });
@@ -3635,6 +3643,7 @@ function showMenuPane(pane) {
   });
   recordsEl.querySelectorAll('.menu-pane').forEach((el) => { el.hidden = el.dataset.pane !== pane; });
   if (pane === 'records') renderRecords();
+  if (typeof Store !== 'undefined') Store.render(); // (and the REMOVE ADS link, off on its own tab)
   recordsEl.scrollTop = 0;
 }
 // pane: which tab to show (the last one shown if left out)

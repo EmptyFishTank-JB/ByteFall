@@ -183,12 +183,24 @@ day you missed). DAILY SWEEP shows today's daily games and starts over at local
 midnight. Achievements for a run in a row (SURGICAL, PICKPOCKET) show your best
 run so far. Unearned rows in RECORDS say which kind of count they show.
 
-The menu icon (lines / trophy, top left) opens three tabs, each its own card:
-**RULES**, **RECORDS** and **EXPLOITS**. RECORDS has level and DECRYPTOR rank,
+The menu icon (lines / trophy, top left) opens four tabs, each its own card:
+**RULES**, **RECORDS**, **EXPLOITS** and **STORE**. RECORDS has level and DECRYPTOR rank,
 every unlock and achievement with a progress tracker, and lifetime stats
 (UNLOCKS / ACHIEVEMENTS / STATS). New unlocks, level-ups
 and achievements pop up as they happen (achievements stay up about 5.5 seconds, like a console's, before crumbling; the rest about 2). Progress is saved in the browser
 (`bytefall-progress`).
+
+**STORE** (`js/store.js`, the cart tab): two purchases, **REMOVE ADS** (no ads,
+nothing unlocked) and **FULL ACCESS** (everything that unlocks by level, and no
+ads), each with its price and BUY (OWNED once bought), and **RESTORE PURCHASES**
+for another device or a reinstall. It's a preview for now: BUY and RESTORE say
+the store isn't open and charge nothing, at placeholder prices ($2.99 and $4.99;
+the store will set the real ones). The app will swap `buy()` and `restore()` for
+Google Play's billing and tell `Unlocks` what's owned (`set` / `setNoAds`). While
+there are ads, a **REMOVE ADS** link (cart icon) sits at the foot of the menu's
+other tabs and opens the STORE with REMOVE ADS lit up. Buying either one earns
+**INDIE SUPPORTER** (THANK YOU group): a real purchase only, not the dev page's
+previews (UNLOCK EVERYTHING owns FULL ACCESS; OWN REMOVE ADS owns REMOVE ADS).
 
 `js/progress.js` holds the stats, levels, unlocks and achievements; `js/script.js`
 reports each drop, decrypt, peel, byte, exploit and point to it.
@@ -417,7 +429,9 @@ point. It counts toward nothing (no XP, stats, achievements or best score). Pop-
 
 ## Startup
 
-A fresh launch (the app or tab opened anew) opens on the START SCREEN: a card
+A fresh launch (the app or tab opened anew) opens on the START SCREEN (the studio,
+EMPTYFISHTANK-JB PRESENTS, across the top; the copyright, the Arcade Paradise
+credit and the build number, from the page's own version, above the wanderers): a card
 filling the screen with the starlight twinkling across it, the BYTEFALL title
 in the middle and a glowing START button below it, as far under the tagline as
 the tagline is under the title (measured letter to letter, in every font; `js/start.js`). A tap anywhere

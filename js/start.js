@@ -9,6 +9,9 @@
     if (screen) screen.hidden = true;
     return;
   }
+  // The build number on the card: this page's own version (index.html's ?v=)
+  const build = document.currentScript && new URL(document.currentScript.src).searchParams.get('v');
+  if (build) document.getElementById('start-build').textContent = `BUILD ${build}`;
   const INTRO_KEY = 'bytefall-intro-done';
   const FADE_MS = 600;
   let starting = false;

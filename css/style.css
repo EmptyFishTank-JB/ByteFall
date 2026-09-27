@@ -2430,3 +2430,52 @@ html.page-twinkle .page-bg { display: block; }
    Courier), so picking one never moves what's below */
 #font-note { min-height: 3lh; }
 #theme-note { min-height: 4lh; }
+
+/* STORE (store.js): the MENU's fourth tab, cards like the exploits', and RESTORE PURCHASES */
+.panel-store .store-preview { font-size: 10px; letter-spacing: 1px; color: var(--accent); }
+.store-item {
+  border: 1px dashed var(--grid-line); border-radius: 4px; padding: 8px 10px; margin-top: 10px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.store-item h3 { margin: 0; display: flex; align-items: baseline; font-size: 13px; letter-spacing: 1px; color: var(--fg); }
+.store-item p { margin: 0; font-size: 11px; }
+.store-price { margin-left: auto; font-size: 12px; color: var(--accent); }
+.store-buy, .store-restore {
+  font-family: inherit; font-size: 12px; letter-spacing: 2px; padding: 6px 16px; cursor: pointer;
+  background: rgba(var(--accent-rgb), 0.08); color: var(--accent); border: 1px solid var(--accent); border-radius: 4px;
+}
+.store-buy { align-self: flex-end; }
+.store-buy:hover:not(:disabled), .store-restore:hover { background: rgba(var(--accent-rgb), 0.18); }
+.store-item.owned { border-style: solid; border-color: var(--fg-dim); }
+.store-item.owned .store-price { color: var(--fg); }
+.store-buy:disabled { cursor: default; color: var(--fg); border-color: var(--fg-dim); background: none; }
+.store-item.flash { animation: store-flash 1.2s ease-out; }
+@keyframes store-flash { 0%, 30% { border-color: var(--accent); box-shadow: 0 0 14px rgba(var(--accent-rgb), 0.5); } 100% { box-shadow: none; } }
+/* (room for a message, so RESTORE PURCHASES never moves) */
+.store-msg { min-height: 2lh; margin: 10px 0 6px !important; font-size: 11px; letter-spacing: 1px; color: var(--accent); text-align: center; }
+.store-restore { display: block; width: 100%; color: var(--fg); border-color: var(--fg-dim); background: none; }
+.panel-store .store-note { margin: 8px 0 0; font-size: 10px; color: var(--fg-dim); }
+/* REMOVE ADS: a quiet link at the foot of the menu's other tabs */
+.remove-ads-link {
+  display: flex; align-items: center; justify-content: center; gap: 6px; margin: 10px auto 0; padding: 5px 12px;
+  font-family: inherit; font-size: 11px; letter-spacing: 2px; cursor: pointer;
+  background: none; color: var(--accent); border: 1px dashed rgba(var(--accent-rgb), 0.6); border-radius: 4px;
+}
+.remove-ads-link svg { width: 15px; height: 15px; }
+.store-buy, .store-restore, .remove-ads-link, .menu-tabs button { white-space: nowrap; }
+.remove-ads-link:hover { background: rgba(var(--accent-rgb), 0.1); }
+.remove-ads-link[hidden] { display: none; }
+
+/* START SCREEN credits: the studio at the top; copyright, the credit and the build number above
+   the wanderers */
+.start-studio {
+  position: absolute; top: 28px; left: 0; right: 0; margin: 0; text-align: center;
+  font-size: 11px; letter-spacing: 4px; color: var(--fg-dim);
+}
+.start-studio span { display: block; margin-top: 6px; font-size: 9px; letter-spacing: 3px; opacity: 0.7; }
+.start-legal {
+  position: absolute; left: 12px; right: 12px; bottom: 64px; text-align: center; pointer-events: none;
+  font-size: 9px; letter-spacing: 1px; line-height: 1.6; color: var(--fg-dim); opacity: 0.8;
+}
+.start-legal p { margin: 0; }
+.start-build { opacity: 0.7; }

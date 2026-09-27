@@ -406,6 +406,8 @@ const Progress = (() => {
         { id: 'developer-options', name: 'DEVELOPER OPTIONS', desc: 'Tap the VS CPU seven times in a row', value: n('dev-taps'), goal: 1, hidden: true },
       ];
     })(),
+    // Buying anything in the STORE (a real purchase: the dev page's previews don't count)
+    { id: 'indie-supporter', name: 'INDIE SUPPORTER', desc: 'Buy REMOVE ADS or FULL ACCESS in the STORE. Thank you for supporting an indie game!', value: () => (Unlocks.hasPurchase() ? 1 : 0), goal: 1 },
     // Impossible (or nearly): lifetime points. Listed on their own, outside the EARNED count.
     { id: '32-bit-overflow', name: '32-BIT OVERFLOW', desc: 'Decrypt 1,073,741,824 nibbles (2^32 bits)', value: () => d.nibbles, goal: 1073741824, impossible: true },
     { id: 'gigabyte', name: 'GIGABYTE', desc: 'Earn 8,000,000,000 points in total', value: () => d.points, goal: 8e9, impossible: true },
@@ -433,6 +435,7 @@ const Progress = (() => {
     ['VS BOTS', ['debugged', 'outhustled', 'bunker-buster', 'patched', 'rogues-gallery', 'kill-9']],
     ['VS MODES AND SETTINGS', ['stack-overflow', 'war-of-attrition', 'frag-limit', 'rope-a-dope', 'multi-boot', 'long-haul', 'heavyweight', 'bankrupt', 'knockout', 'bare-metal', 'arms-race', 'zero-mercy']],
     ['BOTS', ['poke', 'boo', 'the-eyebrow', 'third-wheel', 'matchmaker', 'jump-scare', 'now-you-see-me', 'full-crew', 'personal-space', 'hr-wants-a-word', 'developer-options']],
+    ['THANK YOU', ['indie-supporter']],
     ['SECRETS', ['konami']],
   ];
   const groupOf = {};
