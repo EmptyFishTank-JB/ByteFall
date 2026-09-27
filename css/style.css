@@ -2415,3 +2415,15 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
 /* The game card's wanderers: along its bottom edge between the corner buttons, coming and going from behind them */
 .game-walkers { position: absolute; left: 80px; right: 80px; bottom: 6px; height: 44px; overflow: hidden; pointer-events: none; z-index: 0; }
 .corner-btn { z-index: 1; }
+
+/* Dev: AD BANNER PREVIEW (script.js). The page's height (--app-h) already leaves the strip out; the
+   transform makes the body the frame for fixed layers (start screen, overlays, particles), so they
+   stop above the strip too. The strip hangs just under the body. */
+html.ad-preview body { transform: translate(0, 0); }
+html.ad-preview #board-fx { height: 100%; }
+.ad-preview-bar {
+  position: fixed; top: 100%; left: 0; right: 0; height: var(--ad-h, 50px); z-index: 10000;
+  display: flex; align-items: center; justify-content: center;
+  background: #8a8a8a; color: #3a3a3a; border-top: 1px solid #b0b0b0;
+  font: 11px/1 monospace; letter-spacing: 2px; pointer-events: none;
+}

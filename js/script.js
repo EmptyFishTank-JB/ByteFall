@@ -596,13 +596,27 @@ function fitVsSetup() {
 // fires no resize when it settles), so the page sets its own height (--app-h, used instead of
 // 100dvh) from the smallest of the browser's measures, and re-checks it on every viewport event
 // plus a cheap poll, refitting the board whenever anything changed.
+// Dev: AD BANNER PREVIEW (dev tools, off by default, or ?adpreview) holds a grey 50px strip at the
+// bottom where a phone's banner ad would go. The game's height leaves it out, so everything fits
+// above it as it would with a real banner (the body becomes the frame for fixed layers too).
+const AD_PREVIEW_H = 50;
+const adPreview = new URLSearchParams(location.search).has('adpreview') || storage.get('bytefall-dev-adpreview') === 'on';
+if (adPreview) {
+  document.documentElement.classList.add('ad-preview');
+  document.documentElement.style.setProperty('--ad-h', `${AD_PREVIEW_H}px`);
+  const ad = document.createElement('div');
+  ad.className = 'ad-preview-bar';
+  ad.setAttribute('aria-hidden', 'true');
+  ad.textContent = `AD BANNER // ${AD_PREVIEW_H}PX`;
+  document.body.append(ad);
+}
 function viewportHeight() {
   const vv = window.visualViewport;
   const heights = [document.documentElement.clientHeight];
   // (zoomed in, innerHeight and the visual viewport shrink with the zoom: use the page's size)
   if (vv) heights.push(vv.height * vv.scale);
   if (!vv || Math.abs(vv.scale - 1) < 0.01) heights.push(window.innerHeight);
-  return Math.floor(Math.min(...heights.filter((h) => h > 0)));
+  return Math.floor(Math.min(...heights.filter((h) => h > 0))) - (adPreview ? AD_PREVIEW_H : 0);
 }
 let viewportKey = '';
 function checkViewport(force) {

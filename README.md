@@ -188,6 +188,12 @@ reports each drop, decrypt, peel, byte, exploit and point to it.
 Access, for this browser; the game shows a DEV badge while it's on), JUMP TO
 LV 80 and +10 LEVELS for testing DECRYPTOR ranks, slots and exploit unlocks. With UNLOCK EVERYTHING on,
 press and hold any exploit card for 2 seconds to make it your next drop.
+AD BANNER PREVIEW (off by default; or add `?adpreview` to the URL) holds a grey
+50px strip at the bottom of the screen where a phone's banner ad would go. The
+game's height leaves the strip out, so the card, start screen, menus and music
+player all fit above it, the way they would with a real banner that resizes the
+page. When less than about 650px is left above the strip (a 360×640 phone, say),
+the board is at its smallest and the drop buttons start to crowd it.
 
 ## App view on a phone
 
