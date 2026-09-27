@@ -394,7 +394,7 @@ function initGame() {
     el.querySelector('.combo').textContent = `${easy ? HACKS[el.dataset.hack].easyCombo : HACK_COMBO}x`;
   });
   document.getElementById('overflow-top').textContent = COLS;
-  document.getElementById('rules-keys').textContent = `Click a column or press 1\u2013${COLS} to drop`;
+  document.getElementById('rules-keys').textContent = `Tap a column or its button, or press 1\u2013${COLS}, to drop`;
   document.getElementById('rules-pulse').textContent = difficulty === 'hard'
     ? `every ${BASE_INTERVAL} drops, tightening to every ${HARD_MIN_INTERVAL} as your score climbs`
     : `every ${BASE_INTERVAL} drops`;
@@ -756,7 +756,7 @@ function buildColumnButtons() {
 
 function updateColumnButtons() {
   updateFreeBtn();
-  if (dropCtlReady) applyDropControls(); // (the tutorial's buttons always work)
+  if (dropCtlReady) applyDropControls(); // (the tutorial takes both)
   const buttons = columnButtonsEl.querySelectorAll('button');
   buttons.forEach((btn, c) => {
     const target = pivotFrom !== null && Math.abs(c - pivotFrom) === 1;
@@ -2881,21 +2881,19 @@ buttonsPosBtn.addEventListener('click', () => {
 });
 updateButtonsPos();
 
-// DROP CONTROLS: BOTH (default), BUTTONS or COLUMNS. Touch (or click) and hold on the grid and
-// the bit appears in the top row over that column, following the thumb (or the cursor) from
-// column to column; letting go drops it there (let go well off the grid to call it off). The
-// buttons always show: under COLUMNS they're only labels (the one aimed at lights up), and the
-// tutorial keeps them working whatever this says (its lessons point at them).
+// DROP BY: BOTH (default) or NUMBERS. BOTH: the numbered buttons, or touch (or click) and hold
+// on the grid and the bit appears in the top row over that column, following the thumb (or the
+// cursor) from column to column, its button lit; letting go drops it there (let go well off the
+// grid to call it off). NUMBERS: the buttons only. The tutorial takes both whatever this says.
 const dropCtlBtn = document.getElementById('drop-controls-btn');
-const DROP_CONTROLS = ['both', 'buttons', 'columns'];
+const DROP_CONTROLS = ['both', 'buttons'];
 let dropControls = DROP_CONTROLS.includes(storage.get('bytefall-drop-controls')) ? storage.get('bytefall-drop-controls') : 'both';
-const columnsTouchable = () => dropControls !== 'buttons';
+const columnsTouchable = () => dropControls === 'both' || mode === 'tutorial';
 function applyDropControls() {
-  columnButtonsEl.classList.toggle('by-columns', dropControls === 'columns' && mode !== 'tutorial');
   boardEl.classList.toggle('touch-drop', columnsTouchable());
 }
 function updateDropControls() {
-  dropCtlBtn.textContent = `DROP BY: ${dropControls.toUpperCase()}`;
+  dropCtlBtn.textContent = `DROP BY: ${dropControls === 'both' ? 'BOTH' : 'NUMBERS'}`;
   applyDropControls();
 }
 dropCtlBtn.addEventListener('click', () => {

@@ -26,7 +26,7 @@ const Tutorial = (() => {
       board: [[], [], [], [], [3], [5], []], bits: [3, 2], tap: '.stat-current',
     },
     {
-      text: 'A bit decrypts when its number matches the length of the unbroken line it sits in, across or down. Any column works for any bit. Drop this [3] into column 7: beside the [3] and [5], it makes a line of 3 across.',
+      text: 'A bit decrypts when its number matches the length of the unbroken line it sits in, across or down. Any column works for any bit. Drop this [3] into column 7 (tap its button, or the column itself): beside the [3] and [5], it makes a line of 3 across.',
       drop: 6, cells: [[0, 4], [0, 5]],
       explain: () => 'Both [3]s were in a line of 3, so both decrypted. The [5] is now in a line of 1, which doesn’t match its number, so it stays.',
     },

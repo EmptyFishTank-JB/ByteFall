@@ -262,9 +262,9 @@ Or touch the grid itself: touch (or click) and hold, and the bit appears in the 
 row over that column, following your thumb (or the cursor) from column to column;
 let go to drop it there (let go well off the grid to call it off). A quick tap on
 a column drops straight in. PIVOT's choice of side shows as arrows in the top row
-too. SETTINGS → DROP BY: BOTH (default), BUTTONS (the grid ignores touches) or
-COLUMNS (the buttons stay, as labels only, the aimed one lit; the tutorial keeps
-them working, since its lessons point at them).
+too, and the button over the aimed column lights up. SETTINGS → DROP BY: BOTH
+(default) or NUMBERS (the buttons only; the grid ignores touches). The tutorial
+takes both whatever the setting.
 Before the first drop, the lower-left corner button is EXIT (back to the title
 card, one tap); after it, RESTART (two taps).
 
