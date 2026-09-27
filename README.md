@@ -388,8 +388,13 @@ point. It counts toward nothing (no XP, stats, achievements or best score).
 
 ## Startup
 
-A fresh launch (the app or tab opened anew) always starts on CLASSIC, Normal.
-A refresh, or coming back to the app or tab, carries on where you were.
+A fresh launch (the app or tab opened anew) opens on the START SCREEN: a card
+filling the screen with the starlight twinkling across it, the BYTEFALL title
+in the middle and TAP TO START blinking below (`js/start.js`). A tap (or Enter
+/ Space) fades it to black, then fades into the game, which always starts on
+CLASSIC, Normal. The very first time the game is opened, it fades into the
+TUTORIAL instead (EXIT skips it). A refresh, or coming back to the app or tab,
+skips the start screen and carries on where you were.
 
 ## Music player
 
@@ -404,8 +409,6 @@ work too. The game waits underneath (a VS match pauses). Code: `js/player.js`.
 
 ## To-do
 
-- **First-time introduction** (later): a skippable intro screen that walks a
-  new player through the tutorial the first time they open the game.
 - **CPU exploit loadouts** (maybe): each bot with its own preferred exploits in VS.
 - **CORE DUMP (track 09)**: its trial layers still wait for picks.
 - **Sound effect themes**: on hold.

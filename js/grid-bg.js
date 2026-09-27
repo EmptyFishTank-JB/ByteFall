@@ -156,6 +156,8 @@ function startGridBackground(canvas, { defrag = true } = {}) {
 startGridBackground(document.getElementById('board-bg'));
 // VS setup: the defrag behind its options (the board's cells are covered)
 startGridBackground(document.getElementById('vs-setup-bg'));
+// START SCREEN: the starlight only, twinkling across the whole card
+if (document.getElementById('start-bg')) startGridBackground(document.getElementById('start-bg'), { defrag: false });
 // The HUD boxes (SCORE, CHAIN, NEW LAYER IN, CURRENT...): the starlight only
 document.querySelectorAll('.hud .stat:not(.cpu-stat):not(.cpu-face)').forEach((stat) => {
   const canvas = document.createElement('canvas');
