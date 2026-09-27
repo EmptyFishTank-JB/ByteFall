@@ -2401,10 +2401,14 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
 
 /* Poking a wanderer: it can be tapped; shaking itself off with a puff of dust */
 .start-walkers .walker { pointer-events: auto; cursor: pointer; touch-action: manipulation; }
-.walker.shaking .bot { animation: walker-shake 0.1s steps(2) 7; }
+.cpu-face.shaking .bot { animation: walker-shake 0.1s steps(2) 7; }
+/* The VS CPU's face can be poked too */
+#cpu-face { position: relative; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 @keyframes walker-shake { 0% { transform: translateX(-1px); } 100% { transform: translateX(1px); } }
 .walker-dust {
   position: absolute; left: 50%; top: 55%; width: 4px; height: 4px; background: var(--bot); box-shadow: 0 0 3px var(--bot); pointer-events: none;
   animation: walker-dust 0.6s ease-out forwards;
 }
 @keyframes walker-dust { 0% { transform: translate(0, 0); opacity: 0.9; } 100% { transform: translate(var(--dx), var(--dy)); opacity: 0; } }
+/* (achievement pop-ups show over the start screen too) */
+.start-screen:not([hidden]) ~ .toast { z-index: 206; }

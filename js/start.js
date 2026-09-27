@@ -80,6 +80,12 @@
   lane.className = 'start-walkers';
   card.appendChild(lane);
   const pick = (list) => list[Math.floor(Math.random() * list.length)];
+  // (the bot achievements: counted, and any earned pop up)
+  const botEvent = (id) => {
+    Progress.botEvent(id);
+    if (typeof announce === 'function') announce(Progress.check());
+  };
+  let crewSeen = false;
   const rand = (a, b) => a + Math.random() * (b - a);
   let walkers = [];
   let want = 1 + Math.floor(Math.random() * 3);
@@ -138,7 +144,7 @@
       el.classList.add('pop-in');
       setTimeout(() => el.classList.remove('pop-in'), 500);
       place(w);
-      startle(w, now);
+      if (startle(w, now)) botEvent('jump-scare');
       return;
     }
     if (how < 0.25) { // (15%) arrives at a run, then stops to catch its breath
@@ -151,8 +157,10 @@
   // A meeting cut short leaves the partner out of range put out: -_-
   function startle(src, now) {
     const near = (o) => o !== src && !o.leaving && o.state !== 'vanish' && o.state !== 'startled' && Math.abs(o.x - src.x) <= RADIUS;
+    let startled = 0;
     for (const o of walkers) {
       if (!near(o)) continue;
+      startled++;
       const p = o.partner;
       if (p) {
         o.partner = null;
@@ -172,12 +180,15 @@
       o.el.classList.remove('hopping', 'shaking');
       place(o);
     }
+    return startled;
   }
   // Poked by the player: 40% bolt off, startled; otherwise put out (-_-), it shakes itself off as
   // if the touch left it dirty, then gives you a raised eyebrow before wandering on
   function poke(w, now) {
     if (w.leaving || ['vanish', 'startled', 'poked'].includes(w.state)) return;
+    botEvent('pokes');
     if (w.partner) {
+      botEvent('third-wheel');
       const p = w.partner;
       w.partner = null;
       p.partner = null;
@@ -185,7 +196,10 @@
       p.state = 'idle';
       p.until = now + rand(1200, 1700);
     }
-    if (Math.random() < 0.4) return fright(w, now);
+    if (Math.random() < 0.4) {
+      botEvent('bolts');
+      return fright(w, now);
+    }
     const id = (w.pokeId = (w.pokeId || 0) + 1);
     const still = () => w.pokeId === id && w.state === 'poked' && !w.gone;
     w.state = 'poked';
@@ -211,6 +225,7 @@
       if (!still()) return;
       w.el.classList.remove('shaking');
       mood(w, 'skeptic', true); // (the raised eyebrow, at you)
+      botEvent(`eyebrow-${w.bot}`);
     }, 1400);
   }
 
@@ -225,6 +240,7 @@
       if (typeof FX !== 'undefined') setTimeout(() => FX.burst([{ el: w.el, type: 'warning' }]), 200);
       setTimeout(() => { w.gone = true; }, 480);
       startle(w, now);
+      botEvent('vanish');
     } else if (r < 0.20) fright(w, now);
     else leave(w);
   }
@@ -264,6 +280,10 @@
       nextReroll = now + rand(8000, 15000);
     }
     const staying = walkers.filter((w) => !w.leaving);
+    if (!crewSeen && walkers.filter(inside).length >= 3) {
+      crewSeen = true;
+      botEvent('crew');
+    }
     if (staying.length < want && now > nextSpawn) {
       spawn(now);
       nextSpawn = now + rand(1500, 4500);
@@ -339,6 +359,7 @@
         for (let k = 0; k < 12 && !pairFits(a, b, pair); k++) pair = pick(MEETINGS);
         if (!pairFits(a, b, pair)) pair = ['surprised', 'surprised'];
         const [ma, mb] = pair;
+        if (ma === 'love' && mb === 'love') botEvent('love-pair');
         const until = now + rand(1500, 2300);
         for (const [w, other, m] of [[a, b, ma], [b, a, mb]]) {
           w.state = 'meet';

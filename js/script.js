@@ -1651,9 +1651,11 @@ document.querySelectorAll('#vs-levels button[data-vs]').forEach((btn) => {
       vsNotice(`LOCKED // ${Progress.unlock(`vs-${next}`).need.toUpperCase()}`);
       return;
     }
+    const harder = Object.keys(CpuBoard.LEVELS).indexOf(next) > Object.keys(CpuBoard.LEVELS).indexOf(vsLevel);
     requestReset(btn, 'CONFIRM?', () => {
       vsLevel = next;
       storage.set('bytefall-vs-level', next);
+      botMood(harder ? 'devious' : 'smug', 1900); // (a harder level: bring it; an easier one: going soft?)
     });
   });
 });
@@ -1692,6 +1694,7 @@ document.querySelectorAll('#vs-bots button[data-bot]').forEach((btn) => {
     requestReset(btn, 'CONFIRM?', () => {
       vsBot = next;
       storage.set('bytefall-vs-bot', next);
+      botMood(BOT_HELLO[next], 2100); // (the new bot's hello, once it's pixelated in)
     });
   });
 });
@@ -1703,6 +1706,7 @@ document.querySelectorAll('#vs-modes button[data-vsmode]').forEach((btn) => {
     if (next === vsMode) return;
     requestReset(btn, 'CONFIRM?', () => {
       vsMode = next;
+      botMood('skeptic', 1800); // (a new game mode: hm?)
       storage.set('bytefall-vs-mode', next);
     });
   });
@@ -1719,6 +1723,7 @@ function stepVsGoal(dir) {
     return;
   }
   SFX.play('click');
+  botMood(dir > 0 ? 'devious' : 'smug', 1300);
   if (tug) {
     vsPool = next;
     storage.set('bytefall-vs-pool', String(next));
@@ -2288,7 +2293,10 @@ const BOT_LINES = {
   bunker: { think: '...', happy: 'STEADY', hit: 'HOLD', worried: 'BRACE', dead: 'BREACH', smug: 'SECURE', annoyed: 'WAITING', devious: 'PLANNING' },
   glitch: { think: '?#@', happy: 'H4H4', hit: 'ERR0R', worried: 'W4RN', dead: 'NULL', smug: 'G_G', annoyed: '-_-', devious: '>:)' },
 };
-let botFlash = null; // { mood, until }
+let botFlash = null; // { mood, until, say }: a reaction, ahead of the waiting and planning faces
+// Each bot's hello when picked, and lines for the faces BOT_LINES doesn't cover
+const BOT_HELLO = { bot: 'happy', grifter: 'smug', bunker: 'skeptic', glitch: 'devious' };
+const MOOD_LINES = { skeptic: '...?', scared: 'EEK!', surprised: '!?', love: '<3', dizzy: '@_@', laugh: 'HAHA', tired: 'PHEW' };
 // Now and then its waiting (idle) and planning (think) faces take a variant: waiting BORED
 // (half-lidded, sighing) or TAPPING (glancing up, a foot tapping); planning SCAN (eyes sweeping
 // the board) or PONDER (looking up, a hand to its chin). The level's own face shows otherwise.
@@ -2329,8 +2337,8 @@ function swapBot() {
     }, 250);
   }, 250);
 }
-function botMood(flash = null, ms = 900) {
-  if (flash) botFlash = { mood: flash, until: performance.now() + ms };
+function botMood(flash = null, ms = 900, sayThis = '') {
+  if (flash) botFlash = { mood: flash, until: performance.now() + ms, say: sayThis };
   let mood = 'idle';
   if (gameOver && vsStarted) mood = cpuDown ? 'dead' : 'smug';
   else if (vsPaused) mood = 'paused'; // -_- : waiting for you to come back
@@ -2341,7 +2349,10 @@ function botMood(flash = null, ms = 900) {
   cpuFaceEl.dataset.level = vsLevel;
   swapBot();
   const variant = botVariantFor(mood);
-  const say = variant ? BOT_VARIANT_LINES[variant] : mood === 'idle' ? BOT_REST[vsLevel] : mood === 'paused' ? "I'LL WAIT" : BOT_LINES[vsBot][mood];
+  const flashing = botFlash && performance.now() < botFlash.until && mood === botFlash.mood;
+  const say = flashing && botFlash.say ? botFlash.say
+    : variant ? BOT_VARIANT_LINES[variant] : mood === 'idle' ? BOT_REST[vsLevel] : mood === 'paused' ? "I'LL WAIT"
+      : BOT_LINES[vsBot][mood] || MOOD_LINES[mood] || '';
   if (cpuFaceEl.dataset.mood !== mood || (cpuFaceEl.dataset.variant || '') !== variant || botSayEl.textContent !== say) {
     cpuFaceEl.dataset.mood = mood;
     if (variant) cpuFaceEl.dataset.variant = variant;
@@ -2350,6 +2361,64 @@ function botMood(flash = null, ms = 900) {
   }
 }
 setInterval(() => { if (mode === 'vs' && cpu) botMood(); }, 150);
+
+// Poking the CPU's face: 40% it's startled (EEK!); otherwise it's put out (HEY!), shakes itself off
+// in a puff of dust and gives you a raised eyebrow, as the start screen's bots do. Seven quick
+// taps in a row count down to a developer mode that isn't there.
+let cpuPoking = false;
+let devTaps = 0;
+let devTapAt = 0;
+let devMsgTimer = 0;
+function pokeCpu() {
+  if (cpuPoking) return;
+  cpuPoking = true;
+  Progress.botEvent('pokes');
+  const bot = vsBot;
+  if (Math.random() < 0.4) {
+    botMood('scared', 1200, 'EEK!');
+    setTimeout(() => { cpuPoking = false; }, 1200);
+  } else {
+    botMood('annoyed', 1500, 'HEY!');
+    setTimeout(() => {
+      cpuFaceEl.classList.add('shaking');
+      for (let k = 0; k < 8; k++) {
+        const d = document.createElement('i');
+        d.className = 'walker-dust';
+        d.style.setProperty('--dx', `${Math.round(Math.random() * 44 - 22)}px`);
+        d.style.setProperty('--dy', `${Math.round(Math.random() * 22 - 18)}px`);
+        d.style.animationDelay = `${k * 60}ms`;
+        cpuFaceEl.appendChild(d);
+        setTimeout(() => d.remove(), 800 + k * 60);
+      }
+    }, 600);
+    setTimeout(() => {
+      cpuFaceEl.classList.remove('shaking');
+      botMood('skeptic', 1500); // (the raised eyebrow, at you)
+      Progress.botEvent(`eyebrow-${bot}`);
+      announce(Progress.check());
+    }, 1500);
+    setTimeout(() => { cpuPoking = false; }, 3000);
+  }
+  announce(Progress.check());
+}
+cpuFaceEl.addEventListener('click', () => {
+  const now = performance.now();
+  devTaps = now - devTapAt < 700 ? devTaps + 1 : 1;
+  devTapAt = now;
+  clearTimeout(devMsgTimer);
+  if (devTaps >= 7) {
+    devTaps = 0;
+    setMessage('NO NEED. THERE IS NO DEV MODE HERE.', 'warn');
+    botMood(vsBot === 'glitch' ? 'smug' : 'laugh', 2000, 'NICE TRY');
+    Progress.botEvent('dev-taps');
+    announce(Progress.check());
+  } else if (devTaps >= 3) {
+    const left = 7 - devTaps;
+    setMessage(`YOU ARE ${left} TAP${left === 1 ? '' : 'S'} AWAY FROM BEING A DEVELOPER`);
+  }
+  if (devTaps >= 3 || devTaps === 0) devMsgTimer = setTimeout(() => setMessage(''), 1600);
+  if (devTaps < 3) pokeCpu();
+});
 
 // START: the setup overlay bursts apart and the match (and the CPU's clock) begins
 const vsSetupEl = document.getElementById('vs-setup');

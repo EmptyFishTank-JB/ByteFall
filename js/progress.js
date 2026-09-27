@@ -89,6 +89,7 @@ const Progress = (() => {
     vsBestCancel: 0, // most incoming blocks one attack cancelled
     vsBestSent: 0, // most blocks sent at the CPU in one match
     vsLossStreak: 0, // VS losses in a row
+    bots: {}, // the bots on the start screen and the VS CPU: event -> count (pokes, bolts, eyebrow-<bot> ...)
   });
 
   let d = fresh();
@@ -376,6 +377,23 @@ const Progress = (() => {
       ['tilted', 'TILTED', 'Lose 5 VS matches in a row'],
       ['afk', 'AFK', 'Leave a VS match paused for 5 minutes'],
     ].map(([id, name, desc]) => ({ id, name, desc, value: () => (d.secrets[id] ? 1 : 0), goal: 1, hidden: true })),
+    // The bots: poking them (start screen wanderers, the VS CPU's face) and watching them
+    ...(() => {
+      const n = (id) => () => d.bots[id] || 0;
+      return [
+        { id: 'poke', name: 'POKE', desc: 'Poke a bot', value: n('pokes'), goal: 1 },
+        { id: 'boo', name: 'BOO!', desc: 'Poke a bot so hard it runs away', value: n('bolts'), goal: 1 },
+        { id: 'the-eyebrow', name: 'THE EYEBROW', desc: 'Get a raised eyebrow from all four bots', value: () => ['bot', 'grifter', 'bunker', 'glitch'].filter((b) => d.bots[`eyebrow-${b}`]).length, goal: 4 },
+        { id: 'third-wheel', name: 'THIRD WHEEL', desc: 'Poke a bot in the middle of a conversation', value: n('third-wheel'), goal: 1 },
+        { id: 'matchmaker', name: 'MATCHMAKER', desc: 'Watch two bots fall for each other on the start screen', value: n('love-pair'), goal: 1 },
+        { id: 'jump-scare', name: 'JUMP SCARE', desc: 'Watch a bot pop into view and startle another', value: n('jump-scare'), goal: 1 },
+        { id: 'now-you-see-me', name: 'NOW YOU SEE ME', desc: 'Watch a bot decrypt itself away', value: n('vanish'), goal: 1 },
+        { id: 'full-crew', name: 'FULL CREW', desc: 'See three bots on the start screen at once', value: n('crew'), goal: 1 },
+        { id: 'personal-space', name: 'PERSONAL SPACE', desc: 'Poke 100 bots', value: n('pokes'), goal: 100, hidden: true },
+        { id: 'hr-wants-a-word', name: 'HR WANTS A WORD', desc: 'Poke 200 bots', value: n('pokes'), goal: 200, hidden: true },
+        { id: 'developer-options', name: 'DEVELOPER OPTIONS', desc: 'Tap the VS CPU seven times in a row', value: n('dev-taps'), goal: 1, hidden: true },
+      ];
+    })(),
     // Impossible (or nearly): lifetime points. Listed on their own, outside the EARNED count.
     { id: '32-bit-overflow', name: '32-BIT OVERFLOW', desc: 'Decrypt 1,073,741,824 nibbles (2^32 bits)', value: () => d.nibbles, goal: 1073741824, impossible: true },
     { id: 'gigabyte', name: 'GIGABYTE', desc: 'Earn 8,000,000,000 points in total', value: () => d.points, goal: 8e9, impossible: true },
@@ -402,6 +420,7 @@ const Progress = (() => {
     ['VS CPU', ['first-blood', 'sparring-partner', 'gladiator', 'warlord', 'easy-target', 'fair-fight', 'hard-reset', 'insanity-check', 'counterstrike', 'ddos', 'flawless', 'tilted', 'afk']],
     ['VS BOTS', ['debugged', 'outhustled', 'bunker-buster', 'patched', 'rogues-gallery', 'kill-9']],
     ['VS MODES AND SETTINGS', ['stack-overflow', 'war-of-attrition', 'frag-limit', 'rope-a-dope', 'multi-boot', 'long-haul', 'heavyweight', 'bankrupt', 'knockout', 'bare-metal', 'arms-race', 'zero-mercy']],
+    ['BOTS', ['poke', 'boo', 'the-eyebrow', 'third-wheel', 'matchmaker', 'jump-scare', 'now-you-see-me', 'full-crew', 'personal-space', 'hr-wants-a-word', 'developer-options']],
     ['SECRETS', ['konami']],
   ];
   const groupOf = {};
@@ -651,6 +670,12 @@ const Progress = (() => {
       feat('arms-race', m.exploits);
       feat('zero-mercy', m.level === 'insane' && m.layers && m.exploits);
       feat('flawless', m.landed === 0);
+    },
+    // Something happened with the bots (a poke, a bolt, an eyebrow-<bot> ...); saved at once, since
+    // the start screen's are outside any run
+    botEvent(id) {
+      d.bots[id] = (d.bots[id] || 0) + 1;
+      save();
     },
     // One attack cancelled `n` blocks headed your way
     vsCancelled(n) { d.vsBestCancel = Math.max(d.vsBestCancel, n); },
