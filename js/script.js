@@ -79,6 +79,7 @@ let busy = false; // true while animating/resolving, blocks input
 let runId = 0; // bumped on every new game so a pending game-over sequence can tell it's stale
 let keyloggerDrops = 0; // drops left with the keylogger's preview showing
 let snifferBits = 0; // bits left whose number the player can pick
+let chainLog = []; // this drop's decrypts: { vals, chain, points } per link, { packet, count, points }
 let pivotFrom = null; // PIVOT: column picked, waiting for the player to pick a neighbor
 let pivotWith = null; // PIVOT: the neighbor the landing pivot swaps with
 let breached = false; // BREACH: the board was cleared
@@ -148,6 +149,8 @@ const MODES = {
       : 'BLITZ // 2 minutes on the clock, starting with your first drop. Score all you can.'),
   },
   zen: { label: 'ZEN', noLayers: true, info: () => 'ZEN // no encryption layers and no clock. Just decrypt.' },
+  // TUTORIAL (RULES → TUTORIAL, tutorial.js): set boards and bits, one lesson at a time
+  tutorial: { label: 'TUTORIAL', noLayers: true, info: () => 'TUTORIAL // the rules, one step at a time.' },
   puzzle: {
     label: 'PUZZLE',
     noLayers: true, // no new layers rise (puzzles can start with some)
@@ -323,6 +326,7 @@ function newFirewall(level = 2) {
 
 // Other modes keep their own bests; DAILY keeps today's official score (practice runs save nothing).
 function bestKey() {
+  if (mode === 'tutorial') return null; // (no best to keep)
   if (daily) return dailyOfficial ? dailyKey() : null;
   if (mode !== 'classic') return `bytefall-best-${mode}`;
   return `bytefall-best-${difficulty}`;
@@ -330,7 +334,7 @@ function bestKey() {
 
 // Always enough upcoming bits for the widest preview (the keylogger's). PUZZLE has a fixed list.
 function refillQueue() {
-  if (mode === 'puzzle') return;
+  if (mode === 'puzzle' || mode === 'tutorial') return;
   while (queue.length < 1 + KEYLOGGER_PREVIEW && dealt < dealLimit()) {
     queue.push(newPacket('queue'));
     dealt++;
@@ -401,6 +405,8 @@ function initGame() {
   setMessage('');
   refreshExploitCards();
   fitBoard();
+  if (mode === 'tutorial') Tutorial.begin();
+  else Tutorial.end();
 }
 
 // A layer peeled to 0 shows the bit under it: fixed in PUZZLE boards, random otherwise.
@@ -636,6 +642,7 @@ function updateColumnButtons() {
     btn.disabled = gameOver || busy || (pivotFrom !== null ? !target : columns[c].length >= MAX_ROWS);
     btn.classList.toggle('pivot-from', c === pivotFrom);
     btn.classList.toggle('pivot-target', target);
+    btn.classList.toggle('tut-off', mode === 'tutorial' && !Tutorial.allows(c)); // (dimmed: not this lesson's column)
     btn.textContent = target ? (c < pivotFrom ? '\u2190' : '\u2192') : String(c + 1);
   });
 }
@@ -774,6 +781,7 @@ function render(popped = [], falling = null) {
   }
   boardEl.appendChild(layerLine(!gameOver && !MODES[mode].noLayers && pulseInterval - dropsSinceLastPulse === 1));
   updateColumnButtons();
+  if (mode === 'tutorial') Tutorial.decorate(); // (its pulsing cells, redrawn with the board)
   Music.setIntensity(dangerLevel());
 }
 
@@ -891,6 +899,7 @@ function clearPivotChoice() {
 
 async function attemptDrop(col) {
   if (gameOver || busy || !queue.length || vsPaused) return;
+  if (mode === 'tutorial' && !Tutorial.canDrop(col)) return; // (only where the lesson says)
   if (queue[0].type === 'hack' && queue[0].id === 'pivot') {
     if (pivotFrom !== null) {
       if (Math.abs(col - pivotFrom) !== 1) {
@@ -923,6 +932,7 @@ async function attemptDrop(col) {
   setMessage('');
   const piecesBefore = columns.reduce((n, c) => n + c.length, 0);
   const scoreBefore = score;
+  chainLog = []; // (what this drop decrypts, link by link, for the tutorial's explanations)
   const piece = queue.shift();
   if (piece.type === 'hack') armedHack = null;
   refillQueue();
@@ -999,6 +1009,7 @@ function finishTurn() {
   else if (vsLost) endGame('vs-lose');
   else if (cpuDown) endGame('win');
   else if (pauseQueued) openPause();
+  else if (mode === 'tutorial') Tutorial.afterDrop();
   else if (breached) endGame('breached');
   else if (dealLimit() < Infinity && !queue.length) endGame('daily');
   else if (mode === 'puzzle') checkPuzzle();
@@ -1075,6 +1086,7 @@ function hackForChain(chain) {
 // Hard: 8 bits decrypted by one drop make a byte. Easy and Normal: 4 make a nibble.
 async function awardPackets(kind, count) {
   const packet = PACKETS[kind];
+  chainLog.push({ packet: packet.name, count, points: count * packet.bonus });
   score += count * packet.bonus;
   stealPts += count * packet.bonus;
   if (kind === 'byte') Progress.bytes(count);
@@ -1145,6 +1157,7 @@ async function resolveChains() {
     cleared += pops.length;
     Progress.decrypted(pops.map((p) => grid[p.row][p.col].val), chain);
     const linkPoints = pops.reduce((n, pos) => n + blockPoints(grid[pos.row][pos.col]), 0) * chain;
+    chainLog.push({ vals: pops.map((pos) => grid[pos.row][pos.col].val), chain, points: linkPoints });
     score += linkPoints;
     if (chain >= 2) stealPts += linkPoints; // (VS ATTRITION takes these from the CPU too)
     chainEl.textContent = `${chain}x`;
@@ -1768,7 +1781,7 @@ function refreshVsPicks() {
 function applyModeUi() {
   refreshVsPicks();
   document.querySelectorAll('.modes button').forEach((btn) => {
-    btn.classList.toggle('active', btn.dataset.mode === topMode);
+    btn.classList.toggle('active', btn.dataset.mode === topMode && mode !== 'tutorial');
   });
   document.querySelectorAll('#daily-kinds button').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.daily === dailyKind);
@@ -1787,7 +1800,7 @@ function applyModeUi() {
   vsExploitsBtn.classList.toggle('active', vsExploits);
   document.body.classList.toggle('vs-mode', mode === 'vs'); // a slimmer header, room for the boards
   // (VS keeps it with layers off, dimmed, so nothing shifts when the option changes)
-  document.getElementById('pulse-stat').hidden = !!MODES[mode].noLayers && mode !== 'puzzle' && mode !== 'breach' && mode !== 'vs';
+  document.getElementById('pulse-stat').hidden = !!MODES[mode].noLayers && mode !== 'puzzle' && mode !== 'breach' && mode !== 'vs' && mode !== 'tutorial';
   document.getElementById('pulse-stat').classList.toggle('off', mode === 'vs' && !vsLayers);
   document.getElementById('pulse-label').textContent = mode === 'puzzle' ? 'BITS LEFT' : mode === 'breach' ? 'LAYERS LEFT' : 'ENCRYPT IN';
   updateVsChrome(); // (after ENCRYPT IN shows or hides: it counts the stat rows)
@@ -3066,6 +3079,7 @@ function armExploit() {
   return true;
 }
 exploitBtn.addEventListener('click', () => {
+  if (mode === 'tutorial') { SFX.play('denied'); return; } // (the lessons use set bits)
   if (armedHack) return; // armed: drop it
   if (nextExploit()) {
     if (!armExploit()) SFX.play('denied');
@@ -3398,6 +3412,17 @@ function showMenuPane(pane) {
   recordsEl.scrollTop = 0;
 }
 // pane: which tab to show (the last one shown if left out)
+// RULES → TUTORIAL: the guided lesson (tutorial.js). A live session asks first, as a restart does.
+const tutorialBtn = document.getElementById('tutorial-btn');
+tutorialBtn.addEventListener('click', () => {
+  if (vsStarted && !gameOver) return; // (not mid-match: PAUSE → EXIT first)
+  requestReset(tutorialBtn, 'CONFIRM?', () => {
+    mode = 'tutorial';
+    daily = false;
+    setRecordsOpen(false);
+  });
+});
+
 function setRecordsOpen(open, pane = menuPane) {
   recordsEl.hidden = !open;
   recordsBtn.setAttribute('aria-expanded', String(open));

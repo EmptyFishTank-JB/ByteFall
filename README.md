@@ -369,6 +369,19 @@ from the right, and SLEEP MODE's guitars are double-tracked hard left and right.
 The other tracks are still mono (the WAV renders in `assets/audio/` are mono
 mixdowns).
 
+## Tutorial
+
+RULES → **TUTORIAL** (beside the title) starts a guided lesson on set boards
+with set bits (`js/tutorial.js`). A banner over the board explains each rule
+and asks you to tap what it names; whatever it's talking about pulses, and only
+the lesson's drop column can be pressed (the others dim). After each drop it
+says what happened and shows the points: each link's bits, (10 + number) × the
+chain, NIBBLE bonuses and the total. Thirteen steps: the terminal, CURRENT, a
+line across, a line down, SCORE, a chain with a NIBBLE, CHAIN, peeling a layer
+twice until it reveals its bit, the ======== line, ENCRYPT IN, exploits, then
+PLAY CLASSIC or RULES. EXIT leaves at any point. It counts toward nothing (no
+XP, stats, achievements or best score).
+
 ## Startup
 
 A fresh launch (the app or tab opened anew) always starts on CLASSIC, Normal.
@@ -387,11 +400,6 @@ work too. The game waits underneath (a VS match pauses). Code: `js/player.js`.
 
 ## To-do
 
-- **Interactive tutorial** (its own pass). A TUTORIAL button to the right of the
-  RULES title in the RULES card starts a tutorial match with a few set bits. A
-  banner explains each rule and asks the player to tap the area it names;
-  buttons and bits pulse while they're being talked about, and it explains
-  what just happened and how the points work. The RULES card stays as it is.
 - **First-time introduction** (later): a skippable intro screen that walks a
   new player through the tutorial the first time they open the game.
 - **CPU exploit loadouts** (maybe): each bot with its own preferred exploits in VS.

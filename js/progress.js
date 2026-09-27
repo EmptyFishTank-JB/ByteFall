@@ -547,9 +547,10 @@ const Progress = (() => {
       };
     },
     drop() {
+      if (run.mode === 'tutorial') return; // (the tutorial counts toward nothing)
       if (!run.started) {
         run.started = true;
-        if (run.mode !== 'puzzle' && run.mode !== 'vs') d.games++; // puzzle retries and VS matches aren't sessions
+        if (run.mode !== 'puzzle' && run.mode !== 'vs' && run.mode !== 'tutorial') d.games++; // puzzle retries, VS matches and the tutorial aren't sessions
         if (run.daily) {
           playedDaily();
           const today = new Date().toISOString().slice(0, 10);
@@ -575,6 +576,7 @@ const Progress = (() => {
     },
     // After a drop and everything it set off. heights: each column's height; over: the board overflowed.
     endDrop({ hack, heights, rows, over, lastSecond }) {
+      if (run.mode === 'tutorial') return; // (the tutorial counts toward nothing)
       if (run.dropSevens >= 7) d.secrets.jackpot = true;
       if (lastSecond && run.dropBits > 0) d.secrets['last-second'] = true;
       if (!over && heights.every((h) => h >= rows - 1)) d.secrets['full-house'] = true;
@@ -601,6 +603,7 @@ const Progress = (() => {
     },
     // A session ended (not PUZZLE): reason 'trace', 'time' or 'daily'
     endRun({ score, reason, boardEmpty, track, theme, font, silent }) {
+      if (run.mode === 'tutorial') return; // (the tutorial counts toward nothing)
       if (run.mode === 'vs') return; // (a VS match isn't a session: vsResult() has its own)
       if (score === 404) d.secrets['not-found'] = true;
       if (run.bits === 42) d.secrets['deep-thought'] = true;
@@ -624,7 +627,7 @@ const Progress = (() => {
     },
     // Hidden achievements script.js spots itself (KONAMI, OVERKILL and the like)
     secret(id) { d.secrets[id] = true; },
-    breached() { d.breaches++; },
+    breached() { if (run.mode === 'tutorial') return; d.breaches++; },
     // A VS match ended. m: { level, bot, mode, layers, exploits, won, target, pool, cpuPoints,
     // overflow (the CPU overflowed), landed (blocks that landed on your board), sent }
     vsResult(m) {
@@ -656,6 +659,7 @@ const Progress = (() => {
     },
     // A live session thrown away with RESTART or a difficulty switch
     restarted() {
+      if (run.mode === 'tutorial') return; // (the tutorial counts toward nothing)
       if (run.mode === 'vs') return;
       sittingRestarts++;
       if (sittingRestarts >= 10) d.rageQuit = 1;
@@ -664,6 +668,7 @@ const Progress = (() => {
     runStats: () => ({ ...run }),
     // values: the numbers of the bits decrypted
     decrypted(values, chain) {
+      if (run.mode === 'tutorial') return; // (the tutorial counts toward nothing)
       d.bits += values.length;
       d.xp += values.length;
       run.bits += values.length;
@@ -674,15 +679,18 @@ const Progress = (() => {
       d.bestChain = Math.max(d.bestChain, chain);
     },
     bytes(count) {
+      if (run.mode === 'tutorial') return; // (the tutorial counts toward nothing)
       d.bytes += count;
       run.bytes += count;
       d.bestDropBytes = Math.max(d.bestDropBytes, count);
     },
     nibbles(count) {
+      if (run.mode === 'tutorial') return; // (the tutorial counts toward nothing)
       d.nibbles += count;
       d.bestDropNibbles = Math.max(d.bestDropNibbles, count);
     },
     peeled(broken) {
+      if (run.mode === 'tutorial') return; // (the tutorial counts toward nothing)
       d.peeled++;
       if (broken) {
         d.broken++;
@@ -690,6 +698,7 @@ const Progress = (() => {
       }
     },
     exploit(id) {
+      if (run.mode === 'tutorial') return; // (the tutorial counts toward nothing)
       d.exploits++;
       d.exploitUses[id] = (d.exploitUses[id] || 0) + 1;
       run.exploits++;
@@ -697,21 +706,24 @@ const Progress = (() => {
       if (id === 'pivot') run.pivoted = true;
     },
     score(points) {
+      if (run.mode === 'tutorial') return; // (the tutorial counts toward nothing)
       if (run.mode === 'vs') return; // (the SCORE achievements are for sessions)
       d.bestScore = Math.max(d.bestScore, points);
       if (run.mode === 'blitz' && !run.daily) d.bestBlitz = Math.max(d.bestBlitz, points);
       if (run.exploits === 0 && run.mode !== 'puzzle') d.bestNoToolsScore = Math.max(d.bestNoToolsScore, points);
     },
-    bombHits(n) { d.bestBombHits = Math.max(d.bestBombHits, n); },
-    sting() { d.stings++; },
-    wiretap() { d.wiretaps++; },
+    bombHits(n) { if (run.mode === 'tutorial') return; d.bestBombHits = Math.max(d.bestBombHits, n); },
+    sting() { if (run.mode === 'tutorial') return; d.stings++; },
+    wiretap() { if (run.mode === 'tutorial') return; d.wiretaps++; },
     addPoints(n) {
+      if (run.mode === 'tutorial') return; // (the tutorial counts toward nothing)
       if (n <= 0) return;
       d.points += n;
       d.decryptorPoints += n;
     },
-    sweep() { d.sweeps++; },
+    sweep() { if (run.mode === 'tutorial') return; d.sweeps++; },
     closeCall() {
+      if (run.mode === 'tutorial') return; // (the tutorial counts toward nothing)
       d.closeCalls++;
       run.closeCalls++;
       if (run.mode !== 'vs') d.bestRunCloseCalls = Math.max(d.bestRunCloseCalls, run.closeCalls);
