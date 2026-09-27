@@ -27,7 +27,7 @@ const Tutorial = (() => {
     {
       text: 'A bit decrypts when its number matches the length of the unbroken line it sits in, across or down. Any column works for any bit. Drop this [3] into column 7: beside the [3] and [5], it makes a line of 3 across.',
       drop: 6, cells: [[0, 4], [0, 5]],
-      explain: () => 'Both [3]s were in a line of 3, so both decrypted. The [5] is in a line of 1 now, so it stays.',
+      explain: () => 'Both [3]s were in a line of 3, so both decrypted. The [5] is now in a line of 1, which doesn’t match its number, so it stays.',
     },
     {
       text: 'Lines count down too. Drop the [2] into column 6, on top of the [5]: it will sit in a column 2 tall.',
@@ -35,13 +35,13 @@ const Tutorial = (() => {
       explain: () => 'The [2] was in a line of 2 going down, so it decrypted.',
     },
     {
-      text: 'Each bit decrypted scores 10 plus its number: a [3] is 13. That’s your SCORE. Tap it.',
+      text: 'Each decrypted bit scores 10 plus its number: a [3] is worth 13. That’s your SCORE. Tap it.',
       tap: '#score-stat',
     },
     {
       text: 'When bits decrypt, the ones above fall, and can land in new matches: a CHAIN. Each link multiplies its points: 2x, 3x and up. Drop the [2] into column 7.',
       board: [[], [], [], [3], [6, 3], [5, 3], [2]], bits: [2], drop: 6, cells: [[1, 4], [1, 5], [0, 6]],
-      explain: () => 'The [2]s made a line of 2 going down and the top [3]s a line of 3 across. Then the bits above fell, and the last [3] found itself in a line of 3: a 2x chain. And 4 bits decrypted in one drop make a NIBBLE, 16 bonus points.',
+      explain: () => 'The [2]s made a line of 2 going down and the top [3]s a line of 3 across. Then the bits above fell, and the last [3] found itself in a line of 3: a 2x chain. Decrypting 4 bits in one drop also makes a NIBBLE, worth 16 bonus points.',
     },
     {
       text: 'CHAIN shows how long the last chain was. Tap it.',
@@ -53,7 +53,7 @@ const Tutorial = (() => {
       explain: () => 'The [2] decrypted and peeled the layer once: [=] is now cracked, [-].',
     },
     {
-      text: 'Once more. Drop the next [2] into column 5 again to peel it a second time.',
+      text: 'Drop the next [2] into column 5 to peel the layer a second time.',
       drop: 4, cells: [[0, 3]],
       explain: () => 'The second peel broke the layer open and revealed the bit hidden under it: a [1], alone in a line of 1, so it decrypted too, as the chain’s second link.',
     },
@@ -66,11 +66,11 @@ const Tutorial = (() => {
       tap: '#pulse-stat',
     },
     {
-      text: 'A chain of 5 decrypts in one drop earns an EXPLOIT: a tool that changes the board. Earned exploits are stored in the EXPLOIT button at the bottom right. You have one waiting: a WORM VIRUS. Tap the EXPLOIT button to arm it.',
+      text: 'Get a 5x chain in one drop to earn an EXPLOIT: a tool that changes the board. Earned exploits are stored in the EXPLOIT button at the bottom right. You have one waiting: a WORM VIRUS. Tap the EXPLOIT button to arm it.',
       board: [[], [], [6, 2, 7, 3], [], [], [], []], bits: [], held: ['worm-virus'], tap: '#exploit-btn', pass: true,
     },
     {
-      text: 'Armed: the WORM VIRUS is your CURRENT now, and it drops like a bit. Drop it into column 3, the tall one: it wipes out every block in that column.',
+      text: 'The WORM VIRUS is armed and is now your CURRENT. It drops like a bit. Drop it into column 3, the tall one: it wipes out every block in that column.',
       drop: 2, cells: [[0, 2], [1, 2], [2, 2], [3, 2]],
       explain: () => 'The WORM VIRUS wiped out the whole column. Blocks wiped out by an exploit score a flat 10 each. Other exploits wipe an area, peel layers or change bits: each has its card in the EXPLOITS tab.',
     },
@@ -79,15 +79,15 @@ const Tutorial = (() => {
       board: EMPTY, bits: [], closeMenus: true, tap: '#records-btn', pass: true,
     },
     {
-      text: 'RULES: everything you just learned, written down, with the TUTORIAL button to come back here any time.',
+      text: 'The RULES tab has everything you just learned, written down, with the TUTORIAL button to come back here any time.',
       pane: 'rules', pulse: ['.menu-tabs [data-pane="rules"]'], float: true, next: true,
     },
     {
-      text: 'RECORDS: your level and DECRYPTOR rank, every unlock with the level it opens at, every achievement with its progress, and your lifetime stats.',
+      text: 'The RECORDS tab shows your level and DECRYPTOR rank, every unlock with the level it opens at, every achievement with its progress, and your lifetime stats.',
       pane: 'records', pulse: ['.menu-tabs [data-pane="records"]'], float: true, next: true,
     },
     {
-      text: 'EXPLOITS: your loadout. Only exploits placed in a slot can be earned in a game. Tap a card to put it in a free slot, or tap it again to take it out. More slots and exploits unlock as you level up, and the loadout is locked from a session’s first drop until it ends.',
+      text: 'The EXPLOITS tab is your loadout. You can only earn exploits that are in a slot. Tap a card to put it in a free slot, or tap it again to take it out. More slots and exploits unlock as you level up, and the loadout is locked from a session’s first drop until it ends.',
       pane: 'exploits', pulse: ['.menu-tabs [data-pane="exploits"]'], float: true, next: true,
     },
     {
@@ -95,11 +95,11 @@ const Tutorial = (() => {
       closeMenus: true, tap: '#settings-btn', pass: true,
     },
     {
-      text: 'SETTINGS: sound and music, whether the drop buttons sit under or over the grid, vibration on phones, color THEMES and FONTS (more unlock as you level up), and the PLAYLIST, with the MUSIC PLAYER for listening on its own.',
+      text: 'SETTINGS has sound and music, whether the drop buttons sit under or over the grid, vibration on phones, color THEMES and FONTS (more unlock as you level up), and the PLAYLIST, with the MUSIC PLAYER for listening on its own.',
       float: true, next: true,
     },
     {
-      text: 'That’s everything you need. Good luck, decryptor.',
+      text: 'That’s everything you need to know. Good luck, decryptor.',
       closeMenus: true, done: true,
     },
   ];
