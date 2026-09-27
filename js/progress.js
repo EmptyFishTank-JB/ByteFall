@@ -197,6 +197,13 @@ const Progress = (() => {
   let sittingThemes = 0; // theme changes since the page loaded
   let sittingTracks = 0; // tracks picked since the page loaded
   const count = (obj) => Object.keys(obj).length;
+  // The Daily streak as it stands today: back to 0 once a day has been missed (the streak
+  // achievements track this, not the best one, so a missed day starts them over)
+  const currentStreak = () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    return d.lastDaily === today || d.lastDaily === yesterday ? d.dailyStreak : 0;
+  };
 
   const ACHIEVEMENTS = [
     { id: 'first-contact', name: 'FIRST CONTACT', desc: 'Start your first session', value: () => d.games, goal: 1 },
@@ -226,7 +233,7 @@ const Progress = (() => {
     { id: 'ghost', name: 'GHOST', desc: 'Last 100 drops in one Hard session', value: () => d.bestHardDrops, goal: 100 },
     { id: 'clean-sweep', name: 'CLEAN SWEEP', desc: 'Clear the whole board after 10+ drops', value: () => d.sweeps, goal: 1 },
     { id: 'close-call', name: 'CLOSE CALL', desc: 'Decrypt your way back under the line', value: () => d.closeCalls, goal: 1 },
-    { id: 'daily-driver', name: 'DAILY DRIVER', desc: 'Play a Daily game 7 days in a row', value: () => d.bestDailyStreak, goal: 7 },
+    { id: 'daily-driver', name: 'DAILY DRIVER', desc: 'Play a Daily game 7 days in a row', value: currentStreak, goal: 7 },
     { id: 'locksmith', name: 'LOCKSMITH', desc: 'Solve 10 puzzles', value: () => Object.keys(d.puzzles).length, goal: 10 },
     { id: 'master-key', name: 'MASTER KEY', desc: 'Solve every puzzle', value: () => Object.keys(d.puzzles).length, goal: () => puzzleCount },
     { id: 'maxed-out', name: 'MAXED OUT', desc: 'Reach Lv 80 as DECRYPTOR 9', value: () => (d.decryptor >= 10 || (d.decryptor >= 9 && levelInfo().maxed) ? 1 : 0), goal: 1 },
@@ -247,7 +254,7 @@ const Progress = (() => {
     { id: 'blitzkrieg', name: 'BLITZKRIEG', desc: 'Score 3,000 in one Blitz', value: () => d.bestBlitz, goal: 3000 },
     { id: 'zen-master', name: 'ZEN MASTER', desc: 'Last 300 drops in one Zen session', value: () => d.bestZenDrops, goal: 300 },
     { id: 'daily-grind', name: 'DAILY GRIND', desc: 'Play the Daily on 30 different days', value: () => d.dailies, goal: 30 },
-    { id: 'streak', name: 'STREAK', desc: 'Play a Daily game 30 days in a row', value: () => d.bestDailyStreak, goal: 30 },
+    { id: 'streak', name: 'STREAK', desc: 'Play a Daily game 30 days in a row', value: currentStreak, goal: 30 },
     { id: 'perfect-daily', name: 'PERFECT DAILY', desc: 'Finish a Daily Decrypt with the board empty', value: () => d.perfectDailies, goal: 1 },
     { id: 'first-try', name: 'FIRST TRY', desc: 'Solve a puzzle on your first attempt', value: () => d.firstTries, goal: 1 },
     { id: 'pickpocket', name: 'PICKPOCKET', desc: 'Solve 5 puzzles in a row without failing one', value: () => d.bestPuzzleStreak, goal: 5 },
@@ -295,7 +302,7 @@ const Progress = (() => {
     { id: 'one-shot', name: 'ONE SHOT', desc: 'Solve a daily puzzle on the first try', value: () => d.dailyFirstTries, goal: 1 },
     { id: 'sunday-best', name: 'SUNDAY BEST', desc: "Solve a Sunday daily puzzle (the week's hardest)", value: () => d.sundaySolves, goal: 1 },
     { id: 'safecracker', name: 'SAFECRACKER', desc: 'Solve 30 puzzles', value: () => count(d.puzzles), goal: 30 },
-    { id: 'century', name: 'CENTURY', desc: 'Play a Daily game 100 days in a row', value: () => d.bestDailyStreak, goal: 100 },
+    { id: 'century', name: 'CENTURY', desc: 'Play a Daily game 100 days in a row', value: currentStreak, goal: 100 },
     { id: 'triple-crown', name: 'TRIPLE CROWN', desc: 'Reach DECRYPTOR 3', value: () => d.decryptor, goal: 3 },
     // Nibbles (Easy and Normal: 4 bits decrypted by one drop)
     ...[
