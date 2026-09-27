@@ -2548,6 +2548,24 @@ html.page-twinkle .page-bg { display: block; }
 /* The spider's silk thread, up out of sight */
 .visitor-thread { position: absolute; left: 50%; bottom: 60%; width: 1px; height: 160px; background: rgba(220, 225, 240, 0.45); pointer-events: none; }
 .visitor-spider svg { filter: drop-shadow(0 0 1px rgba(220, 225, 240, 0.45)); }
+/* WINTER and the holidays: the scenery shakes (v-creak) or its flames flare (v-glow) when poked */
+.visitor-scenery.v-creak svg { animation: visitor-shake 0.1s steps(1) 6 alternate; }
+.visitor-scenery.v-glow svg { animation: visitor-glow 0.9s steps(3) 1; }
+@keyframes visitor-glow { 0%, 100% { filter: none; } 50% { filter: brightness(1.5) drop-shadow(0 0 3px #ffd23f); } }
+.visitor-evergreen.v-blink .f-a { animation: visitor-blink 0.24s steps(1) 5; }
+@keyframes visitor-blink { 50% { opacity: 0; } }
+:is(.visitor-menorah, .visitor-kinara, .visitor-evergreen, .visitor-sign) svg { filter: drop-shadow(0 0 1.5px rgba(255, 210, 63, 0.5)); }
+:is(.visitor-penguin, .visitor-reindeer, .visitor-snowman, .visitor-dreidel) svg { filter: drop-shadow(0 0 1px rgba(220, 225, 240, 0.4)); }
+.visitor .f-c { display: none; } /* (the penguin on its belly) */
+.visitor.v-slide :is(.f-a, .f-b) { display: none; }
+.visitor.v-slide .f-c { display: inline; }
+.visitor-reindeer.v-rudolph svg { filter: drop-shadow(0 0 1px rgba(220, 225, 240, 0.4)) drop-shadow(0 0 2px #ff2a2a); }
+/* Snow, in pixel flakes; fireworks, a rocket and its sparks (all in the bots' pixels) */
+:is(.visitor-flake, .visitor-spark) { position: absolute; left: 0; bottom: 0; width: calc(34px / 16); height: calc(34px / 16); pointer-events: none; z-index: 2; }
+.visitor-flake { background: #f2f4f8; opacity: 0.85; }
+[data-theme="paper"] .visitor-flake { background: #b8c4d6; }
+.visitor-spark { background: var(--c); box-shadow: 0 0 3px var(--c); }
+.visitor-spark.rocket { background: #fff6c2; box-shadow: 0 0 2px #ffd23f; }
 
 /* SCREEN SAVER (saver.js): black, but for the wanderers, at a height that moves each minute */
 .saver { position: fixed; inset: 0; z-index: 300; background: #000; cursor: pointer; -webkit-tap-highlight-color: transparent; }
@@ -2557,3 +2575,6 @@ html.page-twinkle .page-bg { display: block; }
 .saver[hidden] { display: none; }
 .saver .saver-lane { top: var(--y, 60%); bottom: auto; left: 16px; right: 16px; }
 .saver-on .toast { z-index: 301; } /* (an achievement from a poke shows over it) */
+
+/* A hat (wanderers.js's winter, holiday and party costumes): the antennas and ear tips go under it */
+.walker[data-hat] :is(.shape-bot, .shape-grifter, .shape-glitch) rect[y="1"] { display: none; }

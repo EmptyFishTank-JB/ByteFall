@@ -516,7 +516,14 @@ off at a run, still angry, or glare a moment and wander on. One poked while half
 on the card reacts right there, peeking in.
 
 **Seasons** (`js/seasons.js`, by the player's own date; the dev page's SEASON
-switch, or `?season=halloween`, forces one or turns them OFF). **HALLOWEEN**
+switch, or `?season=halloween`, forces one or turns them OFF). They STACK: when
+several are on at once (Hanukkah during winter, Christmas and Kwanzaa
+overlapping), each adds its touches, a bot picks its costume from any of them and
+the visitors and scenery come from all of them. The windows: HALLOWEEN Oct 15 to
+31, NOVEMBER the month, WINTER Dec 1 to Jan 6 (the base under the December
+holidays), HANUKKAH its eight nights (a table of first nights, 2025 to 2035),
+CHRISTMAS Dec 18 to 26, KWANZAA Dec 26 to Jan 1, NEW YEAR'S EVE Dec 31 and NEW
+YEAR Jan 1 and 2. Forcing a holiday brings WINTER along with it. **HALLOWEEN**
 (October 15 to 31): most wanderers (80%) arrive in costume, drawn in their own
 pixel grid over the body and under the face, so every face, hop and snap still
 shows: BUNKER is a pumpkin (its face the carved one), BOT a see-through bedsheet
@@ -527,6 +534,19 @@ stops sometimes has a snack (30%): one to three gummy drops (2x2 pixels, a
 random bright color), each pulled from its side and tossed in an arc over its
 head into its mouth (hopping pixel to pixel), a munch and a chew; SWEET TOOTH
 (hidden) for 100 of them.
+
+**Winter and the holidays** (costumes for any bot, mixed across the seasons on;
+a hat hides the antennas and ear tips under it). WINTER: a striped knit BEANIE
+with a pompom, EARMUFFS, a SCARF (blue or green); cookie bites as the snack.
+HANUKKAH: a blue-and-white beanie or scarf; gelt (gold) as the snack.
+CHRISTMAS: a SANTA HAT, an ELF HAT with a bell, or ANTLERS and a red nose;
+candy-cane bits as the snack. KWANZAA: a red-and-green scarf. NEW YEAR'S EVE and
+NEW YEAR: striped PARTY HATS. Snow falls all winter: pixel flakes drifting down
+the lane to the floor, a moment there and gone. At the new year, FIREWORKS go
+up now and then (a rocket, then a burst of pixel sparks that fall away). At the
+player's own midnight on New Year's Eve, every bot on the card counts down from
+ten, one says HAPPY NEW YEAR (the rest WOOO!, YAY! or the year) and the sky
+fills with fireworks (MIDNIGHT, hidden).
 
 **Visitors** (`js/visitors.js`) pass through the same lane, one visit at a time
 every 20 to 45 seconds, in from either side. HALLOWEEN: FRANKENSTEIN'S MONSTER
@@ -544,6 +564,12 @@ turns into three bats, the ghost says BOO (every bot near it jumps) and fades
 away, the bats scatter, the crow caws and takes off, the spider scurries back
 up (bots near it jump) and the turkey gobbles and runs. MONSTER MASH (hidden):
 meet all eight Halloween visitors; GOBBLE GOBBLE (hidden): meet the turkey.
+WINTER: a PENGUIN waddles by (poked: SQUAWK and a belly slide off; BELLY SLIDE,
+hidden). CHRISTMAS: a REINDEER trots past, now and then (25%) the one with the
+glowing red nose (RED NOSE, hidden); poked, it snorts and prances off.
+HANUKKAH: a DREIDEL spins in, wobbles to a stop and lands on a letter (NUN,
+GIMEL, HEY or SHIN; GIMEL, hidden, for seeing it land on GIMEL), then spins on
+its way; poked while it's down, it spins again to land on another.
 
 **Scenery.** HALLOWEEN: now and then (15% of arrivals, one at a time) a
 wanderer comes in pushing a SCARY TREE (a dead, gnarled tree with black eyes and a frown)
@@ -552,7 +578,17 @@ along the card, says "phew" and wanders on. The tree stays for the visit, behind
 every bot and visitor but in front of the start card's copyright line. Poked or
 startled mid-push, the pusher lets go (the tree stays where it stopped) and
 reacts as usual. Poke the tree: it creaks and a bat flies out.
-UPROOTED (hidden): see a tree pushed in.
+UPROOTED (hidden): see a tree pushed in. The other seasons push theirs in the
+same way: WINTER a SNOWMAN (poked: brrr! and a shiver; SNOW DAY, hidden),
+CHRISTMAS a decorated EVERGREEN with blinking lights, a twinkling star and
+presents under it (poked: jingle!, its lights flash), HANUKKAH a MENORAH with
+that night's candles lit and the shamash (the flames flicker; EIGHT NIGHTS,
+hidden), KWANZAA a KINARA (three red, the black, three green) with that day's
+candles lit, the black first and then from the outside in (SEVEN CANDLES,
+hidden), and NEW YEAR'S EVE and NEW YEAR a SIGN with the new year on it (poked:
+HAPPY NEW YEAR! and a firework). Up to two pieces stand at once, one of each,
+each at a spot clear of the other (and of the path to it: nothing is pushed
+through anything). Menorah, kinara and sign are never mirrored.
 
 The same wanderers stroll along the bottom of the game card too, between the
 corner buttons (walking out from behind them), with everything above: meetings,
@@ -588,24 +624,22 @@ work too. The game waits underneath (a VS match pauses). Code: `js/player.js`.
 
 ### Seasonal stuff (ideas, by the player's own date)
 
-Done: **HALLOWEEN** (costumes, candy snacks, eight visitors, the scary tree) and
-**NOVEMBER** (the turkey, the crows). Each new season plugs into the same
+Done: **HALLOWEEN** (costumes, candy snacks, eight visitors, the scary tree),
+**NOVEMBER** (the turkey, the crows), and the stacked December and new year
+seasons: **WINTER**, **HANUKKAH**, **CHRISTMAS**, **KWANZAA**, **NEW YEAR'S
+EVE** and **NEW YEAR**. Each new season plugs into the same
 pieces: a date window in `js/seasons.js`, costumes (`wanderers.js`), visitors
 and scenery (`visitors.js`), a snack, a step on the dev page's SEASON switch,
 and a hidden achievement or two.
 
-- **NEW YEAR** (Dec 31 to Jan 1): fireworks bursting over the card now and then
-  (pixel bursts, the game's particle bursts), party hats and noisemakers
-  ("toot!"), confetti; at the player's local midnight the bots cheer HAPPY NEW
-  YEAR.
+- **NEW YEAR, more**: noisemakers ("toot!") and confetti.
+- **KWANZAA, more**: a visitor or a harvest snack (fruit), if wanted.
 - **LUNAR NEW YEAR** (a week from its date, which moves each year: a small table
   of dates): a dragon dance crossing the card (a long, segmented dragon), red
   lanterns pushed in as scenery, strings of firecrackers popping, red envelopes
   as the snack, and the year's zodiac animal as a visitor.
-- **WINTER** (Dec 1 to 30): falling snow, knit hats and scarves, a snowman
-  pushed in (scenery), a penguin sliding across on its belly, hot cocoa as the
-  snack. Optional, if wanted: a decorated evergreen pushed in and Santa hats /
-  antlers.
+- **WINTER, more**: hot cocoa as a snack (a mug, steam), a snowball tossed
+  between two bots, a sleigh crossing the start card's sky.
 - **SPRING** (Mar 20 to Apr 30): a RABBIT hopping through, butterflies
   fluttering across (like the bats), flower pots pushed in, spring showers (a
   rain shower and a bot with an umbrella), chicks peeping after a hen.

@@ -6,13 +6,23 @@
 // stomps, the MUMMY groans, the CREATURE gurgles and splashes, NOSFERATU hisses and turns into
 // bats, the GHOST says BOO (every bot near it jumps) and fades, bats scatter, crows take off
 // cawing, the SPIDER scurries back up and the TURKEY gobbles and runs.
-// SCENERY: the scary tree a wanderer pushes onto the card (HALLOWEEN; makeTree, wanderers.js does
+// SCENERY: the scary tree a wanderer pushes onto the card (HALLOWEEN; makeScenery, wanderers.js does
 // the pushing): black eyes and a frown. It stays for the visit, behind everything else; poked, it
 // creaks and a bat flies out.
+// WINTER (December and into January, under the holidays): snow falling, a penguin waddling by
+// (poked: SQUAWK and a belly slide off) and a snowman pushed in. CHRISTMAS: reindeer trotting
+// past (now and then the one with the glowing red nose; poked: a snort and a prance off) and a
+// decorated evergreen with blinking lights. HANUKKAH: a dreidel spinning across and landing on a
+// letter, and a menorah with that night's candles lit. KWANZAA: a kinara with that day's candles
+// lit. NEW YEAR'S EVE and NEW YEAR: fireworks, and a sign with the year; at the player's own
+// midnight on New Year's Eve the bots count down from ten and cheer.
+// Stacked seasons (seasons.js) all send theirs; up to two pieces of scenery stand at once.
 // Sprites are drawn as text: one letter a pixel (its color in `pal`, '.' left empty), in the bots'
 // own pixel size, facing right; a second frame (b) steps the legs, flaps the wings or ripples a hem.
 function createVisitors(api) {
   const U = 34 / 16; // (a pixel of the bots' 16-wide grid, in screen pixels)
+  const swap = (rows, map) => rows.map((r) => r.replace(/./g, (c) => map[c] || c)); // (blinking: colors traded)
+  const EVERGREEN = ['.......y.......', '......yyy......', '.......y.......', '.......g.......', '......ggG......', '.....grggG.....', '......ggG......', '.....gggoG.....', '....gggggGG....', '...gbggggggG...', '.....ggggG.....', '....ggrgggG....', '...gggggbggG...', '..gggoggggggG..', '....ggggggG....', '...ggbgggrgG...', '..gggggggggGG..', '.ggrggggoggggG.', 'gggggggggggggGG', '.RyR..ttT..ByB.', '.yyy..ttT..yyy.', '.RyR..ttT..ByB.'];
   const SPRITES = {
     frank: {
       pal: { h: '#1d1d1d', g: '#7fb069', G: '#5e8f4c', e: '#111111', b: '#a0a4aa', m: '#2a2a2a', s: '#2c3140', S: '#1e222d', p: '#3a3226', k: '#0d0d0d' },
@@ -68,7 +78,82 @@ function createVisitors(api) {
       a: ['......kk.', '.....kkeo', 'kk..kkkk.', '.kkkkkKk.', '..kkkkk..', '...k.k...', '...k.k...'],
       b: ['.........', '.........', 'kk.......', '.kkkkkkk.', '..kkkkkke', '...k.k..o', '...k.k...'],
     },
+    penguin: { // (c: on its belly, sliding)
+      pal: { k: '#1b1f27', w: '#f2f4f8', o: '#ff9a1f' },
+      a: ['...kkkk....', '..kkkkkk...', '..kkkkwwk..', '..kkkkwkwoo', '..kkkkwwk..', '.kkkkwwwwk.', 'kkkkwwwwwk.', 'kkkkwwwwwk.', '.kkkwwwwwk.', '.kkkwwwwwk.', '..kkwwwwk..', '...oo..oo..'],
+      b: { 11: '....oo.oo..' },
+      c: ['...........', '...........', '...........', '...........', '...........', '...........', '...........', '...........', '...........', '..kkkkkkkk.', 'okkkkkkkwko', 'okwwwwwwww.'],
+    },
+    reindeer: {
+      pal: { b: '#8a5a2b', w: '#c8a27a', a: '#d9c49a', k: '#1a120b', n: '#2a1a10' },
+      a: ['.........a...a..', '.........aa.aa..', '..........aaa...', '...........bbb..', '...........bkbb.', '...........bbbbn', '.w........bbb...', '.bbbbbbbbbbbb...', '.bbbbbbbbbbbb...', '..bwwwwwwwwb....', '..b.b....b.b....', '..b.b....b.b....', '..k.k....k.k....'],
+      b: { 10: '..b..b..b..b....', 11: '.b...b..b...b...', 12: '.k...k..k...k...' },
+    },
+    dreidel: { // (spinning: its sides turning past)
+      pal: { b: '#2a6fdb', L: '#6fa8ff', w: '#ffffff', h: '#d4a017' },
+      a: ['...hh...', '...hh...', '.bbbbbb.', 'bLbwwbbb', 'bLbwbbbb', 'bLbwwbbb', '.bbbbbb.', '..bbbb..', '...bb...', '...b....'],
+      b: { 3: 'bbbbLbwb', 4: 'bbbbLbwb', 5: 'bbbbLbww' },
+    },
+    snowman: {
+      pal: { w: '#f2f4f8', s: '#b8c4d6', k: '#1b1f27', o: '#ff8a1f', h: '#1b1f27', r: '#d23a3a', b: '#6b4a2b' },
+      a: ['....hhhhh....', '....hhhhh....', '...hhhhhhh...', '....wwwws....', '...wwkwkws...', '...wwwwwoooo.', '...wwkkkws...', '....wwwws....', '...rrrrrrr...', 'b.wwwwwrrws.b', '.bwwwkwrrwsb.', '..wwwwwwwss..', '..wwwkwwwss..', '...wwwwwss...', '..wwwwwwwss..', '.wwwwwwwwwss.', 'wwwwwwwwwwwss', 'wwwwwwwwwwwss', 'wwwwwwwwwwwss', '.wwwwwwwwwss.', '..wwwwwwwss..'],
+    },
+    evergreen: { // (its lights blink, its star twinkles; presents under it)
+      pal: { g: '#1f8a44', G: '#135226', t: '#6b4a2b', T: '#4a3320', y: '#ffd23f', Y: '#fff6c2', r: '#ff3b3b', b: '#3bb8ff', o: '#ffb000', R: '#d23a3a', B: '#3a7bd5' },
+      a: EVERGREEN,
+      b: swap(EVERGREEN, { r: 'o', o: 'b', b: 'r', y: 'Y' }),
+    },
+    // (menorah, kinara and sign: drawn for the night, the day or the year; scenery())
   };
+  // A menorah with this night's candles lit (the newest, leftmost, first... placed from the right),
+  // and the shamash, raised in the middle, always
+  function menorah(night) {
+    const rows = Array.from({ length: 13 }, () => Array(19).fill('.'));
+    const put = (x, y, c) => { rows[y][x] = c; };
+    const lit = [17, 15, 13, 11, 7, 5, 3, 1].slice(0, night);
+    for (const x of [1, 3, 5, 7, 11, 13, 15, 17]) {
+      put(x, 7, 'm');
+      if (lit.includes(x)) { put(x, 3, 'f'); put(x, 4, 'F'); put(x, 5, 'c'); put(x, 6, 'c'); }
+    }
+    put(9, 1, 'f'); put(9, 2, 'F'); put(9, 3, 'c'); put(9, 4, 'c'); put(9, 5, 'm'); put(9, 6, 'm'); put(9, 7, 'm');
+    for (let x = 1; x <= 17; x++) put(x, 8, 'm');
+    put(9, 9, 'm'); put(9, 10, 'm');
+    for (let x = 6; x <= 12; x++) put(x, 11, 'M');
+    for (let x = 5; x <= 13; x++) put(x, 12, 'M');
+    const a = rows.map((r) => r.join(''));
+    return { pal: { m: '#d4a017', M: '#a67c12', c: '#dfe8ff', f: '#ffd23f', F: '#ff8a1f' }, a, b: swap(a, { f: 'F', F: 'f' }) };
+  }
+  // A kinara: three red candles, the black one, three green; the black lit first, then from the
+  // outside in, alternating (one more each day)
+  function kinara(day) {
+    const rows = Array.from({ length: 11 }, () => Array(15).fill('.'));
+    const put = (x, y, c) => { rows[y][x] = c; };
+    const lit = [7, 1, 13, 3, 11, 5, 9].slice(0, day);
+    [1, 3, 5, 7, 9, 11, 13].forEach((x, i) => {
+      const c = i < 3 ? 'r' : i === 3 ? 'k' : 'g';
+      for (let y = 3; y <= 6; y++) put(x, y, c);
+      put(x, 7, 'w');
+      if (lit.includes(x)) { put(x, 1, 'f'); put(x, 2, 'F'); }
+    });
+    for (let x = 0; x <= 14; x++) put(x, 8, 'w');
+    for (let x = 1; x <= 13; x++) put(x, 9, 'W');
+    for (let x = 3; x <= 11; x++) put(x, 10, 'W');
+    const a = rows.map((r) => r.join(''));
+    return { pal: { r: '#d23a3a', k: '#3a3a42', g: '#1f9d4c', w: '#8a5a2b', W: '#6b4222', f: '#ffd23f', F: '#ff8a1f' }, a, b: swap(a, { f: 'F', F: 'f' }) };
+  }
+  // A sign with the year on it (its digits blink)
+  const DIGITS = ['###,#.#,#.#,#.#,###', '.#.,##.,.#.,.#.,###', '###,..#,###,#..,###', '###,..#,.##,..#,###', '#.#,#.#,###,..#,..#',
+    '###,#..,###,..#,###', '###,#..,###,#.#,###', '###,..#,..#,.#.,.#.', '###,#.#,###,#.#,###', '###,#.#,###,..#,###'].map((d) => d.split(','));
+  function sign(year) {
+    const rows = Array.from({ length: 14 }, () => Array(19).fill('.'));
+    for (let y = 0; y < 9; y++) for (let x = 0; x < 19; x++) rows[y][x] = (y === 0 || y === 8 || x === 0 || x === 18) ? 'B' : 'b';
+    String(year).slice(-4).split('').forEach((n, i) => {
+      DIGITS[+n].forEach((line, y) => line.split('').forEach((c, x) => { if (c === '#') rows[2 + y][2 + i * 4 + x] = 'y'; }));
+    });
+    for (let y = 9; y < 14; y++) { rows[y][4] = 'p'; rows[y][14] = 'p'; }
+    const a = rows.map((r) => r.join(''));
+    return { pal: { b: '#20264a', B: '#b8c4d6', y: '#ffd23f', Y: '#ff7ad9', p: '#6b4a2b' }, a, b: swap(a, { y: 'Y' }) };
+  }
 
   // Rows of letters into rects: runs of one color merged along each row
   function rects(rows, pal) {
@@ -84,8 +169,8 @@ function createVisitors(api) {
     });
     return out;
   }
-  function spriteEl(kind) {
-    const def = SPRITES[kind];
+  function spriteEl(kind, pal) {
+    const def = { ...SPRITES[kind], ...(pal ? { pal: { ...SPRITES[kind].pal, ...pal } } : {}) };
     const w = def.a[0].length;
     const h = def.a.length;
     const frameB = Array.isArray(def.b) ? def.b : def.a.map((row, i) => (def.b && def.b[i]) || row); // (one frame: the same twice)
@@ -93,7 +178,8 @@ function createVisitors(api) {
     el.className = `visitor visitor-${kind}`;
     el.style.width = `${w * U}px`;
     el.innerHTML = `<svg viewBox="0 0 ${w} ${h}" width="${w * U}" height="${h * U}" shape-rendering="crispEdges" aria-hidden="true">`
-      + `<g class="f-a">${rects(def.a, def.pal)}</g><g class="f-b">${rects(frameB, def.pal)}</g></svg>`
+      + `<g class="f-a">${rects(def.a, def.pal)}</g><g class="f-b">${rects(frameB, def.pal)}</g>`
+      + `${def.c ? `<g class="f-c">${rects(def.c, def.pal)}</g>` : ''}</svg>`
       + '<span class="walker-emote"></span>';
     return el;
   }
@@ -112,18 +198,34 @@ function createVisitors(api) {
     spider: { speed: 40, frameMs: 260, poke: 'scurry' },
     turkey: { speed: 16, frameMs: 280, sway: 1, poke: 'gobble' },
     tree: { speed: 0, frameMs: 0, poke: 'creak' },
+    penguin: { speed: 13, frameMs: 240, sway: 1, bob: 1, poke: 'squawk' },
+    reindeer: { speed: 30, frameMs: 180, poke: 'snort' },
+    dreidel: { speed: 38, frameMs: 90, poke: 'spin' },
+    snowman: { speed: 0, frameMs: 0, poke: 'brrr' },
+    evergreen: { speed: 0, frameMs: 650, poke: 'jingle' },
+    menorah: { speed: 0, frameMs: 220, fixed: true, poke: 'glow' },
+    kinara: { speed: 0, frameMs: 240, fixed: true, poke: 'glow' },
+    sign: { speed: 0, frameMs: 600, fixed: true, poke: 'cheer' },
   };
+  // (fixed: never mirrored, its order matters: the candles, the year's digits)
   // What each season sends (one visit at a time)
   const VISITS = {
     halloween: ['frank', 'mummy', 'creature', 'nosferatu', 'ghost', 'bats', 'crows', 'spider'],
     november: ['turkey', 'turkey', 'crows'],
+    winter: ['penguin'],
+    christmas: ['reindeer', 'reindeer'],
+    hanukkah: ['dreidel'],
   };
+  // The scenery each season has pushed in (up to two pieces at once, one of each)
+  const SCENERY = { halloween: 'tree', winter: 'snowman', christmas: 'evergreen', hanukkah: 'menorah', kwanzaa: 'kinara', nye: 'sign', newyear: 'sign' };
+  const seasons = () => (typeof Season !== 'undefined' ? Season.active() : []);
+  const visits = () => seasons().flatMap((id) => VISITS[id] || []);
 
   let list = [];
   let nextVisit = performance.now() + rand(6000, 15000);
 
   function add(kind, x, dir, extra = {}) {
-    const el = spriteEl(kind);
+    const el = spriteEl(kind, extra.pal);
     const v = {
       kind, el, emote: el.querySelector('.walker-emote'), x, y: 0, dir, age: 0, speed: KINDS[kind].speed * rand(0.85, 1.15),
       state: 'go', frame: 0, frameAt: 0, scared: new Set(), phase: rand(0, 6.28), ...extra,
@@ -144,7 +246,9 @@ function createVisitors(api) {
     v.sayTimer = setTimeout(() => v.emote.classList.remove('show'), ms);
   }
   // One visit: a monster, the ghost, a flock of bats or a crow or two, in from either side
-  function visit(what = pick(VISITS[Season.current()] || VISITS.halloween)) {
+  function visit(what = pick(visits().length ? visits() : VISITS.halloween)) {
+    if (what === 'countdown') return countdown();
+    if (what === 'fireworks') { for (let i = 0; i < 3; i++) setTimeout(firework, i * 450); return; }
     const W = api.laneW();
     const fromLeft = Math.random() < 0.5;
     const dir = fromLeft ? 1 : -1;
@@ -160,17 +264,49 @@ function createVisitors(api) {
       const s = add('spider', rand(0.15, 0.8) * W, 1, { y: 110, hang: rand(12, 22), life: rand(3000, 5500), state: 'down' });
       s.el.insertAdjacentHTML('afterbegin', '<i class="visitor-thread"></i>');
     } else if (what === 'turkey') add('turkey', edge(12 * U), dir, { stopAt: rand(0.25, 0.65) * W, life: rand(2500, 4500) });
+    else if (what === 'reindeer' || what === 'rudolph') { // (now and then, the one with the red nose)
+      const red = what === 'rudolph' || Math.random() < 0.25;
+      const r = add('reindeer', edge(16 * U), dir, red ? { pal: { n: '#ff2a2a' } } : {});
+      if (red) { r.el.classList.add('v-rudolph'); api.botEvent('visit-rudolph'); }
+    } else if (what === 'dreidel') add('dreidel', edge(8 * U), dir, { stopAt: rand(0.25, 0.7) * W });
     else add(what, edge(SPRITES[what].a[0].length * U), dir);
   }
 
-  // The scary tree, for a wanderer to push in (wanderers.js): off the card until it's moved
-  let tree = null;
-  function makeTree(dir) {
-    tree = add('tree', -400, 1, { state: 'scenery' });
-    tree.el.classList.add('visitor-scenery');
-    tree.w = SPRITES.tree.a[0].length * U;
-    tree.dir = dir;
-    return tree;
+  // The season's scenery, for a wanderer to push in (wanderers.js): off the card until it's moved.
+  // Its spot is clear of any already standing (and of the path to them: it never passes through)
+  const standing = () => list.filter((v) => v.state === 'scenery');
+  function nextScenery() {
+    const here = standing();
+    if (here.length >= 2) return null;
+    const kinds = [...new Set(seasons().map((id) => SCENERY[id]).filter(Boolean))].filter((k) => !here.some((v) => v.kind === k));
+    return kinds.length ? pick(kinds) : null;
+  }
+  // (ok(x): whether its pusher, stopping at x beside it, has room there among the bots)
+  function makeScenery(dir, ok = () => true) {
+    const kind = nextScenery();
+    if (!kind) return null;
+    if (kind === 'menorah') SPRITES.menorah = menorah(Season.hanukkahNight() || 8);
+    if (kind === 'kinara') SPRITES.kinara = kinara(Season.kwanzaaDay() || 7);
+    if (kind === 'sign') SPRITES.sign = sign(Season.newYear());
+    const w = SPRITES[kind].a[0].length * U;
+    let lo = 16 + 34; // (room at the edge for its pusher, who stops beside it)
+    let hi = api.laneW() - w - 16 - 34;
+    for (const o of standing()) {
+      const from = Math.min(o.x, o.spot);
+      const to = Math.max(o.x, o.spot) + o.w;
+      if (dir > 0) hi = Math.min(hi, from - w - 12);
+      else lo = Math.max(lo, to + 12);
+    }
+    if (hi < lo) return null;
+    const t = add(kind, -400, 1, { state: 'scenery' });
+    t.el.classList.add('visitor-scenery');
+    t.w = w;
+    t.dir = KINDS[kind].fixed ? 1 : dir;
+    const pusherAt = (spot) => (dir > 0 ? spot - (34 - 6) : spot + w - 6);
+    t.spot = rand(lo, hi);
+    for (let i = 0; i < 12 && !ok(pusherAt(t.spot)); i++) t.spot = rand(lo, hi);
+    t.x = dir > 0 ? -w - 40 : api.laneW() + 40;
+    return t;
   }
   function moveTree(t, x) {
     t.x = x;
@@ -178,13 +314,19 @@ function createVisitors(api) {
   }
 
   function poke(v) {
-    if (v.kind === 'tree') { // (creaks, and a bat flies out of it in the season)
-      say(v, 'creeeak', 1000);
-      v.el.classList.remove('v-creak');
+    if (v.state === 'scenery') {
+      const k = KINDS[v.kind];
+      const cls = k.poke === 'glow' ? 'v-glow' : 'v-creak';
+      v.el.classList.remove(cls);
       void v.el.offsetWidth;
-      v.el.classList.add('v-creak');
-      if (Season.is('halloween')) add('bat', v.x + v.w / 2, pick([-1, 1]), { fly: 40, speed: rand(60, 90), bolt: true });
-      api.botEvent('tree-pokes');
+      v.el.classList.add(cls);
+      if (k.poke === 'creak') { // (creaks, and a bat flies out of it in the season)
+        say(v, 'creeeak', 1000);
+        if (Season.is('halloween')) add('bat', v.x + v.w / 2, pick([-1, 1]), { fly: 40, speed: rand(60, 90), bolt: true });
+      } else if (k.poke === 'brrr') say(v, 'brrr!', 900);
+      else if (k.poke === 'jingle') { say(v, 'jingle!', 900); v.el.classList.add('v-blink'); setTimeout(() => v.el.classList.remove('v-blink'), 1200); }
+      else if (k.poke === 'cheer') { say(v, Season.is('nye') ? 'SOON!' : 'HAPPY NEW YEAR!', 1400); firework(); }
+      api.botEvent(`${v.kind}-pokes`);
       return;
     }
     if (v.kind === 'spider') {
@@ -196,9 +338,30 @@ function createVisitors(api) {
       api.startle(v, 60); // (the bots near it don't like spiders)
       return;
     }
-    if (v.state !== 'go' && v.state !== 'peck') return;
+    if (v.state !== 'go' && v.state !== 'peck' && v.state !== 'land') return;
     api.botEvent('visitor-pokes');
     const k = KINDS[v.kind];
+    if (k.poke === 'squawk') { // (a flap, then off on its belly)
+      say(v, 'SQUAWK!', 900);
+      v.state = 'slide';
+      v.el.classList.add('v-slide');
+      v.speed = 75;
+      api.botEvent('penguin-slide');
+      return;
+    }
+    if (k.poke === 'snort') { // (a snort, then a prance off at double time)
+      say(v, 'SNORT!', 900);
+      v.speed *= 2.2;
+      v.prance = true;
+      return;
+    }
+    if (k.poke === 'spin') { // (landed: spun again, on along the card, to land on another letter)
+      if (v.state !== 'land') return;
+      say(v, 'whirr', 700);
+      const on = rand(30, 70);
+      spin(v, v.dir > 0 ? v.x + on : api.laneW() - v.x + on); // (stopAt: from the side it came in)
+      return;
+    }
     if (k.poke === 'roar') { // (arms up and a stomp: nearby bots jump)
       say(v, 'RAAWR!');
       v.el.classList.add('v-stomp');
@@ -255,6 +418,96 @@ function createVisitors(api) {
     setTimeout(() => d.remove(), 700);
   }
 
+  // The dreidel: spinning along to a stop, a wobble, and it lands on a letter
+  const LETTERS = ['NUN', 'GIMEL', 'HEY', 'SHIN'];
+  function spin(v, stopAt) {
+    v.state = 'go';
+    v.still = false;
+    v.stopAt = stopAt;
+    v.speed = KINDS.dreidel.speed * rand(0.85, 1.15);
+  }
+
+  // WEATHER: snow in the winter (pixel flakes drifting down to the floor, a moment there, gone);
+  // fireworks at the new year (a rocket up, bursting into pixel sparks that fall away)
+  let flakes = [];
+  let nextFlake = 0;
+  let nextFirework = performance.now() + rand(2000, 5000);
+  const snap = (n) => Math.round(n / U) * U;
+  function snow(now, dt) {
+    const W = api.laneW();
+    if (now > nextFlake && flakes.length < 18) {
+      nextFlake = now + rand(180, 420);
+      const el = document.createElement('i');
+      el.className = 'visitor-flake';
+      api.lane.appendChild(el);
+      flakes.push({ el, x: rand(0, W), y: rand(70, 96), speed: rand(9, 16), phase: rand(0, 6.28), age: 0 });
+    }
+    for (const f of flakes) {
+      f.age += dt * 1000;
+      if (f.y > FLOOR) f.y = Math.max(FLOOR, f.y - f.speed * dt);
+      else if (!f.landed) f.landed = now;
+      const drift = Math.sin(f.age / 700 + f.phase) * 5;
+      f.el.style.transform = `translate(${snap(f.x + drift).toFixed(1)}px, ${(-snap(f.y)).toFixed(1)}px)`;
+      if (f.landed && now - f.landed > 900) f.gone = true;
+    }
+    flakes = flakes.filter((f) => {
+      if (f.gone) f.el.remove();
+      return !f.gone;
+    });
+  }
+  const SPARKS = ['#ff3b5c', '#ffd23f', '#3bd1ff', '#7cff6b', '#b36bff', '#ff7ad9', '#ffffff'];
+  function firework() {
+    if (!api.lane.isConnected) return;
+    const W = api.laneW();
+    const x = snap(rand(0.12, 0.88) * W);
+    const top = snap(rand(58, 84));
+    const c = pick(SPARKS);
+    const piece = (cls) => {
+      const el = document.createElement('i');
+      el.className = cls;
+      el.style.setProperty('--c', c);
+      api.lane.appendChild(el);
+      return el;
+    };
+    const rocket = piece('visitor-spark rocket');
+    const up = rocket.animate([{ transform: `translate(${x}px, ${-FLOOR}px)` }, { transform: `translate(${x}px, ${-top}px)` }],
+      { duration: 650, easing: `steps(${Math.round((top - FLOOR) / U / 2)}, end)`, fill: 'forwards' });
+    up.onfinish = () => {
+      rocket.remove();
+      const n = 12;
+      for (let i = 0; i < n; i++) {
+        const a = (i / n) * Math.PI * 2 + rand(-0.15, 0.15);
+        const r = rand(12, 20);
+        const s = piece('visitor-spark');
+        const frames = [];
+        for (let k = 0; k <= 6; k++) {
+          const t = k / 6;
+          const dx = Math.cos(a) * r * Math.sqrt(t);
+          const dy = Math.sin(a) * r * Math.sqrt(t) - 10 * t * t; // (spreading, then falling)
+          frames.push({ transform: `translate(${snap(x + dx)}px, ${snap(-top - dy)}px)`, opacity: k < 4 ? 1 : 1 - (k - 3) / 4, offset: t, easing: 'steps(1, end)' });
+        }
+        s.animate(frames, { duration: 950, fill: 'forwards' }).onfinish = () => s.remove();
+      }
+    };
+  }
+
+  // NEW YEAR'S EVE at the player's own midnight: the bots count down from ten and cheer, and the
+  // sky fills with fireworks
+  let counted = false;
+  function countdown() {
+    counted = true;
+    for (let i = 10; i >= 1; i--) {
+      setTimeout(() => api.walkers().forEach((w) => api.say(w, 'idle', String(i))), (10 - i) * 1000);
+    }
+    setTimeout(() => {
+      const year = String(Season.newYear());
+      api.walkers().forEach((w, i) => api.say(w, 'happy', i === 0 ? 'HAPPY NEW YEAR!' : pick(['WOOO!', 'YAY!', `${year}!`]))); // (one says it all)
+      api.botEvent('countdown');
+      for (let i = 0; i < 10; i++) setTimeout(firework, i * 320 + rand(0, 200));
+    }, 10000);
+    setTimeout(() => api.walkers().forEach((w) => api.say(w, 'idle', '')), 14000);
+  }
+
   // (the lumbering in whole pixels of the sprite's grid: a pixel's shuffle side to side and a
   // pixel's bob, heights snapped to the grid too; no tilting). FLOOR: the bots' feet rest a pixel
   // of their grid above the lane's bottom edge, and every visitor stands on that same floor.
@@ -267,26 +520,51 @@ function createVisitors(api) {
     const bob = k.bob && going ? Math.round(Math.abs(Math.sin(t * 5 + v.phase)) * k.bob) * U : 0;
     const y = Math.round(v.y / U) * U;
     v.el.style.transform = `translate(${(v.x + shuffle).toFixed(1)}px, ${(-y - bob - FLOOR).toFixed(1)}px)`;
-    v.el.firstChild.style.transform = `scaleX(${v.dir})`;
+    v.el.querySelector('svg').style.transform = `scaleX(${v.dir})`;
   }
 
   function frame(now, dt) {
     const W = api.laneW();
-    const season = typeof Season !== 'undefined' && Season.current();
-    if (!list.some((v) => v.kind !== 'tree') && now > nextVisit && VISITS[season]) {
+    if (!list.some((v) => v.state !== 'scenery') && now > nextVisit && visits().length) {
       visit();
       nextVisit = now + rand(20000, 45000);
+    }
+    if (Season.is('winter') || flakes.length) snow(now, dt);
+    if ((Season.is('nye') || Season.is('newyear')) && now > nextFirework) {
+      firework();
+      nextFirework = now + rand(Season.is('newyear') ? 3000 : 6000, 11000);
+    }
+    if (!counted && Season.is('nye')) { // (ten seconds to the player's midnight)
+      const d = new Date();
+      if (d.getHours() === 23 && d.getMinutes() === 59 && d.getSeconds() >= 50) countdown();
     }
     for (const v of list) {
       const k = KINDS[v.kind];
       v.age += dt * 1000;
-      if (k.frameMs && now - v.frameAt > (v.state === 'peck' ? 160 : k.frameMs)) {
+      if (k.frameMs && !v.still && v.state !== 'slide' && now - v.frameAt > (v.state === 'peck' ? 160 : k.frameMs)) {
         v.frameAt = now;
         v.frame = 1 - v.frame;
         v.el.classList.toggle('step', !!v.frame);
       }
-      if (v.kind === 'tree') {
+      if (v.state === 'scenery') {
         // (scenery: pushed by a wanderer, or standing where it was left)
+      } else if (v.kind === 'dreidel') { // (spins along, wobbles to a stop, lands on a letter; then on)
+        if (v.state === 'go') {
+          v.x += v.dir * v.speed * dt;
+          if (v.stopAt !== null && ((v.dir > 0 && v.x >= v.stopAt) || (v.dir < 0 && v.x <= W - v.stopAt))) {
+            v.state = 'wobble';
+            v.until = now + 700;
+            v.el.classList.add('v-shake');
+          }
+        } else if (v.state === 'wobble' && now > v.until) {
+          v.el.classList.remove('v-shake');
+          v.state = 'land';
+          v.still = true;
+          const letter = pick(LETTERS);
+          say(v, `${letter}!`, 1800);
+          if (letter === 'GIMEL') api.botEvent('gimel');
+          v.until = now + 3200;
+        } else if (v.state === 'land' && now > v.until) spin(v, null); // (and off it goes)
       } else if (v.kind === 'spider') { // (down its thread, a dangle, back up)
         if (v.state === 'down') {
           v.y -= 38 * dt;
@@ -317,8 +595,9 @@ function createVisitors(api) {
           v.y += 55 * dt;
           v.el.classList.remove('step');
         }
-      } else if (v.state === 'go' || v.state === 'leaving') {
-        if (v.state === 'go') v.x += v.dir * v.speed * dt;
+      } else if (v.state === 'go' || v.state === 'leaving' || v.state === 'slide') {
+        if (v.state !== 'leaving') v.x += v.dir * v.speed * dt;
+        if (v.prance) v.y = Math.abs(Math.sin(v.age / 110)) * 4;
         if (k.float) v.y = k.float + Math.sin(v.age / 500 + v.phase) * 4;
         if (k.drips && Math.random() < dt * 1.4) drip(v);
         // A monster passing a bot gives it a fright (once each)
@@ -331,7 +610,7 @@ function createVisitors(api) {
         }
       }
       place(v);
-      if (v.kind === 'tree') continue; // (it stays)
+      if (v.state === 'scenery') continue; // (it stays)
       const w = v.el.offsetWidth || 30;
       if (v.x < -w - 40 || v.x > W + 40 || v.y > 140) v.gone = true;
     }
@@ -343,7 +622,8 @@ function createVisitors(api) {
   function clear() {
     list.forEach((v) => v.el.remove());
     list = [];
-    tree = null;
+    flakes.forEach((f) => f.el.remove());
+    flakes = [];
   }
-  return { frame, clear, visit, list: () => list, makeTree, moveTree, hasTree: () => !!tree };
+  return { frame, clear, visit, list: () => list, makeScenery, moveTree };
 }

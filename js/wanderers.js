@@ -34,10 +34,27 @@ function createWanderers(lane, active = () => true) {
   const canFeel = (w, m) => !(NEVER[w.bot] && NEVER[w.bot][m]) && !(m === 'love' && !LOVE_LEVELS.includes(w.el.dataset.level));
   const pairFits = (a, b, [ma, mb]) => canFeel(a, ma) && canFeel(b, mb)
     && (ma !== 'love' || LOVE_PARTNERS.includes(mb)) && (mb !== 'love' || LOVE_PARTNERS.includes(ma));
-  // SEASONAL COSTUMES (seasons.js says when): drawn in the bot's own 16x17 pixel grid, over its
-  // body and under its face (so the face shows through: the pumpkin's carved face; the ghost's
-  // sheet is see-through). Most arrive dressed up (80%). Colors in style.css ([data-costume]).
+  // SEASONAL COSTUMES (seasons.js says when; stacked seasons all offer theirs): drawn in the bot's
+  // own 16x17 pixel grid, over its body and under its face (so the face shows through: the
+  // pumpkin's carved face; the ghost's sheet is see-through). Most arrive dressed up (80%).
+  // Halloween's colors are in style.css ([data-costume]); the others carry their own. A hat
+  // (data-hat) hides the antennas and ear tips under it.
   const px = (cells, cls) => cells.map(([x, y, w = 1, h = 1]) => `<rect class="${cls}" x="${x}" y="${y}" width="${w}" height="${h}"/>`).join('');
+  const pxc = (cells, fill) => cells.map(([x, y, w = 1, h = 1]) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}"/>`).join('');
+  const TOP = { bot: 3, grifter: 3, bunker: 2, glitch: 3 }; // (where each one's head starts)
+  // Hats and the like, for any bot (t: the top of its head)
+  const WEAR = {
+    beanie: (t, a, b) => pxc([[3, t - 1, 10, 1]], a) + pxc([[4, t - 2, 8, 1], [5, t - 3, 6, 1]], b) + pxc([[4, t - 2], [7, t - 2], [10, t - 2], [6, t - 3], [9, t - 3]], a) + pxc([[7, t - 4, 2, 1]], '#ffffff'),
+    santa: (t) => pxc([[2, t - 1, 12, 1]], '#ffffff') + pxc([[3, t - 2, 9, 1], [4, t - 3, 7, 1], [6, t - 4, 6, 1], [9, t - 5, 4, 1], [12, t - 4, 1, 1]], '#e02b3a') + pxc([[13, t - 4, 2, 2]], '#ffffff'),
+    elf: (t) => pxc([[2, t - 1, 12, 1]], '#c8102e') + pxc([[3, t - 2, 9, 1], [4, t - 3, 7, 1], [6, t - 4, 5, 1], [9, t - 5, 3, 1], [11, t - 6, 2, 1], [13, t - 7, 1, 2]], '#1f9d4c') + pxc([[13, t - 5, 2, 2]], '#ffd23f'),
+    party: (t, a, b) => pxc([[5, t - 1, 6, 1], [6, t - 3, 4, 1], [7, t - 5, 2, 1]], a) + pxc([[6, t - 2, 4, 1], [7, t - 4, 2, 1]], b) + pxc([[7, t - 6, 2, 1]], '#ffffff'),
+    earmuffs: (t, a) => pxc([[4, t - 1, 8, 1]], '#4a4f5a') + pxc([[0, 5, 2, 3], [14, 5, 2, 3]], a),
+    scarf: (t, a, b) => pxc([[1, 12, 14, 2]], a) + pxc([[3, 12, 1, 2], [7, 12, 1, 2], [11, 12, 1, 2]], b) + pxc([[10, 14, 2, 2]], a) + pxc([[10, 15, 2, 1]], b),
+    antlers: (t) => pxc([[4, t - 1], [3, t - 2], [2, t - 3], [4, t - 3], [1, t - 4], [11, t - 1], [12, t - 2], [13, t - 3], [11, t - 3], [14, t - 4]], '#8a5a2b') + pxc([[7, 8, 2, 1]], '#ff3b3b'),
+  };
+  const PARTY = [['#ff3b5c', '#ffd23f'], ['#3bd1ff', '#ffffff'], ['#7cff6b', '#b36bff'], ['#ffb000', '#ff7ad9']];
+  const hat = (kind, ...colors) => ({ id: kind, hat: true, svg: (bot) => WEAR[kind](TOP[bot], ...colors) });
+  const wear = (kind, ...colors) => ({ id: kind, svg: (bot) => WEAR[kind](TOP[bot], ...colors) });
   const COSTUMES = {
     halloween: {
       // BUNKER: a pumpkin (its body turns orange), darker ribs, a stem and a leaf
@@ -49,13 +66,28 @@ function createWanderers(lane, active = () => true) {
       // GLITCH: devil horns and a pointed tail
       glitch: { id: 'devil', svg: px([[3, 2, 2, 1], [3, 1], [2, 0], [11, 2, 2, 1], [12, 1], [13, 0], [14, 12], [15, 11], [16, 10], [16, 9], [15, 8, 3, 1], [16, 7]], 'c-horn') },
     },
+    // (the others: a few choices each, for any bot)
+    winter: [hat('beanie', '#d23a3a', '#f2f2f2'), wear('earmuffs', '#e05a8a'), wear('scarf', '#3a7bd5', '#f2f2f2'), wear('scarf', '#2f9e5a', '#f2f2f2')],
+    hanukkah: [hat('beanie', '#1f5fbf', '#ffffff'), wear('scarf', '#1f5fbf', '#ffffff')],
+    christmas: [hat('santa'), hat('elf'), wear('antlers')],
+    kwanzaa: [wear('scarf', '#d23a3a', '#1f9d4c'), wear('scarf', '#1f9d4c', '#d23a3a')],
+    nye: PARTY.map((c) => hat('party', ...c)),
+    newyear: PARTY.map((c) => hat('party', ...c)),
   };
   function dress(el, bot, always = false) {
-    const season = typeof Season !== 'undefined' && Season.current();
-    const costume = season && COSTUMES[season] && COSTUMES[season][bot];
-    if (!costume || (!always && Math.random() >= 0.8)) return;
+    const seasons = typeof Season !== 'undefined' ? Season.active() : [];
+    const offers = seasons.flatMap((id) => {
+      const c = COSTUMES[id];
+      if (!c) return [];
+      if (Array.isArray(c)) return c;
+      return c[bot] ? [c[bot]] : [];
+    });
+    if (!offers.length || (!always && Math.random() >= 0.8)) return;
+    const costume = pick(offers);
     el.dataset.costume = costume.id;
-    el.querySelector('.bot-body').insertAdjacentHTML('afterend', `<g class="costume">${costume.svg}</g>`);
+    if (costume.hat) el.dataset.hat = '';
+    const svg = typeof costume.svg === 'function' ? costume.svg(bot) : costume.svg;
+    el.querySelector('.bot-body').insertAdjacentHTML('afterend', `<g class="costume">${svg}</g>`);
   }
   let partySeen = false;
   let forcePush = false; // (the dev tests: the next arrival pushes the tree)
@@ -139,6 +171,7 @@ function createWanderers(lane, active = () => true) {
     w.target = freeSpot(w);
     walkers.push(w);
     const how = Math.random();
+    let pushed = null;
     if (how < 0.10) { // (10%) pops into view, pixelating in; those near turn to it, startled
       w.x = w.target;
       w.state = 'idle';
@@ -152,20 +185,21 @@ function createWanderers(lane, active = () => true) {
     if (how < 0.25) { // (15%) arrives at a run, then stops to catch its breath
       w.running = true;
       w.winded = true;
-    } else if (visitors && typeof Season !== 'undefined' && Season.is('halloween') && !visitors.hasTree() && (forcePush || Math.random() < 0.15)) {
+    } else if (visitors && (forcePush || Math.random() < 0.15) && (pushed = visitors.makeScenery(w.dir, (x) => !walkers.some((o) => o !== w && !o.leaving && Math.abs((o.state === 'walk' ? o.target : o.x) - x) < APART)))) {
       forcePush = false;
-      // HALLOWEEN: it arrives pushing the scary tree ahead of it, slowly, straining, and leaves it
-      // standing somewhere along the card (visitors.js's scenery)
-      const t = visitors.makeTree(w.dir);
+      // It arrives pushing the season's scenery ahead of it (the scary tree, a snowman, the
+      // evergreen, a menorah, a kinara, the new year's sign: visitors.js), slowly, straining, and
+      // leaves it standing somewhere along the card (at a spot clear of any already there)
+      const t = pushed;
       w.pushing = t;
       w.speed *= 0.6;
       const W = laneW();
-      const treeX = rand(16, Math.max(16, W - t.w - 16));
+      const treeX = t.spot;
       w.x = w.dir > 0 ? -t.w - 4 - (SIZE - 6) : W + 4 + t.w - 6; // (the tree just off the card)
       w.target = w.dir > 0 ? treeX - (SIZE - 6) : treeX + t.w - 6;
       pushTree(w);
       mood(w, 'strain');
-      botEvent('push-tree');
+      botEvent(`push-${t.kind}`);
     }
     place(w);
   }
@@ -304,7 +338,14 @@ function createWanderers(lane, active = () => true) {
 
   // HALLOWEEN: a snack. One to three gummy drops, each pulled from its side, tossed up and
   // caught in its mouth, a quick chew, then on its way
-  const CANDY = ['#ff3b5c', '#ffb000', '#7cff6b', '#b36bff', '#3bd1ff', '#ff7ad9'];
+  // (what's snacked on, by season: its colors)
+  const SNACKS = {
+    halloween: ['#ff3b5c', '#ffb000', '#7cff6b', '#b36bff', '#3bd1ff', '#ff7ad9'], // (gummy drops)
+    winter: ['#c8894a', '#a86a34'], // (cookie bites)
+    hanukkah: ['#ffcf3a', '#e6b422'], // (gelt)
+    christmas: ['#ff3b3b', '#ffffff'], // (candy cane bits)
+  };
+  const snackColors = () => (typeof Season !== 'undefined' ? Season.active().flatMap((id) => SNACKS[id] || []) : []);
   function snack(w, now) {
     const id = (w.snackId = (w.snackId || 0) + 1);
     const still = () => w.snackId === id && w.state === 'snack' && !w.gone;
@@ -319,7 +360,7 @@ function createWanderers(lane, active = () => true) {
         const side = Math.random() < 0.5 ? -1 : 1;
         const c = document.createElement('i');
         c.className = 'walker-candy';
-        c.style.setProperty('--c', pick(CANDY));
+        c.style.setProperty('--c', pick(snackColors().length ? snackColors() : SNACKS.halloween));
         w.el.appendChild(c);
         // (in the walker's pixels: out at its side, then an arc up over its head and down into its
         // mouth, hopping from pixel to pixel of its grid like everything else)
@@ -345,7 +386,7 @@ function createWanderers(lane, active = () => true) {
           if (!still()) return;
           mood(w, 'munch', k === n - 1 ? true : '');
           w.el.classList.add('chewing');
-          botEvent('candy');
+          botEvent(Season.is('halloween') ? 'candy' : 'treat');
           setTimeout(() => {
             w.el.classList.remove('chewing');
             if (still()) mood(w, 'idle');
@@ -404,7 +445,8 @@ function createWanderers(lane, active = () => true) {
 
   // Seasonal visitors (visitors.js) share the lane
   const visitors = typeof createVisitors === 'function' ? createVisitors({
-    lane, laneW: () => width, walkers: () => walkers, botEvent,
+    lane, laneW: () => width, walkers: () => walkers.filter((w) => inside(w) && !w.leaving), botEvent,
+    say: (w, m, text) => mood(w, m, text),
     startle: (src, radius) => startle(src, performance.now(), radius),
   }) : null;
 
@@ -434,7 +476,7 @@ function createWanderers(lane, active = () => true) {
       crewSeen = true;
       botEvent('crew');
     }
-    if (!partySeen && walkers.filter((w) => inside(w) && w.el.dataset.costume).length >= 4) { // (all four dressed up)
+    if (!partySeen && walkers.filter((w) => inside(w) && ['pumpkin', 'ghost', 'witch', 'devil'].includes(w.el.dataset.costume)).length >= 4) { // (all four dressed up for Halloween)
       partySeen = true;
       botEvent('costume-party');
     }
@@ -480,7 +522,7 @@ function createWanderers(lane, active = () => true) {
             w.state = 'idle';
             w.until = now + rand(900, 3200);
             mood(w, 'idle');
-            if (typeof Season !== 'undefined' && Season.is('halloween') && Math.random() < 0.3) snack(w, now); // (candy!)
+            if (snackColors().length && Math.random() < 0.3) snack(w, now); // (a seasonal snack)
             else if (Math.random() < 0.35) { // a hop or two, then on
               const hops = Math.random() < 0.5 ? 1 : 2;
               w.el.style.setProperty('--hops', hops);
