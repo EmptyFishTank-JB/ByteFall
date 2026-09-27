@@ -50,11 +50,26 @@
   const MEETINGS = [['happy', 'happy'], ['smug', 'annoyed'], ['devious', 'worried'], ['hit', 'happy'], ['annoyed', 'annoyed'],
     ['happy', 'smug'], ['devious', 'devious'], ['love', 'surprised'], ['laugh', 'annoyed'], ['surprised', 'surprised'],
     ['laugh', 'laugh'], ['scared', 'devious'], ['dizzy', 'laugh'], ['love', 'love']];
-  const EMOTES = ['!', '?', '!!', '...', '^^', '?!', '<3', 'haha', 'hm'];
+  // Each face's emotes: they fit the mood (no <3 on a -_-)
+  const MOOD_EMOTES = {
+    happy: ['^^', '!'], hit: ['!', '?!'], worried: ['?', '...', '!'], smug: ['hm', '^^'], annoyed: ['...', 'hm', '-_-'],
+    devious: ['hm', '...'], love: ['<3', '!'], surprised: ['!', '?', '?!'], laugh: ['haha', '^^'], scared: ['!', '!!'],
+    dizzy: ['?', '...'], tired: ['...', 'phew', 'huff'],
+  };
   // Faces each bot won't make, and what it makes instead (GLITCH is never happy or smitten)
   const NEVER = { glitch: { happy: 'smug', love: 'devious', laugh: 'smug' } };
-  const NEVER_EMOTE = { glitch: ['<3', '^^', 'haha'] };
   const NEVER_LEVEL = { glitch: ['easy'] }; // (EASY's resting face is a smile)
+  // The mad ones (HARD's angry and INSANE's red-eyed resting faces) and GLITCH: never cheery
+  const MAD = ['hard', 'insane'];
+  const CHEERY = ['<3', '^^', 'haha'];
+  const cheerless = (w) => w.bot === 'glitch' || MAD.includes(w.el.dataset.level);
+  // Love only from the happy or normal resting faces (EASY, NORMAL), and never toward a worried,
+  // scared or put-out partner
+  const LOVE_LEVELS = ['easy', 'normal'];
+  const LOVE_PARTNERS = ['love', 'happy', 'surprised', 'laugh'];
+  const canFeel = (w, m) => !(NEVER[w.bot] && NEVER[w.bot][m]) && !(m === 'love' && !LOVE_LEVELS.includes(w.el.dataset.level));
+  const pairFits = (a, b, [ma, mb]) => canFeel(a, ma) && canFeel(b, mb)
+    && (ma !== 'love' || LOVE_PARTNERS.includes(mb)) && (mb !== 'love' || LOVE_PARTNERS.includes(ma));
   const RADIUS = 110; // how near a pop, a decrypt or a bolt startles the others
   const HOP_MS = 360;
   const SIZE = 34;
@@ -73,9 +88,12 @@
   const laneW = () => lane.clientWidth;
   const inside = (w) => w.x >= 0 && w.x <= laneW() - SIZE;
 
+  // emote: text to show, or true to pick one that fits the face (and the bot)
   function mood(w, m, emote = '') {
-    m = (NEVER[w.bot] && NEVER[w.bot][m]) || m;
-    if (emote && (NEVER_EMOTE[w.bot] || []).includes(emote)) emote = '?!';
+    if (!canFeel(w, m)) m = (NEVER[w.bot] && NEVER[w.bot][m]) || 'smug';
+    const allowed = (e) => !(cheerless(w) && CHEERY.includes(e));
+    if (emote === true) emote = pick((MOOD_EMOTES[m] || ['!']).filter(allowed)) || '!';
+    else if (emote && !allowed(emote)) emote = '!';
     w.el.dataset.mood = m;
     delete w.el.dataset.variant;
     w.emote.textContent = emote;
@@ -272,14 +290,17 @@
         if (Math.abs(a.x - b.x) > SIZE + 6 || now - a.metAt < 7000 || now - b.metAt < 7000) continue;
         a.metAt = b.metAt = now;
         if (Math.random() > 0.55) continue; // (not every time)
-        const [ma, mb] = pick(MEETINGS);
+        let pair = pick(MEETINGS);
+        for (let k = 0; k < 12 && !pairFits(a, b, pair); k++) pair = pick(MEETINGS);
+        if (!pairFits(a, b, pair)) pair = ['surprised', 'surprised'];
+        const [ma, mb] = pair;
         const until = now + rand(1500, 2300);
         for (const [w, other, m] of [[a, b, ma], [b, a, mb]]) {
           w.state = 'meet';
           w.partner = other;
           w.until = until;
           w.look = other.x > w.x ? 1 : -1;
-          mood(w, m, pick(EMOTES));
+          mood(w, m, true);
           place(w);
         }
       }

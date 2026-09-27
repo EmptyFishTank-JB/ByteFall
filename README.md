@@ -406,7 +406,10 @@ of pixels, 15% get spooked (scared, "!") and bolt, the rest walk off. A pop, a
 decrypt or a bolt startles every bot within 110px (surprised, facing it),
 cutting short any meeting there; a partner out of range is left -_-. Each bot
 keeps to its character: GLITCH is never happy, heart-eyed or laughing (nor
-shows EASY's smiling rest face). The faces include the CPU's moods plus SCARED, TIRED (panting),
+shows EASY's smiling rest face); emotes fit the face (no <3 on a -_-), and the
+mad ones (HARD's angry and INSANE's red-eyed rest faces) and GLITCH never show
+the cheery ones (<3, ^^, haha); love comes only from the EASY and NORMAL faces,
+and never toward a worried, scared or put-out partner. The faces include the CPU's moods plus SCARED, TIRED (panting),
 SURPRISED, LOVE (red heart eyes), DIZZY and LAUGH. The small faces come from
 `js/minibot.js`, a copy of the CPU's face for use anywhere.
 
