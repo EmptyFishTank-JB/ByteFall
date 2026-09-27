@@ -493,7 +493,12 @@ the cheery ones (<3, ^^, haha); love comes only from the EASY and NORMAL faces,
 and never toward a worried, scared or put-out partner. Tap a wanderer and it
 reacts: 40% of the time it's startled and bolts; otherwise it's put out (-_-,
 "hey!"), shakes itself off in a puff of dust as if the touch left it dirty, then
-turns to you with a raised eyebrow (the SKEPTIC face) before wandering on.
+turns to you with a raised eyebrow (the SKEPTIC face) before wandering on. The
+mad ones (HARD's angry and INSANE's red-eyed faces) never bolt: they shake their
+head ("grr"), bare their teeth (SNARL) and snap at you like a rabid dog, three
+lunges with the jaw chomping ("SNAP!" / "CHOMP!"), then 35% of the time stomp
+off at a run, still angry, or glare a moment and wander on. One poked while half
+on the card reacts right there, peeking in.
 
 The same wanderers stroll along the bottom of the game card too, between the
 corner buttons (walking out from behind them), with everything above: meetings,
@@ -505,7 +510,7 @@ runs), THE EYEBROW (a raised eyebrow from all four bots), THIRD WHEEL (poke one
 mid-conversation), MATCHMAKER (two fall for each other), JUMP SCARE (a pop-in
 startles another), NOW YOU SEE ME (one decrypts away), FULL CREW (all four on
 screen at once), and hidden: PERSONAL SPACE (100 pokes), HR WANTS A WORD
-(200) and DEVELOPER OPTIONS (tap the VS CPU seven times in a row: "YOU ARE 3
+(200), RABID (get snapped at by a mad one) and DEVELOPER OPTIONS (tap the VS CPU seven times in a row: "YOU ARE 3
 TAPS AWAY FROM BEING A DEVELOPER" ... "NO NEED. THERE IS NO DEV MODE HERE."). The faces include the CPU's moods plus SCARED, TIRED (panting),
 SURPRISED, LOVE (red heart eyes), DIZZY and LAUGH. The small faces come from
 `js/minibot.js`, a copy of the CPU's face for use anywhere.

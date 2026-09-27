@@ -18,6 +18,7 @@ function createWanderers(lane, active = () => true) {
     happy: ['^^', '!'], hit: ['!', '?!'], worried: ['?', '...', '!'], smug: ['hm', '^^'], annoyed: ['...', 'hm', '-_-'],
     devious: ['hm', '...'], love: ['<3', '!'], surprised: ['!', '?', '?!'], laugh: ['haha', '^^'], scared: ['!', '!!'],
     dizzy: ['?', '...'], tired: ['...', 'phew', 'huff'], skeptic: ['?', 'hm', '...'],
+    angry: ['grr', '!!', '#@!'], snarl: ['GRRR', 'grr'],
   };
   // Faces each bot won't make, and what it makes instead (GLITCH is never happy or smitten)
   const NEVER = { glitch: { happy: 'smug', love: 'devious', laugh: 'smug' } };
@@ -154,13 +155,14 @@ function createWanderers(lane, active = () => true) {
       o.winded = o.running = false; // (a start stops a run: no catching its breath after)
       o.look = src.x > o.x ? 1 : -1;
       o.until = now + rand(1100, 1700);
-      o.el.classList.remove('hopping', 'shaking');
+      o.el.classList.remove('hopping', 'shaking', 'headshaking', 'snapping');
       place(o);
     }
     return startled;
   }
   // Poked by the player: 40% bolt off, startled; otherwise put out (-_-), it shakes itself off as
-  // if the touch left it dirty, then gives you a raised eyebrow before wandering on
+  // if the touch left it dirty, then gives you a raised eyebrow before wandering on. The mad ones
+  // (HARD and INSANE) never bolt: they go rabid (rabid()).
   function poke(w, now) {
     if (w.leaving || ['vanish', 'startled', 'poked'].includes(w.state)) return;
     botEvent('pokes');
@@ -173,6 +175,7 @@ function createWanderers(lane, active = () => true) {
       p.state = 'idle';
       p.until = now + rand(1200, 1700);
     }
+    if (MAD.includes(w.el.dataset.level)) return rabid(w, now);
     if (Math.random() < 0.4) {
       botEvent('bolts');
       return fright(w, now);
@@ -207,6 +210,45 @@ function createWanderers(lane, active = () => true) {
     }, 1400);
   }
 
+  // A mad one poked: it shakes its head, bares its teeth and snaps at you like a rabid dog, three
+  // lunges; then 35% it stomps off at a run, still angry, or glares a moment and wanders on
+  function rabid(w, now) {
+    const id = (w.pokeId = (w.pokeId || 0) + 1);
+    const still = () => w.pokeId === id && w.state === 'poked' && !w.gone;
+    w.state = 'poked';
+    w.winded = w.running = false;
+    w.look = 0; // (at you)
+    w.until = now + 3000;
+    mood(w, 'angry', 'grr');
+    w.el.classList.remove('hopping', 'shaking');
+    w.el.classList.add('headshaking');
+    place(w);
+    setTimeout(() => {
+      if (!still()) return;
+      w.el.classList.remove('headshaking');
+      mood(w, 'snarl', true);
+    }, 650);
+    setTimeout(() => {
+      if (!still()) return;
+      w.el.classList.add('snapping');
+      mood(w, 'snarl', pick(['SNAP!', 'CHOMP!']));
+      botEvent('bitten');
+    }, 1050);
+    setTimeout(() => {
+      if (!still()) return;
+      w.el.classList.remove('snapping');
+      if (Math.random() < 0.35) { // (storms off)
+        mood(w, 'angry', pick(['hmph', '#@!']));
+        w.state = 'idle';
+        leave(w, true);
+        place(w);
+      } else {
+        mood(w, 'angry');
+        w.until = performance.now() + 700; // (a glare, then on its way)
+      }
+    }, 1650);
+  }
+
   // Time to go: mostly a walk off the card; 15% a spooked bolt; 5% a pixelated decrypt
   function depart(w, now) {
     const r = Math.random();
@@ -229,6 +271,7 @@ function createWanderers(lane, active = () => true) {
     w.el.classList.toggle('running', w.state === 'walk' && w.running);
   }
   function walkTo(w, target, running = false) {
+    w.el.classList.remove('headshaking', 'snapping');
     w.target = target;
     w.dir = w.look = target > w.x ? 1 : -1;
     w.state = 'walk';
@@ -244,7 +287,7 @@ function createWanderers(lane, active = () => true) {
   // Spooked: a start (and a !), then off the card at a sprint; anyone near flinches
   function fright(w, now) {
     mood(w, 'scared', pick(['!', '!!', '!?']));
-    w.el.classList.remove('shaking', 'hopping');
+    w.el.classList.remove('shaking', 'hopping', 'headshaking', 'snapping');
     w.state = 'startled';
     w.leaving = true; // (off it goes once the start is over)
     w.until = now + 450;
@@ -288,7 +331,8 @@ function createWanderers(lane, active = () => true) {
     }
     for (const w of walkers) {
       // (the lane got narrower, say on a turn of the phone: whoever stands past its end steps in)
-      if (w.state !== 'walk' && !w.leaving && w.x > laneW() - SIZE) w.x = Math.max(0, laneW() - SIZE);
+      // (not one poked or startled half on the card: it reacts where it is, peeking in)
+      if ((w.state === 'idle' || w.state === 'meet') && !w.leaving && w.x > laneW() - SIZE) w.x = Math.max(0, laneW() - SIZE);
       if (w.state === 'walk') {
         const pace = w.running ? 3.4 : 1;
         const step = w.speed * pace * dt * (w.bot === 'glitch' && Math.random() < 0.08 ? 3 : 1); // (GLITCH lurches)

@@ -2021,6 +2021,8 @@ body.vs-mode .cpu-face:not([hidden]) { display: flex; flex-direction: column; al
 .cpu-face[data-mood="laugh"] :is(.eyes-happy, .mouth-grin),
 .cpu-face[data-mood="skeptic"] :is(.eyes-brow, .mouth-smirk),
 .cpu-face[data-mood="paused"] :is(.eyes-annoyed, .mouth-flat),
+.cpu-face[data-mood="angry"] :is(.eyes-angry, .mouth-frown),
+.cpu-face[data-mood="snarl"] :is(.eyes-angry, .mouth-teeth, .teeth),
 .cpu-face[data-variant="bored"] :is(.eyes-squint, .mouth-flat),
 .cpu-face[data-variant="tapping"] :is(.eyes-open, .mouth-under),
 .cpu-face[data-variant="scan"] :is(.eyes-open, .mouth-flat),
@@ -2475,3 +2477,12 @@ html.page-twinkle .page-bg { display: block; }
   font-size: 9px; letter-spacing: 1px; line-height: 1.6; color: var(--fg-dim); opacity: 0.8;
 }
 .start-legal p { margin: 0; }
+
+/* A mad wanderer poked (wanderers.js's rabid): a hard head shake, then snapping at you like a
+   rabid dog, lunging forward with its jaw chomping open and shut */
+.walker.headshaking .bot { animation: walker-headshake 0.07s steps(2) 9; }
+@keyframes walker-headshake { 0% { transform: translateX(-1.5px) rotate(-5deg); } 100% { transform: translateX(1.5px) rotate(5deg); } }
+.walker.snapping .bot { transform-origin: 50% 80%; animation: walker-lunge 0.2s steps(2) 3; }
+@keyframes walker-lunge { 0% { transform: scale(1.22) translateY(1px); } 100% { transform: scale(1); } }
+.walker.snapping .mouth-teeth { transform-box: fill-box; transform-origin: 50% 0; animation: walker-jaw 0.2s steps(2) 3; }
+@keyframes walker-jaw { 0% { transform: scaleY(2); } 100% { transform: scaleY(0.5); } }

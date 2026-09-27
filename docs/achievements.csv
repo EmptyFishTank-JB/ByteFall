@@ -162,6 +162,7 @@ BOTS,NOW YOU SEE ME,Watch a bot decrypt itself away,1,Standard,now-you-see-me
 BOTS,FULL CREW,See all four bots on screen at once,1,Standard,full-crew
 BOTS,PERSONAL SPACE,Poke 100 bots,100,Hidden,personal-space
 BOTS,HR WANTS A WORD,Poke 200 bots,200,Hidden,hr-wants-a-word
+BOTS,RABID,Poke a HARD or INSANE bot and get snapped at,1,Hidden,rabid
 BOTS,DEVELOPER OPTIONS,Tap the VS CPU seven times in a row,1,Hidden,developer-options
 THANK YOU,INDIE SUPPORTER,Buy REMOVE ADS or FULL ACCESS in the STORE. Thank you for supporting an indie game!,1,Standard,indie-supporter
 SECRETS,KONAMI,Enter the Konami code,1,Hidden,konami
