@@ -395,10 +395,16 @@ in the middle and TAP TO START blinking below (`js/start.js`). A tap (or Enter
 CLASSIC, Normal. The very first time the game is opened, it fades into the
 TUTORIAL instead (EXIT skips it). A refresh, or coming back to the app or tab,
 skips the start screen and carries on where you were. On the start screen one to three of the CPUs (BOT, GRIFTER, BUNKER, GLITCH;
-never two of the same) wander along the bottom of the card, walking in from
-either side, idling, and heading back out; two that meet may stop, face each
-other and pull faces (a mood each and a little emote). The small faces come
-from `js/minibot.js`, a copy of the CPU's face for use anywhere.
+never two of the same) wander along the bottom of the card, looking the way
+they walk (eyes and mouth a pixel that way): in from either side, idling (now
+and then bored or tapping a foot), finding a free spot and heading back out.
+Two that meet may stop no closer than an arm's overlap, face each other and
+pull faces (a mood each and a little emote). Every 15-30 seconds one gets
+spooked (scared, "!") and sprints off the card while any bot nearby flinches;
+about one arrival in five comes in at a run and stops, tired, to catch its
+breath. The faces include the CPU's moods plus SCARED, TIRED (panting),
+SURPRISED, LOVE (red heart eyes), DIZZY and LAUGH. The small faces come from
+`js/minibot.js`, a copy of the CPU's face for use anywhere.
 
 ## Music player
 
