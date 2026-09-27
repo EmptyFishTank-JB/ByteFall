@@ -42,6 +42,22 @@ function createZeroDay(ctx, out) {
   comp.ratio.value = 4;
   bus.connect(comp);
   comp.connect(out);
+  // Stereo width: kick, snares, the sub and the lead stabs stay centered; the reese's two saws
+  // sit a little apart (the sub keeps the low end in the middle), the pad's detuned pairs split
+  // wide, hats sit right, the rave stab's square leans left and its saw right, and the siren
+  // sweeps left to right and back with its pitch
+  // (+3 dB in front: a panner halves a mono sound's power, so one in the middle is exactly as
+  // loud as the sound was plugged straight in, and one to a side keeps the same loudness)
+  const panner = (v, dest = bus) => {
+    const lift = ctx.createGain();
+    lift.gain.value = Math.SQRT2;
+    const p = ctx.createStereoPanner();
+    p.pan.value = v;
+    lift.connect(p);
+    p.connect(dest);
+    lift.pan = p.pan; // (for sweeps)
+    return lift;
+  };
 
   const noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
   const nd = noise.getChannelData(0);
@@ -63,11 +79,11 @@ function createZeroDay(ctx, out) {
     return g;
   }
 
-  function noiseHit(t, level, decay, type, f, q) {
+  function noiseHit(t, level, decay, type, f, q, pan = 0) {
     const src = ctx.createBufferSource();
     src.buffer = noise;
     const flt = filter(type, f, q);
-    src.connect(flt); flt.connect(envGain(t, level, decay, bus));
+    src.connect(flt); flt.connect(envGain(t, level, decay, pan ? panner(pan) : bus));
     src.start(t, Math.random() * 0.5); src.stop(t + decay);
   }
 
@@ -91,24 +107,26 @@ function createZeroDay(ctx, out) {
   }
 
   function hat(t, level = 1, open = false) {
-    noiseHit(t, (open ? 0.045 : 0.035) * level, open ? 0.14 : 0.03, 'highpass', 8500);
+    noiseHit(t, (open ? 0.045 : 0.035) * level, open ? 0.14 : 0.03, 'highpass', 8500, undefined, 0.3);
   }
 
   // Reese: two detuned saws beating against each other, a wobbling lowpass, and a sine sub
   function reese(t, m, dur, open) {
-    const lp = filter('lowpass', 450 + 1400 * open, 3);
     const wob = ctx.createOscillator();
     wob.frequency.value = 1.2 + 2.4 * open;
     const wobDepth = ctx.createGain();
     wobDepth.gain.value = 220 + 700 * open;
-    wob.connect(wobDepth); wobDepth.connect(lp.frequency);
+    wob.connect(wobDepth);
     const g = ctx.createGain();
     g.gain.setValueAtTime(0, t);
     g.gain.linearRampToValueAtTime(0.1, t + 0.01);
     g.gain.setValueAtTime(0.1, t + dur - 0.03);
     g.gain.linearRampToValueAtTime(0, t + dur);
-    lp.connect(g); g.connect(bus);
+    g.connect(bus);
     for (const cents of [-14, 14]) {
+      const lp = filter('lowpass', 450 + 1400 * open, 3); // (one each: the saws sit a little apart)
+      wobDepth.connect(lp.frequency);
+      lp.connect(panner(cents < 0 ? -0.25 : 0.25, g));
       const osc = ctx.createOscillator();
       osc.type = 'sawtooth';
       osc.frequency.value = freq(m);
@@ -129,20 +147,25 @@ function createZeroDay(ctx, out) {
   }
 
   function pad(t, notes, dur, level) {
-    const lp = filter('lowpass', 1500);
     const g = ctx.createGain();
     g.gain.setValueAtTime(0, t);
     g.gain.linearRampToValueAtTime(level, t + 0.12);
     g.gain.setValueAtTime(level, t + dur - 0.1);
     g.gain.linearRampToValueAtTime(0, t + dur);
-    lp.connect(g); g.connect(bus);
+    g.connect(bus);
+    // (each detuned pair split left and right)
+    const sides = [-0.6, 0.6].map((v) => {
+      const lp = filter('lowpass', 1500);
+      lp.connect(panner(v, g));
+      return lp;
+    });
     for (const m of notes) {
       for (const cents of [-8, 8]) {
         const osc = ctx.createOscillator();
         osc.type = 'sawtooth';
         osc.frequency.value = freq(m);
         osc.detune.value = cents;
-        osc.connect(lp);
+        osc.connect(sides[cents < 0 ? 0 : 1]);
         osc.start(t); osc.stop(t + dur);
       }
     }
@@ -160,18 +183,22 @@ function createZeroDay(ctx, out) {
   // Rave stab: a punchy minor chord hit (detuned square + saw, fast filter drop), the classic
   // jungle / drum & bass "hoover" stab
   function raveStab(t, chord, level) {
-    const lp = filter('lowpass', 1200, 2);
-    lp.frequency.setValueAtTime(5200, t);
-    lp.frequency.exponentialRampToValueAtTime(1000, t + 0.14);
     const g = envGain(t, 0.06 * level, 0.18, bus);
-    lp.connect(g);
+    // (the square left, the saw right)
+    const sides = [-0.35, 0.35].map((v) => {
+      const lp = filter('lowpass', 1200, 2);
+      lp.frequency.setValueAtTime(5200, t);
+      lp.frequency.exponentialRampToValueAtTime(1000, t + 0.14);
+      lp.connect(panner(v, g));
+      return lp;
+    });
     for (const m of chord) {
       for (const [type, cents] of [['square', -12], ['sawtooth', 12]]) {
         const osc = ctx.createOscillator();
         osc.type = type;
         osc.detune.value = cents;
         osc.frequency.value = freq(m + 12);
-        osc.connect(lp);
+        osc.connect(sides[type === 'square' ? 0 : 1]);
         osc.start(t); osc.stop(t + 0.2);
       }
     }
@@ -191,7 +218,12 @@ function createZeroDay(ctx, out) {
     g.gain.linearRampToValueAtTime(0.06 * level, t + 0.2);
     g.gain.setValueAtTime(0.06 * level, t + dur - 0.2);
     g.gain.linearRampToValueAtTime(0, t + dur);
-    osc.connect(lp); lp.connect(g); g.connect(bus);
+    // (sweeping left to right and back with the pitch)
+    const sweep = panner(-0.6);
+    sweep.pan.setValueAtTime(-0.6, t);
+    sweep.pan.linearRampToValueAtTime(0.6, t + dur * 0.5);
+    sweep.pan.linearRampToValueAtTime(-0.6, t + dur);
+    osc.connect(lp); lp.connect(g); g.connect(sweep);
     osc.start(t); osc.stop(t + dur);
   }
 

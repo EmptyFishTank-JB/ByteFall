@@ -49,6 +49,22 @@ function createSystemRestore(ctx, out) {
   bus.connect(tone);
   tone.connect(comp);
   comp.connect(out);
+  // Stereo width: kick, snare and both basses stay centered; the piano's notes spread low-left
+  // to high-right like sitting at the keys, the vinyl plays on both sides (two copies, out of
+  // step), hats sit right, the flute just right of center, the stutter's chops ping-pong, the
+  // strings' detuned pairs split wide and the error chime's two notes sit either side
+  // (+3 dB in front: a panner halves a mono sound's power, so one in the middle is exactly as
+  // loud as the sound was plugged straight in, and one to a side keeps the same loudness)
+  const panner = (v, dest = bus) => {
+    const lift = ctx.createGain();
+    lift.gain.value = Math.SQRT2;
+    const p = ctx.createStereoPanner();
+    p.pan.value = v;
+    lift.connect(p);
+    p.connect(dest);
+    lift.pan = p.pan; // (for sweeps)
+    return lift;
+  };
 
   const noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
   const nd = noise.getChannelData(0);
@@ -97,11 +113,11 @@ function createSystemRestore(ctx, out) {
     return g;
   }
 
-  function noiseHit(t, level, decay, type, f, q) {
+  function noiseHit(t, level, decay, type, f, q, pan = 0) {
     const src = ctx.createBufferSource();
     src.buffer = noise;
     const flt = filter(type, f, q);
-    src.connect(flt); flt.connect(envGain(t, level, decay, bus));
+    src.connect(flt); flt.connect(envGain(t, level, decay, pan ? panner(pan) : bus));
     src.start(t, Math.random() * 0.5); src.stop(t + decay);
   }
 
@@ -124,18 +140,20 @@ function createSystemRestore(ctx, out) {
   }
 
   function hat(t, level = 1) {
-    noiseHit(t, 0.03 * level, 0.04, 'bandpass', 7000, 0.9);
+    noiseHit(t, 0.03 * level, 0.04, 'bandpass', 7000, 0.9, 0.3);
   }
 
   function crackle(t, dur, level) {
-    const src = ctx.createBufferSource();
-    src.buffer = vinyl;
-    src.loop = true;
-    const lp = filter('lowpass', 5000);
-    const g = ctx.createGain();
-    g.gain.value = level;
-    src.connect(lp); lp.connect(g); g.connect(bus);
-    src.start(t, Math.random() * 2); src.stop(t + dur);
+    for (const side of [-0.8, 0.8]) { // (two copies from different places in the record)
+      const src = ctx.createBufferSource();
+      src.buffer = vinyl;
+      src.loop = true;
+      const lp = filter('lowpass', 5000);
+      const g = ctx.createGain();
+      g.gain.value = level * 0.7;
+      src.connect(lp); lp.connect(g); g.connect(panner(side));
+      src.start(t, Math.random() * 2); src.stop(t + dur);
+    }
   }
 
   // Electric piano: a sine with a soft octave, a quick bright "tine", and a shared
@@ -150,11 +168,12 @@ function createSystemRestore(ctx, out) {
     notes.forEach((m, k) => {
       const at = t + k * 0.018;
       const f = freq(m);
+      const side = panner(notes.length > 1 ? -0.45 + 0.9 * (k / (notes.length - 1)) : 0); // (low left, high right)
       for (const [ratio, amp, decay] of [[1, 1, 2.6], [2, 0.18, 1.2], [7.02, 0.05, 0.12]]) {
         const osc = ctx.createOscillator();
         osc.frequency.value = f * ratio;
         depth.connect(osc.detune);
-        osc.connect(envGain(at, 0.032 * level * amp, Math.min(dur, decay), bus));
+        osc.connect(envGain(at, 0.032 * level * amp, Math.min(dur, decay), side));
         osc.start(at); osc.stop(at + Math.min(dur, decay) + 0.05);
       }
     });
@@ -199,7 +218,8 @@ function createSystemRestore(ctx, out) {
     g.gain.linearRampToValueAtTime(0.05, t + 0.08);
     g.gain.setValueAtTime(0.05, t + dur - 0.1);
     g.gain.linearRampToValueAtTime(0, t + dur);
-    osc.connect(g); g.connect(bus);
+    const flutePan = panner(0.15);
+    osc.connect(g); g.connect(flutePan);
     osc.start(t); osc.stop(t + dur);
     vib.start(t); vib.stop(t + dur);
     const breath = ctx.createBufferSource();
@@ -208,7 +228,7 @@ function createSystemRestore(ctx, out) {
     const bg = ctx.createGain();
     bg.gain.setValueAtTime(0.012, t);
     bg.gain.linearRampToValueAtTime(0.004, t + dur);
-    breath.connect(bp); bp.connect(bg); bg.connect(bus);
+    breath.connect(bp); bp.connect(bg); bg.connect(flutePan);
     breath.start(t, Math.random() * 0.4); breath.stop(t + dur);
   }
 
@@ -220,7 +240,7 @@ function createSystemRestore(ctx, out) {
       const g = ctx.createGain();
       g.gain.setValueAtTime(0.11 * level, at);
       g.gain.setValueAtTime(0, at + STEP * 0.3); // hard gate: the "chopped" sound
-      osc.connect(g); g.connect(bus);
+      osc.connect(g); g.connect(panner(k % 2 ? 0.5 : -0.5)); // (ping-ponging)
       osc.start(at); osc.stop(at + STEP * 0.32);
     }
   }
@@ -229,7 +249,6 @@ function createSystemRestore(ctx, out) {
   // saw ensemble (two detuned voices per note) through a soft lowpass
   function strings(t, chord, level) {
     const len = STEP * 16;
-    const lp = filter('lowpass', 2600, 0.7);
     const g = ctx.createGain();
     g.gain.setValueAtTime(0, t);
     for (let k = 0; k < 16; k++) {
@@ -238,14 +257,20 @@ function createSystemRestore(ctx, out) {
       g.gain.linearRampToValueAtTime(0.0095 * level, at + STEP * 0.9);
     }
     g.gain.linearRampToValueAtTime(0, t + len);
-    lp.connect(g); g.connect(bus);
+    g.connect(bus);
+    // (each detuned pair split left and right)
+    const sides = [-0.6, 0.6].map((v) => {
+      const f = filter('lowpass', 2600, 0.7);
+      f.connect(panner(v, g));
+      return f;
+    });
     for (const m of chord) {
       for (const cents of [-6, 6]) {
         const osc = ctx.createOscillator();
         osc.type = 'sawtooth';
         osc.detune.value = cents;
         osc.frequency.value = freq(m + 12);
-        osc.connect(lp);
+        osc.connect(sides[cents < 0 ? 0 : 1]);
         osc.start(t); osc.stop(t + len);
       }
     }
@@ -254,10 +279,11 @@ function createSystemRestore(ctx, out) {
   // Error chime: a bell on a tritone (A5 + Eb6)
   function errorChime(t, level) {
     for (const m of [81, 87]) {
+      const side = panner(m === 81 ? -0.4 : 0.4);
       for (const [ratio, amp] of [[1, 1], [2.76, 0.3]]) {
         const osc = ctx.createOscillator();
         osc.frequency.value = freq(m) * ratio;
-        osc.connect(envGain(t, 0.08 * level * amp, 0.9, bus));
+        osc.connect(envGain(t, 0.08 * level * amp, 0.9, side));
         osc.start(t); osc.stop(t + 0.95);
       }
     }

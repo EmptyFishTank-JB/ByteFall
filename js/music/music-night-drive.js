@@ -44,34 +44,63 @@ function createNightDrive(ctx, out) {
   const DEFAULT_MUTED = LAYERS.filter((l) => l.archived).map((l) => l.id);
 
   const bus = ctx.createGain();
-  bus.gain.value = 0.068; // level-matched to the other tracks
+  bus.gain.value = 0.064; // level-matched to the other tracks
   const comp = ctx.createDynamicsCompressor();
   comp.threshold.value = -18;
   comp.ratio.value = 3;
   bus.connect(comp);
   comp.connect(out);
+  // Stereo width, a wide 80s mix: kick, the gated snare, both basses, the lead and the heartbeat
+  // stay centered; the pad's three detuned saws sit left, center and right, the arpeggio
+  // alternates sides with its echoes ping-ponging right and left, hats sit right and the
+  // tambourine left, the tom fill rolls left to right, the lead's octave double leans left, the
+  // chase alternates, the clock's tick and tock trade sides, the brass pairs and the choir's
+  // voices spread out, the crash is wide and the riser drifts across
+  // (+3 dB in front: a panner halves a mono sound's power, so one in the middle is exactly as
+  // loud as the sound was plugged straight in, and one to a side keeps the same loudness)
+  const panner = (v, dest = bus) => {
+    const lift = ctx.createGain();
+    lift.gain.value = Math.SQRT2;
+    const p = ctx.createStereoPanner();
+    p.pan.value = v;
+    lift.connect(p);
+    p.connect(dest);
+    lift.pan = p.pan; // (for sweeps)
+    return lift;
+  };
+  let arpSide = 1;
 
   // Pads and bass run through a "sidechain" gain that dips on every kick: the pumping feel
   const duck = ctx.createGain();
   duck.connect(bus);
 
-  // Dotted-8th echo for the arpeggio and lead
-  const echoIn = ctx.createGain();
-  const delay = ctx.createDelay(2);
-  delay.delayTime.value = STEP * 3;
-  const fb = ctx.createGain();
-  fb.gain.value = 0.38;
-  const echoTone = ctx.createBiquadFilter();
-  echoTone.type = 'lowpass';
-  echoTone.frequency.value = 3200;
-  const wet = ctx.createGain();
-  wet.gain.value = 0.35;
-  echoIn.connect(delay);
-  delay.connect(echoTone);
-  echoTone.connect(fb);
-  fb.connect(delay);
-  echoTone.connect(wet);
-  wet.connect(bus);
+  // Dotted-8th echo for the arpeggio and lead, ping-ponging: the repeats take turns left and
+  // right (the same repeats at the same levels as a single echo). Each note's echo starts on
+  // the other side from the note (echoFrom), so the two sides even out
+  const WET = 0.35;
+  const stage = (side) => {
+    const delay = ctx.createDelay(2);
+    delay.delayTime.value = STEP * 3;
+    const echoTone = ctx.createBiquadFilter();
+    echoTone.type = 'lowpass';
+    echoTone.frequency.value = 3200;
+    const fb = ctx.createGain();
+    fb.gain.value = 0.38;
+    const tap = ctx.createGain();
+    tap.gain.value = WET;
+    delay.connect(echoTone);
+    echoTone.connect(tap);
+    tap.connect(panner(side));
+    echoTone.connect(fb);
+    return { input: delay, next: fb };
+  };
+  const right = stage(0.6);
+  const left = stage(-0.6);
+  right.next.connect(left.input);
+  left.next.connect(right.input);
+  let echoTurn = 1;
+  // (side: where the note sits, the echo starting opposite; none given: they take turns)
+  const echoFrom = (side = (echoTurn = -echoTurn)) => (side > 0 ? left.input : right.input);
 
   const noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
   const nd = noise.getChannelData(0);
@@ -132,11 +161,12 @@ function createNightDrive(ctx, out) {
 
   // The 80s gated-reverb snare: a short body plus a burst of bright noise that holds,
   // then is cut off abruptly (the "gate") instead of fading away
-  function gatedHit(t, level, bodyHz, noiseHz, hold) {
+  function gatedHit(t, level, bodyHz, noiseHz, hold, pan = 0) {
+    const dest = pan ? panner(pan) : bus;
     const body = ctx.createOscillator();
     body.frequency.setValueAtTime(bodyHz * 1.4, t);
     body.frequency.exponentialRampToValueAtTime(bodyHz, t + 0.05);
-    body.connect(envGain(t, 0.35 * level, 0.12, bus));
+    body.connect(envGain(t, 0.35 * level, 0.12, dest));
     body.start(t); body.stop(t + 0.14);
     const src = ctx.createBufferSource();
     src.buffer = noise;
@@ -146,17 +176,17 @@ function createNightDrive(ctx, out) {
     g.gain.setValueAtTime(0.3 * level, t);
     g.gain.linearRampToValueAtTime(0.17 * level, t + hold);
     g.gain.linearRampToValueAtTime(0, t + hold + 0.02);
-    src.connect(bp); bp.connect(lp); lp.connect(g); g.connect(bus);
+    src.connect(bp); bp.connect(lp); lp.connect(g); g.connect(dest);
     src.start(t, Math.random() * 0.5); src.stop(t + hold + 0.03);
   }
   const snare = (t, level = 1) => gatedHit(t, level, 190, 2200, 0.24);
-  const tom = (t, hz) => gatedHit(t, 0.9, hz, 500, 0.18);
+  const tom = (t, hz, pan) => gatedHit(t, 0.9, hz, 500, 0.18, pan);
 
   function hat(t, level = 1, open = false) {
     const src = ctx.createBufferSource();
     src.buffer = noise;
     const hp = filter('highpass', 8000);
-    src.connect(hp); hp.connect(envGain(t, 0.05 * level, open ? 0.16 : 0.035, bus));
+    src.connect(hp); hp.connect(envGain(t, 0.05 * level, open ? 0.16 : 0.035, panner(0.3)));
     src.start(t, Math.random() * 0.5); src.stop(t + 0.2);
   }
 
@@ -164,26 +194,31 @@ function createNightDrive(ctx, out) {
     const src = ctx.createBufferSource();
     src.buffer = noise;
     const bp = filter('bandpass', 9500, 2);
-    src.connect(bp); bp.connect(envGain(t, 0.12 * level, 0.12, bus));
+    src.connect(bp); bp.connect(envGain(t, 0.12 * level, 0.12, panner(-0.4)));
     src.start(t, Math.random() * 0.5); src.stop(t + 0.13);
   }
 
   // Wide pad: three detuned saws per note, a slow swell, filtered brighter with the glow
   function pad(t, notes, dur, glow) {
-    const lp = filter('lowpass', 1100 + 2800 * glow, 0.7);
     const g = ctx.createGain();
     g.gain.setValueAtTime(0, t);
     g.gain.linearRampToValueAtTime(0.022, t + 0.35);
     g.gain.setValueAtTime(0.022, t + dur - 0.25);
     g.gain.linearRampToValueAtTime(0, t + dur);
-    lp.connect(g); g.connect(duck);
+    g.connect(duck);
+    // (the three detuned saws: left, center, right)
+    const sides = {};
+    for (const [cents, v] of [[-11, -0.6], [0, 0], [11, 0.6]]) {
+      sides[cents] = filter('lowpass', 1100 + 2800 * glow, 0.7);
+      sides[cents].connect(panner(v, g));
+    }
     for (const m of notes) {
       for (const cents of [-11, 0, 11]) {
         const osc = ctx.createOscillator();
         osc.type = 'sawtooth';
         osc.frequency.value = freq(m);
         osc.detune.value = cents;
-        osc.connect(lp);
+        osc.connect(sides[cents]);
         osc.start(t); osc.stop(t + dur + 0.02);
       }
     }
@@ -218,22 +253,23 @@ function createNightDrive(ctx, out) {
     osc.type = 'square';
     osc.frequency.value = freq(m);
     const lp = filter('lowpass', 2200 + 3000 * glow);
-    const g = envGain(t, 0.035, STEP * 1.6, bus);
-    osc.connect(lp); lp.connect(g); lp.connect(echoIn);
+    arpSide = -arpSide;
+    const g = envGain(t, 0.035, STEP * 1.6, panner(0.35 * arpSide));
+    osc.connect(lp); lp.connect(g); lp.connect(echoFrom(arpSide));
     osc.start(t); osc.stop(t + STEP * 1.7);
   }
 
   // Gliding lead: two detuned saws that slide into each note, with delayed vibrato
   let lastLead = null;
   // glideFrom: the note to slide from (the previous lead note); remember: update it (off for doubles)
-  function lead(t, m, dur, level = 1, glideFrom = lastLead, remember = true) {
+  function lead(t, m, dur, level = 1, glideFrom = lastLead, remember = true, pan = 0) {
     const lp = filter('lowpass', 3400, 1);
     const g = ctx.createGain();
     g.gain.setValueAtTime(0, t);
     g.gain.linearRampToValueAtTime(0.05 * level, t + 0.03);
     g.gain.setValueAtTime(0.05 * level, t + dur - 0.06);
     g.gain.linearRampToValueAtTime(0, t + dur);
-    lp.connect(g); g.connect(bus); g.connect(echoIn);
+    lp.connect(g); g.connect(pan ? panner(pan) : bus); g.connect(echoFrom(pan || undefined));
     const from = glideFrom === null ? m : glideFrom;
     for (const cents of [-7, 7]) {
       const osc = ctx.createOscillator();
@@ -264,7 +300,7 @@ function createNightDrive(ctx, out) {
       osc.type = 'square';
       osc.frequency.value = freq(tones[(s * 2 + half) % tones.length]);
       const lp = filter('lowpass', 3800);
-      osc.connect(lp); lp.connect(envGain(at, 0.15 * level, STEP * 0.45, bus));
+      osc.connect(lp); lp.connect(envGain(at, 0.15 * level, STEP * 0.45, panner(half ? 0.5 : -0.5)));
       osc.start(at); osc.stop(at + STEP * 0.5);
     }
   }
@@ -275,7 +311,7 @@ function createNightDrive(ctx, out) {
     osc.type = 'square';
     osc.frequency.value = beat % 2 ? 2400 : 1800; // tick, tock
     const hp = filter('highpass', 1200);
-    osc.connect(hp); hp.connect(envGain(t, 0.16 * level, 0.035, bus));
+    osc.connect(hp); hp.connect(envGain(t, 0.16 * level, 0.035, panner(beat % 2 ? 0.3 : -0.3)));
     osc.start(t); osc.stop(t + 0.04);
   }
   function heartbeat(t, level) {
@@ -290,19 +326,23 @@ function createNightDrive(ctx, out) {
 
   // Brass: bright 80s synth-brass chord stabs with a quick filter swell
   function brass(t, chord, level) {
-    const lp = filter('lowpass', 900, 1.5);
-    lp.frequency.setValueAtTime(900, t);
-    lp.frequency.linearRampToValueAtTime(4200, t + 0.03);
-    lp.frequency.exponentialRampToValueAtTime(1100, t + 0.3);
     const g = envGain(t, 0.14 * level, 0.32, bus);
-    lp.connect(g);
+    // (each detuned pair split left and right)
+    const sides = [-0.4, 0.4].map((v) => {
+      const lp = filter('lowpass', 900, 1.5);
+      lp.frequency.setValueAtTime(900, t);
+      lp.frequency.linearRampToValueAtTime(4200, t + 0.03);
+      lp.frequency.exponentialRampToValueAtTime(1100, t + 0.3);
+      lp.connect(panner(v, g));
+      return lp;
+    });
     for (const m of chord) {
       for (const cents of [-9, 9]) {
         const osc = ctx.createOscillator();
         osc.type = 'sawtooth';
         osc.detune.value = cents;
         osc.frequency.value = freq(m + 12);
-        osc.connect(lp);
+        osc.connect(sides[cents < 0 ? 0 : 1]);
         osc.start(t); osc.stop(t + 0.34);
       }
     }
@@ -321,15 +361,20 @@ function createNightDrive(ctx, out) {
     g.gain.setValueAtTime(0.001, t);
     g.gain.exponentialRampToValueAtTime(0.55 * level, t + len - 0.02);
     g.gain.linearRampToValueAtTime(0, t + len);
-    src.connect(bp); bp.connect(g); g.connect(bus);
+    const drift = panner(-0.4); // (drifting across as it rises)
+    drift.pan.setValueAtTime(-0.4, t);
+    drift.pan.linearRampToValueAtTime(0.4, t + len);
+    src.connect(bp); bp.connect(g); g.connect(drift);
     src.start(t); src.stop(t + len);
   }
   function crash(t, level) {
-    const src = ctx.createBufferSource();
-    src.buffer = noise;
-    const hp = filter('highpass', 5000);
-    src.connect(hp); hp.connect(envGain(t, 0.3 * level, 1.4, bus));
-    src.start(t); src.stop(t + 1.45);
+    for (const side of [-0.5, 0.5]) { // (two stretches of noise, one each side: a wide crash)
+      const src = ctx.createBufferSource();
+      src.buffer = noise;
+      const hp = filter('highpass', 5000);
+      src.connect(hp); hp.connect(envGain(t, 0.22 * level, 1.4, panner(side)));
+      src.start(t, Math.random() * 0.5); src.stop(t + 1.45);
+    }
   }
 
   // Choir: an "ahh" pad, buzzy saws shaped by vowel formant filters, swelling each bar
@@ -340,14 +385,16 @@ function createNightDrive(ctx, out) {
     g.gain.setValueAtTime(0.21 * level, t + dur - 0.3);
     g.gain.linearRampToValueAtTime(0, t + dur);
     g.connect(bus);
-    const formants = [[750, 1], [1200, 0.5], [2600, 0.25]].map(([f, amp]) => {
-      const bp = filter('bandpass', f, 8);
-      const fg = ctx.createGain();
-      fg.gain.value = amp;
-      bp.connect(fg); fg.connect(g);
-      return bp;
-    });
-    for (const m of chord) {
+    // (each voice its own place across the stage, low left to high right)
+    chord.forEach((m, k) => {
+      const place = panner(chord.length > 1 ? -0.5 + (k / (chord.length - 1)) : 0, g);
+      const formants = [[750, 1], [1200, 0.5], [2600, 0.25]].map(([f, amp]) => {
+        const bp = filter('bandpass', f, 8);
+        const fg = ctx.createGain();
+        fg.gain.value = amp;
+        bp.connect(fg); fg.connect(place);
+        return bp;
+      });
       const osc = ctx.createOscillator();
       osc.type = 'sawtooth';
       osc.frequency.value = freq(m);
@@ -359,7 +406,7 @@ function createNightDrive(ctx, out) {
       for (const bp of formants) osc.connect(bp);
       osc.start(t); osc.stop(t + dur);
       vib.start(t); vib.stop(t + dur);
-    }
+    });
   }
 
   // Siren: a detuned saw wailing up and down a fifth over two bars
@@ -371,7 +418,7 @@ function createNightDrive(ctx, out) {
     g.gain.linearRampToValueAtTime(0.07 * level, t + 0.4);
     g.gain.setValueAtTime(0.07 * level, t + len - 0.4);
     g.gain.linearRampToValueAtTime(0, t + len);
-    lp.connect(g); g.connect(bus); g.connect(echoIn);
+    lp.connect(g); g.connect(bus); g.connect(echoFrom());
     for (const cents of [-15, 15]) {
       const osc = ctx.createOscillator();
       osc.type = 'sawtooth';
@@ -421,7 +468,7 @@ function createNightDrive(ctx, out) {
       // Drums: kick on 1 and 3 (plus a push before 3), gated snare on 2 and 4, 8th hats
       if (base && !ignition) {
         if (fill) {
-          tom(t, [170, 140, 115, 90][s - 12]);
+          tom(t, [170, 140, 115, 90][s - 12], [-0.5, -0.2, 0.2, 0.5][s - 12]);
         } else {
           if (s === 0 || s === 8 || (s === 6 && section >= 1)) kick(t, section === 0 ? 0.75 : 1);
           if ((s === 4 || s === 12) && section >= 1) snare(t);
@@ -443,7 +490,7 @@ function createNightDrive(ctx, out) {
           if (start !== s) continue;
           const from = lastLead;
           lead(t, m, len * STEP);
-          if (section === 3) lead(t, m - 12, len * STEP, 0.7, from === null ? null : from - 12, false); // doubled an octave down
+          if (section === 3) lead(t, m - 12, len * STEP, 0.7, from === null ? null : from - 12, false, -0.3); // doubled an octave down
         }
       }
 

@@ -79,6 +79,23 @@ function createHandshake(ctx, out) {
   comp.ratio.value = 3;
   bus.connect(comp);
   comp.connect(out);
+  // Stereo width, Game Boy style (its channels could each go left, right or both): the lead
+  // (pulse 1), the wave bass, kick and snare stay centered; pulse 2 sits left (the groove's
+  // stabs, the bridge's arpeggio, the harmony a third below), the lead's echo right, hats and
+  // the fake-chord arpeggios right, the intro run's two voices either side and the low-HP
+  // alarm's two tones trading sides
+  // (+3 dB in front: a panner halves a mono sound's power, so one in the middle is exactly as
+  // loud as the sound was plugged straight in, and one to a side keeps the same loudness)
+  const panner = (v, dest = bus) => {
+    const lift = ctx.createGain();
+    lift.gain.value = Math.SQRT2;
+    const p = ctx.createStereoPanner();
+    p.pan.value = v;
+    lift.connect(p);
+    p.connect(dest);
+    lift.pan = p.pan; // (for sweeps)
+    return lift;
+  };
 
   // Pulse waves at the Game Boy's duty cycles, built from their Fourier series
   function pulseWave(duty) {
@@ -135,21 +152,21 @@ function createHandshake(ctx, out) {
     return g;
   }
 
-  function noise(t, buf, level, decay, hp) {
+  function noise(t, buf, level, decay, hp, pan = 0) {
     const src = ctx.createBufferSource();
     src.buffer = buf;
     const f = ctx.createBiquadFilter();
     f.type = 'highpass';
     f.frequency.value = hp;
-    src.connect(f); f.connect(envGain(t, level, decay, bus));
+    src.connect(f); f.connect(envGain(t, level, decay, pan ? panner(pan) : bus));
     src.start(t, Math.random() * 0.5); src.stop(t + decay);
   }
-  const hat = (t, level = 1) => noise(t, NOISE_SHORT, 0.035 * level, 0.03, 6000);
+  const hat = (t, level = 1) => noise(t, NOISE_SHORT, 0.035 * level, 0.03, 6000, 0.35);
   const snare = (t, level = 1) => noise(t, NOISE_LONG, 0.16 * level, 0.12, 1200);
   const kick = (t, level = 1) => noise(t, NOISE_LONG, 0.2 * level, 0.06, 60);
 
   // A pulse note; vib: delayed vibrato depth in semitones (on notes long enough to hold)
-  function pulse(t, m, dur, level, duty, vib = 0) {
+  function pulse(t, m, dur, level, duty, vib = 0, pan = 0) {
     const osc = ctx.createOscillator();
     osc.setPeriodicWave(DUTY[duty]);
     osc.frequency.value = freq(m);
@@ -167,7 +184,7 @@ function createHandshake(ctx, out) {
     g.gain.setValueAtTime(level, t);
     g.gain.linearRampToValueAtTime(level * 0.75, t + Math.max(0.005, dur * 0.85));
     g.gain.linearRampToValueAtTime(0, t + dur);
-    osc.connect(g); g.connect(bus);
+    osc.connect(g); g.connect(pan ? panner(pan) : bus);
     osc.start(t); osc.stop(t + dur + 0.01);
   }
 
@@ -239,33 +256,33 @@ function createHandshake(ctx, out) {
         if (start !== s) continue;
         const dur = len * STEP * 0.95;
         if (base || solo === 'energy') pulse(t, m, dur, 0.05 * (1 + 0.3 * L.energy), duty, vib);
-        if (L.echo > 0) pulse(t + STEP * 3, m, dur, 0.036 * L.echo, 12);
-        if (L.harmony > 0) pulse(t, thirdBelow(m), dur, 0.035 * L.harmony, 25, vib);
+        if (L.echo > 0) pulse(t + STEP * 3, m, dur, 0.036 * L.echo, 12, 0, 0.6);
+        if (L.harmony > 0) pulse(t, thirdBelow(m), dur, 0.035 * L.harmony, 25, vib, -0.45);
       }
 
       // Pulse 2: the intro run (first time only), the groove's stabs, and the bridge's arpeggio
       if (base) {
         if (intro) {
-          pulse(t, 96 - (step % 32), STEP * 0.9, 0.045, 12);
-          pulse(t, 84 - (step % 32), STEP * 0.9, 0.03, 25);
+          pulse(t, 96 - (step % 32), STEP * 0.9, 0.045, 12, 0, 0.4);
+          pulse(t, 84 - (step % 32), STEP * 0.9, 0.03, 25, 0, -0.4);
           if (s === 0) snare(t, 0.6);
         } else if (section === 0 && i < 2) {
-          for (const [st, m] of GROOVE) if (st === s) pulse(t, m + (i === 1 && st >= 8 ? 1 : 0), STEP * 1.5, 0.04, 25);
+          for (const [st, m] of GROOVE) if (st === s) pulse(t, m + (i === 1 && st >= 8 ? 1 : 0), STEP * 1.5, 0.04, 25, 0, -0.45);
         } else if (section === 2) {
           const tones = [chord[0] + 12, chord[1] + 12, chord[2] + 12, chord[1] + 12];
-          pulse(t, tones[s % 4], STEP * 0.9, 0.03, 12);
+          pulse(t, tones[s % 4], STEP * 0.9, 0.03, 12, 0, -0.45);
         }
       }
 
       // Fake-chord arpeggios: the chord's three notes in one 16th
       if (L.arps > 0 && !intro) {
-        for (let k = 0; k < 3; k++) pulse(t + (k * STEP) / 3, chord[k] + 12, STEP / 3, 0.042 * L.arps, 12);
+        for (let k = 0; k < 3; k++) pulse(t + (k * STEP) / 3, chord[k] + 12, STEP / 3, 0.042 * L.arps, 12, 0, 0.45);
       }
 
       // The low-HP alarm: a rapid two-tone beep on every beat
       if (L.lowhp > 0 && s % 4 === 0) {
-        pulse(t, 93, STEP * 0.5, 0.04 * L.lowhp, 50);
-        pulse(t + STEP * 0.5, 88, STEP * 0.5, 0.04 * L.lowhp, 50);
+        pulse(t, 93, STEP * 0.5, 0.04 * L.lowhp, 50, 0, -0.5);
+        pulse(t + STEP * 0.5, 88, STEP * 0.5, 0.04 * L.lowhp, 50, 0, 0.5);
       }
     },
   };

@@ -52,6 +52,22 @@ function createBruteForce(ctx, out) {
   comp.ratio.value = 3;
   bus.connect(comp);
   comp.connect(out);
+  // Stereo width, like an NES stereo mix: kick, snare, the triangle bass and the lead stay
+  // centered; the arpeggio alternates sides (its 32nd-note doubling on the other), hats sit
+  // right, the octave double left, the boss duet right and the low-battery beep left
+  // (+3 dB in front: a panner halves a mono sound's power, so one in the middle is exactly as
+  // loud as the sound was plugged straight in, and one to a side keeps the same loudness)
+  const panner = (v, dest = bus) => {
+    const lift = ctx.createGain();
+    lift.gain.value = Math.SQRT2;
+    const p = ctx.createStereoPanner();
+    p.pan.value = v;
+    lift.connect(p);
+    p.connect(dest);
+    lift.pan = p.pan; // (for sweeps)
+    return lift;
+  };
+  let arpSide = 1;
 
   // Pulse waves at the NES duty cycles, built from their Fourier series
   function pulseWave(duty) {
@@ -100,13 +116,13 @@ function createBruteForce(ctx, out) {
     return g;
   }
 
-  function noise(t, buf, level, decay, hp) {
+  function noise(t, buf, level, decay, hp, pan = 0) {
     const src = ctx.createBufferSource();
     src.buffer = buf;
     const f = ctx.createBiquadFilter();
     f.type = 'highpass';
     f.frequency.value = hp;
-    src.connect(f); f.connect(envGain(t, level, decay, bus));
+    src.connect(f); f.connect(envGain(t, level, decay, pan ? panner(pan) : bus));
     src.start(t, Math.random() * 0.5); src.stop(t + decay);
   }
 
@@ -131,10 +147,10 @@ function createBruteForce(ctx, out) {
   }
 
   function hat(t, level = 1, open = false) {
-    noise(t, NOISE_HIGH, (open ? 0.05 : 0.04) * level, open ? 0.12 : 0.03, 7000);
+    noise(t, NOISE_HIGH, (open ? 0.05 : 0.04) * level, open ? 0.12 : 0.03, 7000, 0.35);
   }
 
-  function pulse(t, m, dur, level, duty) {
+  function pulse(t, m, dur, level, duty, pan = 0) {
     const osc = ctx.createOscillator();
     osc.setPeriodicWave(DUTY[duty]);
     osc.frequency.value = freq(m);
@@ -142,7 +158,7 @@ function createBruteForce(ctx, out) {
     g.gain.setValueAtTime(level, t);
     g.gain.linearRampToValueAtTime(level * 0.7, t + Math.max(0.01, dur * 0.85));
     g.gain.linearRampToValueAtTime(0, t + dur);
-    osc.connect(g); g.connect(bus);
+    osc.connect(g); g.connect(pan ? panner(pan) : bus);
     osc.start(t); osc.stop(t + dur + 0.01);
   }
 
@@ -204,8 +220,9 @@ function createBruteForce(ctx, out) {
       const tones = [...chords[i], chords[i][0] + 12];
       const arpDuty = L.bright > 0.66 ? 12 : L.bright > 0.33 ? 25 : 50;
       const arpLevel = 0.04 * (1 + 0.8 * L.bright);
-      if (base || solo === 'bright') pulse(t, tones[ARP[s % 8]], STEP * 0.9, arpLevel, arpDuty);
-      if (L.arp32 > 0) pulse(t + STEP / 2, tones[ARP[(s + 4) % 8]], STEP * 0.45, arpLevel * L.arp32, arpDuty);
+      arpSide = -arpSide;
+      if (base || solo === 'bright') pulse(t, tones[ARP[s % 8]], STEP * 0.9, arpLevel, arpDuty, 0.4 * arpSide);
+      if (L.arp32 > 0) pulse(t + STEP / 2, tones[ARP[(s + 4) % 8]], STEP * 0.45, arpLevel * L.arp32, arpDuty, -0.4 * arpSide);
 
       // Melody
       const melody = section === 1 || section === 3 ? MELODY_A : section === 2 ? MELODY_B : null;
@@ -215,14 +232,14 @@ function createBruteForce(ctx, out) {
           const dur = len * STEP * 0.95;
           if (base) {
             pulse(t, m, dur, 0.05, section === 2 ? 25 : 12);
-            if (section === 3) pulse(t, m - 4, dur, 0.03, 25); // boss duet a third below
+            if (section === 3) pulse(t, m - 4, dur, 0.03, 25, 0.45); // boss duet a third below
           }
-          if (L.octave > 0) pulse(t, m + 12, dur, 0.07 * L.octave, 12);
+          if (L.octave > 0) pulse(t, m + 12, dur, 0.07 * L.octave, 12, -0.35);
         }
       }
 
       // "Low battery" beeps: two quick blips on beats 1 and 3
-      if (L.battery > 0 && (s === 0 || s === 2 || s === 8 || s === 10)) pulse(t, 100, STEP * 0.5, 0.075 * L.battery, 50);
+      if (L.battery > 0 && (s === 0 || s === 2 || s === 8 || s === 10)) pulse(t, 100, STEP * 0.5, 0.075 * L.battery, 50, -0.5);
     },
   };
 }

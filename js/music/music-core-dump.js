@@ -68,6 +68,24 @@ function createCoreDump(ctx, out) {
   comp.ratio.value = 4;
   bus.connect(comp);
   comp.connect(out);
+  // Stereo width, double-tracked like a metal record: each guitar note's two detuned voices go
+  // through their own amp, one hard left and one hard right; kick, snare, bass, the lead, the
+  // drops and the riser stay centered; the ride sits right, the china left and the crash a
+  // little left; the lead's harmony a fifth up sits right and the fourth below left, Overflow's
+  // 32nd-note sweeps alternate sides and the sweeps layer leans left (the trials: pinch squeals
+  // right, the fill's toms tumbling right to left, the noodle's double left and its echo right)
+  // (+3 dB in front: a panner halves a mono sound's power, so one in the middle is exactly as
+  // loud as the sound was plugged straight in, and one to a side keeps the same loudness)
+  const panner = (v, dest = bus) => {
+    const lift = ctx.createGain();
+    lift.gain.value = Math.SQRT2;
+    const p = ctx.createStereoPanner();
+    p.pan.value = v;
+    lift.connect(p);
+    p.connect(dest);
+    lift.pan = p.pan; // (for sweeps)
+    return lift;
+  };
 
   // Pulse waves at the NES duty cycles, built from their Fourier series
   function pulseWave(duty) {
@@ -79,25 +97,31 @@ function createCoreDump(ctx, out) {
   }
   const DUTY = { 12: pulseWave(0.125), 25: pulseWave(0.25), 50: pulseWave(0.5) };
 
-  // The guitar: pulse waves through a hard-clipping shaper and a cabinet-ish lowpass
-  const gtrIn = ctx.createGain();
-  const clip = ctx.createWaveShaper();
+  // The guitars: pulse waves through a hard-clipping shaper and a cabinet-ish lowpass, one amp
+  // each side (double-tracked)
   const curve = new Float32Array(1024);
   for (let i = 0; i < curve.length; i++) {
     const x = (i / (curve.length - 1)) * 2 - 1;
     curve[i] = Math.tanh(x * 5);
   }
-  clip.curve = curve;
-  const cab = ctx.createBiquadFilter();
-  cab.type = 'lowpass';
-  cab.frequency.value = 3200;
-  cab.Q.value = 0.9;
-  const gtrOut = ctx.createGain();
-  gtrOut.gain.value = 0.28;
-  gtrIn.connect(clip);
-  clip.connect(cab);
-  cab.connect(gtrOut);
-  gtrOut.connect(bus);
+  function amp(side) {
+    const input = ctx.createGain();
+    const clip = ctx.createWaveShaper();
+    clip.curve = curve;
+    const cab = ctx.createBiquadFilter();
+    cab.type = 'lowpass';
+    cab.frequency.value = 3200;
+    cab.Q.value = 0.9;
+    const gain = ctx.createGain();
+    gain.gain.value = 0.27; // (0.28 when they shared one amp: two amps now, level-matched)
+    input.connect(clip);
+    clip.connect(cab);
+    cab.connect(gain);
+    gain.connect(panner(side));
+    return input;
+  }
+  const gtrL = amp(-0.8);
+  const gtrR = amp(0.8);
 
   // Sample-and-hold noise, like the NES noise channel (longer hold = lower, grainier)
   function holdNoise(hold) {
@@ -122,13 +146,13 @@ function createCoreDump(ctx, out) {
     return g;
   }
 
-  function noise(t, buf, level, decay, hp) {
+  function noise(t, buf, level, decay, hp, pan = 0) {
     const src = ctx.createBufferSource();
     src.buffer = buf;
     const f = ctx.createBiquadFilter();
     f.type = 'highpass';
     f.frequency.value = hp;
-    src.connect(f); f.connect(envGain(t, level, decay, bus));
+    src.connect(f); f.connect(envGain(t, level, decay, pan ? panner(pan) : bus));
     src.start(t, Math.random() * 0.5); src.stop(t + decay);
   }
 
@@ -157,9 +181,9 @@ function createCoreDump(ctx, out) {
     osc.start(t); osc.stop(t + 0.06);
   }
 
-  const ride = (t, level = 1) => noise(t, NOISE_HIGH, 0.035 * level, 0.04, 7500);
-  const china = (t, level = 1) => noise(t, NOISE_MID, 0.05 * level, 0.28, 3500);
-  const crash = (t) => noise(t, NOISE_HIGH, 0.09, 0.9, 4000);
+  const ride = (t, level = 1) => noise(t, NOISE_HIGH, 0.035 * level, 0.04, 7500, 0.35);
+  const china = (t, level = 1) => noise(t, NOISE_MID, 0.05 * level, 0.28, 3500, -0.45);
+  const crash = (t) => noise(t, NOISE_HIGH, 0.09, 0.9, 4000, -0.25);
 
   function pulse(t, m, dur, level, duty, dest = bus) {
     const osc = ctx.createOscillator();
@@ -177,15 +201,15 @@ function createCoreDump(ctx, out) {
   // A guitar note: two slightly detuned 25% pulses into the distortion. dive: drop an octave.
   function guitar(t, m, dur, level, dive = false) {
     for (const cents of [-7, 7]) {
-      const osc = pulse(t, m, dur, level, 25, gtrIn);
+      const osc = pulse(t, m, dur, level, 25, cents < 0 ? gtrL : gtrR);
       osc.detune.value = cents;
       if (dive) osc.frequency.exponentialRampToValueAtTime(freq(m - 12), t + dur);
     }
   }
 
   // The lead: a thin pulse sliding up a semitone into each note
-  function lead(t, m, dur, level) {
-    const osc = pulse(t, m, dur, level, 12);
+  function lead(t, m, dur, level, pan = 0) {
+    const osc = pulse(t, m, dur, level, 12, pan ? panner(pan) : bus);
     osc.frequency.setValueAtTime(freq(m - 1), t);
     osc.frequency.exponentialRampToValueAtTime(freq(m), t + 0.04);
   }
@@ -234,14 +258,14 @@ function createCoreDump(ctx, out) {
     src.start(t); src.stop(t + dur + 0.03);
   }
   // An 8-bit tom: a stepped triangle dropping in pitch
-  function tom(t, hz, level) {
+  function tom(t, hz, level, pan = 0) {
     const osc = ctx.createOscillator();
     osc.type = 'triangle';
     osc.frequency.setValueAtTime(hz, t);
     osc.frequency.exponentialRampToValueAtTime(hz * 0.55, t + 0.12);
-    osc.connect(envGain(t, 0.35 * level, 0.14, bus));
+    osc.connect(envGain(t, 0.35 * level, 0.14, pan ? panner(pan) : bus));
     osc.start(t); osc.stop(t + 0.15);
-    noise(t, NOISE_LOW, 0.04 * level, 0.03, 600);
+    noise(t, NOISE_LOW, 0.04 * level, 0.03, 600, pan);
   }
 
   // A pinch harmonic: a squeal two octaves and a fifth up, bending up a whole step with vibrato
@@ -259,7 +283,7 @@ function createCoreDump(ctx, out) {
     env.gain.setValueAtTime(level, t);
     env.gain.linearRampToValueAtTime(level * 0.6, t + STEP * 3);
     env.gain.linearRampToValueAtTime(0, t + STEP * 4);
-    osc.connect(env); env.connect(gtrIn);
+    osc.connect(env); env.connect(gtrR);
     osc.start(t); osc.stop(t + STEP * 4 + 0.01);
     vib.start(t); vib.stop(t + STEP * 4 + 0.01);
   }
@@ -318,16 +342,16 @@ function createCoreDump(ctx, out) {
           const dur = len * STEP * 0.95;
           if (base) lead(t, m, dur, 0.05);
           if (L.harmony > 0) {
-            lead(t, m + 7, dur, 0.07 * L.harmony);
-            pulse(t, m - 5, dur, 0.05 * L.harmony, 25); // and a fourth below, fuller
+            lead(t, m + 7, dur, 0.07 * L.harmony, 0.35);
+            pulse(t, m - 5, dur, 0.05 * L.harmony, 25, panner(-0.35)); // and a fourth below, fuller
           }
         }
       } else if (section === 2) {
         // OVERFLOW: 32nd-note sweep arpeggios over blast beats
         const tones = sweepTones(SWEEP_CHORDS[i]);
         if (base) {
-          pulse(t, tones[(s * 2) % 12], STEP * 0.48, 0.045, 12);
-          pulse(t + STEP / 2, tones[(s * 2 + 1) % 12], STEP * 0.48, 0.045, 12);
+          pulse(t, tones[(s * 2) % 12], STEP * 0.48, 0.045, 12, panner(-0.3));
+          pulse(t + STEP / 2, tones[(s * 2 + 1) % 12], STEP * 0.48, 0.045, 12, panner(0.3));
           if (i === 0 && s === 0) crash(t);
           if (s % 2 === 0) { kick(t, BLAST); ride(t, BLAST); } else snare(t, 0.8 * BLAST);
           if (s % 2 === 0) bass(t, SWEEP_CHORDS[i][0] - 24, STEP * 1.8);
@@ -373,10 +397,10 @@ function createCoreDump(ctx, out) {
         const root = section === 0 ? TREM[SEGFAULT[i]][s - (s % 4)] - 12 : section === 1 ? TRACE_ROOTS[i] : section === 3 ? DUMP_ROOTS[i] : null;
         if (root !== null) {
           const tones = sweepTones([root + 36, root + 39, root + 43]);
-          pulse(t, tones[s % 12] + 12, STEP * 0.9, 0.11 * L.sweeps, 12);
+          pulse(t, tones[s % 12] + 12, STEP * 0.9, 0.11 * L.sweeps, 12, panner(-0.4));
         } else {
           const tones = sweepTones(SWEEP_CHORDS[i]);
-          pulse(t, tones[11 - (s % 12)] + 12, STEP * 0.9, 0.09 * L.sweeps, 12);
+          pulse(t, tones[11 - (s % 12)] + 12, STEP * 0.9, 0.09 * L.sweeps, 12, panner(-0.4));
         }
       }
 
@@ -390,7 +414,7 @@ function createCoreDump(ctx, out) {
       // TRIAL: fills over the last two beats of every 4th bar: toms tumbling down over 32nd-note
       // kicks, landing on a crash
       if (L.blastfill > 0 && i % 4 === 3 && s >= 8 && bar !== 31) {
-        tom(t, 420 - (s - 8) * 40, L.blastfill);
+        tom(t, 420 - (s - 8) * 40, L.blastfill, 0.5 - (s - 8) / 7); // (right to left)
         if (s % 2 === 1) snare(t, 0.6 * L.blastfill);
         kick(t, 0.8 * L.blastfill); kick(t + STEP / 2, 0.6 * L.blastfill);
         if (s === 15) crash(t + STEP);
@@ -399,8 +423,8 @@ function createCoreDump(ctx, out) {
       if (L.noodle > 0 && s % 2 === 0 && ((section === 0 && i >= 4) || section === 3) && bar !== 31) {
         const m = NOODLE[(i * 8 + s / 2) % NOODLE.length];
         lead(t, m, STEP * 1.6, 0.1 * L.noodle);
-        pulse(t, m - 12, STEP * 1.6, 0.05 * L.noodle, 25); // doubled an octave down
-        pulse(t + STEP * 3, m, STEP * 1.2, 0.045 * L.noodle, 12); // the echo
+        pulse(t, m - 12, STEP * 1.6, 0.05 * L.noodle, 25, panner(-0.3)); // doubled an octave down
+        pulse(t + STEP * 3, m, STEP * 1.2, 0.045 * L.noodle, 12, panner(0.5)); // the echo
       }
       // TRIAL: bass drops into each section (after the first-pass intro) and under the breakdown's
       // dives, each with a riser over the beat before it
@@ -417,7 +441,7 @@ function createCoreDump(ctx, out) {
 
       // ARCHIVED: the "core dump" alarm, a glitchy triple blip on beats 1 and 3
       if (L.glitch > 0 && (s === 0 || s === 8)) {
-        for (let k = 0; k < 3; k++) pulse(t + k * STEP / 3, 96 - k * 5, STEP / 4, 0.07 * L.glitch, 50);
+        for (let k = 0; k < 3; k++) pulse(t + k * STEP / 3, 96 - k * 5, STEP / 4, 0.07 * L.glitch, 50, panner([-0.5, 0.5, 0][k]));
       }
     },
   };

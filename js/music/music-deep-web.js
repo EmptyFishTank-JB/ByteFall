@@ -36,6 +36,23 @@ function createDeepWeb(ctx, out) {
   comp.ratio.value = 3;
   bus.connect(comp);
   comp.connect(out);
+  // Stereo width: kick, clap, the rolling bass and the acid line stay centered; the drone's
+  // detuned pairs split wide, bleeps land on either side with their echo coming back from the
+  // right, hats sit right and the shaker left, the deep section's plucks alternate, the dub stabs
+  // lean left and the modem sits left
+  // (+3 dB in front: a panner halves a mono sound's power, so one in the middle is exactly as
+  // loud as the sound was plugged straight in, and one to a side keeps the same loudness)
+  const panner = (v, dest = bus) => {
+    const lift = ctx.createGain();
+    lift.gain.value = Math.SQRT2;
+    const p = ctx.createStereoPanner();
+    p.pan.value = v;
+    lift.connect(p);
+    p.connect(dest);
+    lift.pan = p.pan; // (for sweeps)
+    return lift;
+  };
+  let pluckSide = 1;
 
   // Dotted-8th echo for the bleeps
   const delay = ctx.createDelay(1);
@@ -51,7 +68,7 @@ function createDeepWeb(ctx, out) {
   delayTone.connect(feedback);
   feedback.connect(delay);
   delayTone.connect(wet);
-  wet.connect(bus);
+  wet.connect(panner(0.5));
 
   const noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
   const nd = noise.getChannelData(0);
@@ -73,11 +90,11 @@ function createDeepWeb(ctx, out) {
     return g;
   }
 
-  function noiseHit(t, level, decay, type, f, q) {
+  function noiseHit(t, level, decay, type, f, q, pan = 0) {
     const src = ctx.createBufferSource();
     src.buffer = noise;
     const flt = filter(type, f, q);
-    src.connect(flt); flt.connect(envGain(t, level, decay, bus));
+    src.connect(flt); flt.connect(envGain(t, level, decay, pan ? panner(pan) : bus));
     src.start(t, Math.random() * 0.5); src.stop(t + decay);
   }
 
@@ -96,11 +113,11 @@ function createDeepWeb(ctx, out) {
   }
 
   function hat(t, level) {
-    noiseHit(t, 0.035 * level, 0.035, 'highpass', 8000);
+    noiseHit(t, 0.035 * level, 0.035, 'highpass', 8000, undefined, 0.35);
   }
 
   function shaker(t, level) {
-    noiseHit(t, 0.07 * level, 0.05, 'bandpass', 6000, 0.8);
+    noiseHit(t, 0.07 * level, 0.05, 'bandpass', 6000, 0.8, -0.35);
   }
 
   function rollingBass(t, m, open) {
@@ -117,31 +134,36 @@ function createDeepWeb(ctx, out) {
   }
 
   function drone(t, notes, dur, level) {
-    const lp = filter('lowpass', 700);
     const g = ctx.createGain();
     g.gain.setValueAtTime(0, t);
     g.gain.linearRampToValueAtTime(level, t + dur * 0.4);
     g.gain.linearRampToValueAtTime(0, t + dur + 0.2);
-    lp.connect(g); g.connect(bus);
+    g.connect(bus);
+    // (each detuned pair split left and right, through its own filter)
+    const sides = [-0.6, 0.6].map((v) => {
+      const f = filter('lowpass', 700);
+      f.connect(panner(v, g));
+      return f;
+    });
     for (const m of notes) {
       for (const cents of [-9, 9]) {
         const osc = ctx.createOscillator();
         osc.type = 'sawtooth';
         osc.frequency.value = freq(m);
         osc.detune.value = cents;
-        osc.connect(lp);
+        osc.connect(sides[cents < 0 ? 0 : 1]);
         osc.start(t); osc.stop(t + dur + 0.2);
       }
     }
   }
 
   // Modem bleep: a short sine that glides a little, sent into the echo
-  function bleep(t, m, glideUp) {
+  function bleep(t, m, glideUp, pan = 0) {
     const osc = ctx.createOscillator();
     const f = freq(m);
     osc.frequency.setValueAtTime(f, t);
     osc.frequency.exponentialRampToValueAtTime(f * (glideUp ? 1.5 : 0.66), t + 0.07);
-    const g = envGain(t, 0.035, 0.08, bus);
+    const g = envGain(t, 0.035, 0.08, panner(pan));
     g.connect(delay);
     osc.connect(g);
     osc.start(t); osc.stop(t + 0.09);
@@ -152,7 +174,8 @@ function createDeepWeb(ctx, out) {
     osc.type = 'square';
     osc.frequency.value = freq(m);
     const lp = filter('lowpass', 1800);
-    osc.connect(lp); lp.connect(envGain(t, 0.03, 0.12, bus)).connect(delay);
+    pluckSide = -pluckSide;
+    osc.connect(lp); lp.connect(envGain(t, 0.03, 0.12, panner(0.35 * pluckSide))).connect(delay);
     osc.start(t); osc.stop(t + 0.13);
   }
 
@@ -172,7 +195,7 @@ function createDeepWeb(ctx, out) {
     const lp = filter('lowpass', 1500, 3);
     lp.frequency.setValueAtTime(2200, t);
     lp.frequency.exponentialRampToValueAtTime(700, t + 0.2);
-    const g = envGain(t, 0.065 * level, 0.22, bus);
+    const g = envGain(t, 0.065 * level, 0.22, panner(-0.2));
     lp.connect(g);
     g.connect(delay);
     for (const m of chord) {
@@ -205,10 +228,10 @@ function createDeepWeb(ctx, out) {
     g.gain.linearRampToValueAtTime(0.09 * level, t + 0.02);
     g.gain.setValueAtTime(0.09 * level, t + dur - 0.05);
     g.gain.linearRampToValueAtTime(0, t + dur);
-    carrier.connect(bp); bp.connect(g); g.connect(bus);
+    carrier.connect(bp); bp.connect(g); g.connect(panner(-0.5));
     carrier.start(t); carrier.stop(t + dur);
     warble.start(t); warble.stop(t + dur);
-    noiseHit(t, 0.07 * level, dur, 'bandpass', 2600, 2);
+    noiseHit(t, 0.07 * level, dur, 'bandpass', 2600, 2, -0.5);
   }
 
   return {
@@ -248,7 +271,7 @@ function createDeepWeb(ctx, out) {
       // Drone and texture
       if (base && s === 0 && i % 2 === 0) drone(t, chords[i], STEP * 32, section === 0 || section === 3 ? 0.03 : 0.02);
       if (base && rnd(loopStep) > 0.82) {
-        bleep(t, BLEEP_NOTES[Math.floor(rnd(loopStep + 999) * BLEEP_NOTES.length)], rnd(loopStep + 7) > 0.5);
+        bleep(t, BLEEP_NOTES[Math.floor(rnd(loopStep + 999) * BLEEP_NOTES.length)], rnd(loopStep + 7) > 0.5, rnd(loopStep + 31) * 1.2 - 0.6);
       }
       if (base && section === 2 && s % 3 === 0) pluck(t, chords[i][s % 2] + 24);
 

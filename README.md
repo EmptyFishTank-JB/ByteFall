@@ -402,12 +402,41 @@ with a cached older script (GitHub Pages lets browsers cache for 10 minutes).
 
 ## Stereo
 
-BYTEFALL THEME and SLEEP MODE are mixed in stereo: drums, bass and the lead
-stay centered; pads and detuned synth voices spread left and right, arps
-alternate sides, hats sit right, the tension saw / alarm left, echoes come back
-from the right, and SLEEP MODE's guitars are double-tracked hard left and right.
-The other tracks are still mono (the WAV renders in `assets/audio/` are mono
-mixdowns).
+Every track is mixed in stereo. Drums, bass and the lead stay centered; the rest
+is placed the way each style would be mixed:
+
+- **01 BYTEFALL THEME, 02 SLEEP MODE:** pads and detuned voices spread left and
+  right, arps alternate sides, hats sit right, the tension saw / alarm left,
+  echoes come back from the right; SLEEP MODE's guitars are double-tracked hard
+  left and right.
+- **03 BRUTE FORCE** (an NES stereo mix): the arpeggio alternates sides (its
+  32nd-note doubling on the other), hats right, the octave double left, the boss
+  duet right, the low-battery beep left.
+- **04 DEEP WEB:** the drone's detuned pairs split wide, bleeps land on either
+  side with their echo from the right, hats right and shaker left, plucks
+  alternate, dub stabs lean left, the modem left.
+- **05 ZERO DAY:** the reese's two saws a little apart (the sub centered), the
+  pad split wide, hats right, the rave stab's square left and saw right, the
+  siren sweeping left to right and back.
+- **06 SYSTEM RESTORE:** the piano spread low-left to high-right, the vinyl on
+  both sides, hats right, the flute just right of center, the stutter
+  ping-ponging, the strings split wide, the error chime's two notes either side.
+- **07 NIGHT DRIVE** (a wide 80s mix): the pad's three saws left, center and
+  right, the arpeggio alternating with a ping-pong echo (each note's echo starts
+  on the other side), hats right, tambourine left, the tom fill rolling left to
+  right, brass and choir spread out, a wide crash, the riser drifting across.
+- **08 STANDBY MODE** (a combo on a small stage): guitar left, harmony sax right,
+  guiro and shaker right, tambourine left, the strings spread out, in a stereo
+  room.
+- **09 CORE DUMP:** the guitars double-tracked through two amps, hard left and
+  right; ride right, china left; the harmonies either side, the sweeps
+  alternating.
+- **10 HANDSHAKE** (Game Boy style): pulse 2 left, the lead's echo right, hats
+  and the fake-chord arps right, the low-HP alarm's two tones trading sides.
+
+Panned sounds get +3 dB ahead of the panner (it halves a mono sound's power), so
+each track kept its loudness (within about 0.3 dB of its mono mix). The WAV
+renders in `assets/audio/` are still the older mono mixdowns.
 
 ## Tutorial
 
@@ -485,7 +514,7 @@ SURPRISED, LOVE (red heart eyes), DIZZY and LAUGH. The small faces come from
 
 SETTINGS → PLAYLIST → **OPEN MUSIC PLAYER** opens the soundtrack on its own,
 over the whole page: every track plays as its full mix (all layers in,
-whatever the game was doing), with a big visualizer: tap it to cycle SPECTRUM (LED bars), WAVE, OSCILLOSCOPE (a few cycles held still on a rising zero crossing, over a graticule), RADIAL (spectrum bars around a ring that swells with the bass), PARTICLES (a liquid blob morphing with the spectrum, shedding particles as it gets louder) and VECTORSCOPE (left against right turned 45°, with a phase-correlation meter; tracks 01 and 02 are in stereo, the rest still mono, a vertical line at +1), its name shown top left. The visualizers follow the theme (its bit and accent colors; a cycling rainbow in SPECTRUM). Also: SPECTROGRAM (the spectrum as a heat-map scrolling left), LEVEL METERS (L / R LED ladders with peak holds), MATRIX RAIN (0s and 1s falling, each column a band), BIT GRID (a 7x7 board stacking bits per band, a full column flashing), SYNTHWAVE GRID (a sun and a wireframe landscape of the spectrum's recent past over a scrolling floor), PLASMA (a color field warped by the bass) and TUNNEL (rings rushing toward you on the beat). The small one in SETTINGS has the ones that read at its height: SPECTRUM, WAVE, OSCILLOSCOPE, SPECTROGRAM, LEVEL METERS and PLASMA;
+whatever the game was doing), with a big visualizer: tap it to cycle SPECTRUM (LED bars), WAVE, OSCILLOSCOPE (a few cycles held still on a rising zero crossing, over a graticule), RADIAL (spectrum bars around a ring that swells with the bass), PARTICLES (a liquid blob morphing with the spectrum, shedding particles as it gets louder) and VECTORSCOPE (left against right turned 45°, with a phase-correlation meter; every track is in stereo; a mono sound shows as a vertical line at +1), its name shown top left. The visualizers follow the theme (its bit and accent colors; a cycling rainbow in SPECTRUM). Also: SPECTROGRAM (the spectrum as a heat-map scrolling left), LEVEL METERS (L / R LED ladders with peak holds), MATRIX RAIN (0s and 1s falling, each column a band), BIT GRID (a 7x7 board stacking bits per band, a full column flashing), SYNTHWAVE GRID (a sun and a wireframe landscape of the spectrum's recent past over a scrolling floor), PLASMA (a color field warped by the bass) and TUNNEL (rings rushing toward you on the beat). The small one in SETTINGS has the ones that read at its height: SPECTRUM, WAVE, OSCILLOSCOPE, SPECTROGRAM, LEVEL METERS and PLASMA;
 PREVIOUS / PLAY-PAUSE / NEXT, REPEAT / SEQUENCE / SHUFFLE, the 16-slot track
 list (locked tracks show the level they open at) and BACKGROUND PLAY, so it can
 run on a phone with the screen off. Keys: Space plays / pauses, ← / → skip,
