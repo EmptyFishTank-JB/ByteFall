@@ -2215,3 +2215,15 @@ body.player-open { overflow: hidden; }
 .mp-note { margin: 0; font-size: 10px; line-height: 1.5; text-align: center; color: var(--panel-text); opacity: 0.8; }
 /* OPEN MUSIC PLAYER: the same gap above the visualizer as between the menu's other buttons */
 .settings #open-player-btn { margin-bottom: 6px; }
+/* The main HUD, as the VS squares: each value (or bit) dead center in its box, and every label
+   centered in the same band above it (the space over CURRENT's bit, so the labels line up across
+   the row). The boxes are tall enough for CURRENT's bit box to center with its label above. */
+body:not(.vs-mode) .hud > .stat:not([hidden]):not(.cpu-stat):not(.cpu-face),
+body:not(.vs-mode) .hud-bits .stat:not([hidden]) { min-height: 60px; }
+body:not(.vs-mode) .hud .stat:not(.cpu-stat):not(.cpu-face) > :is(.value, .bit-sq, .bit-row) {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; max-width: calc(100% - 4px);
+}
+body:not(.vs-mode) .hud .stat:not(.cpu-stat):not(.cpu-face) > .label {
+  position: absolute; left: 1px; right: 1px; top: 1px; height: calc(50% - 19px);
+  display: flex; align-items: center; justify-content: center; text-align: center;
+}
