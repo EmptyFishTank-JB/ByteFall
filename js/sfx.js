@@ -150,6 +150,22 @@ const SFX = (() => {
     preview(name) {
       try { sounds[name](getCtx()); } catch (e) {}
     },
+    // One short square-wave blip of a voice (the tutorial's BOT talking), at freq Hz
+    blip(freq) {
+      if (muted) return;
+      try {
+        const c = getCtx();
+        const t = c.currentTime;
+        const osc = c.createOscillator();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(freq, t);
+        osc.frequency.exponentialRampToValueAtTime(freq * 0.82, t + 0.045);
+        const lp = filter(c, 'lowpass', 2600);
+        osc.connect(lp);
+        lp.connect(envelope(c, VOL * 0.22, t, 0.05));
+        osc.start(t); osc.stop(t + 0.055);
+      } catch (e) {}
+    },
     isMuted: () => muted,
     toggle() {
       muted = !muted;

@@ -2317,3 +2317,30 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
 .start-black { position: fixed; inset: 0; z-index: 210; background: #000; opacity: 0; pointer-events: none; transition: opacity 0.6s ease; }
 .start-black.on { opacity: 1; pointer-events: auto; }
 @media (prefers-reduced-motion: reduce) { .start-tap { animation: none; } }
+
+/* MINI BOTS (minibot.js): the CPU's face, small, anywhere (the tutorial's narrator, the start
+   screen's wanderers) */
+.cpu-face.mini-bot { display: block; padding: 0; background: none; border: none; }
+.mini-bot .cpu-bot { display: block; width: 100%; height: auto; max-height: none; }
+/* Talking: the mouth opens and shuts, whatever the mood's own mouth */
+.cpu-face.talking .mouth { display: none !important; }
+.cpu-face.talking .mouth-open { display: inline !important; animation: bot-talk 0.16s steps(1) infinite; }
+@keyframes bot-talk { 0% { opacity: 1; } 50% { opacity: 0; } }
+/* The tutorial's narrator: BOT beside what it says */
+.tut-body { display: flex; align-items: flex-start; gap: 10px; }
+.tut-bot { flex: none; width: 36px; margin-top: 2px; }
+.tut-body .tut-text { flex: 1; min-width: 0; min-height: 2.9em; cursor: pointer; }
+
+/* The start screen's wanderers: along the bottom of the card, walking in and out of it */
+.start-walkers { position: absolute; left: 0; right: 0; bottom: 10px; height: 44px; pointer-events: none; }
+.start-walkers .walker { position: absolute; left: 0; bottom: 0; width: 34px; will-change: transform; }
+.walker.walking .bot { animation: bot-hop 0.28s steps(2) infinite; }
+.walker.walking .leg-a { animation: bot-step 0.28s steps(1) infinite; }
+.walker.walking .leg-b { animation: bot-step 0.28s steps(1) 0.14s infinite; }
+.walker-emote {
+  position: absolute; left: 50%; bottom: 100%; transform: translate(-50%, 2px); margin-bottom: 2px;
+  font-size: 11px; letter-spacing: 0; color: var(--accent); text-shadow: 0 0 6px var(--accent);
+  opacity: 0; transition: opacity 0.15s, transform 0.15s; white-space: nowrap;
+}
+.walker-emote.show { opacity: 1; transform: translate(-50%, 0); }
+.tut-text .unsaid { visibility: hidden; }

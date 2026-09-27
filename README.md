@@ -370,7 +370,7 @@ mixdowns).
 ## Tutorial
 
 RULES → **TUTORIAL** (beside the title) starts a guided lesson on set boards
-with set bits (`js/tutorial.js`). A banner over the board explains each rule
+with set bits (`js/tutorial.js`). BOT narrates it: its face sits in the banner's corner, and each line types out fast with a blip of square-wave "voice" every other letter (Animalese-style, following SOUND), pausing at punctuation; a tap on the text finishes the line, and the lesson never waits on the typing. BOT's mood follows along (happy at the welcome and the chain, worried at the ======== line, devious with the WORM VIRUS, -_- at a wrong column). A banner over the board explains each rule
 and asks you to tap what it names; whatever it's talking about pulses, and only
 the lesson's drop column can be pressed (the others dim). No lesson drops a bit
 into the column of its own number, so it never looks like it has to. After each
@@ -394,7 +394,11 @@ in the middle and TAP TO START blinking below (`js/start.js`). A tap (or Enter
 / Space) fades it to black, then fades into the game, which always starts on
 CLASSIC, Normal. The very first time the game is opened, it fades into the
 TUTORIAL instead (EXIT skips it). A refresh, or coming back to the app or tab,
-skips the start screen and carries on where you were.
+skips the start screen and carries on where you were. On the start screen one to three of the CPUs (BOT, GRIFTER, BUNKER, GLITCH;
+never two of the same) wander along the bottom of the card, walking in from
+either side, idling, and heading back out; two that meet may stop, face each
+other and pull faces (a mood each and a little emote). The small faces come
+from `js/minibot.js`, a copy of the CPU's face for use anywhere.
 
 ## Music player
 
