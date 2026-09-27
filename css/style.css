@@ -2272,7 +2272,9 @@ body:not(.vs-mode) .hud .stat:not(.cpu-stat):not(.cpu-face) > .label {
   font-family: inherit; font-size: 12px; letter-spacing: 1px; padding: 5px 14px; cursor: pointer;
   background: var(--fg); color: var(--bg-solid); border: 1px solid var(--fg); border-radius: 4px;
 }
-.tut-actions button + button { background: transparent; color: var(--fg); }
+.tut-actions button:not(.tut-back) + button { background: transparent; color: var(--fg); }
+/* BACK: on the left, outlined */
+.tut-actions button.tut-back { margin-right: auto; background: transparent; color: var(--fg-dim); border-color: var(--grid-line); }
 .tut-pulse { position: relative; z-index: 3; animation: tut-pulse 0.9s ease-in-out infinite !important; }
 @keyframes tut-pulse {
   0%, 100% { box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.9), 0 0 6px rgba(var(--accent-rgb), 0.5); }

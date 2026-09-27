@@ -377,7 +377,7 @@ says what happened and shows the points: each link's bits, (10 + number) × the
 chain, NIBBLE bonuses and the total. Thirteen steps: the terminal, CURRENT, a
 line across, a line down, SCORE, a chain with a NIBBLE, CHAIN, peeling a layer
 twice until it reveals its bit, the ======== line, ENCRYPT IN, exploits, then
-PLAY CLASSIC or RULES. EXIT leaves at any point. It counts toward nothing (no
+PLAY CLASSIC or RULES. BACK (from step 2 on) redoes the step just played, or before a drop goes to the step before, putting the board, bits, score and chain back as they were. EXIT leaves at any point. It counts toward nothing (no
 XP, stats, achievements or best score).
 
 ## Startup

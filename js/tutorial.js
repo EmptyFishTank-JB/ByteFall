@@ -76,6 +76,9 @@ const Tutorial = (() => {
   let dropped = false; // this step's drop has happened (waiting on NEXT)
   let tapTarget = null;
   let bannerEl = null;
+  // How the board, bits, score and chain stood as each step began, so BACK can put it back
+  let snapshots = [];
+  const copyCells = (cols) => cols.map((col) => col.map((cell) => ({ ...cell })));
 
   const cur = () => STEPS[step];
   function banner() {
@@ -134,6 +137,7 @@ const Tutorial = (() => {
     text.className = 'tut-text';
     text.textContent = s.text;
     el.appendChild(text);
+    if (step > 0) addButton('BACK', back, 'tut-back');
     if (s.next) addButton('NEXT', () => go(step + 1));
     if (s.done) {
       addButton('PLAY CLASSIC', () => leave('classic'));
@@ -152,7 +156,7 @@ const Tutorial = (() => {
     updateColumnButtons();
     SFX.play('punct');
   }
-  function addButton(label, fn) {
+  function addButton(label, fn, cls = '') {
     let row = bannerEl.querySelector('.tut-actions');
     if (!row) {
       row = document.createElement('div');
@@ -162,6 +166,7 @@ const Tutorial = (() => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.textContent = label;
+    if (cls) btn.className = cls;
     btn.addEventListener('click', fn);
     row.appendChild(btn);
   }
@@ -186,6 +191,25 @@ const Tutorial = (() => {
     step = n;
     if (step >= STEPS.length) return leave();
     setUp(cur());
+    snapshots[step] = { columns: copyCells(columns), queue: queue.map((b) => ({ ...b })), score, chain: chainEl.textContent };
+    show();
+  }
+
+  // BACK: after a drop, the same step again from the start; otherwise the step before it. The
+  // board, bits, score and chain go back to how they stood as that step began.
+  function back() {
+    if (busy) return;
+    const to = dropped ? step : step - 1;
+    const snap = snapshots[to];
+    if (!snap) return;
+    step = to;
+    columns = copyCells(snap.columns);
+    queue = snap.queue.map((b) => ({ ...b }));
+    score = snap.score;
+    chainEl.textContent = snap.chain;
+    render();
+    updateHud();
+    SFX.play('click');
     show();
   }
 
@@ -218,6 +242,7 @@ const Tutorial = (() => {
   return {
     // Called by initGame when the mode is 'tutorial'
     begin() {
+      snapshots = [];
       go(0);
     },
     // Called by initGame for every other mode
