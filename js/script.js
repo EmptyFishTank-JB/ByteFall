@@ -601,7 +601,7 @@ function fitVsSetup() {
 // the lines of text above buttons (notes, descriptions): each keeps the height it has in
 // Courier, so a wider font wrapping onto another line can't push the buttons below it down.
 // Re-measured when the layout changes (fitBoard), a text changes, or one comes into view.
-const LOCKED_BUTTONS = '.modes button, .difficulty button, #vs-layers-btn, #vs-exploits-btn, #vs-start, #pause-resume, #overlay-restart-btn, #overlay-share-btn, .records-tabs button, #vs-goal, .menu-tabs button, .store-buy, .store-restore, .remove-ads-link';
+const LOCKED_BUTTONS = '.modes button, .difficulty button, #vs-layers-btn, #vs-exploits-btn, #vs-start, #pause-resume, #overlay-restart-btn, #overlay-share-btn, .records-tabs button, #vs-goal, .menu-tabs button, .store-buy, .store-restore, .store-shortcut';
 const LOCKED_TEXT = '#mode-info, .settings-note, .vs-setup-note, .vs-setup-msg, #overlay-note, footer p, .panel-store p';
 function unfitButton(b) {
   if (!('fitLs' in b.dataset)) return;
@@ -689,6 +689,8 @@ function lockButtons() {
 // a grey strip at the top (or bottom) where a phone's banner ad would go. The game's height leaves it out, so
 // everything fits above it as it would with a real banner (the body becomes the frame for fixed
 // layers too). Re-read on coming back from the dev page, so it changes without a reload.
+// (its class names never say "ad": ad blockers hide anything named like .ad-top, and on the
+// root element that blanks the whole page)
 let adPreviewH = 0;
 let adPreviewBar = null;
 function applyAdPreview() {
@@ -696,14 +698,14 @@ function applyAdPreview() {
   const flag = storage.get('bytefall-dev-adpreview');
   const h = param !== null ? parseInt(param, 10) || 50 : flag === 'on' ? 50 : parseInt(flag, 10) || 0;
   adPreviewH = [50, 60, 90].includes(h) ? h : 0;
-  document.documentElement.classList.toggle('ad-preview', adPreviewH > 0);
+  document.documentElement.classList.toggle('strip-preview', adPreviewH > 0);
   // (at the top of the screen by default; AD BANNER SPOT in dev tools, or ?adpos=bottom)
   const pos = new URLSearchParams(location.search).get('adpos') || storage.get('bytefall-dev-adpos');
-  document.documentElement.classList.toggle('ad-top', pos !== 'bottom');
-  document.documentElement.style.setProperty('--ad-h', `${adPreviewH}px`);
+  document.documentElement.classList.toggle('strip-top', adPreviewH > 0 && pos !== 'bottom');
+  document.documentElement.style.setProperty('--strip-h', `${adPreviewH}px`);
   if (adPreviewH && !adPreviewBar) {
     adPreviewBar = document.createElement('div');
-    adPreviewBar.className = 'ad-preview-bar';
+    adPreviewBar.className = 'strip-preview-bar';
     adPreviewBar.setAttribute('aria-hidden', 'true');
     document.body.append(adPreviewBar);
   }
@@ -1711,7 +1713,14 @@ function requestReset(btn, confirmText, apply = () => {}) {
 }
 
 const restartBtn = document.getElementById('restart-btn');
-restartBtn.addEventListener('click', () => requestReset(restartBtn, 'TAP AGAIN TO RESTART'));
+restartBtn.addEventListener('click', () => {
+  // (EXIT before the first drop: nothing to lose, so one tap, back to the title card)
+  if (restartBtn.classList.contains('exit')) {
+    if (typeof window.showStartScreen === 'function') window.showStartScreen();
+    return;
+  }
+  requestReset(restartBtn, 'TAP AGAIN TO RESTART');
+});
 
 document.querySelectorAll('#difficulty-row button').forEach((btn) => {
   btn.addEventListener('click', () => {
@@ -3256,7 +3265,14 @@ function updateFreeBtn() {
   const inVs = mode === 'vs';
   // Always there outside VS; greyed out until the first drop (and once the run is over)
   restartBtn.hidden = inVs;
-  restartBtn.disabled = !started || gameOver;
+  // (EXIT until the first drop; greyed out once the run is over)
+  const exit = !started && !gameOver;
+  if (exit !== restartBtn.classList.contains('exit')) {
+    restartBtn.classList.toggle('exit', exit);
+    restartBtn.setAttribute('aria-label', exit ? 'Exit to the title screen' : 'Restart');
+    restartBtn.title = exit ? 'Exit to the title screen' : 'Restart (press twice)';
+  }
+  restartBtn.disabled = gameOver;
   vsQuitBtn.hidden = !inVs;
   const ready = nextExploit();
   const shown = armedHack || ready;

@@ -1983,7 +1983,7 @@ html.theme-fade *::after {
    (script.js) what it's doing: idle (bobs and blinks), think (looks around), happy, hit, worried,
    dead (you won), smug (it won) */
 .cpu-face { display: none; }
-body.vs-mode .cpu-face:not([hidden]) { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 4px; background: var(--inset-bg); }
+body.vs-mode .cpu-face:not(.mini-bot):not([hidden]) { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 4px; background: var(--inset-bg); }
 .cpu-bot { width: 78%; max-height: 80%; overflow: visible; }
 .cpu-face { --bot: var(--fg); --bot-rgb: var(--fg-rgb); }
 .cpu-face[data-bot="grifter"] { --bot: var(--accent); --bot-rgb: var(--accent-rgb); }
@@ -2403,24 +2403,27 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
 /* The drop buttons and the message under the grid: a layer over the wanderers' lane (bats, crows,
    the spider's thread and the rest pass under them) */
 .column-buttons, .message-slot { position: relative; z-index: 2; }
+/* The restart corner button is EXIT (back to the title card) until the first drop */
+.restart-icon .exit-glyph, .restart-icon.exit .restart-glyph { display: none; }
+.restart-icon.exit .exit-glyph { display: block; }
 /* No tap box (highlight, focus ring, text selection) around a poked bot or visitor */
 :is(.start-walkers, .game-walkers) :is(.walker, .visitor) { -webkit-tap-highlight-color: transparent; outline: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 
 /* Dev: AD BANNER PREVIEW (script.js). The page's height (--app-h) already leaves the strip out; the
    transform makes the body the frame for fixed layers (start screen, overlays, particles), so they
    stay clear of the strip too. */
-html.ad-preview body { transform: translate(0, 0); }
-html.ad-preview #board-fx { height: 100%; }
-html:not(.ad-preview) .ad-preview-bar, .ad-preview-bar[hidden] { display: none; }
-.ad-preview-bar {
-  position: fixed; top: 100%; left: 0; right: 0; height: var(--ad-h, 50px); z-index: 10000;
+html.strip-preview body { transform: translate(0, 0); }
+html.strip-preview #board-fx { height: 100%; }
+html:not(.strip-preview) .strip-preview-bar, .strip-preview-bar[hidden] { display: none; }
+.strip-preview-bar {
+  position: fixed; top: 100%; left: 0; right: 0; height: var(--strip-h, 50px); z-index: 10000;
   display: flex; align-items: center; justify-content: center;
   background: #8a8a8a; color: #3a3a3a; border-top: 1px solid #b0b0b0;
   font: 11px/1 monospace; letter-spacing: 2px; pointer-events: none;
 }
 /* At the top (the default): the body moves down under the strip, which hangs just above it */
-html.ad-preview.ad-top body { margin-top: var(--ad-h); }
-html.ad-top .ad-preview-bar { top: auto; bottom: 100%; border-top: 0; border-bottom: 1px solid #b0b0b0; }
+html.strip-preview.strip-top body { margin-top: var(--strip-h); }
+html.strip-top .strip-preview-bar { top: auto; bottom: 100%; border-top: 0; border-bottom: 1px solid #b0b0b0; }
 
 /* Dev: TWINKLE BACKGROUND (grid-bg.js). The starlight twinkling across the whole screen behind the
    game card (and its menus), in place of the plain gradient */
@@ -2462,15 +2465,15 @@ html.page-twinkle .page-bg { display: block; }
 .store-restore { display: block; width: 100%; color: var(--fg); border-color: var(--fg-dim); background: none; }
 .panel-store .store-note { margin: 8px 0 0; font-size: 10px; color: var(--fg-dim); }
 /* REMOVE ADS: a quiet link at the foot of the menu's other tabs */
-.remove-ads-link {
+.store-shortcut {
   display: flex; align-items: center; justify-content: center; gap: 6px; margin: 10px auto 0; padding: 5px 12px;
   font-family: inherit; font-size: 11px; letter-spacing: 2px; cursor: pointer;
   background: none; color: var(--accent); border: 1px dashed rgba(var(--accent-rgb), 0.6); border-radius: 4px;
 }
-.remove-ads-link svg { width: 15px; height: 15px; }
-.store-buy, .store-restore, .remove-ads-link, .menu-tabs button { white-space: nowrap; }
-.remove-ads-link:hover { background: rgba(var(--accent-rgb), 0.1); }
-.remove-ads-link[hidden] { display: none; }
+.store-shortcut svg { width: 15px; height: 15px; }
+.store-buy, .store-restore, .store-shortcut, .menu-tabs button { white-space: nowrap; }
+.store-shortcut:hover { background: rgba(var(--accent-rgb), 0.1); }
+.store-shortcut[hidden] { display: none; }
 
 /* START SCREEN credits: the studio at the top, the copyright above the wanderers */
 .start-studio {
@@ -2564,6 +2567,11 @@ html.page-twinkle .page-bg { display: block; }
 .visitor .f-c { display: none; } /* (the penguin on its belly) */
 .visitor.v-slide :is(.f-a, .f-b) { display: none; }
 .visitor.v-slide .f-c { display: inline; }
+.visitor .f-d { display: none; } /* (a crow flying: wings up, f-c; wings down, f-d) */
+.visitor.v-fly :is(.f-a, .f-b) { display: none; }
+.visitor.v-fly .f-c { display: inline; }
+.visitor.v-fly.step .f-c { display: none; }
+.visitor.v-fly.step .f-d { display: inline; }
 .visitor-reindeer.v-rudolph svg { filter: drop-shadow(0 0 1px rgba(220, 225, 240, 0.4)) drop-shadow(0 0 2px #ff2a2a); }
 /* Snow, in pixel flakes; fireworks, a rocket and its sparks (all in the bots' pixels) */
 :is(.visitor-flake, .visitor-spark) { position: absolute; left: 0; bottom: 0; width: calc(34px / 16); height: calc(34px / 16); pointer-events: none; z-index: 2; }

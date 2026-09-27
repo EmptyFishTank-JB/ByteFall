@@ -25,8 +25,8 @@
   } catch (e) {}
 </script>
 <title>BYTEFALL // decryption terminal</title>
-<script src="js/fonts.js?v=219"></script>
-<link rel="stylesheet" href="css/style.css?v=219">
+<script src="js/fonts.js?v=220"></script>
+<link rel="stylesheet" href="css/style.css?v=220">
 </head>
 <body>
   <!-- Dev: TWINKLE BACKGROUND (grid-bg.js): the starlight behind the whole game, off by default -->
@@ -213,7 +213,7 @@
           </section>
         </div>
         <!-- (on the other tabs: a way to the store while there are ads) -->
-        <button type="button" class="remove-ads-link" id="remove-ads-link">
+        <button type="button" class="store-shortcut" id="store-shortcut">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2 4 H5 L7.5 15 H18.5 L21 7 H6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="19.5" r="1.7" fill="currentColor"/><circle cx="17" cy="19.5" r="1.7" fill="currentColor"/></svg>
           REMOVE ADS
         </button>
@@ -490,8 +490,13 @@
       <span class="dev-badge" id="dev-badge" hidden>DEV // EVERYTHING UNLOCKED</span>
       <!-- The CPUs wandering along the bottom of the card (wanderers.js; SETTINGS → WANDERING BOTS) -->
       <div class="game-walkers" id="game-walkers" aria-hidden="true"></div>
+      <!-- (before the first drop it's EXIT instead: back to the title card) -->
       <button type="button" class="corner-btn restart-icon" id="restart-btn" aria-label="Restart" title="Restart (press twice)" hidden>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <svg class="exit-glyph" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M10 4h9v16h-9" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M14 12H3M7 8l-4 4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <svg class="restart-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <path d="M23 4v6h-6"/>
           <path d="M1 20v-6h6"/>
           <path d="M3.5 9a9 9 0 0 1 14.9-3.4L23 10"/>
@@ -584,36 +589,36 @@
     </div>
   </div>
 
-  <script src="js/unlocks.js?v=219"></script>
-  <script src="js/progress.js?v=219"></script>
-  <script src="js/sfx.js?v=219"></script>
-  <script src="js/music/music-bytefall-theme.js?v=219"></script>
-  <script src="js/music/music-sleep-mode.js?v=219"></script>
-  <script src="js/music/music-brute-force.js?v=219"></script>
-  <script src="js/music/music-deep-web.js?v=219"></script>
-  <script src="js/music/music-zero-day.js?v=219"></script>
-  <script src="js/music/music-system-restore.js?v=219"></script>
-  <script src="js/music/music-night-drive.js?v=219"></script>
-  <script src="js/music/music-standby-mode.js?v=219"></script>
-  <script src="js/music/music-core-dump.js?v=219"></script>
-  <script src="js/music/music-handshake.js?v=219"></script>
-  <script src="js/music/music.js?v=219"></script>
-  <script src="js/data/puzzles.js?v=219"></script>
-  <script src="js/data/daily-puzzles.js?v=219"></script>
-  <script src="js/cpu.js?v=219"></script>
-  <script src="js/fx.js?v=219"></script>
-  <script src="js/viz.js?v=219"></script>
-  <script src="js/minibot.js?v=219"></script>
-  <script src="js/seasons.js?v=219"></script>
-  <script src="js/visitors.js?v=219"></script>
-  <script src="js/wanderers.js?v=219"></script>
-  <script src="js/tutorial.js?v=219"></script>
-  <script src="js/script.js?v=219"></script>
-  <script src="js/grid-bg.js?v=219"></script>
-  <script src="js/player.js?v=219"></script>
-  <script src="js/store.js?v=219"></script>
-  <script src="js/start.js?v=219"></script>
-  <script src="js/place.js?v=219"></script>
-  <script src="js/saver.js?v=219"></script>
+  <script src="js/unlocks.js?v=220"></script>
+  <script src="js/progress.js?v=220"></script>
+  <script src="js/sfx.js?v=220"></script>
+  <script src="js/music/music-bytefall-theme.js?v=220"></script>
+  <script src="js/music/music-sleep-mode.js?v=220"></script>
+  <script src="js/music/music-brute-force.js?v=220"></script>
+  <script src="js/music/music-deep-web.js?v=220"></script>
+  <script src="js/music/music-zero-day.js?v=220"></script>
+  <script src="js/music/music-system-restore.js?v=220"></script>
+  <script src="js/music/music-night-drive.js?v=220"></script>
+  <script src="js/music/music-standby-mode.js?v=220"></script>
+  <script src="js/music/music-core-dump.js?v=220"></script>
+  <script src="js/music/music-handshake.js?v=220"></script>
+  <script src="js/music/music.js?v=220"></script>
+  <script src="js/data/puzzles.js?v=220"></script>
+  <script src="js/data/daily-puzzles.js?v=220"></script>
+  <script src="js/cpu.js?v=220"></script>
+  <script src="js/fx.js?v=220"></script>
+  <script src="js/viz.js?v=220"></script>
+  <script src="js/minibot.js?v=220"></script>
+  <script src="js/seasons.js?v=220"></script>
+  <script src="js/visitors.js?v=220"></script>
+  <script src="js/wanderers.js?v=220"></script>
+  <script src="js/tutorial.js?v=220"></script>
+  <script src="js/script.js?v=220"></script>
+  <script src="js/grid-bg.js?v=220"></script>
+  <script src="js/player.js?v=220"></script>
+  <script src="js/store.js?v=220"></script>
+  <script src="js/start.js?v=220"></script>
+  <script src="js/place.js?v=220"></script>
+  <script src="js/saver.js?v=220"></script>
 </body>
 </html>

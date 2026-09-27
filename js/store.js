@@ -11,7 +11,7 @@ const Store = (() => {
   };
   const menu = document.getElementById('records');
   const msgEl = document.getElementById('store-msg');
-  const link = document.getElementById('remove-ads-link');
+  const link = document.getElementById('store-shortcut');
   let msgTimer = 0;
 
   function say(text) {

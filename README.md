@@ -553,11 +553,11 @@ every 20 to 45 seconds, in from either side. HALLOWEEN: FRANKENSTEIN'S MONSTER
 (lumbering, arm out), a MUMMY (shambling, a loose bandage swinging), the CREATURE
 from the black lagoon (waddling, dripping water), NOSFERATU (gliding), a
 see-through GHOST (floating), a flock of BATS (flapping across), a CROW or two
-(hopping in, pecking, then flying off) and a SPIDER (down on its silk thread
+(hopping in, pecking, then flying off, wings open and flapping) and a SPIDER (down on its silk thread
 somewhere along the card, a dangle, back up). NOVEMBER (the whole month; nothing
 holiday-specific): a TURKEY struts in, pecks a while and struts on (and the
 crows). They're pixel sprites in the bots' pixel size and sway and bob in whole
-pixels, on the same floor as the bots (their feet a pixel of the grid above the lane's edge); they walk behind the bots, bats and crows over them. A monster passing a
+pixels, on the same floor as the bots (their feet two pixels of the grid above the lane's edge); they walk behind the bots, bats and crows over them. A monster passing a
 bot may give it a fright. Poke one: the monster roars and stomps (bots near it
 jump), the mummy groans and slows, the creature splashes, Nosferatu hisses and
 turns into three bats, the ghost says BOO (every bot near it jumps) and fades

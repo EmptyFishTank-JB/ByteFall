@@ -77,6 +77,9 @@ function createVisitors(api) {
       pal: { k: '#2c313b', K: '#4a5566', e: '#e0e0e0', o: '#8a8f98' },
       a: ['......kk.', '.....kkeo', 'kk..kkkk.', '.kkkkkKk.', '..kkkkk..', '...k.k...', '...k.k...'],
       b: ['.........', '.........', 'kk.......', '.kkkkkkk.', '..kkkkkke', '...k.k..o', '...k.k...'],
+      // (flying: its wings open, flapping up and down, legs tucked)
+      c: ['.kkk.....', '..kkk....', '...kkk.k.', 'kk..kkkeo', '.kkkkkkK.', '.........', '.........'],
+      d: ['.........', '.........', '.......k.', 'kk..kkkeo', '.kkkkkkK.', '...kkk...', '....kkk..'],
     },
     penguin: { // (c: on its belly, sliding)
       pal: { k: '#1b1f27', w: '#f2f4f8', o: '#ff9a1f' },
@@ -179,7 +182,7 @@ function createVisitors(api) {
     el.style.width = `${w * U}px`;
     el.innerHTML = `<svg viewBox="0 0 ${w} ${h}" width="${w * U}" height="${h * U}" shape-rendering="crispEdges" aria-hidden="true">`
       + `<g class="f-a">${rects(def.a, def.pal)}</g><g class="f-b">${rects(frameB, def.pal)}</g>`
-      + `${def.c ? `<g class="f-c">${rects(def.c, def.pal)}</g>` : ''}</svg>`
+      + `${def.c ? `<g class="f-c">${rects(def.c, def.pal)}</g>` : ''}${def.d ? `<g class="f-d">${rects(def.d, def.pal)}</g>` : ''}</svg>`
       + '<span class="walker-emote"></span>';
     return el;
   }
@@ -509,9 +512,10 @@ function createVisitors(api) {
   }
 
   // (the lumbering in whole pixels of the sprite's grid: a pixel's shuffle side to side and a
-  // pixel's bob, heights snapped to the grid too; no tilting). FLOOR: the bots' feet rest a pixel
-  // of their grid above the lane's bottom edge, and every visitor stands on that same floor.
-  const FLOOR = U;
+  // pixel's bob, heights snapped to the grid too; no tilting). FLOOR: the bots' feet rest two
+  // pixels of their grid above the lane's bottom edge (their 17-row grid ends two rows under the
+  // legs), and every visitor stands on that same floor.
+  const FLOOR = 2 * U;
   function place(v) {
     const k = KINDS[v.kind];
     const t = v.age / 1000;
@@ -593,7 +597,12 @@ function createVisitors(api) {
         } else if (v.state === 'fly') { // (off up and away)
           v.x += v.dir * 60 * dt;
           v.y += 55 * dt;
-          v.el.classList.remove('step');
+          v.el.classList.add('v-fly');
+          if (now - v.frameAt > 110) { // (a wingbeat)
+            v.frameAt = now;
+            v.frame = 1 - v.frame;
+            v.el.classList.toggle('step', !!v.frame);
+          }
         }
       } else if (v.state === 'go' || v.state === 'leaving' || v.state === 'slide') {
         if (v.state !== 'leaving') v.x += v.dir * v.speed * dt;
