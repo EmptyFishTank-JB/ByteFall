@@ -3,8 +3,8 @@
 // a pass finishes, a freshly scattered pass starts and the two crossfade, so
 // the cycle reads as one continuous process instead of snapping back.
 // { defrag: false } draws only the starlight: the scattered blocks shimmering, never moving
-// (the HUD boxes).
-function startGridBackground(canvas, { defrag = true } = {}) {
+// (the HUD boxes). active(), if given, pauses it while it returns false (a hidden layer).
+function startGridBackground(canvas, { defrag = true, active } = {}) {
   const BLOCK = 5; // css px
   const GAP = 2;
   const PITCH = BLOCK + GAP;
@@ -141,7 +141,7 @@ function startGridBackground(canvas, { defrag = true } = {}) {
 
   let last = 0;
   function frame(now) {
-    if (now - last >= TICK_MS) {
+    if (now - last >= TICK_MS && (!active || active())) {
       last = now;
       tick(now);
     }
@@ -166,3 +166,19 @@ document.querySelectorAll('.hud .stat:not(.cpu-stat):not(.cpu-face)').forEach((s
   stat.prepend(canvas);
   startGridBackground(canvas, { defrag: false });
 });
+
+// Dev: TWINKLE BACKGROUND (dev tools, or ?twinkle): the starlight across the whole screen behind
+// the game card, in place of the plain gradient. Re-read on coming back from the dev page.
+const pageBg = document.getElementById('page-bg');
+if (pageBg) {
+  const twinkleOn = () => {
+    let flag = null;
+    try { flag = localStorage.getItem('bytefall-dev-twinkle'); } catch (e) {}
+    return new URLSearchParams(location.search).has('twinkle') || flag === 'on';
+  };
+  const applyTwinkle = () => document.documentElement.classList.toggle('page-twinkle', twinkleOn());
+  applyTwinkle();
+  window.addEventListener('pageshow', applyTwinkle);
+  window.addEventListener('focus', applyTwinkle);
+  startGridBackground(pageBg, { defrag: false, active: () => document.documentElement.classList.contains('page-twinkle') });
+}

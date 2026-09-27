@@ -596,27 +596,40 @@ function fitVsSetup() {
 // fires no resize when it settles), so the page sets its own height (--app-h, used instead of
 // 100dvh) from the smallest of the browser's measures, and re-checks it on every viewport event
 // plus a cheap poll, refitting the board whenever anything changed.
-// Dev: AD BANNER PREVIEW (dev tools, off by default, or ?adpreview) holds a grey 50px strip at the
-// bottom where a phone's banner ad would go. The game's height leaves it out, so everything fits
-// above it as it would with a real banner (the body becomes the frame for fixed layers too).
-const AD_PREVIEW_H = 50;
-const adPreview = new URLSearchParams(location.search).has('adpreview') || storage.get('bytefall-dev-adpreview') === 'on';
-if (adPreview) {
-  document.documentElement.classList.add('ad-preview');
-  document.documentElement.style.setProperty('--ad-h', `${AD_PREVIEW_H}px`);
-  const ad = document.createElement('div');
-  ad.className = 'ad-preview-bar';
-  ad.setAttribute('aria-hidden', 'true');
-  ad.textContent = `AD BANNER // ${AD_PREVIEW_H}PX`;
-  document.body.append(ad);
+// Dev: AD BANNER PREVIEW (dev tools: OFF by default, then 50 / 60 / 90px; or ?adpreview=60) holds
+// a grey strip at the bottom where a phone's banner ad would go. The game's height leaves it out, so
+// everything fits above it as it would with a real banner (the body becomes the frame for fixed
+// layers too). Re-read on coming back from the dev page, so it changes without a reload.
+let adPreviewH = 0;
+let adPreviewBar = null;
+function applyAdPreview() {
+  const param = new URLSearchParams(location.search).get('adpreview');
+  const flag = storage.get('bytefall-dev-adpreview');
+  const h = param !== null ? parseInt(param, 10) || 50 : flag === 'on' ? 50 : parseInt(flag, 10) || 0;
+  adPreviewH = [50, 60, 90].includes(h) ? h : 0;
+  document.documentElement.classList.toggle('ad-preview', adPreviewH > 0);
+  document.documentElement.style.setProperty('--ad-h', `${adPreviewH}px`);
+  if (adPreviewH && !adPreviewBar) {
+    adPreviewBar = document.createElement('div');
+    adPreviewBar.className = 'ad-preview-bar';
+    adPreviewBar.setAttribute('aria-hidden', 'true');
+    document.body.append(adPreviewBar);
+  }
+  if (adPreviewBar) {
+    adPreviewBar.hidden = !adPreviewH;
+    adPreviewBar.textContent = `AD BANNER // ${adPreviewH}PX`;
+  }
 }
+applyAdPreview();
+window.addEventListener('pageshow', applyAdPreview);
+window.addEventListener('focus', () => { applyAdPreview(); checkViewport(false); });
 function viewportHeight() {
   const vv = window.visualViewport;
   const heights = [document.documentElement.clientHeight];
   // (zoomed in, innerHeight and the visual viewport shrink with the zoom: use the page's size)
   if (vv) heights.push(vv.height * vv.scale);
   if (!vv || Math.abs(vv.scale - 1) < 0.01) heights.push(window.innerHeight);
-  return Math.floor(Math.min(...heights.filter((h) => h > 0))) - (adPreview ? AD_PREVIEW_H : 0);
+  return Math.floor(Math.min(...heights.filter((h) => h > 0))) - adPreviewH;
 }
 let viewportKey = '';
 function checkViewport(force) {
