@@ -2466,7 +2466,7 @@ html.page-twinkle .page-bg { display: block; }
 .remove-ads-link:hover { background: rgba(var(--accent-rgb), 0.1); }
 .remove-ads-link[hidden] { display: none; }
 
-/* START SCREEN credits: the studio at the top; copyright, the credit and the build number above
+/* START SCREEN credits: the studio at the top; the copyright and the build number above
    the wanderers */
 .start-studio {
   position: absolute; top: 28px; left: 0; right: 0; margin: 0; text-align: center;

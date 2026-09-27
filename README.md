@@ -430,8 +430,8 @@ point. It counts toward nothing (no XP, stats, achievements or best score). Pop-
 ## Startup
 
 A fresh launch (the app or tab opened anew) opens on the START SCREEN (the studio,
-EMPTYFISHTANK-JB PRESENTS, across the top; the copyright, the Arcade Paradise
-credit and the build number, from the page's own version, above the wanderers): a card
+EMPTYFISHTANK PRESENTS, across the top; the copyright and the build number,
+from the page's own version, above the wanderers): a card
 filling the screen with the starlight twinkling across it, the BYTEFALL title
 in the middle and a glowing START button below it, as far under the tagline as
 the tagline is under the title (measured letter to letter, in every font; `js/start.js`). A tap anywhere
