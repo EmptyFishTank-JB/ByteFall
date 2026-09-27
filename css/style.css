@@ -2344,7 +2344,7 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
 
 /* The start screen's wanderers: along the bottom of the card, walking in and out of it */
 .start-walkers { position: absolute; left: 0; right: 0; bottom: 10px; height: 44px; pointer-events: none; }
-.start-walkers .walker { position: absolute; left: 0; bottom: 0; width: 34px; will-change: transform; }
+:is(.start-walkers, .game-walkers) .walker { position: absolute; left: 0; bottom: 0; width: 34px; will-change: transform; }
 .walker.walking .bot { animation: bot-hop 0.28s steps(2) infinite; }
 .walker.walking .leg-a { animation: bot-step 0.28s steps(1) infinite; }
 .walker.walking .leg-b { animation: bot-step 0.28s steps(1) 0.14s infinite; }
@@ -2400,7 +2400,7 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
 .start-screen:not([hidden]) ~ #board-fx { z-index: 205; }
 
 /* Poking a wanderer: it can be tapped; shaking itself off with a puff of dust */
-.start-walkers .walker { pointer-events: auto; cursor: pointer; touch-action: manipulation; }
+:is(.start-walkers, .game-walkers) .walker { pointer-events: auto; cursor: pointer; touch-action: manipulation; }
 .cpu-face.shaking .bot { animation: walker-shake 0.1s steps(2) 7; }
 /* The VS CPU's face can be poked too */
 #cpu-face { position: relative; cursor: pointer; -webkit-tap-highlight-color: transparent; }
@@ -2412,3 +2412,6 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
 @keyframes walker-dust { 0% { transform: translate(0, 0); opacity: 0.9; } 100% { transform: translate(var(--dx), var(--dy)); opacity: 0; } }
 /* (achievement pop-ups show over the start screen too) */
 .start-screen:not([hidden]) ~ .toast { z-index: 206; }
+/* The game card's wanderers: along its bottom edge between the corner buttons, coming and going from behind them */
+.game-walkers { position: absolute; left: 80px; right: 80px; bottom: 6px; height: 44px; overflow: hidden; pointer-events: none; z-index: 0; }
+.corner-btn { z-index: 1; }

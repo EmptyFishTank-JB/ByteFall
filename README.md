@@ -415,6 +415,11 @@ reacts: 40% of the time it's startled and bolts; otherwise it's put out (-_-,
 "hey!"), shakes itself off in a puff of dust as if the touch left it dirty, then
 turns to you with a raised eyebrow (the SKEPTIC face) before wandering on.
 
+The same wanderers stroll along the bottom of the game card too, between the
+corner buttons (walking out from behind them), with everything above: meetings,
+frights, pop-ins, decrypts and pokes. SETTINGS → WANDERING BOTS turns them off
+(on by default). The engine is `js/wanderers.js`, shared by both cards.
+
 **Bot achievements** (RECORDS, the BOTS group): POKE, BOO! (poke one so hard it
 runs), THE EYEBROW (a raised eyebrow from all four bots), THIRD WHEEL (poke one
 mid-conversation), MATCHMAKER (two fall for each other), JUMP SCARE (a pop-in

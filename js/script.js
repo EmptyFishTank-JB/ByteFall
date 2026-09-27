@@ -2741,6 +2741,22 @@ buttonsPosBtn.addEventListener('click', () => {
 });
 updateButtonsPos();
 
+// WANDERING BOTS: the CPUs strolling along the bottom of the game card (wanderers.js), on by default
+const wanderersBtn = document.getElementById('wanderers-btn');
+let wanderersOn = storage.get('bytefall-wanderers') !== 'off';
+const gameWalkers = createWanderers(document.getElementById('game-walkers'), () => wanderersOn);
+function updateWanderersBtn() {
+  wanderersBtn.textContent = `WANDERING BOTS: ${wanderersOn ? 'ON' : 'OFF'}`;
+  wanderersBtn.classList.toggle('on', wanderersOn);
+}
+wanderersBtn.addEventListener('click', () => {
+  wanderersOn = !wanderersOn;
+  storage.set('bytefall-wanderers', wanderersOn ? 'on' : 'off');
+  if (wanderersOn) gameWalkers.start();
+  updateWanderersBtn();
+});
+updateWanderersBtn();
+
 // Color themes: each id matches a [data-theme] block in style.css ('terminal' is the default :root).
 // Every theme but TERMINAL is unlocked by progress.js (theme-<id>). Keep the head script in index.html in sync.
 const THEMES = [
