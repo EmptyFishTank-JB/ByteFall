@@ -520,65 +520,115 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     g.textBaseline = 'alphabetic';
   }
 
-  // SYNTHWAVE GRID: a sun on the horizon pulsing with the bass, and a wireframe landscape
-  // scrolling toward you whose ridges are the spectrum's recent past
-  const ridges = [];
-  let gridScroll = 0;
+  // SYNTHWAVE GRID: a sun on the horizon pulsing with the bass, and one landscape rolling toward
+  // you: a single wireframe mesh, flat down the middle (the road's grid) and rising at the sides
+  // into jagged spikes, tallest at the lower outer edges and fading out toward the vanishing
+  // point. The spikes are part of the mesh, so they travel with the grid; the music lifts them
+  // (the bass nearest the road, the treble out at the edges).
+  const T_COLS = 16; // (vertices each side of the middle, half a unit apart)
+  const T_ROWS = 28; // (rows of the mesh, a unit apart, from near to far)
+  const T_ROAD = 1; // (the flat road's half width)
+  const T_CAM = 1; // (the camera's height over the road)
+  const tLevels = new Float32Array(12);
+  let tScroll = 0;
+  let tRow = 0; // (the id of the nearest row: each row keeps its own spikes as it comes)
+  let tLast = 0;
+  let tBg = '#000';
+  let tBgAt = -1e9;
+  // A spike's height at a vertex, 0.15 to 1, the same every time for that vertex of that row
+  const tSpike = (i, row) => {
+    const n = Math.sin(i * 127.1 + row * 311.7) * 43758.5453;
+    const f = n - Math.floor(n);
+    return 0.15 + 0.85 * f * f;
+  };
   function drawTerrain(an, w, h, now) {
     g.clearRect(0, 0, w, h);
-    const lv = bands(an, 24);
-    const bass = lv ? (lv[0] + lv[1] + lv[2]) / 3 : 0;
-    gridScroll = (gridScroll + 0.012 + bass * 0.02) % 1;
-    if (!ridges.length || now - ridges[0].t > 90) {
-      ridges.unshift({ t: now, lv: lv ? Float32Array.from(lv) : new Float32Array(24) });
-      if (ridges.length > 16) ridges.pop();
-    }
-    const horizon = h * 0.42;
+    const lv = bands(an, 12);
+    for (let b = 0; b < 12; b++) tLevels[b] = Math.max(lv ? lv[b] : 0, tLevels[b] * 0.9); // (quick up, eased down)
+    const bass = (tLevels[0] + tLevels[1] + tLevels[2]) / 3;
+    const dt = tLast ? Math.min(0.1, (now - tLast) / 1000) : 0;
+    tLast = now;
+    tScroll += dt * (1.2 + bass * 2.5);
+    while (tScroll >= 1) { tScroll -= 1; tRow++; }
+    const horizon = h * 0.46;
     const cx = w / 2;
-    // the sun
-    const sunR = Math.min(w, h) * (0.2 + bass * 0.04);
+    const f = h * 0.9;
+    // the sun, sitting on the mesh's far edge (no gap under it)
+    const base = horizon + (T_CAM / (T_ROWS - 1)) * f;
+    const sunR = Math.min(w, h) * (0.24 + bass * 0.04);
     g.save();
-    g.beginPath(); g.rect(0, 0, w, horizon); g.clip();
-    const sunGrad = g.createLinearGradient(0, horizon - sunR, 0, horizon);
+    g.beginPath(); g.rect(0, 0, w, base); g.clip();
+    const glow = g.createRadialGradient(cx, base, sunR * 0.8, cx, base, sunR * 1.8);
+    glow.addColorStop(0, rainbow ? hsl(0.1, 45, 0.35) : `rgba(${accentNow}, 0.3)`);
+    glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    g.fillStyle = glow;
+    g.fillRect(0, 0, w, base);
+    const sunGrad = g.createLinearGradient(0, base - sunR, 0, base);
     sunGrad.addColorStop(0, rainbow ? hsl(0.1, 65, 0.95) : `rgba(${accentNow}, 0.95)`);
     sunGrad.addColorStop(1, rainbow ? hsl(0.8, 60, 0.9) : `rgba(${fgNow}, 0.9)`);
     g.fillStyle = sunGrad;
-    g.beginPath(); g.arc(cx, horizon, sunR, Math.PI, 0); g.fill();
-    g.globalCompositeOperation = 'destination-out';
-    for (let k = 1; k < 6; k++) g.fillRect(cx - sunR, horizon - k * sunR * 0.16, sunR * 2, k * 0.9);
+    g.beginPath(); g.arc(cx, base, sunR, Math.PI, 0); g.fill();
     g.restore();
-    // floor lines coming toward you
-    g.lineWidth = 1;
-    for (let k = 0; k < 12; k++) {
-      const z = (k + 1 - gridScroll) / 12;
-      const y = horizon + (h - horizon) * z * z;
-      g.strokeStyle = paint(0.6, (0.1 + z * 0.4).toFixed(2));
-      g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke();
-    }
-    for (let k = -8; k <= 8; k++) {
-      g.strokeStyle = paint(0.6, 0.25);
-      g.beginPath(); g.moveTo(cx + k * w * 0.02, horizon); g.lineTo(cx + k * w * 0.16, h); g.stroke();
-    }
-    // the ridges, far to near, each hiding what's behind it
-    const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg-solid').trim() || '#000';
-    for (let i = ridges.length - 1; i >= 0; i--) {
-      const z = 1 - i / 16;
-      const y = horizon + (h - horizon) * z * z * 0.3;
-      const amp = (h - horizon) * 0.45 * z;
-      const spread = w * (0.35 + 0.65 * z);
-      g.beginPath();
-      g.moveTo(cx - spread, y);
-      const r = ridges[i].lv;
-      for (let k = 0; k < 24; k++) {
-        const b = r[Math.abs(k - 12) * 2 % 24]; // (the bass in the middle)
-        g.lineTo(cx - spread + (k / 23) * spread * 2, y - b * amp);
+    // The mesh: world x (across), y (up), z (away) to the screen
+    const px = (x, z) => cx + (x / z) * f;
+    const py = (y, z) => horizon + ((T_CAM - y) / z) * f;
+    const pts = [];
+    for (let k = 0; k <= T_ROWS; k++) {
+      const z = k + 1 - tScroll;
+      const row = [];
+      for (let i = -T_COLS; i <= T_COLS; i++) {
+        const x = i * 0.5;
+        const side = Math.max(0, Math.abs(x) - T_ROAD);
+        let y = 0;
+        if (side > 0) {
+          const lift = Math.min(1, side / 3) ** 1.3; // (rising toward the edges)
+          const band = Math.min(11, Math.floor((side / (T_COLS * 0.5 - T_ROAD)) * 12));
+          y = lift * 2.6 * tSpike(i, tRow + k) * (0.35 + 0.9 * tLevels[band]);
+        }
+        row.push([px(x, z), py(y, z), y]);
       }
-      g.lineTo(cx + spread, y);
-      g.closePath();
+      pts.push(row);
+    }
+    if (now - tBgAt > 1000) { // (the theme's background, re-read once a second: reading it is slow)
+      tBgAt = now;
+      tBg = getComputedStyle(document.documentElement).getPropertyValue('--bg-solid').trim() || '#000';
+    }
+    const bg = tBg;
+    g.lineJoin = 'round';
+    g.lineWidth = 1;
+    // Far to near (each row hiding what's behind it), a row at a time: its faces filled, then
+    // its edges stroked (the road's softer, the tallest peaks in the hot color). The far rows
+    // fade out, faces and all, into the sun's glow.
+    for (let k = T_ROWS - 1; k >= 0; k--) {
+      const near = pts[k];
+      const far = pts[k + 1];
+      const z = k + 1 - tScroll;
+      const fadeOut = Math.max(0, 1 - z / T_ROWS) ** 1.4; // (gone at the vanishing point)
+      if (fadeOut <= 0.01) continue;
+      const faces = new Path2D();
+      const road = new Path2D();
+      const hills = new Path2D();
+      const peaks = new Path2D();
+      const poly = (path, ...ps) => { path.moveTo(ps[0][0], ps[0][1]); for (let n = 1; n < ps.length; n++) path.lineTo(ps[n][0], ps[n][1]); path.closePath(); };
+      for (let j = 0; j < 2 * T_COLS; j++) {
+        const a = near[j]; const b = near[j + 1]; const c = far[j + 1]; const d = far[j];
+        if (!a[2] && !b[2] && !c[2] && !d[2]) { // (the road: plain squares)
+          poly(faces, a, b, c, d);
+          poly(road, a, b, c, d);
+        } else { // (the hills: two triangles)
+          poly(faces, a, b, c, d);
+          const edges = (a[2] + b[2] + c[2] + d[2]) / 4 > 1.5 ? peaks : hills;
+          poly(edges, a, b, c);
+          poly(edges, a, c, d);
+        }
+      }
+      g.globalAlpha = Math.min(1, fadeOut * 4);
       g.fillStyle = bg;
-      g.fill();
-      g.strokeStyle = paint(i / 16, (0.25 + z * 0.7).toFixed(2), i === 0);
-      g.stroke();
+      g.fill(faces);
+      g.globalAlpha = 1;
+      g.strokeStyle = paint(0.3, (fadeOut * 0.55).toFixed(3)); g.stroke(road);
+      g.strokeStyle = paint(0.7, (fadeOut * 0.9).toFixed(3)); g.stroke(hills);
+      g.strokeStyle = paint(0.9, (fadeOut * 0.95).toFixed(3), true); g.stroke(peaks);
     }
   }
 
