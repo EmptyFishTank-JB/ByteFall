@@ -1839,6 +1839,18 @@ const VS_MAX_BLOCKS = 14;
 // The most blocks that can wait to land on either board, by CPU level; any sent past it are lost
 const VS_CAP = { easy: 8, normal: 16, hard: 24, insane: 32 };
 const vsCap = () => VS_CAP[vsLevel] || 16;
+// The drop clock: a bit left too long drops by itself into a random column (one that won't
+// overflow when it can), so waiting out the CPU is no way to win
+const VS_DROP_MS = { easy: 9000, normal: 7000, hard: 5500, insane: 4500 };
+let dropClock = 0; // ms the current bit has waited
+// Attacks build up, then go: the blocks a chain sends (after cancelling what's headed your
+// way) charge while the chains keep coming, and cross over once VS_SEND_MS pass with nothing
+// added (and your drop has finished). The CPU's charge the same way.
+const VS_SEND_MS = 1500;
+let outgoing = 0; // your blocks charging, not yet sent
+let outgoingAt = 0; // when the last were added
+let cpuOutgoing = 0; // the CPU's blocks charging
+let cpuOutgoingAt = 0;
 let cpu = null;
 let incoming = 0; // blocks headed for you
 let cpuPending = 0; // blocks headed for the CPU
@@ -1867,6 +1879,9 @@ const vsBlocks = (points) => Math.min(VS_MAX_BLOCKS, Math.floor(points / VS_POIN
 function startVs() {
   incoming = 0;
   cpuPending = 0;
+  outgoing = 0;
+  cpuOutgoing = 0;
+  dropClock = 0;
   cpuDown = false;
   vsLost = false;
   vsPaused = false;
@@ -1973,20 +1988,81 @@ function vsLose(why) {
   vsWhy = why;
   if (!busy && !gameOver) endGame('vs-lose');
 }
+// Your attack: it cancels the blocks headed your way (landing first, then the CPU's charging
+// attack); the rest charges up to send
 function sendToCpu(blocks) {
-  const cancel = Math.min(blocks, incoming);
+  if (blocks <= 0) return;
+  let cancel = Math.min(blocks, incoming);
   incoming -= cancel;
+  const fromCharge = Math.min(blocks - cancel, cpuOutgoing);
+  cpuOutgoing -= fromCharge;
+  cancel += fromCharge;
   if (cancel > 0) Progress.vsCancelled(cancel);
-  vsSent += blocks - cancel;
-  cpuPending = Math.min(vsCap(), cpuPending + blocks - cancel);
+  const rest = blocks - cancel;
+  vsSent += rest;
+  if (rest > 0) {
+    outgoing += rest;
+    outgoingAt = performance.now();
+  }
   showVs();
 }
 function sendToPlayer(blocks) {
-  const cancel = Math.min(blocks, cpuPending);
+  if (blocks <= 0) return;
+  let cancel = Math.min(blocks, cpuPending);
   cpuPending -= cancel;
-  incoming = Math.min(vsCap(), incoming + blocks - cancel);
-  if (blocks - cancel > 0) SFX.play('alert');
+  const fromCharge = Math.min(blocks - cancel, outgoing);
+  outgoing -= fromCharge;
+  cancel += fromCharge;
+  const rest = blocks - cancel;
+  if (rest > 0) {
+    cpuOutgoing += rest;
+    cpuOutgoingAt = performance.now();
+  }
   showVs();
+}
+// Charged attacks cross over once nothing has been added for VS_SEND_MS (yours also waits for
+// your drop to finish); the cap applies as they land in the other side's queue
+function releaseAttacks(now) {
+  if (outgoing > 0 && !busy && now - outgoingAt >= VS_SEND_MS) {
+    cpuPending = Math.min(vsCap(), cpuPending + outgoing);
+    outgoing = 0;
+    SFX.play('punct');
+    showVs();
+  }
+  if (cpuOutgoing > 0 && now - cpuOutgoingAt >= VS_SEND_MS) {
+    incoming = Math.min(vsCap(), incoming + cpuOutgoing);
+    cpuOutgoing = 0;
+    SFX.play('alert');
+    showVs();
+  }
+}
+// The drop clock ran out: the bit drops by itself
+function autoDrop() {
+  dropClock = 0;
+  if (!queue.length) return;
+  const open = columns.map((col, c) => (col.length < MAX_ROWS ? c : -1)).filter((c) => c >= 0);
+  const safe = open.filter((c) => columns[c].length < ROWS);
+  const pool = safe.length ? safe : open;
+  if (!pool.length) return;
+  const col = pool[Math.floor(Math.random() * pool.length)];
+  setMessage('TIME // AUTO-DROP', 'warn');
+  setTimeout(() => { if (messageEl.textContent === 'TIME // AUTO-DROP') setMessage(''); }, 1200);
+  pivotFrom = null;
+  attemptDrop(col);
+  if (pivotFrom !== null) { // (PIVOT: the second tap, a neighbor)
+    const next = [pivotFrom - 1, pivotFrom + 1].filter((c) => c >= 0 && c < COLS);
+    attemptDrop(next[Math.floor(Math.random() * next.length)]);
+  }
+}
+const dropTimerEl = document.getElementById('drop-timer');
+function showDropClock() {
+  const on = mode === 'vs' && vsStarted && !gameOver;
+  dropTimerEl.hidden = !on;
+  if (!on) return;
+  const limit = VS_DROP_MS[vsLevel] || 7000;
+  const left = Math.max(0, 1 - dropClock / limit);
+  dropTimerEl.style.setProperty('--left', left.toFixed(3));
+  dropTimerEl.classList.toggle('low', limit - dropClock < 2000 && !busy);
 }
 
 // Encrypted blocks drop onto the top of random columns
@@ -2049,6 +2125,14 @@ setInterval(() => {
   const dt = now - lastCpuTick;
   lastCpuTick = now;
   if (mode !== 'vs' || !cpu || !vsStarted || gameOver || cpuDown || vsLost || vsPaused || document.hidden || panelOpen()) return;
+  releaseAttacks(now);
+  // Your drop clock runs while a bit waits (not mid-drop)
+  if (busy) dropClock = 0;
+  else {
+    dropClock += dt;
+    if (dropClock >= (VS_DROP_MS[vsLevel] || 7000)) autoDrop();
+  }
+  showDropClock();
   cpuClock += dt;
   if (cpuClock >= cpu.delay) {
     cpuClock -= cpu.delay;
@@ -2457,15 +2541,18 @@ function showVs() {
   cpuStatEl.hidden = !vs;
   cpuFaceEl.hidden = !vs;
   if (vs) botMood();
-  incomingEl.hidden = !vs || incoming === 0;
+  incomingEl.hidden = !vs || (incoming === 0 && cpuOutgoing === 0);
+  showDropClock();
   showCpuDesc();
   updatePauseBtn();
   if (!vs) return;
   // ▼ 14 INCOMING, then a pip for each block (up to 32, in groups of 8)
-  incomingEl.innerHTML = `<span>\u25BC ${incoming} INCOMING</span><span class="pips">${'<i></i>'.repeat(incoming)}</span>`;
+  // (and the CPU's charging attack as hollow pips, +n)
+  const charging = Math.min(cpuOutgoing, Math.max(0, 32 - incoming));
+  incomingEl.innerHTML = `<span>\u25BC ${incoming} INCOMING${cpuOutgoing ? ` +${cpuOutgoing}` : ''}</span><span class="pips">${'<i></i>'.repeat(incoming)}${'<i class="charging"></i>'.repeat(charging)}</span>`;
   // CPU // its score (or match points), and the blocks headed its way
   const cpuPts = vsMode === 'classic' ? cpu.score() : vsThem;
-  document.getElementById('cpu-label').innerHTML = `CPU // <b class="cpu-score">${fmt(cpuPts)}</b>${cpuPending ? ` \u25BC${cpuPending}` : ''}`;
+  document.getElementById('cpu-label').innerHTML = `CPU // <b class="cpu-score">${fmt(cpuPts)}</b>${cpuPending ? ` \u25BC${cpuPending}` : ''}${outgoing ? ` <span class="charging">+${outgoing}</span>` : ''}`;
   drawCpu();
 }
 

@@ -1205,7 +1205,7 @@ body.vs-mode .hud > :is(#chain-stat, .hud-bits) { justify-self: start; }
 body.vs-mode .hud > :is(#score-stat, #chain-stat, #pulse-stat) .value,
 body.vs-mode .hud-bits:not(.has-next) #current-piece { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); max-width: calc(100% - 6px); }
 body.vs-mode .hud > :is(#score-stat, #chain-stat, #pulse-stat) .label,
-body.vs-mode .hud-bits:not(.has-next) .stat-current .label { position: absolute; left: 1px; right: 1px; top: 0; letter-spacing: 0 !important; height: calc(50% - 8px); display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.1 !important; }
+body.vs-mode .hud-bits:not(.has-next) .stat-current .label { position: absolute; left: 1px; right: 1px; top: 0; letter-spacing: 0 !important; height: calc(50% - 17px); display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.1 !important; }
 body.vs-mode .hud > .cpu-face { grid-column: 3; grid-row: 1 / -1; }
 body.vs-mode .hud > .cpu-stat { grid-column: 4; grid-row: 1 / -1; justify-content: flex-start; padding: 4px 6px; }
 /* CURRENT's square splits when a KEYLOGGER shows the next bits (VS has no NEXT otherwise) */
@@ -1225,12 +1225,8 @@ body.vs-mode .hud-bits .stat { flex-direction: column; align-items: center; just
 body.vs-mode .hud .stat:not(.cpu-stat) .value { margin-top: 0; font-size: 16px; }
 body.vs-mode .hud .stat:not(.cpu-stat) .sub { display: none; }
 body.vs-mode .hud > .stat:not(.cpu-stat), body.vs-mode .hud-bits .stat { padding-top: 2px; padding-bottom: 2px; }
-/* CURRENT in VS: a bare [n], no box */
-body.vs-mode .hud-bits #current-piece { width: auto; height: auto; aspect-ratio: auto; margin: 0; background: none; border: none; box-shadow: none; font-size: 16px; }
-/* GLYPH: the shape at the size of a HUD bit, with its number (not stretched to the box) */
-body.vs-mode .hud-bits #current-piece.has-glyph { position: relative; width: 30px; height: 30px; flex: none; }
-body.vs-mode .hud-bits #current-piece.has-glyph .glyph { width: 80%; height: 80%; }
-body.vs-mode .hud-bits #current-piece.has-glyph .glyph-num { right: -4px; bottom: -2px; }
+/* CURRENT in VS: the whole bit in its box, as in the other modes */
+body.vs-mode .hud-bits #current-piece { width: 30px; height: 30px; margin: 0; flex: none; font-size: 15px; }
 body.vs-mode .hud-bits, body.vs-mode .hud-bits .stat { min-height: 0; }
 body.vs-mode .vs-status { font-size: 10px; white-space: nowrap; overflow: hidden; }
 .incoming {
@@ -2227,3 +2223,13 @@ body:not(.vs-mode) .hud .stat:not(.cpu-stat):not(.cpu-face) > .label {
   position: absolute; left: 1px; right: 1px; top: 1px; height: calc(50% - 19px);
   display: flex; align-items: center; justify-content: center; text-align: center;
 }
+
+/* VS: the drop clock, a bar along the bottom of CURRENT that runs down; red and pulsing for the
+   last 2 seconds (the bit then drops by itself) */
+.drop-timer { position: absolute; left: 4px; right: 4px; bottom: 3px; height: 3px; border-radius: 2px; background: rgba(var(--fg-rgb), 0.15); overflow: hidden; }
+.drop-timer[hidden] { display: none; }
+.drop-timer::after { content: ''; position: absolute; inset: 0; transform-origin: left; transform: scaleX(var(--left, 1)); background: var(--fg); transition: transform 0.1s linear; }
+.drop-timer.low::after { background: var(--danger); animation: warn-pulse 0.5s ease-in-out infinite; }
+/* The CPU's attack still charging: hollow pips, and your own charging attack by its score */
+.incoming .pips i.charging { background: transparent; box-shadow: inset 0 0 0 1px currentColor; }
+.cpu-label .charging, #cpu-label .charging { color: var(--accent); animation: warn-pulse 0.6s ease-in-out infinite; }
