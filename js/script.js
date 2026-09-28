@@ -1212,6 +1212,7 @@ function computeRunLength(grid, row, col, dRow, dCol) {
 
 // A full chain meter's exploit: one of the equipped ones, at random
 function hackForMeter() {
+  if (mode === 'tutorial') return 'worm-virus'; // (the tutorial's: the one it goes on to teach)
   const ids = Object.keys(HACKS).filter(hackAvailable);
   return ids.length ? ids[Math.floor(dice.hack() * ids.length)] : null;
 }
@@ -1269,15 +1270,17 @@ function showChainMeter() {
   const hacksOn = !MODES[mode].noHacks;
   const cap = streakCap();
   const charge = chainLit ? Math.ceil(streak) + chainLit : streak;
-  const ready = hacksOn && charge === 0 && !!(armedHack || nextExploit());
+  // (an exploit ready: the empty segments pulse amber, the charged ones stay lit as they are)
+  const ready = hacksOn && !chainLit && !!(armedHack || nextExploit());
   for (const m of chainMeters) {
     m.hidden = !hacksOn;
     if (m.children.length !== cap) m.innerHTML = '<i></i>'.repeat(cap);
     m.classList.toggle('ready', ready);
     [...m.children].forEach((seg, i) => {
-      const fill = ready ? 1 : Math.max(0, Math.min(1, charge - i));
+      const fill = Math.max(0, Math.min(1, charge - i));
       seg.style.setProperty('--fill', fill.toFixed(3));
       seg.classList.toggle('lit', fill > 0);
+      seg.classList.toggle('waiting', ready && fill < 1);
     });
   }
 }

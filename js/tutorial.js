@@ -16,7 +16,8 @@ const Tutorial = (() => {
   // pass: the tapped control also does its own job (opens the menu, arms the exploit); pane: the
   // menu open on that tab; closeMenus: the menus shut; held: exploits waiting in the button;
   // float: the banner at the bottom of the screen, over any open menu ('middle': in the middle of
-  // the screen). holdMeter: the chain meter stays lit after the drop, for the lesson on it. mood / explainMood: BOT's
+  // the screen). holdMeter: the chain meter keeps its charge into and through the step (steps 6
+  // to 13: the chain lesson, then the carry-over filling it at step 9 and the exploit it earns). mood / explainMood: BOT's
   // face while it says the step / the explanation after the drop (idle when left out). intro:
   // the welcome ahead of the steps (not counted, no number; BEGIN starts step 1).
   const STEPS = [
@@ -52,34 +53,34 @@ const Tutorial = (() => {
       explain: () => 'Nice one! That was a 3x CHAIN:\n1. The [2]s cleared in a column of 2, and the [5]s in a row of 5.\n2. The [3] cleared in a row of 3.\n3. The [2] cleared in a row of 2.\n\nDecrypting 4 bits in one drop is a NIBBLE, worth 16 bonus points.',
     },
     {
-      text: 'CHAIN shows how long the last chain was. The bars up each side of the grid are the CHAIN METER: each link lights a segment. A chain that stops short of 5 lets it go dark again; reach 5 and it stays lit, pulsing: an exploit is ready. Tap CHAIN.',
+      text: 'CHAIN shows you how long your last decrypted bit chain was. The bars on each side of the grid are the CHAIN METER. Each decrypted link lights up a bar on the meter, and the meter stays charged from one drop to the next. Fill all 5 bars to earn an EXPLOIT. A drop that clears nothing ends the streak, and the meter resets. Tap CHAIN.',
       tap: '#chain-stat', pulse: ['.chain-meter'], holdMeter: true,
     },
     {
       text: 'This [=] is an ENCRYPTION LAYER. Decrypt a bit right beside it to peel it. Drop the [2] into column 5, next to the layer: the two of them make a line of 2.',
-      board: [[], [], [], ['L2:1'], [], [], []], bits: [2, 2], drop: 4, cells: [[0, 3]],
-      explain: () => 'The [2] decrypted and peeled the layer once: [=] is now cracked, [-].',
+      board: [[], [], [], ['L2:1'], [], [], []], bits: [2, 2], drop: 4, cells: [[0, 3]], holdMeter: true,
+      explain: () => 'The [2] decrypted and peeled the layer once: [=] is now cracked, [-]. That was one more link for the CHAIN METER: 4 bars lit.',
     },
     {
       text: 'Drop the next [2] into column 5 to peel the layer a second time.',
-      drop: 4, cells: [[0, 3]],
-      explain: () => 'The second peel broke the layer open and revealed the bit hidden under it: a [1], alone in a line of 1, so it decrypted too, as the chain’s second link.',
+      drop: 4, cells: [[0, 3]], holdMeter: true, explainMood: 'happy',
+      explain: () => 'The second peel broke the layer open and revealed the bit hidden under it: a [1], alone in a line of 1, so it decrypted too, as the chain’s second link. Those 2 links filled the CHAIN METER (3 + 1 + 2 = 6), so you earned an EXPLOIT! The extra link carries over into the next fill.',
     },
     {
       text: 'Keep every column below this ======== line. If anything is still above it once the decrypting stops, the trace completes and the game is over.',
-      board: EMPTY, bits: [], line: true, next: true, place: 'bottom', mood: 'worried',
+      board: EMPTY, bits: [], line: true, next: true, place: 'bottom', mood: 'worried', holdMeter: true,
     },
     {
       text: 'A new row of layers rises from the bottom every 8 drops, pushing everything up. ENCRYPT IN counts down the drops until the next one. Tap it.',
-      tap: '#pulse-stat',
+      tap: '#pulse-stat', holdMeter: true,
     },
     {
-      text: 'Get a 5x chain in one drop, filling the CHAIN METER, to earn an EXPLOIT: a tool that changes the board. While one is waiting, the meter stays lit and pulses. Earned exploits are stored in the EXPLOIT button. You have one waiting: a WORM VIRUS. Tap the EXPLOIT button to arm it.',
-      board: [[], [], [6, 2, 7, 3], [], [], [], []], bits: [], held: ['worm-virus'], tap: '#exploit-btn', pass: true, mood: 'devious',
+      text: 'When the CHAIN METER fills up, you earn an EXPLOIT. Different exploits change the board depending on where you drop them. When you earn an exploit, the CHAIN METER will pulse until you decide to use it. Tap the EXPLOIT button to use the one you have available. It’s a WORM VIRUS!',
+      board: [[], [], [6, 2, 7, 3], [], [], [], []], bits: [], held: ['worm-virus'], tap: '#exploit-btn', pass: true, mood: 'devious', holdMeter: true,
     },
     {
       text: 'The WORM VIRUS is armed and is now your CURRENT. It drops like a bit. Drop it into column 3, the tall one: it wipes out every block in that column.',
-      drop: 2, cells: [[0, 2], [1, 2], [2, 2], [3, 2]], mood: 'devious', explainMood: 'happy',
+      drop: 2, cells: [[0, 2], [1, 2], [2, 2], [3, 2]], mood: 'devious', explainMood: 'happy', holdMeter: true,
       explain: () => 'The WORM VIRUS wiped out the whole column. Blocks wiped out by an exploit score a flat 10 each. Other exploits wipe an area, peel layers or change bits: each has its card in the EXPLOITS tab.',
     },
     {
