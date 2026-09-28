@@ -178,6 +178,39 @@ const Tutorial = (() => {
     document.querySelector('.board-frame').appendChild(bannerEl);
     return bannerEl;
   }
+  // THE DIM: on a step that asks for a tap, the whole screen dims a little but for what to tap
+  // (and the banner, to read), fading in and out over 0.25s. It's a see-through layer cut open
+  // around them (clip-path), so taps go through as usual; it follows them while it's up.
+  let dimEl = null;
+  let dimOn = null; // (the element left bright, while dimmed)
+  let dimRaf = 0;
+  function dimPath() {
+    const W = innerWidth;
+    const H = innerHeight;
+    let d = `M0 0H${W}V${H}H0Z`;
+    for (const el of [dimOn, bannerEl && bannerEl.querySelector('.tut-card'), bannerEl && bannerEl.querySelector('.tut-actions')]) {
+      if (!el || !el.isConnected) continue;
+      const r = el.getBoundingClientRect();
+      if (!r.width) continue;
+      const pad = el === dimOn ? 4 : 0;
+      d += `M${r.left - pad} ${r.top - pad}H${r.right + pad}V${r.bottom + pad}H${r.left - pad}Z`;
+    }
+    dimEl.style.clipPath = `path(evenodd, '${d}')`;
+    if (dimOn) dimRaf = requestAnimationFrame(dimPath);
+  }
+  function dim(target) {
+    if (!dimEl) {
+      dimEl = document.createElement('div');
+      dimEl.className = 'tut-dim';
+      dimEl.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(dimEl);
+      void dimEl.offsetWidth; // (drawn clear first, so the first dim fades in too)
+    }
+    cancelAnimationFrame(dimRaf);
+    dimOn = target || null;
+    if (dimOn) dimPath();
+    dimEl.classList.toggle('on', !!dimOn);
+  }
   function clearPulses() {
     document.querySelectorAll('.tut-pulse').forEach((el) => el.classList.remove('tut-pulse'));
     if (tapTarget) tapTarget.removeEventListener('click', onTap, true);
@@ -271,8 +304,10 @@ const Tutorial = (() => {
     }
     // What it's talking about pulses
     (s.pulse || []).forEach((sel) => document.querySelectorAll(sel).forEach((n) => n.classList.add('tut-pulse')));
+    if (!s.tap) dim(null);
     if (s.tap) {
       tapTarget = document.querySelector(s.tap);
+      dim(tapTarget);
       if (tapTarget) {
         tapTarget.classList.add('tut-pulse');
         tapTarget.addEventListener('click', onTap, true);
@@ -354,6 +389,7 @@ const Tutorial = (() => {
   function leave(to) {
     stopTyping(false);
     clearPulses();
+    dim(null);
     setRecordsOpen(false);
     setSettingsOpen(false);
     if (bannerEl) bannerEl.hidden = true;

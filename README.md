@@ -277,7 +277,8 @@ EXPLOIT READY // its name over the grid. ENCRYPT IN has a ===== under its count
 (the layer it counts down to, as a bit is [n]), flashing with the line under the
 board when the next drop brings one.
 
-The tutorial opens on a welcome (no step number, BEGIN), then 20 steps; a step can take its
+The tutorial opens on a welcome (no step number, BEGIN), then 20 steps; on a step that asks
+for a tap, the screen dims a little but for what to tap and the banner (a 0.25s fade); a step can take its
 drop in more than one column (step 3: column 4 or 7). The tutorial's banner: BOT sits in the top-left corner of its frame with its words
 wrapping around it and on under it; BACK and NEXT sit under the frame, outside it. The
 chain lesson (steps 6 and 7) explains the meter, which stays lit until step 8; the

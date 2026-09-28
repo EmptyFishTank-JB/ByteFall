@@ -2306,6 +2306,10 @@ body:not(.vs-mode) .hud .stat:not(.cpu-stat):not(.cpu-face) > .label {
 /* Over an open menu: fixed at the bottom of the screen, above the menus */
 .tut-banner.float { position: fixed; top: auto; left: 50%; right: auto; bottom: 16px; width: min(460px, calc(100% - 32px)); transform: translateX(-50%); z-index: 60; max-height: 45vh; }
 .tut-banner.float.nudge { animation: none; }
+/* The tutorial's dim (tutorial.js): the screen a little darker but for what to tap and the
+   banner; see-through to taps, fading over 0.25s */
+.tut-dim { position: fixed; inset: 0; z-index: 250; background: rgba(0, 0, 0, 0.5); opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+.tut-dim.on { opacity: 1; }
 .tut-banner.float.middle { top: 50%; bottom: auto; transform: translate(-50%, -50%); }
 /* The menu buttons are dim until opened: pulsing in the tutorial, they light up full */
 :is(.records-btn, .settings-btn).tut-pulse { opacity: 1; filter: drop-shadow(0 0 4px rgba(var(--fg-rgb), 0.6)); }
