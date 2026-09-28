@@ -650,6 +650,10 @@ work too. The game waits underneath (a VS match pauses). Code: `js/player.js`.
 ## To-do
 
 - **CPU exploit loadouts** (maybe): each bot with its own preferred exploits in VS.
+- **CAMPAIGN** (maybe): a ladder against the CPU bots in order at rising difficulty, each
+  round with preset exploits, like Dr. Robotnik's Mean Bean Machine (e.g. 8 rounds on
+  CLASSIC rules, a line from each bot before the match, retries from the current round,
+  GLITCH on INSANE as the final boss, achievements per round and for a full clear).
 - **CORE DUMP (track 09)**: its trial layers still wait for picks.
 - **Sound effect themes**: on hold.
 
