@@ -293,8 +293,10 @@ The tutorial opens on a welcome (no step number, BEGIN), then 20 steps; on a ste
 for a tap, the screen dims a little but for what to tap and the banner (a 0.25s fade); a step can take its
 drop in more than one column (step 3: column 4 or 7). The tutorial's banner: BOT sits in the top-left corner of its frame with its words
 wrapping around it and on under it; BACK and NEXT sit under the frame, outside it. The
-chain lesson (steps 6 and 7) explains the meter, which stays lit until step 8; the
-exploit step mentions it too. The MENU and SETTINGS buttons light up full while pulsing;
+chain lesson (steps 6 and 7) explains the meter, and it keeps its charge on through
+step 13: step 6's 3 links, step 8's 1 and step 9's 2 fill it (3 + 1 + 2 = 6), earning the
+WORM VIRUS the exploit steps then use, with one link carried over. While an exploit
+waits, the meter's empty segments pulse amber and the charged ones stay lit. The MENU and SETTINGS buttons light up full while pulsing;
 the EXPLOITS step pulses SLOTS and the cards; the menu steps' banners sit mid-screen
 (the EXPLOITS one low, clear of what it points at).
 
