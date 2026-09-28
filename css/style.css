@@ -2287,8 +2287,8 @@ body:not(.vs-mode) .hud .stat:not(.cpu-stat):not(.cpu-face) > .label {
 }
 .tut-open.danger { color: var(--danger); border-color: var(--danger); }
 .tut-banner {
-  position: absolute; left: 6px; right: 6px; top: 6px; z-index: 7; max-height: calc(100% - 12px);
-  display: flex; flex-direction: column;
+  position: absolute; left: 13px; right: 13px; top: 6px; z-index: 7; max-height: calc(100% - 12px);
+  display: flex; flex-direction: column; /* (as wide as the grid: the chain meter shows beside it) */
   color: var(--panel-text); font-size: 12px; line-height: 1.45;
   animation: pause-in 0.2s ease-out;
 }
