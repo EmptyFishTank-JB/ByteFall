@@ -128,11 +128,13 @@ const Tutorial = (() => {
   const TYPE_MS = 18;
   function say(el, text, done) {
     stopTyping(true);
-    // (the rest of the line is there but unseen, so the banner is its full size from the start)
+    // (the banner grows with the words as they're said: only the rest of the word being typed is
+    // there unseen, so a word never jumps to the next line halfway through)
     el.innerHTML = '<span class="said"></span><span class="unsaid"></span>';
     const said = el.firstChild;
     const unsaid = el.lastChild;
-    unsaid.textContent = text;
+    const restOfWord = (i) => { const m = /^\S*/.exec(text.slice(i)); return m ? m[0] : ''; };
+    unsaid.textContent = restOfWord(0);
     const t = { el, text, i: 0, timer: 0, done };
     typing = t;
     if (narrator) narrator.classList.add('talking');
@@ -140,7 +142,7 @@ const Tutorial = (() => {
       if (typing !== t) return;
       const ch = t.text[t.i++];
       said.textContent = t.text.slice(0, t.i);
-      unsaid.textContent = t.text.slice(t.i);
+      unsaid.textContent = restOfWord(t.i);
       if (/[A-Za-z0-9]/.test(ch) && t.i % 2) SFX.blip(430 + Math.random() * 170); // (a voice that wanders a little)
       if (t.i >= t.text.length) return stopTyping(false);
       t.timer = setTimeout(tick, /[.!?:]/.test(ch) ? 190 : /[,;]/.test(ch) ? 110 : TYPE_MS);
