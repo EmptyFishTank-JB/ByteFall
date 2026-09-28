@@ -119,7 +119,6 @@ const CpuBoard = (() => {
   // over from move to move until a move decrypts nothing) and uses it when
   // it pays off: WORM VIRUS wipes its tallest column, DICTIONARY ATTACK peels every layer by one.
   const STREAK_FULL = 5;
-  const STREAK_DRAIN_MS = 1500;
   function create(levelId, rnd, bits, layerEvery = 0, botId = 'bot', exploits = false) {
     COLS = ROWS = sizeFor(levelId);
     MAX_ROWS = ROWS + 1;
@@ -130,9 +129,8 @@ const CpuBoard = (() => {
     let nextDelay = rollDelay();
     let held = null; // an exploit waiting to be used
     let meter = 0; // its chain meter: a streak, on its level's rules, as the player's in VS
-    let meterAt = 0; // (HARD / INSANE: when its drain last ran)
-    const drains = levelId === 'hard' || levelId === 'insane';
-    const full = COLS === 8 ? 8 : STREAK_FULL; // (the meter: a segment a row; 8 on HARD and INSANE)
+    const carries = levelId !== 'hard' && levelId !== 'insane'; // (HARD / INSANE: one chain at a time)
+    const full = STREAK_FULL;
     let used = null; // the one used on the last move (for script.js to announce)
     let columns = Array.from({ length: COLS }, () => []);
     let steal = 0; // the extra points since the last takeSteal()
@@ -232,16 +230,13 @@ const CpuBoard = (() => {
         record({ landed: [[columns[col].length - 1, col]] });
         const first = settle();
         let { points } = first;
-        // The streak: each chain's links charge its meter (5 fills it: an exploit, the rest carrying
-        // on; holding one already, it waits full); a move that decrypts nothing breaks it (EASY: a
-        // segment; the rest: all of it). HARD and INSANE: it drains a segment every 1.5s too, and a
-        // partly drained segment still counts whole.
+        // The streak, on its level's rules as the player's: each chain's links charge its meter (5
+        // fills it: an exploit, the rest carrying on; one at a time, so holding one it waits full).
+        // EASY / NORMAL carry it over, a move that decrypts nothing taking one segment off (EASY)
+        // or emptying it (NORMAL); HARD / INSANE empty it after every chain.
         if (exploits) {
-          const now = performance.now();
-          if (drains && meterAt) meter = Math.max(0, meter - (now - meterAt) / STREAK_DRAIN_MS);
-          meterAt = now;
           if (first.chain > 0) {
-            meter = Math.ceil(meter) + first.chain;
+            meter += first.chain;
             if (meter >= full) {
               if (held) meter = full;
               else {
@@ -249,7 +244,8 @@ const CpuBoard = (() => {
                 meter -= full;
               }
             }
-          } else meter = levelId === 'easy' ? Math.max(0, Math.ceil(meter) - 1) : 0;
+            if (!carries) meter = 0;
+          } else meter = levelId === 'easy' ? Math.max(0, meter - 1) : 0;
         }
         drops++;
         if (layerEvery && drops % layerEvery === 0 && !overflowed(columns)) {
