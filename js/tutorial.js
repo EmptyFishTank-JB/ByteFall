@@ -9,41 +9,47 @@ const Tutorial = (() => {
   const EMPTY = [[], [], [], [], [], [], []];
   // A step: text; board / bits to set up (kept from the last step when left out); then what
   // moves it on: next (a NEXT button), tap (a selector to tap), or drop (the column index to drop
-  // into; after it resolves, explain() adds to the banner and NEXT appears). pulse: selectors to
+  // into, or a list of columns it may go in; after it resolves, explain() adds to the banner and
+  // NEXT appears). pulse: selectors to
   // pulse; cells: [row, col] board cells to pulse; line: pulse the ======== line; place: 'bottom'
   // puts the banner under the board's middle instead of at its top.
   // pass: the tapped control also does its own job (opens the menu, arms the exploit); pane: the
   // menu open on that tab; closeMenus: the menus shut; held: exploits waiting in the button;
   // float: the banner at the bottom of the screen, over any open menu ('middle': in the middle of
   // the screen). holdMeter: the chain meter stays lit after the drop, for the lesson on it. mood / explainMood: BOT's
-  // face while it says the step / the explanation after the drop (idle when left out).
+  // face while it says the step / the explanation after the drop (idle when left out). intro:
+  // the welcome ahead of the steps (step 0, not counted; BEGIN starts step 1).
   const STEPS = [
     {
-      text: 'Welcome to BYTEFALL. Encrypted bits fall into this terminal, and you decrypt them by dropping each one into a column. This quick tutorial shows you how.',
-      board: EMPTY, bits: [], next: true, place: 'bottom', mood: 'happy',
+      text: 'Welcome to BYTEFALL! This tutorial will help you understand how the game is played, along with some other useful information. As you can see, there are 20 steps! Don’t worry, they’re not too long, and despite all of the numbers, there’s really no math required as long as you can count to 7!',
+      board: EMPTY, bits: [], intro: true, place: 'bottom', mood: 'happy',
     },
     {
-      text: 'This is your CURRENT bit: the next one you drop. Its number is 3. Tap CURRENT.',
+      text: 'This grid is called the TERMINAL. You’ll be dropping encrypted bits into the TERMINAL’s columns. Encrypted bits are the numbered blocks with brackets: [1] [2] [3] [4] [5] [6] [7]',
+      board: EMPTY, bits: [], next: true, place: 'bottom',
+    },
+    {
+      text: 'This flashing display panel shows your CURRENT bit, [3], which is the one that will be dropped into a column on your next tap. Go ahead and tap the CURRENT display panel!',
       board: [[], [], [], [], [3], [5], []], bits: [3, 2], tap: '.stat-current',
     },
     {
-      text: 'A bit decrypts when its number matches the length of the unbroken line it sits in, across or down. Any column works for any bit. Drop this [3] into column 7 (tap its button, or the column itself): beside the [3] and [5], it makes a line of 3 across.',
-      drop: 6, cells: [[0, 4], [0, 5]],
-      explain: () => 'Both [3]s were in a line of 3, so both decrypted. The [5] is now in a line of 1, which doesn’t match its number, so it stays.',
+      text: 'A bit clears only when its value matches the exact number of bits in the row or column that it sits in. Clearing bits is called DECRYPTING. Any bit can be dropped into any column by tapping a number button below or by tapping the column itself. Go ahead and drop the CURRENT bit, [3], into either column 4 or 7, next to the [3] and [5] bits.',
+      drop: [3, 6], cells: [[0, 4], [0, 5]],
+      explain: () => 'BOOM! Both [3] bits were DECRYPTED, since the row was made 3 bits long. The [5] bit remains, since it was in neither a row nor a column 5 bits long, before or after the drop.',
     },
     {
-      text: 'Lines count down too. Drop the [2] into column 6, on top of the [5]: it will sit in a column 2 tall.',
+      text: 'Let’s try a column. Drop the CURRENT bit, [2], on top of the [5] bit in column 6.',
       drop: 5, cells: [[0, 5]],
-      explain: () => 'The [2] was in a line of 2 going down, so it decrypted.',
+      explain: () => 'Nice! Since dropping the [2] bit made the column 2 bits tall, the [2] bit was DECRYPTED.',
     },
     {
-      text: 'Each decrypted bit scores 10 plus its number: a [3] is worth 13. That’s your SCORE. Tap it.',
+      text: 'Now for the scoring! Each decrypted bit earns you 10 points plus the number it displays. A [1] bit is worth 11 points, a [2] bit is worth 12 points, and a [7] bit is worth 17 points. Get the idea? Up top is your SCORE display panel. Tap it now!',
       tap: '#score-stat',
     },
     {
-      text: 'When bits decrypt, the ones above fall, and can land in new matches: a CHAIN. Each link multiplies its points: 2x, 3x and up. Drop the [2] into column 7.',
-      board: [[], [], [], [3], [6, 3], [5, 3], [2]], bits: [2], drop: 6, cells: [[1, 4], [1, 5], [0, 6]], explainMood: 'happy', holdMeter: true,
-      explain: () => 'The [2]s made a line of 2 going down and the top [3]s a line of 3 across. Then the bits above fell, and the last [3] found itself in a line of 3: a 2x chain. Decrypting 4 bits in one drop also makes a NIBBLE, worth 16 bonus points.',
+      text: 'Any time a bit decrypts, any bits that were above it will fall, and they can cause more bits to DECRYPT. This is called a CHAIN. Each DECRYPTED bit that is part of a CHAIN has its points multiplied by its position within the CHAIN: 2x, 3x, and up. Let’s drop the [2] into column 6.',
+      board: [[], [], [6, 6], [7, 5, 2, 7], [3, 4], [2], [6, 5]], bits: [2], drop: 5, cells: [[0, 5], [1, 3], [1, 6]], explainMood: 'happy', holdMeter: true,
+      explain: () => 'Nice one! The dropped [2] made column 6 two bits tall, and the two [5]s were in a row 5 bits wide. The [2] and [7] above the cleared [5] fell. Then the [3] found itself in a row of 3, and once it cleared, the [4] beside the fallen [2] dropped away, leaving the [2] in a row of 2. Decrypting 4 bits in one drop is called a NIBBLE and is worth 16 bonus points. This drop was a 3x chain, with 16 bonus points from the NIBBLE.',
     },
     {
       text: 'CHAIN shows how long the last chain was. The bars up each side of the grid are the CHAIN METER: each link lights a segment. A chain that stops short of 5 lets it go dark again; reach 5 and it stays lit, pulsing: an exploit is ready. Tap CHAIN.',
@@ -106,6 +112,8 @@ const Tutorial = (() => {
     },
   ];
 
+  // The column(s) a step's drop may go in (drop: an index, or a list of them)
+  const drops = (s) => (s.drop === undefined ? [] : [].concat(s.drop));
   let step = -1;
   let dropped = false; // this step's drop has happened (waiting on NEXT)
   let tapTarget = null;
@@ -232,7 +240,8 @@ const Tutorial = (() => {
     el.appendChild(card);
     const head = document.createElement('div');
     head.className = 'tut-head';
-    head.innerHTML = `<span>// TUTORIAL ${step + 1} / ${STEPS.length}</span>`;
+    // (the welcome isn't a step: it shows 0 / 20, and the steps count from the one after it)
+    head.innerHTML = `<span>// TUTORIAL ${step} / ${STEPS.length - 1}</span>`;
     const exit = document.createElement('button');
     exit.type = 'button';
     exit.className = 'tut-exit';
@@ -254,6 +263,7 @@ const Tutorial = (() => {
     botMood(s.mood);
     say(text, s.text);
     if (step > 0) addButton('BACK', back, 'tut-back');
+    if (s.intro) addButton('BEGIN', () => go(step + 1));
     if (s.next) addButton('NEXT', () => go(step + 1));
     if (s.done) {
       addButton('PLAY CLASSIC', () => leave('classic'));
@@ -295,8 +305,8 @@ const Tutorial = (() => {
         const cell = document.querySelector(`#board .cell[data-pos="${r},${c}"]`);
         if (cell) cell.classList.add('tut-pulse');
       });
-      if (s.drop !== undefined) {
-        const btn = document.querySelectorAll('#column-buttons button')[s.drop];
+      for (const col of drops(s)) {
+        const btn = document.querySelectorAll('#column-buttons button')[col];
         if (btn) btn.classList.add('tut-pulse');
       }
     }
@@ -400,7 +410,7 @@ const Tutorial = (() => {
     },
     canDrop(col) {
       const s = cur();
-      if (s && s.drop === col && !dropped) {
+      if (s && drops(s).includes(col) && !dropped) {
         dropped = true;
         scoreAtDrop = score;
         clearPulses();
@@ -418,7 +428,7 @@ const Tutorial = (() => {
     // Called by finishTurn once a drop has resolved
     afterDrop() {
       const s = cur();
-      if (!s || s.drop === undefined) return;
+      if (!s || !drops(s).length) return;
       const text = bannerEl.querySelector('.tut-text');
       const pts = document.createElement('pre');
       pts.className = 'tut-points';
@@ -433,7 +443,7 @@ const Tutorial = (() => {
     // After each render: pulse this step's cells, drop button and the line
     decorate,
     // Only the lesson's column can be pressed
-    allows: (col) => { const s = cur(); return !!s && s.drop === col && !dropped; },
+    allows: (col) => { const s = cur(); return !!s && drops(s).includes(col) && !dropped; },
     holdsMeter: () => { const s = cur(); return !!s && !!s.holdMeter; },
     active: () => step >= 0,
     // The EXPLOIT button works only on the step that asks for it

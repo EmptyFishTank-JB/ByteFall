@@ -2302,7 +2302,7 @@ body:not(.vs-mode) .hud .stat:not(.cpu-stat):not(.cpu-face) > .label {
   box-shadow: 0 0 14px rgba(var(--accent-rgb), 0.25);
 }
 .tut-banner[hidden] { display: none; }
-.tut-banner.bottom { top: auto; bottom: 30%; }
+.tut-banner.bottom { top: auto; bottom: 30%; max-height: calc(70% - 12px); } /* (long text scrolls in its card, never past the frame's top) */
 /* Over an open menu: fixed at the bottom of the screen, above the menus */
 .tut-banner.float { position: fixed; top: auto; left: 50%; right: auto; bottom: 16px; width: min(460px, calc(100% - 32px)); transform: translateX(-50%); z-index: 60; max-height: 45vh; }
 .tut-banner.float.nudge { animation: none; }
