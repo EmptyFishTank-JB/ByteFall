@@ -1,14 +1,18 @@
-// VS CPU: the computer opponent. A compact copy of the board rules from script.js (Normal,
-// 7x7 plus the overflow row: a bit decrypts when its number matches the unbroken line it sits
+// VS CPU: the computer opponent. A compact copy of the board rules from script.js (Normal's
+// 7x7, or Hard's 8x8 against HARD and INSANE, plus the overflow row: a bit decrypts when its number matches the unbroken line it sits
 // in, across or down; decrypts peel neighboring layers; chains multiply; 4 bits in one drop
 // make a nibble), with no animation. The CPU picks a column for each bit by trying them all.
 // Garbage (the encrypted blocks players send each other) drops onto the top of random columns.
 const CpuBoard = (() => {
-  const COLS = 7;
-  const ROWS = 7;
-  const MAX_ROWS = ROWS + 1;
-  const NIBBLE_BITS = 4;
-  const NIBBLE_BONUS = 16;
+  // The board: 7x7 against EASY and NORMAL; 8x8 against HARD and INSANE, with bits up to 8 and
+  // 8 decrypted in one move making a BYTE (as the player's board, which matches it). Set by create()
+  // for the match (one CPU at a time).
+  let COLS = 7;
+  let ROWS = 7;
+  let MAX_ROWS = ROWS + 1;
+  let NIBBLE_BITS = 4;
+  let NIBBLE_BONUS = 16;
+  const sizeFor = (levelId) => (levelId === 'hard' || levelId === 'insane' ? 8 : 7);
 
   // How each level plays: ms between drops, how often it drops somewhere random instead of
   // its best column, and whether it looks one bit ahead
@@ -116,6 +120,10 @@ const CpuBoard = (() => {
   const STREAK_FULL = 5;
   const STREAK_DRAIN_MS = 1500;
   function create(levelId, rnd, bits, layerEvery = 0, botId = 'bot', exploits = false) {
+    COLS = ROWS = sizeFor(levelId);
+    MAX_ROWS = ROWS + 1;
+    NIBBLE_BITS = COLS === 8 ? 8 : 4; // (a BYTE on 8x8, a NIBBLE on 7x7)
+    NIBBLE_BONUS = COLS === 8 ? 256 : 16;
     let drops = 0;
     const level = LEVELS[levelId] || LEVELS.normal;
     const bot = BOTS[botId] || BOTS.bot;
@@ -125,7 +133,7 @@ const CpuBoard = (() => {
     let meter = 0; // its chain meter: a streak, on its level's rules, as the player's in VS
     let meterAt = 0; // (HARD / INSANE: when its drain last ran)
     const drains = levelId === 'hard' || levelId === 'insane';
-    const full = levelId === 'insane' ? 8 : STREAK_FULL; // (INSANE's meter: 8 segments)
+    const full = COLS === 8 ? 8 : STREAK_FULL; // (the meter: a segment a row; 8 on HARD and INSANE)
     let used = null; // the one used on the last move (for script.js to announce)
     let columns = Array.from({ length: COLS }, () => []);
     let steal = 0; // the extra points since the last takeSteal()
@@ -278,5 +286,10 @@ const CpuBoard = (() => {
     };
   }
 
-  return { create, LEVELS, BOTS, COLS, ROWS, MAX_ROWS };
+  return {
+    create, LEVELS, BOTS, sizeFor,
+    get COLS() { return COLS; },
+    get ROWS() { return ROWS; },
+    get MAX_ROWS() { return MAX_ROWS; },
+  };
 })();

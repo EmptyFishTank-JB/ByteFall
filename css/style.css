@@ -1117,7 +1117,7 @@ body.vs-mode .stat-best { display: none; }
 .cpu-stat .sub { font-size: 10px; margin-top: 3px; }
 .cpu-stat.low .label { color: var(--danger); }
 .cpu-hint { display: block; margin-top: 2px; font-size: 8px; letter-spacing: 1px; color: var(--fg-dim); opacity: 0.7; }
-.cpu-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; width: 100%; max-width: 210px; margin: 4px auto 0; }
+.cpu-grid { display: grid; grid-template-columns: repeat(var(--cpu-cols, 7), 1fr); gap: 2px; width: 100%; max-width: 210px; margin: 4px auto 0; }
 .cpu-grid i {
   aspect-ratio: 1;
   display: flex;
@@ -1246,7 +1246,7 @@ body.vs-mode .hud-bits .stat.keylogger .bit-row .bit-sq { width: 16px; height: 1
 /* ENCRYPT IN stays on one line (it shrinks to fit instead: script.js's fitStatValues) */
 #pulse-label { white-space: nowrap; }
 body.vs-mode .cpu-grid { flex: none; width: 100%; max-width: none; margin: auto 0; }
-body.vs-mode .cpu-grid { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 1px; }
+body.vs-mode .cpu-grid { grid-template-columns: repeat(var(--cpu-cols, 7), minmax(0, 1fr)); gap: 1px; }
 body.vs-mode .cpu-grid i { aspect-ratio: 1; min-width: 0; overflow: hidden; font-size: clamp(7px, 1.1vh, 11px); line-height: 1; }
 body.vs-mode .hud-bits { flex: none; }
 /* The info panels: each label centered over its number, in the middle of its box */

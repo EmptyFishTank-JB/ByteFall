@@ -346,7 +346,8 @@ const dailyBitsLeft = () => dealLimit() - dealt + queue.filter((p) => p.type ===
 
 function initGame() {
   runId++;
-  difficulty = mode === 'classic' ? classicDifficulty : 'normal';
+  // (VS plays on the CPU level's board: HARD's 8x8 against HARD and INSANE, NORMAL's 7x7 otherwise)
+  difficulty = mode === 'classic' ? classicDifficulty : mode === 'vs' && CpuBoard.sizeFor(vsLevel) === 8 ? 'hard' : 'normal';
   dailyOfficial = daily && (mode === 'puzzle' ? dailyPuzzleOfficial() : !storage.get(dailyPlayedKey()));
   setupDice();
   Progress.startRun(difficulty, mode, mode === 'puzzle' && !daily ? puzzleIndex : null, daily);
@@ -381,7 +382,7 @@ function initGame() {
   armedHack = null;
   streak = 0;
   chainLit = 0;
-  pulseInterval = DIFFICULTIES[difficulty].interval(0);
+  pulseInterval = mode === 'vs' ? BASE_INTERVAL : DIFFICULTIES[difficulty].interval(0); // (VS: both boards on the same pace)
   gameOver = false;
   busy = false;
   chainEl.textContent = '0x';
@@ -1112,7 +1113,7 @@ async function attemptDrop(col) {
       await injectPulse();
       wentOver = wentOver || overflowed();
       await resolveChains();
-      pulseInterval = DIFFICULTIES[difficulty].interval(score);
+      pulseInterval = mode === 'vs' ? BASE_INTERVAL : DIFFICULTIES[difficulty].interval(score);
     }
   }
 
@@ -1262,7 +1263,7 @@ const streakRule = () => {
   const level = mode === 'vs' ? vsLevel : difficulty;
   return ['easy', 'hard', 'insane'].includes(level) ? level : 'normal';
 };
-const streakCap = () => (COLS >= 8 || streakRule() === 'insane' ? 8 : HACK_COMBO); // (8 on HARD's 8 columns, and on INSANE)
+const streakCap = () => (COLS >= 8 ? 8 : HACK_COMBO); // (a segment a row: 8 on the 8x8 board of HARD and INSANE)
 const streakDrains = () => ['hard', 'insane'].includes(streakRule());
 function showChainMeter() {
   const hacksOn = !MODES[mode].noHacks;
@@ -2432,6 +2433,7 @@ function drawCpu(frame, falling = null) {
   const cols = view.columns;
   const glyphs = themeIs('glyph');
   cpuGridEl.innerHTML = '';
+  cpuGridEl.style.setProperty('--cpu-cols', CpuBoard.COLS); // (7 or 8, by the level)
   for (let r = CpuBoard.MAX_ROWS - 1; r >= 0; r--) {
     for (let c = 0; c < CpuBoard.COLS; c++) {
       const b = falling && falling.row === r && falling.col === c ? { type: 'number', val: falling.val } : cols[c][r];
