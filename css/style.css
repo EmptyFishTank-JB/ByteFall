@@ -621,6 +621,18 @@ body.vs-mode .vs-title span { color: var(--accent); text-shadow: 0 0 8px var(--a
   padding: 6px;
 }
 
+/* THE CHAIN METER (script.js): a segmented bar up each side of the grid, in the frame's margin;
+   lit segment by segment as a chain grows, the whole bar lit and pulsing while an exploit is ready */
+.chain-meter { position: absolute; top: 6px; bottom: 6px; width: 4px; z-index: 2; display: flex; flex-direction: column-reverse; gap: 3px; pointer-events: none; }
+.chain-meter.left { left: 1px; }
+.chain-meter.right { right: 1px; }
+.chain-meter[hidden] { display: none; }
+.chain-meter i { flex: 1; border-radius: 1px; background: rgba(var(--fg-rgb), 0.12); transition: background 0.15s, box-shadow 0.15s; }
+.chain-meter i.lit { background: var(--fg); box-shadow: 0 0 6px var(--fg); }
+.chain-meter.ready i.lit { background: var(--accent); box-shadow: 0 0 8px var(--accent); animation: chain-ready 1.1s ease-in-out infinite; }
+@keyframes chain-ready { 50% { opacity: 0.35; box-shadow: none; } }
+.toast.show.exploit-ready { animation: byte-in 0.35s ease-out, exploit-ready 0.5s steps(1) 0.35s 4; } /* (in, flashes, then holds) */
+@keyframes exploit-ready { 50% { opacity: 0.25; } }
 .board-frame {
   position: relative;
   background: var(--board-bg);
@@ -824,6 +836,12 @@ body.vs-mode .vs-title span { color: var(--accent); text-shadow: 0 0 8px var(--a
 .overflow-line.hot { animation: line-hot 0.9s ease-in-out infinite; }
 /* The ==== line under the board: dim, flashing amber when the next drop brings a layer */
 .layer-line { grid-column: 1 / -1; overflow: hidden; white-space: nowrap; text-align: center; font-size: 12px; line-height: 12px; letter-spacing: 2px; color: var(--fg-dim); opacity: 0.55; }
+/* ENCRYPT IN's =====: the layer it counts down to, dim like the line under the board, flashing
+   with it when the next drop brings one */
+.stat .layer-mark { display: none; font-size: 9px; line-height: 1; letter-spacing: 1px; margin-top: 3px; color: var(--fg-dim); opacity: 0.8; }
+#pulse-stat.counts-layers .layer-mark { display: block; }
+body:not(.vs-mode) .hud #pulse-stat > .layer-mark { position: absolute; left: 0; right: 0; top: calc(50% + 11px); margin: 0; }
+#pulse-stat.layer-next .layer-mark { color: var(--accent); opacity: 1; text-shadow: 0 0 6px var(--accent); animation: warn-pulse 0.6s ease-in-out infinite; }
 .layer-line.next { color: var(--accent); opacity: 1; text-shadow: 0 0 6px var(--accent); animation: warn-pulse 0.6s ease-in-out infinite; }
 .cpu-grid i.under-edge { border-bottom: 2px solid rgba(var(--fg-rgb), 0.3); }
 .cpu-grid.layer-next i.under-edge { border-bottom-color: var(--accent); animation: warn-pulse 0.6s ease-in-out infinite; }
@@ -2243,12 +2261,19 @@ body:not(.vs-mode) .hud .stat:not(.cpu-stat):not(.cpu-face) > .label {
 }
 .tut-open.danger { color: var(--danger); border-color: var(--danger); }
 .tut-banner {
-  position: absolute; left: 6px; right: 6px; top: 6px; z-index: 7; max-height: calc(100% - 12px); overflow-y: auto;
+  position: absolute; left: 6px; right: 6px; top: 6px; z-index: 7; max-height: calc(100% - 12px);
+  display: flex; flex-direction: column;
+  color: var(--panel-text); font-size: 12px; line-height: 1.45;
+  animation: pause-in 0.2s ease-out;
+}
+.tut-banner { pointer-events: none; } /* (only its card and buttons take taps, not the gaps) */
+.tut-banner > * { pointer-events: auto; }
+/* The frame: the heading, BOT and its words (BACK / NEXT sit under it, outside) */
+.tut-card {
+  flex: 0 1 auto; min-height: 0; overflow-y: auto;
   padding: 8px 10px 10px; border: 1px solid var(--accent); border-radius: 6px;
   background: color-mix(in srgb, var(--panel) 94%, transparent);
   box-shadow: 0 0 14px rgba(var(--accent-rgb), 0.25);
-  color: var(--panel-text); font-size: 12px; line-height: 1.45;
-  animation: pause-in 0.2s ease-out;
 }
 .tut-banner[hidden] { display: none; }
 .tut-banner.bottom { top: auto; bottom: 30%; }
@@ -2261,14 +2286,14 @@ body:not(.vs-mode) .hud .stat:not(.cpu-stat):not(.cpu-face) > .label {
 .tut-exit { font-family: inherit; font-size: 10px; letter-spacing: 1px; padding: 2px 8px; cursor: pointer; background: transparent; color: var(--fg-dim); border: 1px solid var(--grid-line); border-radius: 3px; }
 .tut-text { margin: 0; }
 .tut-points { margin: 6px 0 0; font-family: inherit; font-size: 11px; line-height: 1.5; color: var(--accent); white-space: pre-wrap; }
-.tut-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.tut-actions { flex: none; display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
 .tut-actions button {
   font-family: inherit; font-size: 12px; letter-spacing: 1px; padding: 5px 14px; cursor: pointer;
   background: var(--fg); color: var(--bg-solid); border: 1px solid var(--fg); border-radius: 4px;
 }
-.tut-actions button:not(.tut-back) + button { background: transparent; color: var(--fg); }
+.tut-actions button:not(.tut-back) + button { background: var(--panel); color: var(--fg); }
 /* BACK: on the left, outlined */
-.tut-actions button.tut-back { margin-right: auto; background: transparent; color: var(--fg); border-color: var(--fg-dim); }
+.tut-actions button.tut-back { margin-right: auto; background: var(--panel); color: var(--fg); border-color: var(--fg-dim); }
 .tut-pulse { z-index: 3; animation: tut-pulse 0.9s ease-in-out infinite !important; }
 /* (position only for the cells and drop buttons: the corner and top buttons keep theirs) */
 .cell.tut-pulse, .column-buttons button.tut-pulse { position: relative; }
@@ -2322,9 +2347,10 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
 .cpu-face.talking .mouth-open { display: inline !important; animation: bot-talk 0.16s steps(1) infinite; }
 @keyframes bot-talk { 0% { opacity: 1; } 50% { opacity: 0; } }
 /* The tutorial's narrator: BOT beside what it says */
-.tut-body { display: flex; align-items: flex-start; gap: 10px; }
-.tut-bot { flex: none; width: 36px; margin-top: 2px; }
-.tut-body .tut-text { flex: 1; min-width: 0; min-height: 2.9em; cursor: pointer; }
+/* BOT in the corner, its words wrapping around it and on under it (flow-root: the card holds it) */
+.tut-body { display: flow-root; }
+.tut-bot { float: left; width: 36px; margin: 2px 10px 2px 0; }
+.tut-body .tut-text { cursor: pointer; }
 
 /* The start screen's wanderers: along the bottom of the card, walking in and out of it */
 .start-walkers { position: absolute; left: 0; right: 0; bottom: 10px; height: 44px; pointer-events: none; }

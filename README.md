@@ -268,6 +268,17 @@ takes both whatever the setting.
 Before the first drop, the lower-left corner button is EXIT (back to the title
 card, one tap); after it, RESTART (two taps).
 
+THE CHAIN METER: a segmented bar up each side of the grid, 5 segments (the chain an
+exploit takes). Each link of a drop's chain lights one, from the bottom; a chain that
+falls short goes dark again. While an exploit is ready (earned, the daily free one,
+or armed) both bars stay lit amber and pulse, and an earned one also flashes
+EXPLOIT READY // its name over the grid. ENCRYPT IN has a ===== under its count
+(the layer it counts down to, as a bit is [n]), flashing with the line under the
+board when the next drop brings one.
+
+The tutorial's banner: BOT sits in the top-left corner of its frame with its words
+wrapping around it and on under it; BACK and NEXT sit under the frame, outside it.
+
 The gear/speaker icon in the corner opens the settings: sound and music on or
 off, whether the drop buttons sit under or above the grid, the color theme
 and the playlist.

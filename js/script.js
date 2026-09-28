@@ -901,7 +901,9 @@ function render(popped = [], falling = null) {
       boardEl.appendChild(line);
     }
   }
-  boardEl.appendChild(layerLine(!gameOver && !MODES[mode].noLayers && pulseInterval - dropsSinceLastPulse === 1));
+  const layerNext = !gameOver && !MODES[mode].noLayers && pulseInterval - dropsSinceLastPulse === 1;
+  boardEl.appendChild(layerLine(layerNext));
+  document.getElementById('pulse-stat').classList.toggle('layer-next', layerNext); // (its ===== flashes with the line's)
   updateColumnButtons();
   if (mode === 'tutorial') Tutorial.decorate(); // (its pulsing cells, redrawn with the board)
   if (typeof placeGhost === 'function') placeGhost(); // (a bit being aimed stays in the top row)
@@ -1233,13 +1235,36 @@ async function awardPackets(kind, count) {
   await sleep(150);
 }
 
-// An earned exploit waits in the exploit button until the player arms it
+// An earned exploit waits in the exploit button until the player arms it (the notice flashes over
+// the grid too: an exploit is easy to forget about)
 function awardHack(id) {
   heldHacks.push(id);
   setMessage(`EXPLOIT READY // ${HACKS[id].name}`);
+  if (mode !== 'tutorial') showToast(`EXPLOIT READY // ${HACKS[id].name}`);
   SFX.play('egg');
   updateHud();
   updateFreeBtn();
+}
+
+// THE CHAIN METER: a bar of HACK_COMBO segments up each side of the grid. Each link of a drop's
+// chain lights one (from the bottom); a chain that falls short goes dark again. While an exploit
+// is ready (earned, the daily free one, or armed) the whole bar stays lit, pulsing. Not in the
+// modes without exploits.
+const chainMeters = [...document.querySelectorAll('.chain-meter')];
+chainMeters.forEach((m) => { m.innerHTML = '<i></i>'.repeat(HACK_COMBO); });
+let chainLit = 0;
+function showChainMeter() {
+  const hacksOn = !MODES[mode].noHacks;
+  const ready = hacksOn && chainLit === 0 && !!(armedHack || nextExploit());
+  for (const m of chainMeters) {
+    m.hidden = !hacksOn;
+    m.classList.toggle('ready', ready);
+    [...m.children].forEach((seg, i) => seg.classList.toggle('lit', ready || i < chainLit));
+  }
+}
+function setChainMeter(n) {
+  chainLit = Math.min(n, HACK_COMBO);
+  showChainMeter();
 }
 
 async function resolveChains() {
@@ -1294,6 +1319,7 @@ async function resolveChains() {
     score += linkPoints;
     if (chain >= 2) stealPts += linkPoints; // (VS ATTRITION takes these from the CPU too)
     chainEl.textContent = `${chain}x`;
+    setChainMeter(chain);
 
     FX.burst(cellsAt([...pops, ...sprung]));
     render([...pops, ...sprung]);
@@ -1342,6 +1368,7 @@ async function resolveChains() {
     const packets = kind ? Math.floor(cleared / PACKETS[kind].bits) : 0;
     if (packets) await awardPackets(kind, packets);
     const hack = MODES[mode].noHacks ? null : hackForChain(chain);
+    setChainMeter(0); // (short of an exploit: dark again; one earned: lit, pulsing, ready)
     if (hack) awardHack(hack);
     else setMessage('');
   }
@@ -1948,6 +1975,8 @@ function applyModeUi() {
   document.getElementById('pulse-stat').hidden = !!MODES[mode].noLayers && mode !== 'puzzle' && mode !== 'breach' && mode !== 'vs' && mode !== 'tutorial';
   document.getElementById('pulse-stat').classList.toggle('off', mode === 'vs' && !vsLayers);
   document.getElementById('pulse-label').textContent = mode === 'puzzle' ? 'BITS LEFT' : mode === 'breach' ? 'LAYERS LEFT' : 'ENCRYPT IN';
+  // (ENCRYPT IN: a ===== under the count, the layer it's counting down to, as [n] is a bit)
+  document.getElementById('pulse-stat').classList.toggle('counts-layers', mode !== 'puzzle' && mode !== 'breach');
   updateVsChrome(); // (after ENCRYPT IN shows or hides: it counts the stat rows)
   puzzleNavEl.hidden = mode !== 'puzzle' || daily;
   if (mode === 'puzzle' && !daily) updatePuzzleNav();
@@ -3382,6 +3411,7 @@ function updateFreeBtn() {
   }
   restartBtn.disabled = gameOver;
   vsQuitBtn.hidden = !inVs;
+  showChainMeter();
   const ready = nextExploit();
   const shown = armedHack || ready;
   document.getElementById('exploit-glyph').innerHTML = shown ? iconHtml(shown) : LIGHTNING_SVG;
@@ -3462,6 +3492,7 @@ function nextToast() {
   const text = toastQueue.splice(at, 1)[0];
   const showMs = text.startsWith('ACHIEVEMENT') ? ACHIEVEMENT_SHOW_MS : TOAST_SHOW_MS;
   toastEl.textContent = text;
+  toastEl.classList.toggle('exploit-ready', text.startsWith('EXPLOIT READY'));
   toastEl.hidden = false;
   placeToast();
   toastEl.classList.remove('show');

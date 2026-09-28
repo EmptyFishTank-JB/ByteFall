@@ -223,6 +223,10 @@ const Tutorial = (() => {
     if (el.parentNode !== home) home.appendChild(el);
     el.classList.toggle('float', !!s.float);
     el.innerHTML = '';
+    // The framed card (heading, BOT and what it says); BACK / NEXT go under it, outside the frame
+    const card = document.createElement('div');
+    card.className = 'tut-card';
+    el.appendChild(card);
     const head = document.createElement('div');
     head.className = 'tut-head';
     head.innerHTML = `<span>// TUTORIAL ${step + 1} / ${STEPS.length}</span>`;
@@ -232,7 +236,7 @@ const Tutorial = (() => {
     exit.textContent = 'EXIT';
     exit.addEventListener('click', leave);
     head.appendChild(exit);
-    el.appendChild(head);
+    card.appendChild(head);
     // BOT and what it says
     const body = document.createElement('div');
     body.className = 'tut-body';
@@ -243,7 +247,7 @@ const Tutorial = (() => {
     text.className = 'tut-text';
     text.setAttribute('aria-label', s.text); // (read whole, not letter by letter)
     body.appendChild(text);
-    el.appendChild(body);
+    card.appendChild(body);
     botMood(s.mood);
     say(text, s.text);
     if (step > 0) addButton('BACK', back, 'tut-back');
