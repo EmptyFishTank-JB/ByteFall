@@ -114,6 +114,7 @@ const CpuBoard = (() => {
   // over from move to move until a move decrypts nothing) and uses it when
   // it pays off: WORM VIRUS wipes its tallest column, DICTIONARY ATTACK peels every layer by one.
   const STREAK_FULL = 5;
+  const STREAK_DRAIN_MS = 1500;
   function create(levelId, rnd, bits, layerEvery = 0, botId = 'bot', exploits = false) {
     let drops = 0;
     const level = LEVELS[levelId] || LEVELS.normal;
@@ -121,7 +122,10 @@ const CpuBoard = (() => {
     const rollDelay = () => level.delay * bot.speed * (bot.erratic ? 0.55 + rnd() * 0.9 : 1);
     let nextDelay = rollDelay();
     let held = null; // an exploit waiting to be used
-    let meter = 0; // its chain meter: a streak, on NORMAL's rules, as the player's in VS
+    let meter = 0; // its chain meter: a streak, on its level's rules, as the player's in VS
+    let meterAt = 0; // (HARD / INSANE: when its drain last ran)
+    const drains = levelId === 'hard' || levelId === 'insane';
+    const full = levelId === 'insane' ? 8 : STREAK_FULL; // (INSANE's meter: 8 segments)
     let used = null; // the one used on the last move (for script.js to announce)
     let columns = Array.from({ length: COLS }, () => []);
     let steal = 0; // the extra points since the last takeSteal()
@@ -222,18 +226,23 @@ const CpuBoard = (() => {
         const first = settle();
         let { points } = first;
         // The streak: each chain's links charge its meter (5 fills it: an exploit, the rest carrying
-        // on; holding one already, it waits full); a move that decrypts nothing empties it
+        // on; holding one already, it waits full); a move that decrypts nothing breaks it (EASY: a
+        // segment; the rest: all of it). HARD and INSANE: it drains a segment every 1.5s too, and a
+        // partly drained segment still counts whole.
         if (exploits) {
+          const now = performance.now();
+          if (drains && meterAt) meter = Math.max(0, meter - (now - meterAt) / STREAK_DRAIN_MS);
+          meterAt = now;
           if (first.chain > 0) {
-            meter += first.chain;
-            if (meter >= STREAK_FULL) {
-              if (held) meter = STREAK_FULL;
+            meter = Math.ceil(meter) + first.chain;
+            if (meter >= full) {
+              if (held) meter = full;
               else {
                 held = rnd() < 0.5 ? 'worm-virus' : 'dictionary-attack';
-                meter -= STREAK_FULL;
+                meter -= full;
               }
             }
-          } else meter = 0;
+          } else meter = levelId === 'easy' ? Math.max(0, Math.ceil(meter) - 1) : 0;
         }
         drops++;
         if (layerEvery && drops % layerEvery === 0 && !overflowed(columns)) {

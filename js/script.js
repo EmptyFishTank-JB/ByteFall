@@ -388,7 +388,7 @@ function initGame() {
   document.querySelectorAll('#difficulty-row button').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.difficulty === classicDifficulty);
   });
-  const cap = difficulty === 'easy' ? 3 : HACK_COMBO;
+  const cap = difficulty === 'hard' ? 8 : HACK_COMBO;
   document.getElementById('hack-intro').textContent = `Fill the CHAIN METER (${cap} links, carried over from drop to drop) to get a random exploit from your equipped slots.`;
   document.querySelectorAll('.hack-item').forEach((el) => {
     el.querySelector('.combo').textContent = '';
@@ -1243,21 +1243,27 @@ function awardHack(id) {
   updateFreeBtn();
 }
 
-// THE CHAIN METER, a STREAK: a segmented bar up each side of the grid (5 segments; 3 on EASY).
-// Every link of every chain lights one, and the charge carries over from drop to drop: fill it and
-// an exploit is earned, the links past full carrying into the next fill. A drop that decrypts
-// nothing breaks the streak: on NORMAL the whole bar goes dark at once, on EASY one segment. On
-// HARD the bar also drains on its own, a segment every 1.5s from the moment a chain ends (a
-// partly drained segment still counts whole: the next link fills it back up, then adds). ZEN, VS
-// and the tutorial play NORMAL's rules; BLITZ its difficulty's. While an exploit is ready (earned,
-// the daily free one, or armed) and the bar is empty, it's lit all the way, pulsing.
+// THE CHAIN METER, a STREAK: a segmented bar up each side of the grid (5 segments; 8 on HARD's
+// 8 columns and on INSANE). Every link of every chain lights one, and the charge carries over from drop to
+// drop: fill it and an exploit is earned, the links past full carrying into the next fill. A drop
+// that decrypts nothing breaks the streak: on EASY one segment goes dark, on NORMAL, HARD and
+// INSANE the whole bar at once. On HARD and INSANE the bar also drains on its own, a segment
+// every 1.5s from the moment a chain ends (a partly drained segment still counts whole: the next
+// link fills it back up, then adds). ZEN and the tutorial play NORMAL's rules, BLITZ its
+// difficulty's, VS the CPU's level's. While an exploit is ready
+// (earned, the daily free one, or armed) and the bar is empty, it's lit all the way, pulsing.
 const chainMeters = [...document.querySelectorAll('.chain-meter')];
 const STREAK_DRAIN_MS = 1500; // (HARD: a segment's drain)
 let streak = 0; // the charge, in segments (fractional while HARD drains it)
 let chainLit = 0; // a chain under way: its links so far (shown on top of the charge)
 let dropLinks = 0; // this drop's links, all its chains together
-const streakRule = () => (['zen', 'vs', 'tutorial'].includes(mode) ? 'normal' : ['easy', 'hard'].includes(difficulty) ? difficulty : 'normal');
-const streakCap = () => (streakRule() === 'easy' ? 3 : HACK_COMBO);
+const streakRule = () => {
+  if (mode === 'zen' || mode === 'tutorial') return 'normal';
+  const level = mode === 'vs' ? vsLevel : difficulty;
+  return ['easy', 'hard', 'insane'].includes(level) ? level : 'normal';
+};
+const streakCap = () => (COLS >= 8 || streakRule() === 'insane' ? 8 : HACK_COMBO); // (8 on HARD's 8 columns, and on INSANE)
+const streakDrains = () => ['hard', 'insane'].includes(streakRule());
 function showChainMeter() {
   const hacksOn = !MODES[mode].noHacks;
   const cap = streakCap();
@@ -1274,7 +1280,7 @@ function showChainMeter() {
     });
   }
 }
-// A drop's end: nothing decrypted breaks the streak (NORMAL and HARD: all of it; EASY: a segment)
+// A drop's end: nothing decrypted breaks the streak (EASY: a segment; the rest: all of it)
 function endStreakDrop(usedExploit) {
   if (MODES[mode].noHacks || usedExploit || dropLinks > 0) return;
   if (mode === 'tutorial' && Tutorial.holdsMeter()) return;
@@ -1287,13 +1293,13 @@ setInterval(() => {
   const now = performance.now();
   const dt = now - streakTick;
   streakTick = now;
-  if (streak <= 0 || streakRule() !== 'hard' || busy || gameOver || document.hidden || panelOpen() || startScreenUp()) return;
+  if (streak <= 0 || !streakDrains() || busy || gameOver || document.hidden || panelOpen() || startScreenUp()) return;
   streak = Math.max(0, streak - dt / STREAK_DRAIN_MS);
   showChainMeter();
 }, 100);
-// From the top of the top row's squares down to the bottom of row 1's
+// From the top of the grid's top row (under the ==== line) down to the bottom of row 1
 function placeChainMeter() {
-  const top = boardEl.querySelector(`.cell[data-pos="${MAX_ROWS - 1},0"]`);
+  const top = boardEl.querySelector(`.cell[data-pos="${ROWS - 1},0"]`); // (the grid's squares: not the overflow row)
   const low = boardEl.querySelector('.cell[data-pos="0,0"]');
   if (!top || !low) return;
   const y0 = boardEl.offsetTop + top.offsetTop;

@@ -268,18 +268,22 @@ takes both whatever the setting.
 Before the first drop, the lower-left corner button is EXIT (back to the title
 card, one tap); after it, RESTART (two taps).
 
-THE CHAIN METER, a streak: a segmented bar up each side of the grid, 5 segments (3 on
-EASY), from the top row down to the bottom of row 1, set off from the grid by the same
+THE CHAIN METER, a streak: a segmented bar up each side of the grid, 5 segments (8 on
+HARD's 8x8 grid and on INSANE), exactly as tall as the grid's squares (the top row's top
+to the bottom of row 1), set off from the grid by the same
 3px gap as between its squares (the ===== line under the board runs under it). Every
 link of every chain lights one, from the bottom, and the charge carries over from drop
 to drop: fill it and an exploit is earned (the links past full carry into the next
-fill). A drop that decrypts nothing breaks the streak: on NORMAL the whole bar goes
-dark at once, on EASY one segment. On HARD the bar also drains on its own, a segment
-every 1.5 seconds from the moment a chain ends (paused while a drop plays out, a menu
+fill); as long as a drop clears a bit, the streak holds. A drop that decrypts nothing
+breaks it: on EASY one segment goes dark, on NORMAL, HARD and INSANE the whole bar at
+once. On HARD and INSANE the bar also drains on its own, a segment every 1.5 seconds
+from the moment a chain ends (paused while a drop plays out, a menu
 is open or the game waits in the background); a partly drained segment still counts
-whole, so the next link fills it back up, then adds. ZEN, VS and the tutorial play
-NORMAL's rules, BLITZ its difficulty's. In VS the CPU's exploits come from the same
-streak (5 links, NORMAL's rules): holding one, its meter waits full. While an exploit is ready (earned, the daily free one,
+whole, so the next link fills it back up, then adds. ZEN and the tutorial play
+NORMAL's rules, BLITZ its difficulty's, VS the CPU's level's (HARD with 5 segments on
+its 7 columns, INSANE with 8). In VS the CPU's exploits come from the same streak, on
+its level's rules: holding one, its meter waits full. Both ==== lines (the overflow
+line and the one under the board) run on under the meter. While an exploit is ready (earned, the daily free one,
 or armed) both bars stay lit amber and pulse, and an earned one also flashes
 EXPLOIT READY // its name over the grid. ENCRYPT IN has a ===== under its count
 (the layer it counts down to, as a bit is [n]), flashing with the line under the

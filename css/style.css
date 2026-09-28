@@ -639,7 +639,7 @@ body.vs-mode .vs-title span { color: var(--accent); text-shadow: 0 0 8px var(--a
 .vs-bar .mine { background: var(--fg); box-shadow: 0 0 6px var(--fg); }
 .vs-bar .theirs { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
 .vs-bar .mark { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: var(--panel-text, #fff); box-shadow: 0 0 4px rgba(255, 255, 255, 0.7); transition: left 0.3s; }
-#board .layer-line, #cpu-full .layer-line { margin: 0 -7px; }
+:is(#board, #cpu-full) :is(.layer-line, .overflow-line) { margin-left: -7px; margin-right: -7px; }
 .chain-meter { position: absolute; top: 6px; bottom: 6px; width: 4px; z-index: 2; display: flex; flex-direction: column-reverse; gap: 3px; pointer-events: none; }
 .chain-meter.left { left: 6px; }
 .chain-meter.right { right: 6px; }
