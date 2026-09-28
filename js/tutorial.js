@@ -64,7 +64,7 @@ const Tutorial = (() => {
     {
       text: 'Drop the next [2] into column 5 to peel the layer a second time.',
       drop: 4, cells: [[0, 3]], holdMeter: true, explainMood: 'happy',
-      explain: () => 'The second peel broke the layer open and revealed the bit hidden under it: a [1], alone in a line of 1, so it decrypted too, as the chain’s second link. Those 2 links filled the CHAIN METER (3 + 1 + 2 = 6), so you earned an EXPLOIT! The extra link carries over into the next fill.',
+      explain: () => 'The second peel broke the layer open and revealed the bit hidden under it: a [1], alone in a line of 1, so it decrypted too, as the chain’s second link. Those 2 links filled the CHAIN METER (3 + 1 + 2 = 6), so you earned an EXPLOIT!',
     },
     {
       text: 'Keep every column below this ======== line. If anything is still above it once the decrypting stops, the trace completes and the game is over.',

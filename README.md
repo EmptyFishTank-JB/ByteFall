@@ -271,16 +271,15 @@ card, one tap); after it, RESTART (two taps).
 THE CHAIN METER, a streak: a 5-segment bar up each side of the grid, exactly as tall as
 the grid's squares (the top row's top to the bottom of row 1), set off from the grid by the
 same 3px gap as between its squares (both ==== lines run on under it). Every link of every
-chain lights one, from the bottom; fill it and an exploit is earned (the links past full
-carry into the next fill). How it keeps its charge by level: EASY and NORMAL carry it from
+chain lights one, from the bottom; fill it and an exploit is earned, and the meter starts
+over, empty. How it keeps its charge by level: EASY and NORMAL carry it from
 drop to drop (as long as a drop clears a bit), a drop that decrypts nothing taking one
 segment off on EASY and emptying it on NORMAL; HARD and INSANE empty it as soon as each
 chain ends, so the 5 links have to come in one chain. Only one exploit at a time: while one
-waits (earned, the daily free one, or armed) the meter can fill but holds there, full,
-until it's used. ZEN and the tutorial play NORMAL's rules, BLITZ its difficulty's, VS the
+waits (earned, the daily free one, or armed) chains don't charge the meter at all; it waits
+empty, pulsing amber, until the exploit is used. ZEN and the tutorial play NORMAL's rules, BLITZ its difficulty's, VS the
 CPU's level's; the CPU's exploits come from the same streak on the same rules, one at a
-time. While an exploit is ready, the bars' empty segments pulse amber (the charged ones
-stay lit), and an earned one also flashes
+time. While an exploit is ready, the bars pulse amber, and an earned one also flashes
 EXPLOIT READY // its name over the grid. ENCRYPT IN has a ===== under its count
 (the layer it counts down to, as a bit is [n]), flashing with the line under the
 board when the next drop brings one.
@@ -291,8 +290,8 @@ drop in more than one column (step 3: column 4 or 7). The tutorial's banner: BOT
 wrapping around it and on under it; BACK and NEXT sit under the frame, outside it. The
 chain lesson (steps 6 and 7) explains the meter, and it keeps its charge on through
 step 13: step 6's 3 links, step 8's 1 and step 9's 2 fill it (3 + 1 + 2 = 6), earning the
-WORM VIRUS the exploit steps then use, with one link carried over. While an exploit
-waits, the meter's empty segments pulse amber and the charged ones stay lit. The MENU and SETTINGS buttons light up full while pulsing;
+WORM VIRUS the exploit steps then use. While an exploit
+waits, the meter pulses amber. The MENU and SETTINGS buttons light up full while pulsing;
 the EXPLOITS step pulses SLOTS and the cards; the menu steps' banners sit mid-screen
 (the EXPLOITS one low, clear of what it points at).
 

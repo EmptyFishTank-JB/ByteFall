@@ -1247,9 +1247,9 @@ function awardHack(id) {
 }
 
 // THE CHAIN METER, a STREAK: a 5-segment bar up each side of the grid. Every link of every chain
-// lights one. Fill it and an exploit is earned, the links past full carrying into the next fill.
-// Only one exploit at a time: while one waits (earned, the daily free one, or armed) the meter
-// can fill but holds there, full, earning nothing more until it's used. How it keeps its charge
+// lights one. Fill it and an exploit is earned, and the meter starts over, empty. Only one exploit
+// at a time: while one waits (earned, the daily free one, or armed) chains don't charge the meter
+// at all; it waits empty, pulsing, until the exploit is used. How it keeps its charge
 // by level: EASY and NORMAL carry it from drop to drop, a drop that decrypts nothing taking one
 // segment off on EASY and emptying it on NORMAL; HARD and INSANE empty it as soon as each chain
 // ends (the 5 links in one chain). ZEN and the tutorial play NORMAL's rules, BLITZ its
@@ -1364,7 +1364,7 @@ async function resolveChains() {
     score += linkPoints;
     if (chain >= 2) stealPts += linkPoints; // (VS ATTRITION takes these from the CPU too)
     chainEl.textContent = `${chain}x`;
-    setChainMeter(chain);
+    setChainMeter(exploitWaiting() ? 0 : chain); // (an exploit waiting: the meter doesn't charge)
 
     FX.burst(cellsAt([...pops, ...sprung]));
     render([...pops, ...sprung]);
@@ -1415,22 +1415,18 @@ async function resolveChains() {
     const nibbles = kind ? Math.floor((cleared - bytes * BYTE_BITS) / NIBBLE_BITS) : 0;
     if (bytes) await awardPackets('byte', bytes);
     if (nibbles) await awardPackets('nibble', nibbles);
-    // The streak: this chain's links added to the charge. A fill earns an exploit (the rest carrying
-    // on) unless one is already waiting: then the meter holds, full. HARD / INSANE: empty again
-    // once the chain's done.
+    // The streak: this chain's links added to the charge (none while an exploit waits). A fill
+    // earns an exploit and the meter starts over, empty. HARD / INSANE: empty again once the
+    // chain's done.
     dropLinks += chain;
     let earned = null;
-    if (!MODES[mode].noHacks) {
+    if (!MODES[mode].noHacks && !exploitWaiting()) {
       streak += chain;
       if (streak >= streakCap()) {
-        if (exploitWaiting()) streak = streakCap();
-        else {
-          streak -= streakCap();
-          earned = hackForMeter();
-        }
+        streak = 0;
+        earned = hackForMeter();
       }
       if (!streakCarries()) streak = 0;
-      else streak = Math.min(streak, streakCap());
     }
     chainLit = 0;
     showChainMeter();

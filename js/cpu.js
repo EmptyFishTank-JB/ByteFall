@@ -231,18 +231,17 @@ const CpuBoard = (() => {
         const first = settle();
         let { points } = first;
         // The streak, on its level's rules as the player's: each chain's links charge its meter (5
-        // fills it: an exploit, the rest carrying on; one at a time, so holding one it waits full).
+        // fills it: an exploit, and it starts over empty; one at a time, so while it holds one its
+        // meter doesn't charge).
         // EASY / NORMAL carry it over, a move that decrypts nothing taking one segment off (EASY)
         // or emptying it (NORMAL); HARD / INSANE empty it after every chain.
         if (exploits) {
-          if (first.chain > 0) {
+          if (held) meter = 0;
+          else if (first.chain > 0) {
             meter += first.chain;
             if (meter >= full) {
-              if (held) meter = full;
-              else {
-                held = rnd() < 0.5 ? 'worm-virus' : 'dictionary-attack';
-                meter -= full;
-              }
+              held = rnd() < 0.5 ? 'worm-virus' : 'dictionary-attack';
+              meter = 0;
             }
             if (!carries) meter = 0;
           } else meter = levelId === 'easy' ? Math.max(0, meter - 1) : 0;
