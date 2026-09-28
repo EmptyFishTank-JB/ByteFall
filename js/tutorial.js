@@ -268,7 +268,7 @@ const Tutorial = (() => {
     if (el.parentNode !== home) home.appendChild(el);
     el.classList.toggle('float', !!s.float);
     el.classList.toggle('middle', s.float === 'middle');
-    if (!s.holdMeter) setChainMeter(0); // (the chain lesson's meter stays lit until it's done)
+    if (!s.holdMeter) resetStreak(); // (the chain lesson's meter stays lit until it's done)
     el.innerHTML = '';
     // The framed card (heading, BOT and what it says); BACK / NEXT go under it, outside the frame
     const card = document.createElement('div');

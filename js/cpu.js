@@ -110,8 +110,10 @@ const CpuBoard = (() => {
 
   // Lives for one VS match. rnd: the CPU's random stream; bits(): its next bit; layerEvery:
   // drops between rising layer rows (0 for none), as on your board.
-  // exploits: the EXPLOITS setting. The CPU earns one with a chain of 3 or more and uses it when
+  // exploits: the EXPLOITS setting. The CPU earns one by filling its chain meter (5 links, carried
+  // over from move to move until a move decrypts nothing) and uses it when
   // it pays off: WORM VIRUS wipes its tallest column, DICTIONARY ATTACK peels every layer by one.
+  const STREAK_FULL = 5;
   function create(levelId, rnd, bits, layerEvery = 0, botId = 'bot', exploits = false) {
     let drops = 0;
     const level = LEVELS[levelId] || LEVELS.normal;
@@ -119,6 +121,7 @@ const CpuBoard = (() => {
     const rollDelay = () => level.delay * bot.speed * (bot.erratic ? 0.55 + rnd() * 0.9 : 1);
     let nextDelay = rollDelay();
     let held = null; // an exploit waiting to be used
+    let meter = 0; // its chain meter: a streak, on NORMAL's rules, as the player's in VS
     let used = null; // the one used on the last move (for script.js to announce)
     let columns = Array.from({ length: COLS }, () => []);
     let steal = 0; // the extra points since the last takeSteal()
@@ -218,7 +221,20 @@ const CpuBoard = (() => {
         record({ landed: [[columns[col].length - 1, col]] });
         const first = settle();
         let { points } = first;
-        if (exploits && !held && first.chain >= 3) held = rnd() < 0.5 ? 'worm-virus' : 'dictionary-attack';
+        // The streak: each chain's links charge its meter (5 fills it: an exploit, the rest carrying
+        // on; holding one already, it waits full); a move that decrypts nothing empties it
+        if (exploits) {
+          if (first.chain > 0) {
+            meter += first.chain;
+            if (meter >= STREAK_FULL) {
+              if (held) meter = STREAK_FULL;
+              else {
+                held = rnd() < 0.5 ? 'worm-virus' : 'dictionary-attack';
+                meter -= STREAK_FULL;
+              }
+            }
+          } else meter = 0;
+        }
         drops++;
         if (layerEvery && drops % layerEvery === 0 && !overflowed(columns)) {
           // A row of two-peel layers rises under every column

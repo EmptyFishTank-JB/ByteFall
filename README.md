@@ -43,9 +43,9 @@ docs/achievements.csv   every achievement, grouped
 
 ## Exploits
 
-On Normal and Hard, a 5x chain unlocks a random exploit. On Easy, each exploit
-has its own chain length, so shorter chains unlock the weaker ones. The exploit
-waits in the exploit button (the game card's lower-right corner), which glows
+Filling the CHAIN METER earns a random exploit from the equipped slots: every
+link of every chain charges it, and the charge carries over from drop to drop (5
+links; 3 on Easy). The exploit waits in the exploit button (under the grid), which glows
 green and shows the exploit's icon (with a count if more are waiting). Tap it
 (or press E) to arm the exploit: the button pulses amber and the exploit is
 your next drop, with no taking it back. Drop it into a column like a bit and it
@@ -268,10 +268,18 @@ takes both whatever the setting.
 Before the first drop, the lower-left corner button is EXIT (back to the title
 card, one tap); after it, RESTART (two taps).
 
-THE CHAIN METER: a segmented bar up each side of the grid, 5 segments (the chain an
-exploit takes), from the top row down to the bottom of row 1, set off from the grid by
-the same 3px gap as between its squares (the ===== line under the board runs under it). Each link of a drop's chain lights one, from the bottom; a chain that
-falls short goes dark again. While an exploit is ready (earned, the daily free one,
+THE CHAIN METER, a streak: a segmented bar up each side of the grid, 5 segments (3 on
+EASY), from the top row down to the bottom of row 1, set off from the grid by the same
+3px gap as between its squares (the ===== line under the board runs under it). Every
+link of every chain lights one, from the bottom, and the charge carries over from drop
+to drop: fill it and an exploit is earned (the links past full carry into the next
+fill). A drop that decrypts nothing breaks the streak: on NORMAL the whole bar goes
+dark at once, on EASY one segment. On HARD the bar also drains on its own, a segment
+every 1.5 seconds from the moment a chain ends (paused while a drop plays out, a menu
+is open or the game waits in the background); a partly drained segment still counts
+whole, so the next link fills it back up, then adds. ZEN, VS and the tutorial play
+NORMAL's rules, BLITZ its difficulty's. In VS the CPU's exploits come from the same
+streak (5 links, NORMAL's rules): holding one, its meter waits full. While an exploit is ready (earned, the daily free one,
 or armed) both bars stay lit amber and pulse, and an earned one also flashes
 EXPLOIT READY // its name over the grid. ENCRYPT IN has a ===== under its count
 (the layer it counts down to, as a bit is [n]), flashing with the line under the

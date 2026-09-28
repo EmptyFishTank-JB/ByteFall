@@ -379,6 +379,8 @@ function initGame() {
   started = mode === 'puzzle';
   heldHacks = [];
   armedHack = null;
+  streak = 0;
+  chainLit = 0;
   pulseInterval = DIFFICULTIES[difficulty].interval(0);
   gameOver = false;
   busy = false;
@@ -386,12 +388,10 @@ function initGame() {
   document.querySelectorAll('#difficulty-row button').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.difficulty === classicDifficulty);
   });
-  const easy = difficulty === 'easy';
-  document.getElementById('hack-intro').textContent = easy
-    ? 'Chains earn your equipped exploits: the longer the chain, the stronger the exploit.'
-    : `Chain ${HACK_COMBO} decrypts in one drop to get a random exploit from your equipped slots.`;
+  const cap = difficulty === 'easy' ? 3 : HACK_COMBO;
+  document.getElementById('hack-intro').textContent = `Fill the CHAIN METER (${cap} links, carried over from drop to drop) to get a random exploit from your equipped slots.`;
   document.querySelectorAll('.hack-item').forEach((el) => {
-    el.querySelector('.combo').textContent = `${easy ? HACKS[el.dataset.hack].easyCombo : HACK_COMBO}x`;
+    el.querySelector('.combo').textContent = '';
   });
   document.getElementById('overflow-top').textContent = COLS;
   document.getElementById('rules-keys').textContent = `Tap a column or its button, or press 1\u2013${COLS}, to drop`;
@@ -1070,6 +1070,7 @@ async function attemptDrop(col) {
   const piecesBefore = columns.reduce((n, c) => n + c.length, 0);
   const scoreBefore = score;
   chainLog = []; // (what this drop decrypts, link by link, for the tutorial's explanations)
+  dropLinks = 0;
   const piece = queue.shift();
   if (piece.type === 'hack') armedHack = null;
   refillQueue();
@@ -1126,6 +1127,7 @@ async function attemptDrop(col) {
     if (sniffedOut) Progress.wiretap();
   }
   if (mode === 'vs' && !overflowed()) await vsAfterDrop(score - scoreBefore);
+  endStreakDrop(piece.type === 'hack');
   Progress.endDrop({
     hack: piece.type === 'hack', heights: columns.map((c) => c.length), rows: ROWS, over: overflowed(),
     lastSecond: mode === 'blitz' && timeLeft <= 1,
@@ -1207,17 +1209,10 @@ function computeRunLength(grid, row, col, dRow, dCol) {
   return count;
 }
 
-function hackForChain(chain) {
-  let ids = Object.keys(HACKS).filter(hackAvailable);
-  if (difficulty === 'easy') {
-    const earned = ids.filter((id) => HACKS[id].easyCombo <= chain);
-    if (!earned.length) return null;
-    const tier = Math.max(...earned.map((id) => HACKS[id].easyCombo));
-    ids = earned.filter((id) => HACKS[id].easyCombo === tier);
-  } else if (chain < HACK_COMBO) {
-    return null;
-  }
-  return ids[Math.floor(dice.hack() * ids.length)];
+// A full chain meter's exploit: one of the equipped ones, at random
+function hackForMeter() {
+  const ids = Object.keys(HACKS).filter(hackAvailable);
+  return ids.length ? ids[Math.floor(dice.hack() * ids.length)] : null;
 }
 
 // Hard: 8 bits decrypted by one drop make a byte. Easy and Normal: 4 make a nibble.
@@ -1248,22 +1243,54 @@ function awardHack(id) {
   updateFreeBtn();
 }
 
-// THE CHAIN METER: a bar of HACK_COMBO segments up each side of the grid. Each link of a drop's
-// chain lights one (from the bottom); a chain that falls short goes dark again. While an exploit
-// is ready (earned, the daily free one, or armed) the whole bar stays lit, pulsing. Not in the
-// modes without exploits.
+// THE CHAIN METER, a STREAK: a segmented bar up each side of the grid (5 segments; 3 on EASY).
+// Every link of every chain lights one, and the charge carries over from drop to drop: fill it and
+// an exploit is earned, the links past full carrying into the next fill. A drop that decrypts
+// nothing breaks the streak: on NORMAL the whole bar goes dark at once, on EASY one segment. On
+// HARD the bar also drains on its own, a segment every 1.5s from the moment a chain ends (a
+// partly drained segment still counts whole: the next link fills it back up, then adds). ZEN, VS
+// and the tutorial play NORMAL's rules; BLITZ its difficulty's. While an exploit is ready (earned,
+// the daily free one, or armed) and the bar is empty, it's lit all the way, pulsing.
 const chainMeters = [...document.querySelectorAll('.chain-meter')];
-chainMeters.forEach((m) => { m.innerHTML = '<i></i>'.repeat(HACK_COMBO); });
-let chainLit = 0;
+const STREAK_DRAIN_MS = 1500; // (HARD: a segment's drain)
+let streak = 0; // the charge, in segments (fractional while HARD drains it)
+let chainLit = 0; // a chain under way: its links so far (shown on top of the charge)
+let dropLinks = 0; // this drop's links, all its chains together
+const streakRule = () => (['zen', 'vs', 'tutorial'].includes(mode) ? 'normal' : ['easy', 'hard'].includes(difficulty) ? difficulty : 'normal');
+const streakCap = () => (streakRule() === 'easy' ? 3 : HACK_COMBO);
 function showChainMeter() {
   const hacksOn = !MODES[mode].noHacks;
-  const ready = hacksOn && chainLit === 0 && !!(armedHack || nextExploit());
+  const cap = streakCap();
+  const charge = chainLit ? Math.ceil(streak) + chainLit : streak;
+  const ready = hacksOn && charge === 0 && !!(armedHack || nextExploit());
   for (const m of chainMeters) {
     m.hidden = !hacksOn;
+    if (m.children.length !== cap) m.innerHTML = '<i></i>'.repeat(cap);
     m.classList.toggle('ready', ready);
-    [...m.children].forEach((seg, i) => seg.classList.toggle('lit', ready || i < chainLit));
+    [...m.children].forEach((seg, i) => {
+      const fill = ready ? 1 : Math.max(0, Math.min(1, charge - i));
+      seg.style.setProperty('--fill', fill.toFixed(3));
+      seg.classList.toggle('lit', fill > 0);
+    });
   }
 }
+// A drop's end: nothing decrypted breaks the streak (NORMAL and HARD: all of it; EASY: a segment)
+function endStreakDrop(usedExploit) {
+  if (MODES[mode].noHacks || usedExploit || dropLinks > 0) return;
+  if (mode === 'tutorial' && Tutorial.holdsMeter()) return;
+  streak = streakRule() === 'easy' ? Math.max(0, Math.ceil(streak) - 1) : 0;
+  showChainMeter();
+}
+// HARD: the drain, while the game waits on the player (not mid-drop, over a menu, or hidden)
+let streakTick = performance.now();
+setInterval(() => {
+  const now = performance.now();
+  const dt = now - streakTick;
+  streakTick = now;
+  if (streak <= 0 || streakRule() !== 'hard' || busy || gameOver || document.hidden || panelOpen() || startScreenUp()) return;
+  streak = Math.max(0, streak - dt / STREAK_DRAIN_MS);
+  showChainMeter();
+}, 100);
 // From the top of the top row's squares down to the bottom of row 1's
 function placeChainMeter() {
   const top = boardEl.querySelector(`.cell[data-pos="${MAX_ROWS - 1},0"]`);
@@ -1276,7 +1303,12 @@ function placeChainMeter() {
 }
 if (window.ResizeObserver) new ResizeObserver(placeChainMeter).observe(boardEl);
 function setChainMeter(n) {
-  chainLit = Math.min(n, HACK_COMBO);
+  chainLit = n;
+  showChainMeter();
+}
+function resetStreak() {
+  streak = 0;
+  chainLit = 0;
   showChainMeter();
 }
 
@@ -1380,12 +1412,22 @@ async function resolveChains() {
     const kind = mode === 'puzzle' ? null : DIFFICULTIES[difficulty].packet;
     const packets = kind ? Math.floor(cleared / PACKETS[kind].bits) : 0;
     if (packets) await awardPackets(kind, packets);
-    const hack = MODES[mode].noHacks ? null : hackForChain(chain);
-    // (short of an exploit: dark again; one earned: lit, pulsing, ready. The tutorial's chain
-    // lesson keeps it lit to talk about)
-    setChainMeter(mode === 'tutorial' && Tutorial.holdsMeter() ? chainLit : 0);
-    if (hack) awardHack(hack);
-    else setMessage('');
+    // The streak: this chain's links added to the charge (a partly drained segment counts whole);
+    // each fill earns an exploit, the rest carrying on
+    dropLinks += chain;
+    const earned = [];
+    if (!MODES[mode].noHacks) {
+      streak = Math.ceil(streak) + chain;
+      while (streak >= streakCap()) {
+        streak -= streakCap();
+        const hack = hackForMeter();
+        if (hack) earned.push(hack);
+      }
+    }
+    chainLit = 0;
+    showChainMeter();
+    earned.forEach(awardHack);
+    if (!earned.length) setMessage('');
   }
 }
 
