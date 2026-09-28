@@ -907,6 +907,7 @@ function render(popped = [], falling = null) {
   updateColumnButtons();
   if (mode === 'tutorial') Tutorial.decorate(); // (its pulsing cells, redrawn with the board)
   if (typeof placeGhost === 'function') placeGhost(); // (a bit being aimed stays in the top row)
+  if (typeof placeChainMeter === 'function') placeChainMeter();
   // PIVOT waiting for a side: arrows in the top row over the two neighbors (as on the buttons)
   if (pivotFrom !== null) {
     for (const c of [pivotFrom - 1, pivotFrom + 1]) {
@@ -1262,6 +1263,17 @@ function showChainMeter() {
     [...m.children].forEach((seg, i) => seg.classList.toggle('lit', ready || i < chainLit));
   }
 }
+// From the top of the top row's squares down to the bottom of row 1's
+function placeChainMeter() {
+  const top = boardEl.querySelector(`.cell[data-pos="${MAX_ROWS - 1},0"]`);
+  const low = boardEl.querySelector('.cell[data-pos="0,0"]');
+  if (!top || !low) return;
+  const y0 = boardEl.offsetTop + top.offsetTop;
+  const y1 = boardEl.offsetTop + low.offsetTop + low.offsetHeight;
+  for (const m of chainMeters) Object.assign(m.style, { top: `${y0}px`, bottom: 'auto', height: `${y1 - y0}px` });
+  boardWrapEl.style.setProperty('--cell', `${low.offsetWidth}px`); // (the EXPLOIT button's size)
+}
+if (window.ResizeObserver) new ResizeObserver(placeChainMeter).observe(boardEl);
 function setChainMeter(n) {
   chainLit = Math.min(n, HACK_COMBO);
   showChainMeter();
@@ -1368,7 +1380,9 @@ async function resolveChains() {
     const packets = kind ? Math.floor(cleared / PACKETS[kind].bits) : 0;
     if (packets) await awardPackets(kind, packets);
     const hack = MODES[mode].noHacks ? null : hackForChain(chain);
-    setChainMeter(0); // (short of an exploit: dark again; one earned: lit, pulsing, ready)
+    // (short of an exploit: dark again; one earned: lit, pulsing, ready. The tutorial's chain
+    // lesson keeps it lit to talk about)
+    setChainMeter(mode === 'tutorial' && Tutorial.holdsMeter() ? chainLit : 0);
     if (hack) awardHack(hack);
     else setMessage('');
   }

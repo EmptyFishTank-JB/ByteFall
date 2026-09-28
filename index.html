@@ -25,8 +25,8 @@
   } catch (e) {}
 </script>
 <title>BYTEFALL // decryption terminal</title>
-<script src="js/fonts.js?v=225"></script>
-<link rel="stylesheet" href="css/style.css?v=225">
+<script src="js/fonts.js?v=226"></script>
+<link rel="stylesheet" href="css/style.css?v=226">
 </head>
 <body>
   <!-- Dev: TWINKLE BACKGROUND (grid-bg.js): the starlight behind the whole game, off by default -->
@@ -122,7 +122,7 @@
           <aside class="panel panel-hacks" id="hacks-panel">
             <h2>EXPLOITS</h2>
             <p class="slot-info" id="slot-info"></p>
-            <p><span id="hack-intro">Chain 5 decrypts in one drop to unlock a random exploit.</span> It waits in the exploit button (lower right): tap it to arm the exploit as your next drop, then drop it like a bit and it runs wherever it lands. Once armed, there's no taking it back.</p>
+            <p><span id="hack-intro">Chain 5 decrypts in one drop to unlock a random exploit.</span> It waits in the exploit button (under the grid): tap it to arm the exploit as your next drop, then drop it like a bit and it runs wherever it lands. Once armed, there's no taking it back.</p>
             <div class="hack-item" data-hack="worm-virus">
               <h3><span class="icon">§</span> WORM VIRUS<span class="combo"></span></h3>
               <p>Burrows down the column it lands in and wipes out every block there.</p>
@@ -486,6 +486,15 @@
           </div>
         </div>
         <div id="column-buttons" class="column-buttons"></div>
+        <!-- The EXPLOIT button: under the grid, a square the size of a bit's, set apart from the
+             drop buttons -->
+        <div class="exploit-row">
+          <button type="button" class="exploit-icon" id="exploit-btn" aria-label="Exploits">
+            <span class="exploit-glyph" id="exploit-glyph"></span>
+            <span class="exploit-count" id="exploit-count" hidden></span>
+            <span class="exploit-free" id="exploit-free" hidden>FREE!</span>
+          </button>
+        </div>
       </div>
 
       <div class="message-slot">
@@ -519,11 +528,6 @@
           <path d="M14 4H5v16h9" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
           <path d="M10 12h11M17 8l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-      </button>
-      <button type="button" class="corner-btn exploit-icon" id="exploit-btn" aria-label="Exploits">
-        <span class="exploit-glyph" id="exploit-glyph"></span>
-        <span class="exploit-count" id="exploit-count" hidden></span>
-        <span class="exploit-free" id="exploit-free" hidden>FREE!</span>
       </button>
     </div>
 
@@ -596,36 +600,36 @@
     </div>
   </div>
 
-  <script src="js/unlocks.js?v=225"></script>
-  <script src="js/progress.js?v=225"></script>
-  <script src="js/sfx.js?v=225"></script>
-  <script src="js/music/music-bytefall-theme.js?v=225"></script>
-  <script src="js/music/music-sleep-mode.js?v=225"></script>
-  <script src="js/music/music-brute-force.js?v=225"></script>
-  <script src="js/music/music-deep-web.js?v=225"></script>
-  <script src="js/music/music-zero-day.js?v=225"></script>
-  <script src="js/music/music-system-restore.js?v=225"></script>
-  <script src="js/music/music-night-drive.js?v=225"></script>
-  <script src="js/music/music-standby-mode.js?v=225"></script>
-  <script src="js/music/music-core-dump.js?v=225"></script>
-  <script src="js/music/music-handshake.js?v=225"></script>
-  <script src="js/music/music.js?v=225"></script>
-  <script src="js/data/puzzles.js?v=225"></script>
-  <script src="js/data/daily-puzzles.js?v=225"></script>
-  <script src="js/cpu.js?v=225"></script>
-  <script src="js/fx.js?v=225"></script>
-  <script src="js/viz.js?v=225"></script>
-  <script src="js/minibot.js?v=225"></script>
-  <script src="js/seasons.js?v=225"></script>
-  <script src="js/visitors.js?v=225"></script>
-  <script src="js/wanderers.js?v=225"></script>
-  <script src="js/tutorial.js?v=225"></script>
-  <script src="js/script.js?v=225"></script>
-  <script src="js/grid-bg.js?v=225"></script>
-  <script src="js/player.js?v=225"></script>
-  <script src="js/store.js?v=225"></script>
-  <script src="js/start.js?v=225"></script>
-  <script src="js/place.js?v=225"></script>
-  <script src="js/saver.js?v=225"></script>
+  <script src="js/unlocks.js?v=226"></script>
+  <script src="js/progress.js?v=226"></script>
+  <script src="js/sfx.js?v=226"></script>
+  <script src="js/music/music-bytefall-theme.js?v=226"></script>
+  <script src="js/music/music-sleep-mode.js?v=226"></script>
+  <script src="js/music/music-brute-force.js?v=226"></script>
+  <script src="js/music/music-deep-web.js?v=226"></script>
+  <script src="js/music/music-zero-day.js?v=226"></script>
+  <script src="js/music/music-system-restore.js?v=226"></script>
+  <script src="js/music/music-night-drive.js?v=226"></script>
+  <script src="js/music/music-standby-mode.js?v=226"></script>
+  <script src="js/music/music-core-dump.js?v=226"></script>
+  <script src="js/music/music-handshake.js?v=226"></script>
+  <script src="js/music/music.js?v=226"></script>
+  <script src="js/data/puzzles.js?v=226"></script>
+  <script src="js/data/daily-puzzles.js?v=226"></script>
+  <script src="js/cpu.js?v=226"></script>
+  <script src="js/fx.js?v=226"></script>
+  <script src="js/viz.js?v=226"></script>
+  <script src="js/minibot.js?v=226"></script>
+  <script src="js/seasons.js?v=226"></script>
+  <script src="js/visitors.js?v=226"></script>
+  <script src="js/wanderers.js?v=226"></script>
+  <script src="js/tutorial.js?v=226"></script>
+  <script src="js/script.js?v=226"></script>
+  <script src="js/grid-bg.js?v=226"></script>
+  <script src="js/player.js?v=226"></script>
+  <script src="js/store.js?v=226"></script>
+  <script src="js/start.js?v=226"></script>
+  <script src="js/place.js?v=226"></script>
+  <script src="js/saver.js?v=226"></script>
 </body>
 </html>

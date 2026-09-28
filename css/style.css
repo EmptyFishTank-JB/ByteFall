@@ -525,6 +525,8 @@ body.vs-mode .vs-title span { color: var(--accent); text-shadow: 0 0 8px var(--a
   color: var(--fg-dim);
   letter-spacing: 1px;
 }
+/* The HUD's labels (SCORE ... CURRENT): brighter than the other dim text, to read at a glance */
+.hud .stat .label { color: rgba(var(--fg-rgb), 0.85); }
 
 .stat .value {
   display: block;
@@ -578,7 +580,7 @@ body.vs-mode .vs-title span { color: var(--accent); text-shadow: 0 0 8px var(--a
   display: grid;
   grid-template-columns: repeat(var(--cols, 7), 1fr);
   gap: 3px;
-  padding: 0 7px;
+  padding: 0 14px; /* (under the columns: the board's side margin, 13px, and its frame's 1px border) */
   margin-top: 4px;
 }
 
@@ -623,9 +625,14 @@ body.vs-mode .vs-title span { color: var(--accent); text-shadow: 0 0 8px var(--a
 
 /* THE CHAIN METER (script.js): a segmented bar up each side of the grid, in the frame's margin;
    lit segment by segment as a chain grows, the whole bar lit and pulsing while an exploit is ready */
+/* (the grid gets a wider margin at the sides for it: the bar, then the same 3px gap as between the
+   squares; it runs from the top row down to the bottom of row 1, script.js placing it, and the
+   ===== line under the board runs on under it) */
+#board, #cpu-full { padding-left: 13px; padding-right: 13px; }
+#board .layer-line, #cpu-full .layer-line { margin: 0 -7px; }
 .chain-meter { position: absolute; top: 6px; bottom: 6px; width: 4px; z-index: 2; display: flex; flex-direction: column-reverse; gap: 3px; pointer-events: none; }
-.chain-meter.left { left: 1px; }
-.chain-meter.right { right: 1px; }
+.chain-meter.left { left: 6px; }
+.chain-meter.right { right: 6px; }
 .chain-meter[hidden] { display: none; }
 .chain-meter i { flex: 1; border-radius: 1px; background: rgba(var(--fg-rgb), 0.12); transition: background 0.15s, box-shadow 0.15s; }
 .chain-meter i.lit { background: var(--fg); box-shadow: 0 0 6px var(--fg); }
@@ -840,7 +847,8 @@ body.vs-mode .vs-title span { color: var(--accent); text-shadow: 0 0 8px var(--a
    with it when the next drop brings one */
 .stat .layer-mark { display: none; font-size: 9px; line-height: 1; letter-spacing: 1px; margin-top: 3px; color: var(--fg-dim); opacity: 0.8; }
 #pulse-stat.counts-layers .layer-mark { display: block; }
-body:not(.vs-mode) .hud #pulse-stat > .layer-mark { position: absolute; left: 0; right: 0; top: calc(50% + 11px); margin: 0; }
+.hud #pulse-stat > .layer-mark { position: absolute; left: 0; right: 0; top: calc(50% + 11px); margin: 0; }
+body.vs-mode .hud #pulse-stat > .layer-mark { top: auto; bottom: 7px; } /* (VS: its number sits lower in the square) */
 #pulse-stat.layer-next .layer-mark { color: var(--accent); opacity: 1; text-shadow: 0 0 6px var(--accent); animation: warn-pulse 0.6s ease-in-out infinite; }
 .layer-line.next { color: var(--accent); opacity: 1; text-shadow: 0 0 6px var(--accent); animation: warn-pulse 0.6s ease-in-out infinite; }
 .cpu-grid i.under-edge { border-bottom: 2px solid rgba(var(--fg-rgb), 0.3); }
@@ -1891,12 +1899,20 @@ header { margin-bottom: 6px; }
 /* In a match the corner button is PAUSE (two bars); otherwise QUIT */
 .quit-icon .pause-glyph, .quit-icon.as-pause .quit-glyph { display: none; }
 .quit-icon.as-pause .pause-glyph { display: block; }
-.exploit-icon { right: 12px; color: var(--fg-dim); opacity: 0.6; }
-.exploit-glyph { display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; line-height: 1; }
-.exploit-glyph svg { width: 20px; height: 20px; }
+/* THE EXPLOIT BUTTON: its own row under the grid (under the drop buttons, a gap between: not one
+   of them), a square the size of a grid square with the exploit's symbol in the middle */
+.exploit-row { order: 2; display: flex; justify-content: center; margin-top: 12px; }
+.board-wrap.buttons-top .exploit-row { order: 1; margin-top: 8px; }
+.exploit-icon {
+  position: relative; width: var(--cell, 40px); height: var(--cell, 40px); display: flex; align-items: center; justify-content: center;
+  padding: 0; background: var(--board-bg); border: 1px solid var(--grid-line); border-radius: 6px; cursor: pointer;
+  color: var(--fg-dim); opacity: 0.6; font-family: inherit; -webkit-tap-highlight-color: transparent;
+}
+.exploit-glyph { display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; line-height: 1; }
+.exploit-glyph svg { width: 22px; height: 22px; }
 .exploit-count { position: absolute; top: -7px; right: -7px; padding: 0 4px; border-radius: 6px; background: var(--fg); color: var(--panel); font-size: 10px; font-weight: bold; }
 .exploit-count[hidden] { display: none; }
-.exploit-free { position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%); font-size: 12px; font-weight: bold; letter-spacing: 1px; white-space: nowrap; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.7); animation: warn-pulse 1.6s ease-in-out infinite; }
+.exploit-free { position: absolute; left: calc(100% + 10px); top: 50%; transform: translateY(-50%); font-size: 12px; font-weight: bold; letter-spacing: 1px; white-space: nowrap; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.7); animation: warn-pulse 1.6s ease-in-out infinite; }
 .exploit-free[hidden] { display: none; }
 /* An exploit to arm: bright green glow, showing that exploit's icon */
 .exploit-icon.ready { color: var(--fg); opacity: 1; border-color: var(--fg); box-shadow: 0 0 12px rgba(var(--fg-rgb), 0.7); text-shadow: 0 0 8px rgba(var(--fg-rgb), 0.9); }
@@ -2280,6 +2296,9 @@ body:not(.vs-mode) .hud .stat:not(.cpu-stat):not(.cpu-face) > .label {
 /* Over an open menu: fixed at the bottom of the screen, above the menus */
 .tut-banner.float { position: fixed; top: auto; left: 50%; right: auto; bottom: 16px; width: min(460px, calc(100% - 32px)); transform: translateX(-50%); z-index: 60; max-height: 45vh; }
 .tut-banner.float.nudge { animation: none; }
+.tut-banner.float.middle { top: 50%; bottom: auto; transform: translate(-50%, -50%); }
+/* The menu buttons are dim until opened: pulsing in the tutorial, they light up full */
+:is(.records-btn, .settings-btn).tut-pulse { opacity: 1; filter: drop-shadow(0 0 4px rgba(var(--fg-rgb), 0.6)); }
 .tut-banner.nudge { animation: tut-nudge 0.3s ease-out; }
 @keyframes tut-nudge { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 .tut-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; font-size: 10px; letter-spacing: 2px; color: var(--accent); }

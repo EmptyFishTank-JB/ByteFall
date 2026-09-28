@@ -269,7 +269,8 @@ Before the first drop, the lower-left corner button is EXIT (back to the title
 card, one tap); after it, RESTART (two taps).
 
 THE CHAIN METER: a segmented bar up each side of the grid, 5 segments (the chain an
-exploit takes). Each link of a drop's chain lights one, from the bottom; a chain that
+exploit takes), from the top row down to the bottom of row 1, set off from the grid by
+the same 3px gap as between its squares (the ===== line under the board runs under it). Each link of a drop's chain lights one, from the bottom; a chain that
 falls short goes dark again. While an exploit is ready (earned, the daily free one,
 or armed) both bars stay lit amber and pulse, and an earned one also flashes
 EXPLOIT READY // its name over the grid. ENCRYPT IN has a ===== under its count
@@ -277,7 +278,15 @@ EXPLOIT READY // its name over the grid. ENCRYPT IN has a ===== under its count
 board when the next drop brings one.
 
 The tutorial's banner: BOT sits in the top-left corner of its frame with its words
-wrapping around it and on under it; BACK and NEXT sit under the frame, outside it.
+wrapping around it and on under it; BACK and NEXT sit under the frame, outside it. The
+chain lesson (steps 6 and 7) explains the meter, which stays lit until step 8; the
+exploit step mentions it too. The MENU and SETTINGS buttons light up full while pulsing;
+the EXPLOITS step pulses SLOTS and the cards; the menu steps' banners sit mid-screen
+(the EXPLOITS one low, clear of what it points at).
+
+THE EXPLOIT BUTTON: under the grid in its own row, below the drop buttons with a gap
+between (it's not one of them), a square the size of a grid square with the exploit's
+symbol in the middle; FREE! beside it. The HUD's labels (SCORE ... CURRENT) are brighter.
 
 The gear/speaker icon in the corner opens the settings: sound and music on or
 off, whether the drop buttons sit under or above the grid, the color theme

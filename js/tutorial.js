@@ -14,7 +14,8 @@ const Tutorial = (() => {
   // puts the banner under the board's middle instead of at its top.
   // pass: the tapped control also does its own job (opens the menu, arms the exploit); pane: the
   // menu open on that tab; closeMenus: the menus shut; held: exploits waiting in the button;
-  // float: the banner at the bottom of the screen, over any open menu. mood / explainMood: BOT's
+  // float: the banner at the bottom of the screen, over any open menu ('middle': in the middle of
+  // the screen). holdMeter: the chain meter stays lit after the drop, for the lesson on it. mood / explainMood: BOT's
   // face while it says the step / the explanation after the drop (idle when left out).
   const STEPS = [
     {
@@ -41,12 +42,12 @@ const Tutorial = (() => {
     },
     {
       text: 'When bits decrypt, the ones above fall, and can land in new matches: a CHAIN. Each link multiplies its points: 2x, 3x and up. Drop the [2] into column 7.',
-      board: [[], [], [], [3], [6, 3], [5, 3], [2]], bits: [2], drop: 6, cells: [[1, 4], [1, 5], [0, 6]], explainMood: 'happy',
+      board: [[], [], [], [3], [6, 3], [5, 3], [2]], bits: [2], drop: 6, cells: [[1, 4], [1, 5], [0, 6]], explainMood: 'happy', holdMeter: true,
       explain: () => 'The [2]s made a line of 2 going down and the top [3]s a line of 3 across. Then the bits above fell, and the last [3] found itself in a line of 3: a 2x chain. Decrypting 4 bits in one drop also makes a NIBBLE, worth 16 bonus points.',
     },
     {
-      text: 'CHAIN shows how long the last chain was. Tap it.',
-      tap: '#chain-stat',
+      text: 'CHAIN shows how long the last chain was. The bars up each side of the grid are the CHAIN METER: each link lights a segment. A chain that stops short of 5 lets it go dark again; reach 5 and it stays lit, pulsing: an exploit is ready. Tap CHAIN.',
+      tap: '#chain-stat', pulse: ['.chain-meter'], holdMeter: true,
     },
     {
       text: 'This [=] is an ENCRYPTION LAYER. Decrypt a bit right beside it to peel it. Drop the [2] into column 5, next to the layer: the two of them make a line of 2.',
@@ -67,7 +68,7 @@ const Tutorial = (() => {
       tap: '#pulse-stat',
     },
     {
-      text: 'Get a 5x chain in one drop to earn an EXPLOIT: a tool that changes the board. Earned exploits are stored in the EXPLOIT button at the bottom right. You have one waiting: a WORM VIRUS. Tap the EXPLOIT button to arm it.',
+      text: 'Get a 5x chain in one drop, filling the CHAIN METER, to earn an EXPLOIT: a tool that changes the board. While one is waiting, the meter stays lit and pulses. Earned exploits are stored in the EXPLOIT button. You have one waiting: a WORM VIRUS. Tap the EXPLOIT button to arm it.',
       board: [[], [], [6, 2, 7, 3], [], [], [], []], bits: [], held: ['worm-virus'], tap: '#exploit-btn', pass: true, mood: 'devious',
     },
     {
@@ -81,15 +82,15 @@ const Tutorial = (() => {
     },
     {
       text: 'The RULES tab has everything you just learned, written down, with the TUTORIAL button to come back here any time.',
-      pane: 'rules', pulse: ['.menu-tabs [data-pane="rules"]'], float: true, next: true,
+      pane: 'rules', pulse: ['.menu-tabs [data-pane="rules"]'], float: 'middle', next: true,
     },
     {
       text: 'The RECORDS tab shows your level and DECRYPTOR rank, every unlock with the level it opens at, every achievement with its progress, and your lifetime stats.',
-      pane: 'records', pulse: ['.menu-tabs [data-pane="records"]'], float: true, next: true,
+      pane: 'records', pulse: ['.menu-tabs [data-pane="records"]'], float: 'middle', next: true,
     },
     {
-      text: 'The EXPLOITS tab is your loadout. You can only earn exploits that are in a slot. Tap a card to put it in a free slot, or tap it again to take it out. More slots and exploits unlock as you level up, and the loadout is locked from a session’s first drop until it ends.',
-      pane: 'exploits', pulse: ['.menu-tabs [data-pane="exploits"]'], float: true, next: true,
+      text: 'The EXPLOITS tab is your loadout. You can only earn exploits that are in a slot: SLOTS, at the top, counts the slots you’ve filled and the ones you have. Tap an unlocked card to put it in a free slot, or tap it again to take it out. More slots and exploits unlock as you level up, and the loadout is locked from a session’s first drop until it ends.',
+      pane: 'exploits', pulse: ['.menu-tabs [data-pane="exploits"]', '#slot-info', '.hack-item'], float: true, next: true,
     },
     {
       text: 'Now tap SETTINGS, at the top right.',
@@ -97,7 +98,7 @@ const Tutorial = (() => {
     },
     {
       text: 'SETTINGS has sound and music, whether the drop buttons sit under or over the grid, vibration on phones, color THEMES and FONTS (more unlock as you level up), and the PLAYLIST, with the MUSIC PLAYER for listening on its own.',
-      float: true, next: true,
+      float: 'middle', next: true,
     },
     {
       text: 'That’s everything you need to know. Good luck, decryptor.',
@@ -222,6 +223,8 @@ const Tutorial = (() => {
     const home = s.float ? document.body : document.querySelector('.board-frame');
     if (el.parentNode !== home) home.appendChild(el);
     el.classList.toggle('float', !!s.float);
+    el.classList.toggle('middle', s.float === 'middle');
+    if (!s.holdMeter) setChainMeter(0); // (the chain lesson's meter stays lit until it's done)
     el.innerHTML = '';
     // The framed card (heading, BOT and what it says); BACK / NEXT go under it, outside the frame
     const card = document.createElement('div');
@@ -431,6 +434,7 @@ const Tutorial = (() => {
     decorate,
     // Only the lesson's column can be pressed
     allows: (col) => { const s = cur(); return !!s && s.drop === col && !dropped; },
+    holdsMeter: () => { const s = cur(); return !!s && !!s.holdMeter; },
     active: () => step >= 0,
     // The EXPLOIT button works only on the step that asks for it
     allowsExploit: () => { const s = cur(); return !!s && s.tap === '#exploit-btn'; },
