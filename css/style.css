@@ -2383,7 +2383,7 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
 /* BOT in the corner, its words wrapping around it and on under it (flow-root: the card holds it) */
 .tut-body { display: flow-root; }
 .tut-bot { float: left; width: 36px; margin: 2px 10px 2px 0; }
-.tut-body .tut-text { cursor: pointer; }
+.tut-body .tut-text { cursor: pointer; white-space: pre-line; } /* (a step's text can break into lines) */
 
 /* The start screen's wanderers: along the bottom of the card, walking in and out of it */
 .start-walkers { position: absolute; left: 0; right: 0; bottom: 10px; height: 44px; pointer-events: none; }

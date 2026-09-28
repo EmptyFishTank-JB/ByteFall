@@ -49,7 +49,7 @@ const Tutorial = (() => {
     {
       text: 'Any time a bit decrypts, any bits that were above it will fall, and they can cause more bits to DECRYPT. This is called a CHAIN. Each DECRYPTED bit that is part of a CHAIN has its points multiplied by its position within the CHAIN: 2x, 3x, and up. Let’s drop the [2] into column 6.',
       board: [[], [], [6, 6], [7, 5, 2, 7], [3, 4], [2], [6, 5]], bits: [2], drop: 5, cells: [[0, 5], [1, 3], [1, 6]], explainMood: 'happy', holdMeter: true,
-      explain: () => 'Nice one! The dropped [2] made column 6 two bits tall, and the two [5]s were in a row 5 bits wide. The [2] and [7] above the cleared [5] fell. Then the [3] found itself in a row of 3, and once it cleared, the [4] beside the fallen [2] dropped away, leaving the [2] in a row of 2. Decrypting 4 bits in one drop is called a NIBBLE and is worth 16 bonus points. This drop was a 3x chain, with 16 bonus points from the NIBBLE.',
+      explain: () => 'Nice one! That was a 3x CHAIN:\n1. The [2]s cleared in a column of 2, and the [5]s in a row of 5.\n2. The [3] cleared in a row of 3.\n3. The [2] cleared in a row of 2.\n\nDecrypting 4 bits in one drop is a NIBBLE, worth 16 bonus points.',
     },
     {
       text: 'CHAIN shows how long the last chain was. The bars up each side of the grid are the CHAIN METER: each link lights a segment. A chain that stops short of 5 lets it go dark again; reach 5 and it stays lit, pulsing: an exploit is ready. Tap CHAIN.',
@@ -188,7 +188,8 @@ const Tutorial = (() => {
     const W = innerWidth;
     const H = innerHeight;
     let d = `M0 0H${W}V${H}H0Z`;
-    for (const el of [dimOn, bannerEl && bannerEl.querySelector('.tut-card'), bannerEl && bannerEl.querySelector('.tut-actions')]) {
+    const parts = bannerEl ? [bannerEl.querySelector('.tut-card'), ...bannerEl.querySelectorAll('.tut-actions button')] : [];
+    for (const el of [dimOn, ...parts]) { // (the card and each button: not the empty row beside them)
       if (!el || !el.isConnected) continue;
       const r = el.getBoundingClientRect();
       if (!r.width) continue;
