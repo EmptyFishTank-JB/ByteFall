@@ -629,6 +629,16 @@ body.vs-mode .vs-title span { color: var(--accent); text-shadow: 0 0 8px var(--a
    squares; it runs from the top row down to the bottom of row 1, script.js placing it, and the
    ===== line under the board runs on under it) */
 #board, #cpu-full { padding-left: 13px; padding-right: 13px; }
+/* VS on points: THE SCORE BAR above the grid (script.js), in a taller top margin: the bar, then the
+   same 3px gap. Yours fills in your color, the CPU's in its amber; the | marks the middle (or,
+   in TUG OF WAR, where the points stand) */
+.board-frame.with-vs-bar #board { padding-top: 13px; }
+.vs-bar { position: absolute; left: 13px; right: 13px; top: 6px; height: 4px; border-radius: 2px; background: rgba(var(--fg-rgb), 0.12); z-index: 2; pointer-events: none; }
+.vs-bar[hidden] { display: none; }
+.vs-bar i { position: absolute; top: 0; bottom: 0; transition: width 0.3s, left 0.3s; }
+.vs-bar .mine { background: var(--fg); box-shadow: 0 0 6px var(--fg); }
+.vs-bar .theirs { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+.vs-bar .mark { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: var(--panel-text, #fff); box-shadow: 0 0 4px rgba(255, 255, 255, 0.7); transition: left 0.3s; }
 #board .layer-line, #cpu-full .layer-line { margin: 0 -7px; }
 .chain-meter { position: absolute; top: 6px; bottom: 6px; width: 4px; z-index: 2; display: flex; flex-direction: column-reverse; gap: 3px; pointer-events: none; }
 .chain-meter.left { left: 6px; }
@@ -2540,11 +2550,11 @@ html.page-twinkle .page-bg { display: block; }
 
 /* A mad wanderer poked (wanderers.js's rabid): a hard head shake, then snapping at you like a
    rabid dog, lunging forward with its jaw chomping open and shut */
-.walker.headshaking .bot { animation: walker-headshake 0.16s steps(2) 4; }
+:is(.walker, #cpu-face).headshaking .bot { animation: walker-headshake 0.16s steps(2) 4; }
 @keyframes walker-headshake { 0% { transform: translateX(-1px); } 100% { transform: translateX(1px); } } /* (whole pixels of its grid, no tilt) */
-.walker.snapping .bot { transform-origin: 50% 80%; animation: walker-lunge 0.2s steps(2) 3; }
+:is(.walker, #cpu-face).snapping .bot { transform-origin: 50% 80%; animation: walker-lunge 0.2s steps(2) 3; }
 @keyframes walker-lunge { 0% { transform: scale(1.22) translateY(1px); } 100% { transform: scale(1); } }
-.walker.snapping .mouth-teeth { transform-box: fill-box; transform-origin: 50% 0; animation: walker-jaw 0.2s steps(2) 3; }
+:is(.walker, #cpu-face).snapping .mouth-teeth { transform-box: fill-box; transform-origin: 50% 0; animation: walker-jaw 0.2s steps(2) 3; }
 @keyframes walker-jaw { 0% { transform: scaleY(2); } 100% { transform: scaleY(0.5); } }
 
 /* SEASONAL COSTUMES on the wanderers (wanderers.js): drawn over the body, under the face; the

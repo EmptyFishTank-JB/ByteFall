@@ -947,6 +947,7 @@ function fitStatValues() {
 }
 
 function updateHud() {
+  if (mode === 'vs') updateVsBar();
   if (score > best && bestKey()) {
     best = score;
     storage.set(bestKey(), String(best));
@@ -1832,11 +1833,11 @@ document.querySelectorAll('#vs-levels button[data-vs]').forEach((btn) => {
       vsNotice(`LOCKED // ${Progress.unlock(`vs-${next}`).need.toUpperCase()}`);
       return;
     }
-    const harder = Object.keys(CpuBoard.LEVELS).indexOf(next) > Object.keys(CpuBoard.LEVELS).indexOf(vsLevel);
     requestReset(btn, 'CONFIRM?', () => {
       vsLevel = next;
       storage.set('bytefall-vs-level', next);
-      botMood(harder ? 'devious' : 'smug', 1900); // (a harder level: bring it; an easier one: going soft?)
+      botFlash = null; // (a new level: just its own face, no reaction)
+      botMood();
     });
   });
 });
@@ -2469,7 +2470,7 @@ cpuStatEl.addEventListener('contextmenu', (e) => e.preventDefault()); // a long 
 // thinking just before a move, idle
 const botSayEl = document.getElementById('bot-say');
 // Its lines: at rest by level, and each bot's own for the rest
-const BOT_REST = { easy: 'HI!', normal: 'READY', hard: 'GRR', insane: 'KILL -9' };
+const BOT_REST = { easy: 'HI!', normal: 'READY', hard: 'GRR', insane: 'MAX CPU' };
 const BOT_LINES = {
   bot: { think: '...', happy: 'HA!', hit: 'OOF', worried: 'UH OH', dead: 'ERR', smug: 'GG', annoyed: 'ANY DAY NOW', devious: 'HEH HEH' },
   grifter: { think: 'HMM', happy: 'MINE!', hit: 'HEY!', worried: 'NO NO', dead: 'BROKE', smug: 'PAY UP', annoyed: 'TICK TOCK', devious: 'OH YES' },
@@ -2486,6 +2487,17 @@ const MOOD_LINES = { skeptic: '...?', scared: 'EEK!', surprised: '!?', love: '<3
 const BOT_VARIANTS = { idle: ['', '', 'bored', 'tapping'], think: ['', 'scan', 'ponder'] };
 const BOT_VARIANT_LINES = { bored: 'ZZZ', tapping: 'YOUR MOVE', scan: 'CALC...', ponder: 'HMM...' };
 let botVariant = { mood: null, v: '', until: 0 };
+// The waiting faces (ZZZ, YOUR MOVE) only on the setup screen, 8 seconds after the last setting
+// was touched, and only for the easygoing ones: BOT, GRIFTER and BUNKER on EASY or NORMAL. HARD
+// says HURRY UP... instead, its angry face and all; GLITCH and INSANE just wait.
+const WAIT_MS = 8000;
+let vsTouchedAt = performance.now();
+document.getElementById('vs-setup').addEventListener('pointerdown', () => { vsTouchedAt = performance.now(); }, true);
+const waitedLong = () => {
+  if (vsStarted) vsTouchedAt = performance.now(); // (back on the setup screen after a match: 8s from then)
+  return !vsStarted && performance.now() - vsTouchedAt > WAIT_MS;
+};
+const waitsIdly = () => ['bot', 'grifter', 'bunker'].includes(vsBot) && ['easy', 'normal'].includes(vsLevel);
 function botVariantFor(mood) {
   const opts = BOT_VARIANTS[mood];
   if (!opts) {
@@ -2531,10 +2543,12 @@ function botMood(flash = null, ms = 900, sayThis = '') {
   else if (vsStarted && cpu && cpuClock > cpu.delay - 450) mood = 'think';
   cpuFaceEl.dataset.level = vsLevel;
   swapBot();
-  const variant = botVariantFor(mood);
+  let variant = botVariantFor(mood);
+  if (mood === 'idle' && !(waitedLong() && waitsIdly())) variant = '';
+  const hurry = mood === 'idle' && waitedLong() && vsLevel === 'hard' && vsBot !== 'glitch';
   const flashing = botFlash && performance.now() < botFlash.until && mood === botFlash.mood;
   const say = flashing && botFlash.say ? botFlash.say
-    : variant ? BOT_VARIANT_LINES[variant] : mood === 'idle' ? BOT_REST[vsLevel] : mood === 'paused' ? "I'LL WAIT"
+    : variant ? BOT_VARIANT_LINES[variant] : hurry ? 'HURRY UP...' : mood === 'idle' ? BOT_REST[vsLevel] : mood === 'paused' ? "I'LL WAIT"
       : BOT_LINES[vsBot][mood] || MOOD_LINES[mood] || '';
   if (cpuFaceEl.dataset.mood !== mood || (cpuFaceEl.dataset.variant || '') !== variant || botSayEl.textContent !== say) {
     cpuFaceEl.dataset.mood = mood;
@@ -2557,6 +2571,23 @@ function pokeCpu() {
   cpuPoking = true;
   Progress.botEvent('pokes');
   const bot = vsBot;
+  if (vsLevel === 'insane') { // (rabid: a head shake, a snarl, then it snaps at you)
+    cpuFaceEl.classList.add('headshaking');
+    botMood('angry', 700, 'GRR');
+    setTimeout(() => { cpuFaceEl.classList.remove('headshaking'); botMood('snarl', 500, 'GRRR'); }, 650);
+    setTimeout(() => { cpuFaceEl.classList.add('snapping'); botMood('snarl', 700, 'SNAP!'); Progress.botEvent('bitten'); announce(Progress.check()); }, 1050);
+    setTimeout(() => { cpuFaceEl.classList.remove('snapping'); botMood('angry', 900); }, 1700);
+    setTimeout(() => { cpuPoking = false; }, 2600);
+    return;
+  }
+  if (vsLevel === 'hard') { // (a little less: a head shake and a growl, no bite)
+    cpuFaceEl.classList.add('headshaking');
+    botMood('angry', 1400, 'GRR!');
+    setTimeout(() => cpuFaceEl.classList.remove('headshaking'), 650);
+    setTimeout(() => { cpuPoking = false; }, 1600);
+    announce(Progress.check());
+    return;
+  }
   if (Math.random() < 0.4) {
     botMood('scared', 1200, 'EEK!');
     setTimeout(() => { cpuPoking = false; }, 1200);
@@ -2805,7 +2836,37 @@ function fitVsStatus() {
   }
 }
 
+// THE SCORE BAR, above the grid in VS on points. ATTRITION and DEATHMATCH: two halves filling
+// from the middle outward toward the target, yours to the left, the CPU's to the right. TUG OF
+// WAR: one bar split where the points stand, a | marker sliding left or right as they change
+// hands (yours on the left).
+function updateVsBar() {
+  const vsBarEl = document.getElementById('vs-bar'); // (looked up here: updateHud can call this early)
+  const on = mode === 'vs' && vsMode !== 'classic';
+  vsBarEl.hidden = !on;
+  boardEl.parentElement.classList.toggle('with-vs-bar', on);
+  if (!on) return;
+  const me = cpu ? matchPoints(vsMe, vsThem, score - vsCounted, 0)[0] : (vsMode === 'tug' ? vsPool : 0);
+  const them = cpu ? vsThem : (vsMode === 'tug' ? vsPool : 0);
+  const mine = vsBarEl.querySelector('.mine');
+  const theirs = vsBarEl.querySelector('.theirs');
+  const mark = vsBarEl.querySelector('.mark');
+  vsBarEl.classList.toggle('tug', vsMode === 'tug');
+  if (vsMode === 'tug') {
+    const at = me + them > 0 ? (me / (me + them)) * 100 : 50;
+    Object.assign(mine.style, { left: '0', right: '', width: `${at}%` });
+    Object.assign(theirs.style, { left: `${at}%`, right: '', width: `${100 - at}%` });
+    mark.style.left = `${at}%`;
+  } else {
+    const half = (n) => Math.min(1, Math.max(0, n / vsTarget)) * 50;
+    Object.assign(mine.style, { left: '', right: '50%', width: `${half(me)}%` });
+    Object.assign(theirs.style, { left: '50%', right: '', width: `${half(them)}%` });
+    mark.style.left = '50%';
+  }
+}
+
 function showVs() {
+  updateVsBar();
   const vs = mode === 'vs' && !!cpu;
   cpuStatEl.hidden = !vs;
   cpuFaceEl.hidden = !vs;

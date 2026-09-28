@@ -367,7 +367,7 @@ const Progress = (() => {
         { id: 'bunker-buster', name: 'BUNKER BUSTER', desc: 'Beat BUNKER', value: botWin('bunker'), goal: 1 },
         { id: 'patched', name: 'PATCHED', desc: 'Beat GLITCH', value: botWin('glitch'), goal: 1 },
         { id: 'rogues-gallery', name: "ROGUES' GALLERY", desc: 'Beat every bot', value: () => BOTS.filter((b) => d.vsBotWins[b]).length, goal: BOTS.length },
-        { id: 'kill-9', name: 'KILL -9', desc: 'Beat every bot on INSANE', value: () => BOTS.filter((b) => d.vsBotLevelWins[`${b}:insane`]).length, goal: BOTS.length },
+        { id: 'kill-9', name: 'NO CONTEST', desc: 'Beat every bot on INSANE', value: () => BOTS.filter((b) => d.vsBotLevelWins[`${b}:insane`]).length, goal: BOTS.length },
         { id: 'stack-overflow', name: 'STACK OVERFLOW', desc: 'Win a CLASSIC VS match', value: () => d.vsModeWins.classic || 0, goal: 1 },
         { id: 'war-of-attrition', name: 'WAR OF ATTRITION', desc: 'Win an ATTRITION VS match', value: () => d.vsModeWins.attrition || 0, goal: 1 },
         { id: 'frag-limit', name: 'FRAG LIMIT', desc: 'Win a DEATHMATCH VS match', value: () => d.vsModeWins.deathmatch || 0, goal: 1 },

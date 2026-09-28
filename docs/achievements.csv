@@ -139,7 +139,7 @@ VS BOTS,OUTHUSTLED,Beat GRIFTER,1,Standard,outhustled
 VS BOTS,BUNKER BUSTER,Beat BUNKER,1,Standard,bunker-buster
 VS BOTS,PATCHED,Beat GLITCH,1,Standard,patched
 VS BOTS,ROGUES' GALLERY,Beat every bot,4,Standard,rogues-gallery
-VS BOTS,KILL -9,Beat every bot on INSANE,4,Standard,kill-9
+VS BOTS,NO CONTEST,Beat every bot on INSANE,4,Standard,kill-9
 VS MODES AND SETTINGS,STACK OVERFLOW,Win a CLASSIC VS match,1,Standard,stack-overflow
 VS MODES AND SETTINGS,WAR OF ATTRITION,Win an ATTRITION VS match,1,Standard,war-of-attrition
 VS MODES AND SETTINGS,FRAG LIMIT,Win a DEATHMATCH VS match,1,Standard,frag-limit
