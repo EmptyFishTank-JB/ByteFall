@@ -18,10 +18,10 @@ const Tutorial = (() => {
   // float: the banner at the bottom of the screen, over any open menu ('middle': in the middle of
   // the screen). holdMeter: the chain meter stays lit after the drop, for the lesson on it. mood / explainMood: BOT's
   // face while it says the step / the explanation after the drop (idle when left out). intro:
-  // the welcome ahead of the steps (step 0, not counted; BEGIN starts step 1).
+  // the welcome ahead of the steps (not counted, no number; BEGIN starts step 1).
   const STEPS = [
     {
-      text: 'Welcome to BYTEFALL! This tutorial will help you understand how the game is played, along with some other useful information. As you can see, there are 20 steps! Don’t worry, they’re not too long, and despite all of the numbers, there’s really no math required as long as you can count to 7!',
+      text: 'Welcome to BYTEFALL! This tutorial will help you understand how the game is played, along with some other useful information. There are 20 steps! Don’t worry, they’re not too long, and despite all of the numbers, there’s really no math required as long as you can count to 7! Let’s begin!',
       board: EMPTY, bits: [], intro: true, place: 'bottom', mood: 'happy',
     },
     {
@@ -240,8 +240,8 @@ const Tutorial = (() => {
     el.appendChild(card);
     const head = document.createElement('div');
     head.className = 'tut-head';
-    // (the welcome isn't a step: it shows 0 / 20, and the steps count from the one after it)
-    head.innerHTML = `<span>// TUTORIAL ${step} / ${STEPS.length - 1}</span>`;
+    // (the welcome isn't a step: no number; the steps count from the one after it)
+    head.innerHTML = `<span>// TUTORIAL${s.intro ? '' : ` ${step} / ${STEPS.length - 1}`}</span>`;
     const exit = document.createElement('button');
     exit.type = 'button';
     exit.className = 'tut-exit';
