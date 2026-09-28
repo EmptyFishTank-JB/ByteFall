@@ -47,7 +47,7 @@ const Tutorial = (() => {
       tap: '#score-stat',
     },
     {
-      text: 'Any time a bit decrypts, any bits that were above it will fall, and they can cause more bits to DECRYPT. This is called a CHAIN. Each DECRYPTED bit that is part of a CHAIN has its points multiplied by its position within the CHAIN: 2x, 3x, and up. Let’s drop the [2] into column 6.',
+      text: 'Any time a bit decrypts, any bits that were above it will fall, and they can cause more bits to DECRYPT. This is called a CHAIN, and each wave of bits that clears is a link. The first link scores normal points, the second link’s points are doubled (2x), the third link’s are tripled (3x), and so on. Let’s drop the [2] into column 6.',
       board: [[], [], [6, 6], [7, 5, 2, 7], [3, 4], [2], [6, 5]], bits: [2], drop: 5, cells: [[0, 5], [1, 3], [1, 6]], explainMood: 'happy', holdMeter: true,
       explain: () => 'Nice one! That was a 3x CHAIN:\n1. The [2]s cleared in a column of 2, and the [5]s in a row of 5.\n2. The [3] cleared in a row of 3.\n3. The [2] cleared in a row of 2.\n\nDecrypting 4 bits in one drop is a NIBBLE, worth 16 bonus points.',
     },
