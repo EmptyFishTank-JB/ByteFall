@@ -4,14 +4,13 @@
 // make a nibble), with no animation. The CPU picks a column for each bit by trying them all.
 // Garbage (the encrypted blocks players send each other) drops onto the top of random columns.
 const CpuBoard = (() => {
-  // The board: 7x7 against EASY and NORMAL; 8x8 against HARD and INSANE, with bits up to 8 and
-  // 8 decrypted in one move making a BYTE (as the player's board, which matches it). Set by create()
+  // The board: 7x7 against EASY and NORMAL; 8x8 against HARD and INSANE, with bits up to 8,
+  // 8 decrypted in one move making a BYTE and 4 more a NIBBLE (as the player's board, which
+  // matches it). Set by create()
   // for the match (one CPU at a time).
   let COLS = 7;
   let ROWS = 7;
   let MAX_ROWS = ROWS + 1;
-  let NIBBLE_BITS = 4;
-  let NIBBLE_BONUS = 16;
   const sizeFor = (levelId) => (levelId === 'hard' || levelId === 'insane' ? 8 : 7);
 
   // How each level plays: ms between drops, how often it drops somewhere random instead of
@@ -84,7 +83,9 @@ const CpuBoard = (() => {
       for (let c = 0; c < COLS; c++) columns[c] = columns[c].filter(Boolean);
       if (record) record({ settled: true }); // everything fallen into place
     }
-    const bonus = Math.floor(bits / NIBBLE_BITS) * NIBBLE_BONUS;
+    // (every 8 decrypted in one move a BYTE on 8x8; 4 of the rest, or of all on 7x7, a NIBBLE)
+    const bytes = COLS === 8 ? Math.floor(bits / 8) : 0;
+    const bonus = bytes * 256 + Math.floor((bits - bytes * 8) / 4) * 16;
     return { points: points + bonus, chain, bits, extra: extra + bonus };
   }
 
@@ -122,8 +123,6 @@ const CpuBoard = (() => {
   function create(levelId, rnd, bits, layerEvery = 0, botId = 'bot', exploits = false) {
     COLS = ROWS = sizeFor(levelId);
     MAX_ROWS = ROWS + 1;
-    NIBBLE_BITS = COLS === 8 ? 8 : 4; // (a BYTE on 8x8, a NIBBLE on 7x7)
-    NIBBLE_BONUS = COLS === 8 ? 256 : 16;
     let drops = 0;
     const level = LEVELS[levelId] || LEVELS.normal;
     const bot = BOTS[botId] || BOTS.bot;

@@ -1417,8 +1417,11 @@ async function resolveChains() {
   if (chain > 0) {
     await sleep(300);
     const kind = mode === 'puzzle' ? null : DIFFICULTIES[difficulty].packet;
-    const packets = kind ? Math.floor(cleared / PACKETS[kind].bits) : 0;
-    if (packets) await awardPackets(kind, packets);
+    // (on the 8x8 board, every 8 make a BYTE and 4 of what's left a NIBBLE; on 7x7, NIBBLEs)
+    const bytes = kind === 'byte' ? Math.floor(cleared / BYTE_BITS) : 0;
+    const nibbles = kind ? Math.floor((cleared - bytes * BYTE_BITS) / NIBBLE_BITS) : 0;
+    if (bytes) await awardPackets('byte', bytes);
+    if (nibbles) await awardPackets('nibble', nibbles);
     // The streak: this chain's links added to the charge (a partly drained segment counts whole);
     // each fill earns an exploit, the rest carrying on
     dropLinks += chain;
