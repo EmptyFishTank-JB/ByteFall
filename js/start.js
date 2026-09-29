@@ -34,7 +34,7 @@
           mode = 'tutorial';
           daily = false;
           resetNow();
-        }
+        } else showHome(); // (the main menu)
         requestAnimationFrame(() => {
           fitBoard();
           black.classList.remove('on');
@@ -70,14 +70,15 @@
   if (screen.hidden) inGameHistory();
   window.addEventListener('popstate', () => {
     if (!screen.hidden) return; // (on this screen: the next back leaves)
-    // In the game: an open panel closes first; a game under way stays (a VS match pauses)
+    // An open panel closes first; a game goes back to the main menu (paused, for RESUME); the
+    // tutorial stays (it has its own EXIT); the main menu goes back to this screen
     const player = document.getElementById('music-player');
     const panel = !recordsEl.hidden || !settingsEl.hidden || !player.hidden;
-    if (panel || inAGame()) {
+    if (panel || !homeOpen) {
       if (!player.hidden) document.getElementById('mp-close').click();
       setRecordsOpen(false);
       setSettingsOpen(false);
-      if (!panel && mode === 'vs' && vsStarted && !vsPaused && !gameOver) openPause();
+      if (!panel) showHome();
       history.pushState({ bytefall: 'game' }, '');
       return;
     }

@@ -2659,3 +2659,59 @@ html.page-twinkle .page-bg { display: block; }
 
 /* A hat (wanderers.js's winter, holiday and party costumes): the antennas and ear tips go under it */
 .walker[data-hat] :is(.shape-bot, .shape-grifter, .shape-glitch) rect[y="1"] { display: none; }
+
+/* ===== MAIN MENU (#home, script.js's showHome) =====
+   Over the game card between the start screen and a game: the title, the level bar, the six
+   modes, and the picked mode's panel (its options, what it is, your best, PLAY). The game under
+   it is hidden while it's up; the top icons (RULES & RECORDS, SETTINGS) and the wanderers stay. */
+.home[hidden] { display: none; }
+.home {
+  position: absolute; inset: 0; z-index: 15; pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  padding: 52px clamp(12px, 4vw, 28px) 64px; text-align: center; overflow-y: auto;
+}
+.home > * { pointer-events: auto; }
+.home-head h1 { font-size: 34px; letter-spacing: 6px; }
+.home-head .tagline { margin-top: 6px; }
+.home .level-bar { margin-top: 0; }
+.home .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; max-width: 340px; margin-top: 0; }
+.home .modes button { padding: 10px 4px; font-size: 13px; letter-spacing: 1px; }
+.home-panel {
+  width: 100%; max-width: 340px; display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: 14px 12px; border: 1px solid var(--grid-line); border-radius: 6px; background: rgba(var(--fg-rgb), 0.03);
+  animation: pause-in 0.18s ease-out;
+}
+.home-mode-name { margin: 0; font-size: 15px; letter-spacing: 3px; color: var(--accent); text-shadow: 0 0 8px rgba(var(--accent-rgb), 0.6); }
+.home .mode-info { margin: 0; font-size: 11px; line-height: 1.5; color: var(--panel-text); }
+.home .difficulty, .home .puzzle-nav { margin-top: 0; }
+.home-best { margin: 0; font-size: 12px; letter-spacing: 2px; color: var(--fg-dim); }
+.home-best b { color: var(--fg); }
+.home-best:empty { display: none; }
+.home-play { margin-top: 2px; }
+/* The game under the menu: hidden (still laid out, so nothing jumps when PLAY shows it) */
+body.at-home .crt > :is(header, .hud, .board-wrap, .message-slot, .corner-btn, .vs-title, .dev-badge) { visibility: hidden; }
+
+/* In a game (not the tutorial): the top-left icon is PAUSE (the house when there's nothing to
+   pause: VS's setup, a finished run), and SETTINGS waits on the pause screen */
+.records-btn svg { position: absolute; left: 4px; top: 4.5px; }
+.records-btn :is(.rb-pause, .rb-home) { visibility: hidden; }
+body.in-game .records-btn .rb-menu { visibility: hidden; }
+body.in-game:not(.can-pause) .records-btn .rb-home,
+body.in-game.can-pause .records-btn .rb-pause { visibility: visible; }
+body.in-game .settings-btn:not([aria-expanded="true"]) { visibility: hidden; }
+/* PAUSE in every mode: RESUME, RESTART (and EXIT in VS), RULES & RECORDS and SETTINGS, MAIN MENU */
+.vs-pause .pause-row button { font-size: 11px; padding: 6px 10px; }
+.vs-pause #pause-exit[hidden] { display: none; }
+.pause-menu {
+  padding: 6px 14px; background: transparent; border: 1px solid var(--fg-dim); border-radius: 4px;
+  color: var(--fg-dim); font-family: inherit; font-size: 12px; letter-spacing: 2px; cursor: pointer;
+}
+.pause-menu:hover { color: var(--fg); border-color: var(--fg); }
+/* The game over box: MAIN MENU under NEW SESSION */
+.overlay-menu-btn {
+  display: block; margin: 12px auto 0; padding: 6px 14px; background: transparent; border: 1px solid var(--fg-dim);
+  border-radius: 4px; color: var(--fg-dim); font-family: inherit; font-size: 11px; letter-spacing: 2px; cursor: pointer;
+}
+.overlay-menu-btn:hover { color: var(--fg); border-color: var(--fg); }
+.home #daily-kinds { gap: 5px; }
+.home #daily-kinds button { padding-left: 7px; padding-right: 7px; }

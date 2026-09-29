@@ -404,6 +404,7 @@ const Tutorial = (() => {
     }
     setModeFromChoice();
     resetNow();
+    showHome(); // (out to the main menu)
   }
 
   // What the last drop decrypted, link by link: "[3] [3] (13 + 13) x1 = 26"

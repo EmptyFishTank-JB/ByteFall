@@ -137,7 +137,7 @@ const dailyNote = (date, what) => (dailyOfficial
 // `mode` is the game being played. The mode row picks CLASSIC, DAILY, BLITZ, ZEN or PUZZLE; under
 // DAILY (`daily`) the second row picks DECRYPT, PUZZLE, BLITZ or BREACH (BREACH is daily only).
 const MODES = {
-  classic: { label: 'CLASSIC' },
+  classic: { label: 'CLASSIC', info: () => 'CLASSIC // No clock and no bit limit: keep your columns under the line as long as you can.' },
   decrypt: {
     label: 'DAILY DECRYPT',
     info: (date) => dailyNote(date, `the same ${DAILY_BITS} bits for everyone.`),
@@ -227,6 +227,7 @@ let topMode = TOP_MODES.includes(storage.get('bytefall-mode')) ? storage.get('by
 let dailyKind = DAILY_KINDS[storage.get('bytefall-daily-kind')] ? storage.get('bytefall-daily-kind') : 'decrypt';
 let daily = false;
 let mode = 'classic';
+let homeOpen = false; // the MAIN MENU is up (showHome)
 function setModeFromChoice() {
   daily = topMode === 'daily';
   mode = daily ? dailyKind : topMode;
@@ -407,8 +408,10 @@ function initGame() {
   setMessage('');
   refreshExploitCards();
   fitBoard();
-  if (mode === 'tutorial') Tutorial.begin();
-  else Tutorial.end();
+  if (mode === 'tutorial') {
+    hideHome(); // (the lesson plays on the game screen)
+    Tutorial.begin();
+  } else Tutorial.end();
 }
 
 // A layer peeled to 0 shows the bit under it: fixed in PUZZLE boards, random otherwise.
@@ -603,7 +606,7 @@ function fitVsSetup() {
 // the lines of text above buttons (notes, descriptions): each keeps the height it has in
 // Courier, so a wider font wrapping onto another line can't push the buttons below it down.
 // Re-measured when the layout changes (fitBoard), a text changes, or one comes into view.
-const LOCKED_BUTTONS = '.modes button, .difficulty button, #vs-layers-btn, #vs-exploits-btn, #vs-start, #pause-resume, #overlay-restart-btn, #overlay-share-btn, .records-tabs button, #vs-goal, .menu-tabs button, .store-buy, .store-restore, .store-shortcut';
+const LOCKED_BUTTONS = '.modes button, .difficulty button, #vs-layers-btn, #vs-exploits-btn, #vs-start, #pause-resume, #pause-menu, #home-play, #overlay-restart-btn, #overlay-menu-btn, #overlay-share-btn, .records-tabs button, #vs-goal, .menu-tabs button, .store-buy, .store-restore, .store-shortcut';
 const LOCKED_TEXT = '#mode-info, .settings-note, .vs-setup-note, .vs-setup-msg, #overlay-note, footer p, .panel-store p';
 function unfitButton(b) {
   if (!('fitLs' in b.dataset)) return;
@@ -1037,7 +1040,7 @@ function clearPivotChoice() {
 }
 
 async function attemptDrop(col) {
-  if (gameOver || busy || !queue.length || vsPaused) return;
+  if (gameOver || busy || !queue.length || vsPaused || homeOpen) return;
   if (mode === 'tutorial' && !Tutorial.canDrop(col)) return; // (only where the lesson says)
   if (queue[0].type === 'hack' && queue[0].id === 'pivot') {
     if (pivotFrom !== null) {
@@ -1149,7 +1152,6 @@ function finishTurn() {
   else if (timeUp) endGame('time');
   else if (vsLost) endGame('vs-lose');
   else if (cpuDown) endGame('win');
-  else if (pauseQueued) openPause();
   else if (mode === 'tutorial') Tutorial.afterDrop();
   else if (breached) endGame('breached');
   else if (dealLimit() < Infinity && !queue.length) endGame('daily');
@@ -1158,6 +1160,7 @@ function finishTurn() {
   else if (!MODES[mode].noLayers && pulseInterval - dropsSinceLastPulse === 1 && messageEl.classList.contains('hidden')) {
     setMessage('ENCRYPTION // NEW LAYER NEXT DROP', 'warn');
   }
+  if (pauseQueued) openPause(); // (PAUSE pressed mid-drop; not once the run has ended)
 }
 
 function overflowed() {
@@ -1812,9 +1815,9 @@ function requestReset(btn, confirmText, apply = () => {}) {
 
 const restartBtn = document.getElementById('restart-btn');
 restartBtn.addEventListener('click', () => {
-  // (EXIT before the first drop: nothing to lose, so one tap, back to the title card)
+  // (EXIT before the first drop: nothing to lose, so one tap, back to the main menu)
   if (restartBtn.classList.contains('exit')) {
-    if (typeof window.showStartScreen === 'function') window.showStartScreen();
+    showHome();
     return;
   }
   requestReset(restartBtn, 'TAP AGAIN TO RESTART');
@@ -2019,9 +2022,9 @@ function applyModeUi() {
   document.querySelectorAll('#daily-kinds button').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.daily === dailyKind);
   });
-  const info = document.getElementById('mode-info');
-  info.hidden = mode === 'classic';
-  info.textContent = mode === 'classic' ? '' : MODES[mode].info(todayKey());
+  // (on the menu's panel, under the mode's name: without the name it starts with)
+  document.getElementById('mode-info').textContent = MODES[mode].info(todayKey()).replace(/^[A-Z ]+ \/\/ (.)/, (_, c) => c.toUpperCase());
+  document.getElementById('game-mode-label').textContent = `// ${modeLine()}`;
   document.getElementById('difficulty-row').hidden = mode !== 'classic';
   document.getElementById('daily-kinds').hidden = !daily;
   document.querySelectorAll('#vs-levels button[data-vs]').forEach((btn) => {
@@ -2049,6 +2052,7 @@ function applyModeUi() {
   document.getElementById('time-label').textContent = mode === 'blitz' ? 'TIME' : 'BITS LEFT';
   shareBtn.hidden = true;
   showClock();
+  updateHome();
 }
 
 const timeLeftEl = document.getElementById('time-left');
@@ -2068,7 +2072,7 @@ setInterval(() => {
   const now = performance.now();
   const dt = (now - lastClockTick) / 1000;
   lastClockTick = now;
-  if (mode !== 'blitz' || !clockRunning || gameOver || document.hidden) return;
+  if (mode !== 'blitz' || !clockRunning || gameOver || document.hidden || vsPaused) return;
   timeLeft = Math.max(0, timeLeft - dt);
   showClock();
   if (timeLeft === 0 && !timeUp) {
@@ -2700,8 +2704,7 @@ const vsQuitBtn = document.getElementById('vs-quit');
 // menu; on the VS menu, one press goes back to the previous mode
 function quitVs() {
   if (vsStarted && !gameOver) { // in a match: PAUSE
-    if (busy) pauseQueued = true; // (once the drop finishes)
-    else openPause();
+    requestPause();
     return;
   }
   if (vsStarted) {
@@ -2709,36 +2712,40 @@ function quitVs() {
     return;
   }
   if (busy && !gameOver) return;
-  disarmReset();
-  const back = storage.get('bytefall-before-vs');
-  topMode = TOP_MODES.includes(back) && back !== 'vs' ? back : 'classic';
-  storage.set('bytefall-mode', topMode);
-  setModeFromChoice();
-  resetNow();
+  showHome(); // (VS stays picked there)
 }
 vsQuitBtn.addEventListener('click', quitVs);
 
-// PAUSE (the lower-left corner in a match): the board is covered as on the setup screen and the
-// CPU's clock stops. RESUME carries on; RESTART (a new match, same options) and EXIT (back to the
-// setup screen) each take a second tap to confirm.
+// PAUSE (the top-left icon in a game, and the lower-left corner in a VS match): the board is
+// covered as on the VS setup screen and the clocks (BLITZ's, the CPU's) stop. RESUME carries on;
+// RESTART (VS: a new match, same options) and EXIT (VS: back to its setup screen) each take a
+// second tap to confirm. RULES & RECORDS and SETTINGS open over it; MAIN MENU leaves it paused.
+// (Not in the tutorial, which keeps the top icons for its lessons.)
 const vsPauseEl = document.getElementById('vs-pause');
+const canPause = () => mode !== 'tutorial' && !gameOver && (mode !== 'vs' || vsStarted);
+function requestPause() {
+  if (busy) pauseQueued = true; // (once the drop finishes)
+  else openPause();
+}
 function openPause() {
   pauseQueued = false;
-  if (mode !== 'vs' || !vsStarted || gameOver || vsPaused) return;
+  if (!canPause() || vsPaused) return;
   vsPaused = true;
   vsPausedAt = performance.now();
+  document.getElementById('pause-note').textContent = mode === 'vs' ? 'The CPU is waiting for you.' : 'The game is waiting for you.';
+  document.getElementById('pause-exit').hidden = mode !== 'vs';
   vsPauseEl.classList.remove('closing');
   vsPauseEl.hidden = false;
   document.querySelector('.board-frame').classList.add('paused'); // (the pieces fade out)
   SFX.play('static');
-  botMood();
+  if (mode === 'vs') botMood();
   updatePauseBtn();
 }
 function resumeMatch() {
   if (!vsPaused) return;
   disarmReset();
   vsPaused = false;
-  if (performance.now() - vsPausedAt >= 5 * 60 * 1000) {
+  if (mode === 'vs' && performance.now() - vsPausedAt >= 5 * 60 * 1000) {
     Progress.secret('afk');
     announce(Progress.check());
   }
@@ -2750,7 +2757,7 @@ function resumeMatch() {
     vsPauseEl.classList.remove('closing');
   }, 150);
   SFX.play('static');
-  botMood();
+  if (mode === 'vs') botMood();
   updatePauseBtn();
 }
 // RESTART / EXIT: the first tap arms (CONFIRM?), the second melts the board and starts over
@@ -2764,12 +2771,15 @@ function pauseConfirm(btn, apply) {
   requestReset(btn, 'CONFIRM?', apply);
 }
 document.getElementById('pause-resume').addEventListener('click', resumeMatch);
-document.getElementById('pause-restart').addEventListener('click', (e) => pauseConfirm(e.currentTarget, () => { restartQueued = true; }));
+document.getElementById('pause-restart').addEventListener('click', (e) => pauseConfirm(e.currentTarget, () => { if (mode === 'vs') restartQueued = true; }));
 document.getElementById('pause-exit').addEventListener('click', (e) => pauseConfirm(e.currentTarget));
+document.getElementById('pause-records').addEventListener('click', () => setRecordsOpen(true));
+document.getElementById('pause-settings').addEventListener('click', () => setSettingsOpen(true));
+document.getElementById('pause-menu').addEventListener('click', () => showHome());
 document.addEventListener('keydown', (e) => {
-  if (mode !== 'vs' || (e.key !== 'Escape' && e.key !== 'p' && e.key !== 'P') || panelOpen()) return;
+  if ((e.key !== 'Escape' && e.key !== 'p' && e.key !== 'P') || panelOpen() || homeOpen) return;
   if (vsPaused) resumeMatch();
-  else if (vsStarted && !gameOver) quitVs();
+  else if (canPause()) requestPause();
 });
 // The corner button: PAUSE in a match, QUIT otherwise
 function updatePauseBtn() {
@@ -2777,7 +2787,73 @@ function updatePauseBtn() {
   vsQuitBtn.classList.toggle('as-pause', pause);
   vsQuitBtn.setAttribute('aria-label', pause ? 'Pause' : 'Quit VS');
   vsQuitBtn.title = pause ? 'Pause' : 'Quit';
+  updateTopIcons();
 }
+
+// MAIN MENU: between the start screen and a game (START comes here, and BACK, EXIT and the pause
+// screen's MAIN MENU come back to it). The six modes and the picked one's panel: its options
+// (difficulty, the daily game, the puzzle), what it is, your best, and PLAY (RESUME when a game
+// of it is under way: switching modes then asks first, as a restart does). A game under way is
+// paused while the menu is up.
+const homeEl = document.getElementById('home');
+const homePlayBtn = document.getElementById('home-play');
+// The mode's name: on the menu's panel and under the title in a game
+function modeLine() {
+  if (mode === 'tutorial') return 'TUTORIAL';
+  if (mode === 'classic') return `CLASSIC // ${DIFFICULTIES[classicDifficulty].label}`;
+  if (mode === 'puzzle' && !daily) return `PUZZLE ${puzzleIndex + 1}`;
+  if (daily) return `${DAILY_KINDS[mode]}${dailyOfficial ? '' : ' // PRACTICE'}`;
+  return MODES[mode].label;
+}
+function updateHome() {
+  document.getElementById('home-mode-name').textContent = `// ${daily ? 'DAILY' : MODES[mode].label}`;
+  // BEST: the mode's best (DAILY: today's official score, once it's played)
+  const key = mode === 'vs' || mode === 'tutorial' || mode === 'puzzle' ? null : daily ? dailyKey() : bestKey();
+  const kept = key ? storage.get(key) : null;
+  document.getElementById('home-best').innerHTML = !key || (daily && kept == null) ? ''
+    : `${daily ? 'TODAY' : 'BEST'} <b>${fmt(Number(kept) || 0)}</b>`;
+  homePlayBtn.textContent = inAGame() && mode !== 'tutorial' ? 'RESUME' : 'PLAY';
+}
+function updateTopIcons() {
+  const inGame = !homeOpen && mode !== 'tutorial';
+  document.body.classList.toggle('in-game', inGame);
+  document.body.classList.toggle('can-pause', inGame && (canPause() || vsPaused));
+  document.body.classList.toggle('at-home', homeOpen);
+  document.getElementById('records-btn').setAttribute('aria-label', !inGame ? 'Menu: rules, exploits and records' : vsPaused ? 'Resume' : canPause() ? 'Pause' : 'Main menu');
+}
+function showHome() {
+  if (mode === 'tutorial') return; // (the lesson leaves by its own EXIT, which comes here)
+  disarmReset();
+  setRecordsOpen(false);
+  setSettingsOpen(false);
+  if (inAGame() && !vsPaused) requestPause(); // (kept for RESUME)
+  homeOpen = true;
+  homeEl.hidden = false;
+  updateHome();
+  updateTopIcons();
+  lockButtons(); // (the menu's buttons, now they can be measured)
+}
+function hideHome() {
+  if (!homeOpen) return;
+  disarmReset();
+  homeOpen = false;
+  homeEl.hidden = true;
+  updateTopIcons();
+  fitBoard();
+}
+window.showHome = showHome;
+window.homeIsOpen = () => homeOpen;
+homePlayBtn.addEventListener('click', () => {
+  if (busy && !gameOver) return; // (a mode switch still melting the old board)
+  if (gameOver) resetNow();
+  hideHome();
+  if (vsPaused) resumeMatch();
+  SFX.play('static');
+});
+document.getElementById('overlay-menu-btn').addEventListener('click', () => {
+  resetNow();
+  showHome();
+});
 // (fitted again once a font finishes loading: it measures differently)
 if (document.fonts) document.fonts.addEventListener('loadingdone', () => showCpuDesc());
 // Before START: the picked bot's play style over its board
@@ -2804,6 +2880,7 @@ function updateVsChrome() {
 
 // VS: the HUD takes the room from under the corner icons to where the regular HUD ends, so your
 // board keeps its regular size and place. Measured by briefly laying out the regular header and HUD.
+const VS_TOP_MIN = 168;
 function layoutVsTop() {
   const hud = document.querySelector('.hud');
   hud.style.height = '';
@@ -2821,11 +2898,13 @@ function layoutVsTop() {
   info.hidden = true;
   // (relative to the game card, which can move as the page re-centers)
   const cardTop = () => crtEl.getBoundingClientRect().top;
-  const bottom = hud.getBoundingClientRect().bottom - cardTop();
   // Below the top icons by the same gap as between their tops and the card's top border
   const icon = document.querySelector('.records-btn svg').getBoundingClientRect();
   const iconGap = icon.top - cardTop() - crtEl.clientTop;
   const top = icon.bottom - cardTop() + iconGap;
+  // (at least VS_TOP_MIN tall: the regular header is only the title and the mode's name, so
+  // where there's no room under it the board comes down and fitBoard shrinks it to fit)
+  const bottom = Math.max(hud.getBoundingClientRect().bottom - cardTop(), top + VS_TOP_MIN);
   [diffRow.hidden, info.hidden] = wasHidden;
   cpuStatEl.hidden = false;
   cpuFaceEl.hidden = false;
@@ -3528,11 +3607,12 @@ function updateFreeBtn() {
   const exit = !started && !gameOver;
   if (exit !== restartBtn.classList.contains('exit')) {
     restartBtn.classList.toggle('exit', exit);
-    restartBtn.setAttribute('aria-label', exit ? 'Exit to the title screen' : 'Restart');
-    restartBtn.title = exit ? 'Exit to the title screen' : 'Restart (press twice)';
+    restartBtn.setAttribute('aria-label', exit ? 'Exit to the main menu' : 'Restart');
+    restartBtn.title = exit ? 'Exit to the main menu' : 'Restart (press twice)';
   }
   restartBtn.disabled = gameOver;
-  vsQuitBtn.hidden = !inVs;
+  vsQuitBtn.hidden = true; // (PAUSE is the top-left icon now, in VS too; EXIT is on the pause screen)
+  updateTopIcons();
   showChainMeter();
   const ready = nextExploit();
   const shown = armedHack || ready;
@@ -3634,7 +3714,7 @@ function placeToast() {
   const row = boardEl.querySelectorAll('.cell.overflow');
   const a = row[0] && row[0].getBoundingClientRect();
   const z = row.length && row[row.length - 1].getBoundingClientRect();
-  const onBoard = a && a.width > 0 && a.bottom > 0 && a.top < innerHeight && mode !== 'tutorial';
+  const onBoard = a && a.width > 0 && a.bottom > 0 && a.top < innerHeight && mode !== 'tutorial' && !homeOpen;
   toastEl.classList.toggle('on-board', !!onBoard);
   toastEl.style.top = onBoard ? `${(a.top + a.bottom) / 2}px` : '';
   toastEl.style.left = onBoard ? `${(a.left + z.right) / 2}px` : '';
@@ -3947,7 +4027,17 @@ function setRecordsOpen(open, pane = menuPane) {
     showMenuPane(pane);
   }
 }
-recordsBtn.addEventListener('click', () => setRecordsOpen(recordsEl.hidden));
+// (in a game it's PAUSE / RESUME, or the main menu when there's nothing to pause)
+recordsBtn.addEventListener('click', () => {
+  if (!recordsEl.hidden || !document.body.classList.contains('in-game')) {
+    setRecordsOpen(recordsEl.hidden);
+    return;
+  }
+  setSettingsOpen(false);
+  if (vsPaused) resumeMatch();
+  else if (canPause()) requestPause();
+  else showHome();
+});
 recordsEl.querySelectorAll('.menu-tabs button').forEach((b) => {
   b.addEventListener('click', () => showMenuPane(b.dataset.pane));
 });
