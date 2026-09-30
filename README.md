@@ -267,8 +267,11 @@ a column drops straight in. PIVOT's choice of side shows as arrows in the top ro
 too, and the button over the aimed column lights up. SETTINGS → DROP BY: BOTH
 (default) or NUMBERS (the buttons only; the grid ignores touches). The tutorial
 takes both whatever the setting.
-Before the first drop, the lower-left corner button is EXIT (back to the main
-menu, one tap); after it, RESTART (two taps).
+RESTART (two taps) is on the pause screen; there's no corner button for it.
+
+The HUD (not VS): BEST over SCORE on the left, CURRENT large in the middle (on Easy, NEXT in a
+short dim panel under it; TIME or BITS LEFT under it in the timed and counted modes), ENCRYPT IN
+over CHAIN on the right (CHAIN the whole column in ZEN).
 
 THE CHAIN METER, a streak: a 5-segment bar up each side of the grid, exactly as tall as
 the grid's squares (the top row's top to the bottom of row 1), set off from the grid by the
@@ -551,7 +554,8 @@ DAILY's game, PUZZLE's puzzle), your best (DAILY: today's official score once pl
 PLAY. With a game of that mode under way (a drop made; paused) PLAY reads RESUME and carries
 on; picking another mode then asks first (CONFIRM?), as a restart does, and resets without the
 melt (the board is hidden). Under the panel, RULES & RECORDS and SETTINGS buttons open those
-panels (the corner icons show only while one is open, to close it). In a game (not the tutorial) the game screen is the title, the mode's
+panels, each a card of its own covering the game card: ← BACK (or Esc) closes it, a tap
+beside it doesn't, and the corner icons hide while one is open. In a game (not the tutorial) the game screen is the title, the mode's
 name under it (`// CLASSIC // NORMAL`, `// BLITZ`, `// PUZZLE 3`, `// DAILY DECRYPT // PRACTICE`),
 the HUD and the board: the top-left icon is PAUSE (the house, back to the menu, when there's
 nothing to pause: VS's setup screen), and SETTINGS waits on the pause screen.
@@ -684,7 +688,7 @@ through anything). Menorah, kinara and sign are never mirrored.
 The same wanderers stroll along the bottom of the game card too, between the
 corner buttons (walking out from behind them), with everything above: meetings,
 frights, pop-ins, decrypts and pokes. SETTINGS → WANDERING BOTS turns them off
-(on by default). The engine is `js/wanderers.js`, shared by both cards. They
+(on by default). The engine is `js/wanderers.js`, shared by both cards. On the start card the lane is the whole card: the bots walk along its bottom, and what flies, falls or hangs uses all of it (bats anywhere up the card, the spider dropping from the top edge behind the title, crows climbing off across it, snow falling from the top, fireworks bursting high). In the game the lane is the card's full width along the bottom, with the heights as before. They
 pass under the drop buttons and the message line below the grid (bats, crows
 and the spider's thread included), and a poke leaves no tap box around them.
 

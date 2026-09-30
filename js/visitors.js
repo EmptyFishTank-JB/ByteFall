@@ -20,6 +20,12 @@
 // Sprites are drawn as text: one letter a pixel (its color in `pal`, '.' left empty), in the bots'
 // own pixel size, facing right; a second frame (b) steps the legs, flaps the wings or ripples a hem.
 function createVisitors(api) {
+  // The air: on the start screen the lane is the whole card, so what flies, falls or hangs
+  // uses its full height (sky(f): that far up it, 0-1); in the game's short lane, the heights
+  // it always had (`low`)
+  const tall = () => (api.laneH ? api.laneH() : 0) > 150;
+  const sky = (lo, hi, low) => (tall() ? rand(lo, hi) * api.laneH() : low());
+  const ceiling = () => (tall() ? api.laneH() : 100);
   const U = 34 / 16; // (a pixel of the bots' 16-wide grid, in screen pixels)
   const swap = (rows, map) => rows.map((r) => r.replace(/./g, (c) => map[c] || c)); // (blinking: colors traded)
   const EVERGREEN = ['.......y.......', '......yyy......', '.......y.......', '.......g.......', '......ggG......', '.....grggG.....', '......ggG......', '.....gggoG.....', '....gggggGG....', '...gbggggggG...', '.....ggggG.....', '....ggrgggG....', '...gggggbggG...', '..gggoggggggG..', '....ggggggG....', '...ggbgggrgG...', '..gggggggggGG..', '.ggrggggoggggG.', 'gggggggggggggGG', '.RyR..ttT..ByB.', '.yyy..ttT..yyy.', '.RyR..ttT..ByB.'];
@@ -259,13 +265,15 @@ function createVisitors(api) {
     api.botEvent(`visit-${what}`);
     if (what === 'bats') {
       const n = 3 + Math.floor(Math.random() * 3);
-      for (let k = 0; k < n; k++) add('bat', edge(16) - dir * k * rand(14, 30), dir, { fly: rand(14, 30), speed: rand(45, 75) });
+      for (let k = 0; k < n; k++) add('bat', edge(16) - dir * k * rand(14, 30), dir, { fly: sky(0.2, 0.8, () => rand(14, 30)), speed: rand(45, 75) });
     } else if (what === 'crows') {
       const n = Math.random() < 0.6 ? 1 : 2;
       for (let k = 0; k < n; k++) add('crow', edge(20) - dir * k * 26, dir, { stopAt: rand(0.2, 0.7) * W + k * 20, life: rand(5000, 9000) });
     } else if (what === 'spider') { // (down from above on its thread, somewhere along the card)
-      const s = add('spider', rand(0.15, 0.8) * W, 1, { y: 110, hang: rand(12, 22), life: rand(3000, 5500), state: 'down' });
+      // (from the top of the card on the start screen, dropping behind the title)
+      const s = add('spider', rand(0.15, 0.8) * W, 1, { y: tall() ? ceiling() : 110, hang: sky(0.3, 0.6, () => rand(12, 22)), life: rand(3000, 5500), state: 'down' });
       s.el.insertAdjacentHTML('afterbegin', '<i class="visitor-thread"></i>');
+      s.el.style.setProperty('--thread', `${ceiling() + 60}px`);
     } else if (what === 'turkey') add('turkey', edge(12 * U), dir, { stopAt: rand(0.25, 0.65) * W, life: rand(2500, 4500) });
     else if (what === 'reindeer' || what === 'rudolph') { // (now and then, the one with the red nose)
       const red = what === 'rudolph' || Math.random() < 0.25;
@@ -438,12 +446,14 @@ function createVisitors(api) {
   const snap = (n) => Math.round(n / U) * U;
   function snow(now, dt) {
     const W = api.laneW();
-    if (now > nextFlake && flakes.length < 18) {
+    if (now > nextFlake && flakes.length < (tall() ? 40 : 18)) {
       nextFlake = now + rand(180, 420);
       const el = document.createElement('i');
       el.className = 'visitor-flake';
       api.lane.appendChild(el);
-      flakes.push({ el, x: rand(0, W), y: rand(70, 96), speed: rand(9, 16), phase: rand(0, 6.28), age: 0 });
+      // (from the top of the card on the start screen, falling at the same pace across it)
+      const scale = tall() ? api.laneH() / 96 : 1;
+      flakes.push({ el, x: rand(0, W), y: sky(0.85, 1, () => rand(70, 96)), speed: rand(9, 16) * Math.min(scale, 4), phase: rand(0, 6.28), age: 0 });
     }
     for (const f of flakes) {
       f.age += dt * 1000;
@@ -463,7 +473,7 @@ function createVisitors(api) {
     if (!api.lane.isConnected) return;
     const W = api.laneW();
     const x = snap(rand(0.12, 0.88) * W);
-    const top = snap(rand(58, 84));
+    const top = snap(sky(0.5, 0.85, () => rand(58, 84)));
     const c = pick(SPARKS);
     const piece = (cls) => {
       const el = document.createElement('i');
@@ -480,7 +490,7 @@ function createVisitors(api) {
       const n = 12;
       for (let i = 0; i < n; i++) {
         const a = (i / n) * Math.PI * 2 + rand(-0.15, 0.15);
-        const r = rand(12, 20);
+        const r = rand(12, 20) * (tall() ? 1.6 : 1);
         const s = piece('visitor-spark');
         const frames = [];
         for (let k = 0; k <= 6; k++) {
@@ -596,7 +606,7 @@ function createVisitors(api) {
           if (now > v.until) v.state = 'fly';
         } else if (v.state === 'fly') { // (off up and away)
           v.x += v.dir * 60 * dt;
-          v.y += 55 * dt;
+          v.y += (tall() ? 0.22 * api.laneH() : 55) * dt; // (up across the card, and out)
           v.el.classList.add('v-fly');
           if (now - v.frameAt > 110) { // (a wingbeat)
             v.frameAt = now;
@@ -621,7 +631,7 @@ function createVisitors(api) {
       place(v);
       if (v.state === 'scenery') continue; // (it stays)
       const w = v.el.offsetWidth || 30;
-      if (v.x < -w - 40 || v.x > W + 40 || v.y > 140) v.gone = true;
+      if (v.x < -w - 40 || v.x > W + 40 || v.y > ceiling() + 40) v.gone = true;
     }
     list = list.filter((v) => {
       if (v.gone) v.el.remove();

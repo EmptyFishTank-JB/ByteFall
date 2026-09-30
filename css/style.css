@@ -2390,7 +2390,9 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
 .tut-body .tut-text { cursor: pointer; white-space: pre-line; } /* (a step's text can break into lines) */
 
 /* The start screen's wanderers: along the bottom of the card, walking in and out of it */
-.start-walkers { position: absolute; left: 0; right: 0; bottom: 10px; height: 44px; pointer-events: none; }
+/* (the whole card: the bots walk along its bottom, and what flies, falls or hangs uses all of it) */
+.start-walkers { position: absolute; left: 0; right: 0; top: 0; bottom: 10px; pointer-events: none; }
+.start-title { position: relative; z-index: 1; } /* (the spider drops behind the title) */
 :is(.start-walkers, .game-walkers) .walker { position: absolute; left: 0; bottom: 0; width: 34px; will-change: transform; }
 .walker.walking .bot { animation: bot-hop 0.28s steps(2) infinite; }
 .walker.walking .leg-a { animation: bot-step 0.28s steps(1) infinite; }
@@ -2460,7 +2462,7 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
 /* (achievement pop-ups show over the start screen too) */
 .start-screen:not([hidden]) ~ .toast { z-index: 206; }
 /* The game card's wanderers: along its bottom edge between the corner buttons, coming and going from behind them */
-.game-walkers { position: absolute; left: 80px; right: 80px; bottom: 6px; height: 44px; pointer-events: none; z-index: 0;
+.game-walkers { position: absolute; left: 0; right: 0; bottom: 6px; height: 44px; pointer-events: none; z-index: 0;
   clip-path: inset(-60px 0 0 0); } /* (hidden past its sides, where they walk in and out behind the corner buttons; open above, for what they say) */
 .corner-btn { z-index: 1; }
 /* The drop buttons and the message under the grid: a layer over the wanderers' lane (bats, crows,
@@ -2623,7 +2625,7 @@ html.page-twinkle .page-bg { display: block; }
 .visitor-tree svg { filter: drop-shadow(0 0 1px rgba(220, 225, 240, 0.3)); }
 .visitor-tree.v-creak svg { animation: visitor-shake 0.1s steps(1) 6 alternate; }
 /* The spider's silk thread, up out of sight */
-.visitor-thread { position: absolute; left: 50%; bottom: 60%; width: 1px; height: 160px; background: rgba(220, 225, 240, 0.45); pointer-events: none; }
+.visitor-thread { position: absolute; left: 50%; bottom: 60%; width: 1px; height: var(--thread, 160px); background: rgba(220, 225, 240, 0.45); pointer-events: none; }
 .visitor-spider svg { filter: drop-shadow(0 0 1px rgba(220, 225, 240, 0.45)); }
 /* WINTER and the holidays: the scenery shakes (v-creak) or its flames flare (v-glow) when poked */
 .visitor-scenery.v-creak svg { animation: visitor-shake 0.1s steps(1) 6 alternate; }
@@ -2721,3 +2723,46 @@ body.in-game .settings-btn:not([aria-expanded="true"]) { visibility: hidden; }
 .home-row { display: flex; justify-content: center; gap: 8px; width: 100%; max-width: 340px; margin-top: 0; }
 .home-row button { flex: 1; font-size: 12px; padding: 8px 6px; }
 body.at-home :is(.records-btn, .settings-btn):not([aria-expanded="true"]) { visibility: hidden; }
+
+/* RULES & RECORDS and SETTINGS: each its own card, covering the game card (BACK closes it; the
+   corner icons hide while one is open) */
+.records, .settings {
+  top: 0; left: 0; right: 0; bottom: 0; width: auto; max-width: none; max-height: none;
+  padding: 14px clamp(12px, 4vw, 24px) 20px; border: none; border-radius: 8px; box-shadow: none;
+  background: var(--panel);
+}
+.card-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.card-head span { font-size: 13px; letter-spacing: 2px; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+.card-back, :is(.records, .settings) .card-back {
+  padding: 6px 12px; background: transparent; border: 1px solid var(--fg); border-radius: 4px;
+  color: var(--fg); font-family: inherit; font-size: 12px; letter-spacing: 1px; cursor: pointer;
+}
+:is(.records, .settings) .card-back:hover { background: rgba(var(--fg-rgb), 0.12); }
+body.panel-open .crt :is(.records-btn, .settings-btn) { visibility: hidden !important; }
+
+/* THE HUD (not VS): BEST over SCORE on the left, CURRENT large in the middle (NEXT, on Easy, a
+   short dim panel under it; TIME / BITS LEFT under it in the timed and counted modes), ENCRYPT
+   IN over CHAIN on the right */
+body:not(.vs-mode) .hud {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  grid-template-areas: "best cur enc" "score cur chain";
+  gap: 6px;
+}
+body:not(.vs-mode) .hud.has-time { grid-template-areas: "best cur enc" "score time chain"; }
+body:not(.vs-mode) .hud.no-pulse { grid-template-areas: "best cur chain" "score cur chain"; }
+body:not(.vs-mode) .hud.has-time.no-pulse { grid-template-areas: "best cur chain" "score time chain"; }
+body:not(.vs-mode) .hud > #best-stat { grid-area: best; }
+body:not(.vs-mode) .hud > #score-stat { grid-area: score; }
+body:not(.vs-mode) .hud > #pulse-stat { grid-area: enc; }
+body:not(.vs-mode) .hud > #chain-stat { grid-area: chain; }
+body:not(.vs-mode) .hud > #time-stat { grid-area: time; }
+body:not(.vs-mode) .hud > .hud-bits { grid-area: cur; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+body:not(.vs-mode) .hud-bits .stat-current { flex: 1 1 auto; }
+body:not(.vs-mode) .hud-bits .stat-current .bit-sq { width: 42px; height: 42px; font-size: 20px; margin: auto auto 2px; }
+/* NEXT: a short, dim panel under CURRENT */
+body:not(.vs-mode) .hud-bits #next-stat { flex: 0 0 28px; height: 28px; min-height: 0; flex-direction: row !important; align-items: center; justify-content: center; gap: 8px; padding: 0 4px; opacity: 0.7; }
+body:not(.vs-mode) .hud-bits #next-stat .label { width: auto; margin: 0; }
+body:not(.vs-mode) .hud-bits #next-stat .bit-row { margin: 0; }
+body:not(.vs-mode) .hud-bits #next-stat .bit-sq { width: 20px; height: 20px; margin: 0; font-size: 10px; }

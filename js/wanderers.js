@@ -453,7 +453,7 @@ function createWanderers(lane, active = () => true) {
 
   // Seasonal visitors (visitors.js) share the lane
   const visitors = typeof createVisitors === 'function' ? createVisitors({
-    lane, laneW: () => width, walkers: () => walkers.filter((w) => inside(w) && !w.leaving), botEvent,
+    lane, laneW: () => width, laneH: () => lane.clientHeight, walkers: () => walkers.filter((w) => inside(w) && !w.leaving), botEvent,
     say: (w, m, text) => mood(w, m, text),
     startle: (src, radius) => startle(src, performance.now(), radius),
   }) : null;

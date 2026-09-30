@@ -2051,6 +2051,11 @@ function applyModeUi() {
   document.getElementById('overlay-restart-btn').textContent = mode === 'puzzle' ? 'RETRY' : 'NEW SESSION';
   document.getElementById('time-stat').hidden = mode !== 'blitz' && dealLimit() === Infinity;
   document.getElementById('time-label').textContent = mode === 'blitz' ? 'TIME' : 'BITS LEFT';
+  // (the HUD's grid: TIME / BITS LEFT under CURRENT when there's a clock or a count; CHAIN the
+  // whole right column when there's no ENCRYPT IN)
+  const hudEl = document.querySelector('.hud');
+  hudEl.classList.toggle('has-time', !document.getElementById('time-stat').hidden);
+  hudEl.classList.toggle('no-pulse', document.getElementById('pulse-stat').hidden);
   shareBtn.hidden = true;
   showClock();
   updateHome();
@@ -3493,6 +3498,7 @@ updateBgPlayBtn();
 
 function setSettingsOpen(open) {
   settingsEl.hidden = !open;
+  document.body.classList.toggle('panel-open', !settingsEl.hidden || !recordsEl.hidden);
   if (open && !recordsEl.hidden) setRecordsOpen(false);
   settingsBtn.setAttribute('aria-expanded', String(open));
   if (open) {
@@ -3503,9 +3509,7 @@ function setSettingsOpen(open) {
 }
 
 settingsBtn.addEventListener('click', () => setSettingsOpen(settingsEl.hidden));
-document.addEventListener('pointerdown', (e) => {
-  if (!settingsEl.hidden && !settingsEl.contains(e.target) && !settingsBtn.contains(e.target) && !e.target.closest('.tut-banner')) setSettingsOpen(false);
-});
+// (a card of its own over the game card: BACK or Esc closes it, not a tap beside it)
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !settingsEl.hidden) setSettingsOpen(false);
 });
@@ -3618,9 +3622,8 @@ function nextExploit() {
   return freeAllowed() ? freeExploitId() : null;
 }
 function updateFreeBtn() {
-  const inVs = mode === 'vs';
-  // Always there outside VS; greyed out until the first drop (and once the run is over)
-  restartBtn.hidden = inVs;
+  // (retired: RESTART is on the pause screen now; the button stays for its code paths)
+  restartBtn.hidden = true;
   // (EXIT until the first drop; greyed out once the run is over)
   const exit = !started && !gameOver;
   if (exit !== restartBtn.classList.contains('exit')) {
@@ -4039,6 +4042,7 @@ tutorialBtn.addEventListener('click', () => {
 
 function setRecordsOpen(open, pane = menuPane) {
   recordsEl.hidden = !open;
+  document.body.classList.toggle('panel-open', !settingsEl.hidden || !recordsEl.hidden);
   recordsBtn.setAttribute('aria-expanded', String(open));
   if (open) {
     setSettingsOpen(false);
@@ -4065,10 +4069,11 @@ recordsEl.querySelectorAll('.records-tabs button').forEach((b) => {
     renderRecords();
   });
 });
-document.addEventListener('pointerdown', (e) => {
-  if (e.target.closest('.tut-banner')) return; // (the tutorial's banner talks about the open menu)
-  if (!recordsEl.hidden && !recordsEl.contains(e.target) && !recordsBtn.contains(e.target)) setRecordsOpen(false);
-});
+// (a card of its own over the game card: BACK or Esc closes it, not a tap beside it)
+document.querySelectorAll('.card-back').forEach((b) => b.addEventListener('click', () => {
+  if (b.dataset.close === 'records') setRecordsOpen(false);
+  else setSettingsOpen(false);
+}));
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !recordsEl.hidden) setRecordsOpen(false);
 });
