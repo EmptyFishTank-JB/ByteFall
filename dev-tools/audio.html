@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="../js/fonts.js?v=245"></script>
+<script src="../js/fonts.js?v=246"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#020403">
@@ -115,7 +115,7 @@
   .uses ul { margin: 0; padding-left: 18px; }
   .uses li { margin: 2px 0; }
 
-  button.play {
+  button.play, a.play {
     flex-shrink: 0;
     background: transparent;
     border: 1px solid var(--green);
@@ -128,7 +128,8 @@
     cursor: pointer;
     min-width: 84px;
   }
-  button.play:hover { background: rgba(57, 255, 143, 0.15); }
+  a.play { text-decoration: none; text-align: center; white-space: nowrap; }
+  button.play:hover, a.play:hover { background: rgba(57, 255, 143, 0.15); }
   button.play.playing { background: var(--green); color: var(--panel); font-weight: bold; box-shadow: 0 0 10px rgba(57, 255, 143, 0.4); }
 
   /* tracks */
@@ -207,7 +208,7 @@
 
   @media (max-width: 560px) {
     .card-top { flex-direction: column; }
-    button.play { align-self: flex-start; }
+    button.play, a.play { align-self: flex-start; }
   }
 </style>
 </head>
@@ -218,19 +219,13 @@
   <div class="hero">
     <div class="eyebrow"><span class="dot"></span>BYTEFALL // DEV TOOLS</div>
     <h1>AUDIO <span>COMPENDIUM</span></h1>
-    <p class="lede">Every sound in the game: the one-shot effects, both music tracks, and how the music intensifies near the red line. Nothing here is a recording. This page loads the game's own <code>sfx.js</code>, <code>music-bytefall-theme.js</code> and <code>music-sleep-mode.js</code>, so every button plays exactly what the game plays.</p>
-    <div class="wf-strip" title="Click to switch visualizer style"><canvas id="scope"></canvas></div>
-    <div class="wf-row">
-      <div class="wf-label" id="scope-label">// SCOPE IDLE &mdash; PLAY A TRACK TO SEE IT MOVE</div>
-      <button type="button" class="viz-mode" id="viz-mode">BARS</button>
-    </div>
+    <p class="lede">Every sound in the game: the one-shot effects, and the soundtrack, each track opening in the MIXER (its instruments, their levels per stack height and per SOUND OUTPUT, and how it intensifies near the red line). Nothing here is a recording: the pages load the game's own <code>sfx.js</code> and track files, so everything plays exactly what the game plays.</p>
   </div>
 
   <nav class="tocnav">
     <a href="#dev">00 Dev Switches</a>
     <a href="#effects">01 One-Shot Effects</a>
     <a href="#tracks">02 Music Tracks</a>
-    <a href="#intensity">03 Music Intensity</a>
   </nav>
 
   <section id="dev">
@@ -257,45 +252,17 @@
 
   <section id="tracks">
     <h2><span class="sec-num">02</span> Music Tracks</h2>
-    <p class="sec-desc">The playlist tracks, each a 32-bar loop scheduled live by <code>music.js</code>. In the game, music starts on your first click or key press and the gear/speaker settings icon picks the track. Play one here and drag its intensity slider to hear the danger layers blend in.</p>
+    <p class="sec-desc">The playlist, each track a 32-bar loop scheduled live by <code>music.js</code>. <b>MIXER</b> opens a track on its own page: play it at any stack height as the game would, through PHONE, HEADPHONES or SPEAKERS; see where each instrument plays; set each instrument's level per stack height and output; and EXPORT the levels for <code>js/music/mixes.js</code>. The intensity layers and the notes on how the music intensifies are there too.</p>
     <div id="track-list"></div>
-  </section>
-
-  <section id="intensity">
-    <h2><span class="sec-num">03</span> Music Intensity</h2>
-    <p class="sec-desc">Whichever track is playing gets more intense as your tallest stack nears the red <code>=======</code> line. The game sends the music a target from 0 to 1 every time the board redraws; the music eases toward it a little every 16th note, so layers fade in and out over a few seconds instead of switching. The track itself never restarts.</p>
-    <div class="table-scroll">
-      <table>
-        <thead><tr><th>TALLEST STACK</th><th>INTENSITY</th><th>WHAT YOU HEAR</th></tr></thead>
-        <tbody>
-          <tr><td>0–3 rows</td><td>0%</td><td>The track as written.</td></tr>
-          <tr><td>4 rows</td><td>33%</td><td>16th-note hi-hats come in and the tone starts brightening (layers from 5%).</td></tr>
-          <tr><td>5 rows</td><td>67%</td><td>The low end thickens: a kick on every beat in the theme, extra chugs and double-kick fills in SLEEP MODE (layers from 40%).</td></tr>
-          <tr><td>6+ rows</td><td>100%</td><td>The alarm layer: the tension saw in the theme, the square-wave alarm in SLEEP MODE (layers from 72%). Two rows from the line or closer.</td></tr>
-          <tr><td>Game over</td><td>0%</td><td>Eases back to calm behind the CONNECTION LOST screen.</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="sec-desc">It moves 6% of the remaining distance each 16th note: about two-thirds of the way in roughly 2 seconds on the theme (1.6 seconds on SLEEP MODE, which is faster), and fully settled after about 6 seconds. Each layer has its own entry point and fades in over the next 25% (the brightening layer grows across the whole range). Entry points sit just above the previous stack height's level, so each extra row brings in the next layer. The exact values are listed on each track above, read straight from the track's code, with live level bars while it plays.</p>
   </section>
 
   <footer>GENERATED FROM SOURCE &mdash; NO AUDIO FILES, ALL SYNTHESIZED ON PLAY</footer>
 </div>
 
-<script src="../js/music/output.js?v=245"></script>
-<script src="../js/music/mixes.js?v=245"></script>
-<script src="../js/sfx.js?v=245"></script>
-<script src="../js/music/music-bytefall-theme.js?v=245"></script>
-<script src="../js/music/music-sleep-mode.js?v=245"></script>
-<script src="../js/music/music-brute-force.js?v=245"></script>
-<script src="../js/music/music-deep-web.js?v=245"></script>
-<script src="../js/music/music-zero-day.js?v=245"></script>
-<script src="../js/music/music-system-restore.js?v=245"></script>
-<script src="../js/music/music-night-drive.js?v=245"></script>
-<script src="../js/music/music-standby-mode.js?v=245"></script>
-<script src="../js/music/music-core-dump.js?v=245"></script>
-<script src="../js/music/music-handshake.js?v=245"></script>
-<script src="../js/viz.js?v=245"></script>
+<script src="../js/music/output.js?v=246"></script>
+<script src="../js/music/mixes.js?v=246"></script>
+<script src="../js/sfx.js?v=246"></script>
+<script src="tracks-info.js?v=246"></script>
 <script>
 (() => {
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -376,398 +343,27 @@
     sfxList.appendChild(card);
   }
 
-  // ── Music tracks ───────────────────────────────────────────────────
-  const TRACKS = [
-    {
-      id: 'bytefall-theme', num: '01', title: 'BYTEFALL THEME', create: createBytefallTheme, file: 'music-bytefall-theme.js',
-      meta: ['synthwave', '108 BPM', 'A minor', '32 bars', '~71s loop'],
-      desc: 'An original 80s-style synthwave loop: gated-reverb snare, octave-pulsing bass, detuned saw pads, an echoing 16th-note arpeggio and a square/saw lead.',
-      sections: [
-        ['0:00', 'Intro', 'Am–F–C–G–Am–F–C–E. Pads, bass and arpeggio; drums hold back for 4 bars, then a snare roll.'],
-        ['0:18', 'Melody 1', 'The lead melody enters over the full groove.'],
-        ['0:36', 'Section B', 'New chords (F–G–Em–Am–F–G–E–E), a higher second melody, four-on-the-floor kick and 16th hats, ending in a snare roll.'],
-        ['0:53', 'Climax', 'Melody 1 doubled an octave up over the driving drums, then back to the intro.'],
-      ],
-    },
-    {
-      id: 'sleep-mode', num: '02', title: 'SLEEP MODE', create: createSleepMode, file: 'music-sleep-mode.js',
-      meta: ['electronicore', '150 BPM', 'A minor', '32 bars', '~51s loop'],
-      desc: 'Original trance-meets-metalcore built on the public-domain lullaby "Schlaf, Kindlein, schlaf": a music box, supersaws, and down-tuned distorted power chords through one shared amp.',
-      sections: [
-        ['0:00', 'Music box', 'The lullaby on a music box over a dark pad; ominous guitar hits from bar 5.'],
-        ['0:13', 'Trance build', 'Four-on-the-floor kick, supersaw arpeggio, the lullaby on a supersaw lead, a noise riser and a snare roll.'],
-        ['0:26', 'Drop', 'Chugging palm-muted guitars, double-kick, crashes, the lullaby on the trance lead.'],
-        ['0:38', 'Breakdown', 'Half-time: syncopated chugs locked to the kick, the music box tinkling the lullaby above.'],
-      ],
-    },
-    {
-      id: 'brute-force', num: '03', title: 'BRUTE FORCE', create: createBruteForce, file: 'music-brute-force.js',
-      meta: ['chiptune', '140 BPM', 'E minor', '32 bars', '~55s loop'],
-      desc: 'Original 8-bit game music in the NES style: pulse-wave leads at 12.5/25/50% duty, a stepped 4-bit triangle bass, sample-and-hold noise drums and fast arpeggios that fake the chords.',
-      sections: [
-        ['0:00', 'Boot', 'Em–C–D–B–Em–C–Am–B. Arpeggio and triangle bass; drums join halfway, ending in a snare fill.'],
-        ['0:13', 'Level 1', 'Melody A on a thin 12.5% pulse over kick, snare and 8th-note hats.'],
-        ['0:27', 'Level 2', 'New chords (C–D–Em–Em–C–D–B–B), melody B on a 25% pulse, a syncopated kick.'],
-        ['0:41', 'Boss', 'Melody A as a duet (a third below), four-on-the-floor kick and 16th hats, then back to boot.'],
-      ],
-    },
-    {
-      id: 'deep-web', num: '04', title: 'DEEP WEB', create: createDeepWeb, file: 'music-deep-web.js',
-      meta: ['dark techno', '124 BPM', 'F minor', '32 bars', '~62s loop'],
-      desc: 'Original dark ambient techno: a muffled four-on-the-floor kick and rolling 16th-note bass under a detuned drone, with modem bleeps and data chirps drifting through a dotted-8th echo.',
-      sections: [
-        ['0:00', 'Connect', 'Fm–Db–Eb. Drone and bleeps; the muffled kick and rolling bass join at bar 5.'],
-        ['0:15', 'Tunnel', 'The full groove: kick, rolling bass, off-beat hats and a clap on 2 and 4.'],
-        ['0:31', 'Deep', 'New chords (Bbm–Fm–Db–C) and a "data stream" square pluck on a 3-against-4 cross-rhythm.'],
-        ['0:46', 'Surface', 'The kick drops out for 4 bars under the drone, then the groove returns into the loop.'],
-      ],
-    },
-    {
-      id: 'zero-day', num: '05', title: 'ZERO DAY', create: createZeroDay, file: 'music-zero-day.js',
-      meta: ['drum & bass', '172 BPM', 'D minor', '32 bars', '~45s loop'],
-      desc: 'Original drum & bass: a two-step breakbeat with ghost snares, a detuned "reese" bass with a wobbling filter and sine sub, an urgent saw pad and square-wave lead stabs.',
-      sections: [
-        ['0:00', 'Infiltrate', 'Dm–Bb–C–Dm–Gm–A. Pad and hats with the reese entering; the break drops in at bar 5, ending in a snare roll.'],
-        ['0:11', 'Payload', 'The full roller: two-step break with ghost snares, reese bassline and pad.'],
-        ['0:22', 'Exploit', 'New chords (Bb–C–Dm–A) and a square-wave lead stab riff over the break.'],
-        ['0:33', 'Escape', 'Drumless breakdown for 4 bars (pad and reese), then the break returns with a snare-roll build.'],
-      ],
-    },
-    {
-      id: 'system-restore', num: '06', title: 'SYSTEM RESTORE', create: createSystemRestore, file: 'music-system-restore.js',
-      meta: ['lo-fi / chill', '85 BPM', 'E♭ major', '32 bars', '~90s loop'],
-      desc: 'Original lo-fi: Rhodes-style electric piano sevenths with a tape warble, a round upright-style bass, dusty swung boom-bap drums and vinyl crackle, with a breathy flute melody.',
-      sections: [
-        ['0:00', 'Standby', 'E♭maj7–Cm7–A♭maj7–B♭7. Piano and crackle; the bass and softer drums come in at bar 5.'],
-        ['0:22', 'Restore', 'The full swung beat, with an extra piano comp on the "and" of 3.'],
-        ['0:45', 'Recovery', 'New chords (Fm7–B♭7–E♭maj7–Cm7–A♭maj7–Gm7) and the flute melody.'],
-        ['1:07', 'Reboot', 'A half-time dip for 4 bars, then the full beat returns into the loop.'],
-      ],
-    },
-    {
-      id: 'night-drive', num: '07', title: 'NIGHT DRIVE', create: createNightDrive, file: 'music-night-drive.js',
-      meta: ['synthwave / outrun', '100 BPM', 'F♯ minor', '32 bars', '~77s loop'],
-      desc: 'Original synthwave: a pumping 16th-note octave bass that ducks under every kick, wide detuned saw pads, an 80s gated-reverb snare with tom fills, and a bright arpeggio and gliding lead through a dotted-8th echo.',
-      sections: [
-        ['0:00', 'Ignition', 'F♯m–D–A–E. Pads and a sparse arpeggio; the pumping bass and kick come in at bar 5, with a tom fill into the next section.'],
-        ['0:19', 'Cruise', 'The full drive: gated snare on 2 and 4, 8th-note hats and the 16th arpeggio.'],
-        ['0:38', 'Neon', 'New chords (D–E–C♯m–F♯m–D–E–A–E) and the gliding lead melody.'],
-        ['0:58', 'Overdrive', 'The lead doubled an octave down and the arpeggio an octave up, then a tom fill back into the loop.'],
-      ],
-    },
-    {
-      id: 'standby-mode', num: '08', title: 'STANDBY MODE', create: createStandbyMode, file: 'music-standby-mode.js',
-      meta: ['soul ballad', '112 BPM', 'B♭ major', '32 bars', '~69s loop'],
-      desc: 'Original early-60s soul ballad: a walking upright bass, finger snaps and a guiro scrape, a clean guitar picking the chords, and a breathy saxophone singing the melody through a warm room reverb.',
-      sections: [
-        ['0:00', 'Standby', 'B♭–Gm–E♭–F–B♭, two bars a chord. Bass and snaps alone, then the guitar and guiro join at bar 3.'],
-        ['0:17', 'Signal', 'The saxophone takes the melody.'],
-        ['0:34', 'Connected', 'The melody climbs an octave higher.'],
-        ['0:51', 'Hold', 'The melody back down, with bluesy slides into each note, then round into the loop.'],
-      ],
-    },
-    {
-      id: 'core-dump', num: '09', title: 'CORE DUMP', create: createCoreDump, file: 'music-core-dump.js',
-      meta: ['8-bit tech-death', '190 BPM', 'A harmonic minor', '32 bars', '~40s loop'],
-      desc: 'Original 8-bit tech-death: distorted pulse-wave guitars (tremolo riffs, palm-muted chugs, open notes diving an octave), a square bass, noise-channel blast beats and a china cymbal, and 32nd-note sweep arpeggios on a thin 12.5% pulse.',
-      sections: [
-        ['0:00', 'Segfault', 'A chromatic tremolo riff over blast beats. The first time through, the riff plays alone for two bars and a snare roll brings the blasts in; after that the breakdown\'s glitch runs straight into the blasts, so the loop never stops.'],
-        ['0:10', 'Stack trace', 'Galloping chugs over 16th-note double kick, snare on 2 and 4, and a sliding alien lead.'],
-        ['0:20', 'Overflow', 'Sweep arpeggios in 32nds, two octaves up and back (Am–B♭–G♯dim–Am–E), over blasts.'],
-        ['0:30', 'Core dump', 'A half-time breakdown: chugs, china and pitch dives, then a stuttering glitch back into the loop.'],
-      ],
-    },
-    {
-      id: 'handshake', num: '10', title: 'HANDSHAKE', create: createHandshake, file: 'music-handshake.js',
-      meta: ['8-bit battle theme', '176 BPM', 'C minor', '32 bars', '~44s loop'],
-      desc: 'Original 8-bit battle theme in the style of Game Boy-era handheld RPG battles: a lead pulse with delayed vibrato, a second pulse, a busy 4-bit wave-channel bass bouncing in octaves, and a light noise-channel kit.',
-      sections: [
-        ['0:00', 'Encounter', 'Two bars of groove (the first time through, a falling chromatic intro run instead), then the main theme over Cm–A♭–B♭–G.'],
-        ['0:11', 'Battle', 'The answer: falling phrases, then the theme climbing higher.'],
-        ['0:22', 'Bridge', 'Long notes with vibrato over a 16th-note arpeggio (E♭–B♭–Cm–A♭–Fm–B♭–E♭–G).'],
-        ['0:33', 'Critical', 'A figure rising a semitone every bar, then a falling chromatic run back into the loop.'],
-      ],
-    },
-  ];
-
-  const EASE = 0.06; // matches INTENSITY_EASE in music.js
-  let ctx = null;
-  let analyser = null;
-  let player = null; // { track, session, engine, timer, step, nextTime, intensity, target, ui }
-
-  function audio() {
-    if (!ctx) {
-      ctx = new (window.AudioContext || window.webkitAudioContext)();
-      analyser = ctx.createAnalyser();
-      analyser.fftSize = 2048;
-      analyser.connect(ctx.destination);
-    }
-    if (ctx.state === 'suspended') ctx.resume();
-    return ctx;
-  }
-
-  function stopTrack() {
-    if (!player) return;
-    clearInterval(player.timer);
-    const { session, ui } = player;
-    session.gain.cancelScheduledValues(ctx.currentTime);
-    session.gain.setTargetAtTime(0, ctx.currentTime, 0.08);
-    setTimeout(() => session.disconnect(), 600);
-    ui.btn.classList.remove('playing');
-    ui.btn.innerHTML = '<svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true" style="vertical-align:-1px"><path d="M7 4l12 8-12 8z" fill="currentColor"/></svg> PLAY';
-    ui.rows.forEach((r) => r.classList.remove('active'));
-    ui.now.textContent = '';
-    ui.meter.style.width = '0';
-    showLayers(ui, player.track, 0);
-    ui.soloBtns.forEach((b) => { b.classList.remove('on'); b.textContent = 'SOLO'; });
-    ui.media.classList.remove('live');
-    showPosition(ui, player.track, 0);
-    player = null;
-    document.getElementById('scope-label').textContent = '// SCOPE IDLE — PLAY A TRACK TO SEE IT MOVE';
-  }
-
-  function startTrack(track, ui) {
-    stopTrack();
-    const c = audio();
-    const session = c.createGain();
-    session.gain.setValueAtTime(0, c.currentTime);
-    session.gain.linearRampToValueAtTime(1, c.currentTime + 0.8);
-    session.connect(analyser);
-    const p = {
-      track, session, ui,
-      engine: track.create(c, session),
-      muted: ui.muted, // the MUTE buttons' set, shared so changes apply while playing
-      step: 0,
-      nextTime: c.currentTime + 0.05,
-      intensity: 0,
-      target: Number(ui.slider.value) / 100,
-    };
-    p.timer = setInterval(() => {
-      if (p.nextTime < c.currentTime) p.nextTime = c.currentTime + 0.02;
-      while (p.nextTime < c.currentTime + (document.hidden ? 1.5 : 0.12)) {
-        p.intensity += (p.target - p.intensity) * EASE;
-        p.engine.schedule(p.step, p.nextTime, p.intensity, p.solo, p.muted);
-        p.nextTime += p.engine.step;
-        p.step++;
-      }
-      const frac = audibleFraction(p);
-      const bar = Math.floor(frac * 32);
-      if (!ui.dragging) showPosition(ui, track, frac);
-      ui.rows.forEach((r, i) => r.classList.toggle('active', i === Math.floor(bar / 8)));
-      ui.now.textContent = p.solo
-        ? `// NOW PLAYING — BAR ${bar + 1} OF 32 — SOLO: ${track.layers.find((l) => l.id === p.solo).label.toUpperCase()}`
-        : `// NOW PLAYING — BAR ${bar + 1} OF 32 — INTENSITY ${Math.round(p.intensity * 100)}%`;
-      ui.meter.style.width = `${p.intensity * 100}%`;
-      showLayers(ui, track, p.intensity, p.solo, p.muted);
-    }, 25);
-    player = p;
-    ui.btn.classList.add('playing');
-    ui.btn.innerHTML = '<svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true" style="vertical-align:-1px"><rect x="5" y="5" width="14" height="14" rx="1" fill="currentColor"/></svg> STOP';
-    ui.media.classList.add('live');
-    document.getElementById('scope-label').textContent = `// SCOPE — ${track.title}`;
-  }
-
-  // Game stack heights settle at these intensities (see dangerLevel in script.js).
-  const STACK_LEVELS = [[4, 1 / 3], [5, 2 / 3], [6, 1]];
-
-  function layerWhen({ from, span, archived, trial }) {
-    if (archived) return 'ARCHIVED · NOT IN THE GAME';
-    if (trial) return 'TRIAL · NOT IN THE GAME YET';
-    if (from === 0) return 'FROM 0% · GROWS TO 100%';
-    const stack = STACK_LEVELS.find(([, level]) => level > from)[0];
-    const full = Math.min(100, Math.round((from + span) * 100));
-    return `IN AT ${Math.round(from * 100)}% · STACK ${stack}${stack === 6 ? '+' : ''} · FULL ${full}%`;
-  }
-
-  function showLayers(ui, track, intensity, solo = null, muted = ui.muted) {
-    track.layers.forEach(({ id, from, span }, i) => {
-      const off = !solo && muted.has(id);
-      const level = solo ? Number(id === solo) : off ? 0 : Math.max(0, Math.min(1, (intensity - from) / span));
-      ui.layerRows[i].classList.toggle('on', level > 0.01);
-      ui.layerRows[i].classList.toggle('muted', off);
-      ui.layerRows[i].querySelector('.lvl > span').style.width = `${level * 100}%`;
-    });
-  }
-
-  function fmtTime(sec) {
-    const s = Math.floor(sec);
-    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-  }
-
-  // Loop position of what's audible now (notes are queued slightly ahead of the speakers).
-  function audibleFraction(p) {
-    const audible = p.step - (p.nextTime - ctx.currentTime) / p.engine.step;
-    const loop = p.engine.loopSteps;
-    return (((audible % loop) + loop) % loop) / loop;
-  }
-
-  function showPosition(ui, track, frac) {
-    const pct = `${frac * 100}%`;
-    ui.fill.style.width = pct;
-    ui.head.style.left = pct;
-    ui.cur.textContent = fmtTime(frac * track.loopSteps * track.stepDur);
-    ui.bar.setAttribute('aria-valuenow', String(Math.round(frac * track.loopSteps * track.stepDur)));
-  }
-
-  function seekTo(track, ui, frac) {
-    if (!player || player.track !== track) startTrack(track, ui);
-    player.step = Math.floor(Math.min(frac, 0.999) * player.engine.loopSteps);
-    player.nextTime = ctx.currentTime + 0.05;
-    showPosition(ui, track, frac);
-  }
-
-  // Read each track's step length and loop size from a throwaway offline engine.
-  const probe = new OfflineAudioContext(1, 1, 44100);
-  for (const track of TRACKS) {
-    const eng = track.create(probe, probe.destination);
-    track.stepDur = eng.step;
-    track.loopSteps = eng.loopSteps;
-    track.layers = eng.layers;
-    track.defaultMuted = eng.defaultMuted || []; // layer options the game leaves out
-  }
-
+  // ── Music tracks: the list, each opening in the mixer (mixer.html) ───────
   const trackList = document.getElementById('track-list');
-  for (const track of TRACKS) {
+  const mixed = (id) => { try { return !!localStorage.getItem(`bytefall-mix-${id}`); } catch (e) { return false; } };
+  for (const track of TRACK_INFO) {
     const card = document.createElement('div');
     card.className = 'card';
+    const inGame = typeof MUSIC_MIXES !== 'undefined' && MUSIC_MIXES[track.id];
     card.innerHTML = `
       <div class="card-top">
         <div class="card-main">
           <div class="card-name">${track.num} ${esc(track.title)}<span class="card-id">${esc(track.file)}</span></div>
           <div class="card-desc">${esc(track.desc)}</div>
-          <div class="chips">${track.meta.map((m) => `<span class="chip">${esc(m)}</span>`).join('')}</div>
+          <div class="chips">${track.meta.map((m) => `<span class="chip">${esc(m)}</span>`).join('')}${inGame ? '<span class="chip">MIXED IN THE GAME</span>' : ''}${mixed(track.id) ? '<span class="chip">LEVELS SAVED HERE</span>' : ''}</div>
         </div>
-        <button class="play" type="button"><svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true" style="vertical-align:-1px"><path d="M7 4l12 8-12 8z" fill="currentColor"/></svg> PLAY</button>
+        <a class="play" href="mixer.html?track=${encodeURIComponent(track.id)}">MIXER &rarr;</a>
       </div>
       <div class="sections">${track.sections.map(([time, name, what]) => `
         <div class="sec-row"><span class="time">${esc(time)}</span><span><b>${esc(name)}</b> — ${esc(what)}</span></div>`).join('')}
-      </div>
-      <div class="media">
-        <span class="time cur">0:00</span>
-        <div class="bar" role="slider" tabindex="0" aria-label="${esc(track.title)} position" aria-valuemin="0" aria-valuenow="0">
-          <div class="tick" style="left:25%"></div><div class="tick" style="left:50%"></div><div class="tick" style="left:75%"></div>
-          <div class="fill"></div><div class="head"></div>
-        </div>
-        <span class="time total"></span>
-      </div>
-      <div class="now"></div>
-      <div class="intensity">
-        <div class="intensity-head"><span>// INTENSITY TARGET</span><span class="val">0%</span></div>
-        <input type="range" min="0" max="100" step="1" value="0" aria-label="${esc(track.title)} intensity">
-        <div class="presets">
-          <button type="button" data-v="0">STACK ≤3 · 0%</button>
-          <button type="button" data-v="33">STACK 4 · 33%</button>
-          <button type="button" data-v="67">STACK 5 · 67%</button>
-          <button type="button" data-v="100">STACK 6+ · 100%</button>
-        </div>
-        <div class="meter"><div></div>${[...new Set(track.layers.map((l) => l.from).filter((f) => f > 0))].map((f) => `<span class="mark" style="left:${f * 100}%"></span>`).join('')}</div>
-      </div>
-      <div class="uses"><h4>// INTENSITY LAYERS &mdash; WHEN EACH COMES IN</h4><ul class="layers">${track.layers.map((l) => `
-        <li><span class="at">${esc(layerWhen(l))}</span><span>${esc(l.label)}</span><span class="lvl"><span></span></span><button type="button" class="mute" data-layer="${esc(l.id)}">MUTE</button><button type="button" class="solo" data-layer="${esc(l.id)}">SOLO</button></li>`).join('')}</ul>
-        <p class="layers-note">MUTE leaves a layer out of the full track (PLAY brings it back), so you can hear what it adds in the mix. ARCHIVED layers are kept here to listen to (they start muted) but are no longer in the game; TRIAL layers are candidates being tried out (they start muted too, and PLAY adds one to the mix) that the game leaves out until they're picked. SOLO mutes the rest of the track and plays just what that layer adds, at full strength. Layers that fill gaps go quiet where the track already plays that part: the theme's extra hi-hats and kick in section B and the climax; SLEEP MODE's extra chugs in the drop and breakdown, and its double-kick fills in the drop; BRUTE FORCE's octave double in the boot (no melody yet) and its hi-hats in the boss; ZERO DAY's extra break hits wherever its drums drop out (first half of the intro, and the breakdown); SYSTEM RESTORE's distorted bass until the bass enters (first half of standby); NIGHT DRIVE's hats, tambourine and turbo kicks until the drums enter (first half of ignition).</p></div>`;
-    const ui = {
-      btn: card.querySelector('button.play'),
-      rows: [...card.querySelectorAll('.sec-row')],
-      now: card.querySelector('.now'),
-      slider: card.querySelector('input[type="range"]'),
-      val: card.querySelector('.intensity-head .val'),
-      presets: [...card.querySelectorAll('.presets button')],
-      meter: card.querySelector('.meter > div'),
-      layerRows: [...card.querySelectorAll('.layers li')],
-      soloBtns: [...card.querySelectorAll('.solo')],
-      muteBtns: [...card.querySelectorAll('.mute')],
-      muted: new Set(track.defaultMuted),
-      media: card.querySelector('.media'),
-      bar: card.querySelector('.media .bar'),
-      fill: card.querySelector('.media .fill'),
-      head: card.querySelector('.media .head'),
-      cur: card.querySelector('.media .cur'),
-    };
-    card.querySelector('.media .total').textContent = fmtTime(track.loopSteps * track.stepDur);
-    ui.bar.setAttribute('aria-valuemax', String(Math.round(track.loopSteps * track.stepDur)));
-
-    // Seek: drag previews the playhead, release jumps there (starting the track if needed)
-    const fractionAt = (e) => {
-      const r = ui.bar.getBoundingClientRect();
-      return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
-    };
-    ui.bar.addEventListener('pointerdown', (e) => {
-      ui.dragging = true;
-      ui.bar.setPointerCapture(e.pointerId);
-      showPosition(ui, track, fractionAt(e));
-    });
-    ui.bar.addEventListener('pointermove', (e) => { if (ui.dragging) showPosition(ui, track, fractionAt(e)); });
-    ui.bar.addEventListener('pointerup', (e) => {
-      if (!ui.dragging) return;
-      ui.dragging = false;
-      seekTo(track, ui, fractionAt(e));
-    });
-    ui.bar.addEventListener('keydown', (e) => {
-      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
-      e.preventDefault();
-      const bar = 16 / track.loopSteps;
-      const now = player && player.track === track ? audibleFraction(player) : 0;
-      seekTo(track, ui, (now + (e.key === 'ArrowRight' ? bar : -bar) + 1) % 1);
-    });
-    const setTarget = (v) => {
-      ui.slider.value = v;
-      ui.val.textContent = `${v}%`;
-      ui.presets.forEach((b) => b.classList.toggle('on', Number(b.dataset.v) === Number(v)));
-      if (player && player.track === track) player.target = v / 100;
-    };
-    ui.slider.addEventListener('input', () => setTarget(Number(ui.slider.value)));
-    ui.presets.forEach((b) => b.addEventListener('click', () => setTarget(Number(b.dataset.v))));
-    ui.soloBtns.forEach((b) => b.addEventListener('click', () => {
-      if (!player || player.track !== track) startTrack(track, ui);
-      player.solo = player.solo === b.dataset.layer ? null : b.dataset.layer;
-      ui.soloBtns.forEach((o) => {
-        const on = o.dataset.layer === player.solo;
-        o.classList.toggle('on', on);
-        o.textContent = on ? '■ SOLO' : 'SOLO';
-      });
-    }));
-    const showMutes = () => ui.muteBtns.forEach((o) => {
-      const off = ui.muted.has(o.dataset.layer);
-      o.classList.toggle('on', off);
-      o.textContent = off ? 'PLAY' : 'MUTE';
-    });
-    ui.muteBtns.forEach((b) => b.addEventListener('click', () => {
-      const id = b.dataset.layer;
-      if (ui.muted.has(id)) ui.muted.delete(id);
-      else ui.muted.add(id);
-      showMutes();
-      showLayers(ui, track, player && player.track === track ? player.intensity : 0, player && player.track === track ? player.solo : null);
-    }));
-    showMutes();
-    setTarget(0);
-    ui.btn.addEventListener('click', () => {
-      if (player && player.track === track) stopTrack();
-      else startTrack(track, ui);
-    });
+      </div>`;
     trackList.appendChild(card);
   }
-
-  // Follows the game's BACKGROUND PLAY setting (settings panel).
-  document.addEventListener('visibilitychange', () => {
-    if (!ctx || !player) return;
-    let background = false;
-    try { background = localStorage.getItem('bytefall-music-bg') === 'on'; } catch (e) {}
-    if (document.hidden && !background) ctx.suspend();
-    else ctx.resume();
-  });
-
-  // ── Visualizer: the game's shared bars/wave styles on this page's output ─
-  const viz = createVisualizer(document.getElementById('scope'), () => (player ? analyser : null), { bars: 48 });
-  const vizBtn = document.getElementById('viz-mode');
-  const updateVizBtn = () => { vizBtn.textContent = viz.mode === 'bars' ? 'BARS · switch to wave' : 'WAVE · switch to bars'; };
-  const toggleViz = () => { viz.toggle(); updateVizBtn(); };
-  vizBtn.addEventListener('click', toggleViz);
-  document.querySelector('.wf-strip').addEventListener('click', toggleViz);
-  updateVizBtn();
-  (function vizLoop(now) {
-    viz.draw(now);
-    requestAnimationFrame(vizLoop);
-  })(performance.now());
 })();
 </script>
 <script>

@@ -35,9 +35,11 @@ js/                     the game: script.js (the game itself), player.js (the mu
                         achievements, stats), unlocks.js, cpu.js (VS CPU), sfx.js, fx.js,
                         viz.js, grid-bg.js
 js/data/                puzzles.js, daily-puzzles.js
-js/music/               music.js (the player) and one music-*.js per track
+js/music/               music.js (the player), one music-*.js per track, output.js (SOUND
+                        OUTPUT, instrument channels), mixes.js (mix tables), archive/
 assets/                 fonts/, icons/, audio/ (WAV renders of the tracks, not used by the game)
-dev-tools/audio.html    the audio compendium
+dev-tools/audio.html    the audio compendium (tracks-info.js: the track list for it and the mixer)
+dev-tools/mixer.html    the mixer, one track at a time (?track=sleep-mode)
 docs/achievements.csv   every achievement, grouped
 ```
 
@@ -349,7 +351,7 @@ away.
 
 ## Files
 
-`index.html` (and `dev-tools/audio.html`) load their CSS and JS with a `?v=N`
+`index.html` (and `dev-tools/audio.html`, `dev-tools/mixer.html`) load their CSS and JS with a `?v=N`
 tag. Bump `N` on all of those links whenever any of those files change, so browsers don't pair a fresh page
 with a cached older script (GitHub Pages lets browsers cache for 10 minutes).
 
@@ -426,13 +428,22 @@ with a cached older script (GitHub Pages lets browsers cache for 10 minutes).
   battle, bridge, critical; a low-HP alarm at the top of the stack). Unlocked
   at 15,000 bits.
 - `dev-tools/audio.html` — the audio compendium, opened by the `</>` icon in
-  the footer: every sound effect and track with a play button, where each is
-  used in the game, a seekable progress line and a live intensity slider for
-  each track, a MUTE / PLAY button per intensity layer to hear the mix without
-  it, and a SOLO button to hear just what it adds. ARCHIVED layers are sounds
-  that were taken out of a track (NIGHT DRIVE's wailing siren, DEEP WEB's
-  dial-up modem, ZERO DAY's air-raid siren): the game never plays them, and
-  here they start muted so they can still be heard
+  the footer: every sound effect with a play button and where each is used in the
+  game, and the track list, each track opening in the mixer
+- `dev-tools/mixer.html?track=<id>` — the MIXER, one track per page (only that
+  track's file loads): PLAY with a seekable position line and a visualizer; SOUND
+  OUTPUT (PHONE / HEADPHONES / SPEAKERS, as in the game); the intensity slider and
+  STACK ≤3 / 4 / 5 / 6+ buttons (what the game sends, eased as it does); a TIMELINE
+  with a lane per instrument channel marking every 16th note it plays across the
+  loop at the picked stack height (read from a dry run of the track's own code),
+  with the playhead (tap to jump); a strip per channel with its label, a live
+  meter, a small spectrum shading what a phone speaker can't play (under ~250Hz,
+  a line at PHONE's 170Hz cut), four level sliders (dB at stack ≤3, 4, 5, 6+,
+  LINK moving them together), MUTE and SOLO; EXPORT (the track's levels as text
+  for `js/music/mixes.js`), REVERT TO THE GAME'S, ALL 0 dB. Levels are kept per
+  track and output in the browser (`bytefall-mix-<track>`) until pasted in. The
+  intensity layers (when each comes in, MUTE / PLAY and SOLO; ARCHIVED and TRIAL
+  layers start muted), the sections and how the music intensifies are below
 - `assets/audio/` — offline WAV renders of the music for reference (not loaded by
   the game). `01-bytefall-theme.wav` through `10-handshake.wav` are one full
   loop of each track at full intensity (stack 6+, every layer the game plays,

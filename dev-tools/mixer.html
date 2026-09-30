@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="../js/fonts.js?v=246"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#020403">
+<title>Mixer // BYTEFALL</title>
+<script>
+  try {
+    var FONTS = { 'share-tech': "'Share Tech Mono'", 'press-start': "'Press Start 2P'", bitcount: "'Bitcount Single'", bytesized: "'Bytesized'", orbitron: "'Orbitron'" };
+    var font = FONTS[localStorage.getItem('bytefall-font')];
+    if (font) document.documentElement.style.setProperty('--game-font', font + ", 'Courier New', Courier, monospace");
+  } catch (e) {}
+</script>
+<style>
+  :root {
+    --bg: #020403;
+    --panel: #0b1512;
+    --panel-2: #0e1a16;
+    --line: #1c3d33;
+    --green: #39ff8f;
+    --green-rgb: 57, 255, 143;
+    --green-dim: #1f7a52;
+    --text: #c9f7dc;
+    --text-dim: #7fb89b;
+    --amber: #ffd166;
+    --amber-rgb: 255, 209, 102;
+    --red: #ff4d5e;
+    --red-rgb: 255, 77, 94;
+    --mono: var(--game-font, 'Courier New', Courier, monospace);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: radial-gradient(ellipse at top, #0d1b16 0%, #020403 70%);
+    background-color: var(--bg);
+    background-attachment: fixed;
+    color: var(--text);
+    font-family: var(--mono);
+    line-height: 1.5;
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 28px 16px 80px; }
+  .back { display: inline-block; margin-bottom: 20px; color: var(--green-dim); text-decoration: none; font-size: 12px; letter-spacing: 0.12em; }
+  .back:hover { color: var(--green); }
+  .eyebrow { display: flex; align-items: center; gap: 10px; font-size: 11px; letter-spacing: 0.18em; color: var(--green-dim); margin-bottom: 10px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); }
+  h1 { margin: 0 0 8px; font-size: 26px; letter-spacing: 0.12em; color: var(--green); text-shadow: 0 0 10px rgba(var(--green-rgb), 0.5); }
+  h1 span { color: var(--amber); text-shadow: 0 0 10px rgba(var(--amber-rgb), 0.5); }
+  .lede { margin: 0 0 10px; color: var(--text-dim); font-size: 13px; max-width: 760px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-size: 10px; letter-spacing: 0.1em; padding: 2px 8px; border: 1px solid var(--line); border-radius: 10px; color: var(--text-dim); }
+  .panel { margin-top: 18px; padding: 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+  h2 { margin: 0 0 8px; font-size: 13px; letter-spacing: 0.16em; color: var(--green); font-weight: normal; }
+  h2 em { font-style: normal; color: var(--amber); }
+  .note { margin: 6px 0 0; font-size: 11px; color: var(--text-dim); }
+  button { font-family: inherit; cursor: pointer; }
+  .btn {
+    padding: 6px 12px; background: transparent; border: 1px solid var(--green-dim); border-radius: 4px;
+    color: var(--green); font-size: 11px; letter-spacing: 0.1em;
+  }
+  .btn:hover { border-color: var(--green); background: rgba(var(--green-rgb), 0.08); }
+  .btn.on { background: var(--green); color: var(--bg); border-color: var(--green); font-weight: bold; }
+  .btn.amber.on { background: var(--amber); border-color: var(--amber); }
+  .btn.red.on { background: var(--red); border-color: var(--red); color: #fff; }
+  .play-btn { padding: 10px 22px; font-size: 13px; }
+  .play-btn.playing { color: var(--amber); border-color: var(--amber); }
+
+  /* Transport */
+  .transport-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .media { flex: 1; min-width: 220px; display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text-dim); }
+  .bar { position: relative; flex: 1; height: 16px; cursor: pointer; touch-action: none; }
+  .bar::before { content: ''; position: absolute; left: 0; right: 0; top: 7px; height: 2px; background: var(--line); }
+  .bar .fill { position: absolute; left: 0; top: 7px; height: 2px; width: 0; background: var(--green); }
+  .bar .head { position: absolute; top: 3px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); left: 0; }
+  .bar .tick { position: absolute; top: 4px; width: 1px; height: 8px; background: var(--green-dim); }
+  .now { margin-top: 8px; font-size: 11px; letter-spacing: 0.08em; color: var(--amber); min-height: 1.5em; }
+  #scope { display: block; width: 100%; height: 70px; margin-top: 8px; border: 1px solid var(--line); border-radius: 4px; background: #030806; cursor: pointer; }
+  .group { margin-top: 14px; }
+  .glabel { display: block; font-size: 11px; letter-spacing: 0.14em; color: var(--green-dim); margin-bottom: 6px; }
+  .seg { display: flex; flex-wrap: wrap; gap: 6px; }
+  .intensity-row { display: flex; align-items: center; gap: 10px; }
+  .intensity-row input { flex: 1; accent-color: var(--green); }
+  .intensity-row .val { min-width: 11ch; text-align: right; font-size: 12px; color: var(--amber); }
+  .ease { position: relative; height: 4px; margin-top: 6px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 2px; overflow: hidden; }
+  .ease > i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--amber); }
+  .ease > .mark { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--green-dim); }
+
+  /* Timeline */
+  .tl-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  #timeline { display: block; cursor: pointer; }
+
+  /* Mixer strips */
+  .strips { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+  .strip { padding: 10px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; }
+  .strip.changed { border-color: rgba(var(--amber-rgb), 0.6); }
+  .strip.silent { opacity: 0.5; }
+  .s-head { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
+  .s-head b { font-size: 12px; letter-spacing: 0.1em; color: var(--green); }
+  .s-head .s-now { font-size: 11px; color: var(--amber); white-space: nowrap; }
+  .s-label { font-size: 10.5px; color: var(--text-dim); min-height: 2.9em; }
+  .s-spec { display: block; width: 100%; height: 44px; margin: 4px 0; background: #030806; border: 1px solid var(--line); border-radius: 3px; }
+  .s-meter { position: relative; height: 6px; background: #030806; border: 1px solid var(--line); border-radius: 2px; overflow: hidden; }
+  .s-meter i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: linear-gradient(90deg, var(--green) 70%, var(--amber) 88%, var(--red)); }
+  .s-meter em { position: absolute; top: 0; bottom: 0; width: 2px; left: 0; background: var(--text); opacity: 0.8; }
+  .s-rows { margin-top: 8px; display: grid; grid-template-columns: 3.2ch 1fr 5.5ch; gap: 2px 6px; align-items: center; font-size: 11px; }
+  .s-rows label { color: var(--text-dim); text-align: right; }
+  .s-rows label.here { color: var(--amber); }
+  .s-rows input { width: 100%; accent-color: var(--green); }
+  .s-rows output { text-align: right; color: var(--text); font-variant-numeric: tabular-nums; }
+  .s-rows output.cut { color: var(--amber); }
+  .s-rows output.boost { color: var(--red); }
+  .s-btns { display: flex; gap: 6px; margin-top: 8px; }
+  .s-btns .btn { flex: 1; padding: 4px 0; font-size: 10px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; }
+  .dirty { font-size: 11px; color: var(--amber); }
+  #export { display: block; width: 100%; min-height: 130px; margin-top: 10px; padding: 8px; background: #030806; color: var(--text); border: 1px solid var(--line); border-radius: 4px; font-family: var(--mono); font-size: 11px; }
+  #export[hidden] { display: none; }
+
+  /* Layers, sections, reference */
+  .layers { list-style: none; margin: 0; padding: 0; }
+  .layers li { display: grid; grid-template-columns: 200px 1fr 54px 60px 60px; gap: 10px; align-items: center; padding: 4px 0; font-size: 11.5px; color: var(--text-dim); }
+  .layers li.on { color: var(--text); }
+  .layers li.muted { opacity: 0.45; }
+  .layers .at { font-size: 10.5px; color: var(--green-dim); }
+  .layers li.on .at { color: var(--amber); }
+  .layers .lvl { height: 4px; border: 1px solid var(--line); border-radius: 2px; background: var(--panel-2); overflow: hidden; }
+  .layers .lvl > span { display: block; height: 100%; width: 0; background: var(--green); }
+  .layers .btn { padding: 3px 0; font-size: 10px; }
+  .sec-row { display: grid; grid-template-columns: 5ch 1fr; gap: 10px; padding: 4px 0; font-size: 12px; color: var(--text-dim); }
+  .sec-row.active { color: var(--text); }
+  .sec-row.active .time { color: var(--amber); }
+  .sec-row .time { color: var(--green-dim); }
+  table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+  th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--green-dim); font-weight: normal; letter-spacing: 0.1em; font-size: 10.5px; }
+  tr.here td { color: var(--amber); }
+  .missing { padding: 30px 0; color: var(--text-dim); }
+  .missing a { color: var(--green); }
+  @media (max-width: 640px) {
+    .layers li { grid-template-columns: 1fr 54px 56px 56px; }
+    .layers .at { grid-column: 1 / -1; }
+    h1 { font-size: 21px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="audio.html#tracks">&larr; BACK TO THE TRACK LIST</a>
+  <div class="eyebrow"><span class="dot"></span>BYTEFALL // DEV TOOLS // MIXER</div>
+  <h1 id="title">MIXER</h1>
+  <p class="lede" id="desc"></p>
+  <div class="chips" id="chips"></div>
+
+  <div id="page" hidden>
+    <!-- TRANSPORT: play, position, the output, the intensity as the game sends it -->
+    <section class="panel">
+      <div class="transport-top">
+        <button type="button" class="btn play-btn" id="play">&#9654; PLAY</button>
+        <div class="media">
+          <span id="cur">0:00</span>
+          <div class="bar" id="bar" role="slider" tabindex="0" aria-label="Position" aria-valuemin="0">
+            <div class="tick" style="left:25%"></div><div class="tick" style="left:50%"></div><div class="tick" style="left:75%"></div>
+            <div class="fill"></div><div class="head"></div>
+          </div>
+          <span id="total">0:00</span>
+        </div>
+      </div>
+      <div class="now" id="now"></div>
+      <canvas id="scope" title="Tap to switch the visualizer"></canvas>
+      <div class="group">
+        <span class="glabel">// SOUND OUTPUT (the game's SETTINGS &rarr; SOUND OUTPUT; the levels below are this output's)</span>
+        <div class="seg" id="outputs"></div>
+        <p class="note" id="out-note"></p>
+      </div>
+      <div class="group">
+        <span class="glabel">// INTENSITY (eased as in the game: the stack buttons send what the game sends at each height)</span>
+        <div class="intensity-row">
+          <input type="range" id="intensity" min="0" max="100" step="1" value="0" aria-label="Intensity target">
+          <span class="val" id="intensity-val">0%</span>
+        </div>
+        <div class="seg" id="stacks" style="margin-top:6px"></div>
+        <div class="ease" id="ease"><i></i></div>
+      </div>
+    </section>
+
+    <!-- TIMELINE: which instruments play where in the loop, at the picked stack height -->
+    <section class="panel">
+      <h2>// TIMELINE <em id="tl-at"></em></h2>
+      <div class="tl-scroll"><canvas id="timeline"></canvas></div>
+      <p class="note">Every 16th note each instrument plays is a mark in its lane (brighter: more notes at once), read from the track's own code at the stack height picked above, as the game plays it (layers the game leaves out stay out). Sections are split by the taller lines. Tap to jump there. Muted and silent channels are dimmed.</p>
+    </section>
+
+    <!-- MIXER: a strip per instrument channel -->
+    <section class="panel">
+      <h2>// MIXER <em id="mix-out"></em></h2>
+      <div class="strips" id="strips"></div>
+      <div class="actions">
+        <button type="button" class="btn" id="export-btn">EXPORT</button>
+        <button type="button" class="btn" id="revert-btn">REVERT TO THE GAME'S</button>
+        <button type="button" class="btn" id="zero-btn">ALL 0 dB</button>
+        <button type="button" class="btn" id="clear-btn">UNMUTE / UNSOLO ALL</button>
+        <span class="dirty" id="dirty"></span>
+      </div>
+      <textarea id="export" hidden readonly spellcheck="false"></textarea>
+      <p class="note">Each channel's level in dB at the four stack heights the game settles on (&le;3, 4, 5, 6+ rows: intensity 0, 33, 67, 100%), eased between as the intensity moves; 0 dB is as written. LINK moves a strip's four together. Levels are kept per track and per output in this browser (the game only hears them once they're in <code>js/music/mixes.js</code>): EXPORT gives the text to paste to Claude, or into that file. MUTE and SOLO are for listening only; they aren't exported. The meter shows each channel after its level; the small spectrum shades what a phone speaker can't play (under ~250Hz), with a line where PHONE cuts (170Hz).</p>
+    </section>
+
+    <!-- INTENSITY LAYERS (moved from the audio compendium) -->
+    <section class="panel">
+      <h2>// INTENSITY LAYERS &mdash; WHEN EACH COMES IN</h2>
+      <ul class="layers" id="layers"></ul>
+      <p class="note">MUTE leaves a layer out, so you can hear what it adds; ARCHIVED and TRIAL layers start muted (the game leaves them out), PLAY adds one back. SOLO plays just what that layer adds, at full strength, with the rest of the track muted.</p>
+    </section>
+
+    <section class="panel">
+      <h2>// SECTIONS</h2>
+      <div id="sections"></div>
+    </section>
+
+    <!-- The intensity reference (moved from the audio compendium) -->
+    <section class="panel">
+      <h2>// HOW THE MUSIC INTENSIFIES</h2>
+      <table>
+        <thead><tr><th>TALLEST STACK</th><th>INTENSITY</th><th>WHAT HAPPENS</th></tr></thead>
+        <tbody id="ref">
+          <tr data-v="0"><td>0&ndash;3 rows</td><td>0%</td><td>The track as written.</td></tr>
+          <tr data-v="33"><td>4 rows</td><td>33%</td><td>The first layers come in (from 5%): usually 16th-note hats, and the tone starts brightening.</td></tr>
+          <tr data-v="67"><td>5 rows</td><td>67%</td><td>The low end and rhythm thicken (layers from 40%).</td></tr>
+          <tr data-v="100"><td>6+ rows</td><td>100%</td><td>The alarm layers (from 72%). Two rows from the line or closer.</td></tr>
+          <tr><td>Game over</td><td>0%</td><td>Eases back to calm behind the game over screen.</td></tr>
+        </tbody>
+      </table>
+      <p class="note">The game sends a target from 0 to 1 whenever the board redraws (one row higher on HARD's 8&times;8); the music moves 6% of the way there every 16th note, so layers fade in and out over a few seconds and the track never restarts. Each layer fades in over the 25% after its entry point.</p>
+    </section>
+  </div>
+</div>
+
+<script src="../js/music/output.js?v=246"></script>
+<script src="../js/music/mixes.js?v=246"></script>
+<script src="../js/viz.js?v=246"></script>
+<script src="tracks-info.js?v=246"></script>
+<script>
+(() => {
+  const VERSION = (document.currentScript.previousElementSibling.src.match(/\?v=(\d+)/) || [])[1] || '1';
+  const params = new URLSearchParams(location.search);
+  const track = TRACK_INFO.find((t) => t.id === params.get('track'));
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  if (!track) {
+    $('desc').innerHTML = `<span class="missing">No track picked. <a href="audio.html#tracks">Pick one from the track list.</a></span>`;
+    return;
+  }
+  document.title = `${track.title} // MIXER // BYTEFALL`;
+  $('title').innerHTML = `${esc(track.num)} <span>${esc(track.title)}</span>`;
+  $('desc').textContent = track.desc;
+  $('chips').innerHTML = [...track.meta, track.file].map((m) => `<span class="chip">${esc(m)}</span>`).join('');
+  // Only this track's engine is loaded
+  const script = document.createElement('script');
+  script.src = `../js/music/${track.file}?v=${VERSION}`;
+  script.onload = () => init(window[track.fn]);
+  document.body.appendChild(script);
+
+  function init(create) {
+    $('page').hidden = false;
+    const EASE = 0.06; // (music.js's INTENSITY_EASE)
+    const STACKS = [['≤3', 0], ['4', 33], ['5', 67], ['6+', 100]];
+    // The engine's shape, read from a throwaway offline copy
+    const probe = new OfflineAudioContext(2, 1, 22050);
+    const info = create(probe, probe.destination);
+    const STEP = info.step;
+    const LOOP = info.loopSteps;
+    const LAYERS = info.layers;
+    const CHANNELS = info.channels.map((c) => ({ id: c.id, label: c.label }));
+    const DEFAULT_MUTED = info.defaultMuted || [];
+    const fmtTime = (sec) => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, '0')}`;
+    $('total').textContent = fmtTime(LOOP * STEP);
+
+    // ── The levels: per output, per channel, [dB at 0, 33, 67, 100%] ──────────────
+    const KEY = `bytefall-mix-${track.id}`;
+    const gameMix = () => JSON.parse(JSON.stringify((typeof MUSIC_MIXES !== 'undefined' && MUSIC_MIXES[track.id]) || {}));
+    let mix = null;
+    try { mix = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
+    if (!mix || typeof mix !== 'object') mix = gameMix();
+    const save = () => {
+      // (only what's off 0 dB is kept)
+      for (const out of Object.keys(mix)) {
+        for (const id of Object.keys(mix[out])) if (mix[out][id].every((v) => v === 0)) delete mix[out][id];
+        if (!Object.keys(mix[out]).length) delete mix[out];
+      }
+      try { localStorage.setItem(KEY, JSON.stringify(mix)); } catch (e) {}
+      showDirty();
+    };
+    let outputId = 'headphones';
+    try { outputId = localStorage.getItem('bytefall-mixer-output') || savedSoundOutput(); } catch (e) {}
+    if (!SOUND_OUTPUTS.some((o) => o.id === outputId)) outputId = 'headphones';
+    const pointsOf = (id, out = outputId) => (mix[out] && mix[out][id]) || [0, 0, 0, 0];
+    const setPoints = (id, pts) => {
+      if (!mix[outputId]) mix[outputId] = {};
+      mix[outputId][id] = pts.map((v) => Math.round(v * 2) / 2);
+      save();
+    };
+
+    // ── Audio ─────────────────────────────────────────────────────────────────
+    let ctx = null;
+    let analyser = null;
+    let chain = null;
+    let player = null; // { session, engine, meters, timer, step, nextTime, intensity }
+    let target = 0;
+    const chanMute = new Set();
+    const chanSolo = new Set();
+    const layerMuted = new Set(DEFAULT_MUTED);
+    let layerSolo = null;
+
+    function audio() {
+      if (!ctx) {
+        ctx = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = ctx.createAnalyser();
+        analyser.fftSize = 2048;
+        analyser.connect(ctx.destination);
+        chain = createSoundOutput(ctx, outputId);
+        chain.output.connect(analyser);
+      }
+      if (ctx.state !== 'running') ctx.resume();
+      return ctx;
+    }
+    // A channel's level now: its points at the intensity, or 0 muted / out of the solo
+    function levelOf(id, intensity) {
+      if (chanMute.has(id) || (chanSolo.size && !chanSolo.has(id))) return 0;
+      return mixGain(pointsOf(id), intensity);
+    }
+    function applyLevels(t, smooth = 0.03) {
+      if (!player) return;
+      for (const ch of player.engine.channels) {
+        const g = levelOf(ch.id, player.intensity);
+        if (ch.applied === g) continue;
+        ch.applied = g;
+        setChannelGain(ch, g, t, smooth);
+      }
+    }
+    const refreshLevels = () => { if (player) { player.engine.channels.forEach((c) => { c.applied = undefined; }); applyLevels(ctx.currentTime, 0.02); } };
+
+    function start(fromStep = 0) {
+      stop();
+      const c = audio();
+      const session = c.createGain();
+      session.gain.setValueAtTime(0, c.currentTime);
+      session.gain.linearRampToValueAtTime(1, c.currentTime + 0.4);
+      session.connect(chain.input);
+      const engine = create(c, session);
+      // (a tap after each channel's level, for its meter and spectrum)
+      const meters = {};
+      for (const ch of engine.channels) {
+        const a = c.createAnalyser();
+        a.fftSize = 1024;
+        a.smoothingTimeConstant = 0.6;
+        ch.node.connect(a);
+        meters[ch.id] = { a, time: new Float32Array(a.fftSize), freq: new Uint8Array(a.frequencyBinCount), peak: 0, peakAt: 0 };
+      }
+      const p = { session, engine, meters, step: fromStep, nextTime: c.currentTime + 0.05, intensity: target };
+      player = p;
+      applyLevels(c.currentTime, 0.001);
+      p.timer = setInterval(() => {
+        if (p.nextTime < c.currentTime) p.nextTime = c.currentTime + 0.02;
+        while (p.nextTime < c.currentTime + (document.hidden ? 1.5 : 0.12)) {
+          p.intensity += (target - p.intensity) * EASE;
+          applyLevels(p.nextTime);
+          p.engine.schedule(p.step, p.nextTime, p.intensity, layerSolo, layerMuted);
+          p.nextTime += STEP;
+          p.step++;
+        }
+      }, 25);
+      $('play').classList.add('playing');
+      $('play').innerHTML = '&#9632; STOP';
+    }
+    function stop() {
+      if (!player) return;
+      clearInterval(player.timer);
+      const old = player.session;
+      old.gain.cancelScheduledValues(ctx.currentTime);
+      old.gain.setTargetAtTime(0, ctx.currentTime, 0.06);
+      setTimeout(() => old.disconnect(), 500);
+      player = null;
+      $('play').classList.remove('playing');
+      $('play').innerHTML = '&#9654; PLAY';
+    }
+    $('play').addEventListener('click', () => (player ? stop() : start(lastFrac * LOOP)));
+    // Where in the loop the speakers are (notes are queued slightly ahead)
+    let lastFrac = 0;
+    const audibleFrac = () => {
+      if (!player) return lastFrac;
+      const audible = player.step - (player.nextTime - ctx.currentTime) / STEP;
+      return (((audible % LOOP) + LOOP) % LOOP) / LOOP;
+    };
+    function seek(frac) {
+      lastFrac = Math.max(0, Math.min(0.999, frac));
+      const step = Math.floor(lastFrac * LOOP);
+      if (player) start(step);
+      showPosition(lastFrac);
+    }
+    function showPosition(frac) {
+      $('bar').querySelector('.fill').style.width = `${frac * 100}%`;
+      $('bar').querySelector('.head').style.left = `${frac * 100}%`;
+      $('cur').textContent = fmtTime(frac * LOOP * STEP);
+    }
+    {
+      const bar = $('bar');
+      const at = (e) => { const r = bar.getBoundingClientRect(); return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)); };
+      let drag = false;
+      bar.addEventListener('pointerdown', (e) => { drag = true; bar.setPointerCapture(e.pointerId); showPosition(at(e)); });
+      bar.addEventListener('pointermove', (e) => { if (drag) showPosition(at(e)); });
+      bar.addEventListener('pointerup', (e) => { if (!drag) return; drag = false; seek(at(e)); });
+      bar.addEventListener('keydown', (e) => {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        e.preventDefault();
+        seek((audibleFrac() + (e.key === 'ArrowRight' ? 16 : -16) / LOOP + 1) % 1);
+      });
+    }
+    document.addEventListener('visibilitychange', () => {
+      if (!ctx || !player) return;
+      if (document.hidden) ctx.suspend();
+      else ctx.resume();
+    });
+
+    // ── Output ────────────────────────────────────────────────────────────────
+    function setOutput(id) {
+      outputId = id;
+      try { localStorage.setItem('bytefall-mixer-output', id); } catch (e) {}
+      if (chain) chain.set(id);
+      const o = SOUND_OUTPUTS.find((x) => x.id === id);
+      $('outputs').querySelectorAll('button').forEach((b) => b.classList.toggle('on', b.dataset.out === id));
+      $('out-note').textContent = o.note;
+      $('mix-out').textContent = `— ${o.label}`;
+      buildStripsValues();
+      refreshLevels();
+    }
+    $('outputs').innerHTML = SOUND_OUTPUTS.map((o) => `<button type="button" class="btn" data-out="${o.id}">${o.label}</button>`).join('');
+    $('outputs').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => setOutput(b.dataset.out)));
+
+    // ── Intensity ─────────────────────────────────────────────────────────────
+    $('stacks').innerHTML = STACKS.map(([rows, v]) => `<button type="button" class="btn" data-v="${v}">STACK ${rows} · ${v}%</button>`).join('');
+    $('ease').insertAdjacentHTML('beforeend', [...new Set(LAYERS.map((l) => l.from).filter((f) => f > 0))].map((f) => `<span class="mark" style="left:${f * 100}%"></span>`).join(''));
+    function setTarget(v) {
+      target = v / 100;
+      $('intensity').value = v;
+      $('intensity-val').textContent = `TARGET ${v}%`;
+      $('stacks').querySelectorAll('button').forEach((b) => b.classList.toggle('on', Number(b.dataset.v) === v));
+      $('ref').querySelectorAll('tr[data-v]').forEach((r) => r.classList.toggle('here', Number(r.dataset.v) === v));
+      drawTimeline();
+    }
+    $('intensity').addEventListener('input', () => setTarget(Number($('intensity').value)));
+    $('stacks').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => setTarget(Number(b.dataset.v))));
+
+    // ── Timeline: a dry run of the loop at each stack height, recording which channels play ──
+    const hits = {}; // stack value → { channel id → Uint8Array(LOOP) }
+    for (const [, v] of STACKS) {
+      const off = new OfflineAudioContext(2, 1, 22050);
+      const e = create(off, off.destination);
+      const h = {};
+      for (const c of e.channels) h[c.id] = new Uint8Array(LOOP);
+      let at = 0;
+      e.record((id) => { if (h[id][at] < 255) h[id][at]++; });
+      for (at = 0; at < LOOP; at++) e.schedule(at, at * STEP, v / 100);
+      e.record(null);
+      hits[v] = h;
+    }
+    const nearestStack = () => STACKS.reduce((best, [, v]) => (Math.abs(v / 100 - target) < Math.abs(best / 100 - target) ? v : best), 0);
+    const tl = $('timeline');
+    const tlBase = document.createElement('canvas');
+    const LANE = 15;
+    const LABEL_W = 92;
+    const TOP = 16;
+    function drawTimeline() {
+      const w = Math.max(tl.parentElement.clientWidth, 640);
+      const h = TOP + CHANNELS.length * LANE + 4;
+      const dpr = window.devicePixelRatio || 1;
+      for (const c of [tl, tlBase]) { c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); }
+      tl.style.width = `${w}px`;
+      tl.style.height = `${h}px`;
+      const g = tlBase.getContext('2d');
+      g.setTransform(dpr, 0, 0, dpr, 0, 0);
+      g.clearRect(0, 0, w, h);
+      const v = nearestStack();
+      $('tl-at').textContent = `— AT STACK ${STACKS.find((s) => s[1] === v)[0]} (${v}%)`;
+      const W = w - LABEL_W - 4;
+      const x = (step) => LABEL_W + (step / LOOP) * W;
+      g.font = '10px monospace';
+      g.textBaseline = 'middle';
+      // bar lines and numbers
+      for (let bar = 0; bar <= 32; bar++) {
+        g.fillStyle = bar % 8 === 0 ? 'rgba(57,255,143,0.45)' : bar % 4 === 0 ? 'rgba(57,255,143,0.18)' : 'rgba(57,255,143,0.07)';
+        g.fillRect(Math.round(x(bar * 16)), bar % 8 === 0 ? 2 : TOP, 1, h);
+        if (bar < 32 && bar % 4 === 0) { g.fillStyle = '#1f7a52'; g.fillText(String(bar + 1), x(bar * 16) + 3, 8); }
+      }
+      CHANNELS.forEach((c, k) => {
+        const y = TOP + k * LANE;
+        const off = chanMute.has(c.id) || (chanSolo.size && !chanSolo.has(c.id)) || mixGain(pointsOf(c.id), v / 100) === 0;
+        g.globalAlpha = off ? 0.3 : 1;
+        g.fillStyle = k % 2 ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.045)';
+        g.fillRect(LABEL_W, y, W, LANE - 1);
+        g.fillStyle = '#7fb89b';
+        g.fillText(c.id.toUpperCase().slice(0, 11), 2, y + LANE / 2);
+        const lane = hits[v][c.id];
+        const cell = Math.max(1, W / LOOP);
+        for (let s = 0; s < LOOP; s++) {
+          if (!lane[s]) continue;
+          g.fillStyle = `rgba(57,255,143,${Math.min(1, 0.45 + lane[s] * 0.12)})`;
+          g.fillRect(x(s), y + 2, cell, LANE - 5);
+        }
+        g.globalAlpha = 1;
+      });
+      tl.dataset.w = W;
+    }
+    function drawPlayhead(frac) {
+      const g = tl.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      g.setTransform(1, 0, 0, 1, 0, 0);
+      g.clearRect(0, 0, tl.width, tl.height);
+      g.drawImage(tlBase, 0, 0);
+      g.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const px = LABEL_W + frac * Number(tl.dataset.w);
+      g.fillStyle = '#ffd166';
+      g.fillRect(px, 0, 2, tl.height / dpr);
+    }
+    tl.addEventListener('click', (e) => {
+      const r = tl.getBoundingClientRect();
+      const frac = (e.clientX - r.left - LABEL_W) / Number(tl.dataset.w);
+      if (frac >= 0 && frac <= 1) seek(frac);
+    });
+    window.addEventListener('resize', () => { drawTimeline(); drawPlayhead(audibleFrac()); });
+
+    // ── Mixer strips ──────────────────────────────────────────────────────────
+    const strips = {};
+    $('strips').innerHTML = CHANNELS.map((c) => `
+      <div class="strip" data-id="${esc(c.id)}">
+        <div class="s-head"><b>${esc(c.id.toUpperCase())}</b><span class="s-now"></span></div>
+        <div class="s-label">${esc(c.label)}</div>
+        <canvas class="s-spec"></canvas>
+        <div class="s-meter"><i></i><em></em></div>
+        <div class="s-rows">${STACKS.map(([rows, v], k) => `
+          <label>${rows}</label><input type="range" min="-30" max="12" step="0.5" value="0" data-k="${k}" aria-label="${esc(c.id)} at stack ${rows}"><output>0.0</output>`).join('')}
+        </div>
+        <div class="s-btns">
+          <button type="button" class="btn on" data-act="link">LINK</button>
+          <button type="button" class="btn red" data-act="mute">MUTE</button>
+          <button type="button" class="btn amber" data-act="solo">SOLO</button>
+        </div>
+      </div>`).join('');
+    for (const c of CHANNELS) {
+      const el = $('strips').querySelector(`.strip[data-id="${c.id}"]`);
+      const s = strips[c.id] = {
+        el, inputs: [...el.querySelectorAll('input')], outs: [...el.querySelectorAll('output')], labels: [...el.querySelectorAll('.s-rows label')],
+        now: el.querySelector('.s-now'), bar: el.querySelector('.s-meter i'), peak: el.querySelector('.s-meter em'), spec: el.querySelector('.s-spec'), link: true,
+      };
+      s.inputs.forEach((input) => input.addEventListener('input', () => {
+        const k = Number(input.dataset.k);
+        const pts = [...pointsOf(c.id)];
+        const next = Number(input.value);
+        if (s.link) {
+          const d = next - pts[k];
+          for (let i = 0; i < 4; i++) pts[i] = Math.max(-30, Math.min(12, pts[i] + d));
+        } else pts[k] = next;
+        setPoints(c.id, pts);
+        showStrip(c.id);
+        refreshLevels();
+        drawTimeline();
+      }));
+      el.querySelector('[data-act="link"]').addEventListener('click', (e) => { s.link = !s.link; e.currentTarget.classList.toggle('on', s.link); });
+      el.querySelector('[data-act="mute"]').addEventListener('click', () => { chanMute.has(c.id) ? chanMute.delete(c.id) : chanMute.add(c.id); showMonitors(); });
+      el.querySelector('[data-act="solo"]').addEventListener('click', () => { chanSolo.has(c.id) ? chanSolo.delete(c.id) : chanSolo.add(c.id); showMonitors(); });
+    }
+    function showStrip(id) {
+      const s = strips[id];
+      const pts = pointsOf(id);
+      pts.forEach((v, k) => {
+        s.inputs[k].value = v;
+        s.outs[k].textContent = `${v > 0 ? '+' : ''}${v.toFixed(1)}`;
+        s.outs[k].classList.toggle('cut', v < 0);
+        s.outs[k].classList.toggle('boost', v > 0);
+      });
+      s.el.classList.toggle('changed', pts.some((v) => v !== 0));
+    }
+    function buildStripsValues() { for (const c of CHANNELS) showStrip(c.id); showDirty(); drawTimeline(); }
+    function showMonitors() {
+      for (const c of CHANNELS) {
+        const el = strips[c.id].el;
+        el.querySelector('[data-act="mute"]').classList.toggle('on', chanMute.has(c.id));
+        el.querySelector('[data-act="solo"]').classList.toggle('on', chanSolo.has(c.id));
+        el.classList.toggle('silent', chanMute.has(c.id) || (chanSolo.size > 0 && !chanSolo.has(c.id)));
+      }
+      refreshLevels();
+      drawTimeline();
+    }
+    // What differs from the game's table (mixes.js)
+    function showDirty() {
+      const game = gameMix();
+      const same = JSON.stringify(normalize(game)) === JSON.stringify(normalize(mix));
+      $('dirty').textContent = same ? 'Same as the game\'s levels.' : 'Changed from the game\'s levels (EXPORT to keep them).';
+    }
+    function normalize(m) {
+      const out = {};
+      for (const o of Object.keys(m).sort()) {
+        const t = {};
+        for (const id of Object.keys(m[o]).sort()) if (m[o][id].some((v) => v !== 0)) t[id] = m[o][id];
+        if (Object.keys(t).length) out[o] = t;
+      }
+      return out;
+    }
+    $('export-btn').addEventListener('click', async () => {
+      const m = normalize(mix);
+      const lines = [`// ${track.title}: paste into MUSIC_MIXES in js/music/mixes.js (or send it to Claude)`, `  '${track.id}': {`];
+      for (const o of Object.keys(m)) {
+        lines.push(`    ${o}: {`);
+        for (const [id, pts] of Object.entries(m[o])) lines.push(`      ${id}: [${pts.join(', ')}],`);
+        lines.push('    },');
+      }
+      lines.push('  },');
+      const text = Object.keys(m).length ? lines.join('\n') : `// ${track.title}: every channel at 0 dB on every output (as written); nothing to paste`;
+      const box = $('export');
+      box.hidden = false;
+      box.value = text;
+      box.focus();
+      box.select();
+      try { await navigator.clipboard.writeText(text); $('export-btn').textContent = 'COPIED'; } catch (e) { $('export-btn').textContent = 'SELECTED: COPY IT'; }
+      setTimeout(() => { $('export-btn').textContent = 'EXPORT'; }, 1800);
+    });
+    $('revert-btn').addEventListener('click', () => { mix = gameMix(); save(); buildStripsValues(); refreshLevels(); });
+    $('zero-btn').addEventListener('click', () => { delete mix[outputId]; save(); buildStripsValues(); refreshLevels(); });
+    $('clear-btn').addEventListener('click', () => { chanMute.clear(); chanSolo.clear(); showMonitors(); });
+
+    // ── Intensity layers ──────────────────────────────────────────────────────
+    const LEVELS = [[4, 1 / 3], [5, 2 / 3], [6, 1]];
+    const layerWhen = ({ from, span, archived, trial }) => {
+      if (archived) return 'ARCHIVED · NOT IN THE GAME';
+      if (trial) return 'TRIAL · NOT IN THE GAME YET';
+      if (from === 0) return 'FROM 0% · GROWS TO 100%';
+      const stack = LEVELS.find(([, level]) => level > from)[0];
+      return `IN AT ${Math.round(from * 100)}% · STACK ${stack}${stack === 6 ? '+' : ''} · FULL ${Math.min(100, Math.round((from + span) * 100))}%`;
+    };
+    $('layers').innerHTML = LAYERS.map((l) => `
+      <li data-id="${esc(l.id)}"><span class="at">${esc(layerWhen(l))}</span><span>${esc(l.label)}</span><span class="lvl"><span></span></span><button type="button" class="btn red" data-act="mute">MUTE</button><button type="button" class="btn amber" data-act="solo">SOLO</button></li>`).join('');
+    const layerRows = [...$('layers').querySelectorAll('li')];
+    function showLayerButtons() {
+      layerRows.forEach((li) => {
+        const id = li.dataset.id;
+        const m = li.querySelector('[data-act="mute"]');
+        m.classList.toggle('on', layerMuted.has(id));
+        m.textContent = layerMuted.has(id) ? 'PLAY' : 'MUTE';
+        li.querySelector('[data-act="solo"]').classList.toggle('on', layerSolo === id);
+      });
+    }
+    layerRows.forEach((li) => {
+      const id = li.dataset.id;
+      li.querySelector('[data-act="mute"]').addEventListener('click', () => { layerMuted.has(id) ? layerMuted.delete(id) : layerMuted.add(id); showLayerButtons(); });
+      li.querySelector('[data-act="solo"]').addEventListener('click', () => { layerSolo = layerSolo === id ? null : id; showLayerButtons(); });
+    });
+    showLayerButtons();
+
+    // ── Sections ──────────────────────────────────────────────────────────────
+    $('sections').innerHTML = track.sections.map(([time, name, what]) => `<div class="sec-row"><span class="time">${esc(time)}</span><span><b>${esc(name)}</b> — ${esc(what)}</span></div>`).join('');
+    const secRows = [...$('sections').querySelectorAll('.sec-row')];
+
+    // ── Visualizer and the live displays ─────────────────────────────────────
+    const viz = createVisualizer($('scope'), () => (player ? analyser : null), { bars: 64 });
+    $('scope').addEventListener('click', () => viz.toggle());
+    const specFreqX = (f, w) => (Math.log(f / 40) / Math.log(16000 / 40)) * w;
+    let frameNo = 0;
+    function frame(now) {
+      frameNo++;
+      const frac = audibleFrac();
+      if (player) { lastFrac = frac; showPosition(frac); }
+      drawPlayhead(frac);
+      const bar = Math.floor(frac * 32);
+      secRows.forEach((r, i) => r.classList.toggle('active', player && i === Math.floor(bar / 8)));
+      const intensity = player ? player.intensity : target;
+      $('ease').querySelector('i').style.width = `${intensity * 100}%`;
+      $('now').textContent = player
+        ? `// BAR ${bar + 1} OF 32 · INTENSITY ${Math.round(intensity * 100)}% · ${SOUND_OUTPUTS.find((o) => o.id === outputId).label}${layerSolo ? ` · LAYER SOLO: ${layerSolo.toUpperCase()}` : ''}${chanSolo.size ? ` · SOLO: ${[...chanSolo].join(', ').toUpperCase()}` : ''}`
+        : '// STOPPED';
+      // layers' levels
+      LAYERS.forEach(({ id, from, span }, i) => {
+        const off = !layerSolo && layerMuted.has(id);
+        const level = layerSolo ? Number(id === layerSolo) : off ? 0 : Math.max(0, Math.min(1, (intensity - from) / span));
+        layerRows[i].classList.toggle('on', level > 0.01);
+        layerRows[i].classList.toggle('muted', off);
+        layerRows[i].querySelector('.lvl > span').style.width = `${level * 100}%`;
+      });
+      // strips: the level now, the meter, and (every other frame) the spectrum
+      const x3 = Math.max(0, Math.min(1, intensity)) * 3;
+      for (const c of CHANNELS) {
+        const s = strips[c.id];
+        const g = levelOf(c.id, intensity);
+        s.now.textContent = g === 0 ? 'OFF' : `${(20 * Math.log10(g)).toFixed(1)} dB NOW`;
+        s.labels.forEach((l, k) => l.classList.toggle('here', Math.round(x3) === k));
+        const m = player && player.meters[c.id];
+        if (!m) { s.bar.style.width = '0'; s.peak.style.left = '0'; continue; }
+        m.a.getFloatTimeDomainData(m.time);
+        let sum = 0;
+        let pk = 0;
+        for (let i = 0; i < m.time.length; i++) { sum += m.time[i] * m.time[i]; pk = Math.max(pk, Math.abs(m.time[i])); }
+        const rms = Math.sqrt(sum / m.time.length);
+        const pos = (db) => Math.max(0, Math.min(1, (db + 60) / 60));
+        s.bar.style.width = `${pos(20 * Math.log10(rms + 1e-9)) * 100}%`;
+        if (pk > m.peak || now - m.peakAt > 1200) { m.peak = pk; m.peakAt = now; }
+        s.peak.style.left = `${pos(20 * Math.log10(m.peak + 1e-9)) * 100}%`;
+        if (frameNo % 2) continue;
+        const cv = s.spec;
+        const dpr = window.devicePixelRatio || 1;
+        const w = cv.clientWidth;
+        const h = cv.clientHeight;
+        if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+        const g2 = cv.getContext('2d');
+        g2.setTransform(dpr, 0, 0, dpr, 0, 0);
+        g2.clearRect(0, 0, w, h);
+        g2.fillStyle = 'rgba(255,77,94,0.10)'; // (what a phone speaker can't play)
+        g2.fillRect(0, 0, specFreqX(250, w), h);
+        g2.fillStyle = 'rgba(255,77,94,0.55)';
+        g2.fillRect(specFreqX(170, w), 0, 1, h);
+        m.a.getByteFrequencyData(m.freq);
+        const binHz = ctx.sampleRate / m.a.fftSize;
+        g2.fillStyle = '#39ff8f';
+        const cols = Math.floor(w / 3);
+        for (let k = 0; k < cols; k++) {
+          const f0 = 40 * Math.pow(16000 / 40, k / cols);
+          const f1 = 40 * Math.pow(16000 / 40, (k + 1) / cols);
+          let v = 0;
+          for (let b = Math.floor(f0 / binHz); b <= Math.ceil(f1 / binHz) && b < m.freq.length; b++) v = Math.max(v, m.freq[b]);
+          const bh = (v / 255) * h;
+          g2.fillRect(k * 3, h - bh, 2, bh);
+        }
+      }
+      viz.draw(now);
+      requestAnimationFrame(frame);
+    }
+
+    setOutput(outputId);
+    setTarget(0);
+    showMonitors();
+    requestAnimationFrame(frame);
+  }
+})();
+</script>
+</body>
+</html>
