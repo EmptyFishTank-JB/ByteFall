@@ -436,6 +436,18 @@ with a cached older script (GitHub Pages lets browsers cache for 10 minutes).
   intensity (the engine's `step` follows it, and the player and mixer read it every 16th);
   then 16th hats, a rolling bass, the tune an octave up and an overflow alarm. Unlocked at
   Lv 44 (TRACK 11).
+- `js/music/music-firewall.js` — track 12, FIREWALL: an original 16-bit console track in
+  the style of early-90s Genesis platformers, in two-operator FM synthesis like the console's
+  sound chip (a slap FM bass, an FM electric piano with a tine, FM brass and bell leads) over
+  crunchy sample-style drums (rounded to 64 levels). A bright ZONE theme in F major at 144 BPM
+  (zone, zone again, a bridge, the tune an octave up) that turns into a BOSS FIGHT as the stack
+  nears the line: at 6+ rows (80%) it finishes its two bars, plays a WARNING bar (a siren over
+  a tom roll) and switches to the boss theme in F minor (a driving 16th-note FM bass ostinato,
+  harsh FM brass, pounding drums) until the stack falls to 4 rows (under 60%: the gap keeps it
+  from flipping between 5 and 6), when the zone returns on the next two-bar mark. Layers: the
+  FM brightening, 16th hats, a pushing bass and extra kick, an FM bell counter-melody; the
+  BOSS layer's MUTE (dev pages) keeps the zone theme, its SOLO plays the boss theme. Unlocked
+  at Lv 50 (TRACK 12).
 - `dev-tools/audio.html` — the audio compendium, opened by the `</>` icon in
   the footer: every sound effect with a play button and where each is used in the
   game, and the track list, each track opening in the mixer

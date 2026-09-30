@@ -122,4 +122,16 @@ const TRACK_INFO = [
       ['0:41', 'Breakdown', 'The first tune on a bell over the pad and long bass notes, then the drop comes back on the supersaw into the loop.'],
     ],
   },
+  {
+    id: 'firewall', num: '12', title: 'FIREWALL', fn: 'createFirewall', file: 'music-firewall.js',
+    meta: ['16-bit console', '144 BPM', 'F major / F minor', '32 bars', '~53s loop'],
+    desc: 'An original track in the style of early-90s Genesis platformers: two-operator FM synthesis (a slap FM bass, an FM electric piano, FM brass and bell leads) over crunchy, sample-style drums. A bright ZONE theme that turns into a BOSS FIGHT as the stack nears the line, and back when it falls.',
+    sections: [
+      ['0:00', 'Zone', 'F–Am–B♭–C–F–Am–Gm–C7. The slap bass groove, the piano on the offbeats and the bouncy FM lead.'],
+      ['0:13', 'Zone again', 'The same tune over the full groove.'],
+      ['0:27', 'Bridge', 'Dm–B♭–C–A twice: a longer-note tune climbing into a turnaround.'],
+      ['0:40', 'Zone, up', 'The tune an octave higher, back into the loop.'],
+      ['—', 'BOSS FIGHT', 'At stack 6+ (80%), on the next two-bar mark: a WARNING bar (a siren over a tom roll), then the boss theme in F minor (Fm–Fm–D♭–E♭–Fm–Fm–D♭–C: a driving 16th-note FM bass, harsh FM brass, pounding drums) until the stack falls to 4 rows (under 60%), when the zone returns on the next two-bar mark.'],
+    ],
+  },
 ];
