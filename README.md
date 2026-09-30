@@ -427,6 +427,15 @@ with a cached older script (GitHub Pages lets browsers cache for 10 minutes).
   a noise-channel kit; a falling intro run the first time through; encounter,
   battle, bridge, critical; a low-HP alarm at the top of the stack). Unlocked
   at 15,000 bits.
+- `js/music/music-stack-overflow.js` — track 11, STACK OVERFLOW: an original folk-techno
+  track in D minor (with the raised seventh, C#, for its Russian folk colour): a bouncing
+  dance tune written for the game, on a balalaika-like pluck (long notes as a tremolo) over
+  an oom-pah bass, then a four-on-the-floor build and a drop with a second, brighter tune on
+  a supersaw over a pumping offbeat bass, and a bell breakdown. Its tempo climbs with the
+  stack, like a falling-block game's music: 140 BPM calm, up to 160 at the top of the
+  intensity (the engine's `step` follows it, and the player and mixer read it every 16th);
+  then 16th hats, a rolling bass, the tune an octave up and an overflow alarm. Unlocked at
+  Lv 44 (TRACK 11).
 - `dev-tools/audio.html` — the audio compendium, opened by the `</>` icon in
   the footer: every sound effect with a play button and where each is used in the
   game, and the track list, each track opening in the mixer

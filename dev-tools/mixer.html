@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="../js/fonts.js?v=246"></script>
+<script src="../js/fonts.js?v=247"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#020403">
@@ -236,10 +236,10 @@
   </div>
 </div>
 
-<script src="../js/music/output.js?v=246"></script>
-<script src="../js/music/mixes.js?v=246"></script>
-<script src="../js/viz.js?v=246"></script>
-<script src="tracks-info.js?v=246"></script>
+<script src="../js/music/output.js?v=247"></script>
+<script src="../js/music/mixes.js?v=247"></script>
+<script src="../js/viz.js?v=247"></script>
+<script src="tracks-info.js?v=247"></script>
 <script>
 (() => {
   const VERSION = (document.currentScript.previousElementSibling.src.match(/\?v=(\d+)/) || [])[1] || '1';
@@ -366,7 +366,7 @@
           p.intensity += (target - p.intensity) * EASE;
           applyLevels(p.nextTime);
           p.engine.schedule(p.step, p.nextTime, p.intensity, layerSolo, layerMuted);
-          p.nextTime += STEP;
+          p.nextTime += p.engine.step; // (STACK OVERFLOW's shortens as its tempo climbs)
           p.step++;
         }
       }, 25);
@@ -389,7 +389,7 @@
     let lastFrac = 0;
     const audibleFrac = () => {
       if (!player) return lastFrac;
-      const audible = player.step - (player.nextTime - ctx.currentTime) / STEP;
+      const audible = player.step - (player.nextTime - ctx.currentTime) / player.engine.step;
       return (((audible % LOOP) + LOOP) % LOOP) / LOOP;
     };
     function seek(frac) {

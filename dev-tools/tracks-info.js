@@ -111,4 +111,15 @@ const TRACK_INFO = [
       ['0:33', 'Critical', 'A figure rising a semitone every bar, then a falling chromatic run back into the loop.'],
     ],
   },
+  {
+    id: 'stack-overflow', num: '11', title: 'STACK OVERFLOW', fn: 'createStackOverflow', file: 'music-stack-overflow.js',
+    meta: ['folk techno', '140–160 BPM', 'D minor', '32 bars', '~55s loop at 140'],
+    desc: 'An original folk-techno track: a bouncing minor-key dance tune in the Russian folk style, first on a balalaika-like pluck with a tremolo on its long notes, then on a big supersaw over four-on-the-floor techno. Its tempo climbs with the stack, from 140 BPM up to 160.',
+    sections: [
+      ['0:00', 'Intro', 'Dm–Dm–A–A–Dm–Gm–A–Dm. The tune on the balalaika pluck over an oom-pah bass and chord stabs; a soft kick joins at bar 5.'],
+      ['0:14', 'Build', 'Four-on-the-floor, offbeat hats and the offbeat bass under the pluck, the pad opening up, a noise riser and a snare roll.'],
+      ['0:27', 'Drop', 'A second, brighter tune (F–C–Gm–Dm–B♭–Gm–A–A) on the supersaw over the full groove, with claps and crashes.'],
+      ['0:41', 'Breakdown', 'The first tune on a bell over the pad and long bass notes, then the drop comes back on the supersaw into the loop.'],
+    ],
+  },
 ];
