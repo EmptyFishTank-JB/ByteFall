@@ -516,9 +516,10 @@ or tab carries on where you were.
 The title and level bar, the six modes (CLASSIC, DAILY, BLITZ, ZEN, PUZZLE, VS) in a 3x2
 grid, and the picked mode's panel: its name, what it is, its options (CLASSIC's difficulty,
 DAILY's game, PUZZLE's puzzle), your best (DAILY: today's official score once played) and
-PLAY. With a game of that mode under way (paused) PLAY reads RESUME and carries on; picking
-another mode then asks first (CONFIRM?), as a restart does. The top icons stay (RULES &
-RECORDS, SETTINGS). In a game (not the tutorial) the game screen is the title, the mode's
+PLAY. With a game of that mode under way (a drop made; paused) PLAY reads RESUME and carries
+on; picking another mode then asks first (CONFIRM?), as a restart does, and resets without the
+melt (the board is hidden). Under the panel, RULES & RECORDS and SETTINGS buttons open those
+panels (the corner icons show only while one is open, to close it). In a game (not the tutorial) the game screen is the title, the mode's
 name under it (`// CLASSIC // NORMAL`, `// BLITZ`, `// PUZZLE 3`, `// DAILY DECRYPT // PRACTICE`),
 the HUD and the board: the top-left icon is PAUSE (the house, back to the menu, when there's
 nothing to pause: VS's setup screen), and SETTINGS waits on the pause screen.

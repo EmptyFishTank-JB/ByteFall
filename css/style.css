@@ -2715,3 +2715,8 @@ body.in-game .settings-btn:not([aria-expanded="true"]) { visibility: hidden; }
 .overlay-menu-btn:hover { color: var(--fg); border-color: var(--fg); }
 .home #daily-kinds { gap: 5px; }
 .home #daily-kinds button { padding-left: 7px; padding-right: 7px; }
+/* The main menu's RULES & RECORDS and SETTINGS: buttons, as on the pause screen (the corner
+   icons only show there while their panel is open, to close it) */
+.home-row { display: flex; justify-content: center; gap: 8px; width: 100%; max-width: 340px; margin-top: 0; }
+.home-row button { flex: 1; font-size: 12px; padding: 8px 6px; }
+body.at-home :is(.records-btn, .settings-btn):not([aria-expanded="true"]) { visibility: hidden; }

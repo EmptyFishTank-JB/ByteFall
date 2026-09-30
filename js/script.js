@@ -1786,7 +1786,8 @@ function armReset(btn, confirmText) {
 function requestReset(btn, confirmText, apply = () => {}) {
   // Nothing to lose once the run is over or before the first drop.
   // (PUZZLE boards are short and restart as they started, so they never ask)
-  const fresh = mode === 'puzzle' || (score === 0 && columns.every((col) => col.length === 0));
+  // (under way = a drop made: BREACH's firewall and a puzzle's board are there from the start)
+  const fresh = mode === 'puzzle' || (score === 0 && Progress.runDrops() === 0);
   if (gameOver || fresh) {
     if (busy && !gameOver) return;
     apply();
@@ -1805,7 +1806,7 @@ function requestReset(btn, confirmText, apply = () => {}) {
   Music.setIntensity(0);
   setMessage('');
   const run = runId;
-  const melting = meltBoard(run);
+  const melting = !homeOpen && meltBoard(run); // (from the main menu: nothing to see, no melt)
   setTimeout(() => {
     if (run !== runId) return;
     apply();
@@ -2776,6 +2777,8 @@ document.getElementById('pause-exit').addEventListener('click', (e) => pauseConf
 document.getElementById('pause-records').addEventListener('click', () => setRecordsOpen(true));
 document.getElementById('pause-settings').addEventListener('click', () => setSettingsOpen(true));
 document.getElementById('pause-menu').addEventListener('click', () => showHome());
+document.getElementById('home-records').addEventListener('click', () => setRecordsOpen(true));
+document.getElementById('home-settings').addEventListener('click', () => setSettingsOpen(true));
 document.addEventListener('keydown', (e) => {
   if ((e.key !== 'Escape' && e.key !== 'p' && e.key !== 'P') || panelOpen() || homeOpen) return;
   if (vsPaused) resumeMatch();
