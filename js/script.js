@@ -3088,6 +3088,21 @@ soundBtn.addEventListener('click', () => {
 });
 updateSoundBtn();
 
+// SOUND OUTPUT (output.js): PHONE → HEADPHONES → SPEAKERS, for the music and the sound effects
+const outputBtn = document.getElementById('output-btn');
+function updateOutputBtn() {
+  const out = SOUND_OUTPUTS.find((o) => o.id === Music.getOutput());
+  outputBtn.textContent = `SOUND OUTPUT: ${out.label}`;
+  document.getElementById('output-note').textContent = `${out.note} On earbuds or headphones, pick HEADPHONES.`;
+}
+outputBtn.addEventListener('click', () => {
+  const i = SOUND_OUTPUTS.findIndex((o) => o.id === Music.getOutput());
+  Music.setOutput(SOUND_OUTPUTS[(i + 1) % SOUND_OUTPUTS.length].id);
+  updateOutputBtn();
+  SFX.play('punct');
+});
+updateOutputBtn();
+
 const musicBtn = document.getElementById('music-btn');
 function updateMusicBtn() {
   musicBtn.textContent = Music.isEnabled() ? 'MUSIC: ON' : 'MUSIC: OFF';

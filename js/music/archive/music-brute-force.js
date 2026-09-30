@@ -68,14 +68,6 @@ function createBruteForce(ctx, out) {
     return lift;
   };
   let arpSide = 1;
-  // Instrument channels (output.js): the mixer's strips
-  const ch = createChannels(ctx, bus);
-  const CH = {
-    kick: ch('kick', 'Kick'), snare: ch('snare', 'Snare'), hats: ch('hats', 'Noise hi-hats'),
-    bass: ch('bass', 'Triangle bass'), arp: ch('arp', 'Pulse arpeggio (and its 32nds)'),
-    lead: ch('lead', 'Pulse melody'), duet: ch('duet', 'Boss duet (a third below)'),
-    octave: ch('octave', 'Melody an octave up'), battery: ch('battery', 'Low-battery beep'),
-  };
 
   // Pulse waves at the NES duty cycles, built from their Fourier series
   function pulseWave(duty) {
@@ -100,7 +92,7 @@ function createBruteForce(ctx, out) {
   triOut.gain.value = 0.3;
   triIn.connect(stepper);
   stepper.connect(triOut);
-  triOut.connect(CH.bass.in);
+  triOut.connect(bus);
 
   // Sample-and-hold noise, like the NES noise channel (longer hold = lower, grainier)
   function holdNoise(hold) {
@@ -124,13 +116,13 @@ function createBruteForce(ctx, out) {
     return g;
   }
 
-  function noise(t, buf, level, decay, hp, pan, dest) {
+  function noise(t, buf, level, decay, hp, pan = 0) {
     const src = ctx.createBufferSource();
     src.buffer = buf;
     const f = ctx.createBiquadFilter();
     f.type = 'highpass';
     f.frequency.value = hp;
-    src.connect(f); f.connect(envGain(t, level, decay, pan ? panner(pan, dest) : dest));
+    src.connect(f); f.connect(envGain(t, level, decay, pan ? panner(pan) : bus));
     src.start(t, Math.random() * 0.5); src.stop(t + decay);
   }
 
@@ -139,26 +131,26 @@ function createBruteForce(ctx, out) {
     osc.type = 'triangle';
     osc.frequency.setValueAtTime(160, t);
     osc.frequency.exponentialRampToValueAtTime(40, t + 0.07);
-    osc.connect(envGain(t, 0.8 * level, 0.14, CH.kick.in));
+    osc.connect(envGain(t, 0.8 * level, 0.14, bus));
     osc.start(t); osc.stop(t + 0.15);
-    noise(t, NOISE_LOW, 0.12 * level, 0.02, 200, 0, CH.kick.in);
+    noise(t, NOISE_LOW, 0.12 * level, 0.02, 200);
   }
 
   function snare(t, level = 1) {
-    noise(t, NOISE_LOW, 0.26 * level, 0.13, 900, 0, CH.snare.in);
+    noise(t, NOISE_LOW, 0.26 * level, 0.13, 900);
     const osc = ctx.createOscillator();
     osc.type = 'triangle';
     osc.frequency.setValueAtTime(240, t);
     osc.frequency.exponentialRampToValueAtTime(120, t + 0.05);
-    osc.connect(envGain(t, 0.3 * level, 0.06, CH.snare.in));
+    osc.connect(envGain(t, 0.3 * level, 0.06, bus));
     osc.start(t); osc.stop(t + 0.07);
   }
 
   function hat(t, level = 1, open = false) {
-    noise(t, NOISE_HIGH, (open ? 0.05 : 0.04) * level, open ? 0.12 : 0.03, 7000, 0.35, CH.hats.in);
+    noise(t, NOISE_HIGH, (open ? 0.05 : 0.04) * level, open ? 0.12 : 0.03, 7000, 0.35);
   }
 
-  function pulse(t, m, dur, level, duty, pan, dest) {
+  function pulse(t, m, dur, level, duty, pan = 0) {
     const osc = ctx.createOscillator();
     osc.setPeriodicWave(DUTY[duty]);
     osc.frequency.value = freq(m);
@@ -166,7 +158,7 @@ function createBruteForce(ctx, out) {
     g.gain.setValueAtTime(level, t);
     g.gain.linearRampToValueAtTime(level * 0.7, t + Math.max(0.01, dur * 0.85));
     g.gain.linearRampToValueAtTime(0, t + dur);
-    osc.connect(g); g.connect(pan ? panner(pan, dest) : dest);
+    osc.connect(g); g.connect(pan ? panner(pan) : bus);
     osc.start(t); osc.stop(t + dur + 0.01);
   }
 
@@ -178,7 +170,6 @@ function createBruteForce(ctx, out) {
     g.gain.setValueAtTime(0.5, t);
     g.gain.setValueAtTime(0.5, t + dur * 0.8);
     g.gain.linearRampToValueAtTime(0, t + dur);
-    CH.bass.mark();
     osc.connect(g); g.connect(triIn);
     osc.start(t); osc.stop(t + dur + 0.01);
   }
@@ -187,8 +178,6 @@ function createBruteForce(ctx, out) {
     step: STEP,
     loopSteps: 32 * 16,
     layers: LAYERS,
-    channels: ch.list,
-    record: ch.record,
     // solo: a layer id to hear that layer alone at full strength; muted: layer ids to leave out
     // (both from the dev page)
     schedule(step, t, intensity = 0, solo = null, muted = null) {
@@ -232,8 +221,8 @@ function createBruteForce(ctx, out) {
       const arpDuty = L.bright > 0.66 ? 12 : L.bright > 0.33 ? 25 : 50;
       const arpLevel = 0.04 * (1 + 0.8 * L.bright);
       arpSide = -arpSide;
-      if (base || solo === 'bright') pulse(t, tones[ARP[s % 8]], STEP * 0.9, arpLevel, arpDuty, 0.4 * arpSide, CH.arp.in);
-      if (L.arp32 > 0) pulse(t + STEP / 2, tones[ARP[(s + 4) % 8]], STEP * 0.45, arpLevel * L.arp32, arpDuty, -0.4 * arpSide, CH.arp.in);
+      if (base || solo === 'bright') pulse(t, tones[ARP[s % 8]], STEP * 0.9, arpLevel, arpDuty, 0.4 * arpSide);
+      if (L.arp32 > 0) pulse(t + STEP / 2, tones[ARP[(s + 4) % 8]], STEP * 0.45, arpLevel * L.arp32, arpDuty, -0.4 * arpSide);
 
       // Melody
       const melody = section === 1 || section === 3 ? MELODY_A : section === 2 ? MELODY_B : null;
@@ -242,15 +231,15 @@ function createBruteForce(ctx, out) {
           if (start !== s) continue;
           const dur = len * STEP * 0.95;
           if (base) {
-            pulse(t, m, dur, 0.05, section === 2 ? 25 : 12, 0, CH.lead.in);
-            if (section === 3) pulse(t, m - 4, dur, 0.03, 25, 0.45, CH.duet.in); // boss duet a third below
+            pulse(t, m, dur, 0.05, section === 2 ? 25 : 12);
+            if (section === 3) pulse(t, m - 4, dur, 0.03, 25, 0.45); // boss duet a third below
           }
-          if (L.octave > 0) pulse(t, m + 12, dur, 0.07 * L.octave, 12, -0.35, CH.octave.in);
+          if (L.octave > 0) pulse(t, m + 12, dur, 0.07 * L.octave, 12, -0.35);
         }
       }
 
       // "Low battery" beeps: two quick blips on beats 1 and 3
-      if (L.battery > 0 && (s === 0 || s === 2 || s === 8 || s === 10)) pulse(t, 100, STEP * 0.5, 0.075 * L.battery, 50, -0.5, CH.battery.in);
+      if (L.battery > 0 && (s === 0 || s === 2 || s === 8 || s === 10)) pulse(t, 100, STEP * 0.5, 0.075 * L.battery, 50, -0.5);
     },
   };
 }

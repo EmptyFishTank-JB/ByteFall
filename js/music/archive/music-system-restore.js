@@ -66,14 +66,6 @@ function createSystemRestore(ctx, out) {
     return lift;
   };
 
-  // Instrument channels (output.js): the mixer's strips
-  const ch = createChannels(ctx, bus);
-  const CH = {
-    kick: ch('kick', 'Kick'), snare: ch('snare', 'Snare'), hats: ch('hats', 'Hi-hats'), vinyl: ch('vinyl', 'Vinyl crackle'),
-    piano: ch('piano', 'Electric piano'), bass: ch('bass', 'Bass'), grit: ch('grit', 'Grit bass'), flute: ch('flute', 'Flute'),
-    stutter: ch('stutter', 'Stutter chops'), strings: ch('strings', 'Tremolo strings'), error: ch('error', 'Error chime'),
-  };
-
   const noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
   const nd = noise.getChannelData(0);
   for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
@@ -103,7 +95,7 @@ function createSystemRestore(ctx, out) {
   gritOut.gain.value = 0.12;
   gritShaper.connect(gritTone);
   gritTone.connect(gritOut);
-  gritOut.connect(CH.grit.in);
+  gritOut.connect(bus);
 
   function filter(type, f, q) {
     const node = ctx.createBiquadFilter();
@@ -121,11 +113,11 @@ function createSystemRestore(ctx, out) {
     return g;
   }
 
-  function noiseHit(t, level, decay, type, f, q, pan, dest) {
+  function noiseHit(t, level, decay, type, f, q, pan = 0) {
     const src = ctx.createBufferSource();
     src.buffer = noise;
     const flt = filter(type, f, q);
-    src.connect(flt); flt.connect(envGain(t, level, decay, pan ? panner(pan, dest) : dest));
+    src.connect(flt); flt.connect(envGain(t, level, decay, pan ? panner(pan) : bus));
     src.start(t, Math.random() * 0.5); src.stop(t + decay);
   }
 
@@ -134,7 +126,7 @@ function createSystemRestore(ctx, out) {
     osc.frequency.setValueAtTime(120, t);
     osc.frequency.exponentialRampToValueAtTime(48, t + 0.09);
     const lp = filter('lowpass', 900);
-    osc.connect(lp); lp.connect(envGain(t, 0.85 * level, 0.28, CH.kick.in));
+    osc.connect(lp); lp.connect(envGain(t, 0.85 * level, 0.28, bus));
     osc.start(t); osc.stop(t + 0.3);
   }
 
@@ -143,12 +135,12 @@ function createSystemRestore(ctx, out) {
     src.buffer = noise;
     const bp = filter('bandpass', 1500, 0.8);
     const lp = filter('lowpass', 3800);
-    src.connect(bp); bp.connect(lp); lp.connect(envGain(t, 0.22 * level, 0.18, CH.snare.in));
+    src.connect(bp); bp.connect(lp); lp.connect(envGain(t, 0.22 * level, 0.18, bus));
     src.start(t, Math.random() * 0.5); src.stop(t + 0.19);
   }
 
   function hat(t, level = 1) {
-    noiseHit(t, 0.03 * level, 0.04, 'bandpass', 7000, 0.9, 0.3, CH.hats.in);
+    noiseHit(t, 0.03 * level, 0.04, 'bandpass', 7000, 0.9, 0.3);
   }
 
   function crackle(t, dur, level) {
@@ -159,7 +151,7 @@ function createSystemRestore(ctx, out) {
       const lp = filter('lowpass', 5000);
       const g = ctx.createGain();
       g.gain.value = level * 0.7;
-      src.connect(lp); lp.connect(g); g.connect(panner(side, CH.vinyl.in));
+      src.connect(lp); lp.connect(g); g.connect(panner(side));
       src.start(t, Math.random() * 2); src.stop(t + dur);
     }
   }
@@ -176,7 +168,7 @@ function createSystemRestore(ctx, out) {
     notes.forEach((m, k) => {
       const at = t + k * 0.018;
       const f = freq(m);
-      const side = panner(notes.length > 1 ? -0.45 + 0.9 * (k / (notes.length - 1)) : 0, CH.piano.in); // (low left, high right)
+      const side = panner(notes.length > 1 ? -0.45 + 0.9 * (k / (notes.length - 1)) : 0); // (low left, high right)
       for (const [ratio, amp, decay] of [[1, 1, 2.6], [2, 0.18, 1.2], [7.02, 0.05, 0.12]]) {
         const osc = ctx.createOscillator();
         osc.frequency.value = f * ratio;
@@ -189,7 +181,7 @@ function createSystemRestore(ctx, out) {
 
   function bass(t, m, dur) {
     const lp = filter('lowpass', 700);
-    const g = envGain(t, 0.28, dur, CH.bass.in);
+    const g = envGain(t, 0.28, dur, bus);
     lp.connect(g);
     for (const type of ['sine', 'triangle']) {
       const osc = ctx.createOscillator();
@@ -207,7 +199,6 @@ function createSystemRestore(ctx, out) {
     const g = ctx.createGain();
     g.gain.setValueAtTime(0.5 * level, t);
     g.gain.exponentialRampToValueAtTime(0.001, t + dur);
-    CH.grit.mark();
     osc.connect(g); g.connect(gritShaper);
     osc.start(t); osc.stop(t + dur + 0.02);
   }
@@ -227,7 +218,7 @@ function createSystemRestore(ctx, out) {
     g.gain.linearRampToValueAtTime(0.05, t + 0.08);
     g.gain.setValueAtTime(0.05, t + dur - 0.1);
     g.gain.linearRampToValueAtTime(0, t + dur);
-    const flutePan = panner(0.15, CH.flute.in);
+    const flutePan = panner(0.15);
     osc.connect(g); g.connect(flutePan);
     osc.start(t); osc.stop(t + dur);
     vib.start(t); vib.stop(t + dur);
@@ -249,7 +240,7 @@ function createSystemRestore(ctx, out) {
       const g = ctx.createGain();
       g.gain.setValueAtTime(0.11 * level, at);
       g.gain.setValueAtTime(0, at + STEP * 0.3); // hard gate: the "chopped" sound
-      osc.connect(g); g.connect(panner(k % 2 ? 0.5 : -0.5, CH.stutter.in)); // (ping-ponging)
+      osc.connect(g); g.connect(panner(k % 2 ? 0.5 : -0.5)); // (ping-ponging)
       osc.start(at); osc.stop(at + STEP * 0.32);
     }
   }
@@ -266,7 +257,7 @@ function createSystemRestore(ctx, out) {
       g.gain.linearRampToValueAtTime(0.0095 * level, at + STEP * 0.9);
     }
     g.gain.linearRampToValueAtTime(0, t + len);
-    g.connect(CH.strings.in);
+    g.connect(bus);
     // (each detuned pair split left and right)
     const sides = [-0.6, 0.6].map((v) => {
       const f = filter('lowpass', 2600, 0.7);
@@ -288,7 +279,7 @@ function createSystemRestore(ctx, out) {
   // Error chime: a bell on a tritone (A5 + Eb6)
   function errorChime(t, level) {
     for (const m of [81, 87]) {
-      const side = panner(m === 81 ? -0.4 : 0.4, CH.error.in);
+      const side = panner(m === 81 ? -0.4 : 0.4);
       for (const [ratio, amp] of [[1, 1], [2.76, 0.3]]) {
         const osc = ctx.createOscillator();
         osc.frequency.value = freq(m) * ratio;
@@ -303,8 +294,6 @@ function createSystemRestore(ctx, out) {
     loopSteps: 32 * 16,
     layers: LAYERS,
     defaultMuted: DEFAULT_MUTED,
-    channels: ch.list,
-    record: ch.record,
     // solo: a layer id to hear that layer alone at full strength; muted: layer ids to leave out
     // (both from the dev page)
     schedule(step, t, intensity = 0, solo = null, muted = null) {

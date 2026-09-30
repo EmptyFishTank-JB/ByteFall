@@ -53,6 +53,10 @@ const Music = (() => {
   let ctx = null;
   let analyser = null;
   let stereo = null; // [left, right] analysers
+  // SETTINGS → SOUND OUTPUT (output.js): the chain everything passes through last, and the mix
+  // tables (mixes.js) each track plays with on it
+  let outputId = savedSoundOutput();
+  let outChain = null;
   let session = null; // per-play gain so stopped notes can't bleed into the next start
   let engine = null;
   let timer = null;
@@ -66,7 +70,7 @@ const Music = (() => {
     session = ctx.createGain();
     session.gain.setValueAtTime(0, ctx.currentTime);
     session.gain.linearRampToValueAtTime(1, ctx.currentTime + fadeIn);
-    session.connect(analyser);
+    session.connect(outChain.input);
     engine = TRACKS.find((t) => t.id === trackId).create(ctx, session);
     step = 0;
     loopsToPlay = LOOPS_PER_TRACK;
@@ -106,6 +110,7 @@ const Music = (() => {
     while (nextTime < ctx.currentTime + ahead) {
       advance();
       intensity += (targetIntensity - intensity) * INTENSITY_EASE;
+      applyMix(engine, trackMix(trackId, outputId), intensity, nextTime);
       engine.schedule(step, nextTime, intensity);
       nextTime += engine.step;
       step++;
@@ -123,6 +128,8 @@ const Music = (() => {
         analyser.minDecibels = -90;
         analyser.maxDecibels = -34;
         analyser.connect(ctx.destination);
+        outChain = createSoundOutput(ctx, outputId);
+        outChain.output.connect(analyser);
         // Left and right on their own, for the vectorscope (a mono signal is copied to both
         // sides, as the speakers play it)
         const tap = ctx.createGain();
@@ -219,6 +226,16 @@ const Music = (() => {
     },
     onTrackChange(fn) {
       onTrackChange = fn;
+    },
+    // SOUND OUTPUT: PHONE, HEADPHONES or SPEAKERS (the sound effects follow it too)
+    getOutput: () => outputId,
+    setOutput(id) {
+      if (!SOUND_OUTPUTS.some((o) => o.id === id)) return;
+      outputId = id;
+      try { localStorage.setItem('bytefall-sound-output', id); } catch (e) {}
+      if (outChain) outChain.set(id);
+      if (engine) for (const ch of engine.channels || []) ch.applied = undefined; // (its table now)
+      if (typeof SFX !== 'undefined' && SFX.setOutput) SFX.setOutput(id);
     },
     isBackgroundPlay: () => backgroundPlay,
     setBackgroundPlay(on) {

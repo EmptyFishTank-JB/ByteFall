@@ -79,14 +79,7 @@ function createBytefallTheme(ctx, out) {
   delayTone.connect(feedback);
   feedback.connect(delay);
   delayTone.connect(wet);
-  // Instrument channels (output.js): the mixer's strips
-  const ch = createChannels(ctx, bus);
-  const CH = {
-    kick: ch('kick', 'Kick'), snare: ch('snare', 'Gated snare'), hats: ch('hats', 'Hi-hats'),
-    bass: ch('bass', 'Saw bass'), pad: ch('pad', 'Pad'), arp: ch('arp', 'Square arpeggio', delay),
-    tension: ch('tension', 'Tension saw'), lead: ch('lead', 'Lead', delay), echo: ch('echo', 'Echo (the delay return)'),
-  };
-  wet.connect(panner(0.5, CH.echo.in));
+  wet.connect(panner(0.5));
 
   const noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
   const nd = noise.getChannelData(0);
@@ -113,7 +106,7 @@ function createBytefallTheme(ctx, out) {
     const g = ctx.createGain();
     g.gain.setValueAtTime(0.9 * level, t);
     g.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
-    osc.connect(g); g.connect(CH.kick.in);
+    osc.connect(g); g.connect(bus);
     osc.start(t); osc.stop(t + 0.36);
   }
 
@@ -125,7 +118,7 @@ function createBytefallTheme(ctx, out) {
     g.gain.setValueAtTime(0.32 * level, t);
     g.gain.linearRampToValueAtTime(0.2 * level, t + 0.14);
     g.gain.linearRampToValueAtTime(0, t + 0.16);
-    src.connect(bp); bp.connect(g); g.connect(CH.snare.in);
+    src.connect(bp); bp.connect(g); g.connect(bus);
     src.start(t); src.stop(t + 0.17);
     const body = ctx.createOscillator();
     body.type = 'triangle';
@@ -133,7 +126,7 @@ function createBytefallTheme(ctx, out) {
     const bg = ctx.createGain();
     bg.gain.setValueAtTime(0.25 * level, t);
     bg.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
-    body.connect(bg); bg.connect(CH.snare.in);
+    body.connect(bg); bg.connect(bus);
     body.start(t); body.stop(t + 0.11);
   }
 
@@ -144,7 +137,7 @@ function createBytefallTheme(ctx, out) {
     const dur = open ? 0.18 : 0.04;
     g.gain.setValueAtTime((open ? 0.05 : 0.035) * level, t);
     g.gain.exponentialRampToValueAtTime(0.001, t + dur);
-    src.connect(hp); hp.connect(g); g.connect(panner(0.35, CH.hats.in));
+    src.connect(hp); hp.connect(g); g.connect(panner(0.35));
     src.start(t, Math.random() * 0.5); src.stop(t + dur);
   }
 
@@ -159,7 +152,7 @@ function createBytefallTheme(ctx, out) {
     g.gain.setValueAtTime(0.0001, t);
     g.gain.exponentialRampToValueAtTime(0.16, t + 0.005);
     g.gain.exponentialRampToValueAtTime(0.001, t + dur);
-    osc.connect(lp); lp.connect(g); g.connect(CH.bass.in);
+    osc.connect(lp); lp.connect(g); g.connect(bus);
     osc.start(t); osc.stop(t + dur + 0.01);
   }
 
@@ -170,7 +163,7 @@ function createBytefallTheme(ctx, out) {
     g.gain.linearRampToValueAtTime(0.03, t + 0.3);
     g.gain.setValueAtTime(0.03, t + dur - 0.3);
     g.gain.linearRampToValueAtTime(0, t + dur);
-    lp.connect(g); g.connect(CH.pad.in);
+    lp.connect(g); g.connect(bus);
     for (const m of notes) {
       for (const cents of [-7, 7]) {
         const osc = ctx.createOscillator();
@@ -192,7 +185,7 @@ function createBytefallTheme(ctx, out) {
     g.gain.setValueAtTime(0.035 * (1 + 0.6 * bright), t);
     g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
     arpSide = -arpSide;
-    osc.connect(lp); lp.connect(g); g.connect(panner(0.4 * arpSide, CH.arp.in)); g.connect(CH.arp.send);
+    osc.connect(lp); lp.connect(g); g.connect(panner(0.4 * arpSide)); g.connect(delay);
     osc.start(t); osc.stop(t + 0.13);
   }
 
@@ -205,7 +198,7 @@ function createBytefallTheme(ctx, out) {
     const g = ctx.createGain();
     g.gain.setValueAtTime(0.18 * level, t);
     g.gain.exponentialRampToValueAtTime(0.0005, t + STEP * 0.9);
-    osc.connect(lp); lp.connect(g); g.connect(panner(-0.45, CH.tension.in));
+    osc.connect(lp); lp.connect(g); g.connect(panner(-0.45));
     osc.start(t); osc.stop(t + STEP);
   }
 
@@ -216,7 +209,7 @@ function createBytefallTheme(ctx, out) {
     g.gain.linearRampToValueAtTime(level, t + 0.02);
     g.gain.setValueAtTime(level, t + dur - 0.05);
     g.gain.linearRampToValueAtTime(0, t + dur + 0.08);
-    lp.connect(g); g.connect(CH.lead.in); g.connect(CH.lead.send);
+    lp.connect(g); g.connect(bus); g.connect(delay);
     const vib = ctx.createOscillator();
     vib.frequency.value = 5.5;
     const vibDepth = ctx.createGain();
@@ -240,8 +233,6 @@ function createBytefallTheme(ctx, out) {
     loopSteps: 32 * 16,
     layers: LAYERS,
     output: bus,
-    channels: ch.list,
-    record: ch.record,
     // solo: a layer id to hear that layer alone at full strength; muted: layer ids to leave out
     // (both from the dev page)
     schedule(step, t, intensity = 0, solo = null, muted = null) {

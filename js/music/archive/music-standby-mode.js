@@ -99,23 +99,13 @@ function createStandbyMode(ctx, out) {
   const roomTone = ctx.createBiquadFilter();
   roomTone.type = 'lowpass';
   roomTone.frequency.value = 4500;
-  const roomIn = ctx.createGain(); // (the room channel's input)
   const roomOut = ctx.createGain();
   roomOut.gain.value = 0.32;
   room.connect(roomTone);
   roomTone.connect(roomOut);
-  roomOut.connect(roomIn);
+  roomOut.connect(bus);
   const roomSend = ctx.createGain();
   roomSend.connect(room);
-  // Instrument channels (output.js): the mixer's strips (the room sends follow each one)
-  const ch = createChannels(ctx, bus);
-  const CH = {
-    kick: ch('kick', 'Kick'), snap: ch('snap', 'Finger snap', roomSend), guiro: ch('guiro', 'Guiro'),
-    shaker: ch('shaker', 'Shaker'), tambourine: ch('tambourine', 'Tambourine'), bass: ch('bass', 'Walking bass'),
-    guitar: ch('guitar', 'Guitar', roomSend), strings: ch('strings', 'Strings', roomSend),
-    sax: ch('sax', 'Sax', roomSend), harmony: ch('harmony', 'Harmony sax', roomSend), room: ch('room', 'Room (the reverb return)'),
-  };
-  roomIn.connect(CH.room.in);
 
   const noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
   const nd = noise.getChannelData(0);
@@ -145,12 +135,12 @@ function createStandbyMode(ctx, out) {
   }
 
   // Both dry and into the room
-  function toMix(node, send, pan, chan) {
-    node.connect(pan ? panner(pan, chan.in) : chan.in);
+  function toMix(node, send, pan = 0) {
+    node.connect(pan ? panner(pan) : bus);
     const s = ctx.createGain();
     s.gain.value = send;
     node.connect(s);
-    s.connect(chan.send);
+    s.connect(roomSend);
   }
 
   // Soft felt kick on 1 and 3
@@ -158,7 +148,7 @@ function createStandbyMode(ctx, out) {
     const osc = ctx.createOscillator();
     osc.frequency.setValueAtTime(110, t);
     osc.frequency.exponentialRampToValueAtTime(48, t + 0.12);
-    osc.connect(envGain(t, 0.26 * level, 0.3, CH.kick.in));
+    osc.connect(envGain(t, 0.26 * level, 0.3, bus));
     osc.start(t); osc.stop(t + 0.32);
   }
 
@@ -167,10 +157,10 @@ function createStandbyMode(ctx, out) {
     const src = ctx.createBufferSource();
     src.buffer = noise;
     const bp = filter('bandpass', 2600, 1.4);
-    const g = envGain(t, 0.9 * level, 0.07, CH.snap.in);
+    const g = envGain(t, 0.9 * level, 0.07, bus);
     const s = ctx.createGain();
     s.gain.value = 0.9;
-    g.connect(s); s.connect(CH.snap.send);
+    g.connect(s); s.connect(roomSend);
     src.connect(bp); bp.connect(g);
     src.start(t, Math.random() * 0.5); src.stop(t + 0.08);
   }
@@ -183,7 +173,7 @@ function createStandbyMode(ctx, out) {
       const src = ctx.createBufferSource();
       src.buffer = noise;
       const bp = filter('bandpass', 3400, 3);
-      src.connect(bp); bp.connect(envGain(t + k * gap, 0.55 * level, 0.012, panner(0.5, CH.guiro.in)));
+      src.connect(bp); bp.connect(envGain(t + k * gap, 0.55 * level, 0.012, panner(0.5)));
       src.start(t + k * gap, Math.random() * 0.5); src.stop(t + k * gap + 0.015);
     }
   }
@@ -192,7 +182,7 @@ function createStandbyMode(ctx, out) {
     const src = ctx.createBufferSource();
     src.buffer = noise;
     const hp = filter('highpass', 6500);
-    src.connect(hp); hp.connect(envGain(t, 0.15 * level, 0.05, panner(0.35, CH.shaker.in)));
+    src.connect(hp); hp.connect(envGain(t, 0.15 * level, 0.05, panner(0.35)));
     src.start(t, Math.random() * 0.5); src.stop(t + 0.06);
   }
 
@@ -200,7 +190,7 @@ function createStandbyMode(ctx, out) {
     const src = ctx.createBufferSource();
     src.buffer = noise;
     const bp = filter('bandpass', 9000, 2);
-    src.connect(bp); bp.connect(envGain(t, 0.3 * level, 0.13, panner(-0.35, CH.tambourine.in)));
+    src.connect(bp); bp.connect(envGain(t, 0.3 * level, 0.13, panner(-0.35)));
     src.start(t, Math.random() * 0.5); src.stop(t + 0.14);
   }
 
@@ -213,7 +203,7 @@ function createStandbyMode(ctx, out) {
     g.gain.linearRampToValueAtTime(0.09, t + 0.012);
     g.gain.exponentialRampToValueAtTime(0.035, t + 0.18);
     g.gain.exponentialRampToValueAtTime(0.0005, t + dur * 0.95);
-    lp.connect(g); g.connect(CH.bass.in);
+    lp.connect(g); g.connect(bus);
     for (const type of ['sine', 'triangle']) {
       const osc = ctx.createOscillator();
       osc.type = type;
@@ -237,11 +227,11 @@ function createStandbyMode(ctx, out) {
     lp.frequency.setValueAtTime(2600 + 1600 * warmth, t);
     lp.frequency.exponentialRampToValueAtTime(900, t + 0.4);
     osc.connect(lp); osc2.connect(mix2); mix2.connect(lp);
-    const g = envGain(t, 0.075 * level, 0.9, panner(-0.45, CH.guitar.in));
+    const g = envGain(t, 0.075 * level, 0.9, panner(-0.45));
     lp.connect(g);
     const s = ctx.createGain();
     s.gain.value = 0.5;
-    g.connect(s); s.connect(CH.guitar.send);
+    g.connect(s); s.connect(roomSend);
     osc.start(t); osc.stop(t + 0.95);
     osc2.start(t); osc2.stop(t + 0.95);
   }
@@ -253,7 +243,7 @@ function createStandbyMode(ctx, out) {
     g.gain.linearRampToValueAtTime(0.009 * level, t + 0.8);
     g.gain.setValueAtTime(0.009 * level, t + dur - 0.3);
     g.gain.linearRampToValueAtTime(0, t + dur);
-    toMix(g, 0.8, 0, CH.strings);
+    toMix(g, 0.8);
     // (the three detuned saws: left, center, right)
     const sides = {};
     for (const [cents, v] of [[-8, -0.55], [0, 0], [8, 0.55]]) {
@@ -282,7 +272,7 @@ function createStandbyMode(ctx, out) {
   // breath noise, a scoop up into each note (or a slide from the last one) and a vibrato
   // that blooms on held notes
   let lastSax = null;
-  function sax(t, m, dur, warmth, level = 1, from = null, scoop = 1, pan = 0, chan = CH.sax) {
+  function sax(t, m, dur, warmth, level = 1, from = null, scoop = 1, pan = 0) {
     const f0 = freq(m);
     const start = from !== null ? freq(from) : freq(m - scoop);
     const src = ctx.createGain();
@@ -333,7 +323,7 @@ function createStandbyMode(ctx, out) {
     g.gain.setValueAtTime(peak * 0.8, t + Math.max(0.06, dur - 0.08));
     g.gain.linearRampToValueAtTime(0.0001, t + dur + 0.1);
     lp.connect(g);
-    toMix(g, 0.7, pan, chan);
+    toMix(g, 0.7, pan);
   }
 
   return {
@@ -341,8 +331,6 @@ function createStandbyMode(ctx, out) {
     loopSteps: 32 * 16,
     layers: LAYERS,
     defaultMuted: DEFAULT_MUTED,
-    channels: ch.list,
-    record: ch.record,
     // solo: a layer id to hear that layer alone at full strength; muted: layer ids to leave out
     // (both from the dev page)
     schedule(step, t, intensity = 0, solo = null, muted = null) {
@@ -402,7 +390,7 @@ function createStandbyMode(ctx, out) {
           if (base) {
             sax(t, m, len * STEP, L.warmth, 1, legato ? from : null, bluesy ? 2 : 1);
           }
-          if (L.harmony > 0) sax(t, thirdBelow(m), len * STEP, L.warmth, 0.5 * L.harmony, null, bluesy ? 2 : 1, 0.4, CH.harmony);
+          if (L.harmony > 0) sax(t, thirdBelow(m), len * STEP, L.warmth, 0.5 * L.harmony, null, bluesy ? 2 : 1, 0.4);
           lastSax = m;
         }
         if (s === 15 && i === 7) lastSax = null;

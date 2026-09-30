@@ -59,14 +59,6 @@ function createZeroDay(ctx, out) {
     return lift;
   };
 
-  // Instrument channels (output.js): the mixer's strips
-  const ch = createChannels(ctx, bus);
-  const CH = {
-    kick: ch('kick', 'Kick'), snare: ch('snare', 'Snare'), hats: ch('hats', 'Hi-hats'),
-    reese: ch('reese', 'Reese bass (the two saws)'), sub: ch('sub', 'Sub under the reese'), pad: ch('pad', 'Pad'),
-    stab: ch('stab', 'Square lead stabs'), rave: ch('rave', 'Rave stabs'), siren: ch('siren', 'Air-raid siren'),
-  };
-
   const noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
   const nd = noise.getChannelData(0);
   for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
@@ -87,11 +79,11 @@ function createZeroDay(ctx, out) {
     return g;
   }
 
-  function noiseHit(t, level, decay, type, f, q, pan, dest) {
+  function noiseHit(t, level, decay, type, f, q, pan = 0) {
     const src = ctx.createBufferSource();
     src.buffer = noise;
     const flt = filter(type, f, q);
-    src.connect(flt); flt.connect(envGain(t, level, decay, pan ? panner(pan, dest) : dest));
+    src.connect(flt); flt.connect(envGain(t, level, decay, pan ? panner(pan) : bus));
     src.start(t, Math.random() * 0.5); src.stop(t + decay);
   }
 
@@ -99,23 +91,23 @@ function createZeroDay(ctx, out) {
     const osc = ctx.createOscillator();
     osc.frequency.setValueAtTime(160, t);
     osc.frequency.exponentialRampToValueAtTime(45, t + 0.06);
-    osc.connect(envGain(t, 0.9 * level, 0.2, CH.kick.in));
+    osc.connect(envGain(t, 0.9 * level, 0.2, bus));
     osc.start(t); osc.stop(t + 0.21);
-    noiseHit(t, 0.12 * level, 0.012, 'highpass', 3000, undefined, 0, CH.kick.in);
+    noiseHit(t, 0.12 * level, 0.012, 'highpass', 3000);
   }
 
   function snare(t, level = 1) {
-    noiseHit(t, 0.3 * level, 0.16, 'bandpass', 1900, 0.9, 0, CH.snare.in);
+    noiseHit(t, 0.3 * level, 0.16, 'bandpass', 1900, 0.9);
     const body = ctx.createOscillator();
     body.type = 'triangle';
     body.frequency.setValueAtTime(200, t);
     body.frequency.exponentialRampToValueAtTime(150, t + 0.05);
-    body.connect(envGain(t, 0.25 * level, 0.08, CH.snare.in));
+    body.connect(envGain(t, 0.25 * level, 0.08, bus));
     body.start(t); body.stop(t + 0.09);
   }
 
   function hat(t, level = 1, open = false) {
-    noiseHit(t, (open ? 0.045 : 0.035) * level, open ? 0.14 : 0.03, 'highpass', 8500, undefined, 0.3, CH.hats.in);
+    noiseHit(t, (open ? 0.045 : 0.035) * level, open ? 0.14 : 0.03, 'highpass', 8500, undefined, 0.3);
   }
 
   // Reese: two detuned saws beating against each other, a wobbling lowpass, and a sine sub
@@ -130,7 +122,7 @@ function createZeroDay(ctx, out) {
     g.gain.linearRampToValueAtTime(0.1, t + 0.01);
     g.gain.setValueAtTime(0.1, t + dur - 0.03);
     g.gain.linearRampToValueAtTime(0, t + dur);
-    g.connect(CH.reese.in);
+    g.connect(bus);
     for (const cents of [-14, 14]) {
       const lp = filter('lowpass', 450 + 1400 * open, 3); // (one each: the saws sit a little apart)
       wobDepth.connect(lp.frequency);
@@ -150,7 +142,7 @@ function createZeroDay(ctx, out) {
     sg.gain.linearRampToValueAtTime(0.15, t + 0.01);
     sg.gain.setValueAtTime(0.15, t + dur - 0.03);
     sg.gain.linearRampToValueAtTime(0, t + dur);
-    sub.connect(sg); sg.connect(CH.sub.in);
+    sub.connect(sg); sg.connect(bus);
     sub.start(t); sub.stop(t + dur);
   }
 
@@ -160,7 +152,7 @@ function createZeroDay(ctx, out) {
     g.gain.linearRampToValueAtTime(level, t + 0.12);
     g.gain.setValueAtTime(level, t + dur - 0.1);
     g.gain.linearRampToValueAtTime(0, t + dur);
-    g.connect(CH.pad.in);
+    g.connect(bus);
     // (each detuned pair split left and right)
     const sides = [-0.6, 0.6].map((v) => {
       const lp = filter('lowpass', 1500);
@@ -184,14 +176,14 @@ function createZeroDay(ctx, out) {
     osc.type = 'square';
     osc.frequency.value = freq(m);
     const lp = filter('lowpass', 2600);
-    osc.connect(lp); lp.connect(envGain(t, 0.05, STEP * 2.5, CH.stab.in));
+    osc.connect(lp); lp.connect(envGain(t, 0.05, STEP * 2.5, bus));
     osc.start(t); osc.stop(t + STEP * 2.6);
   }
 
   // Rave stab: a punchy minor chord hit (detuned square + saw, fast filter drop), the classic
   // jungle / drum & bass "hoover" stab
   function raveStab(t, chord, level) {
-    const g = envGain(t, 0.06 * level, 0.18, CH.rave.in);
+    const g = envGain(t, 0.06 * level, 0.18, bus);
     // (the square left, the saw right)
     const sides = [-0.35, 0.35].map((v) => {
       const lp = filter('lowpass', 1200, 2);
@@ -227,7 +219,7 @@ function createZeroDay(ctx, out) {
     g.gain.setValueAtTime(0.06 * level, t + dur - 0.2);
     g.gain.linearRampToValueAtTime(0, t + dur);
     // (sweeping left to right and back with the pitch)
-    const sweep = panner(-0.6, CH.siren.in);
+    const sweep = panner(-0.6);
     sweep.pan.setValueAtTime(-0.6, t);
     sweep.pan.linearRampToValueAtTime(0.6, t + dur * 0.5);
     sweep.pan.linearRampToValueAtTime(-0.6, t + dur);
@@ -240,8 +232,6 @@ function createZeroDay(ctx, out) {
     loopSteps: 32 * 16,
     layers: LAYERS,
     defaultMuted: DEFAULT_MUTED,
-    channels: ch.list,
-    record: ch.record,
     // solo: a layer id to hear that layer alone at full strength; muted: layer ids to leave out
     // (both from the dev page)
     schedule(step, t, intensity = 0, solo = null, muted = null) {

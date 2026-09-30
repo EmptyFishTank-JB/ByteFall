@@ -7,6 +7,18 @@ const SFX = (() => {
   let muted = false;
   try { muted = localStorage.getItem(STORAGE_KEY) === 'off'; } catch (e) {}
 
+  // Everything plays through SETTINGS → SOUND OUTPUT's chain (output.js), as the music does
+  let outChain = null;
+  let outputId = typeof savedSoundOutput === 'function' ? savedSoundOutput() : 'headphones';
+  const dest = (c) => {
+    if (typeof createSoundOutput !== 'function') return c.destination;
+    if (!outChain) {
+      outChain = createSoundOutput(c, outputId);
+      outChain.output.connect(c.destination);
+    }
+    return outChain.input;
+  };
+
   function getCtx() {
     if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
     if (ctx.state !== 'running') ctx.resume(); // (iOS can also leave it 'interrupted')
@@ -26,7 +38,7 @@ const SFX = (() => {
     const gn = c.createGain();
     gn.gain.setValueAtTime(vol, t);
     gn.gain.exponentialRampToValueAtTime(0.001, t + dur);
-    gn.connect(c.destination);
+    gn.connect(dest(c));
     return gn;
   }
 
@@ -70,7 +82,7 @@ const SFX = (() => {
     },
     alert(c) {
       const gn = c.createGain();
-      gn.connect(c.destination);
+      gn.connect(dest(c));
       [440, 330].forEach((freq, idx) => {
         const osc = c.createOscillator();
         osc.type = 'sawtooth'; osc.frequency.value = freq; osc.connect(gn);
@@ -167,6 +179,10 @@ const SFX = (() => {
       } catch (e) {}
     },
     isMuted: () => muted,
+    setOutput(id) {
+      outputId = id;
+      if (outChain) outChain.set(id);
+    },
     toggle() {
       muted = !muted;
       try { localStorage.setItem(STORAGE_KEY, muted ? 'off' : 'on'); } catch (e) {}

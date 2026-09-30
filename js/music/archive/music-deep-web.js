@@ -68,15 +68,7 @@ function createDeepWeb(ctx, out) {
   delayTone.connect(feedback);
   feedback.connect(delay);
   delayTone.connect(wet);
-  // Instrument channels (output.js): the mixer's strips
-  const ch = createChannels(ctx, bus);
-  const CH = {
-    kick: ch('kick', 'Kick'), clap: ch('clap', 'Clap'), hats: ch('hats', 'Hi-hats'), shaker: ch('shaker', 'Shaker'),
-    bass: ch('bass', 'Rolling bass'), drone: ch('drone', 'Drone'), bleeps: ch('bleeps', 'Modem bleeps', delay),
-    pluck: ch('pluck', 'Square pluck', delay), acid: ch('acid', 'Acid line'), dub: ch('dub', 'Dub stabs', delay),
-    modem: ch('modem', 'Dial-up modem'), echo: ch('echo', 'Echo (the delay return)'),
-  };
-  wet.connect(panner(0.5, CH.echo.in));
+  wet.connect(panner(0.5));
 
   const noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
   const nd = noise.getChannelData(0);
@@ -98,11 +90,11 @@ function createDeepWeb(ctx, out) {
     return g;
   }
 
-  function noiseHit(t, level, decay, type, f, q, pan, dest) {
+  function noiseHit(t, level, decay, type, f, q, pan = 0) {
     const src = ctx.createBufferSource();
     src.buffer = noise;
     const flt = filter(type, f, q);
-    src.connect(flt); flt.connect(envGain(t, level, decay, pan ? panner(pan, dest) : dest));
+    src.connect(flt); flt.connect(envGain(t, level, decay, pan ? panner(pan) : bus));
     src.start(t, Math.random() * 0.5); src.stop(t + decay);
   }
 
@@ -111,26 +103,26 @@ function createDeepWeb(ctx, out) {
     osc.frequency.setValueAtTime(140, t);
     osc.frequency.exponentialRampToValueAtTime(42, t + 0.1);
     const lp = filter('lowpass', 220 + 4000 * open, 0.7);
-    osc.connect(lp); lp.connect(envGain(t, 0.95 * level, 0.3, CH.kick.in));
+    osc.connect(lp); lp.connect(envGain(t, 0.95 * level, 0.3, bus));
     osc.start(t); osc.stop(t + 0.31);
-    if (open > 0.05) noiseHit(t, 0.1 * open * level, 0.015, 'highpass', 2500, undefined, 0, CH.kick.in);
+    if (open > 0.05) noiseHit(t, 0.1 * open * level, 0.015, 'highpass', 2500);
   }
 
   function clap(t) {
-    for (const d of [0, 0.012, 0.024]) noiseHit(t + d, 0.16, 0.12, 'bandpass', 1300, 1.2, 0, CH.clap.in);
+    for (const d of [0, 0.012, 0.024]) noiseHit(t + d, 0.16, 0.12, 'bandpass', 1300, 1.2);
   }
 
   function hat(t, level) {
-    noiseHit(t, 0.035 * level, 0.035, 'highpass', 8000, undefined, 0.35, CH.hats.in);
+    noiseHit(t, 0.035 * level, 0.035, 'highpass', 8000, undefined, 0.35);
   }
 
   function shaker(t, level) {
-    noiseHit(t, 0.07 * level, 0.05, 'bandpass', 6000, 0.8, -0.35, CH.shaker.in);
+    noiseHit(t, 0.07 * level, 0.05, 'bandpass', 6000, 0.8, -0.35);
   }
 
   function rollingBass(t, m, open) {
     const lp = filter('lowpass', 280 + 1600 * open, 2);
-    const g = envGain(t, 0.16, STEP * 0.9, CH.bass.in);
+    const g = envGain(t, 0.16, STEP * 0.9, bus);
     lp.connect(g);
     for (const type of ['sine', 'sawtooth']) {
       const osc = ctx.createOscillator();
@@ -146,7 +138,7 @@ function createDeepWeb(ctx, out) {
     g.gain.setValueAtTime(0, t);
     g.gain.linearRampToValueAtTime(level, t + dur * 0.4);
     g.gain.linearRampToValueAtTime(0, t + dur + 0.2);
-    g.connect(CH.drone.in);
+    g.connect(bus);
     // (each detuned pair split left and right, through its own filter)
     const sides = [-0.6, 0.6].map((v) => {
       const f = filter('lowpass', 700);
@@ -171,8 +163,8 @@ function createDeepWeb(ctx, out) {
     const f = freq(m);
     osc.frequency.setValueAtTime(f, t);
     osc.frequency.exponentialRampToValueAtTime(f * (glideUp ? 1.5 : 0.66), t + 0.07);
-    const g = envGain(t, 0.035, 0.08, panner(pan, CH.bleeps.in));
-    g.connect(CH.bleeps.send);
+    const g = envGain(t, 0.035, 0.08, panner(pan));
+    g.connect(delay);
     osc.connect(g);
     osc.start(t); osc.stop(t + 0.09);
   }
@@ -183,7 +175,7 @@ function createDeepWeb(ctx, out) {
     osc.frequency.value = freq(m);
     const lp = filter('lowpass', 1800);
     pluckSide = -pluckSide;
-    osc.connect(lp); lp.connect(envGain(t, 0.03, 0.12, panner(0.35 * pluckSide, CH.pluck.in))).connect(CH.pluck.send);
+    osc.connect(lp); lp.connect(envGain(t, 0.03, 0.12, panner(0.35 * pluckSide))).connect(delay);
     osc.start(t); osc.stop(t + 0.13);
   }
 
@@ -194,7 +186,7 @@ function createDeepWeb(ctx, out) {
     const lp = filter('lowpass', 300, 14);
     lp.frequency.setValueAtTime(300 + (accent ? 2600 : 1200), t);
     lp.frequency.exponentialRampToValueAtTime(280, t + STEP * 0.9);
-    osc.connect(lp); lp.connect(envGain(t, (accent ? 0.17 : 0.12) * level, STEP * 0.95, CH.acid.in));
+    osc.connect(lp); lp.connect(envGain(t, (accent ? 0.17 : 0.12) * level, STEP * 0.95, bus));
     osc.start(t); osc.stop(t + STEP);
   }
 
@@ -203,9 +195,9 @@ function createDeepWeb(ctx, out) {
     const lp = filter('lowpass', 1500, 3);
     lp.frequency.setValueAtTime(2200, t);
     lp.frequency.exponentialRampToValueAtTime(700, t + 0.2);
-    const g = envGain(t, 0.065 * level, 0.22, panner(-0.2, CH.dub.in));
+    const g = envGain(t, 0.065 * level, 0.22, panner(-0.2));
     lp.connect(g);
-    g.connect(CH.dub.send);
+    g.connect(delay);
     for (const m of chord) {
       for (const cents of [-8, 8]) {
         const osc = ctx.createOscillator();
@@ -236,10 +228,10 @@ function createDeepWeb(ctx, out) {
     g.gain.linearRampToValueAtTime(0.09 * level, t + 0.02);
     g.gain.setValueAtTime(0.09 * level, t + dur - 0.05);
     g.gain.linearRampToValueAtTime(0, t + dur);
-    carrier.connect(bp); bp.connect(g); g.connect(panner(-0.5, CH.modem.in));
+    carrier.connect(bp); bp.connect(g); g.connect(panner(-0.5));
     carrier.start(t); carrier.stop(t + dur);
     warble.start(t); warble.stop(t + dur);
-    noiseHit(t, 0.07 * level, dur, 'bandpass', 2600, 2, -0.5, CH.modem.in);
+    noiseHit(t, 0.07 * level, dur, 'bandpass', 2600, 2, -0.5);
   }
 
   return {
@@ -247,8 +239,6 @@ function createDeepWeb(ctx, out) {
     loopSteps: 32 * 16,
     layers: LAYERS,
     defaultMuted: DEFAULT_MUTED,
-    channels: ch.list,
-    record: ch.record,
     // solo: a layer id to hear that layer alone at full strength; muted: layer ids to leave out
     // (both from the dev page)
     schedule(step, t, intensity = 0, solo = null, muted = null) {

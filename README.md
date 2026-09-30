@@ -369,8 +369,8 @@ with a cached older script (GitHub Pages lets browsers cache for 10 minutes).
 - `js/viz.js` — the shared music visualizer (LED bars or auto-gained
   oscilloscope wave with a CRT trail) used by the playlist and the dev page;
   the chosen style is remembered for both
-- `js/grid-bg.js` — the dim "defragmenting" micro-grid animated behind the board (performance: only the blocks whose brightness changed are redrawn each frame, in batches by shade, with the theme's color read once per theme change; the board's and HUD boxes' rest under the main menu)
-  (static when the OS asks for reduced motion)
+- `js/grid-bg.js` — the dim "defragmenting" micro-grid animated behind the board (performance: only the blocks whose brightness changed are redrawn each frame, in batches by shade, with the theme's color read once per theme change; the board's and HUD boxes' rest under the main menu;
+  static when the OS asks for reduced motion)
 - `js/sfx.js` — synthesized sound effects, mostly ported from the ECHOES terminal
   audio compendium, plus a retro 8-bit "data burst" for clears; toggle with
   the SOUND button in settings
@@ -676,6 +676,26 @@ list (locked tracks show the level they open at) and BACKGROUND PLAY, so it can
 run on a phone with the screen off. Keys: Space plays / pauses, ← / → skip,
 Esc closes. Where the browser offers them, the lock screen's media controls
 work too. The game waits underneath (a VS match pauses). Code: `js/player.js`.
+
+## Sound output and instrument channels
+
+SETTINGS → **SOUND OUTPUT** (`js/music/output.js`) picks what the music and sound effects
+pass through last: **HEADPHONES** (the mix as written: headphones, earbuds and good
+speakers), **SPEAKERS** (laptop and tablet speakers: the deep bass played as harmonics, the
+level evened out, about 3 dB louder above 250Hz) or **PHONE** (a phone's own speaker: the
+lows it can't play cut and put back as harmonics it can, folded to mono, 1–4kHz lifted, the
+hiss softened, about 7 dB louder above 250Hz). A page can't tell whether earbuds are in, so
+phones start on PHONE and everything else on HEADPHONES; the note under the button says to
+pick HEADPHONES with earbuds.
+
+Every track routes each instrument through its own channel (kick, snare, hats, bass, lead,
+pads, echo returns...; echo and reverb sends follow their instrument), which change nothing
+at their default level: the split was checked by rendering each track's whole loop before
+and after with the same random seed and comparing sample by sample (NIGHT DRIVE with its
+ping-pong feedback off: with it on, even the original renders a little differently from run
+to run). The originals are kept in `js/music/archive/`. **Mix tables** in `js/music/mixes.js`
+(from the dev mixer's EXPORT) set each channel's level per track and output, at the four
+stack heights the game settles on, eased between as the intensity moves.
 
 ## To-do
 

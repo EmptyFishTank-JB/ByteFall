@@ -72,17 +72,7 @@ function createSleepMode(ctx, out) {
   delayTone.connect(feedback);
   feedback.connect(delay);
   delayTone.connect(wet);
-  // Instrument channels (output.js): the mixer's strips
-  const ch = createChannels(ctx, bus);
-  const CH = {
-    kick: ch('kick', 'Kick'), snare: ch('snare', 'Snare'), hats: ch('hats', 'Hi-hats'),
-    crash: ch('crash', 'Crash cymbal'), riser: ch('riser', 'Noise riser'),
-    guitars: ch('guitars', 'Guitars (chugs, double-tracked)'), sub: ch('sub', 'Sub under the chugs'),
-    box: ch('box', 'Music box', delay), lead: ch('lead', 'Supersaw lead', delay),
-    pluck: ch('pluck', 'Arpeggio pluck', delay), pad: ch('pad', 'Pad'), alarm: ch('alarm', 'Square alarm'),
-    echo: ch('echo', 'Echo (the delay return)'),
-  };
-  wet.connect(panner(0.5, CH.echo.in));
+  wet.connect(panner(0.5));
 
   // One shared amp for every guitar note: drive -> distortion -> cabinet EQ
   const gtrIn = ctx.createGain();
@@ -108,11 +98,11 @@ function createSleepMode(ctx, out) {
   shaper.connect(cabLow);
   cabLow.connect(cabHigh);
   cabHigh.connect(gtrOut);
-  gtrOut.connect(panner(-0.75, CH.guitars.in));
+  gtrOut.connect(panner(-0.75));
   const gtrDouble = ctx.createDelay(0.05);
   gtrDouble.delayTime.value = 0.014;
   gtrOut.connect(gtrDouble);
-  gtrDouble.connect(panner(0.75, CH.guitars.in));
+  gtrDouble.connect(panner(0.75));
 
   const noise = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
   const nd = noise.getChannelData(0);
@@ -144,23 +134,23 @@ function createSleepMode(ctx, out) {
     const osc = ctx.createOscillator();
     osc.frequency.setValueAtTime(170, t);
     osc.frequency.exponentialRampToValueAtTime(48, t + 0.08);
-    osc.connect(envGain(t, 0.9 * level, 0.22, CH.kick.in));
+    osc.connect(envGain(t, 0.9 * level, 0.22, bus));
     osc.start(t); osc.stop(t + 0.23);
     const click = noiseSource();
     const hp = filter('highpass', 3000);
-    click.connect(hp); hp.connect(envGain(t, 0.12 * level, 0.012, CH.kick.in));
+    click.connect(hp); hp.connect(envGain(t, 0.12 * level, 0.012, bus));
     click.start(t, Math.random()); click.stop(t + 0.015);
   }
 
   function snare(t, level = 1) {
     const src = noiseSource();
     const bp = filter('bandpass', 2000, 0.8);
-    src.connect(bp); bp.connect(envGain(t, 0.3 * level, 0.15, CH.snare.in));
+    src.connect(bp); bp.connect(envGain(t, 0.3 * level, 0.15, bus));
     src.start(t, Math.random()); src.stop(t + 0.16);
     const body = ctx.createOscillator();
     body.type = 'triangle';
     body.frequency.value = 200;
-    body.connect(envGain(t, 0.22 * level, 0.08, CH.snare.in));
+    body.connect(envGain(t, 0.22 * level, 0.08, bus));
     body.start(t); body.stop(t + 0.09);
   }
 
@@ -168,14 +158,14 @@ function createSleepMode(ctx, out) {
     const src = noiseSource();
     const hp = filter('highpass', 7500);
     const dur = open ? 0.16 : 0.035;
-    src.connect(hp); hp.connect(envGain(t, (open ? 0.045 : 0.03) * level, dur, panner(0.35, CH.hats.in)));
+    src.connect(hp); hp.connect(envGain(t, (open ? 0.045 : 0.03) * level, dur, panner(0.35)));
     src.start(t, Math.random()); src.stop(t + dur);
   }
 
   function crash(t) {
     const src = noiseSource();
     const hp = filter('highpass', 5000);
-    src.connect(hp); hp.connect(envGain(t, 0.06, 1.4, CH.crash.in));
+    src.connect(hp); hp.connect(envGain(t, 0.06, 1.4, bus));
     src.start(t, Math.random() * 0.5); src.stop(t + 1.4);
   }
 
@@ -187,14 +177,13 @@ function createSleepMode(ctx, out) {
     const g = ctx.createGain();
     g.gain.setValueAtTime(0.0001, t);
     g.gain.exponentialRampToValueAtTime(0.12, t + dur);
-    src.connect(bp); bp.connect(g); g.connect(CH.riser.in);
+    src.connect(bp); bp.connect(g); g.connect(bus);
     src.loop = true;
     src.start(t); src.stop(t + dur);
   }
 
   // Palm-muted power chord (root + fifth + octave) into the shared amp, plus a sine sub
   function chug(t, root, dur, level = 1) {
-    CH.guitars.mark();
     const g = envGain(t, 0.3 * level, dur, gtrIn);
     for (const [semis, cents] of [[0, -6], [7, 5], [12, 0]]) {
       const osc = ctx.createOscillator();
@@ -206,7 +195,7 @@ function createSleepMode(ctx, out) {
     }
     const sub = ctx.createOscillator();
     sub.frequency.value = freq(root + 12);
-    sub.connect(envGain(t, 0.16 * level, dur, CH.sub.in));
+    sub.connect(envGain(t, 0.16 * level, dur, bus));
     sub.start(t); sub.stop(t + dur + 0.02);
   }
 
@@ -215,8 +204,8 @@ function createSleepMode(ctx, out) {
     for (const [ratio, amp] of [[1, 1], [2, 0.35], [3, 0.12], [4.2, 0.06]]) {
       const osc = ctx.createOscillator();
       osc.frequency.value = f * ratio;
-      const g = envGain(t, 0.05 * level * amp, 1.4 / ratio, panner(((m % 12) / 11 - 0.5) * 0.5, CH.box.in));
-      g.connect(CH.box.send);
+      const g = envGain(t, 0.05 * level * amp, 1.4 / ratio, panner(((m % 12) / 11 - 0.5) * 0.5));
+      g.connect(delay);
       osc.connect(g);
       osc.start(t); osc.stop(t + 1.5);
     }
@@ -229,7 +218,7 @@ function createSleepMode(ctx, out) {
     g.gain.linearRampToValueAtTime(level, t + 0.01);
     g.gain.setValueAtTime(level, t + Math.max(0.01, dur - 0.04));
     g.gain.linearRampToValueAtTime(0, t + dur + 0.06);
-    lp.connect(g); g.connect(CH.lead.in); g.connect(CH.lead.send);
+    lp.connect(g); g.connect(bus); g.connect(delay);
     for (const cents of [-18, -9, 0, 9, 18]) {
       const osc = ctx.createOscillator();
       osc.type = 'sawtooth';
@@ -242,7 +231,7 @@ function createSleepMode(ctx, out) {
 
   function pluck(t, m, bright) {
     const lp = filter('lowpass', 2500 + 4000 * bright);
-    lp.connect(envGain(t, 0.03 * (1 + 0.5 * bright), 0.1, CH.pluck.in)).connect(CH.pluck.send);
+    lp.connect(envGain(t, 0.03 * (1 + 0.5 * bright), 0.1, bus)).connect(delay);
     for (const cents of [-10, 10]) {
       const osc = ctx.createOscillator();
       osc.type = 'sawtooth';
@@ -260,7 +249,7 @@ function createSleepMode(ctx, out) {
     g.gain.linearRampToValueAtTime(level, t + 0.4);
     g.gain.setValueAtTime(level, t + dur - 0.3);
     g.gain.linearRampToValueAtTime(0, t + dur);
-    lp.connect(g); g.connect(CH.pad.in);
+    lp.connect(g); g.connect(bus);
     notes.forEach((m, k) => {
       const osc = ctx.createOscillator();
       osc.type = 'triangle';
@@ -275,7 +264,7 @@ function createSleepMode(ctx, out) {
     osc.type = 'square';
     osc.frequency.value = freq(m);
     const lp = filter('lowpass', 3000);
-    osc.connect(lp); lp.connect(envGain(t, 0.16 * level, STEP * 0.9, panner(-0.4, CH.alarm.in)));
+    osc.connect(lp); lp.connect(envGain(t, 0.16 * level, STEP * 0.9, panner(-0.4)));
     osc.start(t); osc.stop(t + STEP);
   }
 
@@ -284,8 +273,6 @@ function createSleepMode(ctx, out) {
     loopSteps: 32 * 16,
     layers: LAYERS,
     output: bus,
-    channels: ch.list,
-    record: ch.record,
     // solo: a layer id to hear that layer alone at full strength; muted: layer ids to leave out
     // (both from the dev page)
     schedule(step, t, intensity = 0, solo = null, muted = null) {
