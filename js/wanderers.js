@@ -411,11 +411,19 @@ function createWanderers(lane, active = () => true) {
     } else if (r < 0.20) fright(w, now);
     else leave(w);
   }
+  // (only what changed is written: every write makes the browser re-check the styles)
   function place(w) {
-    w.el.style.transform = `translateX(${w.x.toFixed(1)}px)`;
-    w.el.dataset.look = w.look > 0 ? 'right' : w.look < 0 ? 'left' : 'front'; // (front: at you)
-    w.el.classList.toggle('walking', w.state === 'walk');
-    w.el.classList.toggle('running', w.state === 'walk' && w.running);
+    const x = w.x.toFixed(1);
+    if (w.placedX !== x) {
+      w.placedX = x;
+      w.el.style.transform = `translateX(${x}px)`;
+    }
+    const look = w.look > 0 ? 'right' : w.look < 0 ? 'left' : 'front'; // (front: at you)
+    if (w.el.dataset.look !== look) w.el.dataset.look = look;
+    const walking = w.state === 'walk';
+    const running = walking && w.running;
+    if (w.placedWalk !== walking) { w.placedWalk = walking; w.el.classList.toggle('walking', walking); }
+    if (w.placedRun !== running) { w.placedRun = running; w.el.classList.toggle('running', running); }
   }
   function walkTo(w, target, running = false) {
     letGo(w);

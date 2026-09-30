@@ -369,7 +369,7 @@ with a cached older script (GitHub Pages lets browsers cache for 10 minutes).
 - `js/viz.js` — the shared music visualizer (LED bars or auto-gained
   oscilloscope wave with a CRT trail) used by the playlist and the dev page;
   the chosen style is remembered for both
-- `js/grid-bg.js` — the dim "defragmenting" micro-grid animated behind the board
+- `js/grid-bg.js` — the dim "defragmenting" micro-grid animated behind the board (performance: only the blocks whose brightness changed are redrawn each frame, in batches by shade, with the theme's color read once per theme change; the board's and HUD boxes' rest under the main menu)
   (static when the OS asks for reduced motion)
 - `js/sfx.js` — synthesized sound effects, mostly ported from the ECHOES terminal
   audio compendium, plus a retro 8-bit "data burst" for clears; toggle with

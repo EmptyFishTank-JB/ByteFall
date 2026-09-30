@@ -4,6 +4,19 @@
 // the cycle reads as one continuous process instead of snapping back.
 // { defrag: false } draws only the starlight: the scattered blocks shimmering, never moving
 // (the HUD boxes). active(), if given, pauses it while it returns false (a hidden layer).
+// The theme's color, read once per theme change rather than on every draw (reading it each
+// frame made the browser recompute styles for every canvas, 25 times a second)
+const gridTheme = { fg: '57, 255, 143', rainbow: false, anaglyph: false, n: 0 };
+function readGridTheme() {
+  const root = document.documentElement;
+  gridTheme.fg = getComputedStyle(root).getPropertyValue('--fg-rgb').trim() || '57, 255, 143';
+  gridTheme.rainbow = root.dataset.theme === 'spectrum';
+  gridTheme.anaglyph = root.dataset.theme === 'anaglyph';
+  gridTheme.n++; // (each canvas rebuilds its colors when this changes)
+}
+readGridTheme();
+new MutationObserver(readGridTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class', 'style'] });
+
 function startGridBackground(canvas, { defrag = true, active } = {}) {
   const BLOCK = 5; // css px
   const GAP = 2;
@@ -49,18 +62,23 @@ function startGridBackground(canvas, { defrag = true, active } = {}) {
     pass.misplaced--;
   }
 
+  let cssW = 0;
+  let cssH = 0;
   function resize() {
     // (its layout size: a pop-in animation's scale mustn't count)
     const rect = { width: canvas.clientWidth, height: canvas.clientHeight };
+    cssW = rect.width;
+    cssH = rect.height;
     const dpr = window.devicePixelRatio || 1;
     canvas.width = Math.round(rect.width * dpr);
     canvas.height = Math.round(rect.height * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     cols = Math.max(1, Math.floor(rect.width / PITCH));
     rows = Math.max(1, Math.floor(rect.height / PITCH));
-    size = cols * rows;
+    size = rect.width && rect.height ? cols * rows : 0; // (hidden: nothing to draw)
     layers = [{ pass: createPass(), weight: 1 }];
     fadeStart = 0;
+    shown = new Uint8Array(0); // (the resize cleared it)
     draw();
   }
 
@@ -72,16 +90,63 @@ function startGridBackground(canvas, { defrag = true, active } = {}) {
 
   const ANA_CYCLE = [[70, 76, 84], [255, 40, 80], [205, 211, 217], [0, 220, 255]]; // dark grey, red, light grey, cyan
 
+  // The plain themes: each block's brightness rounded to one of SHADES steps (too fine to see),
+  // and only the blocks whose step changed since the last frame redrawn (most sit still: only
+  // the twinkles and the defrag's moves change), every block of a step in one go
+  const SHADES = 48;
+  const MAX_ALPHA = 0.3;
+  let shadeStyles = [];
+  let shadeFor = -1;
+  let shown = new Uint8Array(0); // each block's step as drawn (255: not drawn yet)
+  const CLEAR_PAD = 0.5; // (a block's anti-aliased edge goes too; the 2px gap keeps its neighbors)
+  const buckets = Array.from({ length: SHADES + 1 }, () => []);
+  function drawPlain(offX, offY) {
+    if (shadeFor !== gridTheme.n || shown.length !== size) { // (a new theme or size: all of it)
+      shadeFor = gridTheme.n;
+      shadeStyles = buckets.map((_, k) => `rgba(${gridTheme.fg}, ${(k / SHADES * MAX_ALPHA).toFixed(4)})`);
+      shown = new Uint8Array(size).fill(255);
+      ctx.clearRect(0, 0, cssW, cssH);
+    }
+    for (const b of buckets) b.length = 0;
+    for (let i = 0; i < size; i++) {
+      let alpha = 0;
+      for (const { pass, weight } of layers) alpha += weight * ((pass.data[i] ? 0.06 : 0.018) + pass.glow[i] * 0.22);
+      const k = Math.min(SHADES, Math.round(alpha / MAX_ALPHA * SHADES));
+      if (k === shown[i]) continue;
+      if (shown[i] !== 255) ctx.clearRect(offX + (i % cols) * PITCH - CLEAR_PAD, offY + Math.floor(i / cols) * PITCH - CLEAR_PAD, BLOCK + 2 * CLEAR_PAD, BLOCK + 2 * CLEAR_PAD);
+      shown[i] = k;
+      if (k > 0) buckets[k].push(i);
+    }
+    for (let k = 1; k <= SHADES; k++) {
+      const list = buckets[k];
+      if (!list.length) continue;
+      ctx.fillStyle = shadeStyles[k];
+      ctx.beginPath();
+      for (const i of list) ctx.rect(offX + (i % cols) * PITCH, offY + Math.floor(i / cols) * PITCH, BLOCK, BLOCK);
+      ctx.fill();
+    }
+  }
+
   function draw() {
+    if (!size) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      return;
+    }
+    const { rainbow, anaglyph } = gridTheme;
+    if (!rainbow && !anaglyph) {
+      // (on whole device pixels, so a block cleared leaves no faint edge)
+      const dpr = window.devicePixelRatio || 1;
+      drawPlain(Math.round((cssW - cols * PITCH + GAP) / 2 * dpr) / dpr, Math.round((cssH - rows * PITCH + GAP) / 2 * dpr) / dpr);
+      return;
+    }
+    shown = new Uint8Array(0); // (back to a plain theme: a full redraw)
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const fg = getComputedStyle(document.documentElement).getPropertyValue('--fg-rgb').trim() || '57, 255, 143';
-    const rainbow = document.documentElement.dataset.theme === 'spectrum';
+    const offX = (cssW - cols * PITCH + GAP) / 2;
+    const offY = (cssH - rows * PITCH + GAP) / 2;
+    const { fg } = gridTheme;
     // ANAGLYPH: each block cycles dark grey, red, light grey, cyan at its own speed and phase
     // (like SPECTRUM's hues), over a red fringe on its left and a cyan one on its right, like the bits
-    const anaglyph = document.documentElement.dataset.theme === 'anaglyph';
     const secs = performance.now() / 1000;
-    const offX = (canvas.clientWidth - cols * PITCH + GAP) / 2;
-    const offY = (canvas.clientHeight - rows * PITCH + GAP) / 2;
     for (let i = 0; i < size; i++) {
       let alpha = 0;
       for (const { pass, weight } of layers) {
@@ -114,6 +179,7 @@ function startGridBackground(canvas, { defrag = true, active } = {}) {
   }
 
   function tick(now) {
+    if (!size) return;
     const newest = layers[layers.length - 1].pass;
     if (defrag && !fadeStart && newest.misplaced <= OVERLAP_MS / TICK_MS) {
       layers.push({ pass: createPass(), weight: 0 });
@@ -153,7 +219,9 @@ function startGridBackground(canvas, { defrag = true, active } = {}) {
   if (!reduceMotion) requestAnimationFrame(frame);
 }
 
-startGridBackground(document.getElementById('board-bg'));
+// (the board's and the HUD boxes' rest while the main menu covers them)
+const gameShown = () => !document.body.classList.contains('at-home');
+startGridBackground(document.getElementById('board-bg'), { active: gameShown });
 // VS setup: the defrag behind its options (the board's cells are covered)
 startGridBackground(document.getElementById('vs-setup-bg'));
 // START SCREEN: the starlight only, twinkling across the whole card
@@ -164,7 +232,7 @@ document.querySelectorAll('.hud .stat:not(.cpu-stat):not(.cpu-face)').forEach((s
   canvas.className = 'stat-bg';
   canvas.setAttribute('aria-hidden', 'true');
   stat.prepend(canvas);
-  startGridBackground(canvas, { defrag: false });
+  startGridBackground(canvas, { defrag: false, active: gameShown });
 });
 
 // Dev: TWINKLE BACKGROUND (dev tools, or ?twinkle): the starlight across the whole screen behind
