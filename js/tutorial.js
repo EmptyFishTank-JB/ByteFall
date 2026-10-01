@@ -143,6 +143,22 @@ const Tutorial = (() => {
   let narrator = null;
   let typing = null; // { el, text, i, timer, done }
   const TYPE_MS = 18;
+  // The banner laid out once with all its words, then pinned by its top where that puts it: as
+  // the words type out it grows downward, never up (a banner kept at the bottom or the middle
+  // of the screen included)
+  function pinTop(text, words) {
+    const el = bannerEl;
+    el.style.top = el.style.bottom = el.style.transform = '';
+    text.textContent = words;
+    const fixed = el.classList.contains('float');
+    // (offsetTop: where it's laid out, not where its fade-in animation has it this frame; the
+    // middle one is centered by a transform, half its height up)
+    const top = el.offsetTop - (el.classList.contains('middle') ? el.offsetHeight / 2 : 0);
+    el.style.top = `${top}px`;
+    el.style.bottom = 'auto';
+    if (fixed) el.style.transform = 'translateX(-50%)';
+    text.textContent = '';
+  }
   function say(el, text, done) {
     stopTyping(true);
     // (the banner grows with the words as they're said: only the rest of the word being typed is
@@ -318,7 +334,6 @@ const Tutorial = (() => {
     body.appendChild(text);
     card.appendChild(body);
     botMood(s.mood);
-    say(text, s.text);
     if (step > 0) addButton('BACK', back, 'tut-back');
     if (s.intro) addButton('BEGIN', () => go(step + 1));
     if (s.next) addButton('NEXT', () => go(step + 1));
@@ -326,6 +341,8 @@ const Tutorial = (() => {
       addButton('PLAY CLASSIC', () => leave('classic'));
       addButton('RULES', () => { leave(); setRecordsOpen(true, 'rules'); });
     }
+    pinTop(text, s.text);
+    say(text, s.text);
     // What it's talking about pulses
     (s.pulse || []).forEach((sel) => document.querySelectorAll(sel).forEach((n) => n.classList.add('tut-pulse')));
     if (!s.tap) dim(null);
@@ -499,8 +516,11 @@ const Tutorial = (() => {
       bannerEl.querySelector('.tut-body').after(pts);
       botMood(s.explainMood);
       text.setAttribute('aria-label', s.explain());
-      say(text, s.explain(), () => { pts.hidden = false; }); // (the points once it's said)
       addButton('NEXT', () => go(step + 1));
+      pts.hidden = false; // (measured with the points, then hidden till it's said)
+      pinTop(text, s.explain());
+      pts.hidden = true;
+      say(text, s.explain(), () => { pts.hidden = false; }); // (the points once it's said)
     },
     // After each render: pulse this step's cells, drop button and the line
     decorate,
