@@ -4047,6 +4047,8 @@ function setRecordsOpen(open, pane = menuPane) {
   if (open) {
     setSettingsOpen(false);
     showMenuPane(pane);
+    // (RECORDS' own tabs stick just under the card's top: BACK and the four tabs)
+    recordsEl.style.setProperty('--card-top-h', `${recordsEl.querySelector('.card-top').offsetHeight}px`);
   }
 }
 // (in a game it's PAUSE / RESUME, or the main menu when there's nothing to pause)
