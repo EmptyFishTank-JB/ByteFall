@@ -2671,6 +2671,8 @@ html.page-twinkle .page-bg { display: block; }
 :is(.start-walkers, .game-walkers) .visitor.fog-wraith { z-index: 0; transition: opacity 1.8s ease; }
 .visitor.fog-wraith svg { filter: drop-shadow(0 0 3px rgba(220, 235, 255, 0.5)); }
 .visitor.fog-wraith .walker-emote { color: #dfe8f2; }
+.visitor.fog-wraith.scary svg { filter: drop-shadow(0 0 3px rgba(255, 60, 60, 0.45)); }
+.visitor.fog-wraith.scary .walker-emote { color: #ff8a8a; }
 .visitor-tree svg { filter: drop-shadow(0 0 1px rgba(220, 225, 240, 0.3)); }
 .visitor-tree.v-creak svg { animation: visitor-shake 0.1s steps(1) 6 alternate; }
 /* The spider's silk thread, up out of sight */

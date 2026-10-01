@@ -662,8 +662,9 @@ crows), and MIGRATING BIRDS fly over: geese in a V (honking now and then), ducks
 line, a loose flock of songbirds (robins, bluebirds, goldfinches or cardinals) or
 swallows swooping fast. About a third of the time one drops out, lands, pecks about and
 calls (HONK! QUACK! TWEET! CHIRP!) to the nearest bot, which reacts, then flies off after
-the others; poked, the whole flock bolts up and away. Now and then (15% of NOVEMBER's visits) a FOG
-rolls in instead: a heavy bank of coarse-pixel mist drifts in from one side and fills the lane
+the others; poked, the whole flock bolts up and away. Now and then (15% of NOVEMBER's visits, and HALLOWEEN's) a FOG
+rolls in instead (on HALLOWEEN, scarier: bare, twisted trees only, the wanderer's eyes glowing red
+as it moans ooOOoo, and most bots it nears bolting): a heavy bank of coarse-pixel mist drifts in from one side and fills the lane
 (rising a little above it and thinning out; on the start screen only its lower part, clear of the
 title), and pines and bare trees fade in through it, dark against the mist, the far ones fainter.
 Once it's built, the FOG WANDERER (a pale hooded figure with glowing eyes and a trailing hem)

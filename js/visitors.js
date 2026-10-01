@@ -374,7 +374,8 @@ function createVisitors(api) {
     else add(what, edge(SPRITES[what].a[0].length * U), dir);
   }
 
-  // FOG (NOVEMBER, now and then; the dev page's FOG: OFTEN, or ?fog=1, brings it every visit). A
+  // FOG (NOVEMBER and HALLOWEEN, now and then; on HALLOWEEN scarier: bare, twisted trees only and the
+  // wanderer's eyes glowing red, most bots it nears bolting; the dev page's FOG: OFTEN, or ?fog=1, brings it every visit). A
   // heavy fog rolls in from one side and fills the lane; trees fade in through it, dark against the
   // mist (some further back, fainter). Once it's built, the FOG WANDERER comes out of the mist,
   // drifts from spot to spot (any bot it nears is scared: it jumps, or bolts) and fades back into
@@ -384,6 +385,7 @@ function createVisitors(api) {
   // The fog is drawn in coarse pixels: two canvases (one behind the trees, a thinner one in front
   // of everything), from drifting noise.
   const fogOften = () => { try { return localStorage.getItem('bytefall-dev-fog') === 'on' || /[?&]fog=1/.test(location.search); } catch (e) { return false; } };
+  const spooky = () => typeof Season !== 'undefined' && Season.is('halloween'); // (its scarier version)
   const FOG_ODDS = 0.15; // (each NOVEMBER visit: a fog instead)
   let fog = null;
   const NG = 64;
@@ -414,7 +416,7 @@ function createVisitors(api) {
     const W = api.laneW();
     const n = Math.max(4, Math.round(W / 70));
     for (let i = 0; i < n; i++) { // (spread along the card, each nudged a little: some far, some near)
-      const kind = Math.random() < 0.6 ? 'pine' : 'baretree';
+      const kind = !spooky() && Math.random() < 0.6 ? 'pine' : 'baretree'; // (HALLOWEEN: bare trees only)
       const far = Math.random() < 0.5;
       const x = ((i + 0.2 + Math.random() * 0.6) / n) * W - 12;
       const t = add(kind, x, Math.random() < 0.5 ? 1 : -1, { state: 'fogtree' });
@@ -504,11 +506,13 @@ function createVisitors(api) {
   // The FOG WANDERER: out of the mist, from spot to spot, and back into it by a tree
   function wraithIn() {
     const W = api.laneW();
-    const v = add('wraith', rand(0.15, 0.8) * W, Math.random() < 0.5 ? 1 : -1, { state: 'fadein', until: performance.now() + 1800, stops: 2 + Math.floor(Math.random() * 2), target: 0 });
+    const scary = spooky();
+    const v = add('wraith', rand(0.15, 0.8) * W, Math.random() < 0.5 ? 1 : -1, { state: 'fadein', until: performance.now() + 1800, stops: 2 + Math.floor(Math.random() * 2), target: 0, scary, ...(scary ? { pal: { e: '#ff2a2a', c: '#9aa3ae', C: '#6b7480', h: '#0d0f13' } } : {}) });
+    if (scary) v.el.classList.add('scary');
     v.el.classList.add('fog-wraith');
     v.el.style.opacity = '0';
     requestAnimationFrame(() => { v.el.style.opacity = '0.85'; });
-    say(v, '...', 1400);
+    say(v, scary ? pick(['ooOOoo', '...']) : '...', 1400);
   }
   function wraithFrame(v, now, dt, W) {
     v.y = 2 + Math.sin(v.age / 600) * 2; // (floating)
@@ -524,7 +528,7 @@ function createVisitors(api) {
       for (const b of api.walkers()) {
         if (v.scared.has(b) || Math.abs(b.x - v.x) > 50) continue;
         v.scared.add(b);
-        if (Math.random() < 0.45 && api.fright) api.fright(b);
+        if (Math.random() < (v.scary ? 0.75 : 0.45) && api.fright) api.fright(b); // (on HALLOWEEN, most bolt)
         else api.startle(v, 50);
       }
     }
@@ -989,7 +993,7 @@ function createVisitors(api) {
       // (the VIRUS: any time of year, now and then; a FOG now and then in NOVEMBER; otherwise the
       // season's visitors, if any)
       if (virusOften() || Math.random() < VIRUS_ODDS) visit('virus');
-      else if (!fog && (fogOften() || (Season.is('november') && Math.random() < FOG_ODDS))) startFog();
+      else if (!fog && (fogOften() || ((Season.is('november') || Season.is('halloween')) && Math.random() < FOG_ODDS))) startFog();
       else if (visits().length) visit();
       nextVisit = now + (virusOften() ? rand(3000, 6000) : rand(20000, 45000));
     }
