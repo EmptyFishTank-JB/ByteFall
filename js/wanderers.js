@@ -419,6 +419,13 @@ function createWanderers(lane, active = () => true) {
     }
   }
 
+  // Whether an element can be seen where it stands: what's on top at its middle is it
+  function inSight(el) {
+    const r = el.getBoundingClientRect();
+    if (!r.width) return false;
+    const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    return !!top && el.contains(top);
+  }
   // Time to go: mostly a walk off the card; 15% a spooked bolt; 5% a pixelated decrypt
   function depart(w, now) {
     const r = Math.random();
@@ -427,7 +434,8 @@ function createWanderers(lane, active = () => true) {
       w.state = 'vanish';
       mood(w, 'idle');
       w.el.classList.add('pix-out');
-      if (typeof FX !== 'undefined') setTimeout(() => FX.burst([{ el: w.el, type: 'warning' }]), 200);
+      // (its burst is drawn over the whole page: only when it's in sight, not under a card or menu)
+      if (typeof FX !== 'undefined') setTimeout(() => { if (inSight(w.el)) FX.burst([{ el: w.el, type: 'warning' }]); }, 200);
       setTimeout(() => { w.gone = true; }, 480);
       startle(w, now);
       botEvent('vanish');
