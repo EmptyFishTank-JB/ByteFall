@@ -2872,7 +2872,7 @@ function updateTopIcons() {
   document.body.classList.toggle('in-game', inGame);
   document.body.classList.toggle('can-pause', inGame && (canPause() || vsPaused));
   document.body.classList.toggle('at-home', homeOpen);
-  document.getElementById('records-btn').setAttribute('aria-label', !inGame ? 'Menu: rules, exploits and records' : vsPaused ? 'Resume' : canPause() ? 'Pause' : 'Main menu');
+  document.getElementById('records-btn').setAttribute('aria-label', !inGame ? 'Menu: rules, exploits and records' : vsPaused ? 'Resume' : canPause() ? 'Pause' : 'Back to the main menu');
 }
 function showHome() {
   if (mode === 'tutorial') return; // (the lesson leaves by its own EXIT, which comes here)

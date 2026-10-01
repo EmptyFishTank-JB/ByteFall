@@ -2712,13 +2712,17 @@ html.page-twinkle .page-bg { display: block; }
 /* The game under the menu: hidden (still laid out, so nothing jumps when PLAY shows it) */
 body.at-home .crt > :is(header, .hud, .board-wrap, .message-slot, .corner-btn, .vs-title, .dev-badge) { visibility: hidden; }
 
-/* In a game (not the tutorial): the top-left icon is PAUSE (the house when there's nothing to
-   pause: VS's setup, a finished run), and SETTINGS waits on the pause screen */
+/* In a game (not the tutorial): the top-left icon is PAUSE (← BACK to the main menu, like the
+   cards' BACK, when there's nothing to pause: VS's setup, a finished run), and SETTINGS waits on
+   the pause screen */
 .records-btn svg { position: absolute; left: 4px; top: 4.5px; }
-.records-btn :is(.rb-pause, .rb-home) { visibility: hidden; }
+.records-btn .rb-pause { visibility: hidden; }
+.records-btn span.rb-back { display: none; pointer-events: none; }
 body.in-game .records-btn .rb-menu { visibility: hidden; }
-body.in-game:not(.can-pause) .records-btn .rb-home,
 body.in-game.can-pause .records-btn .rb-pause { visibility: visible; }
+body.in-game:not(.can-pause) .records-btn span.rb-back { display: inline-flex; }
+body.in-game:not(.can-pause) .records-btn { opacity: 1; width: auto; height: auto; }
+body.in-game:not(.can-pause) .records-btn:hover .rb-back { background: rgba(var(--fg-rgb), 0.12); }
 body.in-game .settings-btn:not([aria-expanded="true"]) { visibility: hidden; }
 /* PAUSE in every mode: RESUME, RESTART (and EXIT in VS), RULES & RECORDS and SETTINGS, MAIN MENU */
 .vs-pause .pause-row button { font-size: 11px; padding: 6px 10px; }
