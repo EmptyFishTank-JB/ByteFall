@@ -284,7 +284,7 @@ chain ends, so the 5 links have to come in one chain. Only one exploit at a time
 waits (earned, the daily free one, or armed) chains don't charge the meter at all; it waits
 empty, pulsing amber, until the exploit is used. ZEN and the tutorial play NORMAL's rules, BLITZ its difficulty's, VS the
 CPU's level's; the CPU's exploits come from the same streak on the same rules, one at a
-time. While an exploit is ready, the bars pulse amber, and an earned one also flashes
+time. While an exploit is ready, the bars pulse amber, and an earned one also shows
 EXPLOIT READY // its name over the grid's overflow row, staying there (steady) until the exploit is used. ENCRYPT IN has a ===== under its count
 (the layer it counts down to, as a bit is [n]), flashing with the line under the
 board when the next drop brings one.
