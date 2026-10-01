@@ -2,7 +2,9 @@
 // HALLOWEEN (seasons.js): Frankenstein's monster, a mummy, the creature from the black lagoon,
 // Nosferatu, a floating ghost, a flock of bats, a crow or two and a spider on its thread; NOVEMBER:
 // a turkey, the crows, and migrating birds (geese in a V, ducks, songbirds, swallows; now and then
-// one lands, pecks about and calls to a bot; poked, the flock bolts). Every so often one comes by (one visit at a time), crosses the card
+// one lands, pecks about and calls to a bot; poked, the flock bolts). Any time of year, rarely: the
+// VIRUS, a spiky little bug that walks in or pixelates in on the card, scuttles from spot to spot, glitching, and makes any bot it nears
+// jump; poked, it's DELETED (pixelates out). Every so often one comes by (one visit at a time), crosses the card
 // and goes; the monsters give a bot they pass a fright. Each can be poked: FRANKENSTEIN roars and
 // stomps, the MUMMY groans, the CREATURE gurgles and splashes, NOSFERATU hisses and turns into
 // bats, the GHOST says BOO (every bot near it jumps) and fades, bats scatter, crows take off
@@ -87,6 +89,12 @@ function createVisitors(api) {
       // (flying: its wings open, flapping up and down, legs tucked)
       c: ['.kkk.....', '..kkk....', '...kkk.k.', 'kk..kkkeo', '.kkkkkkK.', '.........', '.........'],
       d: ['.........', '.........', '.......k.', 'kk..kkkeo', '.kkkkkkK.', '...kkk...', '....kkk..'],
+    },
+    // The VIRUS (any time of year, rarely): a spiky little bug that glitches about
+    virus: {
+      pal: { v: '#ff3b6b', s: '#c41f4a', o: '#ffd23f', w: '#ffffff', k: '#111111', m: '#3a0a14', l: '#c41f4a' },
+      a: ['.....o.....', '..o..s..o..', '...svvvs...', '..vvvvvvv..', 'osvwkvwkvso', '..vvvvvvv..', '..vvmmmvv..', '...svvvs...', '..o.l.l.o..', '....l.l....'],
+      b: { 8: '..o.l..lo..', 9: '...l...l...' },
     },
     // NOVEMBER's migrating birds: a and b on the ground (standing, pecking), c and d flying (wings
     // up, wings down)
@@ -238,6 +246,7 @@ function createVisitors(api) {
     spider: { speed: 40, frameMs: 260, poke: 'scurry' },
     turkey: { speed: 16, frameMs: 280, sway: 1, poke: 'gobble' },
     // (bird: wave, how far it rises and dips as it flies, over waveMs; beatMs, a wingbeat; call)
+    virus: { speed: 24, frameMs: 160, poke: 'delete' },
     goose: { speed: 42, frameMs: 0, bird: true, wave: 1.5, waveMs: 420, beatMs: 260, call: 'HONK!', poke: 'flush' },
     duck: { speed: 48, frameMs: 0, bird: true, wave: 2, waveMs: 300, beatMs: 140, call: 'QUACK!', poke: 'flush' },
     songbird: { speed: 40, frameMs: 0, bird: true, wave: 5, waveMs: 170, beatMs: 90, call: 'TWEET!', poke: 'flush' },
@@ -266,6 +275,7 @@ function createVisitors(api) {
   const seasons = () => (typeof Season !== 'undefined' ? Season.active() : []);
   const visits = () => seasons().flatMap((id) => VISITS[id] || []);
 
+  const VIRUS_ODDS = 0.06; // (each time a visit comes due: one every ten minutes or so)
   let list = [];
   let nextVisit = performance.now() + rand(6000, 15000);
 
@@ -311,6 +321,18 @@ function createVisitors(api) {
       s.el.insertAdjacentHTML('afterbegin', '<i class="visitor-thread"></i>');
       s.el.style.setProperty('--thread', `${ceiling() + 60}px`);
     } else if (FLOCKS[what]) flock(what, dir, edge, W);
+    else if (what === 'virus') { // (walks in from a side, or pixelates in right on the card)
+      const pop = Math.random() < 0.5;
+      const v = add('virus', pop ? rand(0.15, 0.8) * W : edge(11 * U), dir, { state: 'roam', target: rand(0.15, 0.8) * W, stops: 2 + Math.floor(Math.random() * 3) });
+      if (pop) {
+        v.state = 'lurk';
+        v.still = true;
+        v.until = performance.now() + rand(1000, 1600);
+        v.el.classList.add('v-popin');
+        setTimeout(() => v.el.classList.remove('v-popin'), 500);
+        api.startle(v, 60); // (the bots near where it appears jump)
+      }
+    }
     else if (what === 'turkey') add('turkey', edge(12 * U), dir, { stopAt: rand(0.25, 0.65) * W, life: rand(2500, 4500) });
     else if (what === 'reindeer' || what === 'rudolph') { // (now and then, the one with the red nose)
       const red = what === 'rudolph' || Math.random() < 0.25;
@@ -437,6 +459,16 @@ function createVisitors(api) {
       v.state = 'up';
       v.climb = 130;
       api.startle(v, 60); // (the bots near it don't like spiders)
+      return;
+    }
+    if (v.kind === 'virus') { // (quarantined: it glitches and pixelates out)
+      if (v.state === 'gone') return;
+      api.botEvent('visitor-pokes');
+      say(v, pick(['DELETED', 'ERR!', 'NOOO']), 900);
+      v.state = 'gone';
+      v.el.classList.add('v-vanish');
+      api.botEvent('virus-deleted');
+      setTimeout(() => { v.gone = true; }, 600);
       return;
     }
     if (v.state !== 'go' && v.state !== 'peck' && v.state !== 'land') return;
@@ -637,8 +669,10 @@ function createVisitors(api) {
 
   function frame(now, dt) {
     const W = api.laneW();
-    if (!list.some((v) => v.state !== 'scenery') && now > nextVisit && visits().length) {
-      visit();
+    if (!list.some((v) => v.state !== 'scenery') && now > nextVisit) {
+      // (the VIRUS: any time of year, now and then; otherwise the season's visitors, if any)
+      if (Math.random() < VIRUS_ODDS) visit('virus');
+      else if (visits().length) visit();
       nextVisit = now + rand(20000, 45000);
     }
     if (Season.is('winter') || flakes.length) snow(now, dt);
@@ -692,6 +726,28 @@ function createVisitors(api) {
           v.x += v.dir * v.speed * dt;
           if (!v.pecked && !v.ran && ((v.dir > 0 && v.x >= v.stopAt) || (v.dir < 0 && v.x <= W - v.stopAt))) { v.state = 'peck'; v.until = now + v.life; v.pecked = true; }
         } else if (v.state === 'peck' && now > v.until) v.state = 'go';
+      } else if (v.kind === 'virus') { // (scuttles from spot to spot, lurching; bots near it panic)
+        if (v.state === 'roam') {
+          const step = v.speed * dt * (Math.random() < 0.08 ? 4 : 1);
+          v.dir = v.target > v.x ? 1 : -1;
+          v.x += v.dir * Math.min(step, Math.abs(v.target - v.x));
+          if (Math.abs(v.target - v.x) < 0.5) {
+            v.state = 'lurk';
+            v.still = true;
+            v.until = now + rand(900, 2200);
+            if (Math.random() < 0.5) say(v, pick(['0xBAD', '>:)', 'hehe', '01101', 'ERR']), 1000);
+          }
+        } else if (v.state === 'lurk' && now > v.until) {
+          v.still = false;
+          if (--v.stops > 0) { v.state = 'roam'; v.target = rand(0.1, 0.85) * W; } else { v.state = 'out'; v.dir = v.x < W / 2 ? -1 : 1; }
+        } else if (v.state === 'out') v.x += v.dir * v.speed * 1.4 * dt;
+        if (v.state !== 'gone') { // (a bot it comes near jumps, once each)
+          for (const b of api.walkers()) {
+            if (v.scared.has(b) || Math.abs(b.x - v.x) > 40) continue;
+            v.scared.add(b);
+            api.startle(v, 45);
+          }
+        }
       } else if (k.bird) {
         if (v.state === 'go') { // (with the flock, across the sky)
           v.x += v.dir * v.speed * dt;

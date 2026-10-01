@@ -2634,6 +2634,11 @@ html.page-twinkle .page-bg { display: block; }
 @keyframes visitor-boo { 0% { scale: 1; } 40% { scale: 1.5; } 100% { scale: 1.2; } }
 .visitor.v-fade svg { transition: opacity 0.7s steps(5); opacity: 0; }
 .visitor.v-vanish svg { animation: walker-pix-out 0.45s steps(1) forwards; }
+/* The VIRUS glitches now and then: a jump sideways, a flash of another color */
+.visitor-virus svg { animation: virus-glitch 2.6s steps(1) infinite; }
+.visitor-virus.v-vanish svg { animation: walker-pix-out 0.45s steps(1) forwards; }
+.visitor-virus.v-popin svg { animation: walker-pix-in 0.45s steps(1) forwards; }
+@keyframes virus-glitch { 0%, 86%, 100% { translate: 0 0; filter: none; } 88% { translate: 2px 0; filter: hue-rotate(140deg); } 91% { translate: -2px 0; filter: none; } 94% { translate: 1px 0; filter: hue-rotate(250deg); } }
 
 /* Pushing the scary tree: straining */
 .cpu-face[data-mood="strain"] :is(.eyes-squint, .mouth-flat, .sweat) { display: inline; }

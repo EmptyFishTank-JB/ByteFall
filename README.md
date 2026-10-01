@@ -662,7 +662,11 @@ crows), and MIGRATING BIRDS fly over: geese in a V (honking now and then), ducks
 line, a loose flock of songbirds (robins, bluebirds, goldfinches or cardinals) or
 swallows swooping fast. About a third of the time one drops out, lands, pecks about and
 calls (HONK! QUACK! TWEET! CHIRP!) to the nearest bot, which reacts, then flies off after
-the others; poked, the whole flock bolts up and away. They're pixel sprites in the bots' pixel size and sway and bob in whole
+the others; poked, the whole flock bolts up and away. Any time of year, rarely (6% of the times a visit comes due, about
+one every ten minutes): the VIRUS, a spiky little red bug that walks in from a side or
+pixelates in right on the card (the bots near it jump), scuttles from spot to spot with
+the odd lurch and glitch (0xBAD, >:), hehe), makes any bot it comes near jump, and walks
+off; poked, it's DELETED and pixelates out. They're pixel sprites in the bots' pixel size and sway and bob in whole
 pixels, on the same floor as the bots (their feet two pixels of the grid above the lane's edge); they walk behind the bots, bats and crows over them. A monster passing a
 bot may give it a fright. Poke one: the monster roars and stomps (bots near it
 jump), the mummy groans and slows, the creature splashes, Nosferatu hisses and

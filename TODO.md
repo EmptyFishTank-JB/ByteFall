@@ -2,8 +2,6 @@
 
 Ideas queued for later (not built yet).
 
-- **VIRUS visitor**: a rare visitor in any season. A little virus that walks around the
-  wanderers' lane for a bit, then leaves.
 - **Pushed BITs**: now and then a CPU wanderer pushes a numbered BIT onto the card, like the
   seasonal scenery pushes. The chance varies by bot and personality (around 2% as a baseline;
   e.g. an eager or mischievous bot more often, a lazy one less). EASY / NORMAL wanderers push 1–7. HARD / INSANE wanderers push 1–8, with
