@@ -4026,8 +4026,11 @@ function showMenuPane(pane) {
   recordsEl.querySelectorAll('.menu-pane').forEach((el) => { el.hidden = el.dataset.pane !== pane; });
   if (pane === 'records') renderRecords();
   if (typeof Store !== 'undefined') Store.render(); // (and the REMOVE ADS link, off on its own tab)
-  recordsEl.scrollTop = 0;
+  const box = menuScroller();
+  if (box) box.scrollTop = 0;
 }
+// The page that scrolls in RULES & RECORDS: the open tab's dashed box (the card itself stays put)
+const menuScroller = () => recordsEl.querySelector('.menu-pane:not([hidden]) > .panel');
 // pane: which tab to show (the last one shown if left out)
 // RULES → TUTORIAL: the guided lesson (tutorial.js). A live session asks first, as a restart does.
 const tutorialBtn = document.getElementById('tutorial-btn');

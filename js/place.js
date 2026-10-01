@@ -9,7 +9,7 @@
     const place = {};
     if (!player.hidden) Object.assign(place, { panel: 'player', scroll: player.scrollTop });
     else if (!settingsEl.hidden) Object.assign(place, { panel: 'settings', scroll: settingsEl.scrollTop });
-    else if (!recordsEl.hidden) Object.assign(place, { panel: 'menu', pane: menuPane, tab: recordsTab, scroll: recordsEl.scrollTop });
+    else if (!recordsEl.hidden) Object.assign(place, { panel: 'menu', pane: menuPane, tab: recordsTab, scroll: (menuScroller() || recordsEl).scrollTop });
     if (mode === 'tutorial') place.tutorial = Tutorial.state();
     else if (homeOpen) place.home = true;
     try { sessionStorage.setItem(KEY, JSON.stringify(place)); } catch (e) {}
@@ -30,7 +30,7 @@
   if (place.panel === 'menu') {
     if (place.tab) recordsTab = place.tab;
     setRecordsOpen(true, place.pane);
-    scrollTo(recordsEl);
+    scrollTo(menuScroller() || recordsEl);
   } else if (place.panel === 'settings') {
     setSettingsOpen(true);
     scrollTo(settingsEl);

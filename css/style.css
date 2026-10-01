@@ -2779,3 +2779,17 @@ body:not(.vs-mode) .hud-bits #next-stat .bit-sq { width: 20px; height: 20px; mar
 .card-back, :is(.records, .settings) .card-back { display: inline-flex; width: auto; flex: none; white-space: nowrap; text-align: center; }
 /* The dividers between the settings' sections: dashed in the accent color, like the ===== over the footer */
 .settings-section, .settings-options { border-top-color: rgba(var(--accent-rgb), 0.7); }
+/* RULES & RECORDS: the card stays put and each tab's dashed box scrolls inside its border (its
+   scrollbar inside it too); RECORDS' own tabs stick to the box's top */
+.records:not([hidden]) { display: flex; flex-direction: column; overflow: hidden; padding-bottom: 14px; }
+.records .card-top, .records .store-shortcut { flex: none; }
+.records .menu-pane:not([hidden]) { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.records .menu-pane > .panel {
+  flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
+  scrollbar-width: thin; scrollbar-color: var(--fg-dim) transparent;
+}
+.records .menu-pane > .panel::-webkit-scrollbar { width: 6px; }
+.records .menu-pane > .panel::-webkit-scrollbar-thumb { background: var(--fg-dim); border-radius: 3px; }
+.records .records-tabs { top: -14px; }
+/* Section titles in the accent color, like the cards' titles (// SETTINGS) and the RECORDS categories */
+.panel h2, .settings-title { color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
