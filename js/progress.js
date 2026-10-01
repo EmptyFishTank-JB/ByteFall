@@ -126,9 +126,9 @@ const Progress = (() => {
   }
 
   // Weakest first, each at its level in EXPLOIT_LEVELS
-  const EXPLOIT_ORDER = ['rng', 'bitflip', 'buffer-overflow', 'trojan', 'pivot', 'worm-virus', 'keylogger', 'packet-sniffer',
-    'backdoor', 'logic-bomb', 'honeypot', 'dictionary-attack', 'rainbow-table'];
-  const EXPLOIT_LEVELS = [3, 8, 13, 18, 23, 29, 35, 41, 47, 53, 59, 65, 70];
+  const EXPLOIT_ORDER = ['rng', 'bitflip', 'buffer-overflow', 'trojan', 'pivot', 'swap', 'worm-virus', 'keylogger', 'packet-sniffer',
+    'backdoor', 'logic-bomb', 'honeypot', 'dictionary-attack', 'rainbow-table', 'black-box'];
+  const EXPLOIT_LEVELS = [3, 8, 13, 18, 23, 26, 29, 35, 41, 47, 53, 59, 65, 70, 76];
   // Loadout slots: DECRYPTOR N keeps N (up to MAX_SLOTS); the rest unlock at SLOT_LEVELS in turn
   const MAX_SLOTS = 6;
   const SLOT_LEVELS = [5, 15, 30, 45, 60, 75];
@@ -751,6 +751,13 @@ const Progress = (() => {
         d.broken++;
         run.dropBroken++;
       }
+    },
+    // BLACK BOX opened (as whatever it turns into, it counts as that one when it runs): marked as
+    // used too, for FULL TOOLKIT
+    openedBlackBox() {
+      if (run.mode === 'tutorial') return;
+      d.exploitUses['black-box'] = (d.exploitUses['black-box'] || 0) + 1;
+      save();
     },
     exploit(id) {
       if (run.mode === 'tutorial') return; // (the tutorial counts toward nothing)

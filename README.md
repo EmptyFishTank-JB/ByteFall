@@ -68,6 +68,8 @@ runs where it lands. With nothing to arm, the button opens the menu's EXPLOITS t
 | Packet Sniffer `[~]` * | 3x | For your next 3 bits, tap CURRENT (or press ↑ / ↓) to pick each one's number |
 | Logic Bomb `[!]` * | 4x | Lands as a `[!3]` block counting down each drop; at zero it wipes out the 5×5 around it |
 | Honeypot `[◎]` * | 4x | Lands as a trap; when a bit next to it decrypts, every bit of that number within 2 cells decrypts too |
+| Swap (two arrows) * | 3x | Any two bits trade places: armed, tap a bit on the grid, then another (the first again puts it back; the bits it can pick glow faintly); the second pick drops it, and any match they make decrypts. A column tap first is refused (with fewer than two bits on the board it drops and does nothing). Touch or mouse |
+| Black Box (a box with a ?) * | 5x | Opens, as it's armed, into a random exploit, any of them, equipped or not (the button flicks through their icons first); the last exploit to unlock. Opening it counts toward FULL TOOLKIT |
 
 Every exploit is unlocked by level and has to be equipped in a slot (see below).
 
@@ -133,6 +135,8 @@ level between Lv 2 and Lv 80, spread so a level or two always brings something:
 | 17 | BOT: BUNKER | 43 | DOT MATRIX | 72 | SPECTRUM |
 | 18 | TROJAN | 44 | TRACK 11 | 75 | SLOT 6 |
 | 19 | MONOCHROME | 45 | SLOT 4 | 77 | TRACK 16 |
+
+Also: **SWAP** at Lv 26 and **BLACK BOX** at Lv 76, the last exploit.
 
 **DECRYPTOR ranks** (the game's prestige). With Lv 80 full, RANK UP TO
 DECRYPTOR (in RECORDS → UNLOCKS, four presses) starts you again at Lv 0 one

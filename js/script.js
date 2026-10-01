@@ -54,6 +54,8 @@ const HACKS = {
   'logic-bomb': { name: 'LOGIC BOMB', icon: '!', easyCombo: 4 },
   honeypot: { name: 'HONEYPOT', icon: '\u25CE', easyCombo: 4 },
   pivot: { name: 'PIVOT', icon: '\u21C6', easyCombo: 3 },
+  swap: { name: 'SWAP', icon: 'x', easyCombo: 3 },
+  'black-box': { name: 'BLACK BOX', icon: '\u25A0', easyCombo: 5 },
 };
 const KEYLOGGER_DROPS = 10; // drops the keylogger keeps showing the next bits for
 const KEYLOGGER_PREVIEW = 3;
@@ -82,6 +84,8 @@ let snifferBits = 0; // bits left whose number the player can pick
 let chainLog = []; // this drop's decrypts: { vals, chain, points } per link, { packet, count, points }
 let pivotFrom = null; // PIVOT: column picked, waiting for the player to pick a neighbor
 let pivotWith = null; // PIVOT: the neighbor the landing pivot swaps with
+let swapPicks = []; // SWAP: the bits picked ({ r, c }), two and it drops
+const swapArmed = () => !!queue[0] && queue[0].type === 'hack' && queue[0].id === 'swap';
 let breached = false; // BREACH: the board was cleared
 let started = false; // the session's first drop has landed (PUZZLE counts as started right away)
 let heldHacks = []; // earned exploits waiting in the exploit button
@@ -377,6 +381,7 @@ function initGame() {
   snifferBits = 0;
   pivotFrom = null;
   pivotWith = null;
+  swapPicks = [];
   breached = false;
   started = mode === 'puzzle';
   heldHacks = [];
@@ -826,6 +831,10 @@ function spinBit(el, cell) {
 // are drawn as SVG (BITFLIP's up/down arrow). iconHtml() is for places that render markup.
 const ICON_SVG = {
   bitflip: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M7 8l5-5 5 5M7 16l5 5 5-5"/></svg>',
+  // (two arrows trading places)
+  swap: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h14M14 4l4 4-4 4M20 16H6M10 12l-4 4 4 4"/></svg>',
+  // (a closed box with a question mark)
+  'black-box': '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14M12 17.5v.5"/></svg>',
 };
 const iconHtml = (id) => ICON_SVG[id] || HACKS[id].icon;
 const UPDOWN_SVG = ICON_SVG.bitflip;
@@ -878,6 +887,11 @@ function render(popped = [], falling = null) {
       div.className = 'cell';
       div.dataset.pos = `${r},${c}`;
       if (r >= ROWS) div.classList.add('overflow');
+      // (SWAP armed: the bits it can pick, and the one picked)
+      if (cell && cell.type === 'number' && swapArmed() && !falling) {
+        div.classList.add('swap-target');
+        if (swapPicks.some((p) => p.r === r && p.c === c)) div.classList.add('swap-pick');
+      }
       if (cell) {
         if (cell.type === 'number') {
           div.classList.add('disc');
@@ -1049,6 +1063,13 @@ function clearPivotChoice() {
 async function attemptDrop(col) {
   if (gameOver || busy || !queue.length || vsPaused || homeOpen) return;
   if (mode === 'tutorial' && !Tutorial.canDrop(col)) return; // (only where the lesson says)
+  // SWAP: it drops once two bits are picked on the grid (with fewer than two on the board, it
+  // drops and does nothing)
+  if (swapArmed() && swapPicks.length < 2 && numberCells().length >= 2) {
+    setMessage('SWAP // TAP TWO BITS ON THE GRID');
+    SFX.play('denied');
+    return;
+  }
   if (queue[0].type === 'hack' && queue[0].id === 'pivot') {
     if (pivotFrom !== null) {
       if (Math.abs(col - pivotFrom) !== 1) {
@@ -1493,6 +1514,12 @@ function sniff(step) {
 currentEl.addEventListener('click', () => sniff(1));
 
 // DOM cells for board positions, captured before a re-render replaces them.
+// Every numbered bit on the board ({ r, c })
+function numberCells() {
+  const out = [];
+  columns.forEach((stack, c) => stack.forEach((cell, r) => { if (cell && cell.type === 'number') out.push({ r, c }); }));
+  return out;
+}
 function cellsAt(positions) {
   return positions.map(({ row, col }) => ({
     el: boardEl.querySelector(`[data-pos="${row},${col}"]`),
@@ -1601,6 +1628,18 @@ async function runHack(id, row, col) {
     const other = pivotWith === null ? (col === 0 ? 1 : col - 1) : pivotWith;
     pivotWith = null;
     [columns[col], columns[other]] = [columns[other], columns[col]];
+    render();
+    SFX.play('static');
+    await sleep(300);
+  } else if (id === 'swap') {
+    // The two picked bits trade places (any match they make decrypts next)
+    columns[col].pop();
+    const [a, b] = swapPicks;
+    swapPicks = [];
+    if (a && b && columns[a.c][a.r] && columns[b.c][b.r]) {
+      [columns[a.c][a.r], columns[b.c][b.r]] = [columns[b.c][b.r], columns[a.c][a.r]];
+      FX.burst(cellsAt([{ row: a.r, col: a.c }, { row: b.r, col: b.c }]).map((x) => ({ ...x, type: 'warning' })));
+    }
     render();
     SFX.play('static');
     await sleep(300);
@@ -3184,7 +3223,7 @@ let aimPointer = null;
 let aimGhost = null;
 function aimable(c) {
   const btn = columnButtonsEl.children[c];
-  return !!btn && !btn.disabled && !(mode === 'vs' && !vsStarted) && !vsPaused && queue.length > 0 && pivotFrom === null;
+  return !!btn && !btn.disabled && !(mode === 'vs' && !vsStarted) && !vsPaused && queue.length > 0 && pivotFrom === null && !swapArmed();
 }
 // The column under x (past the grid's sides: the edge column)
 function columnAt(x) {
@@ -3230,7 +3269,33 @@ function endAim() {
   if (aimGhost) aimGhost.remove();
   aimGhost = null;
 }
+// SWAP armed: a tap on the grid picks a bit (again to put it back); the second pick drops it
+// (whatever DROP BY says: the bits are picked on the grid)
+function pickSwapBit(e) {
+  const el = e.target.closest('.cell[data-pos]');
+  const [r, c] = el ? el.dataset.pos.split(',').map(Number) : [-1, -1];
+  const cell = el && columns[c] && columns[c][r];
+  if (!cell || cell.type !== 'number') { SFX.play('denied'); return; }
+  const at = swapPicks.findIndex((p) => p.r === r && p.c === c);
+  if (at >= 0) swapPicks.splice(at, 1);
+  else swapPicks.push({ r, c });
+  SFX.play('click');
+  render();
+  if (swapPicks.length < 2) {
+    setMessage(swapPicks.length ? 'SWAP // NOW THE BIT TO TRADE PLACES WITH' : 'SWAP // TAP TWO BITS TO TRADE PLACES');
+    return;
+  }
+  // (it drops into the first bit's column, or any with room: it's gone as it lands)
+  const first = swapPicks[0].c;
+  const col = columns[first].length < MAX_ROWS ? first : columns.findIndex((s) => s.length < MAX_ROWS);
+  if (col >= 0) attemptDrop(col);
+}
 boardEl.addEventListener('pointerdown', (e) => {
+  if (swapArmed() && !busy && !gameOver && !vsPaused && !homeOpen && (e.pointerType !== 'mouse' || e.button === 0)) {
+    e.preventDefault();
+    pickSwapBit(e);
+    return;
+  }
   if (!columnsTouchable() || aimPointer !== null || (e.pointerType === 'mouse' && e.button !== 0)) return;
   if (gameOver || busy || !queue.length) return;
   aimPointer = e.pointerId;
@@ -3701,13 +3766,29 @@ function armExploit() {
     saveFree();
     free = true;
   }
+  // BLACK BOX: opens into a random exploit, any of them (equipped or not), shuffling through
+  // their icons on the button first
+  const opened = id === 'black-box';
+  if (opened) {
+    Progress.openedBlackBox();
+    const pool = Object.keys(HACKS).filter((h) => h !== 'black-box');
+    id = pool[Math.floor(dice.hack() * pool.length)];
+    let flicks = 0;
+    const glyph = document.getElementById('exploit-glyph');
+    const timer = setInterval(() => {
+      if (++flicks > 9) { clearInterval(timer); updateFreeBtn(); return; }
+      glyph.innerHTML = iconHtml(pool[Math.floor(Math.random() * pool.length)]);
+    }, 70);
+  }
   armedHack = id;
   queue.unshift({ type: 'hack', id });
-  setMessage(`${free ? 'FREE EXPLOIT' : 'ARMED'} // ${HACKS[id].name}`);
+  swapPicks = [];
+  setMessage(opened ? `BLACK BOX // OPENED: ${HACKS[id].name}` : id === 'swap' ? 'SWAP // TAP TWO BITS TO TRADE PLACES' : `${free ? 'FREE EXPLOIT' : 'ARMED'} // ${HACKS[id].name}`);
   burstMessage('warning');
   SFX.play('egg');
   updateHud();
   updateFreeBtn();
+  if (id === 'swap') render(); // (the bits it can pick)
   return true;
 }
 exploitBtn.addEventListener('click', () => {
