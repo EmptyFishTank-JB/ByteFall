@@ -117,8 +117,8 @@ button, input, select, textarea { line-height: inherit; }
   --fg: #ffb000;
   --fg-rgb: 255, 176, 0;
   --fg-dim: #8a5f10;
-  --accent: #fff4dc;
-  --accent-rgb: 255, 244, 220;
+  --accent: #ff7a1f; /* (a hotter orange: stands apart from the amber, and from the danger red) */
+  --accent-rgb: 255, 122, 31;
   --danger: #ff4d3d;
   --danger-rgb: 255, 77, 61;
   --layer-a: #2a2a2a;
@@ -2814,3 +2814,16 @@ body:not(.vs-mode) .hud-bits #next-stat > :is(.bit-row, .bit-sq, .value) { posit
   text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.6); box-shadow: 0 0 14px rgba(var(--accent-rgb), 0.3); pointer-events: none;
 }
 .exploit-notice[hidden] { display: none; }
+/* CURRENT's panel in the accent color */
+.hud-bits .stat-current { border-color: var(--accent); }
+/* Bots readable in every theme (audited per theme, bot and level): INSANE's red eyes go light on a
+   red body (SPECTRUM's BOT is the theme's red; PAPER's GLITCH is red with a dark "light" color),
+   and SPECTRUM's GLITCH, otherwise the same red as its BOT, glitches through the rainbow */
+[data-theme="spectrum"] .cpu-face[data-bot="bot"][data-level="insane"] .eyes-angry { fill: var(--alarm-text); filter: drop-shadow(0 0 1px var(--alarm-text)); }
+[data-theme="paper"] .cpu-face[data-level="insane"][data-bot="glitch"] .eyes-angry { fill: #ffffff; filter: none; }
+[data-theme="spectrum"] .cpu-face[data-bot="glitch"] .bot-body { animation: glitch-hue 2.4s steps(6) infinite; }
+@keyframes glitch-hue { from { filter: hue-rotate(0deg) drop-shadow(0 0 1px rgba(var(--bot-rgb), 0.8)); } to { filter: hue-rotate(360deg) drop-shadow(0 0 1px rgba(var(--bot-rgb), 0.8)); } }
+/* (MONOCHROME's "red" is near white: INSANE's eyes are cut out of the body like the other faces;
+   AMBER CRT's GRIFTER is orange: its INSANE eyes go light) */
+[data-theme="monochrome"] .cpu-face[data-level="insane"] .eyes-angry { fill: var(--board-bg); filter: none; }
+[data-theme="amber-crt"] .cpu-face[data-bot="grifter"][data-level="insane"] .eyes-angry { fill: var(--alarm-text); filter: drop-shadow(0 0 1px var(--alarm-text)); }
