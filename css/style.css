@@ -2802,3 +2802,7 @@ body:not(.vs-mode) .hud-bits #next-stat .bit-sq { width: 20px; height: 20px; mar
 .low-fx *, .low-fx *::before, .low-fx *::after { text-shadow: none !important; box-shadow: none !important; }
 /* (the HUD centered over the grid card, its width set by fitBoard) */
 body:not(.vs-mode) .crt > .hud { align-self: center; max-width: 100%; margin-left: auto; margin-right: auto; }
+/* NEXT (Easy): one row in its short panel, the label beside the bit (not over it, as the taller
+   boxes have them) */
+body:not(.vs-mode) .hud-bits #next-stat > .label { position: static; height: auto; transform: none; flex: none; line-height: 1; }
+body:not(.vs-mode) .hud-bits #next-stat > :is(.bit-row, .bit-sq, .value) { position: static; transform: none; flex: none; }
