@@ -293,7 +293,7 @@ EXPLOIT READY // its name over the grid's overflow row, staying there (steady) u
 (the layer it counts down to, as a bit is [n]), flashing with the line under the
 board when the next drop brings one.
 
-The tutorial opens on a welcome (no step number, BEGIN), then 20 steps; on a step that asks
+The tutorial opens on a welcome (no step number, BEGIN), then 21 steps; on a step that asks
 for a tap, the screen dims a little but for what to tap and the banner (a 0.25s fade); a step can take its
 drop in more than one column (step 3: column 4 or 7). The tutorial's banner: BOT sits in the top-left corner of its frame with its words
 wrapping around it and on under it; BACK and NEXT sit under the frame, outside it. The
@@ -518,18 +518,19 @@ renders in `assets/audio/` are still the older mono mixdowns.
 
 ## Tutorial
 
-RULES → **TUTORIAL** (beside the title) starts a guided lesson on set boards
+MAIN MENU → **TUTORIAL**, or RULES → **TUTORIAL** (beside the title), starts a guided lesson on set boards
 with set bits (`js/tutorial.js`). BOT narrates it: its face sits in the banner's corner, and each line types out fast with a blip of square-wave "voice" every other letter (Animalese-style, following SOUND), pausing at punctuation; a tap on the text finishes the line, and the lesson never waits on the typing. BOT's mood follows along (happy at the welcome and the chain, worried at the ======== line, devious with the WORM VIRUS, -_- at a wrong column). A banner over the board explains each rule
 and asks you to tap what it names; whatever it's talking about pulses, and only
 the lesson's drop column can be pressed (the others dim). No lesson drops a bit
 into the column of its own number, so it never looks like it has to. After each
 drop it says what happened and shows the points: each link's bits, (10 +
-number) × the chain, NIBBLE bonuses and the total. Twenty steps: the terminal,
-CURRENT, a line across, a line down, SCORE, a chain with a NIBBLE, CHAIN,
-peeling a layer twice until it reveals its bit, the ======== line, ENCRYPT IN,
+number) × the chain, NIBBLE bonuses and the total. Twenty-one steps: the terminal,
+CURRENT (the bordered middle panel), a line across, a line down, SCORE, a chain with a NIBBLE, CHAIN,
+peeling a layer twice until it reveals its bit, the ======== line, ENCRYPT IN (the HUD: BEST over SCORE left, CURRENT middle, ENCRYPT IN over CHAIN right),
 an exploit (arm the WORM VIRUS waiting in the EXPLOIT button, then drop it on a
-tall column), the MENU button with its RULES, RECORDS and EXPLOITS (loadout)
-tabs, the SETTINGS button and what's in it, then PLAY CLASSIC or RULES. Over an
+tall column), the top-left button (PAUSE in a game, where the pause screen and MAIN MENU hold RULES & RECORDS and
+SETTINGS; here it opens RULES & RECORDS) with its RULES, RECORDS and EXPLOITS (loadout)
+tabs, closing the card with ← BACK (a tap outside does nothing), the SETTINGS button and what's in it, then PLAY CLASSIC or RULES. Over an
 open menu the banner moves to the bottom of the screen. BACK (from step 2 on)
 redoes the step just played, or before a drop goes to the step before, putting
 the board, bits, score, chain and exploit back as they were. EXIT leaves at any
