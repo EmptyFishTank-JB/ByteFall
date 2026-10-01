@@ -664,7 +664,10 @@ turns into three bats, the ghost says BOO (every bot near it jumps) and fades
 away, the bats scatter, the crow caws and takes off, the spider scurries back
 up (bots near it jump) and the turkey gobbles and runs. MONSTER MASH (hidden):
 meet all eight Halloween visitors; GOBBLE GOBBLE (hidden): meet the turkey.
-WINTER: a PENGUIN waddles by (poked: SQUAWK and a belly slide off; BELLY SLIDE,
+WINTER: now and then (3 in 10) a bot skates in instead of walking: blades under its feet, leaning into
+long pushes and glides, kicking up a trail of powdered ice that melts away over a few seconds (a
+spray of it when it skids to a stop; fewer flecks on REDUCED EFFECTS). It skates around a bit and
+out like any other. A PENGUIN waddles by (poked: SQUAWK and a belly slide off; BELLY SLIDE,
 hidden). CHRISTMAS: a REINDEER trots past, now and then (25%) the one with the
 glowing red nose (RED NOSE, hidden); poked, it snorts and prances off.
 HANUKKAH: a DREIDEL spins in, wobbles to a stop and lands on a letter (NUN,

@@ -201,7 +201,30 @@ function createWanderers(lane, active = () => true) {
       mood(w, 'strain');
       botEvent(`push-${t.kind}`);
     }
+    // WINTER: now and then one skates in instead, gliding in long pushes and leaving a trail of
+    // powdered ice that melts away; it skates around a bit and out like any other
+    if (!w.running && !w.pushing && typeof Season !== 'undefined' && Season.is('winter') && Math.random() < 0.3) {
+      w.skating = true;
+      w.speed *= 2;
+      w.trail = 0;
+      el.classList.add('skater');
+    }
     place(w);
+  }
+  // A skater's powder: a fleck kicked off its blades every few pixels (fewer on REDUCED EFFECTS),
+  // or a spray of them when it stops
+  const lowFx = () => document.documentElement.classList.contains('low-fx');
+  function powder(w, n = 1) {
+    for (let k = 0; k < n; k++) {
+      const d = document.createElement('i');
+      d.className = 'skate-powder';
+      const x = w.x + SIZE / 2 - w.dir * (n > 1 ? -6 : 8) + rand(-3, 3);
+      d.style.transform = `translate(${x.toFixed(1)}px, ${(-rand(0, n > 1 ? 4 : 2)).toFixed(1)}px)`;
+      const ms = rand(2200, 3800);
+      d.style.animationDuration = `${ms.toFixed(0)}ms`;
+      lane.appendChild(d);
+      setTimeout(() => d.remove(), ms + 50);
+    }
   }
   // The tree just ahead of its pusher; letting go leaves it where it is
   function pushTree(w) {
@@ -504,8 +527,14 @@ function createWanderers(lane, active = () => true) {
       if ((w.state === 'idle' || w.state === 'meet') && !w.leaving && w.x > laneW() - SIZE) w.x = Math.max(0, laneW() - SIZE);
       if (w.state === 'walk') {
         const pace = w.running ? 3.4 : 1;
-        const step = w.speed * pace * dt * (w.bot === 'glitch' && Math.random() < 0.08 ? 3 : 1); // (GLITCH lurches)
+        // (a skater surges with each push, then glides; GLITCH lurches)
+        const surge = w.skating && !w.running ? 0.55 + 0.9 * Math.abs(Math.sin(now / 380)) : 1;
+        const step = w.speed * pace * surge * dt * (w.bot === 'glitch' && Math.random() < 0.08 ? 3 : 1);
         w.x += w.dir * step;
+        if (w.skating && w.x > -SIZE && w.x < laneW() && (w.trail += step) > (lowFx() ? 14 : 6)) {
+          w.trail = 0;
+          powder(w);
+        }
         if (w.pushing) pushTree(w);
         if ((w.dir > 0 && w.x >= w.target) || (w.dir < 0 && w.x <= w.target)) {
           w.x = w.target;
@@ -525,6 +554,12 @@ function createWanderers(lane, active = () => true) {
             w.state = 'idle';
             w.until = now + rand(2400, 3600);
             mood(w, 'tired', pick(['...', 'phew', 'huff']));
+          } else if (w.skating) { // (a skid to a stop, a spray of powder, a moment, then off again)
+            w.running = false;
+            w.state = 'idle';
+            w.until = now + rand(700, 2000);
+            mood(w, 'idle');
+            powder(w, lowFx() ? 3 : 6);
           } else {
             w.running = false;
             w.state = 'idle';

@@ -2461,6 +2461,22 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
   animation: walker-dust 0.6s ease-out forwards;
 }
 @keyframes walker-dust { 0% { transform: translate(0, 0); opacity: 0.9; } 100% { transform: translate(var(--dx), var(--dy)); opacity: 0; } }
+/* WINTER skaters: blades under the feet, a lean into the glide and long pushes off each leg, no
+   hop; the powder they kick up lies on the lane and melts away */
+.walker.skater::after { content: ''; position: absolute; left: 8px; right: 8px; bottom: -1px; height: 1px; background: #cfd8e6; pointer-events: none; }
+.walker.skater.walking .bot { animation: none; transform: rotate(7deg); transform-origin: 50% 100%; }
+.walker.skater.walking[data-look="left"] .bot { transform: rotate(-7deg); }
+.walker.skater.walking .leg-a { animation: skate-push 0.76s ease-in-out infinite; }
+.walker.skater.walking .leg-b { animation: skate-push 0.76s ease-in-out -0.38s infinite; }
+.walker.skater.walking[data-look="left"] :is(.leg-a, .leg-b) { animation-name: skate-push-left; }
+@keyframes skate-push { 0%, 100% { transform: translate(0, 0); } 40% { transform: translate(-2px, -1px); } }
+@keyframes skate-push-left { 0%, 100% { transform: translate(0, 0); } 40% { transform: translate(2px, -1px); } }
+.skate-powder {
+  position: absolute; left: 0; bottom: 0; width: 2px; height: 2px; background: #e8eef7; box-shadow: 0 0 2px rgba(232, 238, 247, 0.7);
+  pointer-events: none; animation: skate-melt 3s ease-in forwards;
+}
+@keyframes skate-melt { 0% { opacity: 0.95; } 60% { opacity: 0.6; } 100% { opacity: 0; } }
+[data-theme="paper"] .skate-powder, [data-theme="daylight"] .skate-powder { background: #9fb0c8; box-shadow: none; }
 /* (achievement pop-ups show over the start screen too) */
 .start-screen:not([hidden]) ~ .toast { z-index: 206; }
 /* The game card's wanderers: along its bottom edge between the corner buttons, coming and going from behind them */
