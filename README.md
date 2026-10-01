@@ -306,7 +306,8 @@ the EXPLOITS step pulses SLOTS and the cards; the menu steps' banners sit mid-sc
 
 THE EXPLOIT BUTTON: under the grid in its own row, below the drop buttons with a gap
 between (it's not one of them), a square the size of a grid square with the exploit's
-symbol in the middle; FREE! beside it. The HUD's labels (SCORE ... CURRENT) are brighter.
+symbol in the middle; FREE! beside it. With nothing held, tapping it just buzzes: the EXPLOITS
+tab (the loadout) opens only from RULES & RECORDS. The HUD's labels (SCORE ... CURRENT) are brighter.
 
 The gear/speaker icon in the corner opens the settings: sound and music on or
 off, whether the drop buttons sit under or above the grid, the color theme
@@ -657,7 +658,11 @@ see-through GHOST (floating), a flock of BATS (flapping across), a CROW or two
 (hopping in, pecking, then flying off, wings open and flapping) and a SPIDER (down on its silk thread
 somewhere along the card, a dangle, back up). NOVEMBER (the whole month; nothing
 holiday-specific): a TURKEY struts in, pecks a while and struts on (and the
-crows). They're pixel sprites in the bots' pixel size and sway and bob in whole
+crows), and MIGRATING BIRDS fly over: geese in a V (honking now and then), ducks in a
+line, a loose flock of songbirds (robins, bluebirds, goldfinches or cardinals) or
+swallows swooping fast. About a third of the time one drops out, lands, pecks about and
+calls (HONK! QUACK! TWEET! CHIRP!) to the nearest bot, which reacts, then flies off after
+the others; poked, the whole flock bolts up and away. They're pixel sprites in the bots' pixel size and sway and bob in whole
 pixels, on the same floor as the bots (their feet two pixels of the grid above the lane's edge); they walk behind the bots, bats and crows over them. A monster passing a
 bot may give it a fright. Poke one: the monster roars and stomps (bots near it
 jump), the mummy groans and slows, the creature splashes, Nosferatu hisses and
@@ -761,7 +766,7 @@ stack heights the game settles on, eased between as the intensity moves.
 ### Seasonal stuff (ideas, by the player's own date)
 
 Done: **HALLOWEEN** (costumes, candy snacks, eight visitors, the scary tree),
-**NOVEMBER** (the turkey, the crows), and the stacked December and new year
+**NOVEMBER** (the turkey, the crows, migrating birds), and the stacked December and new year
 seasons: **WINTER**, **HANUKKAH**, **CHRISTMAS**, **KWANZAA**, **NEW YEAR'S
 EVE** and **NEW YEAR**. Each new season plugs into the same
 pieces: a date window in `js/seasons.js`, costumes (`wanderers.js`), visitors

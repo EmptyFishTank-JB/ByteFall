@@ -17,9 +17,6 @@ Ideas queued for later (not built yet).
   pile flattens and fades away the way the falling snow does.
 - **Skate blades**: give the skating bots (WINTER) little visible blades; right now they look like
   they float across the floor.
-- **Migrating birds (NOVEMBER)**: a few kinds of birds flying over in flocks: e.g. geese in a V,
-  ducks, a scatter of songbirds, swallows. Now and then one lands and interacts (with a bot, or
-  pecks at the lane).
 - **Fog (NOVEMBER)**: a heavy fog rolls in and gradually fills the lane; trees fade in behind and
   within it as background scenery, contrasted against the fog. Once the scene has built, a FOG
   WANDERER comes through the mist, wanders about in it, and fades back into the foggy trees. The
@@ -27,5 +24,7 @@ Ideas queued for later (not built yet).
   the bots don't do their usual things (no meetings, snacks or hops); they may bump into each other
   in the thick fog, with a chance to frighten each other. The fog wanderer scares any bot it comes
   near (within its awareness radius).
+- **Exploit loadouts**: 3 saved loadouts, picked on the game setup (before a run). A 3rd or 4th
+  loadout would be BLACK BOX only.
 
 See [WANDERERS.md](WANDERERS.md) for the season-by-season chart and the full ideas list.

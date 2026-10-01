@@ -1,7 +1,8 @@
 // VISITORS: seasonal characters passing through the wanderers' lane (wanderers.js runs them).
 // HALLOWEEN (seasons.js): Frankenstein's monster, a mummy, the creature from the black lagoon,
 // Nosferatu, a floating ghost, a flock of bats, a crow or two and a spider on its thread; NOVEMBER:
-// a turkey (and the crows). Every so often one comes by (one visit at a time), crosses the card
+// a turkey, the crows, and migrating birds (geese in a V, ducks, songbirds, swallows; now and then
+// one lands, pecks about and calls to a bot; poked, the flock bolts). Every so often one comes by (one visit at a time), crosses the card
 // and goes; the monsters give a bot they pass a fright. Each can be poked: FRANKENSTEIN roars and
 // stomps, the MUMMY groans, the CREATURE gurgles and splashes, NOSFERATU hisses and turns into
 // bats, the GHOST says BOO (every bot near it jumps) and fades, bats scatter, crows take off
@@ -86,6 +87,36 @@ function createVisitors(api) {
       // (flying: its wings open, flapping up and down, legs tucked)
       c: ['.kkk.....', '..kkk....', '...kkk.k.', 'kk..kkkeo', '.kkkkkkK.', '.........', '.........'],
       d: ['.........', '.........', '.......k.', 'kk..kkkeo', '.kkkkkkK.', '...kkk...', '....kkk..'],
+    },
+    // NOVEMBER's migrating birds: a and b on the ground (standing, pecking), c and d flying (wings
+    // up, wings down)
+    goose: {
+      pal: { g: '#8b7d6b', G: '#5e5245', k: '#1b1b1b', w: '#eeeeee' },
+      a: ['.........kk.', '.........kw.', '.........k..', '.........k..', '..gggggggk..', '.GGGGgggg...', '..wwwwwww...', '....k..k....'],
+      b: ['............', '............', '............', '............', '..gggggggk..', '.GGGGggggkk.', '..wwwwwwwkw.', '....k..k....'],
+      c: ['............', '............', '....GGG.....', '.....GGG....', 'GgggggggkkkK', '..wwwww...w.', '............', '............'],
+      d: ['............', '............', '............', '............', 'GgggggggkkkK', '..wwGGG...w.', '.....GGG....', '............'],
+    },
+    duck: {
+      pal: { h: '#2f8f4e', y: '#e8b923', b: '#9a8f80', B: '#6d6458', w: '#f2f2f2', c: '#7a4a32', o: '#e8902a' },
+      a: ['.......hh.', '.......hhy', '.......w..', '.bbbbbcc..', 'BBBBbbbc..', '.bbbbbb...', '...o..o...'],
+      b: ['..........', '..........', '..........', '.bbbbbcc..', 'BBBBbbbchh', '.bbbbbb.hy', '...o..o...'],
+      c: ['..........', '...BB.....', '....BB....', 'Bbbbbcwhhy', '.bbbbb....', '..........', '..........'],
+      d: ['..........', '..........', '..........', 'Bbbbbcwhhy', '.bbBBb....', '....BB....', '..........'],
+    },
+    songbird: { // (its colors by kind: SONGBIRDS below)
+      pal: { b: '#6b5a4e', c: '#e0662b', k: '#111111', y: '#e8b923', o: '#8a6a4a' },
+      a: ['...bb.', '..bkby', 'bbbcc.', '.bccc.', '..o.o.'],
+      b: ['......', '...bb.', 'bbbbky', '.bccc.', '..o.o.'],
+      c: ['.bb...', '..bb..', 'bbbbky', '.ccc..', '......'],
+      d: ['......', '......', 'bbbbky', '.cbb..', '..bb..'],
+    },
+    swallow: {
+      pal: { n: '#24366b', r: '#c2462e', w: '#efe6d6', k: '#222222' },
+      a: ['......nn.', '.....nnr.', 'nnnnnnnr.', 'n..wwww..', '....k.k..'],
+      b: ['.........', '......nn.', 'nnnnnnnnr', 'n..wwww..', '....k.k..'],
+      c: ['...nn....', '....nn...', 'n.nnnnnnr', '.n.www...', '.........'],
+      d: ['.........', '.........', 'n.nnnnnnr', '.nwnnw...', '....nn...'],
     },
     penguin: { // (c: on its belly, sliding)
       pal: { k: '#1b1f27', w: '#f2f4f8', o: '#ff9a1f' },
@@ -206,6 +237,11 @@ function createVisitors(api) {
     crow: { speed: 20, frameMs: 0, hop: true, poke: 'caw' },
     spider: { speed: 40, frameMs: 260, poke: 'scurry' },
     turkey: { speed: 16, frameMs: 280, sway: 1, poke: 'gobble' },
+    // (bird: wave, how far it rises and dips as it flies, over waveMs; beatMs, a wingbeat; call)
+    goose: { speed: 42, frameMs: 0, bird: true, wave: 1.5, waveMs: 420, beatMs: 260, call: 'HONK!', poke: 'flush' },
+    duck: { speed: 48, frameMs: 0, bird: true, wave: 2, waveMs: 300, beatMs: 140, call: 'QUACK!', poke: 'flush' },
+    songbird: { speed: 40, frameMs: 0, bird: true, wave: 5, waveMs: 170, beatMs: 90, call: 'TWEET!', poke: 'flush' },
+    swallow: { speed: 85, frameMs: 0, bird: true, wave: 8, waveMs: 520, beatMs: 110, call: 'CHIRP!', poke: 'flush' },
     tree: { speed: 0, frameMs: 0, poke: 'creak' },
     penguin: { speed: 13, frameMs: 240, sway: 1, bob: 1, poke: 'squawk' },
     reindeer: { speed: 30, frameMs: 180, poke: 'snort' },
@@ -220,7 +256,7 @@ function createVisitors(api) {
   // What each season sends (one visit at a time)
   const VISITS = {
     halloween: ['frank', 'mummy', 'creature', 'nosferatu', 'ghost', 'bats', 'crows', 'spider'],
-    november: ['turkey', 'turkey', 'crows'],
+    november: ['turkey', 'turkey', 'crows', 'geese', 'ducks', 'songbirds', 'swallows'],
     winter: ['penguin'],
     christmas: ['reindeer', 'reindeer'],
     hanukkah: ['dreidel'],
@@ -274,7 +310,8 @@ function createVisitors(api) {
       const s = add('spider', rand(0.15, 0.8) * W, 1, { y: tall() ? ceiling() : 110, hang: sky(0.3, 0.6, () => rand(12, 22)), life: rand(3000, 5500), state: 'down' });
       s.el.insertAdjacentHTML('afterbegin', '<i class="visitor-thread"></i>');
       s.el.style.setProperty('--thread', `${ceiling() + 60}px`);
-    } else if (what === 'turkey') add('turkey', edge(12 * U), dir, { stopAt: rand(0.25, 0.65) * W, life: rand(2500, 4500) });
+    } else if (FLOCKS[what]) flock(what, dir, edge, W);
+    else if (what === 'turkey') add('turkey', edge(12 * U), dir, { stopAt: rand(0.25, 0.65) * W, life: rand(2500, 4500) });
     else if (what === 'reindeer' || what === 'rudolph') { // (now and then, the one with the red nose)
       const red = what === 'rudolph' || Math.random() < 0.25;
       const r = add('reindeer', edge(16 * U), dir, red ? { pal: { n: '#ff2a2a' } } : {});
@@ -283,6 +320,59 @@ function createVisitors(api) {
     else add(what, edge(SPRITES[what].a[0].length * U), dir);
   }
 
+  // NOVEMBER's migrating birds: a flock flying over (geese in a V, ducks in a line, a scatter of
+  // songbirds, swallows swooping fast). Now and then one drops out to land, pecks about, chirps at
+  // a bot near it (which reacts), and flies off after the others.
+  const FLOCKS = { geese: { kind: 'goose', n: [5, 8] }, ducks: { kind: 'duck', n: [3, 5] }, songbirds: { kind: 'songbird', n: [4, 7] }, swallows: { kind: 'swallow', n: [3, 6] } };
+  const SONGBIRDS = [
+    { b: '#6b5a4e', c: '#e0662b' }, // (robins)
+    { b: '#3b6fd1', c: '#d9874a' }, // (bluebirds)
+    { b: '#e8c21f', c: '#f2d84a', o: '#6b5a2e' }, // (goldfinches)
+    { b: '#d42a2a', c: '#b51f1f' }, // (cardinals)
+  ];
+  function flock(what, dir, edge, W) {
+    const f = FLOCKS[what];
+    const count = f.n[0] + Math.floor(Math.random() * (f.n[1] - f.n[0] + 1));
+    const base = what === 'geese' ? sky(0.55, 0.85, () => rand(22, 28)) : what === 'swallows' ? sky(0.2, 0.5, () => rand(12, 22)) : sky(0.3, 0.7, () => rand(16, 28));
+    const speed = KINDS[f.kind].speed * rand(0.9, 1.1);
+    const pal = what === 'songbirds' ? pick(SONGBIRDS) : undefined;
+    const lander = Math.random() < 0.35 ? 1 + Math.floor(Math.random() * (count - 1)) : -1; // (never the lead goose)
+    const id = {};
+    const w = SPRITES[f.kind].a[0].length * U;
+    for (let k = 0; k < count; k++) {
+      let x = edge(w);
+      let y = base;
+      let sp = speed;
+      if (what === 'geese') { // (a V: the leader out front, the rest behind it on either side)
+        const rank = Math.ceil(k / 2);
+        x -= dir * rank * 24;
+        y += (k % 2 ? 1 : -1) * rank * (tall() ? 6 : 2.5);
+      } else if (what === 'ducks') { // (a line, stepping down)
+        x -= dir * k * 18;
+        y -= k * (tall() ? 5 : 2);
+      } else { // (loose: each at its own height and pace)
+        x -= dir * (k * rand(12, 26) + rand(0, 10));
+        y += rand(-6, 6);
+        sp *= rand(0.85, 1.15);
+      }
+      const b = add(f.kind, x, dir, { fly: Math.max(4, y), speed: sp, flock: id, lands: k === lander, stopAt: rand(0.2, 0.7) * W, life: rand(3500, 7000), ...(pal ? { pal } : {}) });
+      b.el.classList.add('v-fly');
+    }
+  }
+  // A landed bird calls to the nearest bot, which reacts
+  function greet(v) {
+    const k = KINDS[v.kind];
+    say(v, k.call, 1000);
+    let near = null;
+    for (const b of api.walkers()) if (Math.abs(b.x - v.x) < 70 && (!near || Math.abs(b.x - v.x) < Math.abs(near.x - v.x))) near = b;
+    if (near) setTimeout(() => { if (!near.leaving) api.say(near, pick(['happy', 'surprised', 'love']), true); }, 450);
+  }
+  function wingbeat(v, now, ms) {
+    if (now - v.frameAt < ms) return;
+    v.frameAt = now;
+    v.frame = 1 - v.frame;
+    v.el.classList.toggle('step', !!v.frame);
+  }
   // The season's scenery, for a wanderer to push in (wanderers.js): off the card until it's moved.
   // Its spot is clear of any already standing (and of the path to them: it never passes through)
   const standing = () => list.filter((v) => v.state === 'scenery');
@@ -407,6 +497,14 @@ function createVisitors(api) {
     } else if (k.poke === 'caw') {
       say(v, 'CAW!', 900);
       v.state = 'fly';
+    } else if (k.poke === 'flush') { // (a call, and the whole flock bolts up and away)
+      say(v, k.call, 900);
+      for (const b of list) {
+        if (b.flock !== v.flock) continue;
+        b.bolt = true;
+        b.speed *= 1.6;
+        if (b.state !== 'go') { b.state = 'up'; b.el.classList.add('v-fly'); }
+      }
     } else if (k.poke === 'gobble') { // (a flustered shake, then off at a run)
       say(v, 'GOBBLE!', 1000);
       v.el.classList.add('v-shake');
@@ -594,6 +692,37 @@ function createVisitors(api) {
           v.x += v.dir * v.speed * dt;
           if (!v.pecked && !v.ran && ((v.dir > 0 && v.x >= v.stopAt) || (v.dir < 0 && v.x <= W - v.stopAt))) { v.state = 'peck'; v.until = now + v.life; v.pecked = true; }
         } else if (v.state === 'peck' && now > v.until) v.state = 'go';
+      } else if (k.bird) {
+        if (v.state === 'go') { // (with the flock, across the sky)
+          v.x += v.dir * v.speed * dt;
+          v.y = v.fly + Math.sin(v.age / k.waveMs + v.phase) * k.wave + (v.bolt ? v.age / 50 : 0);
+          wingbeat(v, now, k.beatMs);
+          if (v.kind === 'goose' && Math.random() < dt * 0.15) say(v, k.call, 800); // (the odd honk)
+          if (v.lands && !v.bolt && ((v.dir > 0 && v.x >= v.stopAt) || (v.dir < 0 && v.x <= W - v.stopAt))) v.state = 'down';
+        } else if (v.state === 'down') { // (gliding down to land)
+          v.x += v.dir * v.speed * 0.45 * dt;
+          v.y -= (tall() ? 90 : 35) * dt;
+          wingbeat(v, now, k.beatMs * 2);
+          if (v.y <= 0) {
+            v.y = 0;
+            v.state = 'peck';
+            v.until = now + v.life;
+            v.el.classList.remove('v-fly', 'step');
+            greet(v);
+          }
+        } else if (v.state === 'peck') { // (pecks about, now and then turning around)
+          if (now - v.frameAt > (v.frame ? 220 : rand(300, 900))) {
+            v.frameAt = now;
+            v.frame = 1 - v.frame;
+            v.el.classList.toggle('step', !!v.frame);
+            if (!v.frame && Math.random() < 0.2) v.dir = -v.dir;
+          }
+          if (now > v.until) { v.state = 'up'; v.el.classList.add('v-fly'); }
+        } else if (v.state === 'up') { // (off up and away)
+          v.x += v.dir * v.speed * dt;
+          v.y += (tall() ? 0.25 * api.laneH() : 40) * dt;
+          wingbeat(v, now, k.beatMs);
+        }
       } else if (k.fly) { // (bats: a wavering line through the air)
         v.x += v.dir * v.speed * dt;
         v.y = v.fly + Math.sin(v.age / 260 + v.phase) * 5 + (v.bolt ? v.age / 60 : 0);

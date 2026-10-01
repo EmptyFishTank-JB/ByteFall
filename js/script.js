@@ -3689,14 +3689,6 @@ function freeExploitId() {
 const footerEl = document.querySelector('footer');
 settingsEl.append(footerEl);
 document.body.classList.add('cards-in-settings');
-// The exploit button with nothing to arm shows the EXPLOITS tab
-const hacksPanelBox = document.getElementById('hacks-panel');
-function showExploitsCard() {
-  setRecordsOpen(true, 'exploits');
-  hacksPanelBox.classList.remove('flash');
-  void hacksPanelBox.offsetWidth;
-  hacksPanelBox.classList.add('flash');
-}
 
 // The lower corners: RESTART (QUIT in VS; greyed out until the first drop), and the
 // exploit button
@@ -3800,7 +3792,7 @@ exploitBtn.addEventListener('click', () => {
     if (!armExploit()) SFX.play('denied');
     return;
   }
-  showExploitsCard();
+  SFX.play('denied'); // (nothing held: the EXPLOITS card opens only from RULES & RECORDS)
 });
 
 // UNLOCKED / ACHIEVEMENT pop-ups, shown one at a time: each pops in, holds, bursts apart, and

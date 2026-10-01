@@ -1946,8 +1946,6 @@ body.cards-in-settings .settings footer { margin-top: 12px; display: block; font
 /* An amber ===== line between the footer and the settings above it */
 body.cards-in-settings .settings footer::before { content: "================================================================================"; display: block; margin-bottom: 10px; overflow: hidden; white-space: nowrap; font-size: 11px; line-height: 11px; letter-spacing: 2px; color: var(--accent); opacity: 0.7; }
 body.cards-in-settings .settings .dev-link { display: inline-flex; margin-top: 6px; }
-.panel-hacks.flash { animation: card-flash 0.9s ease-out; }
-@keyframes card-flash { from { box-shadow: 0 0 0 2px var(--fg); } to { box-shadow: 0 0 0 0 transparent; } }
 
 /* Shorter HUD: SCORE, CHAIN, ENCRYPT IN, CURRENT and NEXT take less height */
 .hud .stat { padding-top: 3px; padding-bottom: 3px; }
@@ -2618,14 +2616,14 @@ html.page-twinkle .page-bg { display: block; }
    crows over them); they sway and bob in whole pixels of their grid */
 :is(.start-walkers, .game-walkers) .visitor { position: absolute; left: 0; bottom: 0; z-index: 0; pointer-events: auto; cursor: pointer; touch-action: manipulation; will-change: transform; }
 :is(.start-walkers, .game-walkers) .walker { z-index: 1; }
-:is(.start-walkers, .game-walkers) :is(.visitor-bat, .visitor-crow) { z-index: 2; }
+:is(.start-walkers, .game-walkers) :is(.visitor-bat, .visitor-crow, .visitor-goose, .visitor-duck, .visitor-songbird, .visitor-swallow) { z-index: 2; }
 .visitor svg { display: block; overflow: visible; }
 .visitor .f-b { display: none; }
 .visitor.step .f-a { display: none; }
 .visitor.step .f-b { display: inline; }
 .visitor-ghost svg { opacity: 0.6; filter: drop-shadow(0 0 2px rgba(242, 246, 255, 0.7)); }
 /* (the dark ones get a faint light edge, to show on the dark card) */
-:is(.visitor-nosferatu, .visitor-bat, .visitor-crow) svg { filter: drop-shadow(0 0 1px rgba(220, 225, 240, 0.45)); }
+:is(.visitor-nosferatu, .visitor-bat, .visitor-crow, .visitor-goose, .visitor-duck, .visitor-songbird, .visitor-swallow) svg { filter: drop-shadow(0 0 1px rgba(220, 225, 240, 0.45)); }
 .visitor-drip { position: absolute; top: 40%; width: 2px; height: 3px; background: #6fd3ff; box-shadow: 0 0 2px #6fd3ff; pointer-events: none; animation: visitor-drip 0.65s ease-in forwards; }
 @keyframes visitor-drip { to { transform: translate(var(--dx), var(--dy)); opacity: 0; } }
 .visitor.v-stomp svg { animation: visitor-stomp 0.14s steps(1) 5 alternate; }
