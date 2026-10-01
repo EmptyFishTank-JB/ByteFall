@@ -570,9 +570,10 @@ function fitBoard() {
   boardWrapEl.style.maxWidth = `${Math.floor(width)}px`;
   // The HUD's outer edges line up with the grid card's (not in VS, which lays out its own; and
   // no narrower than its boxes need, so nothing has to shrink to fit)
+  // (VS too: its strip is then laid out again at that width)
   const hudEl = document.querySelector('.hud');
-  hudEl.style.width = '';
-  if (mode !== 'vs') hudEl.style.width = `${Math.max(frame.getBoundingClientRect().width, HUD_MIN_W)}px`;
+  hudEl.style.width = `${Math.max(frame.getBoundingClientRect().width, HUD_MIN_W)}px`;
+  if (mode === 'vs') layoutVsTop();
   lockButtons(); // (fits the VS setup too)
 }
 
@@ -2927,18 +2928,17 @@ function layoutVsTop() {
   const vsTop = hud.getBoundingClientRect().top - cardTop();
   hud.style.marginTop = `${top - vsTop}px`;
   hud.style.height = `${bottom - top}px`;
-  // BOT's box and the CPU's board are the same width: as wide as the board's height allows (its
-  // label takes ~24px), leaving the 2x2 info grid at least 124px
-  const gridH = bottom - top - 24;
-  // The 2x2 info squares: as big as the height allows under the status line, unless that would
-  // squeeze BOT's box and the board below 80px wide
+  // The 2x2 info squares: exactly as tall as the strip allows under the status line (6px gaps),
+  // BOT's box and the CPU's board sharing the width left; unless that would squeeze those two
+  // below 80px wide, when the squares give way
+  const GAP = 6;
   const statusH = document.getElementById('vs-status').offsetHeight;
   const W = hud.clientWidth;
-  let sq = (bottom - top - statusH - 18) / 2;
-  let cpuW = Math.min(gridH * 7 / 8 + 12, (W - 24 - 2 * sq) / 2);
+  let sq = (bottom - top - statusH - 2 * GAP) / 2;
+  let cpuW = (W - 3 * GAP - 2 * sq) / 2;
   if (cpuW < 80) {
-    cpuW = Math.min(80, gridH * 7 / 8 + 12);
-    sq = (W - 24 - 2 * cpuW) / 2;
+    cpuW = 80;
+    sq = (W - 3 * GAP - 2 * cpuW) / 2;
   }
   hud.style.setProperty('--vs-cpu-w', `${Math.floor(cpuW)}px`);
   hud.style.setProperty('--vs-sq', `${Math.floor(sq)}px`);

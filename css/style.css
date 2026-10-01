@@ -1218,7 +1218,9 @@ body.vs-mode .vs-status { display: flex; align-items: center; justify-content: c
    board keeps its regular size and place */
 /* VS's top: the info panels, then BOT (the CPU's face) and the CPU's board in boxes the same size */
 /* The info: a 2x2 grid of boxes (SCORE, CHAIN / ENCRYPT IN, CURRENT) under the status line */
-body.vs-mode .hud { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) var(--vs-cpu-w, 100px) var(--vs-cpu-w, 100px); grid-template-rows: auto minmax(0, 1fr) minmax(0, 1fr); gap: 6px; align-items: stretch; }
+/* (the squares' columns and rows are exactly their size, so the four sit flush with the strip's
+   left edge and their bottoms line up with BOT's and the CPU board's; those two share the rest) */
+body.vs-mode .hud { display: grid; grid-template-columns: var(--vs-sq, 60px) var(--vs-sq, 60px) minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto var(--vs-sq, 60px) var(--vs-sq, 60px); gap: 6px; align-items: stretch; align-content: end; }
 body.vs-mode .hud > * { min-width: 0; min-height: 0; }
 body.vs-mode .hud > .vs-status { grid-column: 1 / 3; grid-row: 1; }
 body.vs-mode .hud > #score-stat { grid-column: 1; grid-row: 2; }
@@ -2801,7 +2803,7 @@ body:not(.vs-mode) .hud-bits #next-stat .bit-sq { width: 20px; height: 20px; mar
 /* REDUCED EFFECTS (SETTINGS → EFFECTS): no glows (repainted with every change) */
 .low-fx *, .low-fx *::before, .low-fx *::after { text-shadow: none !important; box-shadow: none !important; }
 /* (the HUD centered over the grid card, its width set by fitBoard) */
-body:not(.vs-mode) .crt > .hud { align-self: center; max-width: 100%; margin-left: auto; margin-right: auto; }
+.crt > .hud { align-self: center; max-width: 100%; margin-left: auto; margin-right: auto; }
 /* NEXT (Easy): one row in its short panel, the label beside the bit (not over it, as the taller
    boxes have them) */
 body:not(.vs-mode) .hud-bits #next-stat > .label { position: static; height: auto; transform: none; flex: none; line-height: 1; }
