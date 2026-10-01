@@ -12,7 +12,7 @@ Legend: ✅ in the game · 🛠️ planned (TODO.md) · 💡 idea
 | Season | Dates | Costumes | Snacks | Visitors | Scenery (pushed in) | Weather / other |
 |---|---|---|---|---|---|---|
 | **All year** | — | — | — | ✅ VIRUSES (rare; walk or pixelate in, scuttle about, bots near them jump; poked, DELETED: they burst into their pixels or deteriorate): PHAGE (a bacteriophage, taller than the bots), BUG (spiky, fast), TROJAN (disguised as a bot; the first poke pixelates the disguise off: a wooden horse that bolts) · 🛠️ WORM, RANSOMWARE, SPYWARE, ADWARE, LOGIC BOMB | 🛠️ numbered BITs 1–8 (8 only from HARD / INSANE; EASY / NORMAL fear it) | — |
-| **HALLOWEEN** | Oct 15 – 31 | ✅ pumpkin, ghost sheet, witch hat, devil horns & tail | ✅ gummy drops | ✅ Frankenstein, mummy, creature from the black lagoon, Nosferatu, ghost, bats, crows, spider | ✅ scary tree (a bat flies out when poked) | ✅ the FOG, scarier: bare trees only, the wanderer's eyes red, most bots bolt |
+| **HALLOWEEN** | Oct 15 – 31 | ✅ pumpkin, ghost sheet, witch hat, devil horns & tail | ✅ gummy drops | ✅ Frankenstein, mummy, creature from the black lagoon, Nosferatu, ghost, bats, crows, spider, GREMLIN (pranks the bots one after another) | ✅ scary tree (a bat flies out when poked) | ✅ the FOG, scarier: bare trees only; out of it comes the red-eyed wanderer or one of the monsters (Frankenstein, the mummy, the creature, Nosferatu, the ghost), fading back into the mist; most bots bolt |
 | **NOVEMBER** | all month | — | — | ✅ turkey, crows · ✅ migrating birds (geese in a V, ducks in a line, songbirds — robins, bluebirds, goldfinches, cardinals — and swallows; now and then one lands, pecks and calls to a bot; poked, the flock bolts) · ✅ FOG WANDERER (a pale hooded figure out of the fog; scares bots it nears) | ✅ foggy trees (fade in with the fog, stay in the light mist after) | ✅ heavy fog rolls in (pauses other events; bots bump and startle), then a light mist stays a couple of minutes and lifts |
 | **WINTER** | Dec 1 – Jan 6 | ✅ beanie, earmuffs, scarves | ✅ cookie bites | ✅ penguin (belly slide) · ✅ bots skating in with a powder trail · 🛠️ skate blades | ✅ snowman · 🛠️ snowman sneaks off hopping (and may collapse into a pile of snow) | ✅ falling snow |
 | **HANUKKAH** | its 8 nights | ✅ blue beanie, scarf | ✅ gelt | ✅ dreidel (lands on a letter) | ✅ menorah (that night's candles) | — |
@@ -40,3 +40,18 @@ Built seasons are listed with each month for reference; every 💡 is from the i
 | **November** | NOVEMBER | ✅ migrating birds (one may land and interact) · 💡 windblown leaf collector (net or basket) · 💡 sweater weather (scarves, warm drinks) · 💡 candle maker · ✅ fog wanderer (appears / disappears in mist) · 💡 leaf raker · 💡 chilly breeze wanderer · 💡 early winter prepper |
 | **December** | WINTER, HANUKKAH, CHRISTMAS, KWANZAA, NEW YEAR'S EVE | 💡 gift courier · 💡 snow globe collector · 💡 icicle engineer |
 | **Winter (any of Dec – Feb)** | WINTER | 💡 frost spirits (shimmering, slow, icy footprints) · 💡 snow shoveler (tidies paths) · 💡 hot cocoa vendor (steam puffs from the mug) · 💡 aurora watcher (looks up, reacts to sky colors) · 💡 hibernating critter (yawns, waddles slowly) |
+
+## A game of its own (someday)
+
+The wanderers could get their own game, sharing their assets with BYTEFALL through a small shared
+library (the bots, their moods and animations, seasons, costumes, visitors, viruses and effects:
+`wanderers.js`, `visitors.js`, `seasons.js`, `minibot.js` and their styles), so whatever's drawn for
+one shows up in both. Two directions, maybe both eventually:
+
+- **A side-scroller starring one bot** (the favorite): pick BOT, GRIFTER, BUNKER or GLITCH, each with
+  its own ability (GLITCH teleport-lurches, BUNKER tanks hits, GRIFTER grabs bonuses), through
+  seasonal levels (a Halloween forest in the fog, a snowy skating rink, migrating flocks overhead),
+  the viruses and monsters as the enemies.
+- **A virtual pet / terrarium**: look after a little colony of bots; they wander, meet, make
+  friends and rivals, the seasons and visitors come by, and viruses turn up to be poked away
+  before they infect anyone (a defend-the-lane mode inside it).

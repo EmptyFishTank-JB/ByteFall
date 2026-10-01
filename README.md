@@ -662,9 +662,13 @@ crows), and MIGRATING BIRDS fly over: geese in a V (honking now and then), ducks
 line, a loose flock of songbirds (robins, bluebirds, goldfinches or cardinals) or
 swallows swooping fast. About a third of the time one drops out, lands, pecks about and
 calls (HONK! QUACK! TWEET! CHIRP!) to the nearest bot, which reacts, then flies off after
-the others; poked, the whole flock bolts up and away. Now and then (15% of NOVEMBER's visits, and HALLOWEEN's) a FOG
-rolls in instead (on HALLOWEEN, scarier: bare, twisted trees only, the wanderer's eyes glowing red
-as it moans ooOOoo, and most bots it nears bolting): a heavy bank of coarse-pixel mist drifts in from one side and fills the lane
+the others; poked, the whole flock bolts up and away. HALLOWEEN also sends the GREMLIN: a little green creature with big
+ears, red eyes and a toothy grin that scurries up to one bot after another to prank it (hehehe; the
+bot jumps), then runs off; poked, it screeches (SKREE!) and bolts. Now and then (15% of NOVEMBER's visits, and HALLOWEEN's) a FOG
+rolls in instead (on HALLOWEEN, scarier: bare, twisted trees only, and out of the fog comes either the
+wanderer, its eyes glowing red as it moans ooOOoo, or (60%) one of the monsters, Frankenstein, the
+mummy, the creature, Nosferatu or the ghost, fading in by a tree near one side, crossing, and
+fading back into the mist before the other; most bots it nears bolt): a heavy bank of coarse-pixel mist drifts in from one side and fills the lane
 (rising a little above it and thinning out; on the start screen only its lower part, clear of the
 title), and pines and bare trees fade in through it, dark against the mist, the far ones fainter.
 Once it's built, the FOG WANDERER (a pale hooded figure with glowing eyes and a trailing hem)

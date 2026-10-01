@@ -26,5 +26,13 @@ Ideas queued for later (not built yet).
   - **ADWARE**: a pop-up window that keeps popping in at new spots (WIN $$$! / CLICK ME / FREE RAM).
   - **LOGIC BOMB**: a walking bomb with a lit fuse; if it isn't poked (DEFUSED) in time it goes off,
     a big burst, every bot near it scared.
+- **TROJAN: a smoother disguise reveal.** Right now the bot disguise pixelates out and the horse
+  pixelates in on top, a bit abruptly; make it read as the disguise coming off (e.g. the bot's
+  pixels peeling or scattering away from the horse underneath, the horse resolving through them).
+- **Scary October ideas** (pick from): the lights go out (only the bots' eyes blinking; back on, one
+  has moved or a monster stands there), a hand from under the floor grabs a bot, glowing eyes
+  blinking between the fog's trees, the scary tree uprooting and shuffling after the bots, a bot
+  possessed (red eyes, stiff walk; poked, a little ghost shakes out), a full-moon night with a
+  werewolf's howl, a rare blood-red fog where the wanderer chases a bot.
 
 See [WANDERERS.md](WANDERERS.md) for the season-by-season chart and the full ideas list.

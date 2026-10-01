@@ -8,7 +8,9 @@
 // and goes; the monsters give a bot they pass a fright. Each can be poked: FRANKENSTEIN roars and
 // stomps, the MUMMY groans, the CREATURE gurgles and splashes, NOSFERATU hisses and turns into
 // bats, the GHOST says BOO (every bot near it jumps) and fades, bats scatter, crows take off
-// cawing, the SPIDER scurries back up and the TURKEY gobbles and runs.
+// cawing, the SPIDER scurries back up and the TURKEY gobbles and runs. The GREMLIN scurries up to
+// the bots one after another to prank them (hehehe; they jump), then runs off; poked, it screeches
+// and bolts.
 // SCENERY: the scary tree a wanderer pushes onto the card (HALLOWEEN; makeScenery, wanderers.js does
 // the pushing): black eyes and a frown. It stays for the visit, behind everything else; poked, it
 // creaks and a bat flies out.
@@ -114,6 +116,13 @@ function createVisitors(api) {
       a: ['......WW......', '.....WwwWW....', '....WwwwwwW...', '...WwwwrwwwW..', '...WwwwwwwwwWW', '...WwwwwWWwwww', '..WwwwwW..WWWW', '..WwwwwW......', '.WwwwwwwW.....', '.WwwwwwwwWWW..',
         'WwwwwwwwwwwwW.', 'WwwwwwwwwwwwW.', 'WWWWWWWWWWWWW.', '.kk.......kk..', 'kggk.....kggk.', '.kk.......kk..'],
       b: { 13: '.kk.......kk..', 14: 'kgkk.....kgkk.', 15: '.kk.......kk..' },
+    },
+    // The GREMLIN (HALLOWEEN): big ears, red eyes, a toothy grin; scurries up to the bots to
+    // prank them
+    gremlin: {
+      pal: { g: '#5aa64a', G: '#3d7a32', e: '#ff3030', k: '#111111', w: '#ffffff', b: '#a8d08d' },
+      a: ['g..........g', 'gg........gg', '.ggg.gg.ggg.', '..gGggggGg..', '..ggeggegg..', '..gggggggg..', '..gkwkwkwg..', '...gbbbbg...', '..g.bbbb.g..', '....g..g....', '...gg..gg...'],
+      b: { 8: '...gbbbbg...', 9: '...g....g...', 10: '..gg....gg..' },
     },
     // NOVEMBER's FOG: the trees that show through it (dark silhouettes against the mist) and the
     // FOG WANDERER, a pale hooded figure with glowing eyes, its hem trailing
@@ -286,6 +295,7 @@ function createVisitors(api) {
     pine: { speed: 0, frameMs: 0 },
     baretree: { speed: 0, frameMs: 0 },
     wraith: { speed: 9, frameMs: 520, poke: 'mist' },
+    gremlin: { speed: 34, frameMs: 130, poke: 'skree' },
     goose: { speed: 42, frameMs: 0, bird: true, wave: 1.5, waveMs: 420, beatMs: 260, call: 'HONK!', poke: 'flush' },
     duck: { speed: 48, frameMs: 0, bird: true, wave: 2, waveMs: 300, beatMs: 140, call: 'QUACK!', poke: 'flush' },
     songbird: { speed: 40, frameMs: 0, bird: true, wave: 5, waveMs: 170, beatMs: 90, call: 'TWEET!', poke: 'flush' },
@@ -303,7 +313,7 @@ function createVisitors(api) {
   // (fixed: never mirrored, its order matters: the candles, the year's digits)
   // What each season sends (one visit at a time)
   const VISITS = {
-    halloween: ['frank', 'mummy', 'creature', 'nosferatu', 'ghost', 'bats', 'crows', 'spider'],
+    halloween: ['frank', 'mummy', 'creature', 'nosferatu', 'ghost', 'bats', 'crows', 'spider', 'gremlin'],
     november: ['turkey', 'turkey', 'crows', 'geese', 'ducks', 'songbirds', 'swallows'],
     winter: ['penguin'],
     christmas: ['reindeer', 'reindeer'],
@@ -345,6 +355,13 @@ function createVisitors(api) {
   function visit(what = pick(visits().length ? visits() : VISITS.halloween)) {
     if (what === 'countdown') return countdown();
     if (what === 'fog') return startFog();
+    if (what === 'gremlin') { // (in, a few pranks, off at a run)
+      add('gremlin', (Math.random() < 0.5 ? -1 : 1) > 0 ? -30 : api.laneW() + 4, 1, { state: 'go', target: rand(0.2, 0.8) * api.laneW(), pranks: 2 + Math.floor(Math.random() * 2) });
+      const g = list[list.length - 1];
+      if (g.x > 0) g.dir = -1;
+      api.botEvent('visit-gremlin');
+      return;
+    }
     if (what === 'fireworks') { for (let i = 0; i < 3; i++) setTimeout(firework, i * 450); return; }
     const W = api.laneW();
     const fromLeft = Math.random() < 0.5;
@@ -506,13 +523,25 @@ function createVisitors(api) {
   // The FOG WANDERER: out of the mist, from spot to spot, and back into it by a tree
   function wraithIn() {
     const W = api.laneW();
+    if (spooky() && Math.random() < 0.6) return monsterIn(pick(['frank', 'mummy', 'creature', 'nosferatu', 'ghost']), W);
     const scary = spooky();
     const v = add('wraith', rand(0.15, 0.8) * W, Math.random() < 0.5 ? 1 : -1, { state: 'fadein', until: performance.now() + 1800, stops: 2 + Math.floor(Math.random() * 2), target: 0, scary, ...(scary ? { pal: { e: '#ff2a2a', c: '#9aa3ae', C: '#6b7480', h: '#0d0f13' } } : {}) });
     if (scary) v.el.classList.add('scary');
     v.el.classList.add('fog-wraith');
+    v.fogVisitor = true;
     v.el.style.opacity = '0';
     requestAnimationFrame(() => { v.el.style.opacity = '0.85'; });
     say(v, scary ? pick(['ooOOoo', '...']) : '...', 1400);
+  }
+  // HALLOWEEN's fog: one of the monsters comes out of the mist by a tree near one side, crosses (the
+  // bots it passes scared, as ever) and fades back into the fog before the other side
+  function monsterIn(kind, W) {
+    const dir = Math.random() < 0.5 ? 1 : -1;
+    const v = add(kind, dir > 0 ? rand(0.03, 0.15) * W : rand(0.75, 0.88) * W, dir, { fogVisitor: true, fogExit: dir > 0 ? rand(0.68, 0.82) * W : rand(0.12, 0.25) * W });
+    v.el.classList.add('fog-visitor');
+    v.el.style.opacity = '0';
+    requestAnimationFrame(() => { v.el.style.opacity = '1'; });
+    api.botEvent(`visit-${kind}`);
   }
   function wraithFrame(v, now, dt, W) {
     v.y = 2 + Math.sin(v.age / 600) * 2; // (floating)
@@ -776,6 +805,17 @@ function createVisitors(api) {
       return;
     }
     if (v.state === 'fogtree') return;
+    if (v.kind === 'gremlin') { // (a screech, and off at a run)
+      if (v.state === 'out') return;
+      api.botEvent('visitor-pokes');
+      say(v, pick(['SKREE!', 'HISSS']), 900);
+      v.el.classList.add('v-shake');
+      setTimeout(() => v.el.classList.remove('v-shake'), 500);
+      v.state = 'out';
+      v.speed *= 3;
+      v.dir = v.x < api.laneW() / 2 ? -1 : 1;
+      return;
+    }
     if (v.kind === 'wraith') { // (gone back into the mist, quickly)
       if (v.state === 'fade') return;
       api.botEvent('visitor-pokes');
@@ -1016,6 +1056,29 @@ function createVisitors(api) {
       }
       if (v.state === 'fogtree') {
         // (standing in the fog)
+      } else if (v.kind === 'gremlin') { // (up to a bot, a prank, the next; then off)
+        if (v.state === 'go') {
+          v.dir = v.target > v.x ? 1 : -1;
+          v.x += v.dir * Math.min(v.speed * dt, Math.abs(v.target - v.x));
+          if (Math.abs(v.target - v.x) < 0.5) {
+            const near = api.walkers().find((b) => Math.abs(b.x - v.x) < 34);
+            if (near) {
+              v.state = 'prank';
+              v.until = now + rand(800, 1300);
+              v.el.classList.add('v-shake');
+              say(v, pick(['hehehe', 'hehe', 'ehehe!']), 1000);
+              api.startle(v, 40);
+            } else v.until = now + rand(300, 700), v.state = 'prank';
+          }
+        } else if (v.state === 'prank' && now > v.until) {
+          v.el.classList.remove('v-shake');
+          if (--v.pranks > 0) {
+            const bots = api.walkers();
+            v.target = bots.length ? pick(bots).x + rand(-20, 20) : rand(0.1, 0.85) * W;
+            v.target = Math.max(4, Math.min(W - 30, v.target));
+            v.state = 'go';
+          } else { v.state = 'out'; v.dir = v.x < W / 2 ? -1 : 1; v.speed *= 2; }
+        } else if (v.state === 'out') v.x += v.dir * v.speed * dt;
       } else if (v.kind === 'wraith') {
         if (v.state === 'fade' && v.drift !== undefined) v.x += Math.sign(v.drift - v.x) * Math.min(Math.abs(v.drift - v.x), 12 * dt);
         wraithFrame(v, now, dt, W);
@@ -1142,11 +1205,17 @@ function createVisitors(api) {
         }
       }
       place(v);
+      if (v.fogVisitor && v.fogExit !== undefined && !v.fogFading && ((v.dir > 0 && v.x >= v.fogExit) || (v.dir < 0 && v.x <= v.fogExit))) {
+        v.fogFading = true; // (back into the mist)
+        v.el.style.opacity = '0';
+        setTimeout(() => { v.gone = true; }, 2000);
+      }
       if (v.state === 'scenery' || v.state === 'fogtree') continue; // (it stays)
       const w = v.el.offsetWidth || 30;
       if (v.x < -w - 40 || v.x > W + 40 || v.y > ceiling() + 40) v.gone = true;
     }
     list = list.filter((v) => {
+      if (v.gone && v.fogVisitor && fog) fog.wraithGone = true; // (the fog's visitor gone: it thins)
       if (v.gone) v.el.remove();
       return !v.gone;
     });
