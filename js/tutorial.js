@@ -22,7 +22,7 @@ const Tutorial = (() => {
   // the welcome ahead of the steps (not counted, no number; BEGIN starts step 1).
   const STEPS = [
     {
-      text: 'Welcome to BYTEFALL! This tutorial will help you understand how the game is played, along with some other useful information. There are 20 steps! Don’t worry, they’re not too long, and despite all of the numbers, there’s really no math required as long as you can count to 7! Let’s begin!',
+      text: 'Welcome to BYTEFALL! This tutorial will help you understand how the game is played, along with some other useful information. There are 21 steps! Don’t worry, they’re not too long, and despite all of the numbers, there’s really no math required as long as you can count to 7! Let’s begin!',
       board: EMPTY, bits: [], intro: true, place: 'bottom', mood: 'happy',
     },
     {
@@ -30,7 +30,7 @@ const Tutorial = (() => {
       board: EMPTY, bits: [], next: true, place: 'bottom',
     },
     {
-      text: 'This flashing display panel shows your CURRENT bit, [3], which is the one that will be dropped into a column on your next tap. Go ahead and tap the CURRENT display panel!',
+      text: 'This flashing display panel in the middle, with the bright border, shows your CURRENT bit, [3], which is the one that will be dropped into a column on your next tap. Go ahead and tap the CURRENT display panel!',
       board: [[], [], [], [], [3], [5], []], bits: [3, 2], tap: '.stat-current',
     },
     {
@@ -44,7 +44,7 @@ const Tutorial = (() => {
       explain: () => 'Nice! Since dropping the [2] bit made the column 2 bits tall, the [2] bit was DECRYPTED.',
     },
     {
-      text: 'Now for the scoring! Each decrypted bit earns you 10 points plus the number it displays. A [1] bit is worth 11 points, a [2] bit is worth 12 points, and a [7] bit is worth 17 points. Get the idea? Up top is your SCORE display panel. Tap it now!',
+      text: 'Now for the scoring! Each decrypted bit earns you 10 points plus the number it displays. A [1] bit is worth 11 points, a [2] bit is worth 12 points, and a [7] bit is worth 17 points. Get the idea? Your SCORE sits at the left of the panels up top, under your BEST. Tap SCORE now!',
       tap: '#score-stat',
     },
     {
@@ -53,7 +53,7 @@ const Tutorial = (() => {
       explain: () => 'Nice one! That was a 3x CHAIN:\n1. The [2]s cleared in a column of 2, and the [5]s in a row of 5.\n2. The [3] cleared in a row of 3.\n3. The [2] cleared in a row of 2.\n\nDecrypting 4 bits in one drop is a NIBBLE, worth 16 bonus points.',
     },
     {
-      text: 'CHAIN shows you how long your last decrypted bit chain was. The bars on each side of the grid are the CHAIN METER. Each decrypted link lights up a bar on the meter, and the meter stays charged from one drop to the next. Fill all 5 bars to earn an EXPLOIT. A drop that clears nothing ends the streak, and the meter resets. Tap CHAIN.',
+      text: 'CHAIN, at the right of the panels up top, shows you how long your last decrypted bit chain was. The bars on each side of the grid are the CHAIN METER. Each decrypted link lights up a bar on the meter, and the meter stays charged from one drop to the next. Fill all 5 bars to earn an EXPLOIT. A drop that clears nothing ends the streak, and the meter resets. Tap CHAIN.',
       tap: '#chain-stat', pulse: ['.chain-meter'], holdMeter: true,
     },
     {
@@ -71,7 +71,7 @@ const Tutorial = (() => {
       board: EMPTY, bits: [], line: true, next: true, place: 'bottom', mood: 'worried', holdMeter: true,
     },
     {
-      text: 'A new row of layers rises from the bottom every 8 drops, pushing everything up. ENCRYPT IN counts down the drops until the next one. Tap it.',
+      text: 'A new row of layers rises from the bottom every 8 drops, pushing everything up. ENCRYPT IN, at the right just above CHAIN, counts down the drops until the next one. Tap it.',
       tap: '#pulse-stat', holdMeter: true,
     },
     {
@@ -84,11 +84,11 @@ const Tutorial = (() => {
       explain: () => 'The WORM VIRUS wiped out the whole column. Blocks wiped out by an exploit score a flat 10 each. Other exploits wipe an area, peel layers or change bits: each has its card in the EXPLOITS tab.',
     },
     {
-      text: 'Two buttons open the menus. Tap MENU, at the top left.',
+      text: 'In a game, the button at the top left PAUSES it: the pause screen has RULES & RECORDS and SETTINGS, and so does the MAIN MENU. Here, that button opens RULES & RECORDS. Tap it now!',
       board: EMPTY, bits: [], closeMenus: true, tap: '#records-btn', pass: true,
     },
     {
-      text: 'The RULES tab has everything you just learned, written down, with the TUTORIAL button to come back here any time.',
+      text: 'RULES & RECORDS opens as a card over the game, with its tabs along the top. The RULES tab has everything you just learned, written down, with the TUTORIAL button to come back here any time.',
       pane: 'rules', pulse: ['.menu-tabs [data-pane="rules"]'], float: 'middle', next: true,
     },
     {
@@ -100,11 +100,15 @@ const Tutorial = (() => {
       pane: 'exploits', pulse: ['.menu-tabs [data-pane="exploits"]', '#slot-info', '.hack-item'], float: true, next: true,
     },
     {
-      text: 'Now tap SETTINGS, at the top right.',
+      text: 'Tapping outside a card won’t close it: tap ← BACK, at the top left of the card.',
+      pane: 'exploits', tap: '.card-back[data-close="records"]', pass: true, float: 'middle',
+    },
+    {
+      text: 'Now tap SETTINGS, at the top right. (In a game, it’s on the pause screen.)',
       closeMenus: true, tap: '#settings-btn', pass: true,
     },
     {
-      text: 'SETTINGS has sound and music, whether the drop buttons sit under or over the grid, vibration on phones, color THEMES and FONTS (more unlock as you level up), and the PLAYLIST, with the MUSIC PLAYER for listening on its own.',
+      text: 'SETTINGS has sound and music, SOUND OUTPUT (PHONE, HEADPHONES or SPEAKERS, to suit what you’re listening on), DROP BY (buttons, sliding on the grid, or both) and where the drop buttons sit, vibration on phones, the wandering bots, REDUCED EFFECTS for slower phones, the screen saver, color THEMES and FONTS (more unlock as you level up), and the PLAYLIST, with the MUSIC PLAYER for listening on its own. ← BACK closes it, like RULES & RECORDS.',
       float: 'middle', next: true,
     },
     {
