@@ -2773,7 +2773,7 @@ vsQuitBtn.addEventListener('click', quitVs);
 // second tap to confirm. RULES & RECORDS and SETTINGS open over it; MAIN MENU leaves it paused.
 // (Not in the tutorial, which keeps the top icons for its lessons.)
 const vsPauseEl = document.getElementById('vs-pause');
-const canPause = () => mode !== 'tutorial' && !gameOver && (mode !== 'vs' || vsStarted);
+const canPause = () => !gameOver && (mode !== 'vs' || vsStarted);
 function requestPause() {
   if (busy) pauseQueued = true; // (once the drop finishes)
   else openPause();
@@ -2785,6 +2785,8 @@ function openPause() {
   vsPausedAt = performance.now();
   document.getElementById('pause-note').textContent = mode === 'vs' ? 'The CPU is waiting for you.' : 'The game is waiting for you.';
   document.getElementById('pause-exit').hidden = mode !== 'vs';
+  // (the tutorial: no RESTART or MAIN MENU; its banner's EXIT leaves)
+  for (const id of ['pause-restart', 'pause-menu']) document.getElementById(id).hidden = mode === 'tutorial';
   vsPauseEl.classList.remove('closing');
   vsPauseEl.hidden = false;
   document.querySelector('.board-frame').classList.add('paused'); // (the pieces fade out)
@@ -2868,7 +2870,7 @@ function updateHome() {
   homePlayBtn.textContent = inAGame() && mode !== 'tutorial' ? 'RESUME' : 'PLAY';
 }
 function updateTopIcons() {
-  const inGame = !homeOpen && mode !== 'tutorial';
+  const inGame = !homeOpen; // (the tutorial too: PAUSE, as in a game)
   document.body.classList.toggle('in-game', inGame);
   document.body.classList.toggle('can-pause', inGame && (canPause() || vsPaused));
   document.body.classList.toggle('at-home', homeOpen);

@@ -22,7 +22,7 @@ const Tutorial = (() => {
   // the welcome ahead of the steps (not counted, no number; BEGIN starts step 1).
   const STEPS = [
     {
-      text: 'Welcome to BYTEFALL! This tutorial will help you understand how the game is played, along with some other useful information. There are 21 steps! Don’t worry, they’re not too long, and despite all of the numbers, there’s really no math required as long as you can count to 7! Let’s begin!',
+      text: 'Welcome to BYTEFALL! This tutorial will help you understand how the game is played, along with some other useful information. There are 24 steps! Don’t worry, they’re not too long, and despite all of the numbers, there’s really no math required as long as you can count to 7! Let’s begin!',
       board: EMPTY, bits: [], intro: true, place: 'bottom', mood: 'happy',
     },
     {
@@ -84,32 +84,44 @@ const Tutorial = (() => {
       explain: () => 'The WORM VIRUS wiped out the whole column. Blocks wiped out by an exploit score a flat 10 each. Other exploits wipe an area, peel layers or change bits: each has its card in the EXPLOITS tab.',
     },
     {
-      text: 'In a game, the button at the top left PAUSES it: the pause screen has RULES & RECORDS and SETTINGS, and so does the MAIN MENU. Here, that button opens RULES & RECORDS. Tap it now!',
+      text: 'The button at the top left PAUSES the game. Tap it now!',
       board: EMPTY, bits: [], closeMenus: true, tap: '#records-btn', pass: true,
     },
     {
+      text: 'The pause screen has RESUME, RESTART, RULES & RECORDS, SETTINGS and the MAIN MENU (and EXIT, in VS). RULES & RECORDS and SETTINGS are on the MAIN MENU too. Tap RULES & RECORDS.',
+      paused: true, closeMenus: true, tap: '#pause-records', pass: true, float: true,
+    },
+    {
       text: 'RULES & RECORDS opens as a card over the game, with its tabs along the top. The RULES tab has everything you just learned, written down, with the TUTORIAL button to come back here any time.',
-      pane: 'rules', pulse: ['.menu-tabs [data-pane="rules"]'], float: 'middle', next: true,
+      paused: true, pane: 'rules', pulse: ['.menu-tabs [data-pane="rules"]'], float: 'middle', next: true,
     },
     {
       text: 'The RECORDS tab shows your level and DECRYPTOR rank, every unlock with the level it opens at, every achievement with its progress, and your lifetime stats.',
-      pane: 'records', pulse: ['.menu-tabs [data-pane="records"]'], float: 'middle', next: true,
+      paused: true, pane: 'records', pulse: ['.menu-tabs [data-pane="records"]'], float: 'middle', next: true,
     },
     {
       text: 'The EXPLOITS tab is your loadout. You can only earn exploits that are in a slot: SLOTS, at the top, counts the slots you’ve filled and the ones you have. Tap an unlocked card to put it in a free slot, or tap it again to take it out. More slots and exploits unlock as you level up, and the loadout is locked from a session’s first drop until it ends.',
-      pane: 'exploits', pulse: ['.menu-tabs [data-pane="exploits"]', '#slot-info', '.hack-item'], float: true, next: true,
+      paused: true, pane: 'exploits', pulse: ['.menu-tabs [data-pane="exploits"]', '#slot-info', '.hack-item'], float: true, next: true,
     },
     {
       text: 'Tapping outside a card won’t close it: tap ← BACK, at the top left of the card.',
-      pane: 'exploits', tap: '.card-back[data-close="records"]', pass: true, float: 'middle',
+      paused: true, pane: 'exploits', tap: '.card-back[data-close="records"]', pass: true, float: 'middle',
     },
     {
-      text: 'Now tap SETTINGS, at the top right. (In a game, it’s on the pause screen.)',
-      closeMenus: true, tap: '#settings-btn', pass: true,
+      text: 'Now tap SETTINGS.',
+      paused: true, closeMenus: true, tap: '#pause-settings', pass: true, float: true,
     },
     {
-      text: 'SETTINGS has sound and music, SOUND OUTPUT (PHONE, HEADPHONES or SPEAKERS, to suit what you’re listening on), DROP BY (buttons, sliding on the grid, or both) and where the drop buttons sit, vibration on phones, the wandering bots, REDUCED EFFECTS for slower phones, the screen saver, color THEMES and FONTS (more unlock as you level up), and the PLAYLIST, with the MUSIC PLAYER for listening on its own. ← BACK closes it, like RULES & RECORDS.',
-      float: 'middle', next: true,
+      text: 'SETTINGS has sound and music, SOUND OUTPUT (PHONE, HEADPHONES or SPEAKERS, to suit what you’re listening on), DROP BY (buttons, sliding on the grid, or both) and where the drop buttons sit, vibration on phones, the wandering bots, REDUCED EFFECTS for slower phones, the screen saver, color THEMES and FONTS (more unlock as you level up), and the PLAYLIST, with the MUSIC PLAYER for listening on its own.',
+      paused: true, settings: true, float: 'middle', next: true,
+    },
+    {
+      text: 'Tap ← BACK to close SETTINGS.',
+      paused: true, settings: true, tap: '.card-back[data-close="settings"]', pass: true, float: 'middle',
+    },
+    {
+      text: 'And RESUME to get back to the game.',
+      paused: true, closeMenus: true, tap: '#pause-resume', pass: true, float: true,
     },
     {
       text: 'That’s everything you need to know. Good luck, decryptor.',
@@ -235,7 +247,11 @@ const Tutorial = (() => {
   }
   // The menus as a step wants them: one open on a tab, or both shut
   function menus(s) {
+    // (the pause screen, open or not as the step wants it)
+    if (s.paused && !vsPaused) openPause();
+    else if (!s.paused && vsPaused) resumeMatch();
     if (s.pane) setRecordsOpen(true, s.pane);
+    if (s.settings) setSettingsOpen(true);
     if (s.closeMenus) {
       setRecordsOpen(false);
       setSettingsOpen(false);
@@ -400,6 +416,7 @@ const Tutorial = (() => {
     dim(null);
     setRecordsOpen(false);
     setSettingsOpen(false);
+    if (vsPaused) resumeMatch(); // (left from the pause screen)
     if (bannerEl) bannerEl.hidden = true;
     step = -1;
     if (to === 'classic') {

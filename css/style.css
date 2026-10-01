@@ -2394,6 +2394,9 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
 /* The start screen's wanderers: along the bottom of the card, walking in and out of it */
 /* (the whole card: the bots walk along its bottom, and what flies, falls or hangs uses all of it) */
 .start-walkers { position: absolute; left: 0; right: 0; top: 0; bottom: 10px; pointer-events: none; }
+/* (a wanderer walking in or out past a lane's sides is cut off there, not counted toward the page's
+   width: no scroll bar flickering on as it goes; open above and below, for what they say) */
+:is(.start-walkers, .game-walkers, .saver-lane) { overflow-x: clip; overflow-y: visible; }
 .start-title { position: relative; z-index: 1; } /* (the spider drops behind the title) */
 :is(.start-walkers, .game-walkers) .walker { position: absolute; left: 0; bottom: 0; width: 34px; will-change: transform; }
 .walker.walking .bot { animation: bot-hop 0.28s steps(2) infinite; }
@@ -2726,7 +2729,7 @@ body.in-game:not(.can-pause) .records-btn:hover .rb-back { background: rgba(var(
 body.in-game .settings-btn:not([aria-expanded="true"]) { visibility: hidden; }
 /* PAUSE in every mode: RESUME, RESTART (and EXIT in VS), RULES & RECORDS and SETTINGS, MAIN MENU */
 .vs-pause .pause-row button { font-size: 11px; padding: 6px 10px; }
-.vs-pause #pause-exit[hidden] { display: none; }
+.vs-pause :is(#pause-exit, #pause-restart, #pause-menu)[hidden] { display: none; }
 .pause-menu {
   padding: 6px 14px; background: transparent; border: 1px solid var(--fg-dim); border-radius: 4px;
   color: var(--fg-dim); font-family: inherit; font-size: 12px; letter-spacing: 2px; cursor: pointer;
