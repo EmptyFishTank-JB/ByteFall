@@ -11,7 +11,7 @@ Legend: ✅ in the game · 🛠️ planned (TODO.md) · 💡 idea
 
 | Season | Dates | Costumes | Snacks | Visitors | Scenery (pushed in) | Weather / other |
 |---|---|---|---|---|---|---|
-| **All year** | — | — | — | ✅ VIRUS (rare: walks or pixelates in, scuttles about glitching, bots near it jump; poked, DELETED) | 🛠️ numbered BITs 1–8 (8 only from HARD / INSANE; EASY / NORMAL fear it) | — |
+| **All year** | — | — | — | ✅ VIRUS (rare; a bacteriophage, taller than the bots: walks or pixelates in, scuttles about glitching, bots near it jump; poked, DELETED) | 🛠️ numbered BITs 1–8 (8 only from HARD / INSANE; EASY / NORMAL fear it) | — |
 | **HALLOWEEN** | Oct 15 – 31 | ✅ pumpkin, ghost sheet, witch hat, devil horns & tail | ✅ gummy drops | ✅ Frankenstein, mummy, creature from the black lagoon, Nosferatu, ghost, bats, crows, spider | ✅ scary tree (a bat flies out when poked) | — |
 | **NOVEMBER** | all month | — | — | ✅ turkey, crows · ✅ migrating birds (geese in a V, ducks in a line, songbirds — robins, bluebirds, goldfinches, cardinals — and swallows; now and then one lands, pecks and calls to a bot; poked, the flock bolts) · 🛠️ FOG WANDERER (through the fog, scares bots it nears) | 🛠️ foggy trees (fade in with the fog, stay after) | 🛠️ heavy fog rolls in (pauses other events; bots may bump and startle), then a light fog stays |
 | **WINTER** | Dec 1 – Jan 6 | ✅ beanie, earmuffs, scarves | ✅ cookie bites | ✅ penguin (belly slide) · ✅ bots skating in with a powder trail · 🛠️ skate blades | ✅ snowman · 🛠️ snowman sneaks off hopping (and may collapse into a pile of snow) | ✅ falling snow |

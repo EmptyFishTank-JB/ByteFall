@@ -3,7 +3,7 @@
 // Nosferatu, a floating ghost, a flock of bats, a crow or two and a spider on its thread; NOVEMBER:
 // a turkey, the crows, and migrating birds (geese in a V, ducks, songbirds, swallows; now and then
 // one lands, pecks about and calls to a bot; poked, the flock bolts). Any time of year, rarely: the
-// VIRUS, a spiky little bug that walks in or pixelates in on the card, scuttles from spot to spot, glitching, and makes any bot it nears
+// VIRUS, a bacteriophage (taller than the bots) that walks in or pixelates in on the card, scuttles from spot to spot, glitching, and makes any bot it nears
 // jump; poked, it's DELETED (pixelates out). Every so often one comes by (one visit at a time), crosses the card
 // and goes; the monsters give a bot they pass a fright. Each can be poked: FRANKENSTEIN roars and
 // stomps, the MUMMY groans, the CREATURE gurgles and splashes, NOSFERATU hisses and turns into
@@ -90,11 +90,14 @@ function createVisitors(api) {
       c: ['.kkk.....', '..kkk....', '...kkk.k.', 'kk..kkkeo', '.kkkkkkK.', '.........', '.........'],
       d: ['.........', '.........', '.......k.', 'kk..kkkeo', '.kkkkkkK.', '...kkk...', '....kkk..'],
     },
-    // The VIRUS (any time of year, rarely): a spiky little bug that glitches about
+    // The VIRUS (any time of year, rarely): a bacteriophage, taller than the bots. A hexagonal head
+    // with its DNA coiled inside (and eyes), a neck, a striped tail sheath, a base plate with pins,
+    // and kinked tail fibers it walks on (b: the outer pair lifted)
     virus: {
-      pal: { v: '#ff3b6b', s: '#c41f4a', o: '#ffd23f', w: '#ffffff', k: '#111111', m: '#3a0a14', l: '#c41f4a' },
-      a: ['.....o.....', '..o..s..o..', '...svvvs...', '..vvvvvvv..', 'osvwkvwkvso', '..vvvvvvv..', '..vvmmmvv..', '...svvvs...', '..o.l.l.o..', '....l.l....'],
-      b: { 8: '..o.l..lo..', 9: '...l...l...' },
+      pal: { h: '#5b7fd6', H: '#c9d8ff', d: '#ff4f86', k: '#111111', n: '#8fd0ff', t: '#a7a7a7', T: '#6a6a6a', p: '#4aa3d8', g: '#5fd35f', f: '#e3c23a' },
+      a: ['.....hhhhh.....', '....hHHHHHh....', '...hHdHHdHHh...', '..hHHddHdHHHh..', '..hHdHHdHdHHh..', '..hHkHddHHkHh..', '..hHHdHHddHHh..', '...hHHddHdHh...', '....hHHHHHh....', '.....hhhhh.....',
+        '......nnn......', '......tTt......', '......TtT......', '......tTt......', '......TtT......', '...f..tTt..f...', '..f.f.TtT.f.f..', '..f..ppppp..f..', '.f..f.g.g.f..f.', '.f..f.....f..f.', 'f..f.......f..f', 'f..f.......f..f'],
+      b: { 20: '.f.f.......f.f.', 21: '...f.......f...' },
     },
     // NOVEMBER's migrating birds: a and b on the ground (standing, pecking), c and d flying (wings
     // up, wings down)
@@ -323,7 +326,7 @@ function createVisitors(api) {
     } else if (FLOCKS[what]) flock(what, dir, edge, W);
     else if (what === 'virus') { // (walks in from a side, or pixelates in right on the card)
       const pop = Math.random() < 0.5;
-      const v = add('virus', pop ? rand(0.15, 0.8) * W : edge(11 * U), dir, { state: 'roam', target: rand(0.15, 0.8) * W, stops: 2 + Math.floor(Math.random() * 3) });
+      const v = add('virus', pop ? rand(0.15, 0.8) * W : edge(15 * U), dir, { state: 'roam', target: rand(0.15, 0.8) * W, stops: 2 + Math.floor(Math.random() * 3) });
       if (pop) {
         v.state = 'lurk';
         v.still = true;

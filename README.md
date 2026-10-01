@@ -663,7 +663,8 @@ line, a loose flock of songbirds (robins, bluebirds, goldfinches or cardinals) o
 swallows swooping fast. About a third of the time one drops out, lands, pecks about and
 calls (HONK! QUACK! TWEET! CHIRP!) to the nearest bot, which reacts, then flies off after
 the others; poked, the whole flock bolts up and away. Any time of year, rarely (6% of the times a visit comes due, about
-one every ten minutes): the VIRUS, a spiky little red bug that walks in from a side or
+one every ten minutes): the VIRUS, a bacteriophage taller than the bots (a hexagonal blue head with its pink
+DNA coiled inside, a striped tail, and kinked tail fibers it walks on) that walks in from a side or
 pixelates in right on the card (the bots near it jump), scuttles from spot to spot with
 the odd lurch and glitch (0xBAD, >:), hehe), makes any bot it comes near jump, and walks
 off; poked, it's DELETED and pixelates out. They're pixel sprites in the bots' pixel size and sway and bob in whole
