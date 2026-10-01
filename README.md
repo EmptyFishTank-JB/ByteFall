@@ -670,7 +670,9 @@ wanderer, its eyes glowing red as it moans ooOOoo, or (60%) one of the monsters,
 mummy, the creature, Nosferatu or the ghost, fading in by a tree near one side, crossing, and
 fading back into the mist before the other; most bots it nears bolt): a heavy bank of coarse-pixel mist drifts in from one side and fills the lane
 (rising a little above it and thinning out; on the start screen only its lower part, clear of the
-title), and pines and bare trees fade in through it, dark against the mist, the far ones fainter.
+title; the twinkling background behind it fading to black as it thickens), and pines and bare
+trees fade in through it one by one as the bank reaches each, dark against the mist, the far ones
+fainter. It comes to the screen saver too (its lane 90px tall for it, the mist fading out at its ends).
 Once it's built, the FOG WANDERER (a pale hooded figure with glowing eyes and a trailing hem)
 fades out of the mist, drifts from spot to spot (a bot it nears jumps, or bolts) and fades back
 into the trees by the nearest one (poked, it's gone into the mist at once). The fog then thins to a

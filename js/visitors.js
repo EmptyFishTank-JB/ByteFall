@@ -428,17 +428,24 @@ function createVisitors(api) {
   function startFog() {
     if (fog) return;
     const now = performance.now();
-    fog = { phase: 'in', at: now, level: 0, front: 0, dir: Math.random() < 0.5 ? 1 : -1, back: fogCanvas('fog-back'), fore: fogCanvas('fog-fore'), trees: [], drawn: 0, t: 0 };
+    // (dark: the twinkling background behind the lane fading to black under the fog)
+    const dark = document.createElement('div');
+    dark.className = 'fog-dark';
+    dark.setAttribute('aria-hidden', 'true');
+    api.lane.appendChild(dark);
+    fog = { phase: 'in', at: now, level: 0, front: 0, dir: Math.random() < 0.5 ? 1 : -1, dark, back: fogCanvas('fog-back'), fore: fogCanvas('fog-fore'), trees: [], drawn: 0, t: 0 };
     api.botEvent('visit-fog');
     const W = api.laneW();
+    const big = tall(); // (read before the trees go in: a layout read in between would start their fade from full)
     const n = Math.max(4, Math.round(W / 70));
     for (let i = 0; i < n; i++) { // (spread along the card, each nudged a little: some far, some near)
       const kind = !spooky() && Math.random() < 0.6 ? 'pine' : 'baretree'; // (HALLOWEEN: bare trees only)
       const far = Math.random() < 0.5;
       const x = ((i + 0.2 + Math.random() * 0.6) / n) * W - 12;
       const t = add(kind, x, Math.random() < 0.5 ? 1 : -1, { state: 'fogtree' });
+      t.el.style.opacity = '0';
       t.el.classList.add('fog-tree', far ? 'far' : 'near');
-      if (tall()) { // (on the start screen's tall lane: bigger)
+      if (big) { // (on the start screen's tall lane: bigger)
         const svg = t.el.querySelector('svg');
         const k = far ? 2.2 : 3;
         svg.setAttribute('width', svg.getAttribute('width') * k);
@@ -446,8 +453,7 @@ function createVisitors(api) {
         t.el.style.width = `${svg.getAttribute('width')}px`;
       }
       t.depth = far ? 0.45 : 0.85;
-      t.el.style.opacity = '0';
-      setTimeout(() => { t.el.style.opacity = String(t.depth); }, 1800 + i * 450 + Math.random() * 600);
+      t.lag = rand(0.08, 0.2); // (it shows once the fog's well past it: fading in with it, not ahead of it)
       fog.trees.push(t);
     }
   }
@@ -474,6 +480,15 @@ function createVisitors(api) {
       f.level = 0.35 * (1 - Math.min(1, age / 8000));
       if (age > 8000) return endFog();
     }
+    f.dark.style.opacity = Math.min(1, f.level * 1.4).toFixed(2);
+    if (f.phase === 'in') { // (the trees fade in as the bank reaches each one)
+      const W = api.laneW();
+      for (const t of f.trees) {
+        if (t.shown) continue;
+        const at = (f.dir > 0 ? t.x : W - t.x) / W;
+        if (f.front * 1.35 - at > t.lag + 0.25) { t.shown = true; t.el.style.opacity = String(t.depth); }
+      }
+    } else f.trees.forEach((t) => { if (!t.shown && f.phase !== 'lift') { t.shown = true; t.el.style.opacity = String(t.depth); } });
     const low = document.documentElement.classList.contains('low-fx');
     if (now - f.drawn < (low ? 220 : 110)) return;
     f.t += (now - (f.drawn || now)) / 1000;
@@ -493,6 +508,7 @@ function createVisitors(api) {
     const light = ['paper', 'daylight'].includes(document.documentElement.dataset.theme);
     const [r, g, b] = light ? [110, 118, 128] : [200, 208, 220];
     const band = H > 150 ? 0.42 : 1;
+    const sides = api.lane.classList.contains('saver-lane'); // (the screen saver's lane: fading out at its ends too)
     const sx = cell / 22;
     const sy = cell / 12;
     for (let y = 0; y < ch; y++) {
@@ -500,11 +516,12 @@ function createVisitors(api) {
         const px = f.dir > 0 ? x / cw : 1 - x / cw;
         const edge = Math.max(0, Math.min(1, (f.front * 1.35 - px) * 4)); // (the bank rolling in)
         if (!edge) continue;
+        const side = sides ? Math.min(1, Math.min(x, cw - 1 - x) / (cw * 0.12)) : 1;
         const n = 0.65 * noise(x * sx + seed + f.t * 0.35 * f.dir, y * sy + seed) + 0.35 * noise(x * sx * 2.3 + seed + f.t * 0.6 * f.dir, y * sy * 2.3 + f.t * 0.1);
         // (thinning out toward the top: no hard edge; on the start screen's tall lane, only its
         // lower part, clear of the title)
         const rise = Math.max(0, Math.min(1, ((y / ch) - (1 - band)) / band * 1.8));
-        const d = Math.max(0, Math.min(1, (n * 1.1 + 0.25 + (y / ch) * 0.25) * f.level - 0.15)) * edge * rise * rise;
+        const d = Math.max(0, Math.min(1, (n * 1.1 + 0.25 + (y / ch) * 0.25) * f.level - 0.15)) * edge * rise * rise * side;
         const i = (y * cw + x) * 4;
         img.data[i] = r;
         img.data[i + 1] = g;
@@ -517,6 +534,7 @@ function createVisitors(api) {
   function endFog() {
     fog.back.remove();
     fog.fore.remove();
+    fog.dark.remove();
     fog.trees.forEach((t) => { t.gone = true; });
     fog = null;
   }
@@ -1223,7 +1241,7 @@ function createVisitors(api) {
   // (while the fog's heavy: rolling in, or the wanderer about)
   function foggy() { return !!fog && (fog.phase === 'in' || fog.phase === 'thick'); }
   function clear() {
-    if (fog) { fog.back.remove(); fog.fore.remove(); fog = null; }
+    if (fog) { fog.back.remove(); fog.fore.remove(); fog.dark.remove(); fog = null; }
     list.forEach((v) => v.el.remove());
     list = [];
     flakes.forEach((f) => f.el.remove());
