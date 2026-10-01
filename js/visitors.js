@@ -3,7 +3,7 @@
 // Nosferatu, a floating ghost, a flock of bats, a crow or two and a spider on its thread; NOVEMBER:
 // a turkey, the crows, and migrating birds (geese in a V, ducks, songbirds, swallows; now and then
 // one lands, pecks about and calls to a bot; poked, the flock bolts). Any time of year, rarely: the
-// VIRUS, a bacteriophage (taller than the bots) that walks in or pixelates in on the card, scuttles from spot to spot, glitching, and makes any bot it nears
+// VIRUSES (the PHAGE, the BUG, the TROJAN: below). The PHAGE, a bacteriophage (taller than the bots), walks in or pixelates in on the card, scuttles from spot to spot, glitching, and makes any bot it nears
 // jump; poked, it's DELETED (pixelates out). Every so often one comes by (one visit at a time), crosses the card
 // and goes; the monsters give a bot they pass a fright. Each can be poked: FRANKENSTEIN roars and
 // stomps, the MUMMY groans, the CREATURE gurgles and splashes, NOSFERATU hisses and turns into
@@ -98,6 +98,20 @@ function createVisitors(api) {
       a: ['.....hhhhh.....', '....hHHHHHh....', '...hHdHHdHHh...', '..hHHddHdHHHh..', '..hHdHHdHdHHh..', '..hHkHddHHkHh..', '..hHHdHHddHHh..', '...hHHddHdHh...', '....hHHHHHh....', '.....hhhhh.....',
         '......nnn......', '......tTt......', '......TtT......', '......tTt......', '......TtT......', '...f..tTt..f...', '..f.f.TtT.f.f..', '..f..ppppp..f..', '.f..f.g.g.f..f.', '.f..f.....f..f.', 'f..f.......f..f', 'f..f.......f..f'],
       b: { 20: '.f.f.......f.f.', 21: '...f.......f...' },
+    },
+    // The BUG: the first virus, a spiky little red one that scuttles fast, lurching
+    bug: {
+      pal: { v: '#ff3b6b', s: '#c41f4a', o: '#ffd23f', w: '#ffffff', k: '#111111', m: '#3a0a14', l: '#c41f4a' },
+      a: ['.....o.....', '..o..s..o..', '...svvvs...', '..vvvvvvv..', 'osvwkvwkvso', '..vvvvvvv..', '..vvmmmvv..', '...svvvs...', '..o.l.l.o..', '....l.l....'],
+      b: { 8: '..o.l..lo..', 9: '...l...l...' },
+    },
+    // The TROJAN: under its disguise (a bot, wandering with the others), a wooden horse on wheels
+    // with a red eye
+    trojan: {
+      pal: { w: '#9a6a35', W: '#5e3a18', r: '#ff2a2a', k: '#8a8a8a', g: '#d8d8d8' },
+      a: ['......WW......', '.....WwwWW....', '....WwwwwwW...', '...WwwwrwwwW..', '...WwwwwwwwwWW', '...WwwwwWWwwww', '..WwwwwW..WWWW', '..WwwwwW......', '.WwwwwwwW.....', '.WwwwwwwwWWW..',
+        'WwwwwwwwwwwwW.', 'WwwwwwwwwwwwW.', 'WWWWWWWWWWWWW.', '.kk.......kk..', 'kggk.....kggk.', '.kk.......kk..'],
+      b: { 13: '.kk.......kk..', 14: 'kgkk.....kgkk.', 15: '.kk.......kk..' },
     },
     // NOVEMBER's migrating birds: a and b on the ground (standing, pecking), c and d flying (wings
     // up, wings down)
@@ -250,6 +264,8 @@ function createVisitors(api) {
     turkey: { speed: 16, frameMs: 280, sway: 1, poke: 'gobble' },
     // (bird: wave, how far it rises and dips as it flies, over waveMs; beatMs, a wingbeat; call)
     virus: { speed: 24, frameMs: 160, poke: 'delete' },
+    bug: { speed: 34, frameMs: 120, poke: 'delete' },
+    trojan: { speed: 18, frameMs: 200, poke: 'delete' },
     goose: { speed: 42, frameMs: 0, bird: true, wave: 1.5, waveMs: 420, beatMs: 260, call: 'HONK!', poke: 'flush' },
     duck: { speed: 48, frameMs: 0, bird: true, wave: 2, waveMs: 300, beatMs: 140, call: 'QUACK!', poke: 'flush' },
     songbird: { speed: 40, frameMs: 0, bird: true, wave: 5, waveMs: 170, beatMs: 90, call: 'TWEET!', poke: 'flush' },
@@ -279,6 +295,8 @@ function createVisitors(api) {
   const visits = () => seasons().flatMap((id) => VISITS[id] || []);
 
   const VIRUS_ODDS = 0.06; // (each time a visit comes due: one every ten minutes or so)
+  // (the dev page's VIRUSES: OFTEN, or ?virus=1: one every visit, the kinds in turn, visits sooner)
+  const virusOften = () => { try { return localStorage.getItem('bytefall-dev-virus') === 'on' || /[?&]virus=1/.test(location.search); } catch (e) { return false; } };
   let list = [];
   let nextVisit = performance.now() + rand(6000, 15000);
 
@@ -324,18 +342,8 @@ function createVisitors(api) {
       s.el.insertAdjacentHTML('afterbegin', '<i class="visitor-thread"></i>');
       s.el.style.setProperty('--thread', `${ceiling() + 60}px`);
     } else if (FLOCKS[what]) flock(what, dir, edge, W);
-    else if (what === 'virus') { // (walks in from a side, or pixelates in right on the card)
-      const pop = Math.random() < 0.5;
-      const v = add('virus', pop ? rand(0.15, 0.8) * W : edge(15 * U), dir, { state: 'roam', target: rand(0.15, 0.8) * W, stops: 2 + Math.floor(Math.random() * 3) });
-      if (pop) {
-        v.state = 'lurk';
-        v.still = true;
-        v.until = performance.now() + rand(1000, 1600);
-        v.el.classList.add('v-popin');
-        setTimeout(() => v.el.classList.remove('v-popin'), 500);
-        api.startle(v, 60); // (the bots near where it appears jump)
-      }
-    }
+    else if (what === 'virus') virusVisit(nextVirus(), dir, edge, W); // (or one by name, for tests: phage, bug, trojan)
+    else if (['phage', 'bug', 'trojan'].includes(what)) virusVisit(what === 'phage' ? 'virus' : what, dir, edge, W);
     else if (what === 'turkey') add('turkey', edge(12 * U), dir, { stopAt: rand(0.25, 0.65) * W, life: rand(2500, 4500) });
     else if (what === 'reindeer' || what === 'rudolph') { // (now and then, the one with the red nose)
       const red = what === 'rudolph' || Math.random() < 0.25;
@@ -343,6 +351,120 @@ function createVisitors(api) {
       if (red) { r.el.classList.add('v-rudolph'); api.botEvent('visit-rudolph'); }
     } else if (what === 'dreidel') add('dreidel', edge(8 * U), dir, { stopAt: rand(0.25, 0.7) * W });
     else add(what, edge(SPRITES[what].a[0].length * U), dir);
+  }
+
+  // VIRUSES (any time of year, rarely): the PHAGE (kind 'virus'), the BUG and the TROJAN. Each walks
+  // in from a side or pixelates in right on the card, scuttles from spot to spot and leaves; a bot
+  // it comes near jumps (not the TROJAN's: it looks like one of them, until it's poked). Poked, it's
+  // DELETED: it bursts into its own pixels (as a bit bursts, finer) or deteriorates, pixel by pixel.
+  const VIRUS_KINDS = ['virus', 'bug', 'trojan'];
+  let virusTurn = 0;
+  const nextVirus = () => (virusOften() ? VIRUS_KINDS[virusTurn++ % VIRUS_KINDS.length] : pick(VIRUS_KINDS));
+  function virusVisit(kind, dir, edge, W) {
+    const pop = Math.random() < 0.5;
+    const w = SPRITES[kind].a[0].length * U;
+    const v = add(kind, pop ? rand(0.15, 0.8) * W : edge(w), dir, { state: 'roam', target: rand(0.15, 0.8) * W, stops: 2 + Math.floor(Math.random() * 3), virus: true });
+    if (kind === 'trojan') { // (in disguise: one of the bots, any of them)
+      const look = miniBot(pick(['bot', 'grifter', 'bunker', 'glitch']), 'normal');
+      look.classList.add('trojan-look');
+      v.el.appendChild(look);
+      v.el.classList.add('disguised');
+      v.disguised = true;
+      v.speed = rand(18, 26);
+    }
+    if (pop) {
+      v.state = 'lurk';
+      v.still = true;
+      v.until = performance.now() + rand(1000, 1600);
+      v.el.classList.add('v-popin');
+      setTimeout(() => v.el.classList.remove('v-popin'), 500);
+      if (!v.disguised) api.startle(v, 60); // (the bots near where it appears jump)
+    }
+  }
+  // Whether it's in sight where it stands (not under a card or menu): what's on top at its middle
+  function inSight(el) {
+    const r = el.getBoundingClientRect();
+    if (!r.width) return false;
+    const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    return !!top && el.contains(top);
+  }
+  // Its own pixels as they're drawn now (the frame showing), in page coordinates and their colors
+  function shownFrame(v) {
+    return [...v.el.querySelectorAll(':scope > svg > g')].find((g) => getComputedStyle(g).display !== 'none');
+  }
+  function pixelsOf(v) {
+    const g = shownFrame(v);
+    const out = [];
+    if (!g) return out;
+    for (const r of g.querySelectorAll('rect')) {
+      const b = r.getBoundingClientRect();
+      const n = Number(r.getAttribute('width')) || 1;
+      const u = b.width / n;
+      const hex = r.getAttribute('fill');
+      const rgb = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(', ');
+      for (let i = 0; i < n; i++) out.push({ x: b.left + u * (i + 0.5), y: b.top + b.height / 2, size: u, color: rgb });
+    }
+    return out;
+  }
+  // DELETED: a word, then it bursts into its pixels, or crumbles away pixel by pixel
+  function kill(v) {
+    v.state = 'gone';
+    v.still = true;
+    say(v, pick(['DELETED', 'ERR!', 'NOOO', '404']), 1000);
+    api.botEvent('virus-deleted');
+    const seen = inSight(v.el);
+    if (Math.random() < 0.5) {
+      setTimeout(() => {
+        if (seen && typeof FX !== 'undefined' && FX.shatter) FX.shatter(pixelsOf(v));
+        v.el.querySelector(':scope > svg').style.visibility = 'hidden';
+        setTimeout(() => { v.gone = true; }, 900);
+      }, 150);
+    } else decay(v);
+  }
+  // The pixel deterioration (as the screen goes into the screen saver): its pixels drop out in a
+  // random order, in steps
+  function decay(v) {
+    const g = shownFrame(v);
+    if (!g) { v.gone = true; return; }
+    const units = [];
+    for (const r of [...g.querySelectorAll('rect')]) { // (each run of color split into single pixels)
+      const x = Number(r.getAttribute('x'));
+      const n = Number(r.getAttribute('width')) || 1;
+      for (let i = 0; i < n; i++) {
+        const u = r.cloneNode();
+        u.setAttribute('x', x + i);
+        u.setAttribute('width', 1);
+        g.appendChild(u);
+        units.push(u);
+      }
+      r.remove();
+    }
+    for (let i = units.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [units[i], units[j]] = [units[j], units[i]]; }
+    const STEPS = 9;
+    for (let k = 0; k < STEPS; k++) {
+      setTimeout(() => {
+        units.slice(Math.floor((k * units.length) / STEPS), Math.floor(((k + 1) * units.length) / STEPS)).forEach((u) => u.remove());
+        if (k === STEPS - 1) setTimeout(() => { v.gone = true; }, 500);
+      }, 200 + k * 75);
+    }
+  }
+  // The TROJAN unmasked: its disguise pixelates off, the horse pixelates in, it laughs and bolts
+  function unmask(v) {
+    v.disguised = false;
+    v.el.classList.add('unmasking');
+    setTimeout(() => { v.el.classList.remove('disguised'); v.el.classList.add('unmasked'); }, 450);
+    setTimeout(() => {
+      const look = v.el.querySelector('.trojan-look');
+      if (look) look.remove();
+      v.el.classList.remove('unmasking');
+    }, 950);
+    say(v, pick(['HEHE', 'BUSTED', '>:)']), 1200);
+    api.botEvent('trojan-unmasked');
+    api.startle(v, 70);
+    v.state = 'out';
+    v.still = false;
+    v.speed = 60;
+    v.dir = v.x < api.laneW() / 2 ? -1 : 1;
   }
 
   // NOVEMBER's migrating birds: a flock flying over (geese in a V, ducks in a line, a scatter of
@@ -464,14 +586,11 @@ function createVisitors(api) {
       api.startle(v, 60); // (the bots near it don't like spiders)
       return;
     }
-    if (v.kind === 'virus') { // (quarantined: it glitches and pixelates out)
+    if (v.virus) { // (a TROJAN's first poke unmasks it; otherwise DELETED)
       if (v.state === 'gone') return;
       api.botEvent('visitor-pokes');
-      say(v, pick(['DELETED', 'ERR!', 'NOOO']), 900);
-      v.state = 'gone';
-      v.el.classList.add('v-vanish');
-      api.botEvent('virus-deleted');
-      setTimeout(() => { v.gone = true; }, 600);
+      if (v.disguised) unmask(v);
+      else kill(v);
       return;
     }
     if (v.state !== 'go' && v.state !== 'peck' && v.state !== 'land') return;
@@ -674,9 +793,9 @@ function createVisitors(api) {
     const W = api.laneW();
     if (!list.some((v) => v.state !== 'scenery') && now > nextVisit) {
       // (the VIRUS: any time of year, now and then; otherwise the season's visitors, if any)
-      if (Math.random() < VIRUS_ODDS) visit('virus');
+      if (virusOften() || Math.random() < VIRUS_ODDS) visit('virus');
       else if (visits().length) visit();
-      nextVisit = now + rand(20000, 45000);
+      nextVisit = now + (virusOften() ? rand(3000, 6000) : rand(20000, 45000));
     }
     if (Season.is('winter') || flakes.length) snow(now, dt);
     if ((Season.is('nye') || Season.is('newyear')) && now > nextFirework) {
@@ -729,22 +848,23 @@ function createVisitors(api) {
           v.x += v.dir * v.speed * dt;
           if (!v.pecked && !v.ran && ((v.dir > 0 && v.x >= v.stopAt) || (v.dir < 0 && v.x <= W - v.stopAt))) { v.state = 'peck'; v.until = now + v.life; v.pecked = true; }
         } else if (v.state === 'peck' && now > v.until) v.state = 'go';
-      } else if (v.kind === 'virus') { // (scuttles from spot to spot, lurching; bots near it panic)
+      } else if (v.virus) { // (scuttles from spot to spot, lurching; bots near it panic)
         if (v.state === 'roam') {
-          const step = v.speed * dt * (Math.random() < 0.08 ? 4 : 1);
+          const step = v.speed * dt * (!v.disguised && Math.random() < 0.08 ? 4 : 1); // (a disguised one walks like a bot)
           v.dir = v.target > v.x ? 1 : -1;
           v.x += v.dir * Math.min(step, Math.abs(v.target - v.x));
           if (Math.abs(v.target - v.x) < 0.5) {
             v.state = 'lurk';
             v.still = true;
             v.until = now + rand(900, 2200);
-            if (Math.random() < 0.5) say(v, pick(['0xBAD', '>:)', 'hehe', '01101', 'ERR']), 1000);
+            if (Math.random() < 0.5) say(v, v.disguised ? pick(['hi', '^^', '...']) : pick(['0xBAD', '>:)', 'hehe', '01101', 'ERR']), 1000);
           }
         } else if (v.state === 'lurk' && now > v.until) {
           v.still = false;
           if (--v.stops > 0) { v.state = 'roam'; v.target = rand(0.1, 0.85) * W; } else { v.state = 'out'; v.dir = v.x < W / 2 ? -1 : 1; }
         } else if (v.state === 'out') v.x += v.dir * v.speed * 1.4 * dt;
-        if (v.state !== 'gone') { // (a bot it comes near jumps, once each)
+        v.el.classList.toggle('moving', v.state === 'roam' || v.state === 'out');
+        if (v.state !== 'gone' && !v.disguised) { // (a bot it comes near jumps, once each)
           for (const b of api.walkers()) {
             if (v.scared.has(b) || Math.abs(b.x - v.x) > 40) continue;
             v.scared.add(b);

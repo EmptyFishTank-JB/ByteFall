@@ -2637,7 +2637,18 @@ html.page-twinkle .page-bg { display: block; }
 /* The VIRUS glitches now and then: a jump sideways, a flash of another color */
 .visitor-virus svg { animation: virus-glitch 2.6s steps(1) infinite; }
 .visitor-virus.v-vanish svg { animation: walker-pix-out 0.45s steps(1) forwards; }
-.visitor-virus.v-popin svg { animation: walker-pix-in 0.45s steps(1) forwards; }
+/* (the BUG and the unmasked TROJAN glitch too; any virus pixelates in) */
+:is(.visitor-bug, .visitor-trojan.unmasked) > svg { animation: virus-glitch 2.6s steps(1) infinite; }
+:is(.visitor-virus, .visitor-bug, .visitor-trojan).v-popin svg { animation: walker-pix-in 0.45s steps(1) forwards; }
+/* The TROJAN: a bot on the outside (walking like one), the horse hidden until it's poked; then the
+   disguise pixelates off and the horse pixelates in */
+.visitor-trojan .trojan-look { position: absolute; left: 50%; bottom: 0; width: 34px; translate: -50% 0; }
+.visitor-trojan.disguised > svg { visibility: hidden; }
+.visitor-trojan.disguised.moving .trojan-look .bot { animation: bot-hop 0.28s steps(2) infinite; }
+.visitor-trojan.disguised.moving .trojan-look .leg-a { animation: bot-step 0.28s steps(1) infinite; }
+.visitor-trojan.disguised.moving .trojan-look .leg-b { animation: bot-step 0.28s steps(1) 0.14s infinite; }
+.visitor-trojan.unmasking .trojan-look .bot-swap { animation: walker-pix-out 0.45s steps(1) forwards; }
+.visitor-trojan.unmasked.unmasking > svg { animation: walker-pix-in 0.45s steps(1) forwards; }
 @keyframes virus-glitch { 0%, 86%, 100% { translate: 0 0; filter: none; } 88% { translate: 2px 0; filter: hue-rotate(140deg); } 91% { translate: -2px 0; filter: none; } 94% { translate: 1px 0; filter: hue-rotate(250deg); } }
 
 /* Pushing the scary tree: straining */

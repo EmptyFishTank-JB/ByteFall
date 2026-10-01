@@ -663,11 +663,17 @@ line, a loose flock of songbirds (robins, bluebirds, goldfinches or cardinals) o
 swallows swooping fast. About a third of the time one drops out, lands, pecks about and
 calls (HONK! QUACK! TWEET! CHIRP!) to the nearest bot, which reacts, then flies off after
 the others; poked, the whole flock bolts up and away. Any time of year, rarely (6% of the times a visit comes due, about
-one every ten minutes): the VIRUS, a bacteriophage taller than the bots (a hexagonal blue head with its pink
-DNA coiled inside, a striped tail, and kinked tail fibers it walks on) that walks in from a side or
-pixelates in right on the card (the bots near it jump), scuttles from spot to spot with
-the odd lurch and glitch (0xBAD, >:), hehe), makes any bot it comes near jump, and walks
-off; poked, it's DELETED and pixelates out. They're pixel sprites in the bots' pixel size and sway and bob in whole
+one every ten minutes): a VIRUS, one of three. The PHAGE, a bacteriophage taller than the bots (a
+hexagonal blue head with its pink DNA coiled inside, a striped tail, kinked tail fibers it walks
+on); the BUG, a spiky little red one that scuttles fast; and the TROJAN, which walks about as one
+of the bots (any of them) and scares no one, until it's poked: the disguise pixelates off, a
+wooden horse on wheels with a red eye pixelates in, laughs (HEHE) and bolts, the bots near it
+jumping. Each walks in from a side or pixelates in right on the card, scuttles from spot to spot
+with the odd lurch and glitch (0xBAD, >:), hehe) and walks off; a bot it comes near jumps. Poked
+(a TROJAN: once it's unmasked), it's DELETED: it either bursts into its own pixels, each a fragment
+in its own color (as a bit bursts, finer), or deteriorates, its pixels dropping out in a random
+order, in steps, as the screen does going into the screen saver. The dev page's VIRUSES: OFTEN
+brings one every few seconds, the three in turn (or ?virus=1). They're pixel sprites in the bots' pixel size and sway and bob in whole
 pixels, on the same floor as the bots (their feet two pixels of the grid above the lane's edge); they walk behind the bots, bats and crows over them. A monster passing a
 bot may give it a fright. Poke one: the monster roars and stomps (bots near it
 jump), the mummy groans and slows, the creature splashes, Nosferatu hisses and

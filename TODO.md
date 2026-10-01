@@ -24,5 +24,14 @@ Ideas queued for later (not built yet).
   near (within its awareness radius).
 - **Exploit loadouts**: 3 saved loadouts, picked on the game setup (before a run). A 3rd or 4th
   loadout would be BLACK BOX only.
+- **More VIRUS types** (up to 8; the PHAGE, BUG and TROJAN are in), each with its own way about:
+  - **WORM**: a segmented worm that inches along, and tunnels: sinks into the floor and pops up
+    somewhere else.
+  - **RANSOMWARE**: a padlock creature that walks up to a bot and demands payment (PAY UP / 1 BTC);
+    the bot freezes, worried, until it leaves (or is poked away).
+  - **SPYWARE**: a floating eye that tails a bot, peeking at it; the bot notices, suspicious.
+  - **ADWARE**: a pop-up window that keeps popping in at new spots (WIN $$$! / CLICK ME / FREE RAM).
+  - **LOGIC BOMB**: a walking bomb with a lit fuse; if it isn't poked (DEFUSED) in time it goes off,
+    a big burst, every bot near it scared.
 
 See [WANDERERS.md](WANDERERS.md) for the season-by-season chart and the full ideas list.

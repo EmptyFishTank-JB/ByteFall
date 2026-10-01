@@ -144,5 +144,36 @@ const FX = (() => {
     ctx.fillRect(p.x - size / 2, p.y - size / 2, size, size);
   }
 
-  return { burst };
+  // A sprite's own pixels bursting apart (a deleted VIRUS): as a bit bursts, but finer, every
+  // pixel its own fragment in its own color, with a few glyphs. pixels: [{ x, y, size, color }],
+  // page coordinates, color 'r, g, b'
+  function shatter(pixels) {
+    if (reduceMotion || !pixels.length) return;
+    const origin = fit();
+    const low = document.documentElement.classList.contains('low-fx');
+    const cx = pixels.reduce((a, p) => a + p.x, 0) / pixels.length;
+    const cy = pixels.reduce((a, p) => a + p.y, 0) / pixels.length;
+    pixels.forEach((p, i) => {
+      if (low && i % 2) return; // (REDUCED EFFECTS: half of them)
+      const angle = Math.atan2(p.y - cy, p.x - cx) + (Math.random() - 0.5) * 1.2;
+      const speed = 30 + Math.random() * 120;
+      particles.push({
+        kind: 'frag', x: p.x - origin.left, y: p.y - origin.top, color: p.color,
+        vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 40,
+        size: p.size * (0.7 + Math.random() * 0.4),
+        delay: Math.random() * 0.12, life: 0.4 + Math.random() * 0.5, age: 0,
+      });
+    });
+    for (let k = 0; k < 4; k++) {
+      const p = pixels[Math.floor(Math.random() * pixels.length)];
+      particles.push({ kind: 'glyph', color: p.color, ch: GLYPHS[Math.floor(Math.random() * GLYPHS.length)], x: cx - origin.left + (Math.random() - 0.5) * 20, y: cy - origin.top, vx: (Math.random() - 0.5) * 30, vy: -35 - Math.random() * 40, size: 9, delay: 0.05 + Math.random() * 0.1, life: 0.8 + Math.random() * 0.4, age: 0 });
+    }
+    if (!running) {
+      running = true;
+      last = performance.now();
+      requestAnimationFrame(frame);
+    }
+  }
+
+  return { burst, shatter };
 })();
