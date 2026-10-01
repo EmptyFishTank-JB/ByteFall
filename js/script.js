@@ -1244,12 +1244,11 @@ async function awardPackets(kind, count) {
   await sleep(150);
 }
 
-// An earned exploit waits in the exploit button until the player arms it (the notice flashes over
-// the grid too: an exploit is easy to forget about)
+// An earned exploit waits in the exploit button until the player arms it (the notice stays over
+// the grid until it's used: an exploit is easy to forget about; showExploitNotice)
 function awardHack(id) {
   heldHacks.push(id);
   setMessage(`EXPLOIT READY // ${HACKS[id].name}`);
-  if (mode !== 'tutorial') showToast(`EXPLOIT READY // ${HACKS[id].name}`);
   SFX.play('egg');
   updateHud();
   updateFreeBtn();
@@ -3643,6 +3642,22 @@ function nextExploit() {
   if (heldHacks.length) return heldHacks[0];
   return freeAllowed() ? freeExploitId() : null;
 }
+// EXPLOIT READY // NAME over the overflow row while an earned exploit waits (or is armed), until
+// it's used (not in the tutorial, which explains it in its banner; the pause screen covers it)
+const exploitNoticeEl = document.getElementById('exploit-notice');
+function showExploitNotice() {
+  const id = armedHack || heldHacks[0];
+  const show = !!id && !gameOver && mode !== 'tutorial' && !!HACKS[id];
+  exploitNoticeEl.hidden = !show;
+  if (!show) return;
+  exploitNoticeEl.textContent = `EXPLOIT READY // ${HACKS[id].name}`;
+  const cell = boardEl.querySelector('.cell.overflow');
+  if (!cell) return;
+  const frame = exploitNoticeEl.parentElement.getBoundingClientRect();
+  const r = cell.getBoundingClientRect();
+  exploitNoticeEl.style.top = `${r.top - frame.top + r.height / 2}px`;
+}
+window.addEventListener('resize', () => exploitNoticeEl.hidden || showExploitNotice());
 function updateFreeBtn() {
   // (retired: RESTART is on the pause screen now; the button stays for its code paths)
   restartBtn.hidden = true;
@@ -3659,6 +3674,7 @@ function updateFreeBtn() {
   showChainMeter();
   const ready = nextExploit();
   const shown = armedHack || ready;
+  showExploitNotice();
   document.getElementById('exploit-glyph').innerHTML = shown ? iconHtml(shown) : LIGHTNING_SVG;
   exploitBtn.classList.toggle('armed', !!armedHack);
   exploitBtn.classList.toggle('ready', !armedHack && !!ready);
