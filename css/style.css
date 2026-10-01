@@ -2793,3 +2793,12 @@ body:not(.vs-mode) .hud-bits #next-stat .bit-sq { width: 20px; height: 20px; mar
 .records .records-tabs { top: -14px; }
 /* Section titles in the accent color, like the cards' titles (// SETTINGS) and the RECORDS categories */
 .panel h2, .settings-title { color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+/* The main menu's TUTORIAL: as wide as one of the buttons above it, centered */
+.home-row-single button { flex: 0 0 calc((100% - 8px) / 2); }
+/* EQUIPPED and OWNED in the accent color */
+.hack-item.equipped h3::after { color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+.store-item.owned .store-price, .store-item.owned .store-buy { color: var(--accent); }
+/* REDUCED EFFECTS (SETTINGS → EFFECTS): no glows (repainted with every change) */
+.low-fx *, .low-fx *::before, .low-fx *::after { text-shadow: none !important; box-shadow: none !important; }
+/* (the HUD centered over the grid card, its width set by fitBoard) */
+body:not(.vs-mode) .crt > .hud { align-self: center; max-width: 100%; margin-left: auto; margin-right: auto; }

@@ -27,7 +27,6 @@ const Music = (() => {
     { id: 'core-dump', title: 'CORE DUMP', create: createCoreDump },
     { id: 'handshake', title: 'HANDSHAKE', create: createHandshake },
     { id: 'stack-overflow', title: 'STACK OVERFLOW', create: createStackOverflow },
-    { id: 'firewall', title: 'FIREWALL', create: createFirewall },
   ];
   let enabled = true;
   let backgroundPlay = false;

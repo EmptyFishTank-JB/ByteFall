@@ -54,10 +54,12 @@ const FX = (() => {
       if (!r || !r.width) continue;
       const x0 = r.left - origin.left;
       const y0 = r.top - origin.top;
-      const piece = Math.max(3, Math.min(r.width, r.height) / SPLIT);
+      // (REDUCED EFFECTS: fewer, bigger pieces)
+      const split = document.documentElement.classList.contains('low-fx') ? SPLIT / 2 : SPLIT;
+      const piece = Math.max(3, Math.min(r.width, r.height) / split);
       const cols = Math.max(1, Math.round(r.width / piece));
       const rows = Math.max(1, Math.round(r.height / piece));
-      const sweep = cols > SPLIT ? 0.3 : 0.15; // wide shapes dissolve left to right a bit slower
+      const sweep = cols > split ? 0.3 : 0.15; // wide shapes dissolve left to right a bit slower
       const cx = x0 + r.width / 2;
       const cy = y0 + r.height / 2;
       const palette = colors();

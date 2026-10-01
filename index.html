@@ -22,11 +22,12 @@
     // The start screen shows on a fresh launch, and again on a refresh until START is pressed
     // (start.js sets the flag; coming back to the tab or a refresh after it goes straight in)
     if (sessionStorage.getItem('bytefall-started')) document.documentElement.classList.add('no-start');
+    if (localStorage.getItem('bytefall-effects') === 'reduced') document.documentElement.classList.add('low-fx');
   } catch (e) {}
 </script>
 <title>BYTEFALL // decryption terminal</title>
-<script src="js/fonts.js?v=251"></script>
-<link rel="stylesheet" href="css/style.css?v=251">
+<script src="js/fonts.js?v=252"></script>
+<link rel="stylesheet" href="css/style.css?v=252">
 </head>
 <body>
   <!-- Dev: TWINKLE BACKGROUND (grid-bg.js): the starlight behind the whole game, off by default -->
@@ -257,6 +258,8 @@
         <p class="settings-note">Where the drop buttons sit: under the grid (easier to reach on a phone) or above it.</p>
         <button type="button" id="wanderers-btn" class="toggle-btn on">WANDERING BOTS: ON</button>
         <p class="settings-note">The CPUs strolling along the bottom of the game card. Tap one to poke it.</p>
+        <button type="button" id="effects-btn" class="toggle-btn on">EFFECTS: FULL</button>
+        <p class="settings-note">REDUCED, for slower phones: the twinkling backgrounds hold still, the glows go, and exploded bits break into fewer, bigger pieces.</p>
         <button type="button" id="saver-btn" class="toggle-btn on">SCREEN SAVER: ON</button>
         <p class="settings-note">After 90 seconds untouched (not during a timed game), the screen goes black but for the wandering bots, to save battery. Tap to come back.</p>
         <p class="settings-title settings-section">// THEME</p>
@@ -325,6 +328,9 @@
         <div class="difficulty home-row">
           <button type="button" id="home-records">RULES &amp; RECORDS</button>
           <button type="button" id="home-settings">SETTINGS</button>
+        </div>
+        <div class="difficulty home-row home-row-single">
+          <button type="button" id="home-tutorial">TUTORIAL</button>
         </div>
       </section>
       <p class="vs-title" aria-hidden="true">VS.<span> CPU</span></p>
@@ -641,40 +647,39 @@
     </div>
   </div>
 
-  <script src="js/unlocks.js?v=251"></script>
-  <script src="js/progress.js?v=251"></script>
-  <script src="js/music/output.js?v=251"></script>
-  <script src="js/music/mixes.js?v=251"></script>
-  <script src="js/sfx.js?v=251"></script>
-  <script src="js/music/music-bytefall-theme.js?v=251"></script>
-  <script src="js/music/music-sleep-mode.js?v=251"></script>
-  <script src="js/music/music-brute-force.js?v=251"></script>
-  <script src="js/music/music-deep-web.js?v=251"></script>
-  <script src="js/music/music-zero-day.js?v=251"></script>
-  <script src="js/music/music-system-restore.js?v=251"></script>
-  <script src="js/music/music-night-drive.js?v=251"></script>
-  <script src="js/music/music-standby-mode.js?v=251"></script>
-  <script src="js/music/music-core-dump.js?v=251"></script>
-  <script src="js/music/music-handshake.js?v=251"></script>
-  <script src="js/music/music-stack-overflow.js?v=251"></script>
-  <script src="js/music/music-firewall.js?v=251"></script>
-  <script src="js/music/music.js?v=251"></script>
-  <script src="js/data/puzzles.js?v=251"></script>
-  <script src="js/data/daily-puzzles.js?v=251"></script>
-  <script src="js/cpu.js?v=251"></script>
-  <script src="js/fx.js?v=251"></script>
-  <script src="js/viz.js?v=251"></script>
-  <script src="js/minibot.js?v=251"></script>
-  <script src="js/seasons.js?v=251"></script>
-  <script src="js/visitors.js?v=251"></script>
-  <script src="js/wanderers.js?v=251"></script>
-  <script src="js/tutorial.js?v=251"></script>
-  <script src="js/script.js?v=251"></script>
-  <script src="js/grid-bg.js?v=251"></script>
-  <script src="js/player.js?v=251"></script>
-  <script src="js/store.js?v=251"></script>
-  <script src="js/start.js?v=251"></script>
-  <script src="js/place.js?v=251"></script>
-  <script src="js/saver.js?v=251"></script>
+  <script src="js/unlocks.js?v=252"></script>
+  <script src="js/progress.js?v=252"></script>
+  <script src="js/music/output.js?v=252"></script>
+  <script src="js/music/mixes.js?v=252"></script>
+  <script src="js/sfx.js?v=252"></script>
+  <script src="js/music/music-bytefall-theme.js?v=252"></script>
+  <script src="js/music/music-sleep-mode.js?v=252"></script>
+  <script src="js/music/music-brute-force.js?v=252"></script>
+  <script src="js/music/music-deep-web.js?v=252"></script>
+  <script src="js/music/music-zero-day.js?v=252"></script>
+  <script src="js/music/music-system-restore.js?v=252"></script>
+  <script src="js/music/music-night-drive.js?v=252"></script>
+  <script src="js/music/music-standby-mode.js?v=252"></script>
+  <script src="js/music/music-core-dump.js?v=252"></script>
+  <script src="js/music/music-handshake.js?v=252"></script>
+  <script src="js/music/music-stack-overflow.js?v=252"></script>
+  <script src="js/music/music.js?v=252"></script>
+  <script src="js/data/puzzles.js?v=252"></script>
+  <script src="js/data/daily-puzzles.js?v=252"></script>
+  <script src="js/cpu.js?v=252"></script>
+  <script src="js/fx.js?v=252"></script>
+  <script src="js/viz.js?v=252"></script>
+  <script src="js/minibot.js?v=252"></script>
+  <script src="js/seasons.js?v=252"></script>
+  <script src="js/visitors.js?v=252"></script>
+  <script src="js/wanderers.js?v=252"></script>
+  <script src="js/tutorial.js?v=252"></script>
+  <script src="js/script.js?v=252"></script>
+  <script src="js/grid-bg.js?v=252"></script>
+  <script src="js/player.js?v=252"></script>
+  <script src="js/store.js?v=252"></script>
+  <script src="js/start.js?v=252"></script>
+  <script src="js/place.js?v=252"></script>
+  <script src="js/saver.js?v=252"></script>
 </body>
 </html>

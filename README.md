@@ -439,7 +439,7 @@ with a cached older script (GitHub Pages lets browsers cache for 10 minutes).
   intensity (the engine's `step` follows it, and the player and mixer read it every 16th);
   then 16th hats, a rolling bass, the tune an octave up and an overflow alarm. Unlocked at
   Lv 44 (TRACK 11).
-- `js/music/music-firewall.js` — track 12, FIREWALL: an original 16-bit console track in
+- `js/music/music-firewall.js` — FIREWALL (off the playlist for now; on the dev pages to hear and mix): an original 16-bit console track in
   the style of early-90s Genesis platformers, in two-operator FM synthesis like the console's
   sound chip (a slap FM bass, an FM electric piano with a tine, FM brass and bell leads) over
   crunchy sample-style drums (rounded to 64 levels). A bright ZONE theme in F major at 144 BPM
@@ -449,8 +449,7 @@ with a cached older script (GitHub Pages lets browsers cache for 10 minutes).
   harsh FM brass, pounding drums) until the stack falls to 4 rows (under 60%: the gap keeps it
   from flipping between 5 and 6), when the zone returns on the next two-bar mark. Layers: the
   FM brightening, 16th hats, a pushing bass and extra kick, an FM bell counter-melody; the
-  BOSS layer's MUTE (dev pages) keeps the zone theme, its SOLO plays the boss theme. Unlocked
-  at Lv 50 (TRACK 12).
+  BOSS layer's MUTE (dev pages) keeps the zone theme, its SOLO plays the boss theme.
 - `dev-tools/audio.html` — the audio compendium, opened by the `</>` icon in
   the footer: every sound effect with a play button and where each is used in the
   game, and the track list, each track opening in the mixer
@@ -554,7 +553,8 @@ DAILY's game, PUZZLE's puzzle), your best (DAILY: today's official score once pl
 PLAY. With a game of that mode under way (a drop made; paused) PLAY reads RESUME and carries
 on; picking another mode then asks first (CONFIRM?), as a restart does, and resets without the
 melt (the board is hidden). Under the panel, RULES & RECORDS and SETTINGS buttons open those
-panels, each a card of its own covering the game card: ← BACK (or Esc) closes it, a tap
+panels, and TUTORIAL under them (as wide as one of them, centered; a game under way asks
+first), each panel a card of its own covering the game card: ← BACK (or Esc) closes it, a tap
 beside it doesn't, and the corner icons hide while one is open. In a game (not the tutorial) the game screen is the title, the mode's
 name under it (`// CLASSIC // NORMAL`, `// BLITZ`, `// PUZZLE 3`, `// DAILY DECRYPT // PRACTICE`),
 the HUD and the board: the top-left icon is PAUSE (the house, back to the menu, when there's
@@ -712,6 +712,12 @@ list (locked tracks show the level they open at) and BACKGROUND PLAY, so it can
 run on a phone with the screen off. Keys: Space plays / pauses, ← / → skip,
 Esc closes. Where the browser offers them, the lock screen's media controls
 work too. The game waits underneath (a VS match pauses). Code: `js/player.js`.
+
+## Effects
+
+SETTINGS → **EFFECTS: FULL / REDUCED**, for slower phones: REDUCED holds the twinkling grid
+backgrounds still (the board's, the HUD boxes', the start card's), drops the glows (text and
+box shadows, repainted with every change) and bursts bits into fewer, bigger pieces.
 
 ## Sound output and instrument channels
 

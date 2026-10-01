@@ -124,7 +124,7 @@ const TRACK_INFO = [
   },
   {
     id: 'firewall', num: '12', title: 'FIREWALL', fn: 'createFirewall', file: 'music-firewall.js',
-    meta: ['16-bit console', '144 BPM', 'F major / F minor', '32 bars', '~53s loop'],
+    meta: ['NOT IN THE GAME', '16-bit console', '144 BPM', 'F major / F minor', '32 bars', '~53s loop'],
     desc: 'An original track in the style of early-90s Genesis platformers: two-operator FM synthesis (a slap FM bass, an FM electric piano, FM brass and bell leads) over crunchy, sample-style drums. A bright ZONE theme that turns into a BOSS FIGHT as the stack nears the line, and back when it falls.',
     sections: [
       ['0:00', 'Zone', 'F–Am–B♭–C–F–Am–Gm–C7. The slap bass groove, the piano on the offbeats and the bouncy FM lead.'],

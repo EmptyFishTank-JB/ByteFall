@@ -546,6 +546,7 @@ function alignHeader() {
   headerEl.style.setProperty('--head-nudge', `${(iconTop - inkTop).toFixed(1)}px`);
 }
 
+const HUD_MIN_W = 300;
 function fitBoard() {
   layoutVsTop();
   fitStatValues();
@@ -567,6 +568,11 @@ function fitBoard() {
   const ratio = frame.offsetHeight / frame.offsetWidth;
   const width = Math.max(MIN_BOARD, Math.min(cssMax, (viewportHeight() - pad - rest) / ratio));
   boardWrapEl.style.maxWidth = `${Math.floor(width)}px`;
+  // The HUD's outer edges line up with the grid card's (not in VS, which lays out its own; and
+  // no narrower than its boxes need, so nothing has to shrink to fit)
+  const hudEl = document.querySelector('.hud');
+  hudEl.style.width = '';
+  if (mode !== 'vs') hudEl.style.width = `${Math.max(frame.getBoundingClientRect().width, HUD_MIN_W)}px`;
   lockButtons(); // (fits the VS setup too)
 }
 
@@ -3094,6 +3100,22 @@ soundBtn.addEventListener('click', () => {
 updateSoundBtn();
 
 // SOUND OUTPUT (output.js): PHONE → HEADPHONES → SPEAKERS, for the music and the sound effects
+// EFFECTS: FULL / REDUCED (slower phones): the grid backgrounds hold still (grid-bg.js), no
+// glows (style.css, .low-fx), fewer pieces when bits burst (fx.js)
+const effectsBtn = document.getElementById('effects-btn');
+function updateEffectsBtn() {
+  const low = document.documentElement.classList.contains('low-fx');
+  effectsBtn.textContent = `EFFECTS: ${low ? 'REDUCED' : 'FULL'}`;
+  effectsBtn.classList.toggle('on', !low);
+}
+effectsBtn.addEventListener('click', () => {
+  const low = document.documentElement.classList.toggle('low-fx');
+  storage.set('bytefall-effects', low ? 'reduced' : 'full');
+  updateEffectsBtn();
+  SFX.play('punct');
+});
+updateEffectsBtn();
+
 const outputBtn = document.getElementById('output-btn');
 function updateOutputBtn() {
   const out = SOUND_OUTPUTS.find((o) => o.id === Music.getOutput());
@@ -4034,14 +4056,17 @@ const menuScroller = () => recordsEl.querySelector('.menu-pane:not([hidden]) > .
 // pane: which tab to show (the last one shown if left out)
 // RULES → TUTORIAL: the guided lesson (tutorial.js). A live session asks first, as a restart does.
 const tutorialBtn = document.getElementById('tutorial-btn');
-tutorialBtn.addEventListener('click', () => {
-  if (vsStarted && !gameOver) return; // (not mid-match: PAUSE → EXIT first)
-  requestReset(tutorialBtn, 'CONFIRM?', () => {
+// (from RULES, or the main menu's TUTORIAL; a game under way asks first, CONFIRM?)
+function startTutorial(btn) {
+  if (vsStarted && !gameOver && !homeOpen) return; // (not mid-match: PAUSE → EXIT first)
+  requestReset(btn, 'CONFIRM?', () => {
     mode = 'tutorial';
     daily = false;
     setRecordsOpen(false);
   });
-});
+}
+tutorialBtn.addEventListener('click', () => startTutorial(tutorialBtn));
+document.getElementById('home-tutorial').addEventListener('click', (e) => startTutorial(e.currentTarget));
 
 function setRecordsOpen(open, pane = menuPane) {
   recordsEl.hidden = !open;

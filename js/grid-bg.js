@@ -220,12 +220,14 @@ function startGridBackground(canvas, { defrag = true, active } = {}) {
 }
 
 // (the board's and the HUD boxes' rest while the main menu covers them)
-const gameShown = () => !document.body.classList.contains('at-home');
+// (REDUCED EFFECTS: they all hold still)
+const lowFx = () => document.documentElement.classList.contains('low-fx');
+const gameShown = () => !document.body.classList.contains('at-home') && !lowFx();
 startGridBackground(document.getElementById('board-bg'), { active: gameShown });
 // VS setup: the defrag behind its options (the board's cells are covered)
-startGridBackground(document.getElementById('vs-setup-bg'));
+startGridBackground(document.getElementById('vs-setup-bg'), { active: () => !lowFx() });
 // START SCREEN: the starlight only, twinkling across the whole card
-if (document.getElementById('start-bg')) startGridBackground(document.getElementById('start-bg'), { defrag: false });
+if (document.getElementById('start-bg')) startGridBackground(document.getElementById('start-bg'), { defrag: false, active: () => !lowFx() });
 // The HUD boxes (SCORE, CHAIN, NEW LAYER IN, CURRENT...): the starlight only
 document.querySelectorAll('.hud .stat:not(.cpu-stat):not(.cpu-face)').forEach((stat) => {
   const canvas = document.createElement('canvas');
