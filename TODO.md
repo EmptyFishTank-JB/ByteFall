@@ -15,13 +15,6 @@ Ideas queued for later (not built yet).
   pile flattens and fades away the way the falling snow does.
 - **Skate blades**: give the skating bots (WINTER) little visible blades; right now they look like
   they float across the floor.
-- **Fog (NOVEMBER)**: a heavy fog rolls in and gradually fills the lane; trees fade in behind and
-  within it as background scenery, contrasted against the fog. Once the scene has built, a FOG
-  WANDERER comes through the mist, wanders about in it, and fades back into the foggy trees. The
-  trees and a light fog stay afterward. While the fog is in, other events pause: no visitors, and
-  the bots don't do their usual things (no meetings, snacks or hops); they may bump into each other
-  in the thick fog, with a chance to frighten each other. The fog wanderer scares any bot it comes
-  near (within its awareness radius).
 - **Exploit loadouts**: 3 saved loadouts, picked on the game setup (before a run). A 3rd or 4th
   loadout would be BLACK BOX only.
 - **More VIRUS types** (up to 8; the PHAGE, BUG and TROJAN are in), each with its own way about:

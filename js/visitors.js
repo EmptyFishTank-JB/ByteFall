@@ -92,11 +92,13 @@ function createVisitors(api) {
     },
     // The VIRUS (any time of year, rarely): a bacteriophage, taller than the bots. A hexagonal head
     // with its DNA coiled inside (and eyes), a neck, a striped tail sheath, a base plate with pins,
-    // and kinked tail fibers it walks on (b: the outer pair lifted)
+    // and kinked tail fibers it walks on (all four stepping, in turn)
     virus: {
       pal: { h: '#5b7fd6', H: '#c9d8ff', d: '#ff4f86', k: '#111111', n: '#8fd0ff', t: '#a7a7a7', T: '#6a6a6a', p: '#4aa3d8', g: '#5fd35f', f: '#e3c23a' },
       a: ['.....hhhhh.....', '....hHHHHHh....', '...hHdHHdHHh...', '..hHHddHdHHHh..', '..hHdHHdHdHHh..', '..hHkHddHHkHh..', '..hHHdHHddHHh..', '...hHHddHdHh...', '....hHHHHHh....', '.....hhhhh.....',
-        '......nnn......', '......tTt......', '......TtT......', '......tTt......', '......TtT......', '...f..tTt..f...', '..f.f.TtT.f.f..', '..f..ppppp..f..', '.f..f.g.g.f..f.', '.f..f.....f..f.', 'f..f.......f..f', 'f..f.......f..f'],
+        '......nnn......', '......tTt......', '......TtT......', '......tTt......', '......TtT......', '...f..tTt..f...', '..f.f.TtT.f.f..', '..f..ppppp..f..', '.f..f.g.g.f..f.', '.f..f.....f..f.', 'f...f.....f...f', 'f.............f'],
+      // (the four fibers step in turn: a, the outer pair planted and the inner pair lifted; b, the
+      // inner pair planted and the outer pair lifted)
       b: { 20: '.f.f.......f.f.', 21: '...f.......f...' },
     },
     // The BUG: the first virus, a spiky little red one that scuttles fast, lurching
@@ -112,6 +114,21 @@ function createVisitors(api) {
       a: ['......WW......', '.....WwwWW....', '....WwwwwwW...', '...WwwwrwwwW..', '...WwwwwwwwwWW', '...WwwwwWWwwww', '..WwwwwW..WWWW', '..WwwwwW......', '.WwwwwwwW.....', '.WwwwwwwwWWW..',
         'WwwwwwwwwwwwW.', 'WwwwwwwwwwwwW.', 'WWWWWWWWWWWWW.', '.kk.......kk..', 'kggk.....kggk.', '.kk.......kk..'],
       b: { 13: '.kk.......kk..', 14: 'kgkk.....kgkk.', 15: '.kk.......kk..' },
+    },
+    // NOVEMBER's FOG: the trees that show through it (dark silhouettes against the mist) and the
+    // FOG WANDERER, a pale hooded figure with glowing eyes, its hem trailing
+    pine: {
+      pal: { t: '#1e262b', T: '#2d383e' },
+      a: ['....t....', '....t....', '...ttt...', '..ttTtt..', '...ttt...', '..ttttt..', '.ttTtttt.', '..ttttt..', '.ttttttt.', 'ttttTtttt', '.ttttttt.', 'ttttttttt', 'tttTttttt', 'ttttttttt', '....t....', '....t....', '....t....', '...ttt...'],
+    },
+    baretree: {
+      pal: { t: '#1e262b' },
+      a: ['..t.....t....', '...t...t..t..', 't..t..t..t...', '.t.t..t.t....', '..tt.t..t..t.', '...tt...t.t..', '....t..tt....', '....tt.t.....', '.....ttt.....', '.....tt......', '.....tt......', '.....tt......', '.....tt......', '.....tt......', '.....tt......', '.....tt......', '....tttt.....', '...tttttt....'],
+    },
+    wraith: {
+      pal: { c: '#b8c0cc', C: '#8a94a2', h: '#262c36', e: '#e8fbff' },
+      a: ['...cccc...', '..cCCCCc..', '.cChhhhCc.', '.cCehheCc.', '.cChhhhCc.', '..cChhCc..', '.cccCCccc.', 'ccCcccCccc', 'cCccccccCc', 'cccccccccc', 'cCcccccCcc', 'cccccccccc', 'ccCccccCcc', 'cccccccccc', '.ccCcccccc', '.cccccCcc.', '.c.cc.cc.c', 'c..c..c..c'],
+      b: { 16: '.cc.cc.cc.', 17: '.c..c..c..' },
     },
     // NOVEMBER's migrating birds: a and b on the ground (standing, pecking), c and d flying (wings
     // up, wings down)
@@ -266,6 +283,9 @@ function createVisitors(api) {
     virus: { speed: 24, frameMs: 160, poke: 'delete' },
     bug: { speed: 34, frameMs: 120, poke: 'delete' },
     trojan: { speed: 18, frameMs: 200, poke: 'delete' },
+    pine: { speed: 0, frameMs: 0 },
+    baretree: { speed: 0, frameMs: 0 },
+    wraith: { speed: 9, frameMs: 520, poke: 'mist' },
     goose: { speed: 42, frameMs: 0, bird: true, wave: 1.5, waveMs: 420, beatMs: 260, call: 'HONK!', poke: 'flush' },
     duck: { speed: 48, frameMs: 0, bird: true, wave: 2, waveMs: 300, beatMs: 140, call: 'QUACK!', poke: 'flush' },
     songbird: { speed: 40, frameMs: 0, bird: true, wave: 5, waveMs: 170, beatMs: 90, call: 'TWEET!', poke: 'flush' },
@@ -324,6 +344,7 @@ function createVisitors(api) {
   // One visit: a monster, the ghost, a flock of bats or a crow or two, in from either side
   function visit(what = pick(visits().length ? visits() : VISITS.halloween)) {
     if (what === 'countdown') return countdown();
+    if (what === 'fog') return startFog();
     if (what === 'fireworks') { for (let i = 0; i < 3; i++) setTimeout(firework, i * 450); return; }
     const W = api.laneW();
     const fromLeft = Math.random() < 0.5;
@@ -351,6 +372,170 @@ function createVisitors(api) {
       if (red) { r.el.classList.add('v-rudolph'); api.botEvent('visit-rudolph'); }
     } else if (what === 'dreidel') add('dreidel', edge(8 * U), dir, { stopAt: rand(0.25, 0.7) * W });
     else add(what, edge(SPRITES[what].a[0].length * U), dir);
+  }
+
+  // FOG (NOVEMBER, now and then; the dev page's FOG: OFTEN, or ?fog=1, brings it every visit). A
+  // heavy fog rolls in from one side and fills the lane; trees fade in through it, dark against the
+  // mist (some further back, fainter). Once it's built, the FOG WANDERER comes out of the mist,
+  // drifts from spot to spot (any bot it nears is scared: it jumps, or bolts) and fades back into
+  // the trees. Then the fog thins to a light mist, the trees standing in it, for a couple of
+  // minutes, and lifts. While it's heavy nothing else comes by, and the bots keep to themselves
+  // (no meetings, snacks or hops; wanderers.js asks foggy()), bumping into each other now and then.
+  // The fog is drawn in coarse pixels: two canvases (one behind the trees, a thinner one in front
+  // of everything), from drifting noise.
+  const fogOften = () => { try { return localStorage.getItem('bytefall-dev-fog') === 'on' || /[?&]fog=1/.test(location.search); } catch (e) { return false; } };
+  const FOG_ODDS = 0.15; // (each NOVEMBER visit: a fog instead)
+  let fog = null;
+  const NG = 64;
+  const grid = Float32Array.from({ length: NG * NG }, () => Math.random());
+  const smooth = (t) => t * t * (3 - 2 * t);
+  function noise(x, y) {
+    const xi = Math.floor(x);
+    const yi = Math.floor(y);
+    const fx = smooth(x - xi);
+    const fy = smooth(y - yi);
+    const at = (i, j) => grid[(((j % NG) + NG) % NG) * NG + (((i % NG) + NG) % NG)];
+    const a = at(xi, yi) + (at(xi + 1, yi) - at(xi, yi)) * fx;
+    const b = at(xi, yi + 1) + (at(xi + 1, yi + 1) - at(xi, yi + 1)) * fx;
+    return a + (b - a) * fy;
+  }
+  function fogCanvas(cls) {
+    const c = document.createElement('canvas');
+    c.className = `fog-layer ${cls}`;
+    c.setAttribute('aria-hidden', 'true');
+    api.lane.appendChild(c);
+    return c;
+  }
+  function startFog() {
+    if (fog) return;
+    const now = performance.now();
+    fog = { phase: 'in', at: now, level: 0, front: 0, dir: Math.random() < 0.5 ? 1 : -1, back: fogCanvas('fog-back'), fore: fogCanvas('fog-fore'), trees: [], drawn: 0, t: 0 };
+    api.botEvent('visit-fog');
+    const W = api.laneW();
+    const n = Math.max(4, Math.round(W / 70));
+    for (let i = 0; i < n; i++) { // (spread along the card, each nudged a little: some far, some near)
+      const kind = Math.random() < 0.6 ? 'pine' : 'baretree';
+      const far = Math.random() < 0.5;
+      const x = ((i + 0.2 + Math.random() * 0.6) / n) * W - 12;
+      const t = add(kind, x, Math.random() < 0.5 ? 1 : -1, { state: 'fogtree' });
+      t.el.classList.add('fog-tree', far ? 'far' : 'near');
+      if (tall()) { // (on the start screen's tall lane: bigger)
+        const svg = t.el.querySelector('svg');
+        const k = far ? 2.2 : 3;
+        svg.setAttribute('width', svg.getAttribute('width') * k);
+        svg.setAttribute('height', svg.getAttribute('height') * k);
+        t.el.style.width = `${svg.getAttribute('width')}px`;
+      }
+      t.depth = far ? 0.45 : 0.85;
+      t.el.style.opacity = '0';
+      setTimeout(() => { t.el.style.opacity = String(t.depth); }, 1800 + i * 450 + Math.random() * 600);
+      fog.trees.push(t);
+    }
+  }
+  const FOG_IN_MS = 6000;
+  function fogFrame(now) {
+    const f = fog;
+    const age = now - f.at;
+    if (f.phase === 'in') {
+      f.front = Math.min(1, age / FOG_IN_MS);
+      f.level = f.front;
+      if (age > FOG_IN_MS + 2000) { f.phase = 'thick'; f.at = now; wraithIn(); }
+    } else if (f.phase === 'thick') { // (until the wanderer's gone)
+      if (f.wraithGone) { f.phase = 'thin'; f.at = now; }
+    } else if (f.phase === 'thin') {
+      f.level = 1 - 0.65 * Math.min(1, age / 5000);
+      if (age > 5000) { f.phase = 'light'; f.at = now; }
+    } else if (f.phase === 'light') {
+      if (age > (fogOften() ? 20000 : 120000)) {
+        f.phase = 'lift';
+        f.at = now;
+        f.trees.forEach((t) => { t.el.style.opacity = '0'; });
+      }
+    } else if (f.phase === 'lift') {
+      f.level = 0.35 * (1 - Math.min(1, age / 8000));
+      if (age > 8000) return endFog();
+    }
+    const low = document.documentElement.classList.contains('low-fx');
+    if (now - f.drawn < (low ? 220 : 110)) return;
+    f.t += (now - (f.drawn || now)) / 1000;
+    f.drawn = now;
+    drawFog(f.back, f, 0.78, 0, low);
+    drawFog(f.fore, f, f.phase === 'in' || f.phase === 'thick' ? 0.42 : 0.16, 31, low);
+  }
+  function drawFog(c, f, maxA, seed, low) {
+    const cell = low ? 6 : 4;
+    const W = c.clientWidth;
+    const H = c.clientHeight;
+    const cw = Math.max(1, Math.ceil(W / cell));
+    const ch = Math.max(1, Math.ceil(H / cell));
+    if (c.width !== cw || c.height !== ch) { c.width = cw; c.height = ch; }
+    const ctx = c.getContext('2d');
+    const img = ctx.createImageData(cw, ch);
+    const light = ['paper', 'daylight'].includes(document.documentElement.dataset.theme);
+    const [r, g, b] = light ? [110, 118, 128] : [200, 208, 220];
+    const band = H > 150 ? 0.42 : 1;
+    const sx = cell / 22;
+    const sy = cell / 12;
+    for (let y = 0; y < ch; y++) {
+      for (let x = 0; x < cw; x++) {
+        const px = f.dir > 0 ? x / cw : 1 - x / cw;
+        const edge = Math.max(0, Math.min(1, (f.front * 1.35 - px) * 4)); // (the bank rolling in)
+        if (!edge) continue;
+        const n = 0.65 * noise(x * sx + seed + f.t * 0.35 * f.dir, y * sy + seed) + 0.35 * noise(x * sx * 2.3 + seed + f.t * 0.6 * f.dir, y * sy * 2.3 + f.t * 0.1);
+        // (thinning out toward the top: no hard edge; on the start screen's tall lane, only its
+        // lower part, clear of the title)
+        const rise = Math.max(0, Math.min(1, ((y / ch) - (1 - band)) / band * 1.8));
+        const d = Math.max(0, Math.min(1, (n * 1.1 + 0.25 + (y / ch) * 0.25) * f.level - 0.15)) * edge * rise * rise;
+        const i = (y * cw + x) * 4;
+        img.data[i] = r;
+        img.data[i + 1] = g;
+        img.data[i + 2] = b;
+        img.data[i + 3] = Math.round(255 * maxA * d);
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+  function endFog() {
+    fog.back.remove();
+    fog.fore.remove();
+    fog.trees.forEach((t) => { t.gone = true; });
+    fog = null;
+  }
+  // The FOG WANDERER: out of the mist, from spot to spot, and back into it by a tree
+  function wraithIn() {
+    const W = api.laneW();
+    const v = add('wraith', rand(0.15, 0.8) * W, Math.random() < 0.5 ? 1 : -1, { state: 'fadein', until: performance.now() + 1800, stops: 2 + Math.floor(Math.random() * 2), target: 0 });
+    v.el.classList.add('fog-wraith');
+    v.el.style.opacity = '0';
+    requestAnimationFrame(() => { v.el.style.opacity = '0.85'; });
+    say(v, '...', 1400);
+  }
+  function wraithFrame(v, now, dt, W) {
+    v.y = 2 + Math.sin(v.age / 600) * 2; // (floating)
+    if (v.state === 'fadein' && now > v.until) { v.state = 'roam'; v.target = rand(0.1, 0.85) * W; }
+    else if (v.state === 'roam') {
+      v.dir = v.target > v.x ? 1 : -1;
+      v.x += v.dir * Math.min(v.speed * dt, Math.abs(v.target - v.x));
+      if (Math.abs(v.target - v.x) < 0.5) { v.state = 'linger'; v.until = now + rand(1500, 2800); }
+    } else if (v.state === 'linger' && now > v.until) {
+      if (--v.stops > 0) { v.state = 'roam'; v.target = rand(0.1, 0.85) * W; } else fadeAway(v, now);
+    } else if (v.state === 'fade' && now > v.until) { v.gone = true; if (fog) fog.wraithGone = true; }
+    if (v.state !== 'fade') { // (any bot it nears: a fright, or a bolt off the card)
+      for (const b of api.walkers()) {
+        if (v.scared.has(b) || Math.abs(b.x - v.x) > 50) continue;
+        v.scared.add(b);
+        if (Math.random() < 0.45 && api.fright) api.fright(b);
+        else api.startle(v, 50);
+      }
+    }
+  }
+  function fadeAway(v, now, ms = 2200) { // (toward the nearest tree, fading into the mist)
+    const tree = fog && fog.trees.reduce((best, t) => (!best || Math.abs(t.x - v.x) < Math.abs(best.x - v.x) ? t : best), null);
+    v.state = 'fade';
+    v.until = now + ms;
+    if (tree) v.drift = tree.x;
+    v.el.style.transition = `opacity ${ms}ms ease-in`;
+    v.el.style.opacity = '0';
   }
 
   // VIRUSES (any time of year, rarely): the PHAGE (kind 'virus'), the BUG and the TROJAN. Each walks
@@ -586,6 +771,14 @@ function createVisitors(api) {
       api.startle(v, 60); // (the bots near it don't like spiders)
       return;
     }
+    if (v.state === 'fogtree') return;
+    if (v.kind === 'wraith') { // (gone back into the mist, quickly)
+      if (v.state === 'fade') return;
+      api.botEvent('visitor-pokes');
+      say(v, '...', 900);
+      fadeAway(v, performance.now(), 900);
+      return;
+    }
     if (v.virus) { // (a TROJAN's first poke unmasks it; otherwise DELETED)
       if (v.state === 'gone') return;
       api.botEvent('visitor-pokes');
@@ -791,9 +984,12 @@ function createVisitors(api) {
 
   function frame(now, dt) {
     const W = api.laneW();
-    if (!list.some((v) => v.state !== 'scenery') && now > nextVisit) {
-      // (the VIRUS: any time of year, now and then; otherwise the season's visitors, if any)
+    if (fog) fogFrame(now);
+    if (!foggy() && !list.some((v) => v.state !== 'scenery' && v.state !== 'fogtree') && now > nextVisit) {
+      // (the VIRUS: any time of year, now and then; a FOG now and then in NOVEMBER; otherwise the
+      // season's visitors, if any)
       if (virusOften() || Math.random() < VIRUS_ODDS) visit('virus');
+      else if (!fog && (fogOften() || (Season.is('november') && Math.random() < FOG_ODDS))) startFog();
       else if (visits().length) visit();
       nextVisit = now + (virusOften() ? rand(3000, 6000) : rand(20000, 45000));
     }
@@ -814,7 +1010,12 @@ function createVisitors(api) {
         v.frame = 1 - v.frame;
         v.el.classList.toggle('step', !!v.frame);
       }
-      if (v.state === 'scenery') {
+      if (v.state === 'fogtree') {
+        // (standing in the fog)
+      } else if (v.kind === 'wraith') {
+        if (v.state === 'fade' && v.drift !== undefined) v.x += Math.sign(v.drift - v.x) * Math.min(Math.abs(v.drift - v.x), 12 * dt);
+        wraithFrame(v, now, dt, W);
+      } else if (v.state === 'scenery') {
         // (scenery: pushed by a wanderer, or standing where it was left)
       } else if (v.kind === 'dreidel') { // (spins along, wobbles to a stop, lands on a letter; then on)
         if (v.state === 'go') {
@@ -937,7 +1138,7 @@ function createVisitors(api) {
         }
       }
       place(v);
-      if (v.state === 'scenery') continue; // (it stays)
+      if (v.state === 'scenery' || v.state === 'fogtree') continue; // (it stays)
       const w = v.el.offsetWidth || 30;
       if (v.x < -w - 40 || v.x > W + 40 || v.y > ceiling() + 40) v.gone = true;
     }
@@ -946,11 +1147,14 @@ function createVisitors(api) {
       return !v.gone;
     });
   }
+  // (while the fog's heavy: rolling in, or the wanderer about)
+  function foggy() { return !!fog && (fog.phase === 'in' || fog.phase === 'thick'); }
   function clear() {
+    if (fog) { fog.back.remove(); fog.fore.remove(); fog = null; }
     list.forEach((v) => v.el.remove());
     list = [];
     flakes.forEach((f) => f.el.remove());
     flakes = [];
   }
-  return { frame, clear, visit, list: () => list, makeScenery, moveTree };
+  return { frame, clear, visit, list: () => list, makeScenery, moveTree, foggy };
 }

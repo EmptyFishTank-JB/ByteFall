@@ -662,10 +662,21 @@ crows), and MIGRATING BIRDS fly over: geese in a V (honking now and then), ducks
 line, a loose flock of songbirds (robins, bluebirds, goldfinches or cardinals) or
 swallows swooping fast. About a third of the time one drops out, lands, pecks about and
 calls (HONK! QUACK! TWEET! CHIRP!) to the nearest bot, which reacts, then flies off after
-the others; poked, the whole flock bolts up and away. Any time of year, rarely (6% of the times a visit comes due, about
+the others; poked, the whole flock bolts up and away. Now and then (15% of NOVEMBER's visits) a FOG
+rolls in instead: a heavy bank of coarse-pixel mist drifts in from one side and fills the lane
+(rising a little above it and thinning out; on the start screen only its lower part, clear of the
+title), and pines and bare trees fade in through it, dark against the mist, the far ones fainter.
+Once it's built, the FOG WANDERER (a pale hooded figure with glowing eyes and a trailing hem)
+fades out of the mist, drifts from spot to spot (a bot it nears jumps, or bolts) and fades back
+into the trees by the nearest one (poked, it's gone into the mist at once). The fog then thins to a
+light mist with the trees standing in it for two minutes, and lifts. While it's heavy nothing else
+comes by and the bots keep to themselves, walking slower (no meetings, snacks, hops or pushed
+scenery; now and then a worried ? or ...); two that walk into each other jump apart (!?), and now
+and then one bolts. The dev page's FOG: OFTEN brings it at the next visit, in any season, its light
+mist lifting after 20 seconds (or ?fog=1). Any time of year, rarely (6% of the times a visit comes due, about
 one every ten minutes): a VIRUS, one of three. The PHAGE, a bacteriophage taller than the bots (a
-hexagonal blue head with its pink DNA coiled inside, a striped tail, kinked tail fibers it walks
-on); the BUG, a spiky little red one that scuttles fast; and the TROJAN, which walks about as one
+hexagonal blue head with its pink DNA coiled inside, a striped tail, and four kinked tail fibers it
+walks on, stepping in turn); the BUG, a spiky little red one that scuttles fast; and the TROJAN, which walks about as one
 of the bots (any of them) and scares no one, until it's poked: the disguise pixelates off, a
 wooden horse on wheels with a red eye pixelates in, laughs (HEHE) and bolts, the bots near it
 jumping. Each walks in from a side or pixelates in right on the card, scuttles from spot to spot

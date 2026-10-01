@@ -2657,6 +2657,17 @@ html.page-twinkle .page-bg { display: block; }
    card's copyright line */
 .start-walkers { z-index: 0; }
 :is(.start-walkers, .game-walkers) .visitor-scenery { z-index: -1; }
+/* NOVEMBER's FOG (visitors.js): coarse-pixel mist behind the trees, the trees dark against it, a
+   thinner mist in front of everything; the trees and the wanderer fade in and out of it */
+:is(.start-walkers, .game-walkers, .saver-lane) .fog-layer { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; }
+.game-walkers .fog-layer { top: -28px; height: calc(100% + 28px); } /* (rising a little over the lane's top, fading out) */
+.fog-layer.fog-back { z-index: -3; }
+.fog-layer.fog-fore { z-index: 3; }
+:is(.start-walkers, .game-walkers) .visitor.fog-tree { z-index: -2; pointer-events: none; transition: opacity 2.5s ease; }
+.visitor.fog-tree svg { filter: none !important; }
+:is(.start-walkers, .game-walkers) .visitor.fog-wraith { z-index: 0; transition: opacity 1.8s ease; }
+.visitor.fog-wraith svg { filter: drop-shadow(0 0 3px rgba(220, 235, 255, 0.5)); }
+.visitor.fog-wraith .walker-emote { color: #dfe8f2; }
 .visitor-tree svg { filter: drop-shadow(0 0 1px rgba(220, 225, 240, 0.3)); }
 .visitor-tree.v-creak svg { animation: visitor-shake 0.1s steps(1) 6 alternate; }
 /* The spider's silk thread, up out of sight */

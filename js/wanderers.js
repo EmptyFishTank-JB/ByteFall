@@ -185,7 +185,7 @@ function createWanderers(lane, active = () => true) {
     if (how < 0.25) { // (15%) arrives at a run, then stops to catch its breath
       w.running = true;
       w.winded = true;
-    } else if (visitors && (forcePush || Math.random() < 0.15) && (pushed = visitors.makeScenery(w.dir, (x) => !walkers.some((o) => o !== w && !o.leaving && Math.abs((o.state === 'walk' ? o.target : o.x) - x) < APART)))) {
+    } else if (visitors && !foggy() && (forcePush || Math.random() < 0.15) && (pushed = visitors.makeScenery(w.dir, (x) => !walkers.some((o) => o !== w && !o.leaving && Math.abs((o.state === 'walk' ? o.target : o.x) - x) < APART)))) {
       forcePush = false;
       // It arrives pushing the season's scenery ahead of it (the scary tree, a snowman, the
       // evergreen, a menorah, a kinara, the new year's sign: visitors.js), slowly, straining, and
@@ -482,12 +482,37 @@ function createWanderers(lane, active = () => true) {
     startle(w, now);
   }
 
+  // In the fog: two that walk into each other jump (and knock apart); now and then one bolts
+  function bumps(now) {
+    for (let i = 0; i < walkers.length; i++) {
+      for (let j = i + 1; j < walkers.length; j++) {
+        const a = walkers[i];
+        const b = walkers[j];
+        const free = (w) => !w.leaving && inside(w) && !['startled', 'vanish', 'poked'].includes(w.state) && now - (w.bumpAt || 0) > 4000;
+        if (!free(a) || !free(b) || (a.state !== 'walk' && b.state !== 'walk') || Math.abs(a.x - b.x) > SIZE - 10) continue;
+        a.bumpAt = b.bumpAt = now;
+        if (Math.random() > 0.6) continue; // (passed by, just)
+        botEvent('fog-bump');
+        for (const [w, o] of [[a, b], [b, a]]) {
+          w.state = 'idle';
+          w.until = now + rand(900, 1500);
+          w.look = o.x > w.x ? 1 : -1;
+          w.x = Math.max(0, Math.min(laneW() - SIZE, w.x - w.look * 6)); // (knocked apart)
+          mood(w, 'surprised', pick(['!?', '!', '?!']));
+          place(w);
+        }
+        if (Math.random() < 0.3) fright(pick([a, b]), now);
+      }
+    }
+  }
   // Seasonal visitors (visitors.js) share the lane
   const visitors = typeof createVisitors === 'function' ? createVisitors({
     lane, laneW: () => width, laneH: () => lane.clientHeight, walkers: () => walkers.filter((w) => inside(w) && !w.leaving), botEvent,
     say: (w, m, text) => mood(w, m, text),
     startle: (src, radius) => startle(src, performance.now(), radius),
+    fright: (w) => { if (!w.leaving && w.state !== 'vanish' && w.state !== 'startled') fright(w, performance.now()); },
   }) : null;
+  const foggy = () => !!visitors && visitors.foggy();
 
   let last = performance.now();
   let running = false;
@@ -534,7 +559,7 @@ function createWanderers(lane, active = () => true) {
       // (not one poked or startled half on the card: it reacts where it is, peeking in)
       if ((w.state === 'idle' || w.state === 'meet') && !w.leaving && w.x > laneW() - SIZE) w.x = Math.max(0, laneW() - SIZE);
       if (w.state === 'walk') {
-        const pace = w.running ? 3.4 : 1;
+        const pace = (w.running ? 3.4 : 1) * (foggy() && !w.running ? 0.7 : 1); // (feeling its way in the fog)
         // (a skater surges with each push, then glides; GLITCH lurches)
         const surge = w.skating && !w.running ? 0.55 + 0.9 * Math.abs(Math.sin(now / 380)) : 1;
         const step = w.speed * pace * surge * dt * (w.bot === 'glitch' && Math.random() < 0.08 ? 3 : 1);
@@ -573,7 +598,8 @@ function createWanderers(lane, active = () => true) {
             w.state = 'idle';
             w.until = now + rand(900, 3200);
             mood(w, 'idle');
-            if (snackColors().length && Math.random() < 0.3) snack(w, now); // (a seasonal snack)
+            if (foggy()) { if (Math.random() < 0.35) mood(w, 'worried', pick(['?', '...'])); } // (in the fog: keeping to itself, uneasy)
+            else if (snackColors().length && Math.random() < 0.3) snack(w, now); // (a seasonal snack)
             else if (Math.random() < 0.35) { // a hop or two, then on
               const hops = Math.random() < 0.5 ? 1 : 2;
               w.el.style.setProperty('--hops', hops);
@@ -608,8 +634,10 @@ function createWanderers(lane, active = () => true) {
       }
       place(w);
     }
-    // Two that meet may stop and make faces at each other
-    for (let i = 0; i < walkers.length; i++) {
+    // Two that meet may stop and make faces at each other (in the heavy fog, they don't see each
+    // other coming: they bump, and now and then one gives the other a fright)
+    if (foggy()) bumps(now);
+    else for (let i = 0; i < walkers.length; i++) {
       for (let j = i + 1; j < walkers.length; j++) {
         const a = walkers[i];
         const b = walkers[j];
