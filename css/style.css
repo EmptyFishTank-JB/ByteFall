@@ -1756,7 +1756,7 @@ body.vs-mode header #mode-info { display: none; }
 .settings .toggle-btn.on { color: var(--fg); border-color: var(--fg-dim); }
 
 .settings-note + .toggle-btn { margin-top: 10px; }
-.settings > .toggle-btn + .toggle-btn { margin-top: 10px; } /* (two in a row, no note between: VIBRATION, then DROP BY) */
+.settings > .toggle-btn + .toggle-btn { margin-top: 6px; } /* (two in a row, no note between: VIBRATION, then DROP BY; the same 6px as SOUND / MUSIC to SOUND OUTPUT) */
 
 .settings-note {
   margin: 6px 2px 0;
