@@ -314,7 +314,7 @@ The gear/speaker icon in the corner opens the settings: sound and music on or
 off, whether the drop buttons sit under or above the grid, the color theme
 and the playlist.
 
-Themes (picked from the swatch grid in settings; the page fades to the new one over 1 second, 1.25 into or out of PAPER):
+Themes (picked from the swatch grid in settings; a locked theme or font shows its unlock level in its corner, LV 12, as the playlist's tracks do; the page fades to the new one over 1 second, 1.25 into or out of PAPER):
 
 | Theme | Bits | Layers | Cracks & exploits | Trace |
 |---|---|---|---|---|

@@ -3406,6 +3406,7 @@ function applyTheme() {
     if (!themeAvailable(t)) {
       // Locked: tapping shows what unlocks it
       btn.classList.add('locked');
+      lvTag(btn, `theme-${t.id}`);
       btn.addEventListener('click', () => {
         const u = Progress.unlock(`theme-${t.id}`);
         themeNoteEl.textContent = `${t.label} is locked. ${u.need} to unlock it (${Math.min(u.value(), u.goal).toLocaleString('en-US')} / ${u.goal.toLocaleString('en-US')}).`;
@@ -3475,6 +3476,7 @@ function applyFont() {
     btn.dataset.fontPreview = f.id; // each name shows in its own font
     if (!fontAvailable(f)) {
       btn.classList.add('locked');
+      lvTag(btn, `font-${f.id}`);
       btn.addEventListener('click', () => {
         const u = Progress.unlock(`font-${f.id}`);
         fontNoteEl.textContent = `${f.label} is locked. ${u.need} to unlock it (${Math.min(u.value(), u.goal).toLocaleString('en-US')} / ${u.goal.toLocaleString('en-US')}).`;
@@ -3513,6 +3515,15 @@ const settingsBtn = document.getElementById('settings-btn');
 const settingsEl = document.getElementById('settings');
 const playlistTracksEl = document.getElementById('playlist-tracks');
 
+// A locked THEME or FONT button: the level it opens at, in its corner (as the PLAYLIST's tracks show)
+function lvTag(btn, unlockId) {
+  const u = Progress.unlock(unlockId);
+  if (!u || !u.goal) return;
+  const tag = document.createElement('span');
+  tag.className = 'lv-tag';
+  tag.textContent = `LV ${u.goal}`;
+  btn.appendChild(tag);
+}
 function renderPlaylist() {
   playlistTracksEl.innerHTML = '';
   const tracks = Music.tracks();

@@ -1415,8 +1415,10 @@ body.vs-mode header #mode-info { display: none; }
   mask: var(--icon-lock) center / contain no-repeat;
   pointer-events: none;
 }
-.settings .theme-option.locked > *,
+.settings .theme-option.locked > *:not(.lv-tag),
 .hack-item.locked > *:not(.lock-tag) { opacity: 0.3; }
+/* (a locked theme's or font's unlock level, in its top-right corner, as the tracks show theirs) */
+.settings .theme-option .lv-tag { position: absolute; top: 2px; right: 4px; font-size: 8px; line-height: 1; letter-spacing: 0; color: var(--accent); pointer-events: none; font-family: 'Courier New', monospace; }
 .difficulty button.locked { position: relative; color: rgba(var(--fg-rgb), 0.3); }
 .settings #playlist-tracks button.locked { position: relative; color: rgba(var(--fg-rgb), 0.3); opacity: 1; }
 .hack-item.locked { position: relative; }
