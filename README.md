@@ -590,7 +590,8 @@ behind it rests: the background animations stop, the card's wanderers go, the
 menus and the player close; the music plays on. A bot can be poked as ever; a tap
 anywhere else, or a key, wakes it (the blocks breaking up, quicker), and that tap
 goes no further. On the start screen one to four of the CPUs (BOT, GRIFTER, BUNKER, GLITCH;
-never two of the same) wander along the bottom of the card, looking the way
+never two of the same; each at a level for its resting face, mostly EASY (35%) and NORMAL (45%),
+the angry HARD (14%) and red-eyed INSANE (6%) now and then) wander along the bottom of the card, looking the way
 they walk (eyes and mouth a pixel that way): in from either side, idling (now
 and then bored or tapping a foot), finding a free spot and heading back out.
 Two that meet may stop no closer than an arm's overlap, face each other and

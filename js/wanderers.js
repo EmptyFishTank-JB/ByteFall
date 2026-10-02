@@ -9,7 +9,15 @@ function createWanderers(lane, active = () => true) {
   // more), face each other and pull faces. Sometimes one is spooked and bolts off the card, or
   // one arrives at a run and has to stop and catch its breath.
   const BOTS = ['bot', 'grifter', 'bunker', 'glitch'];
-  const LEVELS = ['easy', 'normal', 'normal', 'hard', 'insane'];
+  // Each one's level (its resting face), weighted: mostly EASY and NORMAL, the angry HARD and the
+  // red-eyed INSANE now and then (14% and 6%)
+  const LEVEL_ODDS = { easy: 35, normal: 45, hard: 14, insane: 6 };
+  function pickLevel(bot) {
+    const ok = Object.entries(LEVEL_ODDS).filter(([l]) => !(NEVER_LEVEL[bot] || []).includes(l));
+    let r = Math.random() * ok.reduce((a, [, n]) => a + n, 0);
+    for (const [l, n] of ok) if ((r -= n) < 0) return l;
+    return 'normal';
+  }
   const MEETINGS = [['happy', 'happy'], ['smug', 'annoyed'], ['devious', 'worried'], ['hit', 'happy'], ['annoyed', 'annoyed'],
     ['happy', 'smug'], ['devious', 'devious'], ['love', 'surprised'], ['laugh', 'annoyed'], ['surprised', 'surprised'],
     ['laugh', 'laugh'], ['scared', 'devious'], ['dizzy', 'laugh'], ['love', 'love']];
@@ -228,7 +236,7 @@ function createWanderers(lane, active = () => true) {
     if (!free.length) return;
     const bot = pick(free);
     const fromLeft = Math.random() < 0.5;
-    const el = miniBot(bot, pick(LEVELS.filter((l) => !(NEVER_LEVEL[bot] || []).includes(l))));
+    const el = miniBot(bot, pickLevel(bot));
     el.classList.add('walker');
     dress(el, bot);
     const emote = document.createElement('span');
