@@ -664,9 +664,11 @@ line, a loose flock of songbirds (robins, bluebirds, goldfinches or cardinals) o
 swallows swooping fast. About a third of the time one drops out, lands, pecks about and
 calls (HONK! QUACK! TWEET! CHIRP!) to the nearest bot, which reacts, then flies off after
 the others; poked, the whole flock bolts up and away. Any time of year, with music playing, a bot may walk in wearing HEADPHONES (1 in 10) or stop and
-put a pair on (15% of its stops): then it vibes, eyes closed and nodding on the beat while it
-stands (♪), its steps falling two to a beat as it walks (the beat read from the music engine, kept
-in sync as the tempo moves). It keeps them on until it leaves; if the music's switched off, it
+put a pair on (15% of its stops): then it vibes, eyes closed (♪). Standing, it moves to the drums: a nodder (6 in 10) nods
+on the kicks, at most every half beat, and a tapper taps its foot on the hi-hats, at most every
+eighth (the music engine logs each drum hit as it schedules it, kicks, hats and snares, and the
+bots move as each is heard); with nothing to follow (a breakdown) they keep time anyway, a nod each
+bar, a tap each beat. Walking, its steps fall two to a beat (kept in sync as the tempo moves). It keeps them on until it leaves; if the music's switched off, it
 goes -_- and puts them away. Besides the scary tree, a bot may push in a JACK O' LANTERN: a carved grin lit from inside, its
 candle flickering; poked, it flares up and cackles (HAHAHA!), the bots near it jumping. HALLOWEEN also sends the GREMLIN: a little green creature with big
 ears, red eyes and a toothy grin that scurries up to one bot after another to prank it (hehehe; the

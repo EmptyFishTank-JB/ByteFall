@@ -105,6 +105,9 @@ const Music = (() => {
     }
   }
 
+  // Which channels count as which drum: the low hits (kick), the high ones (hats, ticks, shakers)
+  const DRUM_KIND = { kick: 'low', sub: 'low', toms: 'low', hats: 'high', tick: 'high', shaker: 'high', tambourine: 'high', snare: 'snare', clap: 'snare' };
+  let drumLog = [];
   function tick() {
     if (nextTime < ctx.currentTime) nextTime = ctx.currentTime + 0.02;
     const ahead = document.hidden ? HIDDEN_LOOKAHEAD : LOOKAHEAD;
@@ -112,7 +115,12 @@ const Music = (() => {
       advance();
       intensity += (targetIntensity - intensity) * INTENSITY_EASE;
       applyMix(engine, trackMix(trackId, outputId), intensity, nextTime);
+      // (the drums as they're scheduled, for whatever moves to them: the wanderers' headphones)
+      let hit = step % 4 === 0 ? { time: nextTime, beat: true, bar: step % 16 === 0 } : null;
+      if (engine.record) engine.record((id) => { const k = DRUM_KIND[id]; if (k) { hit = hit || { time: nextTime }; hit[k] = true; } });
       engine.schedule(step, nextTime, intensity);
+      if (engine.record) engine.record(null);
+      if (hit) { drumLog.push(hit); if (drumLog.length > 96) drumLog.shift(); }
       nextTime += engine.step;
       step++;
     }
@@ -200,6 +208,12 @@ const Music = (() => {
     currentTrack: () => trackId,
     // The beat, for whatever moves to the music (the wandering bots' headphones): a quarter note's
     // length in seconds and how far into the current one the music is (0-1); null when silent
+    // The drum hits as they're heard: { now (the audio clock, less the output's delay), hits: [{
+    // time, low, high, snare, beat, bar }] } (the recent ones and the few scheduled just ahead)
+    drums() {
+      if (!timer || !enabled) return null;
+      return { now: ctx.currentTime - (ctx.outputLatency || ctx.baseLatency || 0), hits: drumLog };
+    },
     beat() {
       if (!timer || !engine || !enabled) return null;
       const at = step - (nextTime - ctx.currentTime) / engine.step; // (the 16th playing now)

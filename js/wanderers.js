@@ -103,6 +103,7 @@ function createWanderers(lane, active = () => true) {
     const body = w.el.querySelector('.costume') || w.el.querySelector('.bot-body');
     body.insertAdjacentHTML('afterend', `<g class="headphones">${phonesSvg(w.bot)}</g>`);
     w.el.classList.add('vibing');
+    w.groove = Math.random() < 0.6 ? 'kick' : 'hats'; // (what it moves to: the kicks, or the hats)
     syncBeat(w, music());
     if (!arriving) {
       w.state = 'idle';
@@ -128,6 +129,41 @@ function createWanderers(lane, active = () => true) {
     w.el.style.setProperty('--beat', `${b.period.toFixed(3)}s`);
     w.el.style.setProperty('--beat-at', `${(-b.phase * b.period).toFixed(3)}s`);
     w.beatSynced = performance.now();
+  }
+  // Moving to the drums: each groover nods on the kicks (or taps its foot on the hats), never faster
+  // than the beat allows (a nod at most every half beat, a tap every eighth), and with none to
+  // follow (a breakdown) it keeps time anyway: a nod each bar, a tap each beat
+  let heardUpTo = 0;
+  function groove(now, beat) {
+    const d = typeof Music !== 'undefined' && Music.drums ? Music.drums() : null;
+    if (!d || !beat) return;
+    if (now - (groove.at || 0) > 500) heardUpTo = Math.max(heardUpTo, d.now - 0.05); // (back after a gap: not the old hits all at once)
+    groove.at = now;
+    const fresh = d.hits.filter((h) => h.time > heardUpTo && h.time <= d.now);
+    if (fresh.length) heardUpTo = fresh[fresh.length - 1].time;
+    if (!fresh.length) return;
+    const P = beat.period * 1000;
+    for (const w of walkers) {
+      if (!w.el.classList.contains('grooving')) continue;
+      for (const h of fresh) {
+        if (w.groove === 'kick') {
+          if ((h.low && now - (w.nodAt || 0) > P * 0.45) || (h.bar && now - (w.nodAt || 0) > P * 3.5)) { w.nodAt = now; move(w, 'nod', P); }
+        } else if ((h.high && now - (w.tapAt || 0) > P * 0.45) || (h.beat && now - (w.tapAt || 0) > P * 1.5)) {
+          w.tapAt = now;
+          move(w, 'tap', P);
+        }
+      }
+    }
+  }
+  function move(w, how, P) {
+    const bot = w.el.querySelector('.bot');
+    if (!bot || !bot.animate) return;
+    if (how === 'nod') bot.animate([{ transform: 'translateY(1.5px)' }, { transform: 'translateY(0)' }], { duration: Math.min(280, P * 0.6), easing: 'ease-out' });
+    else {
+      bot.animate([{ transform: 'translateY(0.6px)' }, { transform: 'translateY(0)' }], { duration: Math.min(160, P * 0.35), easing: 'ease-out' });
+      const leg = w.el.querySelector(w.look < 0 ? '.leg-b' : '.leg-a');
+      if (leg && leg.animate) leg.animate([{ transform: 'translateY(-1px)' }, { transform: 'translateY(0)' }], { duration: Math.min(160, P * 0.35), easing: 'steps(1, end)' });
+    }
   }
   let partySeen = false;
   let forcePush = false; // (the dev tests: the next arrival pushes the tree)
@@ -712,6 +748,7 @@ function createWanderers(lane, active = () => true) {
         }
       }
     }
+    if (beat && walkers.some((w) => w.phones)) groove(now, beat);
     walkers = walkers.filter((w) => {
       if (w.gone) w.el.remove();
       return !w.gone;
