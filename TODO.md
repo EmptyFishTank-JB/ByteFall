@@ -34,5 +34,15 @@ Ideas queued for later (not built yet).
   blinking between the fog's trees, the scary tree uprooting and shuffling after the bots, a bot
   possessed (red eyes, stiff walk; poked, a little ghost shakes out), a full-moon night with a
   werewolf's howl, a rare blood-red fog where the wanderer chases a bot.
+- **MUSIC PLAYER speed switch**: for the tracks that speed up as the stack rises (STACK OVERFLOW
+  and the like), a switch in the player for those tracks only: their speed held, or ramping.
+- **New tracks**, in the spirit of (not copies of): Cutting Crew's *(I Just) Died in Your Arms*,
+  a-ha's *Take On Me*, Starship's *We Built This City*, Duran Duran's *Hungry Like the Wolf*, Paula
+  Abdul's *Straight Up* (its funky bass line, not the tapping intro), Sonic Spinball's *Toxic Caves*
+  (that super funky bass line too), and an upbeat synthwave track.
+- **Sound themes**: more unlockable sets of game sound effects (like the color themes and fonts).
+- **RESTORE PURCHASES**: a little dial-up modem sound while it works.
+- **Button sounds**: every button makes a sound; check the levels, some are barely audible.
+- **CPU customization**: simple things for the bots to wear, e.g. retro-futuristic glasses.
 
 See [WANDERERS.md](WANDERERS.md) for the season-by-season chart and the full ideas list.

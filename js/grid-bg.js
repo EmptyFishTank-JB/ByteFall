@@ -73,13 +73,41 @@ function startGridBackground(canvas, { defrag = true, active } = {}) {
     canvas.width = Math.round(rect.width * dpr);
     canvas.height = Math.round(rect.height * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    cols = Math.max(1, Math.floor(rect.width / PITCH));
-    rows = Math.max(1, Math.floor(rect.height / PITCH));
-    size = rect.width && rect.height ? cols * rows : 0; // (hidden: nothing to draw)
-    layers = [{ pass: createPass(), weight: 1 }];
-    fadeStart = 0;
+    const nextCols = Math.max(1, Math.floor(rect.width / PITCH));
+    const nextRows = Math.max(1, Math.floor(rect.height / PITCH));
+    const nextSize = rect.width && rect.height ? nextCols * nextRows : 0; // (hidden: nothing to draw)
+    // A resize keeps what's there (a VS mode's score bar nudging the board a few pixels used to
+    // start it over from a fresh scatter, the whole pattern jumping): each block stays at its
+    // column and row, any new ones scattered in
+    if (size && nextSize && layers.length) layers = layers.map(({ pass, weight }) => ({ pass: remap(pass, nextCols, nextRows), weight }));
+    else {
+      layers = [];
+      fadeStart = 0;
+    }
+    cols = nextCols;
+    rows = nextRows;
+    size = nextSize;
+    if (!layers.length) layers = [{ pass: createPass(), weight: 1 }];
     shown = new Uint8Array(0); // (the resize cleared it)
     draw();
+  }
+  function remap(pass, nc, nr) {
+    const data = new Uint8Array(nc * nr);
+    const glow = new Float32Array(nc * nr);
+    for (let r = 0; r < nr; r++) {
+      for (let c = 0; c < nc; c++) {
+        const j = r * nc + c;
+        if (c < cols && r < rows) {
+          data[j] = pass.data[r * cols + c];
+          glow[j] = pass.glow[r * cols + c];
+        } else data[j] = Math.random() < FILL ? 1 : 0;
+      }
+    }
+    let count = 0;
+    for (let i = 0; i < data.length; i++) count += data[i];
+    let misplaced = 0;
+    for (let i = count; i < data.length; i++) misplaced += data[i];
+    return { data, glow, writePtr: 0, readPtr: data.length - 1, misplaced };
   }
 
   // SPECTRUM: every block cycles through the hues like the bits do, at its own speed and phase

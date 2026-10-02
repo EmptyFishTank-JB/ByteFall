@@ -96,10 +96,15 @@
     render();
     requestAnimationFrame(loop);
   }
+  // (X, Esc or the phone's back: back to SETTINGS, where it was opened from)
   function close() {
     el.hidden = true;
     document.body.classList.remove('player-open');
     Music.setFullMix(false);
+    if (typeof setSettingsOpen === 'function') {
+      setSettingsOpen(true);
+      document.getElementById('open-player-btn').focus({ preventScroll: true });
+    }
   }
 
   document.getElementById('open-player-btn').addEventListener('click', open);
@@ -110,7 +115,7 @@
     else if (e.key === ' ') { e.preventDefault(); playBtn.click(); }
     else if (e.key === 'ArrowRight') { Music.skip(1); after(); }
     else if (e.key === 'ArrowLeft') { Music.skip(-1); after(); }
-    e.stopPropagation();
+    e.stopImmediatePropagation(); // (not on to SETTINGS' own Esc, which would close it again)
   }, true);
   playBtn.addEventListener('click', () => {
     Music.toggle();
