@@ -663,7 +663,8 @@ crows), and MIGRATING BIRDS fly over: geese in a V (honking now and then), ducks
 line, a loose flock of songbirds (robins, bluebirds, goldfinches or cardinals) or
 swallows swooping fast. About a third of the time one drops out, lands, pecks about and
 calls (HONK! QUACK! TWEET! CHIRP!) to the nearest bot, which reacts, then flies off after
-the others; poked, the whole flock bolts up and away. HALLOWEEN also sends the GREMLIN: a little green creature with big
+the others; poked, the whole flock bolts up and away. Besides the scary tree, a bot may push in a JACK O' LANTERN: a carved grin lit from inside, its
+candle flickering; poked, it flares up and cackles (HAHAHA!), the bots near it jumping. HALLOWEEN also sends the GREMLIN: a little green creature with big
 ears, red eyes and a toothy grin that scurries up to one bot after another to prank it (hehehe; the
 bot jumps), then runs off; poked, it screeches (SKREE!) and bolts. Now and then (15% of NOVEMBER's visits, and HALLOWEEN's) a FOG
 rolls in instead (on HALLOWEEN, scarier: bare, twisted trees only, and out of the fog comes either the
@@ -795,7 +796,7 @@ stack heights the game settles on, eased between as the intensity moves.
 
 ### Seasonal stuff (ideas, by the player's own date)
 
-Done: **HALLOWEEN** (costumes, candy snacks, eight visitors, the scary tree),
+Done: **HALLOWEEN** (costumes, candy snacks, nine visitors with the gremlin, the scary tree and the jack o' lantern, the fog),
 **NOVEMBER** (the turkey, the crows, migrating birds), and the stacked December and new year
 seasons: **WINTER**, **HANUKKAH**, **CHRISTMAS**, **KWANZAA**, **NEW YEAR'S
 EVE** and **NEW YEAR**. Each new season plugs into the same

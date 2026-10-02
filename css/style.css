@@ -2692,6 +2692,11 @@ html.page-twinkle .page-bg { display: block; }
 /* WINTER and the holidays: the scenery shakes (v-creak) or its flames flare (v-glow) when poked */
 .visitor-scenery.v-creak svg { animation: visitor-shake 0.1s steps(1) 6 alternate; }
 .visitor-scenery.v-glow svg { animation: visitor-glow 0.9s steps(3) 1; }
+/* The JACK O' LANTERN glows from inside (a warm halo that flickers with its candle); poked, it flares */
+.visitor-jacklantern svg { filter: drop-shadow(0 0 3px rgba(255, 160, 40, 0.55)); }
+.visitor-jacklantern.step svg { filter: drop-shadow(0 0 2px rgba(255, 160, 40, 0.4)); }
+.visitor-jacklantern.v-creak svg { animation: jack-flare 0.9s ease-out 1; }
+@keyframes jack-flare { 0% { filter: drop-shadow(0 0 10px rgba(255, 180, 40, 1)) brightness(1.5); } 100% { filter: drop-shadow(0 0 3px rgba(255, 160, 40, 0.55)); } }
 @keyframes visitor-glow { 0%, 100% { filter: none; } 50% { filter: brightness(1.5) drop-shadow(0 0 3px #ffd23f); } }
 .visitor-evergreen.v-blink .f-a { animation: visitor-blink 0.24s steps(1) 5; }
 @keyframes visitor-blink { 50% { opacity: 0; } }

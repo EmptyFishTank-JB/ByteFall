@@ -124,6 +124,13 @@ function createVisitors(api) {
       a: ['g..........g', 'gg........gg', '.ggg.gg.ggg.', '..gGggggGg..', '..ggeggegg..', '..gggggggg..', '..gkwkwkwg..', '...gbbbbg...', '..g.bbbb.g..', '....g..g....', '...gg..gg...'],
       b: { 8: '...gbbbbg...', 9: '...g....g...', 10: '..gg....gg..' },
     },
+    // HALLOWEEN's JACK O' LANTERN (pushed in, like the scary tree): a carved grin lit from inside,
+    // the candle flickering (a and b)
+    jacklantern: {
+      pal: { o: '#ff8a1f', O: '#c4580a', s: '#3f8f3a', l: '#6cc24a', y: '#ffd23f', Y: '#ff9d00' },
+      a: ['......ss......', '.....ssl......', '...OOOsOOO....', '..OooOoOooO...', '.OoyyoOoyyoO..', '.OoyyoOoyyoO..', 'OooooOyOoooOO.', 'OooooYYYooooO.', 'OoyoooooooyoO.', 'OoyyYyYyYyyoO.', '.OoyyyyyyyoO..', '..OooOoOooO...', '...OOOOOOO....'],
+      b: { 4: '.OoYYoOoYYoO..', 5: '.OoYYoOoYYoO..', 7: 'OooooyyyooooO.', 9: 'OoYYyYyYyYYoO.', 10: '.OoYYYYYYYoO..' },
+    },
     // NOVEMBER's FOG: the trees that show through it (dark silhouettes against the mist) and the
     // FOG WANDERER, a pale hooded figure with glowing eyes, its hem trailing
     pine: {
@@ -301,6 +308,7 @@ function createVisitors(api) {
     songbird: { speed: 40, frameMs: 0, bird: true, wave: 5, waveMs: 170, beatMs: 90, call: 'TWEET!', poke: 'flush' },
     swallow: { speed: 85, frameMs: 0, bird: true, wave: 8, waveMs: 520, beatMs: 110, call: 'CHIRP!', poke: 'flush' },
     tree: { speed: 0, frameMs: 0, poke: 'creak' },
+    jacklantern: { speed: 0, frameMs: 260, poke: 'cackle' },
     penguin: { speed: 13, frameMs: 240, sway: 1, bob: 1, poke: 'squawk' },
     reindeer: { speed: 30, frameMs: 180, poke: 'snort' },
     dreidel: { speed: 38, frameMs: 90, poke: 'spin' },
@@ -320,7 +328,7 @@ function createVisitors(api) {
     hanukkah: ['dreidel'],
   };
   // The scenery each season has pushed in (up to two pieces at once, one of each)
-  const SCENERY = { halloween: 'tree', winter: 'snowman', christmas: 'evergreen', hanukkah: 'menorah', kwanzaa: 'kinara', nye: 'sign', newyear: 'sign' };
+  const SCENERY = { halloween: ['tree', 'jacklantern'], winter: 'snowman', christmas: 'evergreen', hanukkah: 'menorah', kwanzaa: 'kinara', nye: 'sign', newyear: 'sign' };
   const seasons = () => (typeof Season !== 'undefined' ? Season.active() : []);
   const visits = () => seasons().flatMap((id) => VISITS[id] || []);
 
@@ -762,7 +770,7 @@ function createVisitors(api) {
   function nextScenery() {
     const here = standing();
     if (here.length >= 2) return null;
-    const kinds = [...new Set(seasons().map((id) => SCENERY[id]).filter(Boolean))].filter((k) => !here.some((v) => v.kind === k));
+    const kinds = [...new Set(seasons().flatMap((id) => [].concat(SCENERY[id] || [])))].filter((k) => !here.some((v) => v.kind === k));
     return kinds.length ? pick(kinds) : null;
   }
   // (ok(x): whether its pusher, stopping at x beside it, has room there among the bots)
@@ -808,6 +816,10 @@ function createVisitors(api) {
         say(v, 'creeeak', 1000);
         if (Season.is('halloween')) add('bat', v.x + v.w / 2, pick([-1, 1]), { fly: 40, speed: rand(60, 90), bolt: true });
       } else if (k.poke === 'brrr') say(v, 'brrr!', 900);
+      else if (k.poke === 'cackle') { // (it flares up and cackles; the bots near it jump)
+        say(v, pick(['HAHAHA!', 'MWAHAHA!', 'BOO!']), 1200);
+        api.startle(v, 70);
+      }
       else if (k.poke === 'jingle') { say(v, 'jingle!', 900); v.el.classList.add('v-blink'); setTimeout(() => v.el.classList.remove('v-blink'), 1200); }
       else if (k.poke === 'cheer') { say(v, Season.is('nye') ? 'SOON!' : 'HAPPY NEW YEAR!', 1400); firework(); }
       api.botEvent(`${v.kind}-pokes`);
