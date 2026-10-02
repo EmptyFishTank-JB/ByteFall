@@ -3331,6 +3331,16 @@ boardEl.addEventListener('pointerup', (e) => {
 boardEl.addEventListener('pointercancel', (e) => { if (e.pointerId === aimPointer) endAim(); });
 
 // WANDERING BOTS: the CPUs strolling along the bottom of the game card (wanderers.js), on by default
+// GAME MUSIC: LAYERED (building with the stack) or FULL (every layer in)
+const musicLayersBtn = document.getElementById('music-layers-btn');
+function updateMusicLayersBtn() {
+  musicLayersBtn.textContent = `GAME MUSIC: ${Music.isFullInGame() ? 'FULL' : 'LAYERED'}`;
+}
+musicLayersBtn.addEventListener('click', () => {
+  Music.setFullInGame(!Music.isFullInGame());
+  updateMusicLayersBtn();
+});
+updateMusicLayersBtn();
 const wanderersBtn = document.getElementById('wanderers-btn');
 let wanderersOn = storage.get('bytefall-wanderers') !== 'off';
 // (not while the start screen covers the card: start.js starts them when it goes)

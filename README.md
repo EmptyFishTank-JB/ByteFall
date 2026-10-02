@@ -755,7 +755,9 @@ SURPRISED, LOVE (red heart eyes), DIZZY and LAUGH. The small faces come from
 
 ## Music player
 
-SETTINGS → PLAYLIST → **OPEN MUSIC PLAYER** opens the soundtrack on its own,
+SETTINGS → **GAME MUSIC**: LAYERED (the default: the music builds with your stack, more layers
+coming in as the danger climbs) or FULL (every layer in the whole game long, as in the music
+player; STACK OVERFLOW then runs at its top speed). SETTINGS → PLAYLIST → **OPEN MUSIC PLAYER** opens the soundtrack on its own,
 over the whole page (its ×, Esc or the phone's back return to SETTINGS): every track plays as its full mix (all layers in,
 whatever the game was doing), with a big visualizer: tap it to cycle SPECTRUM (LED bars), WAVE, OSCILLOSCOPE (a few cycles held still on a rising zero crossing, over a graticule), RADIAL (spectrum bars around a ring that swells with the bass), PARTICLES (a liquid blob morphing with the spectrum, shedding particles as it gets louder) and VECTORSCOPE (left against right turned 45°, with a phase-correlation meter; every track is in stereo; a mono sound shows as a vertical line at +1), its name shown top left. The visualizers follow the theme (its bit and accent colors; a cycling rainbow in SPECTRUM). Also: SPECTROGRAM (the spectrum as a heat-map scrolling left), LEVEL METERS (L / R LED ladders with peak holds), MATRIX RAIN (0s and 1s falling, each column a band), BIT GRID (a 7x7 board stacking bits per band, a full column flashing), SYNTHWAVE GRID (a sun on the horizon, and one wireframe landscape rolling toward you: flat down the middle like a road, rising at the sides into jagged spikes that travel with the grid, tallest at the lower outer edges and fading out toward the vanishing point; the music lifts them, the bass nearest the road and the treble at the edges), PLASMA (a color field warped by the bass) and TUNNEL (rings rushing toward you on the beat). The small one in SETTINGS has the ones that read at its height: SPECTRUM, WAVE, OSCILLOSCOPE, SPECTROGRAM, LEVEL METERS and PLASMA;
 PREVIOUS / PLAY-PAUSE / NEXT, REPEAT / SEQUENCE / SHUFFLE, the 16-slot track

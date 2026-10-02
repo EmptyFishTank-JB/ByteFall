@@ -51,6 +51,8 @@ const Music = (() => {
   let targetIntensity = 0;
   let gameIntensity = 0; // what the game asks for; the MUSIC PLAYER's full mix overrides it
   let fullMix = false;
+  // SETTINGS → GAME MUSIC: FULL plays every layer in during the game too (LAYERED: they build with the stack)
+  let alwaysFull = (() => { try { return localStorage.getItem('bytefall-music-full') === 'on'; } catch (e) { return false; } })();
   let ctx = null;
   let analyser = null;
   let stereo = null; // [left, right] analysers
@@ -272,12 +274,18 @@ const Music = (() => {
     },
     setIntensity(value) {
       gameIntensity = Math.max(0, Math.min(1, value));
-      targetIntensity = fullMix ? 1 : gameIntensity;
+      targetIntensity = fullMix || alwaysFull ? 1 : gameIntensity;
     },
     // MUSIC PLAYER: every layer in, whatever the game is doing
     setFullMix(on) {
       fullMix = on;
-      targetIntensity = on ? 1 : gameIntensity;
+      targetIntensity = on || alwaysFull ? 1 : gameIntensity;
+    },
+    isFullInGame: () => alwaysFull,
+    setFullInGame(on) {
+      alwaysFull = on;
+      try { localStorage.setItem('bytefall-music-full', on ? 'on' : 'off'); } catch (e) {}
+      targetIntensity = fullMix || alwaysFull ? 1 : gameIntensity;
     },
     isPlaying: () => !!timer,
     // The next (dir 1) or previous (-1) playable track; NEXT in SHUFFLE picks one at random
