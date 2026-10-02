@@ -2831,10 +2831,14 @@ function pauseConfirm(btn, apply) {
 document.getElementById('pause-resume').addEventListener('click', resumeMatch);
 document.getElementById('pause-restart').addEventListener('click', (e) => pauseConfirm(e.currentTarget, () => { if (mode === 'vs') restartQueued = true; }));
 document.getElementById('pause-exit').addEventListener('click', (e) => pauseConfirm(e.currentTarget));
-document.getElementById('pause-records').addEventListener('click', () => setRecordsOpen(true));
+document.getElementById('pause-records').addEventListener('click', () => setRecordsOpen(true, rulesPane));
+document.getElementById('pause-exploits').addEventListener('click', () => setRecordsOpen(true, 'exploits'));
+document.getElementById('pause-store').addEventListener('click', () => setRecordsOpen(true, 'store'));
 document.getElementById('pause-settings').addEventListener('click', () => setSettingsOpen(true));
 document.getElementById('pause-menu').addEventListener('click', () => showHome());
-document.getElementById('home-records').addEventListener('click', () => setRecordsOpen(true));
+document.getElementById('home-records').addEventListener('click', () => setRecordsOpen(true, rulesPane));
+document.getElementById('home-exploits').addEventListener('click', () => setRecordsOpen(true, 'exploits'));
+document.getElementById('home-store').addEventListener('click', () => setRecordsOpen(true, 'store'));
 document.getElementById('home-settings').addEventListener('click', () => setSettingsOpen(true));
 document.addEventListener('keydown', (e) => {
   if ((e.key !== 'Escape' && e.key !== 'p' && e.key !== 'P') || panelOpen() || homeOpen) return;
@@ -4137,8 +4141,15 @@ function renderRecords() {
   }
 }
 
+// RULES & RECORDS (its two tabs), EXPLOITS and STORE: one card, opened on its own by each's
+// button (main menu, pause screen); EXPLOITS and STORE show alone, under their own title
+const SOLO_PANES = { exploits: '// EXPLOITS', store: '// STORE' };
+let rulesPane = 'rules'; // (the RULES & RECORDS tab last open)
 function showMenuPane(pane) {
   menuPane = pane;
+  if (!SOLO_PANES[pane]) rulesPane = pane;
+  recordsEl.classList.toggle('solo', !!SOLO_PANES[pane]);
+  document.getElementById('records-title').textContent = SOLO_PANES[pane] || '// RULES & RECORDS';
   recordsEl.querySelectorAll('.menu-tabs button').forEach((b) => {
     b.setAttribute('aria-selected', String(b.dataset.pane === pane));
   });

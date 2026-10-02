@@ -1475,6 +1475,9 @@ body.vs-mode header #mode-info { display: none; }
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
 }
 .records[hidden] { display: none; }
+/* EXPLOITS and STORE have buttons of their own (main menu, pause screen): no tabs for them here, and
+   opened on their own the card has no tabs at all */
+.records .menu-tabs [data-pane="exploits"], .records .menu-tabs [data-pane="store"], .records.solo .menu-tabs { display: none; }
 
 .records-tabs { display: flex; gap: 4px; margin-bottom: 10px; }
 .records-tabs button {

@@ -189,8 +189,9 @@ day you missed). DAILY SWEEP shows today's daily games and starts over at local
 midnight. Achievements for a run in a row (SURGICAL, PICKPOCKET) show your best
 run so far. Unearned rows in RECORDS say which kind of count they show.
 
-The menu icon (lines / trophy, top left, on the main menu; in a game RULES & RECORDS on the pause screen) opens four tabs, each its own card:
-**RULES**, **RECORDS**, **EXPLOITS** and **STORE**. RECORDS has level and DECRYPTOR rank,
+RULES & RECORDS (main menu and pause screen) opens a card with two tabs, **RULES** and
+**RECORDS**; **EXPLOITS** and **STORE** have buttons of their own beside it (main menu and pause
+screen), each opening the same card on its own, under its own title and with no tabs. RECORDS has level and DECRYPTOR rank,
 every unlock and achievement with a progress tracker, and lifetime stats
 (UNLOCKS / ACHIEVEMENTS / STATS). New unlocks, level-ups
 and achievements pop up as they happen (achievements stay up about 5.5 seconds, like a console's, before crumbling; the rest about 2). Progress is saved in the browser
@@ -293,7 +294,7 @@ EXPLOIT READY // its name over the grid's overflow row, staying there (steady) u
 (the layer it counts down to, as a bit is [n]), flashing with the line under the
 board when the next drop brings one.
 
-The tutorial opens on a welcome (no step number, BEGIN), then 24 steps; on a step that asks
+The tutorial opens on a welcome (no step number, BEGIN), then 26 steps; on a step that asks
 for a tap, the screen dims a little but for what to tap and the banner (a 0.25s fade); a step can take its
 drop in more than one column (step 3: column 4 or 7). The tutorial's banner: BOT sits in the top-left corner of its frame with its words
 wrapping around it and on under it; BACK and NEXT sit under the frame, outside it. The
@@ -307,7 +308,7 @@ the EXPLOITS step pulses SLOTS and the cards; the menu steps' banners sit mid-sc
 THE EXPLOIT BUTTON: under the grid in its own row, below the drop buttons with a gap
 between (it's not one of them), a square the size of a grid square with the exploit's
 symbol in the middle; FREE! beside it. With nothing held, tapping it just buzzes: the EXPLOITS
-tab (the loadout) opens only from RULES & RECORDS. The HUD's labels (SCORE ... CURRENT) are brighter.
+card (the loadout) opens only from its EXPLOITS button. The HUD's labels (SCORE ... CURRENT) are brighter.
 
 The gear/speaker icon in the corner opens the settings: sound and music on or
 off, whether the drop buttons sit under or above the grid, the color theme
@@ -525,14 +526,14 @@ and asks you to tap what it names; whatever it's talking about pulses, and only
 the lesson's drop column can be pressed (the others dim). No lesson drops a bit
 into the column of its own number, so it never looks like it has to. After each
 drop it says what happened and shows the points: each link's bits, (10 +
-number) × the chain, NIBBLE bonuses and the total. Twenty-four steps: the terminal,
+number) × the chain, NIBBLE bonuses and the total. Twenty-six steps: the terminal,
 CURRENT (the bordered middle panel), a line across, a line down, SCORE, a chain with a NIBBLE, CHAIN,
 peeling a layer twice until it reveals its bit, the ======== line, ENCRYPT IN (the HUD: BEST over SCORE left, CURRENT middle, ENCRYPT IN over CHAIN right),
 an exploit (arm the WORM VIRUS waiting in the EXPLOIT button, then drop it on a
 tall column), PAUSE (the top-left button, as in a game) and the pause screen (in the tutorial: RESUME, RULES &
-RECORDS and SETTINGS; no RESTART or MAIN MENU, the banner's EXIT leaves), RULES & RECORDS with its
-RULES, RECORDS and EXPLOITS (loadout) tabs, closing the card with ← BACK (a tap outside does
-nothing), SETTINGS and what's in it, ← BACK and RESUME, then PLAY CLASSIC or RULES. Over an
+RECORDS, SETTINGS, EXPLOITS and STORE; no RESTART or MAIN MENU, the banner's EXIT leaves), RULES &
+RECORDS with its RULES and RECORDS tabs, closing the card with ← BACK (a tap outside does
+nothing), EXPLOITS (the loadout) and ← BACK, SETTINGS and what's in it, ← BACK and RESUME, then PLAY CLASSIC or RULES. Over an
 open menu the banner moves to the bottom of the screen. BACK (from step 2 on)
 redoes the step just played, or before a drop goes to the step before, putting
 the board, bits, score, chain and exploit back as they were. EXIT leaves at any
@@ -559,7 +560,7 @@ grid, and the picked mode's panel: its name, what it is, its options (CLASSIC's 
 DAILY's game, PUZZLE's puzzle), your best (DAILY: today's official score once played) and
 PLAY. With a game of that mode under way (a drop made; paused) PLAY reads RESUME and carries
 on; picking another mode then asks first (CONFIRM?), as a restart does, and resets without the
-melt (the board is hidden). Under the panel, RULES & RECORDS and SETTINGS buttons open those
+melt (the board is hidden). Under the panel, RULES & RECORDS and SETTINGS, then EXPLOITS and STORE buttons open those
 panels, and TUTORIAL under them (as wide as one of them, centered; a game under way asks
 first), each panel a card of its own covering the game card: ← BACK (or Esc) closes it, a tap
 beside it doesn't, and the corner icons hide while one is open. In a game (not the tutorial) the game screen is the title, the mode's
@@ -570,7 +571,7 @@ nothing to pause: VS's setup screen), and SETTINGS waits on the pause screen.
 **PAUSE** (every mode but the tutorial; the top-left icon, or Esc / P): the board is covered
 as on VS's setup screen and the clocks stop (BLITZ's, the CPU's): RESUME, RESTART (VS: a new
 match with the same options) and, in VS, EXIT (back to its setup screen), the last two taking
-a second tap; RULES & RECORDS and SETTINGS open over it; MAIN MENU goes to the menu with the
+a second tap; RULES & RECORDS, SETTINGS, EXPLOITS and STORE open over it; MAIN MENU goes to the menu with the
 game still paused. A pause pressed mid-drop opens once the drop finishes. The game over box
 has MAIN MENU under NEW SESSION.
 

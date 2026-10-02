@@ -22,7 +22,7 @@ const Tutorial = (() => {
   // the welcome ahead of the steps (not counted, no number; BEGIN starts step 1).
   const STEPS = [
     {
-      text: 'Welcome to BYTEFALL! This tutorial will help you understand how the game is played, along with some other useful information. There are 24 steps! Don’t worry, they’re not too long, and despite all of the numbers, there’s really no math required as long as you can count to 7! Let’s begin!',
+      text: 'Welcome to BYTEFALL! This tutorial will help you understand how the game is played, along with some other useful information. There are 26 steps! Don’t worry, they’re not too long, and despite all of the numbers, there’s really no math required as long as you can count to 7! Let’s begin!',
       board: EMPTY, bits: [], intro: true, place: 'bottom', mood: 'happy',
     },
     {
@@ -88,7 +88,7 @@ const Tutorial = (() => {
       board: EMPTY, bits: [], closeMenus: true, tap: '#records-btn', pass: true,
     },
     {
-      text: 'The pause screen has RESUME, RESTART, RULES & RECORDS, SETTINGS and the MAIN MENU (and EXIT, in VS). RULES & RECORDS and SETTINGS are on the MAIN MENU too. Tap RULES & RECORDS.',
+      text: 'The pause screen has RESUME, RESTART, RULES & RECORDS, SETTINGS, EXPLOITS, the STORE and the MAIN MENU (and EXIT, in VS). All but RESUME and RESTART are on the MAIN MENU too. Tap RULES & RECORDS.',
       paused: true, closeMenus: true, tap: '#pause-records', pass: true, float: true,
     },
     {
@@ -100,11 +100,19 @@ const Tutorial = (() => {
       paused: true, pane: 'records', pulse: ['.menu-tabs [data-pane="records"]'], float: 'middle', next: true,
     },
     {
-      text: 'The EXPLOITS tab is your loadout. You can only earn exploits that are in a slot: SLOTS, at the top, counts the slots you’ve filled and the ones you have. Tap an unlocked card to put it in a free slot, or tap it again to take it out. More slots and exploits unlock as you level up, and the loadout is locked from a session’s first drop until it ends.',
-      paused: true, pane: 'exploits', pulse: ['.menu-tabs [data-pane="exploits"]', '#slot-info', '.hack-item'], float: true, next: true,
+      text: 'Tapping outside a card won’t close it: tap ← BACK, at the top left of the card.',
+      paused: true, pane: 'records', tap: '.card-back[data-close="records"]', pass: true, float: 'middle',
     },
     {
-      text: 'Tapping outside a card won’t close it: tap ← BACK, at the top left of the card.',
+      text: 'Now tap EXPLOITS. (The STORE beside it has REMOVE ADS and FULL ACCESS.)',
+      paused: true, closeMenus: true, tap: '#pause-exploits', pass: true, float: true,
+    },
+    {
+      text: 'EXPLOITS is your loadout. You can only earn exploits that are in a slot: SLOTS, at the top, counts the slots you’ve filled and the ones you have. Tap an unlocked card to put it in a free slot, or tap it again to take it out. More slots and exploits unlock as you level up, and the loadout is locked from a session’s first drop until it ends.',
+      paused: true, pane: 'exploits', pulse: ['#slot-info', '.hack-item'], float: true, next: true,
+    },
+    {
+      text: 'Tap ← BACK to close it.',
       paused: true, pane: 'exploits', tap: '.card-back[data-close="records"]', pass: true, float: 'middle',
     },
     {

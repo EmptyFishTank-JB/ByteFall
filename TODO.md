@@ -46,7 +46,6 @@ Ideas queued for later (not built yet).
 - **CPU customization**: simple things for the bots to wear, e.g. retro-futuristic glasses.
 - **HALLOWEEN: a big SPIDER visitor** (the size of the viruses) that walks around and jumps about.
 - **HALLOWEEN: a pushed-in JACK O' LANTERN** (scenery a bot pushes onto the card, like the scary tree).
-- **RULES & RECORDS**: pull EXPLOITS and STORE out into buttons of their own (not tabs in that card).
 - **Lv # on the THEME and FONT buttons**: show the level each locked one unlocks at, the way the
   PLAYLIST's tracks do.
 - **SOUND PROFILES section in SETTINGS**: pick a set of game sound effects; the current one is the

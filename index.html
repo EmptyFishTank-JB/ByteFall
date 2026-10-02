@@ -26,8 +26,8 @@
   } catch (e) {}
 </script>
 <title>BYTEFALL // decryption terminal</title>
-<script src="js/fonts.js?v=275"></script>
-<link rel="stylesheet" href="css/style.css?v=275">
+<script src="js/fonts.js?v=276"></script>
+<link rel="stylesheet" href="css/style.css?v=276">
 </head>
 <body>
   <!-- Dev: TWINKLE BACKGROUND (grid-bg.js): the starlight behind the whole game, off by default -->
@@ -83,7 +83,7 @@
       </button>
       <div id="records" class="records" hidden>
         <div class="card-top">
-        <div class="card-head"><button type="button" class="card-back" data-close="records">&larr; BACK</button><span>// RULES &amp; RECORDS</span></div>
+        <div class="card-head"><button type="button" class="card-back" data-close="records">&larr; BACK</button><span id="records-title">// RULES &amp; RECORDS</span></div>
         <div class="menu-tabs" role="tablist">
           <button type="button" role="tab" data-pane="rules">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 2 H15 L19 6 V22 H6 Z M15 2 V6 H19 M9 11 H16 M9 14.5 H16 M9 18 H13" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
@@ -337,6 +337,10 @@
           <button type="button" id="home-records">RULES &amp; RECORDS</button>
           <button type="button" id="home-settings">SETTINGS</button>
         </div>
+        <div class="difficulty home-row">
+          <button type="button" id="home-exploits">EXPLOITS</button>
+          <button type="button" id="home-store">STORE</button>
+        </div>
         <div class="difficulty home-row home-row-single">
           <button type="button" id="home-tutorial">TUTORIAL</button>
         </div>
@@ -538,6 +542,10 @@
               <button type="button" id="pause-records">RULES &amp; RECORDS</button>
               <button type="button" id="pause-settings">SETTINGS</button>
             </div>
+            <div class="difficulty pause-row">
+              <button type="button" id="pause-exploits">EXPLOITS</button>
+              <button type="button" id="pause-store">STORE</button>
+            </div>
             <button type="button" class="pause-menu" id="pause-menu">MAIN MENU</button>
           </div>
         </div>
@@ -657,39 +665,39 @@
     </div>
   </div>
 
-  <script src="js/unlocks.js?v=275"></script>
-  <script src="js/progress.js?v=275"></script>
-  <script src="js/music/output.js?v=275"></script>
-  <script src="js/music/mixes.js?v=275"></script>
-  <script src="js/sfx.js?v=275"></script>
-  <script src="js/music/music-bytefall-theme.js?v=275"></script>
-  <script src="js/music/music-sleep-mode.js?v=275"></script>
-  <script src="js/music/music-brute-force.js?v=275"></script>
-  <script src="js/music/music-deep-web.js?v=275"></script>
-  <script src="js/music/music-zero-day.js?v=275"></script>
-  <script src="js/music/music-system-restore.js?v=275"></script>
-  <script src="js/music/music-night-drive.js?v=275"></script>
-  <script src="js/music/music-standby-mode.js?v=275"></script>
-  <script src="js/music/music-core-dump.js?v=275"></script>
-  <script src="js/music/music-handshake.js?v=275"></script>
-  <script src="js/music/music-stack-overflow.js?v=275"></script>
-  <script src="js/music/music.js?v=275"></script>
-  <script src="js/data/puzzles.js?v=275"></script>
-  <script src="js/data/daily-puzzles.js?v=275"></script>
-  <script src="js/cpu.js?v=275"></script>
-  <script src="js/fx.js?v=275"></script>
-  <script src="js/viz.js?v=275"></script>
-  <script src="js/minibot.js?v=275"></script>
-  <script src="js/seasons.js?v=275"></script>
-  <script src="js/visitors.js?v=275"></script>
-  <script src="js/wanderers.js?v=275"></script>
-  <script src="js/tutorial.js?v=275"></script>
-  <script src="js/script.js?v=275"></script>
-  <script src="js/grid-bg.js?v=275"></script>
-  <script src="js/player.js?v=275"></script>
-  <script src="js/store.js?v=275"></script>
-  <script src="js/start.js?v=275"></script>
-  <script src="js/place.js?v=275"></script>
-  <script src="js/saver.js?v=275"></script>
+  <script src="js/unlocks.js?v=276"></script>
+  <script src="js/progress.js?v=276"></script>
+  <script src="js/music/output.js?v=276"></script>
+  <script src="js/music/mixes.js?v=276"></script>
+  <script src="js/sfx.js?v=276"></script>
+  <script src="js/music/music-bytefall-theme.js?v=276"></script>
+  <script src="js/music/music-sleep-mode.js?v=276"></script>
+  <script src="js/music/music-brute-force.js?v=276"></script>
+  <script src="js/music/music-deep-web.js?v=276"></script>
+  <script src="js/music/music-zero-day.js?v=276"></script>
+  <script src="js/music/music-system-restore.js?v=276"></script>
+  <script src="js/music/music-night-drive.js?v=276"></script>
+  <script src="js/music/music-standby-mode.js?v=276"></script>
+  <script src="js/music/music-core-dump.js?v=276"></script>
+  <script src="js/music/music-handshake.js?v=276"></script>
+  <script src="js/music/music-stack-overflow.js?v=276"></script>
+  <script src="js/music/music.js?v=276"></script>
+  <script src="js/data/puzzles.js?v=276"></script>
+  <script src="js/data/daily-puzzles.js?v=276"></script>
+  <script src="js/cpu.js?v=276"></script>
+  <script src="js/fx.js?v=276"></script>
+  <script src="js/viz.js?v=276"></script>
+  <script src="js/minibot.js?v=276"></script>
+  <script src="js/seasons.js?v=276"></script>
+  <script src="js/visitors.js?v=276"></script>
+  <script src="js/wanderers.js?v=276"></script>
+  <script src="js/tutorial.js?v=276"></script>
+  <script src="js/script.js?v=276"></script>
+  <script src="js/grid-bg.js?v=276"></script>
+  <script src="js/player.js?v=276"></script>
+  <script src="js/store.js?v=276"></script>
+  <script src="js/start.js?v=276"></script>
+  <script src="js/place.js?v=276"></script>
+  <script src="js/saver.js?v=276"></script>
 </body>
 </html>
