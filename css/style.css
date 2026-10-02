@@ -1261,7 +1261,7 @@ body.vs-mode .hud > .stat:not(.cpu-stat), body.vs-mode .hud-bits .stat { padding
 /* CURRENT in VS: the whole bit in its box, as in the other modes */
 body.vs-mode .hud-bits #current-piece { width: 30px; height: 30px; margin: 0; flex: none; font-size: 15px; }
 body.vs-mode .hud-bits, body.vs-mode .hud-bits .stat { min-height: 0; }
-body.vs-mode .vs-status { font-size: 10px; white-space: nowrap; overflow: hidden; }
+body.vs-mode .vs-status { font-size: 10px; white-space: nowrap; overflow: hidden; height: 14px; line-height: 14px; } /* (one fixed height: its text shrinking to fit a longer game type never moves the board) */
 .incoming {
   position: absolute;
   top: 2px;

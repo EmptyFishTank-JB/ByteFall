@@ -557,6 +557,7 @@ function fitBoard() {
   fitStatValues();
   alignHeader();
   const frame = document.querySelector('.board-frame');
+  const was = parseFloat(boardWrapEl.style.maxWidth) || 0;
   boardWrapEl.style.maxWidth = '';
   const cssMax = boardWrapEl.getBoundingClientRect().width;
   // (the card's contents, not the card: on phones the card fills the screen height)
@@ -572,7 +573,10 @@ function fitBoard() {
   const pad = parseFloat(getComputedStyle(document.body).paddingTop) * 2;
   const ratio = frame.offsetHeight / frame.offsetWidth;
   const width = Math.max(MIN_BOARD, Math.min(cssMax, (viewportHeight() - pad - rest) / ratio));
-  boardWrapEl.style.maxWidth = `${Math.floor(width)}px`;
+  // (what's around the board is measured at the board's last size, and some of it, the buttons
+  // under it, follows its width: worked out again, it can land a pixel or two off, and every
+  // switch of game type nudged it. A change that small keeps the size it has.)
+  boardWrapEl.style.maxWidth = `${was && Math.abs(Math.floor(width) - was) < 3 && was <= cssMax ? was : Math.floor(width)}px`;
   // The HUD's outer edges line up with the grid card's (not in VS, which lays out its own; and
   // no narrower than its boxes need, so nothing has to shrink to fit)
   // (VS too: its strip is then laid out again at that width)
@@ -2061,6 +2065,7 @@ function refreshVsPicks() {
 }
 
 function applyModeUi() {
+  boardEl.parentElement.classList.toggle('with-vs-bar', mode === 'vs'); // (the score bar's room, before the board's fitted)
   refreshVsPicks();
   document.querySelectorAll('.modes button').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.mode === topMode && mode !== 'tutorial');
@@ -3024,7 +3029,8 @@ function updateVsBar() {
   const vsBarEl = document.getElementById('vs-bar'); // (looked up here: updateHud can call this early)
   const on = mode === 'vs' && vsMode !== 'classic';
   vsBarEl.hidden = !on;
-  boardEl.parentElement.classList.toggle('with-vs-bar', on);
+  // (its room kept in every VS game type, CLASSIC too: the board stays one size as you switch)
+  boardEl.parentElement.classList.toggle('with-vs-bar', mode === 'vs');
   if (!on) return;
   const me = cpu ? matchPoints(vsMe, vsThem, score - vsCounted, 0)[0] : (vsMode === 'tug' ? vsPool : 0);
   const them = cpu ? vsThem : (vsMode === 'tug' ? vsPool : 0);
