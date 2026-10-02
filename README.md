@@ -663,7 +663,11 @@ crows), and MIGRATING BIRDS fly over: geese in a V (honking now and then), ducks
 line, a loose flock of songbirds (robins, bluebirds, goldfinches or cardinals) or
 swallows swooping fast. About a third of the time one drops out, lands, pecks about and
 calls (HONK! QUACK! TWEET! CHIRP!) to the nearest bot, which reacts, then flies off after
-the others; poked, the whole flock bolts up and away. Besides the scary tree, a bot may push in a JACK O' LANTERN: a carved grin lit from inside, its
+the others; poked, the whole flock bolts up and away. Any time of year, with music playing, a bot may walk in wearing HEADPHONES (1 in 10) or stop and
+put a pair on (15% of its stops): then it vibes, eyes closed and nodding on the beat while it
+stands (♪), its steps falling two to a beat as it walks (the beat read from the music engine, kept
+in sync as the tempo moves). It keeps them on until it leaves; if the music's switched off, it
+goes -_- and puts them away. Besides the scary tree, a bot may push in a JACK O' LANTERN: a carved grin lit from inside, its
 candle flickering; poked, it flares up and cackles (HAHAHA!), the bots near it jumping. HALLOWEEN also sends the GREMLIN: a little green creature with big
 ears, red eyes and a toothy grin that scurries up to one bot after another to prank it (hehehe; the
 bot jumps), then runs off; poked, it screeches (SKREE!) and bolts. Now and then (15% of NOVEMBER's visits, and HALLOWEEN's) a FOG

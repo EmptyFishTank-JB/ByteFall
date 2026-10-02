@@ -198,6 +198,13 @@ const Music = (() => {
       need: t.free ? '' : Progress.unlock(unlockId(t)).need,
     })),
     currentTrack: () => trackId,
+    // The beat, for whatever moves to the music (the wandering bots' headphones): a quarter note's
+    // length in seconds and how far into the current one the music is (0-1); null when silent
+    beat() {
+      if (!timer || !engine || !enabled) return null;
+      const at = step - (nextTime - ctx.currentTime) / engine.step; // (the 16th playing now)
+      return { period: engine.step * 4, phase: (((at / 4) % 1) + 1) % 1 };
+    },
     // The music's output analyser for the playlist visualizer; null when nothing is playing.
     getAnalyser: () => (timer ? analyser : null),
     getStereo: () => (timer ? stereo : null),

@@ -89,6 +89,46 @@ function createWanderers(lane, active = () => true) {
     const svg = typeof costume.svg === 'function' ? costume.svg(bot) : costume.svg;
     el.querySelector('.bot-body').insertAdjacentHTML('afterend', `<g class="costume">${svg}</g>`);
   }
+  // HEADPHONES: with music playing, a bot may arrive wearing a pair or pull them out and put them
+  // on, then vibe: eyes closed, nodding on the beat while it stands, its steps on the beat as it
+  // walks. It keeps them on until it leaves; if the music stops, -_- and they're put away.
+  const music = () => (typeof Music !== 'undefined' && Music.beat ? Music.beat() : null);
+  function phonesSvg(bot) {
+    const t = TOP[bot] || 3;
+    return pxc([[3, t - 1, 10, 1], [2, t, 1, 2], [13, t, 1, 2]], '#2b2f36') + pxc([[0, t + 2, 2, 4], [14, t + 2, 2, 4]], '#e0455f') + pxc([[0, t + 3, 1, 2], [15, t + 3, 1, 2]], '#ff8aa0');
+  }
+  function phonesOn(w, now, arriving = false) {
+    if (w.phones) return;
+    w.phones = true;
+    const body = w.el.querySelector('.costume') || w.el.querySelector('.bot-body');
+    body.insertAdjacentHTML('afterend', `<g class="headphones">${phonesSvg(w.bot)}</g>`);
+    w.el.classList.add('vibing');
+    syncBeat(w, music());
+    if (!arriving) {
+      w.state = 'idle';
+      w.until = now + rand(6000, 11000);
+      mood(w, 'happy', '♪');
+      botEvent('headphones');
+    }
+  }
+  function phonesOff(w) { // (the music stopped: -_-, and away they go)
+    if (!w.phones) return;
+    w.phones = false;
+    w.el.classList.remove('grooving');
+    mood(w, 'annoyed', '-_-');
+    setTimeout(() => {
+      const g = w.el.querySelector('.headphones');
+      if (g) g.remove();
+      w.el.classList.remove('vibing');
+    }, 700);
+  }
+  // (the nod and the steps on the beat: its length and where in it the music is)
+  function syncBeat(w, b) {
+    if (!b) return;
+    w.el.style.setProperty('--beat', `${b.period.toFixed(3)}s`);
+    w.el.style.setProperty('--beat-at', `${(-b.phase * b.period).toFixed(3)}s`);
+    w.beatSynced = performance.now();
+  }
   let partySeen = false;
   let forcePush = false; // (the dev tests: the next arrival pushes the tree)
   const RADIUS = 110; // how near a pop, a decrypt or a bolt startles the others
@@ -170,6 +210,7 @@ function createWanderers(lane, active = () => true) {
     };
     w.target = freeSpot(w);
     walkers.push(w);
+    if (music() && Math.random() < 0.1) phonesOn(w, now, true); // (walks in wearing a pair)
     const how = Math.random();
     let pushed = null;
     if (how < 0.10) { // (10%) pops into view, pixelating in; those near turn to it, startled
@@ -554,7 +595,13 @@ function createWanderers(lane, active = () => true) {
         nextDepart = now + rand(1200, 3000);
       }
     }
+    const beat = music();
     for (const w of walkers) {
+      if (w.phones) {
+        if (!beat && !w.leaving) phonesOff(w);
+        else if (beat && now - (w.beatSynced || 0) > 2000) syncBeat(w, beat); // (the tempo can move)
+        w.el.classList.toggle('grooving', w.phones && !!beat && w.state === 'idle');
+      }
       // (the lane got narrower, say on a turn of the phone: whoever stands past its end steps in)
       // (not one poked or startled half on the card: it reacts where it is, peeking in)
       if ((w.state === 'idle' || w.state === 'meet') && !w.leaving && w.x > laneW() - SIZE) w.x = Math.max(0, laneW() - SIZE);
@@ -599,6 +646,8 @@ function createWanderers(lane, active = () => true) {
             w.until = now + rand(900, 3200);
             mood(w, 'idle');
             if (foggy()) { if (Math.random() < 0.35) mood(w, 'worried', pick(['?', '...'])); } // (in the fog: keeping to itself, uneasy)
+            else if (w.phones && music()) { w.until = now + rand(4000, 8000); mood(w, 'happy', Math.random() < 0.4 ? '♪' : ''); } // (vibing a while)
+            else if (!w.phones && music() && Math.random() < 0.15) phonesOn(w, now);
             else if (snackColors().length && Math.random() < 0.3) snack(w, now); // (a seasonal snack)
             else if (Math.random() < 0.35) { // a hop or two, then on
               const hops = Math.random() < 0.5 ? 1 : 2;
@@ -680,6 +729,6 @@ function createWanderers(lane, active = () => true) {
   }
   start();
   // (start: after being switched back on; list / startle / crowd / dress / visit / snack / push: for the dev tests)
-  return { start, list: () => walkers, startle: (w) => startle(w, performance.now()), crowd: (n) => { want = n; nextReroll = performance.now() + 60000; }, dress, visit: (what) => visitors && visitors.visit(what), snack: (w) => snack(w, performance.now()), push: () => { forcePush = true; nextSpawn = 0; } };
+  return { start, phones: (w) => phonesOn(w, performance.now()), list: () => walkers, startle: (w) => startle(w, performance.now()), crowd: (n) => { want = n; nextReroll = performance.now() + 60000; }, dress, visit: (what) => visitors && visitors.visit(what), snack: (w) => snack(w, performance.now()), push: () => { forcePush = true; nextSpawn = 0; } };
 
 }

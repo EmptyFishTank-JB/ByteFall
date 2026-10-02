@@ -2433,6 +2433,15 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
 .walker[data-look="right"] .bot-face { animation: none; transform: translateX(1px); }
 .walker[data-look="left"] .bot-face { animation: none; transform: translateX(-1px); }
 .walker.running .bot { animation: bot-hop 0.14s steps(2) infinite; }
+/* HEADPHONES (wanderers.js): standing, eyes closed and nodding on the beat; walking, its steps on
+   the beat (two to a beat); --beat and --beat-at set from the music */
+.walker.grooving .eyes { display: none !important; }
+.walker.grooving .eyes-squint { display: inline !important; }
+.walker.grooving .bot { animation: vibe-nod var(--beat, 0.5s) ease-out var(--beat-at, 0s) infinite !important; }
+@keyframes vibe-nod { 0% { transform: translateY(1.5px); } 35% { transform: translateY(0); } 100% { transform: translateY(0); } }
+.walker.vibing.walking:not(.running) .bot { animation: bot-hop calc(var(--beat, 0.56s) / 2) steps(2) var(--beat-at, 0s) infinite; }
+.walker.vibing.walking:not(.running) .leg-a { animation: bot-step calc(var(--beat, 0.56s) / 2) steps(1) var(--beat-at, 0s) infinite; }
+.walker.vibing.walking:not(.running) .leg-b { animation: bot-step calc(var(--beat, 0.56s) / 2) steps(1) calc(var(--beat-at, 0s) + var(--beat, 0.56s) / 4) infinite; }
 .walker.running .leg-a { animation: bot-step 0.14s steps(1) infinite; }
 .walker.running .leg-b { animation: bot-step 0.14s steps(1) 0.07s infinite; }
 
