@@ -9,6 +9,9 @@
   const stateEl = document.getElementById('mp-state');
   const playBtn = document.getElementById('mp-play');
   const bgBtn = document.getElementById('mp-bg-btn');
+  const speedBtn = document.getElementById('mp-speed-btn');
+  bgBtn.hidden = !!window.BYTEFALL_APP; // (the app: the player always plays on in the background)
+  if (window.BYTEFALL_APP) document.querySelector('#music-player .mp-note').textContent = 'Every track plays with all its layers in. With the player open, the music keeps going with the screen off or in another app.';
   const viz = createVisualizer(document.getElementById('mp-viz'), Music.getAnalyser, {
     bars: 40, modes: ['bars', 'wave', 'scope', 'spectro', 'vu', 'radial', 'fluid', 'vector', 'matrix', 'bitgrid', 'terrain', 'plasma', 'tunnel'], key: 'bytefall-player-viz', getStereo: Music.getStereo,
   });
@@ -29,6 +32,10 @@
     document.querySelectorAll('#mp-modes button').forEach((b) => b.classList.toggle('active', b.dataset.mode === Music.getMode()));
     bgBtn.textContent = `BACKGROUND PLAY: ${Music.isBackgroundPlay() ? 'ON' : 'OFF'}`;
     bgBtn.classList.toggle('on', Music.isBackgroundPlay());
+    // SPEED: for a track that speeds up as the stack climbs, held at its calm tempo or ramping up
+    speedBtn.hidden = !Music.hasSpeed(Music.currentTrack());
+    speedBtn.textContent = `SPEED: ${Music.getSpeed() === 'held' ? 'HELD' : 'RAMPING'}`;
+    speedBtn.classList.toggle('on', Music.getSpeed() === 'ramp');
     tracksEl.innerHTML = '';
     for (let n = 0; n < Math.max(SLOTS, tracks.length); n++) {
       const t = tracks[n];
@@ -133,6 +140,10 @@
     if (typeof updateModeBtn === 'function') updateModeBtn();
     render();
   }));
+  speedBtn.addEventListener('click', () => {
+    Music.setSpeed(Music.getSpeed() === 'held' ? 'ramp' : 'held');
+    render();
+  });
   bgBtn.addEventListener('click', () => {
     Music.setBackgroundPlay(!Music.isBackgroundPlay());
     if (typeof updateBgPlayBtn === 'function') updateBgPlayBtn();

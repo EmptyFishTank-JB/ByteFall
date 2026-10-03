@@ -90,9 +90,9 @@ const Progress = (() => {
     vsBestSent: 0, // most blocks sent at the CPU in one match
     vsLossStreak: 0, // VS losses in a row
     bots: {}, // the bots on the start screen and the VS CPU: event -> count (pokes, bolts, eyebrow-<bot> ...)
-    hashes: 0, // HASHES (#): the game's currency, spent on boosters in the STORE
-    hashesEarned: 0, // every one ever earned
-    hashBits: 0, // bits decrypted toward the next hash (one every HASH_BITS)
+    keys: 0, // KEYS: the game's currency, spent on boosters in the STORE
+    keysEarned: 0, // every one ever earned
+    keyBits: 0, // bits decrypted toward the next key (one every KEY_BITS)
     boosters: {}, // booster id -> how many owned
   });
 
@@ -100,6 +100,11 @@ const Progress = (() => {
   try {
     const saved = JSON.parse(localStorage.getItem(KEY));
     if (saved) d = { ...d, ...saved };
+    if (saved && saved.hashes != null && saved.keys == null) { // (KEYS were HASHES for a day)
+      d.keys = saved.hashes;
+      d.keysEarned = saved.hashesEarned || 0;
+      d.keyBits = saved.hashBits || 0;
+    }
   } catch (e) {}
   const save = () => {
     try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
@@ -478,23 +483,23 @@ const Progress = (() => {
   function playedDaily() {
     const today = localDay();
     if (d.lastDaily === today) return;
-    earn(HASH_PAY.daily); // (the day's first daily game)
+    earn(KEY_PAY.daily); // (the day's first daily game)
     d.dailyStreak = d.lastDaily === localDay(-1) ? d.dailyStreak + 1 : 1;
     d.bestDailyStreak = Math.max(d.bestDailyStreak, d.dailyStreak);
     d.lastDaily = today;
     d.dailies++;
   }
 
-  // HASHES: earned by playing, spent on boosters (script.js's STORE). One for every HASH_BITS bits
+  // KEYS: earned by playing, spent on boosters (script.js's STORE). One for every KEY_BITS bits
   // decrypted, a bonus for long chains, and some for firsts: a puzzle solved for the first time (by
   // its set), each achievement, each level, the day's first daily game, the DAILY DROP
-  const HASH_BITS = 10;
-  const HASH_PAY = { chain5: 2, chain7: 5, achievement: 10, level: 10, daily: 5, puzzle: { e: 2, n: 4, h: 6 } };
+  const KEY_BITS = 10;
+  const KEY_PAY = { chain5: 2, chain7: 5, achievement: 10, level: 10, daily: 5, puzzle: { e: 2, n: 4, h: 6 } };
   function earn(n) {
     if (!(n > 0)) return;
-    d.hashes += n;
-    d.hashesEarned += n;
-    if (run) run.hashes = (run.hashes || 0) + n;
+    d.keys += n;
+    d.keysEarned += n;
+    if (run) run.keys = (run.keys || 0) + n;
   }
 
   // Marks newly met unlocks and achievements; returns them as [{ type, name }] (quiet: just record).
@@ -509,8 +514,8 @@ const Progress = (() => {
     }
     const { level } = levelInfo();
     if (level > d.lastLevel) {
-      earned.push({ type: 'LEVEL UP', name: `LV ${level}`, hashes: (level - d.lastLevel) * HASH_PAY.level });
-      if (!quiet) earn((level - d.lastLevel) * HASH_PAY.level);
+      earned.push({ type: 'LEVEL UP', name: `LV ${level}`, keys: (level - d.lastLevel) * KEY_PAY.level });
+      if (!quiet) earn((level - d.lastLevel) * KEY_PAY.level);
     }
     d.lastLevel = Math.max(d.lastLevel, level);
     let opened = false;
@@ -533,8 +538,8 @@ const Progress = (() => {
     for (const a of ACHIEVEMENTS) {
       if (!d.achieved[a.id] && a.value() >= goalOf(a)) {
         d.achieved[a.id] = true;
-        earn(HASH_PAY.achievement);
-        earned.push({ type: 'ACHIEVEMENT', name: a.name, hashes: HASH_PAY.achievement });
+        earn(KEY_PAY.achievement);
+        earned.push({ type: 'ACHIEVEMENT', name: a.name, keys: KEY_PAY.achievement });
       }
     }
     save();
@@ -597,7 +602,7 @@ const Progress = (() => {
     puzzleSolved: (i) => !!d.puzzles[i],
     solvePuzzle(i) {
       if (!d.puzzles[i] && d.puzzleTries[i] === 1) d.firstTries++;
-      if (!d.puzzles[i]) earn(HASH_PAY.puzzle[typeof i === 'number' ? 'n' : String(i)[0]] || 0); // (a first solve: EASY 2, NORMAL 4, HARD 6)
+      if (!d.puzzles[i]) earn(KEY_PAY.puzzle[typeof i === 'number' ? 'n' : String(i)[0]] || 0); // (a first solve: EASY 2, NORMAL 4, HARD 6)
       d.puzzles[i] = true;
       d.puzzleStreak++;
       d.bestPuzzleStreak = Math.max(d.bestPuzzleStreak, d.puzzleStreak);
@@ -752,11 +757,11 @@ const Progress = (() => {
       run.dropBits += values.length;
       run.dropSevens += values.filter((v) => v === 7).length;
       run.chain = Math.max(run.chain, chain);
-      d.hashBits += values.length;
-      earn(Math.floor(d.hashBits / HASH_BITS));
-      d.hashBits %= HASH_BITS;
-      if (chain === 5) earn(HASH_PAY.chain5); // (a chain reaching 5 links, and 7)
-      if (chain === 7) earn(HASH_PAY.chain7);
+      d.keyBits += values.length;
+      earn(Math.floor(d.keyBits / KEY_BITS));
+      d.keyBits %= KEY_BITS;
+      if (chain === 5) earn(KEY_PAY.chain5); // (a chain reaching 5 links, and 7)
+      if (chain === 7) earn(KEY_PAY.chain7);
       for (const v of values) d.bitsByValue[v] = (d.bitsByValue[v] || 0) + 1;
       d.bestChain = Math.max(d.bestChain, chain);
     },
@@ -818,13 +823,13 @@ const Progress = (() => {
       if (run.mode !== 'vs') d.bestRunCloseCalls = Math.max(d.bestRunCloseCalls, run.closeCalls);
     },
     check,
-    // HASHES and boosters (the STORE)
-    hashes: () => d.hashes,
-    runHashes: () => (run && run.hashes) || 0,
-    claimHashes(n) { earn(n); save(); },
-    spendHashes(n) {
-      if (d.hashes < n) return false;
-      d.hashes -= n;
+    // KEYS and boosters (the STORE)
+    keys: () => d.keys,
+    runKeys: () => (run && run.keys) || 0,
+    claimKeys(n) { earn(n); save(); },
+    spendKeys(n) {
+      if (d.keys < n) return false;
+      d.keys -= n;
       save();
       return true;
     },

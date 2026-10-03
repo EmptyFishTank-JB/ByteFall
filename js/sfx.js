@@ -151,6 +151,54 @@ const SFX = (() => {
       osc.connect(envelope(c, VOL * 0.07, t, 0.12));
       osc.start(t); osc.stop(t + 0.13);
     },
+    // A button pressed: a short, clear square-wave tick (louder than the keyboard click, so every
+    // button is heard)
+    button(c) {
+      const t = c.currentTime;
+      const osc = c.createOscillator();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(1250, t);
+      osc.frequency.exponentialRampToValueAtTime(900, t + 0.03);
+      const lp = filter(c, 'lowpass', 3000);
+      osc.connect(lp); lp.connect(envelope(c, VOL * 0.22, t, 0.035));
+      osc.start(t); osc.stop(t + 0.04);
+    },
+    // RESTORE PURCHASES: a little dial-up modem: the number dialed (touch tones), then the
+    // handshake's carrier warbling against bursts of static (about a second)
+    dialup(c) {
+      const t0 = c.currentTime;
+      const gn = c.createGain();
+      gn.gain.value = VOL * 0.35;
+      const lp = filter(c, 'lowpass', 3400);
+      gn.connect(lp); lp.connect(dest(c));
+      const tone = (f, t, dur, type = 'sine', vol = 1) => {
+        const o = c.createOscillator();
+        const g = c.createGain();
+        o.type = type; o.frequency.value = f;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(vol, t + 0.005);
+        g.gain.setValueAtTime(vol, t + dur - 0.01);
+        g.gain.linearRampToValueAtTime(0, t + dur);
+        o.connect(g); g.connect(gn);
+        o.start(t); o.stop(t + dur);
+        return o;
+      };
+      // (touch tones: each digit two tones at once)
+      [[697, 1209], [770, 1336], [852, 1477], [697, 1336], [941, 1336]].forEach(([lo, hi], i) => {
+        const t = t0 + i * 0.075;
+        tone(lo, t, 0.06, 'sine', 0.5);
+        tone(hi, t, 0.06, 'sine', 0.5);
+      });
+      // (the answer tone, then the carrier warbling between 1650 and 2100 Hz with static over it)
+      const t1 = t0 + 0.42;
+      tone(2100, t1, 0.16, 'sine', 0.6);
+      const car = tone(1650, t1 + 0.18, 0.55, 'square', 0.25);
+      for (let k = 0; k < 11; k++) car.frequency.setValueAtTime(k % 2 ? 2100 : 1650, t1 + 0.18 + k * 0.05);
+      const hiss = noiseBuffer(c, 0.5, (i, n) => (Math.floor(i / 400) % 3 ? 0.5 : 0.1) * (1 - i / n));
+      const bp = filter(c, 'bandpass', 2400, 0.7);
+      hiss.connect(bp); bp.connect(gn);
+      hiss.start(t1 + 0.24); hiss.stop(t1 + 0.74);
+    },
   };
 
   return {

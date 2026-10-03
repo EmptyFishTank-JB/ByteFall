@@ -162,7 +162,7 @@ const MODES = {
     info: (date) => {
       const n = currentPuzzle().pieces.length;
       const rule = `Decrypt every block on the board with exactly the ${n === 1 ? 'bit' : `${n} bits`} given, in order.`;
-      if (!daily) return rule;
+      if (!daily) return 'PUZZLE // clear the board with exactly the bits given, in order. 100 puzzles each on EASY, NORMAL and HARD, each opening once the one before it is solved.';
       const head = `DAILY PUZZLE // ${date} // ${WEEKDAYS[utcWeekday()]}, DIFFICULTY ${utcWeekday() + 1}/7`;
       if (dailyOfficial) return `${head}: ${rule} ${DAILY_PUZZLE_TRIES - dailyPuzzleTries()} of ${DAILY_PUZZLE_TRIES} tries left today.`;
       return `${head} // PRACTICE: ${dailyPuzzleSolvedAt() ? `solved today in ${dailyPuzzleSolvedAt()} of ${DAILY_PUZZLE_TRIES} tries` : `not solved in today's ${DAILY_PUZZLE_TRIES} tries`}. ${rule}`;
@@ -207,23 +207,28 @@ const savedPuzzle = (t = puzzleTier) => {
 let puzzleIndex = savedPuzzle();
 let overlayNext = null; // what the overlay button does in PUZZLE: 'next' or 'retry'
 
-// BOOSTERS: bought with HASHES in the STORE (store.js). The ones for before a game are switched on
+// BOOSTERS: bought with KEYS in the STORE (store.js). The ones for before a game are switched on
 // from the main menu (and stay on while there are any left), each used up at that game's first
 // drop; SECOND CHANCE only when it saves you; HINT and UNDO (PUZZLE) when they're pressed. Never
 // in DAILY or VS (or the tutorial): those stay the same for everyone. A boosted game says so.
 const BOOSTERS = {
   'head-start': { name: 'HEAD START', cost: 15, desc: 'The CHAIN METER starts half full.', modes: ['classic', 'blitz', 'zen'] },
   'firewall-delay': { name: 'FIREWALL DELAY', cost: 20, desc: 'The first encryption layer rises 4 drops later.', modes: ['classic', 'blitz'] },
-  lookahead: { name: 'LOOKAHEAD', cost: 15, desc: 'The next bit is shown all game (EASY always shows it).', modes: ['classic', 'blitz', 'zen'] },
+  lookahead: { name: 'LOOKAHEAD', cost: 15, desc: 'The next bit is shown for the first 60 seconds of play (EASY always shows it).', modes: ['classic', 'blitz', 'zen'] },
   overtime: { name: 'OVERTIME', cost: 20, desc: '+15 seconds on the BLITZ clock.', modes: ['blitz'] },
-  'second-chance': { name: 'SECOND CHANCE', cost: 40, desc: 'When the trace completes, the overflow row is wiped and the game goes on. Once a game.', modes: ['classic', 'blitz', 'zen'] },
+  'second-chance': { name: 'SECOND CHANCE', cost: 40, desc: 'When the trace completes, everything above the bottom 3 rows is wiped and the game goes on. Once a game.', modes: ['classic', 'blitz', 'zen'] },
   hint: { name: 'HINT', cost: 10, desc: 'PUZZLE: lights the column the next bit goes in.', modes: ['puzzle'], inGame: true },
   undo: { name: 'UNDO', cost: 8, desc: 'PUZZLE: takes back your last drop, even after running out of bits.', modes: ['puzzle'], inGame: true },
 };
 window.BOOSTERS = BOOSTERS;
 const boosterFits = (id, m = mode) => !daily && BOOSTERS[id].modes.includes(m);
-const armedBoosts = new Set((storage.get('bytefall-boosters-on') || '').split(',').filter((id) => BOOSTERS[id]));
-const saveArmed = () => storage.set('bytefall-boosters-on', [...armedBoosts].join(','));
+// (switched on per mode: CLASSIC's choice isn't BLITZ's)
+const armedKey = () => `bytefall-boosters-on-${mode}`;
+let armedBoosts = new Set();
+const loadArmed = () => { armedBoosts = new Set((storage.get(armedKey()) || '').split(',').filter((id) => BOOSTERS[id] && boosterFits(id))); };
+const saveArmed = () => storage.set(armedKey(), [...armedBoosts].join(','));
+const LOOKAHEAD_MS = 60000;
+let lookaheadLeft = 0; // LOOKAHEAD: the play time it has left (counted while the game is being played)
 let runBoosts = new Set(); // this game's (switched on, owned, for this mode): used up at its first drop
 let boostsSpent = false;
 let secondChanceUsed = false;
@@ -447,6 +452,7 @@ function initGame() {
     ? `every ${BASE_INTERVAL} drops, tightening to every ${HARD_MIN_INTERVAL} as your score climbs`
     : `every ${BASE_INTERVAL} drops`;
   // (the boosters switched on for this mode, while there are any left: paid for at the first drop)
+  loadArmed();
   runBoosts = new Set([...armedBoosts].filter((id) => !BOOSTERS[id].inGame && id !== 'second-chance' && boosterFits(id) && Progress.boosters(id) > 0));
   boostsSpent = false;
   secondChanceUsed = false;
@@ -455,6 +461,7 @@ function initGame() {
   if (runBoosts.has('head-start')) streak = Math.floor(streakCap() / 2);
   if (runBoosts.has('firewall-delay')) dropsSinceLastPulse = -4;
   if (runBoosts.has('overtime')) timeLeft += 15;
+  lookaheadLeft = runBoosts.has('lookahead') ? LOOKAHEAD_MS : 0;
   updateHud();
   buildColumnButtons();
   render();
@@ -523,12 +530,12 @@ function checkPuzzle() {
   }
 }
 
-// The HASHES this game earned, under the score
-function showRunHashes() {
-  const el = document.getElementById('overlay-hashes');
-  const n = Progress.runHashes();
+// The KEYS this game earned, under the score
+function showRunKeys() {
+  const el = document.getElementById('overlay-keys');
+  const n = Progress.runKeys();
   el.hidden = !n || mode === 'tutorial';
-  el.textContent = `+${fmt(n)} HASHES // # ${fmt(Progress.hashes())}`;
+  el.textContent = `+${fmt(n)} KEYS // ${fmt(Progress.keys())} IN ALL`;
 }
 
 function showPuzzleResult(solved, firstTime = false) {
@@ -562,7 +569,7 @@ function showPuzzleResult(solved, firstTime = false) {
   document.getElementById('overlay-restart-btn').textContent = overlayNext === 'next' ? 'NEXT PUZZLE'
     : daily && dailyOfficial && !solved && triesLeft > 0 ? 'NEXT TRY' : daily && dailyOfficial ? 'PRACTICE' : 'RETRY';
   if (!daily) updatePuzzleNav();
-  showRunHashes();
+  showRunKeys();
   refreshPuzzleTools();
   const run = runId;
   setTimeout(() => {
@@ -570,30 +577,8 @@ function showPuzzleResult(solved, firstTime = false) {
   }, solved ? 500 : 700);
 }
 
-const puzzleNavEl = document.getElementById('puzzle-nav');
-function updatePuzzleNav() {
-  const label = document.getElementById('puzzle-label');
-  label.innerHTML = `${GRID_SVG} PUZZLE ${puzzleIndex + 1} / ${tierPuzzles().length}${puzzleDone(puzzleIndex) ? ' \u2713' : ''}`;
-  label.classList.toggle('solved', puzzleDone(puzzleIndex));
-  document.getElementById('puzzle-prev').disabled = puzzleIndex === 0;
-  // Ahead: once this one's solved
-  document.getElementById('puzzle-next').disabled = puzzleIndex + 1 >= tierPuzzles().length || !puzzleOpen(puzzleIndex + 1);
-  document.querySelectorAll('#puzzle-tiers button').forEach((b) => b.classList.toggle('active', b.dataset.ptier === puzzleTier));
-}
-const GRID_SVG = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" fill="currentColor"/></svg>';
-// The set: EASY, NORMAL or HARD, at the one you were on in it
-document.querySelectorAll('#puzzle-tiers button').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    const next = btn.dataset.ptier;
-    if (next === puzzleTier) return;
-    requestReset(btn, 'CONFIRM?', () => setPuzzle(savedPuzzle(next), next));
-  });
-});
-// The label: every puzzle of the set, to pick from (PUZZLES, a page of the menu card)
-document.getElementById('puzzle-label').addEventListener('click', () => {
-  puzzlePage = Math.floor(puzzleIndex / PUZZLE_PAGE);
-  setRecordsOpen(true, 'puzzles');
-});
+// (picked on PUZZLES, the menu card's page: PLAY opens it)
+function updatePuzzleNav() {}
 
 // PUZZLES (the menu card's page): the set's puzzles in pages of 25, solved ones lit and ticked,
 // the next one to solve open, the rest locked until the one before is solved. A tap plays it.
@@ -635,7 +620,10 @@ function renderPuzzleSelect() {
     b.addEventListener('click', () => {
       setRecordsOpen(false);
       setPuzzle(i, puzzleListTier);
-      if (homeOpen) homePlayBtn.click();
+      if (homeOpen) {
+        hideHome();
+        SFX.play('static');
+      }
     });
     grid.appendChild(b);
   }
@@ -646,12 +634,6 @@ document.querySelectorAll('[data-ptier-pick]').forEach((btn) => {
     puzzlePage = Math.floor((puzzleListTier === puzzleTier ? puzzleIndex : firstUnsolved(puzzleListTier)) / PUZZLE_PAGE);
     renderPuzzleSelect();
   });
-});
-document.getElementById('puzzle-prev').addEventListener('click', () => {
-  if (!busy || gameOver) setPuzzle(puzzleIndex - 1);
-});
-document.getElementById('puzzle-next').addEventListener('click', () => {
-  if (!busy || gameOver) setPuzzle(puzzleIndex + 1);
 });
 
 // Size the board so the whole game panel fits the window's height (no clipping at the top or
@@ -1143,7 +1125,7 @@ function updateHud() {
   }
   // Easy previews the next bit; an active keylogger shows the next three; PUZZLE shows what's left.
   const preview = mode === 'puzzle' ? Math.min(KEYLOGGER_PREVIEW, Math.max(0, queue.length - 1))
-    : keyloggerDrops > 0 ? KEYLOGGER_PREVIEW : DIFFICULTIES[difficulty].showNext || runBoosts.has('lookahead') ? 1 : 0;
+    : keyloggerDrops > 0 ? KEYLOGGER_PREVIEW : DIFFICULTIES[difficulty].showNext || lookaheadLeft > 0 ? 1 : 0;
   nextStatEl.hidden = !preview;
   nextLabelEl.textContent = keyloggerDrops > 0 ? `KEYLOG ${keyloggerDrops}` : 'NEXT';
   nextStatEl.classList.toggle('keylogger', keyloggerDrops > 0);
@@ -1896,7 +1878,7 @@ function endGame(reason = 'trace') {
     note.hidden = false;
     note.textContent += ` // BOOSTED: ${[...runBoosts, ...(secondChanceUsed ? ['second-chance'] : [])].map((id) => BOOSTERS[id].name).join(', ')}`;
   }
-  showRunHashes();
+  showRunKeys();
   shareBtn.hidden = !daily || mode === 'puzzle';
   shareBtn.textContent = 'SHARE';
 
@@ -2249,13 +2231,12 @@ function applyModeUi() {
   // (ENCRYPT IN: a ===== under the count, the layer it's counting down to, as [n] is a bit)
   document.getElementById('pulse-stat').classList.toggle('counts-layers', mode !== 'puzzle' && mode !== 'breach');
   updateVsChrome(); // (after ENCRYPT IN shows or hides: it counts the stat rows)
-  puzzleNavEl.hidden = mode !== 'puzzle' || daily;
-  document.getElementById('puzzle-tiers').hidden = mode !== 'puzzle' || daily;
   if (mode === 'puzzle' && !daily) updatePuzzleNav();
   // The overlay goes back to its trace look until a puzzle result changes it
   overlayNext = null;
   document.querySelector('.overlay-box').classList.remove('win');
   document.getElementById('overlay-restart-btn').textContent = mode === 'puzzle' ? 'RETRY' : 'NEW SESSION';
+  document.getElementById('overlay-menu-btn').textContent = mode === 'puzzle' && !daily ? 'PUZZLES' : 'MAIN MENU';
   document.getElementById('time-stat').hidden = mode !== 'blitz' && dealLimit() === Infinity;
   document.getElementById('time-label').textContent = mode === 'blitz' ? 'TIME' : 'BITS LEFT';
   // (the HUD's grid: TIME / BITS LEFT under CURRENT when there's a clock or a count; CHAIN the
@@ -2279,6 +2260,15 @@ function showClock() {
   timeLeftEl.textContent = `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
   timeLeftEl.closest('.stat').classList.toggle('time-low', clockRunning && secs <= 10);
 }
+
+// LOOKAHEAD's 60 seconds: play time only (not paused, at the menu or in the background)
+setInterval(() => {
+  if (lookaheadLeft <= 0 || !started || gameOver || vsPaused || homeOpen || document.hidden) return;
+  lookaheadLeft -= 250;
+  if (lookaheadLeft > 0) return;
+  updateHud();
+  if (!busy) setMessage('LOOKAHEAD // OFF');
+}, 250);
 
 let lastClockTick = performance.now();
 setInterval(() => {
@@ -3067,6 +3057,10 @@ window.showHome = showHome;
 window.homeIsOpen = () => homeOpen;
 homePlayBtn.addEventListener('click', () => {
   if (busy && !gameOver) return; // (a mode switch still melting the old board)
+  if (mode === 'puzzle' && !daily && !inAGame()) { // (PUZZLE: pick one first)
+    setRecordsOpen(true, 'puzzles');
+    return;
+  }
   if (gameOver) resetNow();
   hideHome();
   if (vsPaused) resumeMatch();
@@ -3075,6 +3069,7 @@ homePlayBtn.addEventListener('click', () => {
 document.getElementById('overlay-menu-btn').addEventListener('click', () => {
   resetNow();
   showHome();
+  if (mode === 'puzzle' && !daily) setRecordsOpen(true, 'puzzles'); // (PUZZLE: back to the puzzles)
 });
 // (fitted again once a font finishes loading: it measures differently)
 if (document.fonts) document.fonts.addEventListener('loadingdone', () => showCpuDesc());
@@ -3804,6 +3799,26 @@ SFX.play = (name) => {
     try { navigator.vibrate(HAPTICS[name]); } catch (e) {}
   }
 };
+// TEXT SIZE: NORMAL, LARGE or LARGER (style.css scales the smaller text; index.html's inline
+// script applies the saved one before the first paint)
+const TEXT_SIZES = { normal: '', large: 'text-l', larger: 'text-xl' };
+let textSize = TEXT_SIZES[storage.get('bytefall-text-size')] !== undefined ? storage.get('bytefall-text-size') : 'normal';
+const textSizeBtn = document.getElementById('text-size-btn');
+function applyTextSize() {
+  document.documentElement.classList.remove('text-l', 'text-xl');
+  if (TEXT_SIZES[textSize]) document.documentElement.classList.add(TEXT_SIZES[textSize]);
+  textSizeBtn.textContent = `TEXT SIZE: ${textSize.toUpperCase()}`;
+  textSizeBtn.classList.toggle('on', textSize !== 'normal');
+}
+textSizeBtn.addEventListener('click', () => {
+  const order = Object.keys(TEXT_SIZES);
+  textSize = order[(order.indexOf(textSize) + 1) % order.length];
+  storage.set('bytefall-text-size', textSize);
+  applyTextSize();
+  requestAnimationFrame(fitBoard); // (the HUD's labels refit)
+});
+applyTextSize();
+
 const vibrateBtn = document.getElementById('vibrate-btn');
 vibrateBtn.hidden = !canVibrate;
 function updateVibrateBtn() {
@@ -3817,6 +3832,13 @@ vibrateBtn.addEventListener('click', () => {
   if (vibrate) navigator.vibrate(20);
 });
 updateVibrateBtn();
+// Every button ticks as it's pressed (the drop buttons have the drop's own sound)
+document.addEventListener('pointerdown', (e) => {
+  if (e.button !== 0) return;
+  const b = e.target.closest('button:not(:disabled)');
+  if (!b || b.closest('.column-buttons')) return;
+  SFX.play('button');
+}, { capture: true, passive: true });
 // Every button buzzes as it's pressed (with VIBRATION on), as the game's own sounds do
 document.addEventListener('pointerdown', (e) => {
   if (!vibrate || e.button !== 0 || !e.target.closest('button:not(:disabled), a[href], .walker, .visitor')) return;
@@ -3854,7 +3876,7 @@ document.addEventListener('fullscreenchange', () => {
 });
 updateFullscreenBtn();
 
-// DAILY DROP: each day (the player's own date) one free exploit, and 5 HASHES, to claim in the
+// DAILY DROP: each day (the player's own date) one free exploit, and 5 KEYS, to claim in the
 // STORE; claimed, the exploit waits behind the exploit button until used. It's one of the first
 // five in the unlock order, locked or not, so new players get a feel for them. Unused, it doesn't
 // stack. Not in DAILY, PUZZLE or VS, which stay the same for everyone.
@@ -3869,7 +3891,7 @@ if (freeExploit.day !== localDay()) {
   saveFree();
   freeGrantedNow = true;
 }
-const DAILY_DROP_HASHES = 5;
+const DAILY_DROP_KEYS = 5;
 window.dailyDrop = {
   claimable: () => !!freeExploit.claimable,
   claim() {
@@ -3877,22 +3899,23 @@ window.dailyDrop = {
     freeExploit.claimable = false;
     freeExploit.ready = true;
     saveFree();
-    Progress.claimHashes(DAILY_DROP_HASHES);
+    Progress.claimKeys(DAILY_DROP_KEYS);
     SFX.play('egg');
-    showToast(`DAILY DROP // FREE EXPLOIT READY +${DAILY_DROP_HASHES} #`);
+    showToast(`DAILY DROP // FREE EXPLOIT READY +${DAILY_DROP_KEYS} KEYS`);
     updateFreeBtn();
-    showHashes();
+    showKeys();
     return true;
   },
 };
 
-// HASHES (#): on the main menu under the title, and in the STORE; the STORE buttons get a mark
+// KEYS: on the main menu under the title, and in the STORE; the STORE buttons get a mark
 // while the DAILY DROP waits
-function showHashes() {
-  const n = fmt(Progress.hashes());
-  document.getElementById('hash-label').textContent = `# ${n}`;
-  const inStore = document.getElementById('store-hash-count');
-  if (inStore) inStore.textContent = `# ${n}`;
+const KEY_SVG = '<svg class="key-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 4h6v8H1zM3 6v4h2V6zM7 7h8v2H7zM11 9h1.5v2H11zM13.5 9H15v3h-1.5z" fill="currentColor" fill-rule="evenodd"/></svg>';
+function showKeys() {
+  const n = fmt(Progress.keys());
+  document.getElementById('key-label').innerHTML = `${KEY_SVG} ${n}`;
+  const inStore = document.getElementById('store-key-count');
+  if (inStore) inStore.innerHTML = `${KEY_SVG} ${n}`;
   for (const id of ['home-store', 'pause-store']) {
     const b = document.getElementById(id);
     if (b) b.classList.toggle('has-drop', !!freeExploit.claimable);
@@ -3906,6 +3929,7 @@ function showHashes() {
 function refreshBoosterRow() {
   const row = document.getElementById('booster-row');
   if (!row) return;
+  loadArmed(); // (this mode's)
   const ids = Object.keys(BOOSTERS).filter((id) => !BOOSTERS[id].inGame && boosterFits(id));
   row.hidden = !ids.length || mode === 'tutorial';
   if (row.hidden) return;
@@ -3940,21 +3964,22 @@ function refreshBoosterRow() {
   }
 }
 
-// SECOND CHANCE: the trace completes, but the overflow row is wiped and the game goes on (once a
-// game, when it's switched on and there's one left)
+// SECOND CHANCE: the trace completes, but everything above the bottom 3 rows is wiped and the game
+// goes on (once a game, when it's switched on and there's one left)
+const SECOND_CHANCE_KEEP = 3;
 function secondChance() {
   if (secondChanceUsed || !armedBoosts.has('second-chance') || !boosterFits('second-chance')) return false;
   if (!Progress.useBooster('second-chance')) return false;
   secondChanceUsed = true;
-  FX.burst(cellsAt(columns.flatMap((c, col) => c.slice(ROWS).map((_, k) => ({ row: ROWS + k, col })))));
-  columns = columns.map((c) => c.slice(0, ROWS));
+  FX.burst(cellsAt(columns.flatMap((c, col) => c.slice(SECOND_CHANCE_KEEP).map((_, k) => ({ row: SECOND_CHANCE_KEEP + k, col })))));
+  columns = columns.map((c) => c.slice(0, SECOND_CHANCE_KEEP)); // (the bottom rows stay)
   render();
   SFX.play('egg');
   setMessage('SECOND CHANCE // TRACE BLOCKED', 'warn');
   return true;
 }
 
-// PUZZLE's HINT and UNDO: one owned is used; none owned, a second tap buys one with HASHES
+// PUZZLE's HINT and UNDO: one owned is used; none owned, a second tap buys one with KEYS
 const toolArm = {};
 function useTool(id, btn, action) {
   if (Progress.boosters(id) > 0) {
@@ -3963,22 +3988,22 @@ function useTool(id, btn, action) {
     return;
   }
   const cost = BOOSTERS[id].cost;
-  if (Progress.hashes() < cost) {
+  if (Progress.keys() < cost) {
     SFX.play('denied');
-    setMessage(`${BOOSTERS[id].name} // ${cost} HASHES (YOU HAVE ${Progress.hashes()})`);
+    setMessage(`${BOOSTERS[id].name} // ${cost} KEYS (YOU HAVE ${Progress.keys()})`);
     return;
   }
   if (!toolArm[id]) { // (first tap: BUY?)
     toolArm[id] = setTimeout(() => { toolArm[id] = null; refreshPuzzleTools(); }, 3000);
-    btn.textContent = `BUY # ${cost}?`;
+    btn.textContent = `BUY: ${cost} KEYS?`;
     return;
   }
   clearTimeout(toolArm[id]);
   toolArm[id] = null;
-  if (!Progress.spendHashes(cost)) return;
+  if (!Progress.spendKeys(cost)) return;
   Progress.addBooster(id);
   if (action()) Progress.useBooster(id);
-  showHashes();
+  showKeys();
 }
 function refreshPuzzleTools() {
   const box = document.getElementById('puzzle-tools');
@@ -3988,7 +4013,7 @@ function refreshPuzzleTools() {
   for (const id of ['hint', 'undo']) {
     if (toolArm[id]) continue;
     const n = Progress.boosters(id);
-    document.getElementById(`puzzle-${id}`).textContent = n ? `${BOOSTERS[id].name} \u00d7${n}` : `${BOOSTERS[id].name} # ${BOOSTERS[id].cost}`;
+    document.getElementById(`puzzle-${id}`).textContent = n ? `${BOOSTERS[id].name} \u00d7${n}` : `${BOOSTERS[id].name} (${BOOSTERS[id].cost} KEYS)`;
   }
   document.getElementById('puzzle-undo').disabled = !puzzleHistory.length || overlayNext === 'next';
   document.getElementById('puzzle-hint').disabled = gameOver;
@@ -4235,8 +4260,8 @@ function announce(earned) {
   updateLevelBar();
   if (!earned.length) return;
   SFX.play('egg');
-  for (const e of earned) showToast(`${e.type} // ${unlockLabel(e.name)}${e.hashes ? ` +${e.hashes} #` : ''}`);
-  showHashes();
+  for (const e of earned) showToast(`${e.type} // ${unlockLabel(e.name)}${e.keys ? ` +${e.keys} KEYS` : ''}`);
+  showKeys();
   applyUnlocks();
   if (!recordsEl.hidden) renderRecords();
 }
@@ -4696,7 +4721,7 @@ document.body.classList.toggle('dev-unlock', Unlocks.isDevUnlock());
 initGame();
 updateFreeBtn();
 if (freeGrantedNow) showToast('DAILY DROP // CLAIM IT IN THE STORE');
-showHashes();
+showKeys();
 
 function formatCentral(isoDate) {
   const d = new Date(isoDate);
