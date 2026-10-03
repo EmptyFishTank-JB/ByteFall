@@ -1,4 +1,4 @@
 # The Android app build (tools/build-app.js, Capacitor): generated, never committed
-node_modules/
-www/
-android/
+/node_modules/
+/www/
+/android/
