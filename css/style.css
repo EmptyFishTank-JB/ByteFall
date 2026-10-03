@@ -2931,3 +2931,32 @@ html.pixel-mode :is(.walker, #cpu-face).snapping .bot { animation-name: px-lunge
 @keyframes px-lunge { 0% { transform: translateY(-1px); } 100% { transform: translateY(0.5px); } }
 html.pixel-mode .walker.skater.walking .bot,
 html.pixel-mode .walker.skater.walking[data-look="left"] .bot { transform: none; } /* (its lean is redrawn, pixel.js) */
+
+/* PUZZLE: the label opens every puzzle of the set (PUZZLES, the menu card's page) */
+.puzzle-nav .puzzle-label { font-size: 12px; letter-spacing: 2px; padding: 4px 10px; display: inline-flex; align-items: center; gap: 6px; }
+.puzzle-nav .puzzle-label .ico { width: 10px; height: 10px; }
+.puzzle-nav .puzzle-label.solved { color: var(--accent); border-color: var(--accent); }
+#puzzle-tiers { margin-bottom: 6px; }
+.panel-puzzles .pz-tiers { margin: 0 0 8px; }
+.pz-count { margin: 0 0 8px; text-align: center; letter-spacing: 2px; color: var(--accent); }
+.pz-pages { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 10px; }
+.pz-pages button {
+  padding: 4px 2px; background: none; border: 1px solid var(--grid-line); border-radius: 4px;
+  color: var(--fg-dim); font-family: inherit; font-size: 11px; letter-spacing: 1px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; line-height: 1.3;
+}
+.pz-pages button small { font-size: 9px; opacity: 0.8; }
+.pz-pages button.active { color: var(--fg); border-color: var(--fg); background: rgba(var(--fg-rgb), 0.08); }
+.pz-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.pz-tile {
+  position: relative; aspect-ratio: 1; display: grid; place-items: center;
+  background: var(--inset-bg, transparent); border: 1px solid var(--fg-dim); border-radius: 4px;
+  color: var(--fg); font-family: inherit; font-size: 14px; cursor: pointer;
+}
+.pz-tile svg { width: 14px; height: 14px; }
+.pz-tile i { position: absolute; top: 2px; right: 4px; font-style: normal; font-size: 9px; color: var(--accent); }
+.pz-tile.done { border-color: var(--fg); background: rgba(var(--fg-rgb), 0.12); }
+.pz-tile.next { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.45); }
+.pz-tile.current { outline: 2px solid var(--accent); outline-offset: 1px; }
+.pz-tile:disabled { opacity: 0.3; cursor: default; color: var(--fg-dim); border-style: dashed; }
+.pz-note { margin: 10px 0 0; font-size: 10px; color: var(--fg-dim); text-align: center; }

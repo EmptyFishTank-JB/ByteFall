@@ -2,6 +2,7 @@ package com.emptyfishtank.bytefall;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import androidx.activity.OnBackPressedCallback;
 import androidx.core.view.WindowCompat;
@@ -14,11 +15,20 @@ import com.getcapacitor.BridgeActivity;
 //   on black, so the strip a bar leaves (or the camera's notch) is black, not grey
 // - the music starts as the app opens (no tap needed first)
 // - in the background everything rests: the game's timers and animation stop, and the music with
-//   them (music.js), until it's opened again
+//   them (music.js), until it's opened again; except with the MUSIC PLAYER open, when the music
+//   plays on (player.js tells this through window.BytefallAndroid)
 // - the back button works the game (window.bytefallBack, in script.js): closes what's open, pauses
 //   or resumes a game, goes from the main menu to the start screen; on the start screen, the app
 //   goes to the background
 public class MainActivity extends BridgeActivity {
+    private volatile boolean playerOpen = false;
+
+    // (what the page can tell the app: window.BytefallAndroid)
+    public class AppBridge {
+        @JavascriptInterface
+        public void setPlayerOpen(boolean open) { playerOpen = open; }
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,6 +36,7 @@ public class MainActivity extends BridgeActivity {
         WebView web = bridge.getWebView();
         web.setBackgroundColor(Color.BLACK);
         web.getSettings().setMediaPlaybackRequiresUserGesture(false);
+        web.addJavascriptInterface(new AppBridge(), "BytefallAndroid");
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -39,6 +50,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onPause() {
         super.onPause();
+        if (playerOpen) return; // (the music plays on: only the page's drawing stops, as Android does)
         WebView web = bridge.getWebView();
         web.onPause(); // (the page is told it's hidden: the game and the music rest)
         web.pauseTimers(); // (and its timers stop)
