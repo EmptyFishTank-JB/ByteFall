@@ -47,7 +47,23 @@ js/pixel.js             PIXEL MODE (the sandbox's switch, for now): the bots on 
                         art's resolution: moves in whole pixels, turns redrawn, hair that flows
 js/bot-svg.js           the bots' pixel art (shared by the game and the sandbox)
 docs/achievements.csv   every achievement, grouped
+tools/build-app.js      the Android app's copy of the game (www/): no dev page, no DEV link, build info baked in
+tools/setup-android.js  the Android project made ByteFall's: full screen, portrait, back button, version, test key
+tools/android/          its MainActivity, icon and splash images, and the test signing key
+.github/workflows/      android-apk.yml: builds the test APK on GitHub (Actions → Android test APK)
 ```
+
+## Android test APK
+
+GitHub builds the game as an Android app (Capacitor) on each push to `main` that changes
+the game, or by hand: **Actions → Android test APK → Run workflow**. When the run is
+done, its page has the APK under **Artifacts** (a zip; unzip it on the phone and open the
+`.apk`, allowing installs from that app if Android asks). It's the game as players
+would get it: no dev page or DEV link, dev switches cleared, full screen, portrait.
+Every test build is signed with the same test key (`tools/android/test.keystore`, not a
+secret and not for the Play Store), so a new one installs over the last and keeps the
+progress. To build it locally instead: `npm ci && node tools/build-app.js && npx cap add
+android && node tools/setup-android.js`, then open `android/` in Android Studio.
 
 ## Exploits
 

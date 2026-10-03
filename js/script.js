@@ -4395,10 +4395,14 @@ function formatCentral(isoDate) {
 
 // The build number: this page's own version (index.html's ?v= on this script)
 {
-  const build = document.currentScript && new URL(document.currentScript.src).searchParams.get('v');
+  const build = (window.BYTEFALL_APP && window.BYTEFALL_APP.build) || (document.currentScript && new URL(document.currentScript.src).searchParams.get('v'));
   document.getElementById('buildInfo').textContent = build || '\u2014';
 }
-fetch('https://api.github.com/repos/EmptyFishTank-JB/ByteFall/commits?sha=main&per_page=1')
+// (the Android app has them baked in: tools/build-app.js)
+if (window.BYTEFALL_APP) {
+  document.getElementById('commitInfo').textContent = window.BYTEFALL_APP.commit || '\u2014';
+  document.getElementById('updatedInfo').textContent = window.BYTEFALL_APP.date ? formatCentral(window.BYTEFALL_APP.date) : '\u2014';
+} else fetch('https://api.github.com/repos/EmptyFishTank-JB/ByteFall/commits?sha=main&per_page=1')
   .then((r) => {
     if (!r.ok) throw new Error('bad response');
     return r.json();
@@ -4412,6 +4416,16 @@ fetch('https://api.github.com/repos/EmptyFishTank-JB/ByteFall/commits?sha=main&p
     document.getElementById('commitInfo').textContent = 'unavailable';
     document.getElementById('updatedInfo').textContent = 'unavailable';
   });
+
+// The Android app's back button (tools/android/MainActivity.java): as Escape here (closes the open
+// card, the music player or the settings; pauses a game, or resumes it; wakes the screen saver).
+// false on the start screen, or at the main menu with nothing open: the app goes to the background
+window.bytefallBack = () => {
+  const start = document.getElementById('start-screen');
+  if ((start && !start.hidden) || (homeOpen && !panelOpen())) return false;
+  document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  return true;
+};
 
 // Every button (and link): tinted while held (RESTART and QUIT turn red), and sliding the finger
 // or mouse off it before letting go cancels the press, even where the browser would still click

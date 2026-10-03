@@ -1,0 +1,10 @@
+{
+  "appId": "com.emptyfishtank.bytefall",
+  "appName": "ByteFall",
+  "webDir": "www",
+  "backgroundColor": "#020403",
+  "android": {
+    "backgroundColor": "#020403",
+    "webContentsDebuggingEnabled": false
+  }
+}

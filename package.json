@@ -1,0 +1,15 @@
+{
+  "name": "bytefall",
+  "private": true,
+  "description": "ByteFall: the Android app build (Capacitor). The game itself needs no build step.",
+  "scripts": {
+    "build:app": "node tools/build-app.js",
+    "android:sync": "node tools/build-app.js && cap sync android"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.5.2",
+    "@capacitor/core": "^8.5.2"
+  }
+}
