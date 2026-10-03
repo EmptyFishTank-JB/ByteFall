@@ -5,6 +5,20 @@
 function themeRgb(name, fallback) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
 }
+// (the theme's values as of the last theme or font change: one style read for each change, not
+// one for every burst or frame)
+const fxTheme = (() => {
+  let cache = null;
+  const read = () => ({
+    fg: themeRgb('--fg-rgb', '57, 255, 143'),
+    hack: themeRgb('--accent-rgb', '255, 209, 102'),
+    firewall: themeRgb('--layer-rgb', '175, 175, 175'),
+    hot: themeRgb('--burst-hot-rgb', '170, 255, 205'),
+    font: themeRgb('--font', "'Courier New', monospace"),
+  });
+  new MutationObserver(() => { cache = null; }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-font', 'class', 'style'] });
+  return () => cache || (cache = read());
+})();
 
 const FX = (() => {
   const canvas = document.getElementById('board-fx');
@@ -19,13 +33,16 @@ const FX = (() => {
   }
 
   // Read at burst time so a theme switch applies straight away
-  const colors = () => ({
-    number: document.documentElement.dataset.theme === 'spectrum' ? randomHueRgb() : themeRgb('--fg-rgb', '57, 255, 143'),
-    hack: themeRgb('--accent-rgb', '255, 209, 102'),
-    firewall: themeRgb('--layer-rgb', '175, 175, 175'),
-    warning: themeRgb('--accent-rgb', '255, 209, 102'),
-    hot: themeRgb('--burst-hot-rgb', '170, 255, 205'),
-  });
+  const colors = () => {
+    const t = fxTheme();
+    return {
+      number: document.documentElement.dataset.theme === 'spectrum' ? randomHueRgb() : t.fg,
+      hack: t.hack,
+      firewall: t.firewall,
+      warning: t.hack,
+      hot: t.hot,
+    };
+  };
   const GLYPHS = '0101010123456789ABCDEF';
   const SPLIT = 5; // fragments across the short side
   let particles = [];
@@ -104,20 +121,28 @@ const FX = (() => {
     }
   }
 
+  // Each frame: the live particles moved and drawn, the spent ones dropped in place (no new array
+  // a frame); each one's color built once (its fade is the canvas's alpha), and the glyphs' font
+  // set only when it changes
   function frame(now) {
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.globalCompositeOperation = 'lighter';
-    const fontFamily = themeRgb('--font', "'Courier New', monospace"); // the chosen game font
-    particles = particles.filter((p) => {
+    const fontFamily = fxTheme().font; // the chosen game font
+    let font = '';
+    let keep = 0;
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
       p.age += dt;
       const t = p.age - p.delay;
+      if (t > p.life) continue;
+      particles[keep++] = p;
+      if (!p.fill) p.fill = `rgb(${p.color})`;
       if (t < 0) {
         if (p.kind === 'frag') drawFrag(p, 1, p.size);
-        return true;
+        continue;
       }
-      if (t > p.life) return false;
       const fade = 1 - t / p.life;
       p.vx *= 0.94;
       p.vy = p.vy * 0.94 + (p.kind === 'frag' ? 60 : 0) * dt;
@@ -125,12 +150,15 @@ const FX = (() => {
       p.y += p.vy * dt;
       if (p.kind === 'frag') drawFrag(p, fade, p.size * (0.4 + 0.6 * fade));
       else {
-        ctx.fillStyle = `rgba(${p.color}, ${(0.7 * fade).toFixed(3)})`;
-        ctx.font = `bold ${p.size}px ${fontFamily}`;
+        ctx.globalAlpha = 0.7 * fade;
+        ctx.fillStyle = p.fill;
+        const f = `bold ${p.size}px ${fontFamily}`;
+        if (f !== font) ctx.font = font = f;
         ctx.fillText(p.ch, p.x, p.y);
       }
-      return true;
-    });
+    }
+    particles.length = keep;
+    ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
     if (particles.length) requestAnimationFrame(frame);
     else {
@@ -140,7 +168,8 @@ const FX = (() => {
   }
 
   function drawFrag(p, alpha, size) {
-    ctx.fillStyle = `rgba(${p.color}, ${(0.85 * alpha).toFixed(3)})`;
+    ctx.globalAlpha = 0.85 * alpha;
+    ctx.fillStyle = p.fill;
     ctx.fillRect(p.x - size / 2, p.y - size / 2, size, size);
   }
 

@@ -1241,7 +1241,7 @@ function createVisitors(api) {
         setTimeout(() => { v.gone = true; }, 2000);
       }
       if (v.state === 'scenery' || v.state === 'fogtree') continue; // (it stays)
-      const w = v.el.offsetWidth || 30;
+      const w = v.boxW || (v.boxW = v.el.offsetWidth) || 30; // (measured once: read every frame between the moves, it forced a layout per visitor)
       if (v.x < -w - 40 || v.x > W + 40 || v.y > ceiling() + 40) v.gone = true;
     }
     list = list.filter((v) => {

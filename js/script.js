@@ -554,7 +554,7 @@ function alignHeader() {
 const HUD_MIN_W = 300;
 function fitBoard() {
   layoutVsTop();
-  fitStatValues();
+  fitStatValues(true);
   alignHeader();
   const frame = document.querySelector('.board-frame');
   const was = parseFloat(boardWrapEl.style.maxWidth) || 0;
@@ -955,16 +955,30 @@ function dangerLevel() {
   return (tallest - (ROWS - 4)) / 3;
 }
 
-// A HUD number (or a label's word) too long for its box shrinks until it fits
-function fitStatValues() {
+// A HUD number (or a label's word) too long for its box shrinks until it fits. Each is fitted
+// again only when its text (or the theme or font) changed since it was last fitted, or the layout
+// did (fitBoard: force); and all the sizes are put back before any is measured, so the page lays
+// out once for the lot, not once for each (this runs on every HUD update)
+const statFits = new WeakMap(); // (each box: what it was last fitted showing)
+function fitStatValues(force = false) {
   const labels = [...document.querySelectorAll('.hud .stat:not(.cpu-stat) .label')];
-  const labelMin = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-min')) || 7;
   // (and the CURRENT / NEXT bits: "[5]" in a wide font can outgrow its square)
   const bits = [...document.querySelectorAll('.hud .bit-sq')];
-  for (const el of [scoreEl, bestEl, chainEl, pulseCounterEl, ...bits, ...labels]) {
+  const root = document.documentElement;
+  const look = `|${root.dataset.theme || ''}|${root.dataset.font || ''}`;
+  const els = [scoreEl, bestEl, chainEl, pulseCounterEl, ...bits, ...labels].filter((el) => force || statFits.get(el) !== el.textContent + look);
+  if (!els.length) return;
+  for (const el of els) {
     el.style.fontSize = '';
     el.style.whiteSpace = '';
-    if (!el.offsetParent) continue;
+  }
+  const labelMin = parseFloat(getComputedStyle(root).getPropertyValue('--label-min')) || 7;
+  const over = els.filter((el) => {
+    if (!el.offsetParent) { statFits.delete(el); return false; } // (hidden: fitted when it shows)
+    statFits.set(el, el.textContent + look);
+    return el.scrollWidth > el.clientWidth;
+  });
+  for (const el of over) {
     const label = el.classList.contains('label');
     let size = parseFloat(getComputedStyle(el).fontSize);
     // (labels no smaller than the font's readable floor, --label-min: past that they wrap instead)

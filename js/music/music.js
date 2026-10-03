@@ -110,6 +110,8 @@ const Music = (() => {
   // Which channels count as which drum: the low hits (kick), the high ones (hats, ticks, shakers)
   const DRUM_KIND = { kick: 'low', sub: 'low', toms: 'low', hats: 'high', tick: 'high', shaker: 'high', tambourine: 'high', snare: 'snare', clap: 'snare' };
   let drumLog = [];
+  let hit = null; // (the step being scheduled's drum hits, as the engine plays them)
+  const recordHit = (id) => { const k = DRUM_KIND[id]; if (k) { hit = hit || { time: nextTime }; hit[k] = true; } };
   function tick() {
     if (nextTime < ctx.currentTime) nextTime = ctx.currentTime + 0.02;
     const ahead = document.hidden ? HIDDEN_LOOKAHEAD : LOOKAHEAD;
@@ -118,8 +120,8 @@ const Music = (() => {
       intensity += (targetIntensity - intensity) * INTENSITY_EASE;
       applyMix(engine, trackMix(trackId, outputId), intensity, nextTime);
       // (the drums as they're scheduled, for whatever moves to them: the wanderers' headphones)
-      let hit = step % 4 === 0 ? { time: nextTime, beat: true, bar: step % 16 === 0, half: step % 8 === 0, feel: engine.feel ? engine.feel(step) : null } : null;
-      if (engine.record) engine.record((id) => { const k = DRUM_KIND[id]; if (k) { hit = hit || { time: nextTime }; hit[k] = true; } });
+      hit = step % 4 === 0 ? { time: nextTime, beat: true, bar: step % 16 === 0, half: step % 8 === 0, feel: engine.feel ? engine.feel(step) : null } : null;
+      if (engine.record) engine.record(recordHit);
       engine.schedule(step, nextTime, intensity);
       if (engine.record) engine.record(null);
       if (hit) { drumLog.push(hit); if (drumLog.length > 96) drumLog.shift(); }
