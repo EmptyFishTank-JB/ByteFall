@@ -105,31 +105,6 @@ function createWanderers(lane, active = () => true) {
     const t = TOP[bot] || 3;
     return pxc([[3, t - 1, 10, 1], [2, t, 1, 2], [13, t, 1, 2]], '#2b2f36') + pxc([[0, t + 2, 2, 4], [14, t + 2, 2, 4]], '#e0455f') + pxc([[0, t + 3, 1, 2], [15, t + 3, 1, 2]], '#ff8aa0');
   }
-  // CORE DUMP's metalheads: long hair (dark, behind the head, hanging past the body on both sides) while its feel lasts
-  function hairSvg(bot) {
-    const t = TOP[bot] || 3;
-    const c = '#2c2833';
-    const h = '#5f5670'; // (a lighter strand or two)
-    return pxc([[3, t - 1, 10, 1], [2, t, 12, 1], [1, t + 1, 2, 11], [13, t + 1, 2, 11], [0, t + 4, 1, 9], [15, t + 4, 1, 9], [2, t + 12, 1, 2], [13, t + 12, 1, 2]], c)
-      + pxc([[5, t, 1, 1], [10, t, 1, 1], [1, t + 6, 1, 4], [14, t + 6, 1, 4]], h);
-  }
-  function hairOn(w) {
-    if (w.hair) return;
-    w.hair = true;
-    if (pixelOn()) { // (PIXEL MODE: strands that flow, drawn pixel by pixel; stepped in the frame loop)
-      w.pxHair = Pixel.hair(w.el.querySelector('svg'), TOP[w.bot] || 3);
-      return;
-    }
-    // (behind the body: it flies out around the head's edges, never across the face)
-    w.el.querySelector('.bot-body').insertAdjacentHTML('beforebegin', `<g class="metal-hair">${hairSvg(w.bot)}</g>`);
-  }
-  function hairOff(w) {
-    if (!w.hair) return;
-    w.hair = false;
-    if (w.pxHair) { w.pxHair.remove(); w.pxHair = null; }
-    const g = w.el.querySelector('.metal-hair');
-    if (g) g.remove();
-  }
   function phonesOn(w, now, arriving = false) {
     if (w.phones) return;
     w.phones = true;
@@ -148,7 +123,6 @@ function createWanderers(lane, active = () => true) {
   function phonesOff(w) { // (the music stopped: -_-, and away they go)
     if (!w.phones) return;
     w.phones = false;
-    hairOff(w);
     w.el.classList.remove('grooving');
     mood(w, 'annoyed', '-_-');
     setTimeout(() => {
@@ -185,8 +159,6 @@ function createWanderers(lane, active = () => true) {
     if (marks.length) feeling = !!marks[marks.length - 1].feel; // (held between the beats)
     for (const w of walkers) {
       if (!w.el.classList.contains('grooving')) continue;
-      if (feeling) hairOn(w);
-      else hairOff(w);
       if (feeling) {
         for (const h of felt) {
           if (h.feel === 'blast') { const n = millBeats(P); if ((n === 1 ? h.beat : h.half) && !(w.pose && w.pose.kind === 'mill' && performance.now() - w.pose.start < P * (n - 0.2))) pose(w, 'mill', P); } // (a cycle every beat or two, as drawn, from the beats)
@@ -216,14 +188,10 @@ function createWanderers(lane, active = () => true) {
         frames.push({ transform: `translate(${(d * 3 * Math.sin(a)).toFixed(2)}px, ${(1.5 - 1.5 * Math.cos(a)).toFixed(2)}px) rotate(${(d * 14 * Math.sin(a)).toFixed(1)}deg)` });
       }
       bot.animate(frames, { duration: P, easing: 'linear' });
-      const hair = w.el.querySelector('.metal-hair');
-      if (hair) hair.animate(frames.map((f, k) => ({ transform: `rotate(${(d * 34 * Math.sin((k / 8) * Math.PI * 2 - 0.6)).toFixed(1)}deg)` })), { duration: P, easing: 'linear' }); // (whipping round wider, a little behind)
     }
     else if (how === 'bang' || how === 'bang-heavy') {
       const heavy = how === 'bang-heavy';
       bot.animate([{ transform: `translateY(${heavy ? 3 : 2}px) scaleY(${heavy ? 0.86 : 0.92})` }, { transform: 'translateY(0) scaleY(1)' }], { duration: Math.min(heavy ? 420 : 260, P * (heavy ? 1.6 : 0.8)), easing: 'cubic-bezier(.2,.8,.3,1)' });
-      const hair = w.el.querySelector('.metal-hair');
-      if (hair) hair.animate([{ transform: 'translateY(0) scaleY(1)' }, { transform: `translateY(${heavy ? 2 : 1}px) scaleY(${heavy ? 1.25 : 1.12})`, offset: 0.25 }, { transform: 'translateY(0) scaleY(1)' }], { duration: Math.min(heavy ? 480 : 300, P * (heavy ? 1.7 : 0.9)), easing: 'ease-out' }); // (flung down, then settling)
     } else if (how === 'nod') bot.animate([{ transform: 'translateY(1.5px)' }, { transform: 'translateY(0)' }], { duration: Math.min(280, P * 0.6), easing: 'ease-out' });
     else {
       bot.animate([{ transform: 'translateY(0.6px)' }, { transform: 'translateY(0)' }], { duration: Math.min(160, P * 0.35), easing: 'ease-out' });
@@ -285,7 +253,6 @@ function createWanderers(lane, active = () => true) {
       w.leanSprite = null;
       bot.style.transform = head.dx || head.dy ? `translate(${Pixel.snap(head.dx)}px, ${Pixel.snap(head.dy)}px)` : '';
     }
-    if (w.pxHair) w.pxHair.step(w.pxDt || 0.016, { ...head, worldX: w.x / (SIZE / 16) });
   }
   // CORE DUMP'S POSES (drawn as pixel sprites, pixel mode or not): the bot BENT OVER, the top of
   // its head to you (the headphones' band across it) and its hair hanging down in front to the
@@ -329,12 +296,7 @@ function createWanderers(lane, active = () => true) {
     } else if (kind === 'bang-heavy') frames = [{ at: 0, pose: 'tilt' }, { at: P * 0.15, pose: 'down' }, { at: P * 1.0, pose: 'tilt' }, { at: P * 1.4, pose: 'up' }];
     else frames = [{ at: 0, pose: 'tilt' }, { at: P * 0.12, pose: 'down' }, { at: P * 0.42, pose: 'tilt' }, { at: P * 0.66, pose: 'up' }];
     const svg = w.el.querySelector('svg');
-    if (!w.pose) { // (its own pixels, upright and without its hair: what the poses are made from)
-      const hair = svg.querySelector('.metal-hair');
-      if (hair) hair.style.display = 'none';
-      w.poseBase = Pixel.snapshot(svg);
-      if (hair) hair.style.display = '';
-    }
+    if (!w.pose) w.poseBase = Pixel.snapshot(svg); // (its own pixels, upright: what the poses are made from)
     w.pose = { kind, start: performance.now(), frames, end: cycle || frames[frames.length - 1].at + (kind === 'mill' ? P / 8 : 60) };
   }
   function posePlay(w, now) {
