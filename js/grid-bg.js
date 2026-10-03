@@ -16,6 +16,13 @@ function readGridTheme() {
 }
 readGridTheme();
 new MutationObserver(readGridTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class', 'style'] });
+// One animation-frame loop for every grid on the page (the board's, the HUD boxes', the start
+// screen's...) in place of one each; the screen saver's rest read once a frame for all of them
+const gridLoops = [];
+function gridFrame(now) {
+  if (!document.documentElement.classList.contains('saver-on')) for (const f of gridLoops) f(now); // (resting under the screen saver)
+  requestAnimationFrame(gridFrame);
+}
 
 function startGridBackground(canvas, { defrag = true, active } = {}) {
   const BLOCK = 5; // css px
@@ -235,16 +242,15 @@ function startGridBackground(canvas, { defrag = true, active } = {}) {
 
   let last = 0;
   function frame(now) {
-    if (now - last >= TICK_MS && !document.documentElement.classList.contains('saver-on') && (!active || active())) { // (resting under the screen saver)
+    if (now - last >= TICK_MS && (!active || active())) {
       last = now;
       tick(now);
     }
-    requestAnimationFrame(frame);
   }
 
   resize();
   if (window.ResizeObserver) new ResizeObserver(resize).observe(canvas);
-  if (!reduceMotion) requestAnimationFrame(frame);
+  if (!reduceMotion && gridLoops.push(frame) === 1) requestAnimationFrame(gridFrame);
 }
 
 // (the board's and the HUD boxes' rest while the main menu covers them)
