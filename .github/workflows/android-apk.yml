@@ -1,0 +1,75 @@
+# ANDROID TEST APK: the game built as an Android app (Capacitor), as players would get it (no dev
+# page). Runs on each push to main that changes the game, or by hand (Actions → Android test APK →
+# Run workflow). The APK is on the run's page under Artifacts (a zip: unzip it and install the .apk
+# on the phone). Test-signed (tools/android/test.keystore): each one installs over the last.
+name: Android test APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'manifest.webmanifest'
+      - 'css/**'
+      - 'js/**'
+      - 'assets/fonts/**'
+      - 'assets/icons/**'
+      - 'tools/**'
+      - 'capacitor.config.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/android-apk.yml'
+
+concurrency:
+  group: android-apk
+  cancel-in-progress: true # (a newer push replaces a build still running)
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install Capacitor
+        run: npm ci
+
+      - name: Build the app's copy of the game (www/)
+        run: node tools/build-app.js
+
+      - name: Create the Android project
+        run: |
+          npx cap add android
+          node tools/setup-android.js
+          npx @capacitor/assets generate --android --assetPath tools/android/res \
+            --iconBackgroundColor '#020403' --iconBackgroundColorDark '#020403' \
+            --splashBackgroundColor '#020403' --splashBackgroundColorDark '#020403'
+          npx cap sync android
+
+      - name: Build the APK
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Name it
+        id: name
+        run: |
+          BUILD=$(grep -o '?v=[0-9]*' index.html | head -1 | cut -d= -f2)
+          echo "file=ByteFall-test-v${BUILD}-${GITHUB_SHA::7}.apk" >> "$GITHUB_OUTPUT"
+          cp android/app/build/outputs/apk/debug/app-debug.apk "ByteFall-test-v${BUILD}-${GITHUB_SHA::7}.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.name.outputs.file }}
+          path: ${{ steps.name.outputs.file }}
+          retention-days: 14
