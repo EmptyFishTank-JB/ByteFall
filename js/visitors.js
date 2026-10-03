@@ -2330,5 +2330,11 @@ function createVisitors(api) {
     flakes.forEach((f) => f.el.remove());
     flakes = [];
   }
-  return { frame, clear, visit, list: () => list, makeScenery, moveTree, foggy, spirit };
+  // (the dev page's frame editor: every sprite and its frames, how fast each steps)
+  function art() {
+    const sprites = { ...SPRITES, menorah: menorah(8), kinara: kinara(7), sign: sign(new Date().getFullYear()), 'moon-full': moonSprite(false), 'moon-blood': moonSprite(true) };
+    delete sprites.bit;
+    return { sprites, kinds: KINDS };
+  }
+  return { frame, clear, visit, list: () => list, makeScenery, moveTree, foggy, spirit, art };
 }

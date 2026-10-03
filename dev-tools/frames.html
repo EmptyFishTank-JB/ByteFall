@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" class="sandbox">
 <head>
-<script src="../js/fonts.js?v=307"></script>
+<script src="../js/fonts.js?v=308"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#020403">
 <title>Frame Editor // BYTEFALL</title>
-<link rel="stylesheet" href="../css/style.css?v=307">
+<link rel="stylesheet" href="../css/style.css?v=308">
 <!-- FRAME EDITOR: the bots' animations a frame at a time, on their pixel grid. Start from a bot (any
      of the four, any level, mood, with or without headphones) or from one of the game's own
      animations (CORE DUMP's headbang and windmill), draw and erase pixels in the bots' colors, add
@@ -54,14 +54,17 @@
 <div class="fe">
   <a class="back" href="audio.html#dev">&larr; DEV PAGE</a>
   <h1>// FRAME EDITOR</h1>
-  <p class="lede">Draw the bots' animations a frame at a time, on their own pixel grid (each square is one pixel of a bot; the dashed box is the bot's 16x17). Start from a bot or one of the game's animations, paint and erase, add frames and time them, and play it back at game size. Your animations are kept in this browser; EXPORT saves one as a file to hand over to be built into the game.</p>
+  <p class="lede">Draw the bots' animations a frame at a time, on their own pixel grid (each square is one pixel of a bot; the dashed box is the bot's 16x17). Start from any of the game's characters (every bot and what it does, every visitor's frames) or a blank, paint and erase (at the game's pixels or 2x for finer detail), add frames and time them, and play it back at game size. UNDO and REDO (Ctrl+Z, Ctrl+Y) cover everything: painting, and adding, deleting, moving and timing frames. Your animations are kept in this browser; EXPORT saves one as a file to hand over to be built into the game.</p>
 
   <div class="fe-grid">
     <div>
       <canvas id="canvas"></canvas>
       <div class="row" style="margin-top: 8px;">
         <button type="button" id="t-paint" class="on">PAINT</button><button type="button" id="t-erase">ERASE</button><button type="button" id="t-pick">PICK COLOR</button><button type="button" id="t-fill">FILL</button>
-        <button type="button" id="onion">ONION SKIN</button><button type="button" id="undo">UNDO</button>
+        <button type="button" id="onion">ONION SKIN</button><button type="button" id="undo" title="Ctrl+Z">UNDO</button><button type="button" id="redo" title="Ctrl+Y or Ctrl+Shift+Z">REDO</button>
+      </div>
+      <div class="row"><b>PIXELS</b><button type="button" id="res1" class="on">1x (THE GAME'S)</button><button type="button" id="res2">2x (FINER)</button>
+        <span class="note">2x: each pixel of a bot is four, for finer detail (switching back to 1x merges each four into one)</span>
       </div>
       <div class="row">
         <button type="button" id="shift-l">&larr;</button><button type="button" id="shift-r">&rarr;</button><button type="button" id="shift-u">&uarr;</button><button type="button" id="shift-d">&darr;</button>
@@ -92,6 +95,17 @@
       </div>
 
       <div class="grp">
+        <h2>THE GAME'S CHARACTERS</h2>
+        <p>Every bot and visitor, and what each does, loaded as a NEW animation (yours are left as they are).</p>
+        <div class="row"><b>CHARACTER</b><select id="lib-char" style="flex: 1;"></select></div>
+        <div class="row"><b>ACTION</b><select id="lib-act" style="flex: 1;"></select><button type="button" class="go" id="lib-load">LOAD AS NEW</button></div>
+        <div class="row" id="lib-bot-opts"><b>BOT LOOK</b>
+          <select id="lib-level"><option>easy</option><option selected>normal</option><option>hard</option><option>insane</option></select>
+          <label class="note"><input type="checkbox" id="lib-phones"> HEADPHONES</label>
+        </div>
+      </div>
+
+      <div class="grp">
         <h2>START FROM</h2>
         <p>Replaces this animation's frames (COPY it first to keep it).</p>
         <div class="row"><b>A BOT (ONE FRAME)</b>
@@ -111,17 +125,20 @@
 <div class="stat cpu-face" id="cpu-face" hidden aria-hidden="true"></div>
 <div id="stage" style="position: absolute; left: -9999px; top: 0; width: 200px; height: 60px;"><div class="game-walkers" id="lane"></div></div>
 <canvas id="board-fx" hidden></canvas>
-<script src="../js/bot-svg.js?v=307"></script>
-<script src="../js/pixel.js?v=307"></script>
-<script src="../js/minibot.js?v=307"></script>
-<script src="../js/data/bot-anims.js?v=307"></script>
-<script src="../js/wanderers.js?v=307"></script>
+<script src="../js/bot-svg.js?v=308"></script>
+<script src="../js/pixel.js?v=308"></script>
+<script src="../js/minibot.js?v=308"></script>
+<script src="../js/data/bot-anims.js?v=308"></script>
+<script src="../js/seasons.js?v=308"></script>
+<script src="../js/visitors.js?v=308"></script>
+<script src="../js/wanderers.js?v=308"></script>
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
   // The grid: art pixels, x from X0 and y from Y0 (room around the 16x17 bot for hair, arms, horns)
-  const X0 = -8; const Y0 = -10; const W = 32; const H = 30;
-  const SCALE = 18;
+  // (big enough for the tallest visitors: the scary tree, the big trees)
+  const X0 = -12; const Y0 = -20; const W = 40; const H = 40;
+  const SCALE = 15;
   const canvas = $('canvas');
   canvas.width = W * SCALE; canvas.height = H * SCALE;
   const ctx = canvas.getContext('2d');
@@ -144,8 +161,25 @@
   if (!anims.length) anims.push(blank('MY FIRST ANIMATION'));
   const A = () => anims[cur];
   const F = () => A().frames[frame];
+  // (RES: 1, the game's pixels; 2, each split in four. Cells are keyed in RES-ths of a bot pixel)
+  const R = () => A().res || 1;
+  // UNDO and REDO: the whole animation as it was (its frames, the one shown, its pixels), so adding,
+  // deleting, moving and timing frames undo too, as well as painting
   let undo = [];
-  const snapshotUndo = () => { undo.push(JSON.stringify(F().cells)); if (undo.length > 60) undo.shift(); };
+  let redo = [];
+  const state = () => JSON.stringify({ frames: A().frames, frame, res: R() });
+  const snapshotUndo = () => { undo.push(state()); if (undo.length > 100) undo.shift(); redo = []; };
+  function restore(st) {
+    const d = JSON.parse(st);
+    A().frames = d.frames;
+    A().res = d.res;
+    frame = Math.min(d.frame, A().frames.length - 1);
+    showRes();
+    draw();
+    save();
+  }
+  const doUndo = () => { if (!undo.length) return; redo.push(state()); restore(undo.pop()); };
+  const doRedo = () => { if (!redo.length) return; undo.push(state()); restore(redo.pop()); };
 
   // ── Drawing ──
   let tool = 'paint';
@@ -156,10 +190,18 @@
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     if (onion && frame > 0) drawCells(A().frames[frame - 1].cells, 0.25);
     drawCells(F().cells, 1);
-    ctx.strokeStyle = 'rgba(57, 255, 143, 0.08)';
     ctx.lineWidth = 1;
-    for (let x = 0; x <= W; x++) { ctx.beginPath(); ctx.moveTo(x * SCALE + 0.5, 0); ctx.lineTo(x * SCALE + 0.5, H * SCALE); ctx.stroke(); }
-    for (let y = 0; y <= H; y++) { ctx.beginPath(); ctx.moveTo(0, y * SCALE + 0.5); ctx.lineTo(W * SCALE, y * SCALE + 0.5); ctx.stroke(); }
+    const r = R();
+    for (let i = 0; i <= W * r; i++) { // (the game's pixels; at 2x, fainter lines between their halves)
+      ctx.strokeStyle = i % r ? 'rgba(57, 255, 143, 0.04)' : 'rgba(57, 255, 143, 0.1)';
+      const p = Math.round((i * SCALE) / r) + 0.5;
+      ctx.beginPath(); ctx.moveTo(p, 0); ctx.lineTo(p, H * SCALE); ctx.stroke();
+    }
+    for (let i = 0; i <= H * r; i++) {
+      ctx.strokeStyle = i % r ? 'rgba(57, 255, 143, 0.04)' : 'rgba(57, 255, 143, 0.1)';
+      const p = Math.round((i * SCALE) / r) + 0.5;
+      ctx.beginPath(); ctx.moveTo(0, p); ctx.lineTo(W * SCALE, p); ctx.stroke();
+    }
     ctx.setLineDash([5, 4]);
     ctx.strokeStyle = 'rgba(255, 209, 102, 0.6)';
     ctx.strokeRect((0 - X0) * SCALE + 0.5, (0 - Y0) * SCALE + 0.5, 16 * SCALE, 17 * SCALE);
@@ -169,12 +211,15 @@
     renderStrip();
     drawPreview(F().cells);
   }
-  function drawCells(cells, alpha, c2 = ctx, s = SCALE, ox = X0, oy = Y0) {
+  // (s: page pixels to a bot pixel; at 2x each cell is half that)
+  function drawCells(cells, alpha, c2 = ctx, s = SCALE, r = R()) {
     c2.globalAlpha = alpha;
+    const cs = s / r;
     for (const [k, c] of Object.entries(cells)) {
       const [x, y] = k.split(',').map(Number);
       c2.fillStyle = c;
-      c2.fillRect((x - ox) * s, (y - oy) * s, s, s);
+      const px = Math.round((x - X0 * r) * cs); const py = Math.round((y - Y0 * r) * cs); // (whole page pixels: no seams between cells)
+      c2.fillRect(px, py, Math.round((x - X0 * r + 1) * cs) - px, Math.round((y - Y0 * r + 1) * cs) - py);
     }
     c2.globalAlpha = 1;
   }
@@ -192,7 +237,8 @@
   }
   const cellAt = (e) => {
     const r = canvas.getBoundingClientRect();
-    return [Math.floor(((e.clientX - r.left) / r.width) * W) + X0, Math.floor(((e.clientY - r.top) / r.height) * H) + Y0];
+    const k = R();
+    return [Math.floor(((e.clientX - r.left) / r.width) * W * k) + X0 * k, Math.floor(((e.clientY - r.top) / r.height) * H * k) + Y0 * k];
   };
   function apply(x, y) {
     const k = `${x},${y}`;
@@ -208,7 +254,8 @@
       while (stack.length) {
         const [cx, cy] = stack.pop();
         const kk = `${cx},${cy}`;
-        if (seen.has(kk) || cx < X0 || cy < Y0 || cx >= X0 + W || cy >= Y0 + H || (cells[kk] || null) !== from) continue;
+        const r = R();
+        if (seen.has(kk) || cx < X0 * r || cy < Y0 * r || cx >= (X0 + W) * r || cy >= (Y0 + H) * r || (cells[kk] || null) !== from) continue;
         seen.add(kk);
         cells[kk] = color;
         stack.push([cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]);
@@ -232,7 +279,46 @@
   const tools = ['paint', 'erase', 'pick', 'fill'];
   tools.forEach((t) => $(`t-${t}`).addEventListener('click', () => { tool = t; tools.forEach((u) => $(`t-${u}`).classList.toggle('on', u === t)); }));
   $('onion').addEventListener('click', (e) => { onion = !onion; e.target.classList.toggle('on', onion); draw(); });
-  $('undo').addEventListener('click', () => { if (undo.length) { F().cells = JSON.parse(undo.pop()); draw(); save(); } });
+  $('undo').addEventListener('click', doUndo);
+  $('redo').addEventListener('click', doRedo);
+  document.addEventListener('keydown', (e) => {
+    if (!(e.ctrlKey || e.metaKey) || /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return;
+    const k = e.key.toLowerCase();
+    if (k === 'z' && !e.shiftKey) { e.preventDefault(); doUndo(); }
+    else if (k === 'y' || (k === 'z' && e.shiftKey)) { e.preventDefault(); doRedo(); }
+  });
+  // ── 1x / 2x: each pixel split in four, or each four merged back into one (the most-used color of
+  // the four, empty if most are) ──
+  const up = (cells) => { const o = {}; for (const [k, c] of Object.entries(cells)) { const [x, y] = k.split(',').map(Number); for (const [i, j] of [[0, 0], [1, 0], [0, 1], [1, 1]]) o[`${x * 2 + i},${y * 2 + j}`] = c; } return o; };
+  function down(cells) {
+    const groups = new Map();
+    for (const [k, c] of Object.entries(cells)) {
+      const [x, y] = k.split(',').map(Number);
+      const g = `${Math.floor(x / 2)},${Math.floor(y / 2)}`;
+      if (!groups.has(g)) groups.set(g, []);
+      groups.get(g).push(c);
+    }
+    const o = {};
+    for (const [g, cs] of groups) {
+      if (cs.length < 2) continue; // (a lone half-pixel: gone)
+      const n = {};
+      cs.forEach((c) => { n[c] = (n[c] || 0) + 1; });
+      o[g] = Object.entries(n).sort((a, b) => b[1] - a[1])[0][0];
+    }
+    return o;
+  }
+  const fit = (cells) => (R() === 2 ? up(cells) : cells); // (the game's pixels, loaded into this animation)
+  function showRes() { $('res1').classList.toggle('on', R() === 1); $('res2').classList.toggle('on', R() === 2); }
+  function setRes(r) {
+    if (R() === r) return;
+    snapshotUndo();
+    A().frames.forEach((fr) => { fr.cells = r === 2 ? up(fr.cells) : down(fr.cells); });
+    A().res = r;
+    showRes(); draw(); save();
+    status(r === 2 ? 'Now at 2x: each pixel is four.' : 'Back to 1x: each four merged into one (UNDO to get the detail back).');
+  }
+  $('res1').addEventListener('click', () => setRes(1));
+  $('res2').addEventListener('click', () => setRes(2));
   function setColor(c) { color = hex(c); renderPalette(); tool = 'paint'; tools.forEach((u) => $(`t-${u}`).classList.toggle('on', u === 'paint')); }
   function renderPalette() {
     const p = $('palette');
@@ -248,7 +334,7 @@
   const shift = (dx, dy) => { snapshotUndo(); const out = {}; for (const [k, c] of Object.entries(F().cells)) { const [x, y] = k.split(',').map(Number); out[`${x + dx},${y + dy}`] = c; } F().cells = out; draw(); save(); };
   $('shift-l').addEventListener('click', () => shift(-1, 0)); $('shift-r').addEventListener('click', () => shift(1, 0));
   $('shift-u').addEventListener('click', () => shift(0, -1)); $('shift-d').addEventListener('click', () => shift(0, 1));
-  $('flip').addEventListener('click', () => { snapshotUndo(); const out = {}; for (const [k, c] of Object.entries(F().cells)) { const [x, y] = k.split(',').map(Number); out[`${15 - x},${y}`] = c; } F().cells = out; draw(); save(); });
+  $('flip').addEventListener('click', () => { snapshotUndo(); const out = {}; for (const [k, c] of Object.entries(F().cells)) { const [x, y] = k.split(',').map(Number); out[`${16 * R() - 1 - x},${y}`] = c; } F().cells = out; draw(); save(); });
   $('clear-frame').addEventListener('click', () => { snapshotUndo(); F().cells = {}; draw(); save(); });
 
   // ── Frames ──
@@ -264,18 +350,18 @@
       drawCells(fr.cells, 1, c2, 2);
       t.appendChild(cv);
       t.appendChild(Object.assign(document.createElement('span'), { textContent: `${i + 1} · ${fr.ms}ms` }));
-      t.addEventListener('click', () => { frame = i; undo = []; $('ms').value = F().ms; draw(); });
+      t.addEventListener('click', () => { frame = i; $('ms').value = F().ms; draw(); });
       strip.appendChild(t);
     });
     $('ms').value = F().ms;
   }
-  $('add-frame').addEventListener('click', () => { A().frames.splice(frame + 1, 0, { ms: F().ms, cells: {} }); frame++; draw(); save(); });
-  $('dup-frame').addEventListener('click', () => { A().frames.splice(frame + 1, 0, { ms: F().ms, cells: { ...F().cells } }); frame++; draw(); save(); });
-  $('del-frame').addEventListener('click', () => { if (A().frames.length < 2) return; A().frames.splice(frame, 1); frame = Math.max(0, frame - 1); draw(); save(); });
-  const moveFrame = (d) => { const j = frame + d; if (j < 0 || j >= A().frames.length) return; const fs = A().frames; [fs[frame], fs[j]] = [fs[j], fs[frame]]; frame = j; draw(); save(); };
+  $('add-frame').addEventListener('click', () => { snapshotUndo(); A().frames.splice(frame + 1, 0, { ms: F().ms, cells: {} }); frame++; draw(); save(); });
+  $('dup-frame').addEventListener('click', () => { snapshotUndo(); A().frames.splice(frame + 1, 0, { ms: F().ms, cells: { ...F().cells } }); frame++; draw(); save(); });
+  $('del-frame').addEventListener('click', () => { if (A().frames.length < 2) return; snapshotUndo(); A().frames.splice(frame, 1); frame = Math.max(0, frame - 1); draw(); save(); });
+  const moveFrame = (d) => { const j = frame + d; if (j < 0 || j >= A().frames.length) return; snapshotUndo(); const fs = A().frames; [fs[frame], fs[j]] = [fs[j], fs[frame]]; frame = j; draw(); save(); };
   $('move-l').addEventListener('click', () => moveFrame(-1)); $('move-r').addEventListener('click', () => moveFrame(1));
-  $('ms').addEventListener('change', () => { F().ms = Math.max(16, Number($('ms').value) || 120); draw(); save(); });
-  $('ms-all').addEventListener('click', () => { A().frames.forEach((fr) => { fr.ms = F().ms; }); draw(); save(); });
+  $('ms').addEventListener('change', () => { snapshotUndo(); F().ms = Math.max(16, Number($('ms').value) || 120); draw(); save(); });
+  $('ms-all').addEventListener('click', () => { snapshotUndo(); A().frames.forEach((fr) => { fr.ms = F().ms; }); draw(); save(); });
 
   // ── Playback ──
   let playing = 0;
@@ -293,16 +379,18 @@
     $('name').value = A().name;
     $('notes').value = A().notes || '';
     renderPalette();
+    showRes();
     draw();
   }
-  $('anims').addEventListener('change', () => { cur = Number($('anims').value); frame = 0; undo = []; renderAnims(); });
-  $('new-anim').addEventListener('click', () => { anims.push(blank()); cur = anims.length - 1; frame = 0; save(); renderAnims(); });
-  $('dup-anim').addEventListener('click', () => { anims.push({ ...JSON.parse(JSON.stringify(A())), name: `${A().name} (COPY)` }); cur = anims.length - 1; frame = 0; save(); renderAnims(); });
-  $('del-anim').addEventListener('click', () => { if (!confirm(`Delete ${A().name}?`)) return; anims.splice(cur, 1); if (!anims.length) anims.push(blank()); cur = 0; frame = 0; save(); renderAnims(); });
+  const fresh = () => { undo = []; redo = []; };
+  $('anims').addEventListener('change', () => { cur = Number($('anims').value); frame = 0; fresh(); renderAnims(); });
+  $('new-anim').addEventListener('click', () => { fresh(); anims.push(blank()); cur = anims.length - 1; frame = 0; save(); renderAnims(); });
+  $('dup-anim').addEventListener('click', () => { fresh(); anims.push({ ...JSON.parse(JSON.stringify(A())), name: `${A().name} (COPY)` }); cur = anims.length - 1; frame = 0; save(); renderAnims(); });
+  $('del-anim').addEventListener('click', () => { if (!confirm(`Delete ${A().name}?`)) return; fresh(); anims.splice(cur, 1); if (!anims.length) anims.push(blank()); cur = 0; frame = 0; save(); renderAnims(); });
   $('name').addEventListener('input', () => { A().name = $('name').value || 'UNTITLED'; save(); $('anims').options[cur].textContent = A().name; });
   $('notes').addEventListener('input', () => { A().notes = $('notes').value; save(); });
   // (the file: the frames, each its pixels as 'x,y': '#color' on the bot's grid, (0, 0) its top left)
-  const fileOf = (a) => JSON.stringify({ bytefallAnimation: 1, name: a.name, notes: a.notes || '', grid: 'art pixels of the bot; (0,0) its top-left, 16x17; the floor at y = 17', palette: a.palette, frames: a.frames }, null, 1);
+  const fileOf = (a) => JSON.stringify({ bytefallAnimation: 1, name: a.name, notes: a.notes || '', grid: (a.res || 1) === 2 ? 'half pixels of the bot (res 2: each bot pixel is 2x2 of these); (0,0) its top-left, 32x34; the floor at y = 34' : 'art pixels of the bot; (0,0) its top-left, 16x17; the floor at y = 17', res: a.res || 1, palette: a.palette, frames: a.frames }, null, 1);
   const status = (t) => { $('status').textContent = t; clearTimeout(status.t); status.t = setTimeout(() => { $('status').textContent = ''; }, 4000); };
   $('export').addEventListener('click', () => {
     const blob = new Blob([fileOf(A())], { type: 'application/json' });
@@ -318,8 +406,8 @@
     if (!file) return;
     try {
       const d = JSON.parse(await file.text());
-      anims.push({ name: d.name || 'IMPORTED', notes: d.notes || '', palette: d.palette || blank().palette, frames: d.frames });
-      cur = anims.length - 1; frame = 0; save(); renderAnims(); status('Imported.');
+      anims.push({ name: d.name || 'IMPORTED', notes: d.notes || '', res: d.res === 2 ? 2 : 1, palette: d.palette || blank().palette, frames: d.frames });
+      cur = anims.length - 1; frame = 0; fresh(); save(); renderAnims(); status('Imported.');
     } catch (err) { status('That file isn\'t an animation.'); }
     e.target.value = '';
   });
@@ -328,30 +416,99 @@
   const MOODS = ['idle', 'happy', 'hit', 'worried', 'smug', 'annoyed', 'devious', 'love', 'surprised', 'laugh', 'scared', 'dizzy', 'tired', 'skeptic', 'angry', 'snarl', 'munch', 'strain'];
   $('s-mood').innerHTML = MOODS.map((m) => `<option>${m}</option>`).join('');
   const lane = createWanderers($('lane'), () => false);
-  function makeBot() {
+  function makeBot(o = {}) {
+    const opt = { bot: $('s-bot').value, level: $('s-level').value, mood: $('s-mood').value, phones: $('s-phones').checked, ...o };
     lane.clearAll();
-    lane.spawn({ bot: $('s-bot').value, level: $('s-level').value, enter: 'pop', phones: $('s-phones').checked, costume: false, skate: false });
+    lane.spawn({ bot: opt.bot, level: opt.level, enter: 'pop', phones: opt.phones, costume: false, skate: false });
     const w = lane.list()[lane.list().length - 1];
-    w.el.dataset.mood = $('s-mood').value;
+    w.el.dataset.mood = opt.mood;
     w.el.querySelectorAll('*').forEach((n) => { n.style.animation = 'none'; }); // (its rest pose: no bob, blink or step mid-way)
     return w;
   }
   const colorsOf = (cells) => { for (const c of Object.values(cells)) if (!A().palette.includes(c)) A().palette.push(c); };
   function botFrame() { const w = makeBot(); const cells = toObj(Pixel.snapshot(w.el.querySelector('svg'))); colorsOf(cells); return cells; }
-  $('from-bot').addEventListener('click', () => { A().frames = [{ ms: 120, cells: botFrame() }]; frame = 0; save(); renderAnims(); status('Loaded the bot.'); });
-  $('add-bot').addEventListener('click', () => { A().frames.push({ ms: 120, cells: botFrame() }); frame = A().frames.length - 1; save(); renderAnims(); });
+  $('from-bot').addEventListener('click', () => { snapshotUndo(); A().frames = [{ ms: 120, cells: fit(botFrame()) }]; frame = 0; save(); renderAnims(); status('Loaded the bot.'); });
+  $('add-bot').addEventListener('click', () => { snapshotUndo(); A().frames.push({ ms: 120, cells: fit(botFrame()) }); frame = A().frames.length - 1; save(); renderAnims(); });
   const fromPose = (kind, label) => {
     const w = makeBot();
     w.phones = true;
     const frames = lane.poseFrames(w, kind).map((f) => ({ ms: f.ms, cells: toObj(f.cells) }));
     frames.forEach((f) => colorsOf(f.cells));
-    A().frames = frames; frame = 0;
+    snapshotUndo();
+    A().frames = frames.map((f) => ({ ...f, cells: fit(f.cells) })); frame = 0;
     if (A().name === 'NEW ANIMATION' || A().name === 'MY FIRST ANIMATION') A().name = label;
     save(); renderAnims(); status(`Loaded the game's ${label} (one beat at 190 BPM).`);
   };
   $('from-bang').addEventListener('click', () => fromPose('bang', 'HEADBANG'));
   $('from-heavy').addEventListener('click', () => fromPose('bang-heavy', 'HEAVY HEADBANG'));
   $('from-mill').addEventListener('click', () => fromPose('mill', 'WINDMILL'));
+
+  // ── The game's characters: every bot and what it does, every visitor's frames ──
+  const BOTS = ['bot', 'grifter', 'bunker', 'glitch'];
+  const art = lane.visitorArt() || { sprites: {}, kinds: {} };
+  const VISITORS = Object.keys(art.sprites).sort();
+  const BOT_ACTS = [['walk', 'WALK (ITS TWO STEPS)'], ['hop', 'HOP'], ['moods', 'EVERY FACE (ONE FRAME EACH)'], ['bang', 'HEADBANG (HEADPHONES)'], ['bang-heavy', 'HEAVY HEADBANG (HEADPHONES)'], ['mill', 'WINDMILL (HEADPHONES)'],
+    ...MOODS.map((m) => [`mood:${m}`, `STANDING, ${m.toUpperCase()}`])];
+  const FRAME_NAMES = { a: 'FRAME A (STANDING, OR ITS FIRST)', b: 'FRAME B (ITS STEP, FLAP OR SECOND)', c: 'FRAME C', d: 'FRAME D' };
+  $('lib-char').innerHTML = `<optgroup label="BOTS">${BOTS.map((b) => `<option value="bot:${b}">${b.toUpperCase()}</option>`).join('')}</optgroup>`
+    + `<optgroup label="VISITORS, SCENERY AND THE REST">${VISITORS.map((k) => `<option value="v:${k}">${k.toUpperCase()}</option>`).join('')}</optgroup>`;
+  const framesOf = (def) => ['a', 'b', 'c', 'd'].filter((k) => def[k]);
+  function renderActs() {
+    const [type, id] = $('lib-char').value.split(':');
+    $('lib-bot-opts').style.display = type === 'bot' ? '' : 'none';
+    const acts = type === 'bot' ? BOT_ACTS : [['all', 'ALL ITS FRAMES, IN TURN'], ...framesOf(art.sprites[id]).map((k) => [k, FRAME_NAMES[k]])];
+    $('lib-act').innerHTML = acts.map(([v, t]) => `<option value="${v}">${t}</option>`).join('');
+  }
+  $('lib-char').addEventListener('change', renderActs);
+  renderActs();
+  // (a visitor's frame on the bots' grid: centered on the bot's box, standing on the same floor)
+  function spriteCells(def, key) {
+    const rows = key === 'a' ? def.a : key === 'b' ? (Array.isArray(def.b) ? def.b : def.a.map((r, i) => (def.b && def.b[i]) || r)) : def[key];
+    const w = rows[0].length;
+    const x0 = 8 - Math.floor(w / 2);
+    const y0 = 15 - rows.length;
+    const cells = {};
+    rows.forEach((row, y) => [...row].forEach((ch, x) => { if (ch !== '.' && def.pal[ch]) cells[`${x0 + x},${y0 + y}`] = hex(def.pal[ch]); }));
+    return cells;
+  }
+  function botCells(o, tweak) {
+    const w = makeBot(o);
+    const svg = w.el.querySelector('svg');
+    if (tweak) tweak(svg);
+    return toObj(Pixel.snapshot(svg));
+  }
+  $('lib-load').addEventListener('click', () => {
+    const [type, id] = $('lib-char').value.split(':');
+    const act = $('lib-act').value;
+    const label = $('lib-act').selectedOptions[0].textContent;
+    let frames = [];
+    if (type === 'bot') {
+      const o = { bot: id, level: $('lib-level').value, phones: $('lib-phones').checked, mood: 'idle' };
+      if (act === 'walk') { // (one leg up, then the other: the walk's steps)
+        frames = ['.leg-a', '.leg-b'].map((leg) => ({ ms: 140, cells: botCells(o, (svg) => svg.querySelectorAll(leg).forEach((r) => { r.style.transform = 'translateY(-1px)'; })) }));
+      } else if (act === 'hop') {
+        frames = [0, 1, 2, 1, 0].map((dy, i) => ({ ms: i === 4 ? 300 : 90, cells: botCells(o, (svg) => { svg.querySelector('.bot').style.transform = `translateY(${-dy}px)`; }) }));
+      } else if (act === 'moods') frames = MOODS.map((m) => ({ ms: 500, cells: botCells({ ...o, mood: m }) }));
+      else if (act.startsWith('mood:')) frames = [{ ms: 120, cells: botCells({ ...o, mood: act.slice(5) }) }];
+      else {
+        const w = makeBot({ ...o, phones: true });
+        w.phones = true;
+        frames = lane.poseFrames(w, act).map((f) => ({ ms: f.ms, cells: toObj(f.cells) }));
+      }
+    } else {
+      const def = art.sprites[id];
+      const ms = (art.kinds[id] && art.kinds[id].frameMs) || 300;
+      frames = (act === 'all' ? framesOf(def) : [act]).map((k) => ({ ms, cells: spriteCells(def, k) }));
+    }
+    anims.push({ ...blank(`${id.toUpperCase()}: ${label}`), notes: `From the game: ${id}, ${label.toLowerCase()}`, frames });
+    cur = anims.length - 1;
+    frame = 0;
+    fresh();
+    frames.forEach((f) => colorsOf(f.cells));
+    save();
+    renderAnims();
+    status(`Loaded ${id.toUpperCase()}: ${label}.`);
+  });
 
   renderAnims();
 })();
