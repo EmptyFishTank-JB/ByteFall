@@ -118,7 +118,7 @@ const Music = (() => {
       intensity += (targetIntensity - intensity) * INTENSITY_EASE;
       applyMix(engine, trackMix(trackId, outputId), intensity, nextTime);
       // (the drums as they're scheduled, for whatever moves to them: the wanderers' headphones)
-      let hit = step % 4 === 0 ? { time: nextTime, beat: true, bar: step % 16 === 0 } : null;
+      let hit = step % 4 === 0 ? { time: nextTime, beat: true, bar: step % 16 === 0, half: step % 8 === 0, feel: engine.feel ? engine.feel(step) : null } : null;
       if (engine.record) engine.record((id) => { const k = DRUM_KIND[id]; if (k) { hit = hit || { time: nextTime }; hit[k] = true; } });
       engine.schedule(step, nextTime, intensity);
       if (engine.record) engine.record(null);

@@ -309,6 +309,14 @@ function createCoreDump(ctx, out) {
     defaultMuted: DEFAULT_MUTED,
     channels: ch.list,
     record: ch.record,
+    // The feel at a step, for whatever moves to the music (the wanderers' headphones): the blast
+    // sections (once the riff's intro is through), the gallop, and the half-time breakdown
+    feel(step) {
+      const bar = Math.floor(step / 16) % 32;
+      const section = Math.floor(bar / 8);
+      if (section === 0) return step < 32 * 16 && bar < 2 ? 'gallop' : 'blast';
+      return section === 2 ? 'blast' : section === 1 ? 'gallop' : 'half';
+    },
     // solo: a layer id to hear that layer alone at full strength; muted: layer ids to leave out
     // (both from the dev page)
     schedule(step, t, intensity = 0, solo = null, muted = null) {

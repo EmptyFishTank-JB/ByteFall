@@ -2439,6 +2439,8 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
 .walker.grooving .eyes-squint { display: inline !important; }
 /* (standing, its own moves come from the drums, wanderers.js: no mood's bounce under them) */
 .walker.grooving :is(.bot, .leg-a, .leg-b) { animation: none !important; }
+.walker.grooving .bot { transform-box: fill-box; transform-origin: 50% 60%; }
+.walker .metal-hair { transform-box: fill-box; transform-origin: 50% 0; } /* (CORE DUMP's head spins about its middle; headbangs squash toward the feet) */
 .walker.vibing.walking:not(.running) .bot { animation: bot-hop calc(var(--beat, 0.56s) / 2) steps(2) var(--beat-at, 0s) infinite; }
 .walker.vibing.walking:not(.running) .leg-a { animation: bot-step calc(var(--beat, 0.56s) / 2) steps(1) var(--beat-at, 0s) infinite; }
 .walker.vibing.walking:not(.running) .leg-b { animation: bot-step calc(var(--beat, 0.56s) / 2) steps(1) calc(var(--beat-at, 0s) + var(--beat, 0.56s) / 4) infinite; }
