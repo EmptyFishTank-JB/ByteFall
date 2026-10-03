@@ -181,14 +181,30 @@ const MODES = {
     info: (date) => dailyNote(date, `break through a ${BREACH_ROWS}-row firewall with ${BREACH_BITS} bits. +${BREACH_LAYER_POINTS} for every layer broken, +${BREACH_CLEAR_BONUS} for clearing the board.`),
   },
 };
-Progress.setPuzzleCount(PUZZLES.length);
+// PUZZLE: three sets of 100 (EASY and NORMAL on the 7x7, HARD on the 8x8), each played in order:
+// puzzle 1 of each is open, and every one after it opens once the one before it is solved
+const PUZZLE_TIERS = ['easy', 'normal', 'hard'];
+let puzzleTier = PUZZLE_TIERS.includes(storage.get('bytefall-puzzle-tier')) ? storage.get('bytefall-puzzle-tier') : 'normal';
+const tierPuzzles = (t = puzzleTier) => PUZZLES[t];
+// (in the saved progress NORMAL's keep the plain numbers they've always had; EASY's and HARD's are e0, h0...)
+const puzzleKey = (i, t = puzzleTier) => (t === 'normal' ? i : `${t[0]}${i}`);
+const puzzleDone = (i, t = puzzleTier) => Progress.puzzleSolved(puzzleKey(i, t));
+const puzzleOpen = (i, t = puzzleTier) => i === 0 || puzzleDone(i - 1, t);
+const tierSolved = (t = puzzleTier) => tierPuzzles(t).filter((_, n) => puzzleDone(n, t)).length;
+const tierLabel = (t = puzzleTier) => DIFFICULTIES[t].label;
+Progress.setPuzzleCount(PUZZLE_TIERS.reduce((n, t) => n + PUZZLES[t].length, 0));
 Progress.setTrackCount(Music.tracks().length);
-// PUZZLE: the first unsolved one, or the one you were on
-const firstUnsolved = () => {
-  const i = PUZZLES.findIndex((_, n) => !Progress.puzzleSolved(n));
-  return i < 0 ? PUZZLES.length - 1 : i;
+// The one you were on in a set (or its first unsolved one)
+const firstUnsolved = (t = puzzleTier) => {
+  const i = tierPuzzles(t).findIndex((_, n) => !puzzleDone(n, t));
+  return i < 0 ? tierPuzzles(t).length - 1 : i;
 };
-let puzzleIndex = Math.min(Number(storage.get('bytefall-puzzle')) || firstUnsolved(), firstUnsolved());
+const puzzleIndexKey = (t = puzzleTier) => (t === 'normal' ? 'bytefall-puzzle' : `bytefall-puzzle-${t}`);
+const savedPuzzle = (t = puzzleTier) => {
+  const n = Number(storage.get(puzzleIndexKey(t)));
+  return Math.min(Number.isInteger(n) && n >= 0 && storage.get(puzzleIndexKey(t)) != null ? n : firstUnsolved(t), firstUnsolved(t));
+};
+let puzzleIndex = savedPuzzle();
 let overlayNext = null; // what the overlay button does in PUZZLE: 'next' or 'retry'
 // The mode row's choice ('daily' or one of MODES) and the daily game under it
 const TOP_MODES = ['classic', 'daily', 'blitz', 'zen', 'puzzle', 'vs'];
@@ -245,7 +261,7 @@ function todayPuzzle() {
   const day = Math.floor((Date.parse(`${todayKey()}T00:00:00Z`) - Date.parse(`${DAILY_PUZZLES[0].date}T00:00:00Z`)) / 86400000);
   return DAILY_PUZZLES[((day % DAILY_PUZZLES.length) + DAILY_PUZZLES.length) % DAILY_PUZZLES.length];
 }
-const currentPuzzle = () => (daily ? todayPuzzle() : PUZZLES[puzzleIndex]);
+const currentPuzzle = () => (daily ? todayPuzzle() : tierPuzzles()[puzzleIndex]);
 // DAILY PUZZLE: 4 official tries a day (a try counts from its first drop); once it's solved or
 // they're used up, it's practice. Every attempt, practice too, counts toward STUBBORN.
 const DAILY_PUZZLE_TRIES = 4;
@@ -352,10 +368,11 @@ const dailyBitsLeft = () => dealLimit() - dealt + queue.filter((p) => p.type ===
 function initGame() {
   runId++;
   // (VS plays on the CPU level's board: HARD's 8x8 against HARD and INSANE, NORMAL's 7x7 otherwise)
-  difficulty = mode === 'classic' ? classicDifficulty : mode === 'vs' && CpuBoard.sizeFor(vsLevel) === 8 ? 'hard' : 'normal';
+  difficulty = mode === 'classic' ? classicDifficulty : mode === 'puzzle' && !daily ? puzzleTier
+    : mode === 'vs' && CpuBoard.sizeFor(vsLevel) === 8 ? 'hard' : 'normal';
   dailyOfficial = daily && (mode === 'puzzle' ? dailyPuzzleOfficial() : !storage.get(dailyPlayedKey()));
   setupDice();
-  Progress.startRun(difficulty, mode, mode === 'puzzle' && !daily ? puzzleIndex : null, daily);
+  Progress.startRun(difficulty, mode, mode === 'puzzle' && !daily ? puzzleKey(puzzleIndex) : null, daily);
   timeLeft = daily ? DAILY_BLITZ_SECONDS : BLITZ_SECONDS;
   clockRunning = false;
   timeUp = false;
@@ -443,9 +460,11 @@ function loadPuzzle() {
   queue = puzzle.pieces.map((val) => ({ type: 'number', val }));
 }
 
-function setPuzzle(i) {
+function setPuzzle(i, tier = puzzleTier) {
+  puzzleTier = tier;
   puzzleIndex = i;
-  storage.set('bytefall-puzzle', String(i));
+  storage.set('bytefall-puzzle-tier', tier);
+  storage.set(puzzleIndexKey(tier), String(i));
   SFX.play('static');
   initGame();
 }
@@ -463,8 +482,8 @@ function checkPuzzle() {
   } else if (daily) {
     if (!queue.length) showPuzzleResult(false);
   } else if (columns.every((c) => c.length === 0)) {
-    const first = !Progress.puzzleSolved(puzzleIndex);
-    Progress.solvePuzzle(puzzleIndex);
+    const first = !puzzleDone(puzzleIndex);
+    Progress.solvePuzzle(puzzleKey(puzzleIndex));
     announce(Progress.check());
     showPuzzleResult(true, first);
   } else if (!queue.length) {
@@ -478,7 +497,7 @@ function showPuzzleResult(solved, firstTime = false) {
   setMessage('');
   SFX.play(solved ? 'egg' : 'denied');
   if (!solved && !daily) Progress.puzzleFailed();
-  const last = daily || puzzleIndex === PUZZLES.length - 1;
+  const last = daily || puzzleIndex === tierPuzzles().length - 1;
   overlayNext = solved && !last ? 'next' : 'retry';
   document.querySelector('.overlay-box').classList.toggle('win', solved);
   document.getElementById('overlay-title').textContent = solved ? 'DECRYPTED' : 'OUT OF BITS';
@@ -489,7 +508,7 @@ function showPuzzleResult(solved, firstTime = false) {
       : triesLeft > 0 ? `Blocks are still encrypted. ${triesLeft} ${triesLeft === 1 ? 'try' : 'tries'} left today.`
       : `Blocks are still encrypted. That was today's last try.`)
     : solved
-    ? (last ? 'Every puzzle solved. The whole archive is yours.' : `Puzzle ${puzzleIndex + 1} cracked${firstTime ? '' : ' again'}.`)
+    ? (last && tierSolved() === tierPuzzles().length ? `Every ${tierLabel()} puzzle solved. The whole set is yours.` : `Puzzle ${puzzleIndex + 1} cracked${firstTime ? '' : ' again'}.`)
     : 'Blocks are still encrypted.';
   finalScoreEl.textContent = score;
   newBestEl.hidden = true;
@@ -497,7 +516,7 @@ function showPuzzleResult(solved, firstTime = false) {
   note.hidden = false;
   note.textContent = daily
     ? `DAILY PUZZLE // ${todayKey()} // ${WEEKDAYS[utcWeekday()]}`
-    : `PUZZLE ${puzzleIndex + 1} / ${PUZZLES.length} // ${PUZZLES.filter((_, n) => Progress.puzzleSolved(n)).length} SOLVED`;
+    : `${tierLabel()} // PUZZLE ${puzzleIndex + 1} / ${tierPuzzles().length} // ${tierSolved()} SOLVED`;
   shareBtn.hidden = !daily; // every daily shares, win or lose
   shareBtn.textContent = 'SHARE';
   document.getElementById('overlay-restart-btn').textContent = overlayNext === 'next' ? 'NEXT PUZZLE'
@@ -512,12 +531,80 @@ function showPuzzleResult(solved, firstTime = false) {
 const puzzleNavEl = document.getElementById('puzzle-nav');
 function updatePuzzleNav() {
   const label = document.getElementById('puzzle-label');
-  label.textContent = `PUZZLE ${puzzleIndex + 1} / ${PUZZLES.length}${Progress.puzzleSolved(puzzleIndex) ? ' \u2713' : ''}`;
-  label.classList.toggle('solved', Progress.puzzleSolved(puzzleIndex));
+  label.innerHTML = `${GRID_SVG} PUZZLE ${puzzleIndex + 1} / ${tierPuzzles().length}${puzzleDone(puzzleIndex) ? ' \u2713' : ''}`;
+  label.classList.toggle('solved', puzzleDone(puzzleIndex));
   document.getElementById('puzzle-prev').disabled = puzzleIndex === 0;
-  // Ahead: any solved puzzle, or the first unsolved one
-  document.getElementById('puzzle-next').disabled = puzzleIndex + 1 >= PUZZLES.length || puzzleIndex + 1 > firstUnsolved();
+  // Ahead: once this one's solved
+  document.getElementById('puzzle-next').disabled = puzzleIndex + 1 >= tierPuzzles().length || !puzzleOpen(puzzleIndex + 1);
+  document.querySelectorAll('#puzzle-tiers button').forEach((b) => b.classList.toggle('active', b.dataset.ptier === puzzleTier));
 }
+const GRID_SVG = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" fill="currentColor"/></svg>';
+// The set: EASY, NORMAL or HARD, at the one you were on in it
+document.querySelectorAll('#puzzle-tiers button').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const next = btn.dataset.ptier;
+    if (next === puzzleTier) return;
+    requestReset(btn, 'CONFIRM?', () => setPuzzle(savedPuzzle(next), next));
+  });
+});
+// The label: every puzzle of the set, to pick from (PUZZLES, a page of the menu card)
+document.getElementById('puzzle-label').addEventListener('click', () => {
+  puzzlePage = Math.floor(puzzleIndex / PUZZLE_PAGE);
+  setRecordsOpen(true, 'puzzles');
+});
+
+// PUZZLES (the menu card's page): the set's puzzles in pages of 25, solved ones lit and ticked,
+// the next one to solve open, the rest locked until the one before is solved. A tap plays it.
+const PUZZLE_PAGE = 25;
+let puzzlePage = 0;
+let puzzleListTier = puzzleTier;
+function renderPuzzleSelect() {
+  const pane = recordsEl.querySelector('.menu-pane[data-pane="puzzles"]');
+  if (!pane) return;
+  const list = tierPuzzles(puzzleListTier);
+  const pages = Math.ceil(list.length / PUZZLE_PAGE);
+  puzzlePage = Math.max(0, Math.min(pages - 1, puzzlePage));
+  pane.querySelectorAll('[data-ptier-pick]').forEach((b) => b.classList.toggle('active', b.dataset.ptierPick === puzzleListTier));
+  pane.querySelector('.pz-count').textContent = `${tierSolved(puzzleListTier)} / ${list.length} SOLVED`;
+  const pageRow = pane.querySelector('.pz-pages');
+  pageRow.innerHTML = '';
+  for (let k = 0; k < pages; k++) {
+    const from = k * PUZZLE_PAGE;
+    const to = Math.min(list.length, from + PUZZLE_PAGE);
+    const done = list.slice(from, to).filter((_, n) => puzzleDone(from + n, puzzleListTier)).length;
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = k === puzzlePage ? 'active' : '';
+    b.innerHTML = `${from + 1}\u2013${to}<small>${done}/${to - from}</small>`;
+    b.addEventListener('click', () => { puzzlePage = k; renderPuzzleSelect(); });
+    pageRow.appendChild(b);
+  }
+  const grid = pane.querySelector('.pz-grid');
+  grid.innerHTML = '';
+  for (let i = puzzlePage * PUZZLE_PAGE; i < Math.min(list.length, (puzzlePage + 1) * PUZZLE_PAGE); i++) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    const done = puzzleDone(i, puzzleListTier);
+    const open = puzzleOpen(i, puzzleListTier);
+    b.className = `pz-tile${done ? ' done' : ''}${open && !done ? ' next' : ''}${puzzleListTier === puzzleTier && i === puzzleIndex ? ' current' : ''}`;
+    b.disabled = !open;
+    b.innerHTML = open ? `${i + 1}${done ? '<i>\u2713</i>' : ''}` : `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11V8a5 5 0 0 1 10 0v3M5 11h14v10H5z" fill="none" stroke="currentColor" stroke-width="2"/></svg>`;
+    b.setAttribute('aria-label', `Puzzle ${i + 1}${done ? ', solved' : open ? '' : ', locked'}`);
+    b.addEventListener('click', () => {
+      setRecordsOpen(false);
+      setPuzzle(i, puzzleListTier);
+      if (homeOpen) homePlayBtn.click();
+    });
+    grid.appendChild(b);
+  }
+}
+document.querySelectorAll('[data-ptier-pick]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    puzzleListTier = btn.dataset.ptierPick;
+    puzzlePage = Math.floor((puzzleListTier === puzzleTier ? puzzleIndex : firstUnsolved(puzzleListTier)) / PUZZLE_PAGE);
+    renderPuzzleSelect();
+  });
+});
 document.getElementById('puzzle-prev').addEventListener('click', () => {
   if (!busy || gameOver) setPuzzle(puzzleIndex - 1);
 });
@@ -2108,6 +2195,7 @@ function applyModeUi() {
   document.getElementById('pulse-stat').classList.toggle('counts-layers', mode !== 'puzzle' && mode !== 'breach');
   updateVsChrome(); // (after ENCRYPT IN shows or hides: it counts the stat rows)
   puzzleNavEl.hidden = mode !== 'puzzle' || daily;
+  document.getElementById('puzzle-tiers').hidden = mode !== 'puzzle' || daily;
   if (mode === 'puzzle' && !daily) updatePuzzleNav();
   // The overlay goes back to its trace look until a puzzle result changes it
   overlayNext = null;
@@ -2879,7 +2967,7 @@ const homePlayBtn = document.getElementById('home-play');
 function modeLine() {
   if (mode === 'tutorial') return 'TUTORIAL';
   if (mode === 'classic') return `CLASSIC // ${DIFFICULTIES[classicDifficulty].label}`;
-  if (mode === 'puzzle' && !daily) return `PUZZLE ${puzzleIndex + 1}`;
+  if (mode === 'puzzle' && !daily) return `PUZZLE // ${tierLabel()} ${puzzleIndex + 1}`;
   if (daily) return `${DAILY_KINDS[mode]}${dailyOfficial ? '' : ' // PRACTICE'}`;
   return MODES[mode].label;
 }
@@ -3147,7 +3235,7 @@ shareBtn.addEventListener('click', async () => {
 });
 
 document.getElementById('overlay-restart-btn').addEventListener('click', () => {
-  if (mode === 'puzzle' && !daily && overlayNext === 'next') setPuzzle(Math.min(puzzleIndex + 1, PUZZLES.length - 1));
+  if (mode === 'puzzle' && !daily && overlayNext === 'next') setPuzzle(Math.min(puzzleIndex + 1, tierPuzzles().length - 1));
   else restart();
 });
 
@@ -4185,7 +4273,7 @@ function renderRecords() {
 
 // RULES & RECORDS (its two tabs), EXPLOITS and STORE: one card, opened on its own by each's
 // button (main menu, pause screen); EXPLOITS and STORE show alone, under their own title
-const SOLO_PANES = { exploits: '// EXPLOITS', store: '// STORE' };
+const SOLO_PANES = { exploits: '// EXPLOITS', store: '// STORE', puzzles: '// PUZZLES' };
 let rulesPane = 'rules'; // (the RULES & RECORDS tab last open)
 function showMenuPane(pane) {
   menuPane = pane;
@@ -4197,6 +4285,7 @@ function showMenuPane(pane) {
   });
   recordsEl.querySelectorAll('.menu-pane').forEach((el) => { el.hidden = el.dataset.pane !== pane; });
   if (pane === 'records') renderRecords();
+  if (pane === 'puzzles') { puzzleListTier = puzzleTier; renderPuzzleSelect(); }
   if (typeof Store !== 'undefined') Store.render(); // (and the REMOVE ADS link, off on its own tab)
   const box = menuScroller();
   if (box) box.scrollTop = 0;

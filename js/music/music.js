@@ -188,7 +188,9 @@ const Music = (() => {
 
   document.addEventListener('visibilitychange', () => {
     if (!ctx || !timer) return;
-    if (document.hidden && (!backgroundPlay || window.BYTEFALL_APP)) ctx.suspend(); // (the Android app: always rests)
+    // (the Android app: it plays on in the background only from the MUSIC PLAYER)
+    const playOn = window.BYTEFALL_APP ? document.body.classList.contains('player-open') : backgroundPlay;
+    if (document.hidden && !playOn) ctx.suspend();
     else ctx.resume();
   });
 

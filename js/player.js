@@ -88,10 +88,14 @@
     viz.draw();
     requestAnimationFrame(loop);
   }
+  // (the Android app: with the player open, the music keeps playing when the app is in the
+  // background; tools/android/MainActivity.java)
+  const toApp = (on) => { try { if (window.BytefallAndroid) window.BytefallAndroid.setPlayerOpen(on); } catch (e) {} };
   function open() {
     if (typeof setSettingsOpen === 'function') setSettingsOpen(false);
     el.hidden = false;
     document.body.classList.add('player-open');
+    toApp(true);
     Music.setFullMix(true);
     render();
     requestAnimationFrame(loop);
@@ -100,6 +104,7 @@
   function close() {
     el.hidden = true;
     document.body.classList.remove('player-open');
+    toApp(false);
     Music.setFullMix(false);
     if (typeof setSettingsOpen === 'function') {
       setSettingsOpen(true);
