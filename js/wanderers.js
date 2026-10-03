@@ -283,14 +283,16 @@ function createWanderers(lane, active = () => true) {
     return best;
   }
 
-  function spawn(now) {
+  // (o, from the dev page's bot sandbox: { bot, level, enter: 'left' | 'right' | 'pop' | 'run' |
+  // 'push', skate, phones, costume: false }; left out, chance decides as ever)
+  function spawn(now, o = {}) {
     const free = BOTS.filter((b) => !walkers.some((w) => w.bot === b));
-    if (!free.length) return;
-    const bot = pick(free);
-    const fromLeft = Math.random() < 0.5;
-    const el = miniBot(bot, pickLevel(bot));
+    if (!free.length && !o.bot) return;
+    const bot = o.bot || pick(free);
+    const fromLeft = o.enter === 'left' ? true : o.enter === 'right' ? false : Math.random() < 0.5;
+    const el = miniBot(bot, o.level || pickLevel(bot));
     el.classList.add('walker');
-    dress(el, bot);
+    if (o.costume !== false) dress(el, bot, !!o.costume);
     const emote = document.createElement('span');
     emote.className = 'walker-emote';
     el.appendChild(emote);
@@ -306,8 +308,9 @@ function createWanderers(lane, active = () => true) {
     };
     w.target = freeSpot(w);
     walkers.push(w);
-    if (music() && Math.random() < 0.1) phonesOn(w, now, true); // (walks in wearing a pair)
-    const how = Math.random();
+    if (o.phones || (o.phones === undefined && music() && Math.random() < 0.1)) phonesOn(w, now, true); // (walks in wearing a pair)
+    const how = o.enter === 'pop' ? 0 : o.enter === 'run' ? 0.2 : o.enter ? 0.5 : Math.random();
+    if (o.enter === 'push') forcePush = true;
     let pushed = null;
     if (how < 0.10) { // (10%) pops into view, pixelating in; those near turn to it, startled
       w.x = w.target;
@@ -322,7 +325,7 @@ function createWanderers(lane, active = () => true) {
     if (how < 0.25) { // (15%) arrives at a run, then stops to catch its breath
       w.running = true;
       w.winded = true;
-    } else if (visitors && !foggy() && (forcePush || Math.random() < 0.15) && (pushed = visitors.makeScenery(w.dir, (x) => !walkers.some((o) => o !== w && !o.leaving && Math.abs((o.state === 'walk' ? o.target : o.x) - x) < APART)))) {
+    } else if (visitors && !foggy() && (forcePush || (!o.enter && Math.random() < 0.15)) && (pushed = visitors.makeScenery(w.dir, (x) => !walkers.some((o) => o !== w && !o.leaving && Math.abs((o.state === 'walk' ? o.target : o.x) - x) < APART)))) {
       forcePush = false;
       // It arrives pushing the season's scenery ahead of it (the scary tree, a snowman, the
       // evergreen, a menorah, a kinara, the new year's sign: visitors.js), slowly, straining, and
@@ -340,7 +343,7 @@ function createWanderers(lane, active = () => true) {
     }
     // WINTER: now and then one skates in instead, gliding in long pushes and leaving a trail of
     // powdered ice that melts away; it skates around a bit and out like any other
-    if (!w.running && !w.pushing && typeof Season !== 'undefined' && Season.is('winter') && Math.random() < 0.3) {
+    if (o.skate || (o.skate === undefined && !w.running && !w.pushing && typeof Season !== 'undefined' && Season.is('winter') && Math.random() < 0.3)) {
       w.skating = true;
       w.speed *= 2;
       w.trail = 0;
@@ -826,6 +829,6 @@ function createWanderers(lane, active = () => true) {
   }
   start();
   // (start: after being switched back on; list / startle / crowd / dress / visit / snack / push: for the dev tests)
-  return { start, phones: (w) => phonesOn(w, performance.now()), list: () => walkers, startle: (w) => startle(w, performance.now()), crowd: (n) => { want = n; nextReroll = performance.now() + 60000; }, dress, visit: (what) => visitors && visitors.visit(what), snack: (w) => snack(w, performance.now()), push: () => { forcePush = true; nextSpawn = 0; } };
+  return { start, clearAll: () => { walkers.forEach((w) => w.el.remove()); walkers = []; want = 0; nextReroll = performance.now() + 1e9; if (visitors) visitors.clear(); }, mood, fright: (w) => fright(w, performance.now()), rabid: (w) => rabid(w, performance.now()), spawn: (o) => spawn(performance.now(), o), poke: (w) => poke(w, performance.now()), depart: (w) => depart(w, performance.now()), phonesOff, phones: (w) => phonesOn(w, performance.now()), list: () => walkers, startle: (w) => startle(w, performance.now()), crowd: (n) => { want = n; nextReroll = performance.now() + 60000; }, dress, visit: (what) => visitors && visitors.visit(what), snack: (w) => snack(w, performance.now()), push: () => { forcePush = true; nextSpawn = 0; } };
 
 }

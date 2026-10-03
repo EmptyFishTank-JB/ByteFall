@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en" class="sandbox">
+<head>
+<script src="../js/fonts.js?v=286"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#020403">
+<title>Bot Sandbox // BYTEFALL</title>
+<link rel="stylesheet" href="../css/style.css?v=286">
+<!-- BOT SANDBOX: the wandering bots and everything around them (visitors, viruses, seasons, the fog,
+     headphones and the music) running on the game's own code, with every behaviour on a button.
+     Progress is stubbed: nothing here touches the saved game (no achievements, no unlocks). -->
+<script>
+  window.SANDBOX_LOG = [];
+  window.Progress = {
+    botEvent(id) { window.SANDBOX_LOG.push(id); if (window.onSandboxEvent) window.onSandboxEvent(id); },
+    check: () => [],
+    isUnlocked: () => true,
+    unlock: () => ({ need: '', goal: 0, value: () => 0 }),
+    heardTrack() {},
+  };
+</script>
+<style>
+  html.sandbox, html.sandbox body { min-height: 100%; }
+  html.sandbox body {
+    display: block; margin: 0; padding: 24px 16px 60px; overflow-x: hidden;
+    background: radial-gradient(ellipse at top, #0d1b16 0%, #020403 70%) fixed; background-color: #020403;
+    color: var(--fg); font-family: var(--game-font, 'Courier New', Courier, monospace);
+  }
+  .sb { max-width: 980px; margin: 0 auto; }
+  .sb-back { color: var(--fg-dim); text-decoration: none; font-size: 12px; letter-spacing: 2px; }
+  .sb-back:hover { color: var(--fg); }
+  .sb h1 { font-size: 20px; letter-spacing: 3px; margin: 14px 0 4px; color: var(--accent); }
+  .sb .lede { font-size: 12px; color: var(--fg-dim); margin: 0 0 18px; line-height: 1.5; }
+  .sb-grid { display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 20px; align-items: start; }
+  @media (max-width: 860px) { .sb-grid { grid-template-columns: minmax(0, 1fr); } }
+  .sb-stage { position: sticky; top: 12px; }
+  /* The three stages, as in the game: the game card's lane, the start screen, the screen saver */
+  .stage { display: none; position: relative; width: 100%; max-width: 420px; }
+  .stage.on { display: block; }
+  .stage-game .crt { height: 230px; padding: 0; display: block; max-width: none; }
+  .stage-game .sb-board { position: absolute; left: 22px; right: 22px; top: 16px; height: 120px; border: 1px dashed var(--grid-line); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; letter-spacing: 2px; color: var(--fg-dim); }
+  .stage-start .start-card { height: 600px; position: relative; }
+  .stage-start .start-title { position: absolute; top: 36%; left: 0; right: 0; }
+  .stage-saver .saver { position: relative; inset: auto; z-index: auto; height: 420px; border-radius: 10px; cursor: default; }
+  .stage-saver .saver-lane { --y: 70%; }
+  .sb-zoom { margin-top: 10px; display: flex; gap: 6px; align-items: center; font-size: 11px; color: var(--fg-dim); }
+  .sb-log { margin-top: 10px; height: 120px; overflow: auto; font-size: 10px; line-height: 1.5; color: var(--fg-dim); border: 1px solid var(--grid-line); border-radius: 6px; padding: 6px 8px; white-space: pre-wrap; }
+  .grp { border: 1px solid var(--grid-line); border-radius: 8px; padding: 10px 12px 12px; margin-bottom: 12px; background: rgba(0, 0, 0, 0.25); }
+  .grp h2 { font-size: 11px; letter-spacing: 2px; color: var(--accent); margin: 0 0 8px; font-weight: normal; }
+  .grp p { font-size: 10px; color: var(--fg-dim); margin: 0 0 8px; line-height: 1.5; }
+  .row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 6px; }
+  .row:last-child { margin-bottom: 0; }
+  .row > b { font-weight: normal; font-size: 10px; color: var(--fg-dim); width: 100%; letter-spacing: 1px; }
+  .sb button {
+    font-family: inherit; font-size: 10px; letter-spacing: 1px; padding: 5px 8px; cursor: pointer;
+    background: transparent; color: var(--fg); border: 1px solid var(--fg-dim); border-radius: 4px;
+  }
+  .sb button:hover { background: rgba(var(--fg-rgb), 0.12); }
+  .sb button.on { background: var(--fg); color: var(--board-bg, #020403); border-color: var(--fg); }
+  .sb button.go { border-color: var(--accent); color: var(--accent); }
+  .sb select, .sb input[type="range"] { font-family: inherit; font-size: 11px; background: transparent; color: var(--fg); border: 1px solid var(--fg-dim); border-radius: 4px; padding: 3px; }
+  .sb select option { background: #020403; }
+</style>
+</head>
+<body>
+<div class="sb">
+  <a class="sb-back" href="audio.html#dev">&larr; DEV PAGE</a>
+  <h1>// BOT SANDBOX</h1>
+  <p class="lede">The wandering bots on the game's own code: spawn any bot at any level, call up any visitor, season, virus or the fog, play the music for the headphones, and set every mood and reaction off on a button. Tap a bot or visitor to poke it, as in the game. Nothing here touches your saved game.</p>
+
+  <div class="sb-grid">
+    <div class="sb-stage">
+      <div class="stage stage-game on" id="stage-game">
+        <div class="crt"><div class="sb-board">// THE GRID</div><div class="game-walkers" id="lane-game"></div></div>
+      </div>
+      <div class="stage stage-start" id="stage-start">
+        <div class="start-card"><canvas class="start-bg" id="start-bg"></canvas>
+          <div class="start-title"><h1 class="start-logo">BYTE<span>FALL</span></h1></div>
+          <div class="start-walkers" id="lane-start"></div>
+        </div>
+      </div>
+      <div class="stage stage-saver" id="stage-saver">
+        <div class="saver"><div class="start-walkers saver-lane" id="lane-saver"></div></div>
+      </div>
+      <div class="sb-zoom">ZOOM <button type="button" data-zoom="1" class="on">1x</button><button type="button" data-zoom="2">2x</button><button type="button" data-zoom="3">3x</button></div>
+      <div class="sb-log" id="sb-log">// events (what the bots and visitors set off) show here</div>
+    </div>
+
+    <div class="sb-controls">
+      <div class="grp">
+        <h2>STAGE &amp; LOOK</h2>
+        <div class="row" id="stages"><b>STAGE</b>
+          <button type="button" data-stage="game" class="on">GAME CARD</button><button type="button" data-stage="start">START SCREEN</button><button type="button" data-stage="saver">SCREEN SAVER</button>
+        </div>
+        <div class="row" id="themes"><b>THEME</b></div>
+        <div class="row"><b>REDUCED EFFECTS</b><button type="button" id="lowfx">OFF</button></div>
+      </div>
+
+      <div class="grp">
+        <h2>SPAWN A BOT</h2>
+        <div class="row" id="pick-bot"><b>BOT</b></div>
+        <div class="row" id="pick-level"><b>LEVEL</b></div>
+        <div class="row" id="pick-enter"><b>COMES IN</b></div>
+        <div class="row"><b>WITH</b><button type="button" id="opt-skate">SKATES</button><button type="button" id="opt-phones">HEADPHONES</button><button type="button" id="opt-costume">SEASON COSTUME</button></div>
+        <div class="row"><button type="button" class="go" id="spawn">SPAWN</button><button type="button" id="clear">CLEAR ALL</button></div>
+        <div class="row" id="crowd"><b>LET THEM COME AND GO ON THEIR OWN (HOW MANY)</b></div>
+      </div>
+
+      <div class="grp">
+        <h2>EVERY BOT ON THE STAGE</h2>
+        <div class="row"><b>REACTIONS</b>
+          <button type="button" data-act="poke">POKE</button><button type="button" data-act="fright">FRIGHT (BOLT)</button><button type="button" data-act="rabid">RABID SNAP</button><button type="button" data-act="startle">STARTLE</button><button type="button" data-act="snack">SNACK</button><button type="button" data-act="phones">HEADPHONES ON</button><button type="button" data-act="phonesoff">HEADPHONES OFF</button><button type="button" data-act="leave">LEAVE</button>
+        </div>
+        <div class="row" id="moods"><b>MOOD (FACE)</b></div>
+      </div>
+
+      <div class="grp">
+        <h2>SEASON</h2>
+        <div class="row" id="seasons"></div>
+      </div>
+
+      <div class="grp">
+        <h2>VISITORS</h2>
+        <p>A visitor comes whatever the season. PUSHED SCENERY brings in a bot pushing the season's piece (pick a season with some first).</p>
+        <div class="row" id="visits"></div>
+        <div class="row"><button type="button" class="go" id="push">PUSHED SCENERY</button></div>
+      </div>
+
+      <div class="grp">
+        <h2>MUSIC (FOR THE HEADPHONES)</h2>
+        <div class="row"><select id="track"></select><button type="button" class="go" id="play">PLAY</button><button type="button" id="stop">STOP</button></div>
+        <div class="row"><b>STACK HEIGHT (INTENSITY)</b><input type="range" id="intensity" min="0" max="100" value="40" style="width: 100%;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<canvas id="board-fx" aria-hidden="true"></canvas>
+<div class="stat cpu-face" id="cpu-face" hidden aria-hidden="true"></div>
+
+<script src="../js/bot-svg.js?v=286"></script>
+<script src="../js/music/output.js?v=286"></script>
+<script src="../js/music/mixes.js?v=286"></script>
+<script src="../js/sfx.js?v=286"></script>
+<script src="../js/music/music-bytefall-theme.js?v=286"></script>
+<script src="../js/music/music-sleep-mode.js?v=286"></script>
+<script src="../js/music/music-brute-force.js?v=286"></script>
+<script src="../js/music/music-deep-web.js?v=286"></script>
+<script src="../js/music/music-zero-day.js?v=286"></script>
+<script src="../js/music/music-system-restore.js?v=286"></script>
+<script src="../js/music/music-night-drive.js?v=286"></script>
+<script src="../js/music/music-standby-mode.js?v=286"></script>
+<script src="../js/music/music-core-dump.js?v=286"></script>
+<script src="../js/music/music-handshake.js?v=286"></script>
+<script src="../js/music/music-stack-overflow.js?v=286"></script>
+<script src="../js/music/music.js?v=286"></script>
+<script src="../js/fx.js?v=286"></script>
+<script src="../js/minibot.js?v=286"></script>
+<script src="../js/seasons.js?v=286"></script>
+<script src="../js/visitors.js?v=286"></script>
+<script src="../js/wanderers.js?v=286"></script>
+<script src="../js/grid-bg.js?v=286"></script>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, attrs = {}, text = '') => { const e = document.createElement(tag); Object.assign(e, attrs); if (text) e.textContent = text; return e; };
+  // (one button lit in a row)
+  const radio = (row, btn) => { row.querySelectorAll('button').forEach((b) => b.classList.toggle('on', b === btn)); };
+
+  // ── The stages: each its own set of wanderers, only the shown one running ──
+  let stage = 'game';
+  const sets = {
+    game: createWanderers($('lane-game'), () => stage === 'game'),
+    start: createWanderers($('lane-start'), () => stage === 'start'),
+    saver: createWanderers($('lane-saver'), () => stage === 'saver'),
+  };
+  const W = () => sets[stage];
+  Object.values(sets).forEach((s) => s.clearAll());
+  $('stages').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => {
+    stage = b.dataset.stage;
+    radio($('stages'), b);
+    document.querySelectorAll('.stage').forEach((s) => s.classList.toggle('on', s.id === `stage-${stage}`));
+    requestAnimationFrame(() => W().start());
+  }));
+  document.querySelectorAll('[data-zoom]').forEach((b) => b.addEventListener('click', () => {
+    radio(b.parentElement, b);
+    document.querySelectorAll('.stage').forEach((s) => { s.style.zoom = b.dataset.zoom; });
+  }));
+
+  // ── Theme and REDUCED EFFECTS ──
+  const THEMES = ['terminal', 'cipher', 'amber-crt', 'monochrome', 'anaglyph', 'synthwave', 'dot-matrix', 'paper', 'glyph', 'spectrum'];
+  for (const t of THEMES) {
+    const b = el('button', { type: 'button' }, t.toUpperCase().replace('-', ' '));
+    if (t === 'terminal') b.classList.add('on');
+    b.addEventListener('click', () => {
+      radio($('themes'), b);
+      if (t === 'terminal') delete document.documentElement.dataset.theme;
+      else document.documentElement.dataset.theme = t;
+    });
+    $('themes').appendChild(b);
+  }
+  $('lowfx').addEventListener('click', (e) => {
+    const on = document.documentElement.classList.toggle('low-fx');
+    e.target.textContent = on ? 'ON' : 'OFF';
+    e.target.classList.toggle('on', on);
+  });
+
+  // ── Seasons (through the address, as ?season= does in the game: nothing saved) ──
+  const SEASONS = ['auto', 'off', 'halloween', 'november', 'winter', 'hanukkah', 'christmas', 'kwanzaa', 'nye', 'newyear'];
+  const setSeason = (s) => {
+    const q = new URLSearchParams(location.search);
+    if (s === 'auto') q.delete('season'); else q.set('season', s);
+    history.replaceState(null, '', `${location.pathname}${q.toString() ? `?${q}` : ''}`);
+  };
+  setSeason(new URLSearchParams(location.search).get('season') || 'off');
+  for (const s of SEASONS) {
+    const b = el('button', { type: 'button' }, s.toUpperCase());
+    if (s === (new URLSearchParams(location.search).get('season') || 'auto')) b.classList.add('on');
+    b.addEventListener('click', () => { radio($('seasons'), b); setSeason(s); });
+    $('seasons').appendChild(b);
+  }
+
+  const here = () => W().list().filter((w) => !w.leaving && !w.gone);
+  let crowdTimer = 0;
+  // ── Spawning ──
+  const pick = { bot: 'bot', level: 'normal', enter: 'left' };
+  const choices = (row, key, list) => {
+    for (const v of list) {
+      const b = el('button', { type: 'button' }, v.toUpperCase());
+      if (v === pick[key]) b.classList.add('on');
+      b.addEventListener('click', () => { pick[key] = v; radio($(row), b); });
+      $(row).appendChild(b);
+    }
+  };
+  choices('pick-bot', 'bot', ['bot', 'grifter', 'bunker', 'glitch', 'random']);
+  choices('pick-level', 'level', ['easy', 'normal', 'hard', 'insane', 'random']);
+  choices('pick-enter', 'enter', ['left', 'right', 'pop', 'run', 'random']);
+  const toggle = (id) => $(id).addEventListener('click', () => $(id).classList.toggle('on'));
+  ['opt-skate', 'opt-phones', 'opt-costume'].forEach(toggle);
+  $('spawn').addEventListener('click', () => {
+    W().spawn({
+      bot: pick.bot === 'random' ? undefined : pick.bot,
+      level: pick.level === 'random' ? undefined : pick.level,
+      enter: pick.enter === 'random' ? undefined : pick.enter,
+      skate: $('opt-skate').classList.contains('on'),
+      phones: $('opt-phones').classList.contains('on'),
+      costume: $('opt-costume').classList.contains('on') ? true : false,
+    });
+    W().crowd(here().length); // (they stay: no one leaves to bring the number back down)
+    radio($('crowd'), null);
+    clearInterval(crowdTimer);
+  });
+  $('clear').addEventListener('click', () => { W().clearAll(); radio($('crowd'), null); });
+  for (const n of [0, 1, 2, 3, 4]) {
+    const b = el('button', { type: 'button' }, String(n));
+    b.addEventListener('click', () => {
+      radio($('crowd'), b);
+      clearInterval(crowdTimer);
+      W().crowd(n);
+      crowdTimer = setInterval(() => W().crowd(n), 30000); // (kept at that number)
+    });
+    $('crowd').appendChild(b);
+  }
+
+  // ── Everyone on the stage ──
+  const ACTS = {
+    poke: (w) => W().poke(w), fright: (w) => W().fright(w), rabid: (w) => W().rabid(w), startle: (w) => W().startle(w),
+    snack: (w) => W().snack(w), phones: (w) => W().phones(w), phonesoff: (w) => W().phonesOff(w), leave: (w) => W().depart(w),
+  };
+  document.querySelectorAll('[data-act]').forEach((b) => b.addEventListener('click', () => here().forEach((w) => { if (w.state === 'walk') { w.state = 'idle'; w.until = performance.now() + 1500; } ACTS[b.dataset.act](w); })));
+  const MOODS = ['idle', 'happy', 'hit', 'worried', 'smug', 'annoyed', 'devious', 'love', 'surprised', 'laugh', 'scared', 'dizzy', 'tired', 'skeptic', 'angry', 'snarl', 'munch', 'strain'];
+  for (const m of MOODS) {
+    const b = el('button', { type: 'button' }, m.toUpperCase());
+    b.addEventListener('click', () => here().forEach((w) => { w.state = 'idle'; w.until = performance.now() + 4000; W().mood(w, m, true); }));
+    $('moods').appendChild(b);
+  }
+
+  // ── Visitors ──
+  const VISITS = ['frank', 'mummy', 'creature', 'nosferatu', 'ghost', 'bats', 'crows', 'spider', 'gremlin', 'turkey', 'geese', 'ducks', 'songbirds', 'swallows', 'penguin', 'reindeer', 'rudolph', 'dreidel', 'phage', 'bug', 'trojan', 'fog', 'fireworks', 'countdown'];
+  for (const v of VISITS) {
+    const b = el('button', { type: 'button' }, v.toUpperCase());
+    b.addEventListener('click', () => W().visit(v));
+    $('visits').appendChild(b);
+  }
+  $('push').addEventListener('click', () => W().spawn({ enter: 'push', bot: pick.bot === 'random' ? undefined : pick.bot }));
+
+  // ── Music ──
+  for (const t of Music.tracks()) $('track').appendChild(el('option', { value: t.id }, t.title));
+  const intensity = () => Number($('intensity').value) / 100;
+  let holding = 0;
+  $('play').addEventListener('click', () => {
+    Music.play($('track').value);
+    clearInterval(holding);
+    holding = setInterval(() => Music.setIntensity(intensity()), 200); // (the game sets it as the stack moves; here, the slider)
+  });
+  $('stop').addEventListener('click', () => { if (Music.isEnabled()) Music.toggle(); clearInterval(holding); });
+
+  // ── What they set off ──
+  const log = $('sb-log');
+  let first = true;
+  window.onSandboxEvent = (id) => {
+    if (first) { log.textContent = ''; first = false; }
+    log.textContent = `${new Date().toLocaleTimeString()}  ${id}\n${log.textContent}`.slice(0, 4000);
+  };
+})();
+</script>
+</body>
+</html>

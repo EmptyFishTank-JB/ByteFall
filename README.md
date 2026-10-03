@@ -40,6 +40,8 @@ js/music/               music.js (the player), one music-*.js per track, output.
 assets/                 fonts/, icons/, audio/ (WAV renders of the tracks, not used by the game)
 dev-tools/audio.html    the audio compendium (tracks-info.js: the track list for it and the mixer)
 dev-tools/mixer.html    the mixer, one track at a time (?track=sleep-mode)
+dev-tools/bots.html     the bot sandbox: the wanderers, visitors, seasons, fog and headphones on buttons
+js/bot-svg.js           the bots' pixel art (shared by the game and the sandbox)
 docs/achievements.csv   every achievement, grouped
 ```
 
