@@ -845,6 +845,17 @@ run on a phone with the screen off. Keys: Space plays / pauses, ← / → skip,
 Esc closes. Where the browser offers them, the lock screen's media controls
 work too. The game waits underneath (a VS match pauses). Code: `js/player.js`.
 
+## Sound effects themes
+
+SETTINGS → **SOUND EFFECTS** picks the game's whole set of sound effects, each in the style of one of
+the tracks (js/sfx.js). **TERMINAL**, the first and free: the keyboard's clicks and keys, line static
+and an 8-bit crunch. **HANDSHAKE**, opening with the HANDSHAKE track (TRACK 10, Lv 40): a handheld
+console's, as in that Game Boy battle theme, tuned to its C minor: pulse-wave blips for the cursor and
+buttons, a wave-channel thud as a bit lands, the noise channel's metallic crunch as one decrypts (with
+a note of the scale each time, so a chain plays a little tune), an item-get arpeggio for a chain or a
+reward, the battle's low-HP alarm for a warning and a low buzz for no. The dial-up and the narrator's
+voice are the same in every theme. The dev page's ONE-SHOT EFFECTS plays every theme's take.
+
 ## Effects
 
 SETTINGS → **EFFECTS: FULL / REDUCED**, for slower phones: REDUCED holds the twinkling grid
@@ -873,13 +884,8 @@ stack heights the game settles on, eased between as the intensity moves.
 
 ## To-do
 
-- **CPU exploit loadouts** (maybe): each bot with its own preferred exploits in VS.
-- **CAMPAIGN** (maybe): a ladder against the CPU bots in order at rising difficulty, each
-  round with preset exploits, like Dr. Robotnik's Mean Bean Machine (e.g. 8 rounds on
-  CLASSIC rules, a line from each bot before the match, retries from the current round,
-  GLITCH on INSANE as the final boss, achievements per round and for a full clear).
 - **CORE DUMP (track 09)**: its trial layers still wait for picks.
-- **Sound effect themes**: on hold.
+- **Sound effect themes**: more in the style of the tracks (TERMINAL and HANDSHAKE so far: SETTINGS → SOUND EFFECTS).
 - **Future games** (separate from ByteFall): BYTERRIUM, a Tamagotchi-style spin-off for the CPU
   bots, a Jumanji / Zathura-style board game of events the players survive together, and three Halo
   game types to rebuild in Halo Infinite (AVALANCHE, WARTHOG ARENA, PAC-MAN ARENA FIESTA). See

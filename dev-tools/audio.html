@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="../js/fonts.js?v=309"></script>
+<script src="../js/fonts.js?v=310"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#020403">
@@ -251,6 +251,7 @@
   <section id="effects">
     <h2><span class="sec-num">01</span> One-Shot Effects</h2>
     <p class="sec-desc">Nine short synthesized sounds defined in <code>sfx.js</code>: eight ported from the ECHOES terminal audio compendium, plus the data burst made for decrypting bits. They're turned on and off with the SOUND button in the game; the buttons here play them regardless.</p>
+    <p class="sec-desc">SOUND THEME (SETTINGS &rarr; SOUND EFFECTS in the game): <span id="sfx-themes"></span> The PLAY buttons below play the theme picked here (the dial-up and the narrator's voice are the same in every theme).</p>
     <div id="sfx-list"></div>
   </section>
 
@@ -263,10 +264,10 @@
   <footer>GENERATED FROM SOURCE &mdash; NO AUDIO FILES, ALL SYNTHESIZED ON PLAY</footer>
 </div>
 
-<script src="../js/music/output.js?v=309"></script>
-<script src="../js/music/mixes.js?v=309"></script>
-<script src="../js/sfx.js?v=309"></script>
-<script src="tracks-info.js?v=309"></script>
+<script src="../js/music/output.js?v=310"></script>
+<script src="../js/music/mixes.js?v=310"></script>
+<script src="../js/sfx.js?v=310"></script>
+<script src="tracks-info.js?v=310"></script>
 <script>
 (() => {
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -341,6 +342,23 @@
     },
   ];
 
+  let sfxTheme = 'terminal';
+  const themesEl = document.getElementById('sfx-themes');
+  for (const t of SFX.themes()) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'play';
+    b.style.marginRight = '6px';
+    b.textContent = t.name;
+    b.title = t.desc;
+    b.style.opacity = t.id === sfxTheme ? '1' : '0.55';
+    b.addEventListener('click', () => {
+      sfxTheme = t.id;
+      themesEl.querySelectorAll('button').forEach((x) => { x.style.opacity = x === b ? '1' : '0.55'; });
+      SFX.preview('egg', sfxTheme);
+    });
+    themesEl.appendChild(b);
+  }
   const sfxList = document.getElementById('sfx-list');
   for (const fx of EFFECTS) {
     const card = document.createElement('div');
@@ -355,7 +373,7 @@
         <button class="play" type="button"><svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true" style="vertical-align:-1px"><path d="M7 4l12 8-12 8z" fill="currentColor"/></svg> PLAY</button>
       </div>
       <div class="uses"><h4>// PLAYS WHEN</h4><ul>${fx.uses.map((u) => `<li>${esc(u)}</li>`).join('')}</ul></div>`;
-    card.querySelector('button').addEventListener('click', () => SFX.preview(fx.id));
+    card.querySelector('button').addEventListener('click', () => SFX.preview(fx.id, sfxTheme));
     sfxList.appendChild(card);
   }
 

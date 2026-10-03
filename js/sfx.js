@@ -230,14 +230,148 @@ const SFX = (() => {
     },
   };
 
+  // ── SOUND THEMES (SETTINGS → SOUND EFFECTS): the whole set of effects in one style. TERMINAL (the
+  // keyboard, static and crunch above) is free; HANDSHAKE, the sound of the HANDSHAKE track (a Game
+  // Boy battle theme: pulse-wave blips at its duty cycles, the 4-bit wave channel's bass and the
+  // noise channel's hiss and metallic crunch, tuned to its C minor), unlocks with that track (TRACK
+  // 10). A theme leaves out what it has no take on (the dial-up modem, the narrator's voice): those
+  // stay as they are.
+  const THEMES = [
+    { id: 'terminal', name: 'TERMINAL', desc: 'The keyboard: clicks, keys, static and an 8-bit crunch.' },
+    { id: 'handshake', name: 'HANDSHAKE', desc: 'A handheld game console, as in the HANDSHAKE track: pulse-wave blips, a wave-channel thud and noise-channel crunch.', unlock: 'track-10', track: 'HANDSHAKE' },
+  ];
+  const THEME_KEY = 'bytefall-sfx-theme';
+  let themeId = 'terminal';
+  try { if (THEMES.some((t) => t.id === localStorage.getItem(THEME_KEY))) themeId = localStorage.getItem(THEME_KEY); } catch (e) {}
+  const themeOpen = (t) => !t.unlock || (typeof Progress !== 'undefined' && Progress.isUnlocked(t.unlock));
+
+  // HANDSHAKE's instruments (made once, on the first sound)
+  let chip = null;
+  function chipKit(c) {
+    if (chip) return chip;
+    const pulseWave = (duty) => {
+      const n = 48;
+      const real = new Float32Array(n);
+      const imag = new Float32Array(n);
+      for (let k = 1; k < n; k++) real[k] = (2 / (k * Math.PI)) * Math.sin(k * Math.PI * duty);
+      return c.createPeriodicWave(real, imag);
+    };
+    const wave = (() => { // (the wave channel: a 32-step, 4-bit rounded saw)
+      const N = 32;
+      const table = Array.from({ length: N }, (_, k) => Math.round(15 * Math.pow(k / (N - 1), 0.8)) / 7.5 - 1);
+      const real = new Float32Array(16);
+      const imag = new Float32Array(16);
+      for (let h = 1; h < 16; h++) {
+        for (let k = 0; k < N; k++) {
+          real[h] += (table[k] * Math.cos((2 * Math.PI * h * k) / N)) / N;
+          imag[h] += (table[k] * Math.sin((2 * Math.PI * h * k) / N)) / N;
+        }
+      }
+      return c.createPeriodicWave(real, imag);
+    })();
+    const lfsr = (short) => { // (the noise channel: long, hissy; short, metallic)
+      const buf = c.createBuffer(1, c.sampleRate, c.sampleRate);
+      const d = buf.getChannelData(0);
+      let reg = 0x7fff;
+      let v = 0;
+      for (let i = 0; i < d.length; i++) {
+        if (i % 4 === 0) {
+          const bit = (reg ^ (reg >> 1)) & 1;
+          reg = (reg >> 1) | (bit << 14);
+          if (short) reg = (reg & ~0x40) | (bit << 6);
+          v = reg & 1 ? -1 : 1;
+        }
+        d[i] = v;
+      }
+      return buf;
+    };
+    chip = { duty: { 12: pulseWave(0.125), 25: pulseWave(0.25), 50: pulseWave(0.5) }, wave, long: lfsr(false), short: lfsr(true) };
+    return chip;
+  }
+  const midi = (m) => 440 * Math.pow(2, (m - 69) / 12);
+  // (its volume falls in steps, as the console's envelopes do)
+  function steps(c, t, vol, dur, n = 4) {
+    const g = c.createGain();
+    for (let i = 0; i < n; i++) g.gain.setValueAtTime(vol * (1 - i / n), t + (dur * i) / n);
+    g.gain.setValueAtTime(0, t + dur);
+    g.connect(dest(c));
+    return g;
+  }
+  function sq(c, t, m, dur, vol, duty = 50, to = null) { // (a pulse channel note; to: slid to that note)
+    const o = c.createOscillator();
+    o.setPeriodicWave(chipKit(c).duty[duty]);
+    o.frequency.setValueAtTime(midi(m), t);
+    if (to !== null) o.frequency.exponentialRampToValueAtTime(midi(to), t + dur);
+    o.connect(steps(c, t, VOL * vol, dur));
+    o.start(t); o.stop(t + dur + 0.01);
+  }
+  function wv(c, t, m, dur, vol, to = null) { // (the wave channel)
+    const o = c.createOscillator();
+    o.setPeriodicWave(chipKit(c).wave);
+    o.frequency.setValueAtTime(midi(m), t);
+    if (to !== null) o.frequency.exponentialRampToValueAtTime(midi(to), t + dur);
+    o.connect(steps(c, t, VOL * vol, dur, 3));
+    o.start(t); o.stop(t + dur + 0.01);
+  }
+  function nz(c, t, dur, vol, short = false, rate = 1, rateTo = null) { // (the noise channel; rate: its pitch)
+    const src = c.createBufferSource();
+    src.buffer = short ? chipKit(c).short : chipKit(c).long;
+    src.playbackRate.setValueAtTime(rate, t);
+    if (rateTo !== null) src.playbackRate.exponentialRampToValueAtTime(rateTo, t + dur);
+    src.connect(steps(c, t, VOL * vol, dur));
+    src.start(t, Math.random() * 0.5); src.stop(t + dur + 0.01);
+  }
+  // (C minor, as the track: C Eb F G Bb)
+  const SCALE = [72, 75, 77, 79, 82, 84];
+  const handshake = {
+    // (the cursor: a thin, high tick)
+    click(c) { sq(c, c.currentTime, 96, 0.025, 0.26, 12); },
+    // (a button: the menu's select blip, two quick notes)
+    button(c) { const t = c.currentTime; sq(c, t, 91, 0.03, 0.24, 50); sq(c, t + 0.03, 96, 0.04, 0.24, 50); },
+    // (a firewall layer showing, a hint: a little rising chirp)
+    punct(c) { sq(c, c.currentTime, 87, 0.06, 0.26, 25, 91); },
+    // (a bit landing: a wave-channel thud and a tick of noise)
+    enter(c) { const t = c.currentTime; wv(c, t, 45, 0.09, 0.5, 33); nz(c, t, 0.03, 0.18, false, 0.5); },
+    // (a layer cracked, an undo: a scrape and a falling blip)
+    backspace(c) { const t = c.currentTime; nz(c, t, 0.05, 0.16, false, 0.7, 0.35); sq(c, t, 79, 0.06, 0.12, 25, 67); },
+    // (a screen changing: a falling whoosh of noise)
+    static(c) { nz(c, c.currentTime, 0.16, 0.4, false, 1, 0.2); },
+    // (a warning: the battle's low-HP alarm, four quick beeps)
+    alert(c) { const t = c.currentTime; [91, 84, 91, 84].forEach((m, i) => sq(c, t + i * 0.07, m, 0.06, 0.24, 50)); },
+    // (no: a low buzz, bumping down)
+    denied(c) { const t = c.currentTime; sq(c, t, 43, 0.06, 0.22, 12); sq(c, t + 0.07, 42, 0.09, 0.22, 12); nz(c, t, 0.02, 0.12, true, 0.6); },
+    // (a chain, a reward: the item-get arpeggio up C minor, a quieter echo just behind)
+    egg(c) {
+      const t = c.currentTime;
+      [72, 75, 79, 84].forEach((m, i) => {
+        sq(c, t + i * 0.045, m, 0.05, 0.2, 25);
+        sq(c, t + i * 0.045 + 0.022, m + 12, 0.04, 0.05, 12);
+      });
+    },
+    // (a bit decrypting: the noise channel's metallic crunch, falling, and a blip on a note of the
+    // scale, a different one each time, so a chain plays a little tune)
+    burst(c) {
+      const t = c.currentTime;
+      nz(c, t, 0.2, 0.18, true, 1.2, 0.25);
+      const m = SCALE[Math.floor(Math.random() * SCALE.length)];
+      sq(c, t, m, 0.09, 0.1, 50, m - 24);
+    },
+  };
+  const SETS = { terminal: sounds, handshake };
+  const current = () => {
+    const t = THEMES.find((x) => x.id === themeId);
+    return t && themeOpen(t) ? SETS[themeId] : sounds;
+  };
+  const playIn = (set, name) => (set[name] || sounds[name])(getCtx());
+
   return {
     play(name) {
       if (muted) return;
-      try { sounds[name](getCtx()); } catch (e) {}
+      try { playIn(current(), name); } catch (e) {}
     },
-    // Plays even when muted (used by the dev audio compendium).
-    preview(name) {
-      try { sounds[name](getCtx()); } catch (e) {}
+    // Plays even when muted (used by the dev audio compendium); theme: a sound theme's take on it
+    preview(name, theme) {
+      try { playIn(theme ? SETS[theme] || sounds : current(), name); } catch (e) {}
     },
     // One short square-wave blip of a voice (the tutorial's BOT talking), at freq Hz
     blip(freq) {
@@ -256,6 +390,14 @@ const SFX = (() => {
       } catch (e) {}
     },
     isMuted: () => muted,
+    // (the sound themes: every one, whether it's open, the one picked)
+    themes: () => THEMES.map((t) => ({ ...t, open: themeOpen(t) })),
+    theme: () => themeId,
+    setTheme(id) {
+      if (!THEMES.some((t) => t.id === id)) return;
+      themeId = id;
+      try { localStorage.setItem(THEME_KEY, id); } catch (e) {}
+    },
     setOutput(id) {
       outputId = id;
       if (outChain) outChain.set(id);

@@ -3771,12 +3771,34 @@ bgPlayBtn.addEventListener('click', () => {
 updateBgPlayBtn();
 bgPlayBtn.hidden = !!window.BYTEFALL_APP; // (the Android app: in the background, everything rests)
 
+// SOUND EFFECTS: the game's sound theme (sfx.js), the open ones in turn; each plays a taste of itself
+const sfxThemeBtn = document.getElementById('sfx-theme-btn');
+const sfxThemeNote = document.getElementById('sfx-theme-note');
+function updateSfxThemeBtn() {
+  const all = SFX.themes();
+  const cur = all.find((t) => t.id === SFX.theme() && t.open) || all[0];
+  sfxThemeBtn.textContent = `SOUND EFFECTS: ${cur.name}`;
+  sfxThemeBtn.classList.toggle('on', cur.id !== 'terminal');
+  const locked = all.filter((t) => !t.open).map((t) => `${t.name} opens with the ${t.track} track (LV ${Progress.unlock(t.unlock).goal})`);
+  sfxThemeNote.textContent = `${cur.desc}${locked.length ? ` ${locked.join('; ')}.` : ''}`;
+}
+sfxThemeBtn.addEventListener('click', () => {
+  const open = SFX.themes().filter((t) => t.open);
+  const i = open.findIndex((t) => t.id === SFX.theme());
+  const next = open[(i + 1) % open.length];
+  SFX.setTheme(next.id);
+  updateSfxThemeBtn();
+  SFX.play('egg');
+});
+updateSfxThemeBtn();
+
 function setSettingsOpen(open) {
   settingsEl.hidden = !open;
   document.body.classList.toggle('panel-open', !settingsEl.hidden || !recordsEl.hidden);
   if (open && !recordsEl.hidden) setRecordsOpen(false);
   settingsBtn.setAttribute('aria-expanded', String(open));
   if (open) {
+    updateSfxThemeBtn(); // (one may have opened since)
     renderPlaylist();
     fitFontNames();
     requestAnimationFrame(visualizerLoop);
