@@ -676,10 +676,13 @@ bots move as each is heard); with nothing to follow (a breakdown) they keep time
 bar, a tap each beat. Walking, its steps fall two to a beat (kept in sync as the tempo moves). CORE DUMP (track 09) tells its feel, and to it the headphone bots go metal, in poses drawn
 as pixel sprites: they grow long hair, and in the gallop they HEADBANG, four frames a beat (up,
 tilting forward with the hair falling over the brow, bent face-down on the beat with the top of the
-head to you, the headphones' band across it and the hair hanging to the floor, tilting back); the
+head to you, the headphones' band across it, the eyes and mouth just peeking at its lower edge and a
+few strands hanging off the face, tilting back), a fist raised beside the head with the metal
+horns up; the
 half-time breakdown's bang holds face-down longer, on 1 and 3. In the blast beats they bend over and
-WINDMILL: the hair a blade sweeping a full circle round the crown each beat (eight frames, two
-fainter strands trailing it), the head swaying with it. The hair goes when the track does. It keeps them on until it leaves; if the music's switched off, it
+WINDMILL: the head circling on the neck (round, up and down, narrowing as it turns to the sides)
+and the hair a blade sweeping a full circle round the crown each beat (eight frames, two fainter
+strands trailing it). The hair is near-black with a cool sheen. The hair goes when the track does. It keeps them on until it leaves; if the music's switched off, it
 goes -_- and puts them away. Besides the scary tree, a bot may push in a JACK O' LANTERN: a carved grin lit from inside, its
 candle flickering; poked, it flares up and cackles (HAHAHA!), the bots near it jumping. HALLOWEEN also sends the GREMLIN: a little green creature with big
 ears, red eyes and a toothy grin that scurries up to one bot after another to prank it (hehehe; the

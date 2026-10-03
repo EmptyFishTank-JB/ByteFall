@@ -108,8 +108,8 @@ function createWanderers(lane, active = () => true) {
   // CORE DUMP's metalheads: long hair (dark, behind the head, hanging past the body on both sides) while its feel lasts
   function hairSvg(bot) {
     const t = TOP[bot] || 3;
-    const c = '#7a5236';
-    const h = '#a2774f'; // (a lighter strand or two)
+    const c = '#2c2833';
+    const h = '#5f5670'; // (a lighter strand or two)
     return pxc([[3, t - 1, 10, 1], [2, t, 12, 1], [1, t + 1, 2, 11], [13, t + 1, 2, 11], [0, t + 4, 1, 9], [15, t + 4, 1, 9], [2, t + 12, 1, 2], [13, t + 12, 1, 2]], c)
       + pxc([[5, t, 1, 1], [10, t, 1, 1], [1, t + 6, 1, 4], [14, t + 6, 1, 4]], h);
   }
@@ -292,7 +292,8 @@ function createWanderers(lane, active = () => true) {
   // floor. A HEADBANG is four frames a beat: up, tilting forward (the hair falling over its face),
   // face down on the beat, tilting back. The WINDMILL stays bent over while the hair sweeps a full
   // circle round the crown each beat (eight frames, trailing strands behind), the head swaying.
-  const HAIR = ['#7a5236', '#a2774f'];
+  const HAIR = ['#2c2833', '#5f5670'];
+  const lum = (c) => { const m = /(\d+),\s*(\d+),\s*(\d+)/.exec(c); return m ? 0.3 * m[1] + 0.59 * m[2] + 0.11 * m[3] : 128; };
   const shade = (c) => { const m = /(\d+),\s*(\d+),\s*(\d+)/.exec(c); return m ? `rgb(${m.slice(1).map((v) => Math.round(v * 0.62)).join(', ')})` : c; };
   function pose(w, kind, P) {
     let frames;
@@ -302,7 +303,12 @@ function createWanderers(lane, active = () => true) {
     } else if (kind === 'bang-heavy') frames = [{ at: 0, pose: 'tilt' }, { at: P * 0.15, pose: 'down' }, { at: P * 1.0, pose: 'tilt' }, { at: P * 1.4, pose: 'up' }];
     else frames = [{ at: 0, pose: 'tilt' }, { at: P * 0.12, pose: 'down' }, { at: P * 0.42, pose: 'tilt' }, { at: P * 0.66, pose: 'up' }];
     const svg = w.el.querySelector('svg');
-    if (!w.pose) w.poseBase = Pixel.snapshot(svg); // (its own pixels, upright: what the poses are made from)
+    if (!w.pose) { // (its own pixels, upright and without its hair: what the poses are made from)
+      const hair = svg.querySelector('.metal-hair');
+      if (hair) hair.style.display = 'none';
+      w.poseBase = Pixel.snapshot(svg);
+      if (hair) hair.style.display = '';
+    }
     w.pose = { start: performance.now(), frames, end: frames[frames.length - 1].at + (kind === 'mill' ? P / 8 : 60) };
   }
   function posePlay(w, now) {
@@ -328,31 +334,56 @@ function createWanderers(lane, active = () => true) {
     const body = Object.keys(count).sort((a, b) => count[b] - count[a])[0];
     const LEGS = 13;
     for (const [k, c] of base) { const [x, y] = k.split(',').map(Number); if (y >= LEGS) set(x, y, c); } // (the legs stay planted)
+    // The metal salute: a fist raised beside the head, two fingers up (the horns), in the headbang
+    const horns = (ax, from) => {
+      for (let y = from; y >= from - 4; y--) set(ax, y, body); // (the arm, up)
+      for (let x = ax - 1; x <= ax + 1; x++) { set(x, from - 5, body); set(x, from - 6, body); } // (the fist)
+      set(ax - 1, from - 7, body); set(ax + 1, from - 7, body); set(ax - 1, from - 8, body); set(ax + 1, from - 8, body); // (the horns)
+    };
     if (f.pose === 'tilt') { // (the head pitched forward and down two pixels, hair falling over its brow)
+      horns(w.look < 0 ? 0 : 15, 9);
       for (const [k, c] of base) { const [x, y] = k.split(',').map(Number); if (y < LEGS && y + 2 <= LEGS) set(x, y + 2, c); }
       for (let x = 2; x <= 13; x++) for (let y = 3; y <= 5 + ((x * 7) % 3); y++) set(x, y, HAIR[(x + y) % 5 === 0 ? 1 : 0]);
       return cells;
     }
-    // Bent over: a flatter head, lower, its top to you; the headphones' band across it
-    const sway = f.pose === 'mill' ? Math.round(1.5 * Math.sin(f.a)) : 0;
-    for (let y = 7; y <= 12; y++) for (let x = 1 + (y === 7 ? 1 : 0); x <= 14 - (y === 7 ? 1 : 0); x++) set(x + sway, y, body);
+    // Bent over: the head hanging low, its top to you (the headphones' band across it) and its face
+    // to the floor: a rounded lower edge, the rim in shadow, the dark face plate just showing
+    // underneath. In the windmill it circles on its neck (round and up and down), narrowing as it
+    // swings to the sides as if turning, the cups keeping to its edges.
+    const face = [...count ? Object.keys(count) : []].filter((c) => c !== body).sort((a, b) => lum(a) - lum(b))[0] || '#020403';
+    const a = f.pose === 'mill' ? f.a : 0;
+    const cxh = 7.5 + (f.pose === 'mill' ? 2 * Math.sin(a) : 0);
+    const top = 6 + (f.pose === 'mill' ? Math.round(1 - Math.cos(a)) : 0); // (its lower edge just over the legs)
+    const half = f.pose === 'mill' ? 6.5 * (0.62 + 0.38 * Math.abs(Math.cos(a))) : 6.5;
+    const L = Math.round(cxh - half);
+    const R = Math.round(cxh + half);
+    const rows = [[0, 1], [1, 0], [2, 0], [3, 0], [4, 0], [5, 1], [6, 2]]; // (row, how far in at each end: rounded)
+    for (const [r, inset] of rows) for (let x = L + inset; x <= R - inset; x++) set(x, top + r, r >= 5 ? shade(body) : body);
+    // (its face, aimed at the floor: the eyes and mouth just peeking at the bottom edge)
+    const mid = Math.round(cxh);
+    for (let x = L + 1; x <= R - 1; x++) set(x, top + 5, body);
+    if (R - L >= 9) {
+      set(mid - 3, top + 5, face); set(mid - 2, top + 5, face); set(mid + 1, top + 5, face); set(mid + 2, top + 5, face); // (eyes)
+      set(mid - 1, top + 6, face); set(mid, top + 6, face); // (mouth)
+    } else { set(mid, top + 5, face); set(mid + (cxh > 7.5 ? 1 : -1), top + 5, face); } // (turned: one eye showing)
     if (w.phones) {
-      for (let x = 1; x <= 14; x++) set(x + sway, 8, '#2b2f36');
-      for (let y = 8; y <= 11; y++) { set(sway, y, '#e0455f'); set(15 + sway, y, '#e0455f'); }
+      for (let x = L + 1; x <= R - 1; x++) set(x, top + 1, '#2b2f36');
+      for (let y = top + 1; y <= top + 4; y++) { set(L - 1, y, '#e0455f'); set(R + 1, y, '#e0455f'); }
     }
-    // The crown's hair over the top of the head
-    for (let y = 9; y <= 12; y++) for (let x = 4 - (y > 10 ? 1 : 0); x <= 11 + (y > 10 ? 1 : 0); x++) set(x + sway, y, HAIR[(x * 3 + y) % 7 === 0 ? 1 : 0]); // (its crown, the body's color showing round it)
-    for (let x = 2; x <= 13; x++) set(x + sway, 12, cells.get(`${x + sway},12`) === body ? shade(body) : cells.get(`${x + sway},12`)); // (the underside, in shadow)
+    // The crown's hair over the top of the head, the body's color showing round it
+    for (let y = top + 2; y <= top + 3; y++) for (let x = Math.round(cxh) - 3 + (y === top + 2 ? 1 : 0); x <= Math.round(cxh) + 2 - (y === top + 2 ? 1 : 0); x++) set(x, y, HAIR[(x * 3 + y) % 7 === 0 ? 1 : 0]); // (a patch at the crown, where it grows from)
     if (f.pose === 'down') { // (hanging straight down in front, ragged at the ends)
+      horns(w.look < 0 ? L - 2 : R + 2, top + 3);
       for (let x = 2; x <= 13; x++) {
-        const len = 3 + ((x * 5) % 3);
-        for (let y = 13; y < 13 + len; y++) set(x, y, HAIR[(x + y) % 6 === 0 ? 1 : 0]);
+        const len = 2 + ((x * 5) % 3);
+        if (Math.abs(x - mid) > 1) continue; // (a few strands hanging straight down off the face, between the legs)
+        for (let y = top + 7; y < top + 7 + len; y++) set(x, y, HAIR[(x + y) % 6 === 0 ? 1 : 0]);
       }
       return cells;
     }
     // The windmill: the hair a blade sweeping round the crown, two fainter strands trailing it
-    const cx = 7.5 + sway;
-    const cy = 11;
+    const cx = cxh;
+    const cy = top + 4;
     [[0, 11, HAIR[0]], [-0.45, 9, HAIR[0]], [-0.9, 6, HAIR[1]]].forEach(([lag, len, c]) => {
       const a = f.a + lag * (w.look < 0 ? -1 : 1);
       for (let r = 1; r <= len; r += 0.5) {

@@ -140,7 +140,7 @@ const Pixel = (() => {
   // HAIR: strands hanging from the head's crown and sides, each a chain of points carried along
   // with the head (and the bot's walk, in world pixels) with momentum and gravity, so they trail,
   // swing out, overshoot and settle; drawn as whole pixels with a line between each two points
-  function hair(svg, top = 3, colors = ['#7a5236', '#a2774f']) {
+  function hair(svg, top = 3, colors = ['#2c2833', '#5f5670']) {
     const g = layer(svg, 'px-hair', true);
     // (a full head of it: across the crown, and down each side of the head)
     const ROOTS = [[3, top], [4, top - 1], [5, top - 1], [6, top - 1], [7, top - 1], [8, top - 1], [9, top - 1], [10, top - 1], [11, top - 1], [12, top], [2, top + 1], [13, top + 1], [1, top + 2], [14, top + 2]];
