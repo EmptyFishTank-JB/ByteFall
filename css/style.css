@@ -2960,3 +2960,43 @@ html.pixel-mode .walker.skater.walking[data-look="left"] .bot { transform: none;
 .pz-tile.current { outline: 2px solid var(--accent); outline-offset: 1px; }
 .pz-tile:disabled { opacity: 0.3; cursor: default; color: var(--fg-dim); border-style: dashed; }
 .pz-note { margin: 10px 0 0; font-size: 10px; color: var(--fg-dim); text-align: center; }
+
+/* HASHES (#): beside the level bar, in the accent color */
+.hash-label { margin-left: 4px; color: var(--accent); letter-spacing: 1px; white-space: nowrap; }
+/* The STORE buttons, while the DAILY DROP waits: a dot */
+#home-store.has-drop, #pause-store.has-drop { position: relative; }
+#home-store.has-drop::after, #pause-store.has-drop::after {
+  content: ''; position: absolute; top: 4px; right: 6px; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.8);
+}
+/* STORE: the balance, the sections, the boosters */
+.panel-store .store-hashes { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 10px; letter-spacing: 2px; color: var(--fg-dim); }
+.panel-store .store-hashes b { font-size: 16px; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+.panel-store .store-sub { margin: 14px 0 4px; font-size: 12px; letter-spacing: 2px; color: var(--accent); }
+.panel-store .store-sub-note { margin: 0 0 8px; font-size: 10px; color: var(--fg-dim); }
+.booster-shop { display: flex; flex-direction: column; gap: 8px; }
+.booster-buy-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.booster-owned { font-size: 11px; letter-spacing: 1px; color: var(--accent); }
+.store-buy.short { opacity: 0.45; }
+/* The main menu's BOOSTERS: switches for the next game */
+.booster-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; margin: 8px 0 2px; }
+.booster-row[hidden] { display: none; }
+.booster-title { width: 100%; text-align: center; font-size: 10px; letter-spacing: 2px; color: var(--fg-dim); }
+.booster-chip {
+  padding: 4px 8px; background: none; border: 1px dashed var(--fg-dim); border-radius: 4px;
+  color: var(--fg-dim); font-family: inherit; font-size: 10px; letter-spacing: 1px; cursor: pointer;
+}
+.booster-chip.on { border-style: solid; border-color: var(--accent); color: var(--accent); box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.4); }
+.booster-chip.get { border-style: solid; border-color: var(--fg-dim); color: var(--fg); }
+/* PUZZLE: HINT and UNDO under the drop buttons, and the column HINT lights */
+.puzzle-tools { display: flex; justify-content: center; gap: 8px; margin-top: 6px; }
+.puzzle-tools[hidden] { display: none; }
+.puzzle-tools button {
+  padding: 4px 12px; background: none; border: 1px solid var(--fg-dim); border-radius: 4px;
+  color: var(--fg); font-family: inherit; font-size: 11px; letter-spacing: 1px; cursor: pointer;
+}
+.puzzle-tools button:disabled { opacity: 0.35; cursor: default; }
+.column-buttons button.hinted { border-color: var(--accent); color: var(--accent); animation: amber-pulse 0.9s ease-in-out infinite; }
+/* The HASHES a game earned, under its score */
+.overlay-hashes { margin: 4px 0 0; font-size: 12px; letter-spacing: 1px; color: var(--accent); }
+.overlay-hashes[hidden] { display: none; }

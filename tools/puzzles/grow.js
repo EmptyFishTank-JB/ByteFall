@@ -1,8 +1,8 @@
 // Longer puzzles grown from shorter ones: a puzzle that takes k drops becomes one that takes k+1
 // by adding blocks that a new first bit clears (or simply sits on): the new first drop, wherever
 // it's meant to go, rebuilds the k-drop board, and the rest is the old puzzle. Every one is then
-// checked by the solver (sim.js) for its number of solutions and that it can't clear sooner.
-const S = require('./sim.js');
+// checked by the solver (js/puzzle-sim.js) for its number of solutions and that it can't clear sooner.
+const S = require('../../js/puzzle-sim.js');
 
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 

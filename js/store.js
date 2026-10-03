@@ -1,4 +1,5 @@
-// STORE: the MENU's fourth tab. Two purchases: REMOVE ADS (no ads, nothing unlocked) and FULL
+// STORE: the MENU's fourth tab. The DAILY DROP to claim (script.js's dailyDrop), the BOOSTERS
+// bought with HASHES (script.js's BOOSTERS, Progress's wallet), and two purchases: REMOVE ADS (no ads, nothing unlocked) and FULL
 // ACCESS (everything that unlocks by level, and no ads), plus RESTORE PURCHASES. A preview for
 // now: BUY and RESTORE say the store isn't open and charge nothing. The app will swap buy() and
 // restore() for Google Play's billing, then tell Unlocks what's owned (Unlocks.set / setNoAds).
@@ -19,7 +20,48 @@ const Store = (() => {
     clearTimeout(msgTimer);
     msgTimer = setTimeout(() => { msgEl.textContent = ''; }, 5000);
   }
+  // BOOSTERS: each with what it does, how many are owned, and BUY for its price in HASHES
+  const shop = document.getElementById('booster-shop');
+  const boosters = window.BOOSTERS || {};
+  for (const [id, b] of Object.entries(boosters)) {
+    const item = document.createElement('div');
+    item.className = 'store-item booster-item';
+    item.dataset.booster = id;
+    item.innerHTML = `<h3>${b.name} <span class="store-price"># ${b.cost}</span></h3><p>${b.desc}</p>`
+      + '<div class="booster-buy-row"><span class="booster-owned"></span><button type="button" class="store-buy">BUY</button></div>';
+    item.querySelector('.store-buy').addEventListener('click', () => {
+      if (!Progress.spendHashes(b.cost)) {
+        SFX.play('denied');
+        say(`NOT ENOUGH HASHES // ${b.name} IS # ${b.cost}`);
+        return;
+      }
+      Progress.addBooster(id);
+      SFX.play('egg');
+      say(`BOUGHT // ${b.name}`);
+      if (typeof showHashes === 'function') showHashes();
+      render();
+    });
+    shop.appendChild(item);
+  }
+  const claimBtn = document.getElementById('daily-claim');
+  claimBtn.addEventListener('click', () => {
+    if (window.dailyDrop && window.dailyDrop.claim()) say('CLAIMED // YOUR FREE EXPLOIT IS ON THE EXPLOIT BUTTON');
+    render();
+  });
+
   function render() {
+    const hashes = Progress.hashes();
+    menu.querySelectorAll('.booster-item').forEach((item) => {
+      const b = boosters[item.dataset.booster];
+      const n = Progress.boosters(item.dataset.booster);
+      item.querySelector('.booster-owned').textContent = n ? `OWNED \u00d7${n}` : '';
+      item.querySelector('.store-buy').classList.toggle('short', hashes < b.cost);
+    });
+    const claimable = !!(window.dailyDrop && window.dailyDrop.claimable());
+    claimBtn.disabled = !claimable;
+    claimBtn.textContent = claimable ? 'CLAIM' : 'CLAIMED \u2713';
+    document.getElementById('daily-drop-state').textContent = claimable ? 'READY' : 'BACK TOMORROW';
+    document.getElementById('store-hash-count').textContent = `# ${hashes.toLocaleString()}`;
     for (const [id, item] of Object.entries(ITEMS)) {
       const owned = item.owned();
       menu.querySelector(`.store-item[data-item="${id}"]`).classList.toggle('owned', owned);

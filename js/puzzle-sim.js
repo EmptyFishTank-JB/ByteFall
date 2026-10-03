@@ -1,5 +1,6 @@
-// PUZZLE mode's rules, as script.js plays them (resolveChains, collapse, overflowed), for the
-// puzzle generator and checker: no exploits, no rising layers.
+// PUZZLE mode's rules, as script.js plays them (resolveChains, collapse, overflowed): no exploits,
+// no rising layers. For the game's HINT (script.js) and the puzzle generator and checker
+// (tools/puzzles); window.PuzzleSim in the page, require() in Node.
 // A board: columns, bottom to top; a cell is a number (a bit) or [level, hidden] (a layer).
 function parse(board) {
   return board.map((col) => col.map((b) => (typeof b === 'number' ? b : (([l, h]) => [l, h])(b.slice(1).split(':').map(Number)))));
@@ -74,4 +75,5 @@ function solve(board, pieces, size, cap = 50) {
   return out;
 }
 
-module.exports = { parse, format, drop, resolve, solve, empty, over, clone };
+const PuzzleSim = { parse, format, drop, resolve, solve, empty, over, clone };
+if (typeof module !== 'undefined' && module.exports) module.exports = PuzzleSim;

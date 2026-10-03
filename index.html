@@ -26,8 +26,8 @@
   } catch (e) {}
 </script>
 <title>BYTEFALL // decryption terminal</title>
-<script src="js/fonts.js?v=300"></script>
-<link rel="stylesheet" href="css/style.css?v=300">
+<script src="js/fonts.js?v=301"></script>
+<link rel="stylesheet" href="css/style.css?v=301">
 </head>
 <body>
   <!-- Dev: TWINKLE BACKGROUND (grid-bg.js): the starlight behind the whole game, off by default -->
@@ -215,6 +215,18 @@
         <div class="menu-pane" data-pane="store" hidden>
           <section class="panel panel-store">
             <h2>STORE</h2>
+            <p class="store-hashes">YOUR HASHES <b id="store-hash-count"># 0</b></p>
+            <!-- DAILY DROP (script.js): once a day, a free exploit and some HASHES, claimed here -->
+            <div class="store-item store-daily" data-item="daily-drop">
+              <h3>DAILY DROP <span class="store-price" id="daily-drop-state">FREE</span></h3>
+              <p>Once a day: a free exploit for your next game (not in DAILY, PUZZLE or VS) and 5 HASHES.</p>
+              <button type="button" class="store-buy" id="daily-claim">CLAIM</button>
+            </div>
+            <!-- BOOSTERS (script.js's BOOSTERS, store.js): bought with HASHES -->
+            <h3 class="store-sub">BOOSTERS</h3>
+            <p class="store-sub-note">Bought with HASHES, earned by playing: 1 for every 10 bits decrypted, more for chains of 5 and 7 links, first puzzle solves, achievements, levels and the day's first daily game. Switch them on from the main menu; each is used up in the game it's on in (SECOND CHANCE only if it saves you). Not in DAILY or VS.</p>
+            <div class="booster-shop" id="booster-shop"></div>
+            <h3 class="store-sub">SUPPORT THE GAME</h3>
             <p>Everything in BYTEFALL can be earned by playing. These are for playing without ads, or having it all now.</p>
             <p class="store-preview">PREVIEW // PURCHASES AREN'T OPEN YET</p>
             <div class="store-item" data-item="remove-ads">
@@ -318,6 +330,7 @@
           <span id="level-label">LV 0</span>
           <span class="xp"><i id="xp-fill"></i></span>
           <span id="xp-label">0 / 50 BITS</span>
+          <span class="hash-label" id="hash-label" title="HASHES: spent on boosters in the STORE"># 0</span>
         </div>
         <div class="modes" role="group" aria-label="Game mode">
           <button data-mode="classic">CLASSIC</button>
@@ -352,6 +365,8 @@
           <button data-difficulty="normal">NORMAL</button>
           <button data-difficulty="hard">HARD</button>
         </div>
+        <!-- BOOSTERS (script.js): the ones owned for this mode, switched on for the next game -->
+        <div class="booster-row" id="booster-row" hidden></div>
         <p class="home-best" id="home-best"></p>
         <button type="button" class="vs-start home-play" id="home-play">PLAY</button>
         </div>
@@ -493,6 +508,11 @@
           </div>
         </div>
         <div id="column-buttons" class="column-buttons"></div>
+        <!-- PUZZLE: HINT and UNDO (boosters, script.js) -->
+        <div class="puzzle-tools" id="puzzle-tools" hidden>
+          <button type="button" id="puzzle-hint">HINT</button>
+          <button type="button" id="puzzle-undo">UNDO</button>
+        </div>
         <!-- The EXPLOIT button: under the grid, a square the size of a bit's, set apart from the
              drop buttons -->
         <div class="exploit-row">
@@ -601,6 +621,7 @@
       <p class="overlay-sub" id="overlay-sub">They found you.</p>
       <p>Final score: <span id="final-score">0</span></p>
       <p class="overlay-note" id="overlay-note" hidden></p>
+      <p class="overlay-hashes" id="overlay-hashes" hidden></p>
       <p id="new-best" class="new-best" hidden>NEW HIGH SCORE</p>
       <!-- (no space between the two: a space is a different width in each font) -->
       <button id="overlay-restart-btn">NEW SESSION</button><button id="overlay-share-btn" class="overlay-share-btn" hidden>SHARE</button>
@@ -608,42 +629,43 @@
     </div>
   </div>
 
-  <script src="js/bot-svg.js?v=300"></script>
-  <script src="js/unlocks.js?v=300"></script>
-  <script src="js/progress.js?v=300"></script>
-  <script src="js/music/output.js?v=300"></script>
-  <script src="js/music/mixes.js?v=300"></script>
-  <script src="js/sfx.js?v=300"></script>
-  <script src="js/music/music-bytefall-theme.js?v=300"></script>
-  <script src="js/music/music-sleep-mode.js?v=300"></script>
-  <script src="js/music/music-brute-force.js?v=300"></script>
-  <script src="js/music/music-deep-web.js?v=300"></script>
-  <script src="js/music/music-zero-day.js?v=300"></script>
-  <script src="js/music/music-system-restore.js?v=300"></script>
-  <script src="js/music/music-night-drive.js?v=300"></script>
-  <script src="js/music/music-standby-mode.js?v=300"></script>
-  <script src="js/music/music-core-dump.js?v=300"></script>
-  <script src="js/music/music-handshake.js?v=300"></script>
-  <script src="js/music/music-stack-overflow.js?v=300"></script>
-  <script src="js/music/music.js?v=300"></script>
-  <script src="js/data/puzzles.js?v=300"></script>
-  <script src="js/data/daily-puzzles.js?v=300"></script>
-  <script src="js/cpu.js?v=300"></script>
-  <script src="js/fx.js?v=300"></script>
-  <script src="js/viz.js?v=300"></script>
-  <script src="js/pixel.js?v=300"></script>
-  <script src="js/minibot.js?v=300"></script>
-  <script src="js/seasons.js?v=300"></script>
-  <script src="js/visitors.js?v=300"></script>
-  <script src="js/data/bot-anims.js?v=300"></script>
-<script src="js/wanderers.js?v=300"></script>
-  <script src="js/tutorial.js?v=300"></script>
-  <script src="js/script.js?v=300"></script>
-  <script src="js/grid-bg.js?v=300"></script>
-  <script src="js/player.js?v=300"></script>
-  <script src="js/store.js?v=300"></script>
-  <script src="js/start.js?v=300"></script>
-  <script src="js/place.js?v=300"></script>
-  <script src="js/saver.js?v=300"></script>
+  <script src="js/bot-svg.js?v=301"></script>
+  <script src="js/unlocks.js?v=301"></script>
+  <script src="js/progress.js?v=301"></script>
+  <script src="js/music/output.js?v=301"></script>
+  <script src="js/music/mixes.js?v=301"></script>
+  <script src="js/sfx.js?v=301"></script>
+  <script src="js/music/music-bytefall-theme.js?v=301"></script>
+  <script src="js/music/music-sleep-mode.js?v=301"></script>
+  <script src="js/music/music-brute-force.js?v=301"></script>
+  <script src="js/music/music-deep-web.js?v=301"></script>
+  <script src="js/music/music-zero-day.js?v=301"></script>
+  <script src="js/music/music-system-restore.js?v=301"></script>
+  <script src="js/music/music-night-drive.js?v=301"></script>
+  <script src="js/music/music-standby-mode.js?v=301"></script>
+  <script src="js/music/music-core-dump.js?v=301"></script>
+  <script src="js/music/music-handshake.js?v=301"></script>
+  <script src="js/music/music-stack-overflow.js?v=301"></script>
+  <script src="js/music/music.js?v=301"></script>
+  <script src="js/data/puzzles.js?v=301"></script>
+  <script src="js/data/daily-puzzles.js?v=301"></script>
+  <script src="js/cpu.js?v=301"></script>
+  <script src="js/fx.js?v=301"></script>
+  <script src="js/viz.js?v=301"></script>
+  <script src="js/pixel.js?v=301"></script>
+  <script src="js/minibot.js?v=301"></script>
+  <script src="js/seasons.js?v=301"></script>
+  <script src="js/visitors.js?v=301"></script>
+  <script src="js/data/bot-anims.js?v=301"></script>
+<script src="js/wanderers.js?v=301"></script>
+  <script src="js/tutorial.js?v=301"></script>
+  <script src="js/puzzle-sim.js?v=301"></script>
+  <script src="js/script.js?v=301"></script>
+  <script src="js/grid-bg.js?v=301"></script>
+  <script src="js/player.js?v=301"></script>
+  <script src="js/store.js?v=301"></script>
+  <script src="js/start.js?v=301"></script>
+  <script src="js/place.js?v=301"></script>
+  <script src="js/saver.js?v=301"></script>
 </body>
 </html>

@@ -1,9 +1,9 @@
-// The PUZZLE generator: random boards and bits, kept when the brute-force solver (sim.js) finds
+// The PUZZLE generator: random boards and bits, kept when the brute-force solver (js/puzzle-sim.js) finds
 // they clear in exactly that many drops (never fewer) and in only a few ways.
 //   node tools/puzzles/gen.js <tier> <count> <seed>   (prints the puzzles as JSON)
 // Each tier is a list of bands: { n (puzzles), drops, size, layers (none / 1 / 1-2), sols (most
 // solutions allowed), cells ([min, max] blocks on the board) }
-const S = require('./sim.js');
+const S = require('../../js/puzzle-sim.js');
 
 const TIERS = {
   easy: [

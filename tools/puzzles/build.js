@@ -5,11 +5,11 @@
 //   drops and 20 of 5, grown from the originals, layers up to level 2
 // - HARD (8x8, bits 1-8): 2 to 5 drops, layers up to level 2, at most 2 ways to solve the longer ones
 // Random boards (gen.js) for the short ones, grown from shorter ones (grow.js) for the long ones;
-// every puzzle checked by the solver (sim.js): solvable, never in fewer drops. Seeded: the same
+// every puzzle checked by the solver (js/puzzle-sim.js): solvable, never in fewer drops. Seeded: the same
 // file every time. Each set is ordered easiest first.
 const fs = require('fs');
 const path = require('path');
-const S = require('./sim.js');
+const S = require('../../js/puzzle-sim.js');
 const { generate, TIERS } = require('./gen.js');
 const { grow } = require('./grow.js');
 

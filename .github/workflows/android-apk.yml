@@ -1,29 +1,14 @@
 # ANDROID TEST APK: the game built as an Android app (Capacitor), as players would get it (no dev
-# page). Runs on each push to main that changes the game, or by hand (Actions → Android test APK →
-# Run workflow). The APK is on the run's page under Artifacts (a zip: unzip it and install the .apk
-# on the phone). Test-signed (tools/android/test.keystore): each one installs over the last.
+# page). Runs only by hand: Actions → Android test APK → Run workflow. The APK is on the run's
+# page under Artifacts (a zip: unzip it and install the .apk on the phone). Test-signed (tools/android/test.keystore): each one installs over the last.
 name: Android test APK
 
 on:
-  workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'index.html'
-      - 'manifest.webmanifest'
-      - 'css/**'
-      - 'js/**'
-      - 'assets/fonts/**'
-      - 'assets/icons/**'
-      - 'tools/**'
-      - 'capacitor.config.json'
-      - 'package.json'
-      - 'package-lock.json'
-      - '.github/workflows/android-apk.yml'
+  workflow_dispatch: # (only by hand: Actions → Android test APK → Run workflow)
 
 concurrency:
   group: android-apk
-  cancel-in-progress: true # (a newer push replaces a build still running)
+  cancel-in-progress: true # (a newer run replaces one still going)
 
 jobs:
   apk:
