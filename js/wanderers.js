@@ -189,7 +189,7 @@ function createWanderers(lane, active = () => true) {
       else hairOff(w);
       if (feeling) {
         for (const h of felt) {
-          if (h.feel === 'blast') { if (h.half && !(w.pose && w.pose.kind === 'mill' && performance.now() - w.pose.start < P * 1.8)) pose(w, 'mill', P); } // (a cycle every two beats, from the even beats)
+          if (h.feel === 'blast') { const n = millBeats(P); if ((n === 1 ? h.beat : h.half) && !(w.pose && w.pose.kind === 'mill' && performance.now() - w.pose.start < P * (n - 0.2))) pose(w, 'mill', P); } // (a cycle every beat or two, as drawn, from the beats)
           else if (h.feel === 'gallop' || h.half) pose(w, h.feel === 'half' ? 'bang-heavy' : 'bang', P);
         }
         continue;
@@ -295,11 +295,20 @@ function createWanderers(lane, active = () => true) {
   const HAIR = ['#2c2833', '#5f5670'];
   const lum = (c) => { const m = /(\d+),\s*(\d+),\s*(\d+)/.exec(c); return m ? 0.3 * m[1] + 0.59 * m[2] + 0.11 * m[3] : 128; };
   const shade = (c) => { const m = /(\d+),\s*(\d+),\s*(\d+)/.exec(c); return m ? `rgb(${m.slice(1).map((v) => Math.round(v * 0.62)).join(', ')})` : c; };
+  // (how many beats a drawn windmill cycle spans: its drawn length to the nearest whole beat, 1 or 2)
+  const millBeats = (P) => {
+    const A = typeof BOT_ANIMS !== 'undefined' && BOT_ANIMS.windmill;
+    if (!A || !A.ms) return 2;
+    return Math.min(2, Math.max(1, Math.round(A.ms.reduce((t, v) => t + v, 0) / P)));
+  };
   function pose(w, kind, P) {
     let frames;
-    if (kind === 'mill' && typeof BOT_ANIMS !== 'undefined') { // (the drawn one, bot-anims.js: its frames over two beats)
-      const n = BOT_ANIMS.windmill.frames.length;
-      frames = BOT_ANIMS.windmill.frames.map((_, k) => ({ at: (k / n) * P * 2, pose: 'drawn', anim: 'windmill', k }));
+    if (kind === 'mill' && typeof BOT_ANIMS !== 'undefined') { // (the drawn one, bot-anims.js: its frames at their drawn pace, fitted to the beat)
+      const A = BOT_ANIMS.windmill;
+      const ms = A.frames.map((_, k) => (A.ms && A.ms[k]) || 40);
+      const scale = (millBeats(P) * P) / ms.reduce((t, v) => t + v, 0);
+      let t = 0;
+      frames = A.frames.map((_, k) => { const f = { at: t, pose: 'drawn', anim: 'windmill', k }; t += ms[k] * scale; return f; });
     } else if (kind === 'mill') {
       frames = [];
       for (let k = 0; k < 8; k++) frames.push({ at: (k / 8) * P, pose: 'mill', a: (k / 8) * Math.PI * 2 * (w.look < 0 ? -1 : 1) });
@@ -312,7 +321,7 @@ function createWanderers(lane, active = () => true) {
       w.poseBase = Pixel.snapshot(svg);
       if (hair) hair.style.display = '';
     }
-    w.pose = { kind, start: performance.now(), frames, end: frames[frames.length - 1].at + (kind === 'mill' ? (frames[0].pose === 'drawn' ? P / 4 : P / 8) : 60) };
+    w.pose = { kind, start: performance.now(), frames, end: frames[frames.length - 1].at + (kind === 'mill' ? (frames[0].pose === 'drawn' ? millBeats(P) * P - frames[frames.length - 1].at : P / 8) : 60) };
   }
   function posePlay(w, now) {
     const svg = w.el.querySelector('svg');
