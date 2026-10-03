@@ -189,7 +189,7 @@ function createWanderers(lane, active = () => true) {
       else hairOff(w);
       if (feeling) {
         for (const h of felt) {
-          if (h.feel === 'blast') pose(w, 'mill', P);
+          if (h.feel === 'blast') { if (h.half && !(w.pose && w.pose.kind === 'mill' && performance.now() - w.pose.start < P * 1.8)) pose(w, 'mill', P); } // (a cycle every two beats, from the even beats)
           else if (h.feel === 'gallop' || h.half) pose(w, h.feel === 'half' ? 'bang-heavy' : 'bang', P);
         }
         continue;
@@ -297,7 +297,10 @@ function createWanderers(lane, active = () => true) {
   const shade = (c) => { const m = /(\d+),\s*(\d+),\s*(\d+)/.exec(c); return m ? `rgb(${m.slice(1).map((v) => Math.round(v * 0.62)).join(', ')})` : c; };
   function pose(w, kind, P) {
     let frames;
-    if (kind === 'mill') {
+    if (kind === 'mill' && typeof BOT_ANIMS !== 'undefined') { // (the drawn one, bot-anims.js: its frames over two beats)
+      const n = BOT_ANIMS.windmill.frames.length;
+      frames = BOT_ANIMS.windmill.frames.map((_, k) => ({ at: (k / n) * P * 2, pose: 'drawn', anim: 'windmill', k }));
+    } else if (kind === 'mill') {
       frames = [];
       for (let k = 0; k < 8; k++) frames.push({ at: (k / 8) * P, pose: 'mill', a: (k / 8) * Math.PI * 2 * (w.look < 0 ? -1 : 1) });
     } else if (kind === 'bang-heavy') frames = [{ at: 0, pose: 'tilt' }, { at: P * 0.15, pose: 'down' }, { at: P * 1.0, pose: 'tilt' }, { at: P * 1.4, pose: 'up' }];
@@ -309,7 +312,7 @@ function createWanderers(lane, active = () => true) {
       w.poseBase = Pixel.snapshot(svg);
       if (hair) hair.style.display = '';
     }
-    w.pose = { start: performance.now(), frames, end: frames[frames.length - 1].at + (kind === 'mill' ? P / 8 : 60) };
+    w.pose = { kind, start: performance.now(), frames, end: frames[frames.length - 1].at + (kind === 'mill' ? (frames[0].pose === 'drawn' ? P / 4 : P / 8) : 60) };
   }
   function posePlay(w, now) {
     const svg = w.el.querySelector('svg');
@@ -317,7 +320,7 @@ function createWanderers(lane, active = () => true) {
     if (t > w.pose.end) { w.pose = null; w.poseKey = null; Pixel.clear(svg); svg.classList.remove('px-pose'); return; }
     let f = w.pose.frames[0];
     for (const fr of w.pose.frames) if (fr.at <= t) f = fr;
-    const key = `${f.pose}${f.a || 0}`;
+    const key = `${f.pose}${f.a || 0}${f.k || 0}`;
     if (key === w.poseKey) return;
     w.poseKey = key;
     if (f.pose === 'up') { Pixel.clear(svg); svg.classList.remove('px-pose'); return; }
@@ -333,6 +336,20 @@ function createWanderers(lane, active = () => true) {
     for (const c of base.values()) count[c] = (count[c] || 0) + 1;
     const body = Object.keys(count).sort((a, b) => count[b] - count[a])[0];
     const LEGS = 13;
+    if (f.pose === 'drawn') { // (a drawn animation's frame, bot-anims.js, in this bot's own colors; mirrored when it faces left)
+      const A = BOT_ANIMS[f.anim];
+      const face0 = Object.keys(count).filter((c) => c !== body).sort((a, b) => lum(a) - lum(b))[0] || '#01120a';
+      const role = { b: body, f: face0, s: shade(body) };
+      A.frames[f.k].forEach((row, j) => {
+        for (let i = 0; i < row.length; i++) {
+          const ch = row[i];
+          if (ch === '.') continue;
+          const x = A.x0 + i;
+          set(w.look < 0 ? 15 - x : x, A.y0 + j, role[ch] || A.pal[ch]);
+        }
+      });
+      return cells;
+    }
     for (const [k, c] of base) { const [x, y] = k.split(',').map(Number); if (y >= LEGS) set(x, y, c); } // (the legs stay planted)
     // The metal salute: a fist raised beside the head, two fingers up (the horns), in the headbang
     const horns = (ax, from) => {

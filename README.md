@@ -42,6 +42,7 @@ dev-tools/audio.html    the audio compendium (tracks-info.js: the track list for
 dev-tools/mixer.html    the mixer, one track at a time (?track=sleep-mode)
 dev-tools/bots.html     the bot sandbox: the wanderers, visitors, seasons, fog and headphones on buttons
 dev-tools/frames.html   the frame editor: the bots' animations drawn a frame at a time, exported as .json
+js/data/bot-anims.js    the drawn animations, built in from the frame editor's files (the windmill)
 js/pixel.js             PIXEL MODE (the sandbox's switch, for now): the bots on a screen at twice the
                         art's resolution: moves in whole pixels, turns redrawn, hair that flows
 js/bot-svg.js           the bots' pixel art (shared by the game and the sandbox)
@@ -680,10 +681,11 @@ tilting forward with the hair falling over the brow, bent face-down on the beat 
 head to you, the headphones' band across it, the eyes and mouth just peeking at its lower edge and a
 few strands hanging off the face, tilting back), a fist raised beside the head with the metal
 horns up; the
-half-time breakdown's bang holds face-down longer, on 1 and 3. In the blast beats they bend over and
-WINDMILL: the head circling on the neck (round, up and down, narrowing as it turns to the sides)
-and the hair a blade sweeping a full circle round the crown each beat (eight frames, two fainter
-strands trailing it). The hair is near-black with a cool sheen. The hair goes when the track does. It keeps them on until it leaves; if the music's switched off, it
+half-time breakdown's bang holds face-down longer, on 1 and 3. In the blast beats they WINDMILL (drawn in the
+dev page's FRAME EDITOR, `js/data/bot-anims.js`): eight frames over two beats, starting on the even
+beats, the hair flung straight up, swept over to the right as the head pitches down, covering it at
+the bottom of the swing, round the left and flung up again as the head comes back up; in each bot's
+own colors, mirrored when it faces left. The hair is near-black with a cool sheen. The hair goes when the track does. It keeps them on until it leaves; if the music's switched off, it
 goes -_- and puts them away. Besides the scary tree, a bot may push in a JACK O' LANTERN: a carved grin lit from inside, its
 candle flickering; poked, it flares up and cackles (HAHAHA!), the bots near it jumping. HALLOWEEN also sends the GREMLIN: a little green creature with big
 ears, red eyes and a toothy grin that scurries up to one bot after another to prank it (hehehe; the
