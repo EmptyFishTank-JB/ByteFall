@@ -596,10 +596,10 @@ body.vs-mode .vs-title span { color: var(--accent); text-shadow: 0 0 8px var(--a
   transition: background 0.15s, transform 0.1s;
 }
 
-.column-buttons button:hover:not(:disabled) {
+@media (hover: hover) { .column-buttons button:hover:not(:disabled) {
   background: rgba(var(--fg-rgb), 0.25);
   transform: translateY(-2px);
-}
+} }
 
 /* PIVOT: the picked column and the two neighbors it can swap with */
 .column-buttons button.pivot-from { border-color: var(--accent); color: var(--accent); }
@@ -941,9 +941,9 @@ body.vs-mode .hud #pulse-stat > .layer-mark { top: auto; bottom: 7px; } /* (VS: 
 #vibrate-btn, #fullscreen-btn { margin-top: 6px; }
 .rec-reset { margin-top: 14px; width: 100%; padding: 6px; background: none; border: 1px solid var(--grid-line); border-radius: 4px; color: var(--fg-dim); font-family: inherit; font-size: 11px; letter-spacing: 1px; cursor: pointer; }
 
-#restart-btn:hover, #overlay-restart-btn:hover {
+@media (hover: hover) { #restart-btn:hover, #overlay-restart-btn:hover {
   background: rgba(var(--fg-rgb), 0.15);
-}
+} }
 
 
 
@@ -1028,7 +1028,7 @@ body.vs-mode .stat-best { display: none; }
 @media (max-width: 380px) {
   .modes button { padding: 3px 5px; font-size: 10px; letter-spacing: 0; }
 }
-.modes button:hover { color: var(--fg); border-color: var(--fg); }
+@media (hover: hover) { .modes button:hover { color: var(--fg); border-color: var(--fg); } }
 .modes button.active { color: var(--fg); border-color: var(--fg); box-shadow: 0 0 8px rgba(var(--fg-rgb), 0.3); }
 
 .mode-info {
@@ -1073,7 +1073,7 @@ body.vs-mode .stat-best { display: none; }
   letter-spacing: 1px;
 }
 .overlay-share-btn[hidden] { display: none; }
-.overlay-share-btn:hover { background: rgba(var(--accent-rgb), 0.15); }
+@media (hover: hover) { .overlay-share-btn:hover { background: rgba(var(--accent-rgb), 0.15); } }
 
 .stat.time-low .value { color: var(--danger); text-shadow: 0 0 8px var(--danger); }
 
@@ -1088,7 +1088,7 @@ body.vs-mode .stat-best { display: none; }
   letter-spacing: 1px;
 }
 
-.difficulty button:hover { background: rgba(var(--fg-rgb), 0.15); }
+@media (hover: hover) { .difficulty button:hover { background: rgba(var(--fg-rgb), 0.15); } }
 
 .difficulty button.active {
   background: var(--fg);
@@ -1360,7 +1360,7 @@ body.vs-mode header #mode-info { display: none; }
 .slot-info { margin: 0 0 8px; font-size: 11px; letter-spacing: 1px; color: var(--accent); }
 .hack-item.unlocked { cursor: pointer; }
 .hack-item.unlocked:not(.equipped) { opacity: 0.7; }
-.hack-item.unlocked:hover { border-color: var(--fg-dim); }
+@media (hover: hover) { .hack-item.unlocked:hover { border-color: var(--fg-dim); } }
 .hack-item.equipped { border: 1px solid var(--fg); }
 
 /* DEV: holding a card fills a bar across it; at 2 seconds the exploit becomes the next drop */
@@ -1515,7 +1515,7 @@ body.vs-mode header #mode-info { display: none; }
   cursor: pointer;
 }
 .menu-tabs button svg { width: 18px; height: 18px; display: block; }
-.menu-tabs button:hover { background: rgba(var(--fg-rgb), 0.08); }
+@media (hover: hover) { .menu-tabs button:hover { background: rgba(var(--fg-rgb), 0.08); } }
 .menu-tabs button[aria-selected="true"] { color: var(--fg); border-color: var(--fg); text-shadow: 0 0 6px rgba(var(--fg-rgb), 0.6); filter: drop-shadow(0 0 3px rgba(var(--fg-rgb), 0.35)); }
 .menu-pane[hidden] { display: none; }
 .records .panel { padding: 10px; font-size: 11px; }
@@ -1683,7 +1683,7 @@ body.vs-mode header #mode-info { display: none; }
   cursor: pointer;
 }
 
-.settings button:hover:not(:disabled) { background: rgba(var(--fg-rgb), 0.12); }
+@media (hover: hover) { .settings button:hover:not(:disabled) { background: rgba(var(--fg-rgb), 0.12); } }
 .settings button.active { border-color: var(--fg-dim); }
 .settings button.playing { border-color: var(--accent); color: var(--accent); }
 .settings button.playing::after {
@@ -1742,7 +1742,7 @@ body.vs-mode header #mode-info { display: none; }
   white-space: normal; /* .settings button uses pre, which would render the markup's newline above the canvas */
 }
 
-.settings .viz-toggle:hover { border-color: var(--fg-dim); background: var(--inset-bg); }
+@media (hover: hover) { .settings .viz-toggle:hover { border-color: var(--fg-dim); background: var(--inset-bg); } }
 
 .viz-toggle canvas { display: block; width: 100%; height: 100%; }
 
@@ -1793,11 +1793,8 @@ footer {
 
 .dev-link { width: auto; height: auto; padding: 4px 2px; font-size: 11px; letter-spacing: 1px; white-space: nowrap; text-decoration: none; }
 
-.dev-link:hover,
-.dev-link:focus-visible {
-  opacity: 1;
-  filter: drop-shadow(0 0 4px rgba(var(--fg-rgb), 0.6));
-}
+.dev-link:focus-visible { opacity: 1; filter: drop-shadow(0 0 4px rgba(var(--fg-rgb), 0.6)); }
+@media (hover: hover) { .dev-link:hover { opacity: 1; filter: drop-shadow(0 0 4px rgba(var(--fg-rgb), 0.6)); } }
 
 
 footer p {
@@ -1911,7 +1908,7 @@ header { margin-bottom: 6px; }
 }
 .corner-btn[hidden] { display: none; }
 #restart-btn.corner-btn, #vs-quit.corner-btn { padding: 0; letter-spacing: 0; } /* not the old text buttons' padding */
-#restart-btn.corner-btn:hover { background: rgba(var(--fg-rgb), 0.08); }
+@media (hover: hover) { #restart-btn.corner-btn:hover { background: rgba(var(--fg-rgb), 0.08); } }
 /* Nothing to restart yet (before the first drop, or once the run is over): greyed out */
 #restart-btn.corner-btn:disabled { color: var(--fg-dim); opacity: 0.4; cursor: default; background: rgba(255, 255, 255, 0.02); }
 .corner-btn svg { width: 20px; height: 20px; display: block; }
@@ -2186,7 +2183,7 @@ body.vs-mode .overlay { background: transparent; }
   width: 26px; height: 24px; padding: 0; font-family: inherit; font-size: 14px; line-height: 1; letter-spacing: 0;
   background: transparent; border: 1px solid var(--fg); border-radius: 4px; color: var(--fg); cursor: pointer;
 }
-.vs-goal-row button:hover:not(:disabled) { background: rgba(var(--fg-rgb), 0.15); }
+@media (hover: hover) { .vs-goal-row button:hover:not(:disabled) { background: rgba(var(--fg-rgb), 0.15); } }
 .vs-goal { min-width: 13ch; font-size: 12px; letter-spacing: 1px; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
 .vs-goal-row.off { opacity: 0.35; }
 .vs-goal-row button:disabled { opacity: 0.35; cursor: default; }
@@ -2373,7 +2370,8 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
   text-shadow: 0 0 8px var(--fg); box-shadow: 0 0 14px rgba(var(--fg-rgb), 0.35);
   animation: start-glow 1.6s ease-in-out infinite;
 }
-.start-btn:hover, .start-btn:focus-visible { background: rgba(var(--fg-rgb), 0.18); outline: none; }
+.start-btn:focus-visible { background: rgba(var(--fg-rgb), 0.18); outline: none; }
+@media (hover: hover) { .start-btn:hover { background: rgba(var(--fg-rgb), 0.18); outline: none; } }
 @keyframes start-glow { 0%, 100% { box-shadow: 0 0 8px rgba(var(--fg-rgb), 0.25); } 50% { box-shadow: 0 0 20px rgba(var(--fg-rgb), 0.6); } }
 @keyframes start-blink { 0%, 55% { opacity: 1; } 56%, 100% { opacity: 0; } }
 .start-screen.starting .start-btn { animation: start-blink 0.16s steps(1) infinite; }
@@ -2560,7 +2558,7 @@ html.page-twinkle .page-bg { display: block; }
   background: rgba(var(--accent-rgb), 0.08); color: var(--accent); border: 1px solid var(--accent); border-radius: 4px;
 }
 .store-buy { align-self: flex-end; }
-.store-buy:hover:not(:disabled), .store-restore:hover { background: rgba(var(--accent-rgb), 0.18); }
+@media (hover: hover) { .store-buy:hover:not(:disabled), .store-restore:hover { background: rgba(var(--accent-rgb), 0.18); } }
 .store-item.owned { border-style: solid; border-color: var(--fg-dim); }
 .store-item.owned .store-price { color: var(--fg); }
 .store-buy:disabled { cursor: default; color: var(--fg); border-color: var(--fg-dim); background: none; }
@@ -2578,7 +2576,7 @@ html.page-twinkle .page-bg { display: block; }
 }
 .store-shortcut svg { width: 15px; height: 15px; }
 .store-buy, .store-restore, .store-shortcut, .menu-tabs button { white-space: nowrap; }
-.store-shortcut:hover { background: rgba(var(--accent-rgb), 0.1); }
+@media (hover: hover) { .store-shortcut:hover { background: rgba(var(--accent-rgb), 0.1); } }
 .store-shortcut[hidden] { display: none; }
 
 /* START SCREEN credits: the studio at the top, the copyright above the wanderers */
@@ -2783,7 +2781,7 @@ body.in-game .records-btn .rb-menu { visibility: hidden; }
 body.in-game.can-pause .records-btn .rb-pause { visibility: visible; }
 body.in-game:not(.can-pause) .records-btn span.rb-back { display: inline-flex; }
 body.in-game:not(.can-pause) .records-btn { opacity: 1; width: auto; height: auto; }
-body.in-game:not(.can-pause) .records-btn:hover .rb-back { background: rgba(var(--fg-rgb), 0.12); }
+@media (hover: hover) { body.in-game:not(.can-pause) .records-btn:hover .rb-back { background: rgba(var(--fg-rgb), 0.12); } }
 body.in-game .settings-btn:not([aria-expanded="true"]) { visibility: hidden; }
 /* PAUSE in every mode: RESUME, RESTART (and EXIT in VS), RULES & RECORDS and SETTINGS, MAIN MENU */
 .vs-pause .pause-row button { font-size: 11px; padding: 6px 10px; }
@@ -2792,13 +2790,13 @@ body.in-game .settings-btn:not([aria-expanded="true"]) { visibility: hidden; }
   padding: 6px 14px; background: transparent; border: 1px solid var(--fg-dim); border-radius: 4px;
   color: var(--fg-dim); font-family: inherit; font-size: 12px; letter-spacing: 2px; cursor: pointer;
 }
-.pause-menu:hover { color: var(--fg); border-color: var(--fg); }
+@media (hover: hover) { .pause-menu:hover { color: var(--fg); border-color: var(--fg); } }
 /* The game over box: MAIN MENU under NEW SESSION */
 .overlay-menu-btn {
   display: block; margin: 12px auto 0; padding: 6px 14px; background: transparent; border: 1px solid var(--fg-dim);
   border-radius: 4px; color: var(--fg-dim); font-family: inherit; font-size: 11px; letter-spacing: 2px; cursor: pointer;
 }
-.overlay-menu-btn:hover { color: var(--fg); border-color: var(--fg); }
+@media (hover: hover) { .overlay-menu-btn:hover { color: var(--fg); border-color: var(--fg); } }
 .home #daily-kinds { gap: 5px; }
 .home #daily-kinds button { padding-left: 7px; padding-right: 7px; }
 /* The main menu's RULES & RECORDS and SETTINGS: buttons, as on the pause screen (the corner
@@ -2820,7 +2818,7 @@ body.at-home :is(.records-btn, .settings-btn):not([aria-expanded="true"]) { visi
   padding: 6px 12px; background: transparent; border: 1px solid var(--fg); border-radius: 4px;
   color: var(--fg); font-family: inherit; font-size: 12px; letter-spacing: 1px; cursor: pointer;
 }
-:is(.records, .settings) .card-back:hover { background: rgba(var(--fg-rgb), 0.12); }
+@media (hover: hover) { :is(.records, .settings) .card-back:hover { background: rgba(var(--fg-rgb), 0.12); } }
 body.panel-open .crt :is(.records-btn, .settings-btn) { visibility: hidden !important; }
 
 /* THE HUD (not VS): BEST over SCORE on the left, CURRENT large in the middle (NEXT, on Easy, a

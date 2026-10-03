@@ -183,10 +183,12 @@ const Music = (() => {
     else if (ctx && ctx.state !== 'running') ctx.resume();
   }
   for (const type of ['pointerdown', 'touchend', 'click', 'keydown']) document.addEventListener(type, unlock, true);
+  // (the Android app lets sound start without a tap: the music plays as it opens)
+  if (window.BYTEFALL_APP) unlock();
 
   document.addEventListener('visibilitychange', () => {
     if (!ctx || !timer) return;
-    if (document.hidden && !backgroundPlay) ctx.suspend();
+    if (document.hidden && (!backgroundPlay || window.BYTEFALL_APP)) ctx.suspend(); // (the Android app: always rests)
     else ctx.resume();
   });
 

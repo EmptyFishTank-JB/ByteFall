@@ -3628,6 +3628,7 @@ bgPlayBtn.addEventListener('click', () => {
   updateBgPlayBtn();
 });
 updateBgPlayBtn();
+bgPlayBtn.hidden = !!window.BYTEFALL_APP; // (the Android app: in the background, everything rests)
 
 function setSettingsOpen(open) {
   settingsEl.hidden = !open;
@@ -3672,6 +3673,11 @@ vibrateBtn.addEventListener('click', () => {
   if (vibrate) navigator.vibrate(20);
 });
 updateVibrateBtn();
+// Every button buzzes as it's pressed (with VIBRATION on), as the game's own sounds do
+document.addEventListener('pointerdown', (e) => {
+  if (!vibrate || e.button !== 0 || !e.target.closest('button:not(:disabled), a[href], .walker, .visitor')) return;
+  try { navigator.vibrate(12); } catch (err) {}
+}, { capture: true, passive: true });
 
 // FULLSCREEN (app view): the browser's fullscreen mode where it's allowed (Android Chrome,
 // desktop). iPhones don't allow it for pages, so there the note points to Add to Home Screen,
@@ -3686,8 +3692,9 @@ function updateFullscreenBtn() {
   fullscreenBtn.textContent = `FULLSCREEN: ${on ? 'ON' : 'OFF'}`;
   fullscreenBtn.classList.toggle('on', on);
 }
-fullscreenBtn.hidden = runningAsApp || !canFullscreen;
-appNoteEl.hidden = runningAsApp;
+// (the Android app: always full screen, no button or note)
+fullscreenBtn.hidden = runningAsApp || !canFullscreen || !!window.BYTEFALL_APP;
+appNoteEl.hidden = runningAsApp || !!window.BYTEFALL_APP;
 appNoteEl.textContent = canFullscreen
   ? 'FULLSCREEN hides the browser bars. For an app icon on your phone, use your browser’s Add to Home Screen.'
   : 'For full screen on this device, use Share → Add to Home Screen: ByteFall then opens like an app.';
@@ -4418,11 +4425,16 @@ if (window.BYTEFALL_APP) {
   });
 
 // The Android app's back button (tools/android/MainActivity.java): as Escape here (closes the open
-// card, the music player or the settings; pauses a game, or resumes it; wakes the screen saver).
-// false on the start screen, or at the main menu with nothing open: the app goes to the background
+// card, the music player or the settings; pauses a game, or resumes it; wakes the screen saver);
+// at the main menu with nothing open, back to the start screen. false on the start screen: the
+// app goes to the background
 window.bytefallBack = () => {
   const start = document.getElementById('start-screen');
-  if ((start && !start.hidden) || (homeOpen && !panelOpen())) return false;
+  if (start && !start.hidden) return false;
+  if (homeOpen && !panelOpen() && window.showStartScreen) {
+    window.showStartScreen();
+    return true;
+  }
   document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
   return true;
 };
