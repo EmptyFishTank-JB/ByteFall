@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" class="sandbox">
 <head>
-<script src="../js/fonts.js?v=308"></script>
+<script src="../js/fonts.js?v=309"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#020403">
 <title>Frame Editor // BYTEFALL</title>
-<link rel="stylesheet" href="../css/style.css?v=308">
+<link rel="stylesheet" href="../css/style.css?v=309">
 <!-- FRAME EDITOR: the bots' animations a frame at a time, on their pixel grid. Start from a bot (any
      of the four, any level, mood, with or without headphones) or from one of the game's own
      animations (CORE DUMP's headbang and windmill), draw and erase pixels in the bots' colors, add
@@ -71,7 +71,7 @@
         <span class="note">move the whole frame a pixel</span>
         <button type="button" id="flip">FLIP</button><button type="button" id="clear-frame">CLEAR FRAME</button>
       </div>
-      <div class="row" id="palette"></div>
+      <div id="palette" style="margin: 6px 0;"></div>
       <div class="row"><b>ANY COLOR</b><input type="color" id="custom" value="#2c2833"><button type="button" id="add-color">ADD TO PALETTE</button></div>
       <div class="previews"><div><div class="note">GAME SIZE</div><canvas id="prev1"></canvas></div><div><div class="note">3x</div><canvas id="prev3"></canvas></div></div>
       <div class="row" style="margin-top: 8px;"><button type="button" class="go" id="play">PLAY</button><button type="button" id="stop">STOP</button><span class="note" id="playing"></span></div>
@@ -125,13 +125,13 @@
 <div class="stat cpu-face" id="cpu-face" hidden aria-hidden="true"></div>
 <div id="stage" style="position: absolute; left: -9999px; top: 0; width: 200px; height: 60px;"><div class="game-walkers" id="lane"></div></div>
 <canvas id="board-fx" hidden></canvas>
-<script src="../js/bot-svg.js?v=308"></script>
-<script src="../js/pixel.js?v=308"></script>
-<script src="../js/minibot.js?v=308"></script>
-<script src="../js/data/bot-anims.js?v=308"></script>
-<script src="../js/seasons.js?v=308"></script>
-<script src="../js/visitors.js?v=308"></script>
-<script src="../js/wanderers.js?v=308"></script>
+<script src="../js/bot-svg.js?v=309"></script>
+<script src="../js/pixel.js?v=309"></script>
+<script src="../js/minibot.js?v=309"></script>
+<script src="../js/data/bot-anims.js?v=309"></script>
+<script src="../js/seasons.js?v=309"></script>
+<script src="../js/visitors.js?v=309"></script>
+<script src="../js/wanderers.js?v=309"></script>
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -157,7 +157,8 @@
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(anims)); } catch (e) {} };
   let cur = 0;
   let frame = 0;
-  const blank = (name = 'NEW ANIMATION') => ({ name, notes: '', palette: ['#39ff8f', '#01120a', '#2b2f36', '#e0455f', '#ff8aa0', '#2c2833', '#5f5670', '#ffd23f', '#ffffff'], frames: [{ ms: 120, cells: {} }] });
+  const DEFAULTS = ['#39ff8f', '#01120a', '#2b2f36', '#e0455f', '#ff8aa0', '#2c2833', '#5f5670', '#ffd23f', '#ffffff'];
+  const blank = (name = 'NEW ANIMATION') => ({ name, notes: '', palette: [...DEFAULTS], added: [], frames: [{ ms: 120, cells: {} }] });
   if (!anims.length) anims.push(blank('MY FIRST ANIMATION'));
   const A = () => anims[cur];
   const F = () => A().frames[frame];
@@ -209,6 +210,7 @@
     ctx.strokeStyle = 'rgba(255, 209, 102, 0.35)'; // (the floor)
     ctx.beginPath(); ctx.moveTo(0, (17 - Y0) * SCALE + 0.5); ctx.lineTo(W * SCALE, (17 - Y0) * SCALE + 0.5); ctx.stroke();
     renderStrip();
+    paletteIfChanged();
     drawPreview(F().cells);
   }
   // (s: page pixels to a bot pixel; at 2x each cell is half that)
@@ -320,17 +322,39 @@
   $('res1').addEventListener('click', () => setRes(1));
   $('res2').addEventListener('click', () => setRes(2));
   function setColor(c) { color = hex(c); renderPalette(); tool = 'paint'; tools.forEach((u) => $(`t-${u}`).classList.toggle('on', u === 'paint')); }
+  // The palette: a first row of the default colors and any you've added, and a second of the colors
+  // this animation's frames use (a character opened brings its own), the most used first
+  const mine = () => [...new Set([...DEFAULTS, ...(A().added || [])])];
+  function used() {
+    const n = new Map();
+    for (const fr of A().frames) for (const c of Object.values(fr.cells)) n.set(c, (n.get(c) || 0) + 1);
+    const first = new Set(mine());
+    return [...n].filter(([c]) => !first.has(c)).sort((a, b) => b[1] - a[1]).map(([c]) => c);
+  }
+  let paletteKey = '';
+  function paletteIfChanged() { const k = `${cur}|${color}|${mine().join()}|${used().join()}`; if (k !== paletteKey) renderPalette(); }
   function renderPalette() {
     const p = $('palette');
-    p.innerHTML = '<b>COLORS (RIGHT-CLICK OR ERASE TO REMOVE PIXELS)</b>';
-    for (const c of A().palette) {
-      const s = document.createElement('button');
-      s.type = 'button'; s.className = `swatch${c === color ? ' on' : ''}`; s.style.background = c; s.title = c;
-      s.addEventListener('click', () => setColor(c));
-      p.appendChild(s);
-    }
+    const second = used();
+    paletteKey = `${cur}|${color}|${mine().join()}|${second.join()}`;
+    p.innerHTML = '';
+    const row = (label, colors) => {
+      const r = document.createElement('div');
+      r.className = 'row';
+      r.style.margin = '0';
+      r.innerHTML = `<b>${label}</b>`;
+      for (const c of colors) {
+        const s = document.createElement('button');
+        s.type = 'button'; s.className = `swatch${c === color ? ' on' : ''}`; s.style.background = c; s.title = c;
+        s.addEventListener('click', () => setColor(c));
+        r.appendChild(s);
+      }
+      p.appendChild(r);
+    };
+    row('COLORS (RIGHT-CLICK OR ERASE TO REMOVE PIXELS)', mine());
+    if (second.length) row('THIS ANIMATION\'S COLORS', second);
   }
-  $('add-color').addEventListener('click', () => { const c = hex($('custom').value); if (!A().palette.includes(c)) A().palette.push(c); setColor(c); save(); });
+  $('add-color').addEventListener('click', () => { const c = hex($('custom').value); A().added = A().added || []; if (!mine().includes(c)) A().added.push(c); setColor(c); save(); });
   const shift = (dx, dy) => { snapshotUndo(); const out = {}; for (const [k, c] of Object.entries(F().cells)) { const [x, y] = k.split(',').map(Number); out[`${x + dx},${y + dy}`] = c; } F().cells = out; draw(); save(); };
   $('shift-l').addEventListener('click', () => shift(-1, 0)); $('shift-r').addEventListener('click', () => shift(1, 0));
   $('shift-u').addEventListener('click', () => shift(0, -1)); $('shift-d').addEventListener('click', () => shift(0, 1));
@@ -390,7 +414,7 @@
   $('name').addEventListener('input', () => { A().name = $('name').value || 'UNTITLED'; save(); $('anims').options[cur].textContent = A().name; });
   $('notes').addEventListener('input', () => { A().notes = $('notes').value; save(); });
   // (the file: the frames, each its pixels as 'x,y': '#color' on the bot's grid, (0, 0) its top left)
-  const fileOf = (a) => JSON.stringify({ bytefallAnimation: 1, name: a.name, notes: a.notes || '', grid: (a.res || 1) === 2 ? 'half pixels of the bot (res 2: each bot pixel is 2x2 of these); (0,0) its top-left, 32x34; the floor at y = 34' : 'art pixels of the bot; (0,0) its top-left, 16x17; the floor at y = 17', res: a.res || 1, palette: a.palette, frames: a.frames }, null, 1);
+  const fileOf = (a) => JSON.stringify({ bytefallAnimation: 1, name: a.name, notes: a.notes || '', grid: (a.res || 1) === 2 ? 'half pixels of the bot (res 2: each bot pixel is 2x2 of these); (0,0) its top-left, 32x34; the floor at y = 34' : 'art pixels of the bot; (0,0) its top-left, 16x17; the floor at y = 17', res: a.res || 1, palette: [...new Set([...DEFAULTS, ...(a.added || []), ...a.frames.flatMap((f) => Object.values(f.cells))])], frames: a.frames }, null, 1);
   const status = (t) => { $('status').textContent = t; clearTimeout(status.t); status.t = setTimeout(() => { $('status').textContent = ''; }, 4000); };
   $('export').addEventListener('click', () => {
     const blob = new Blob([fileOf(A())], { type: 'application/json' });
@@ -425,7 +449,7 @@
     w.el.querySelectorAll('*').forEach((n) => { n.style.animation = 'none'; }); // (its rest pose: no bob, blink or step mid-way)
     return w;
   }
-  const colorsOf = (cells) => { for (const c of Object.values(cells)) if (!A().palette.includes(c)) A().palette.push(c); };
+  const colorsOf = () => {}; // (the palette's second row shows a character's colors: renderPalette)
   function botFrame() { const w = makeBot(); const cells = toObj(Pixel.snapshot(w.el.querySelector('svg'))); colorsOf(cells); return cells; }
   $('from-bot').addEventListener('click', () => { snapshotUndo(); A().frames = [{ ms: 120, cells: fit(botFrame()) }]; frame = 0; save(); renderAnims(); status('Loaded the bot.'); });
   $('add-bot').addEventListener('click', () => { snapshotUndo(); A().frames.push({ ms: 120, cells: fit(botFrame()) }); frame = A().frames.length - 1; save(); renderAnims(); });
