@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="../js/fonts.js?v=301"></script>
+<script src="../js/fonts.js?v=303"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#020403">
@@ -263,10 +263,10 @@
   <footer>GENERATED FROM SOURCE &mdash; NO AUDIO FILES, ALL SYNTHESIZED ON PLAY</footer>
 </div>
 
-<script src="../js/music/output.js?v=301"></script>
-<script src="../js/music/mixes.js?v=301"></script>
-<script src="../js/sfx.js?v=301"></script>
-<script src="tracks-info.js?v=301"></script>
+<script src="../js/music/output.js?v=303"></script>
+<script src="../js/music/mixes.js?v=303"></script>
+<script src="../js/sfx.js?v=303"></script>
+<script src="tracks-info.js?v=303"></script>
 <script>
 (() => {
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -290,6 +290,18 @@
       desc: 'A quiet retro 8-bit explosion: grainy sample-and-hold noise under a falling lowpass, plus a quick square-wave pitch drop. The pitch varies slightly each time so chains don\'t repeat exactly.',
       params: ['dur 280ms', 'S&H noise', 'lowpass 3200 → 260Hz', 'square 520–660 → 70Hz', '0.2× volume'],
       uses: ['Each step of a chain when bits decrypt', 'Worm Virus or Trojan wipes out its blocks'],
+    },
+    {
+      id: 'button', name: 'BUTTON',
+      desc: 'A short, clear square-wave tick, falling a little in pitch: every button is heard.',
+      params: ['dur 35ms', 'square 1250 → 900Hz', 'lowpass 3000Hz', '0.22× volume'],
+      uses: ['Any button pressed (not the drop buttons, which have the drop\'s own sound)'],
+    },
+    {
+      id: 'dialup', name: 'DIAL-UP',
+      desc: 'A little dial-up modem: five touch-tone digits, the answer tone, then the carrier warbling between 1650 and 2100Hz under bursts of static.',
+      params: ['about 1.2s', 'DTMF pairs 75ms apart', '2100Hz answer', 'square 1650/2100Hz warble', 'band-passed static', 'lowpass 3400Hz'],
+      uses: ['RESTORE PURCHASES in the STORE, while it checks'],
     },
     {
       id: 'egg', name: 'EASTER EGG TONE',

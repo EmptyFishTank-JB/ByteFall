@@ -13,8 +13,6 @@ Ideas queued for later (not built yet).
   hopping until it leaves the card. 10% chance it trips or its head falls off: it stays put about
   2 seconds, then its snow loses its shape and slumps into a pile over about 4 seconds, and the
   pile flattens and fades away the way the falling snow does.
-- **Skate blades**: give the skating bots (WINTER) little visible blades; right now they look like
-  they float across the floor.
 - **Exploit loadouts**: 3 saved loadouts, picked on the game setup (before a run). A 3rd or 4th
   loadout would be BLACK BOX only.
 - **More VIRUS types** (up to 8; the PHAGE, BUG and TROJAN are in), each with its own way about:
@@ -34,15 +32,11 @@ Ideas queued for later (not built yet).
   blinking between the fog's trees, the scary tree uprooting and shuffling after the bots, a bot
   possessed (red eyes, stiff walk; poked, a little ghost shakes out), a full-moon night with a
   werewolf's howl, a rare blood-red fog where the wanderer chases a bot.
-- **MUSIC PLAYER speed switch**: for the tracks that speed up as the stack rises (STACK OVERFLOW
-  and the like), a switch in the player for those tracks only: their speed held, or ramping.
 - **New tracks**, in the spirit of (not copies of): Cutting Crew's *(I Just) Died in Your Arms*,
   a-ha's *Take On Me*, Starship's *We Built This City*, Duran Duran's *Hungry Like the Wolf*, Paula
   Abdul's *Straight Up* (its funky bass line, not the tapping intro), Sonic Spinball's *Toxic Caves*
   (that super funky bass line too), and an upbeat synthwave track.
 - **Sound themes**: more unlockable sets of game sound effects (like the color themes and fonts).
-- **RESTORE PURCHASES**: a little dial-up modem sound while it works.
-- **Button sounds**: every button makes a sound; check the levels, some are barely audible.
 - **CPU customization**: simple things for the bots to wear, e.g. retro-futuristic glasses.
 - **HALLOWEEN: a big SPIDER visitor** (the size of the viruses) that walks around and jumps about.
 - **SOUND PROFILES section in SETTINGS**: pick a set of game sound effects; the current one is the

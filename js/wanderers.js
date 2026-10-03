@@ -520,6 +520,12 @@ function createWanderers(lane, active = () => true) {
       w.speed *= 2;
       w.trail = 0;
       el.classList.add('skater');
+      // (a blade under each foot, two pixels long toward the front, moving with its leg)
+      el.querySelectorAll('svg rect.leg').forEach((leg) => {
+        const blade = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        for (const [k, v] of [['x', leg.getAttribute('x')], ['y', 15], ['width', 2], ['height', 1], ['class', `${leg.getAttribute('class')} skate-blade`]]) blade.setAttribute(k, v);
+        leg.after(blade);
+      });
     }
     place(w);
   }

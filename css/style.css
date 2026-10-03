@@ -1040,20 +1040,6 @@ body.vs-mode .stat-best { display: none; }
 }
 .difficulty[hidden] { display: none; }
 
-.puzzle-nav { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 10px; font-size: 12px; letter-spacing: 2px; }
-.puzzle-nav[hidden] { display: none; }
-.puzzle-nav button {
-  background: none;
-  border: 1px solid var(--fg-dim);
-  border-radius: 4px;
-  color: var(--fg);
-  font-family: inherit;
-  font-size: 10px;
-  padding: 3px 8px;
-  cursor: pointer;
-}
-.puzzle-nav button:disabled { opacity: 0.3; cursor: default; }
-.puzzle-nav .solved { color: var(--accent); }
 
 /* A solved puzzle uses the terminal color instead of the trace red */
 .overlay-box.win { border-color: var(--fg); box-shadow: 0 0 30px rgba(var(--fg-rgb), 0.4); }
@@ -1879,7 +1865,6 @@ header { margin-bottom: 6px; }
 .ico { display: inline-block; width: 1em; height: 1em; vertical-align: -0.14em; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .ico.solid { fill: currentColor; stroke: none; }
 .free-exploit-btn .ico { margin-right: 6px; }
-.puzzle-nav .ico { width: 9px; height: 9px; vertical-align: middle; }
 
 /* ===== Lower corners =====
    RESTART (QUIT in VS) sits in the game card's lower-left corner during a session; the exploit
@@ -2478,7 +2463,7 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
 @keyframes walker-dust { 0% { transform: translate(0, 0); opacity: 0.9; } 100% { transform: translate(var(--dx), var(--dy)); opacity: 0; } }
 /* WINTER skaters: blades under the feet, a lean into the glide and long pushes off each leg, no
    hop; the powder they kick up lies on the lane and melts away */
-.walker.skater::after { content: ''; position: absolute; left: 8px; right: 8px; bottom: -1px; height: 1px; background: #cfd8e6; pointer-events: none; }
+.walker.skater .skate-blade { fill: #cfd8e6 !important; }
 .walker.skater.walking .bot { animation: none; transform: rotate(7deg); transform-origin: 50% 100%; }
 .walker.skater.walking[data-look="left"] .bot { transform: rotate(-7deg); }
 .walker.skater.walking .leg-a { animation: skate-push 0.76s ease-in-out infinite; }
@@ -2763,7 +2748,7 @@ html.page-twinkle .page-bg { display: block; }
 }
 .home-mode-name { margin: 0; font-size: 15px; letter-spacing: 3px; color: var(--accent); text-shadow: 0 0 8px rgba(var(--accent-rgb), 0.6); }
 .home .mode-info { margin: 0; font-size: 11px; line-height: 1.5; color: var(--panel-text); }
-.home .difficulty, .home .puzzle-nav { margin-top: 0; }
+.home .difficulty { margin-top: 0; }
 .home-best { margin: 0; font-size: 12px; letter-spacing: 2px; color: var(--fg-dim); }
 .home-best b { color: var(--fg); }
 .home-best:empty { display: none; }
@@ -2831,20 +2816,17 @@ body:not(.vs-mode) .hud {
   grid-template-areas: "best cur enc" "score cur chain";
   gap: 6px;
 }
-body:not(.vs-mode) .hud.has-time { grid-template-areas: "best cur enc" "score time chain"; }
 body:not(.vs-mode) .hud.no-pulse { grid-template-areas: "best cur chain" "score cur chain"; }
-body:not(.vs-mode) .hud.has-time.no-pulse { grid-template-areas: "best cur chain" "score time chain"; }
 body:not(.vs-mode) .hud > #best-stat { grid-area: best; }
 body:not(.vs-mode) .hud > #score-stat { grid-area: score; }
 body:not(.vs-mode) .hud > #pulse-stat { grid-area: enc; }
 body:not(.vs-mode) .hud > #chain-stat { grid-area: chain; }
-body:not(.vs-mode) .hud > #time-stat { grid-area: time; }
 body:not(.vs-mode) .hud > .hud-bits { grid-area: cur; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
 body:not(.vs-mode) .hud-bits .stat-current { flex: 1 1 auto; }
 body:not(.vs-mode) .hud-bits .stat-current .bit-sq { width: 42px; height: 42px; font-size: 20px; margin: auto auto 2px; }
-/* NEXT: a short, dim panel under CURRENT */
-body:not(.vs-mode) .hud-bits #next-stat { flex: 0 0 28px; height: 28px; min-height: 0; flex-direction: row !important; align-items: center; justify-content: center; gap: 8px; padding: 0 4px; opacity: 0.7; }
-body:not(.vs-mode) .hud-bits #next-stat .label { width: auto; margin: 0; }
+/* NEXT (and BLITZ's TIME): a short, dim panel under CURRENT */
+body:not(.vs-mode) .hud-bits :is(#next-stat, #time-stat) { flex: 0 0 28px; height: 28px; min-height: 0; flex-direction: row !important; align-items: center; justify-content: center; gap: 8px; padding: 0 4px; opacity: 0.7; }
+body:not(.vs-mode) .hud-bits :is(#next-stat, #time-stat) .label { width: auto; margin: 0; }
 body:not(.vs-mode) .hud-bits #next-stat .bit-row { margin: 0; }
 body:not(.vs-mode) .hud-bits #next-stat .bit-sq { width: 20px; height: 20px; margin: 0; font-size: 10px; }
 /* The cards' tops stay put while their pages scroll: BACK and the title (and RULES & RECORDS'
@@ -2885,8 +2867,8 @@ body:not(.vs-mode) .hud-bits #next-stat .bit-sq { width: 20px; height: 20px; mar
 .crt > .hud { align-self: center; max-width: 100%; margin-left: auto; margin-right: auto; }
 /* NEXT (Easy): one row in its short panel, the label beside the bit (not over it, as the taller
    boxes have them) */
-body:not(.vs-mode) .hud-bits #next-stat > .label { position: static; height: auto; transform: none; flex: none; line-height: 1; }
-body:not(.vs-mode) .hud-bits #next-stat > :is(.bit-row, .bit-sq, .value) { position: static; transform: none; flex: none; }
+body:not(.vs-mode) .hud-bits :is(#next-stat, #time-stat) > .label { position: static; height: auto; transform: none; flex: none; line-height: 1; }
+body:not(.vs-mode) .hud-bits :is(#next-stat, #time-stat) > :is(.bit-row, .bit-sq, .value) { position: static; transform: none; flex: none; }
 /* EXPLOIT READY // NAME: steady over the overflow row until the exploit is used */
 .exploit-notice {
   position: absolute; left: 50%; z-index: 5; translate: -50% -50%; max-width: calc(100% - 16px);
@@ -2932,11 +2914,7 @@ html.pixel-mode :is(.walker, #cpu-face).snapping .bot { animation-name: px-lunge
 html.pixel-mode .walker.skater.walking .bot,
 html.pixel-mode .walker.skater.walking[data-look="left"] .bot { transform: none; } /* (its lean is redrawn, pixel.js) */
 
-/* PUZZLE: the label opens every puzzle of the set (PUZZLES, the menu card's page) */
-.puzzle-nav .puzzle-label { font-size: 12px; letter-spacing: 2px; padding: 4px 10px; display: inline-flex; align-items: center; gap: 6px; }
-.puzzle-nav .puzzle-label .ico { width: 10px; height: 10px; }
-.puzzle-nav .puzzle-label.solved { color: var(--accent); border-color: var(--accent); }
-#puzzle-tiers { margin-bottom: 6px; }
+/* PUZZLES: the menu card's page, every puzzle of a set */
 .panel-puzzles .pz-tiers { margin: 0 0 8px; }
 .pz-count { margin: 0 0 8px; text-align: center; letter-spacing: 2px; color: var(--accent); }
 .pz-pages { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 10px; }
@@ -2961,8 +2939,8 @@ html.pixel-mode .walker.skater.walking[data-look="left"] .bot { transform: none;
 .pz-tile:disabled { opacity: 0.3; cursor: default; color: var(--fg-dim); border-style: dashed; }
 .pz-note { margin: 10px 0 0; font-size: 10px; color: var(--fg-dim); text-align: center; }
 
-/* HASHES (#): beside the level bar, in the accent color */
-.hash-label { margin-left: 4px; color: var(--accent); letter-spacing: 1px; white-space: nowrap; }
+/* KEYS: beside the level bar, in the accent color, after a key */
+.key-label { margin-left: 4px; color: var(--accent); letter-spacing: 1px; white-space: nowrap; }
 /* The STORE buttons, while the DAILY DROP waits: a dot */
 #home-store.has-drop, #pause-store.has-drop { position: relative; }
 #home-store.has-drop::after, #pause-store.has-drop::after {
@@ -2970,8 +2948,8 @@ html.pixel-mode .walker.skater.walking[data-look="left"] .bot { transform: none;
   background: var(--accent); box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.8);
 }
 /* STORE: the balance, the sections, the boosters */
-.panel-store .store-hashes { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 10px; letter-spacing: 2px; color: var(--fg-dim); }
-.panel-store .store-hashes b { font-size: 16px; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+.panel-store .store-keys { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 10px; letter-spacing: 2px; color: var(--fg-dim); }
+.panel-store .store-keys b { font-size: 16px; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
 .panel-store .store-sub { margin: 14px 0 4px; font-size: 12px; letter-spacing: 2px; color: var(--accent); }
 .panel-store .store-sub-note { margin: 0 0 8px; font-size: 10px; color: var(--fg-dim); }
 .booster-shop { display: flex; flex-direction: column; gap: 8px; }
@@ -2997,6 +2975,18 @@ html.pixel-mode .walker.skater.walking[data-look="left"] .bot { transform: none;
 }
 .puzzle-tools button:disabled { opacity: 0.35; cursor: default; }
 .column-buttons button.hinted { border-color: var(--accent); color: var(--accent); animation: amber-pulse 0.9s ease-in-out infinite; }
-/* The HASHES a game earned, under its score */
-.overlay-hashes { margin: 4px 0 0; font-size: 12px; letter-spacing: 1px; color: var(--accent); }
-.overlay-hashes[hidden] { display: none; }
+/* The KEYS a game earned, under its score */
+.overlay-keys { margin: 4px 0 0; font-size: 12px; letter-spacing: 1px; color: var(--accent); }
+.overlay-keys[hidden] { display: none; }
+.key-ico { width: 1em; height: 1em; vertical-align: -0.15em; }
+/* STORE: the ===== line between what KEYS buy and what money buys, as the other menus have them */
+.store-rule { margin: 16px 0 4px; overflow: hidden; white-space: nowrap; font-size: 11px; line-height: 11px; letter-spacing: 2px; color: var(--accent); opacity: 0.7; } /* (as RECORDS' .rec-sep) */
+body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; line-height: 1; }
+/* TEXT SIZE (SETTINGS): LARGE and LARGER scale the game's smaller text: the notes and descriptions,
+   the menu card's pages, the tutorial, messages and toasts (zoomed, so they reflow where they are),
+   and the HUD's labels (whose floor rises with them) */
+:root { --ts: 1; }
+:root.text-l { --ts: 1.15; --label-min: 8; }
+:root.text-xl { --ts: 1.3; --label-min: 9; }
+:root:is(.text-l, .text-xl) :is(.mode-info, .settings-note, .cpu-desc, .message, .toast, .tut-text, .tut-points, .overlay-box p, .records .menu-pane > .panel, .home-best, .booster-row, .vs-setup-note) { zoom: var(--ts); }
+:root:is(.text-l, .text-xl) .hud .stat .label { font-size: calc(8px * var(--ts)); }

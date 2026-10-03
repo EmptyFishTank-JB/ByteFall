@@ -51,6 +51,12 @@ const Music = (() => {
   let targetIntensity = 0;
   let gameIntensity = 0; // what the game asks for; the MUSIC PLAYER's full mix overrides it
   let fullMix = false;
+  // The MUSIC PLAYER's SPEED, for the tracks whose tempo climbs with the stack (a `tempo` layer:
+  // STACK OVERFLOW): HELD at its calm tempo, or RAMPING up across each time through the track
+  const SPEED_KEY = 'bytefall-player-speed';
+  let speedMode = 'ramp';
+  try { if (localStorage.getItem(SPEED_KEY) === 'held') speedMode = 'held'; } catch (e) {}
+  const RAMPING_TRACKS = new Set(['stack-overflow']);
   // SETTINGS → GAME MUSIC: FULL plays every layer in during the game too (LAYERED: they build with the stack)
   let alwaysFull = (() => { try { return localStorage.getItem('bytefall-music-full') === 'on'; } catch (e) { return false; } })();
   let ctx = null;
@@ -122,7 +128,9 @@ const Music = (() => {
       // (the drums as they're scheduled, for whatever moves to them: the wanderers' headphones)
       hit = step % 4 === 0 ? { time: nextTime, beat: true, bar: step % 16 === 0, half: step % 8 === 0, feel: engine.feel ? engine.feel(step) : null } : null;
       if (engine.record) engine.record(recordHit);
-      engine.schedule(step, nextTime, intensity);
+      // (the player: the tempo held or ramping, not the full mix's top speed)
+      const tempo = fullMix && RAMPING_TRACKS.has(trackId) ? (speedMode === 'held' ? 0 : (step % engine.loopSteps) / engine.loopSteps) : null;
+      engine.schedule(step, nextTime, intensity, null, null, tempo);
       if (engine.record) engine.record(null);
       if (hit) { drumLog.push(hit); if (drumLog.length > 96) drumLog.shift(); }
       nextTime += engine.step;
@@ -283,6 +291,12 @@ const Music = (() => {
       targetIntensity = fullMix || alwaysFull ? 1 : gameIntensity;
     },
     // MUSIC PLAYER: every layer in, whatever the game is doing
+    hasSpeed: (id = trackId) => RAMPING_TRACKS.has(id),
+    getSpeed: () => speedMode,
+    setSpeed(m) {
+      speedMode = m === 'held' ? 'held' : 'ramp';
+      try { localStorage.setItem(SPEED_KEY, speedMode); } catch (e) {}
+    },
     setFullMix(on) {
       fullMix = on;
       targetIntensity = on || alwaysFull ? 1 : gameIntensity;

@@ -304,7 +304,8 @@ function createStackOverflow(ctx, out) {
     record: ch.record,
     // solo: a layer id to hear that layer alone at full strength; muted: layer ids to leave out
     // (both from the dev pages)
-    schedule(step, t, intensity = 0, solo = null, muted = null) {
+    // tempoAt: the tempo layer set from outside (0 calm - 1 top; the MUSIC PLAYER's SPEED)
+    schedule(step, t, intensity = 0, solo = null, muted = null, tempoAt = null) {
       const L = {};
       for (const { id, from, span } of LAYERS) {
         L[id] = solo ? Number(id === solo) : Math.max(0, Math.min(1, (intensity - from) / span));
@@ -312,7 +313,7 @@ function createStackOverflow(ctx, out) {
       if (muted && !solo) for (const id of muted) L[id] = 0;
       const base = !solo;
       // The tempo (soloing it: the track at full speed)
-      const tempo = solo ? (solo === 'tempo' ? 1 : 0) : L.tempo;
+      const tempo = solo ? (solo === 'tempo' ? 1 : 0) : tempoAt != null ? tempoAt : L.tempo;
       STEP = stepAt(BPM_CALM + (BPM_MAX - BPM_CALM) * tempo);
       delay.delayTime.setTargetAtTime(STEP * 3, t, 0.5);
       if (solo === 'tempo') L.tempo = 1;
