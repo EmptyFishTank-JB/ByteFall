@@ -1242,22 +1242,33 @@ function createVisitors(api) {
     return t;
   }
   // A numbered BIT: the very bit the grid drops (a .cell.disc, [n], in the theme's look: style.css),
-  // over an empty sprite its size
+  // half again a bot's size, over an empty sprite that size
   function bitSprite() {
-    return { pal: {}, a: Array.from({ length: 15 }, () => '.'.repeat(15)) };
+    return { pal: {}, a: Array.from({ length: 24 }, () => '.'.repeat(24)) };
   }
   function bitCell(t, n) {
     const c = document.createElement('div');
     c.className = 'cell disc pushed-bit';
-    if (typeof fillBit === 'function') fillBit(c, n); // (the game's own: GLYPH draws its glyph)
-    else c.textContent = `[${n}]`;
     t.el.appendChild(c);
     t.cell = c;
+    t.spin = null;
+    bitLook(t);
+  }
+  // (drawn as the grid draws its bits, and again whenever the theme changes: GLYPH's glyph,
+  // SPECTRUM's own hue cycle)
+  function bitLook(t) {
+    const theme = document.documentElement.dataset.theme;
+    if (t.theme === theme) return;
+    t.theme = theme;
+    if (typeof fillBit === 'function') fillBit(t.cell, t.value);
+    else t.cell.textContent = `[${t.value}]`;
+    if (typeof spinBit === 'function') spinBit(t.cell, t);
   }
   // A BIT on the card: an EASY or NORMAL bot coming near an 8 is frightened off (only the mad ones
   // push those); poked, or left long enough, it decrypts in a burst of its pixels. Each number seen
   // counts toward a hidden achievement
   function bitFrame(v, now) {
+    bitLook(v);
     if (!v.seen && v.x >= 0 && v.x <= api.laneW() - v.w) {
       v.seen = true;
       api.botEvent(`seen-bit-${v.value}`);
