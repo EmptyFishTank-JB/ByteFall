@@ -667,6 +667,69 @@ function createVisitors(api) {
   }
   // The pixel deterioration (as the screen goes into the screen saver): its pixels drop out in a
   // random order, in steps
+  // THE SNOWMAN SNEAKS OFF: a while after it's left standing, its eyes shift side to side and it
+  // blinks, checking no one's watching; then it hops off the way it faces, hop after hop, off the
+  // card. One time in ten it trips, or its head falls off: it stays put a couple of seconds, then
+  // slumps into a pile of snow, and the pile flattens and fades away as the falling snow does.
+  function snowmanWaits(v, now) {
+    if (v.x !== v.lastX) { // (still being pushed, or just left)
+      v.lastX = v.x;
+      v.stillSince = now;
+      v.sneakAfter = rand(25000, 60000);
+      return;
+    }
+    if (now - v.stillSince < v.sneakAfter || foggy()) return; // (not in the fog)
+    v.state = 'peek';
+    v.peekAt = now;
+    v.eyes = [...v.el.querySelectorAll('.f-a rect')].filter((r) => r.getAttribute('y') === '4' && r.getAttribute('fill') === '#1b1f27');
+    v.eyeX = v.eyes.map((r) => Number(r.getAttribute('x')));
+  }
+  const SNOW_LOOK = [[0, -1], [550, 1], [1100, -1], [1650, 0], [2000, 'blink'], [2180, 0], [2420, 'blink'], [2600, 0]];
+  function snowmanEyes(v, how) {
+    v.eyes.forEach((r, i) => {
+      r.setAttribute('x', v.eyeX[i] + (how === 'blink' ? 0 : how));
+      r.setAttribute('fill', how === 'blink' ? '#b8c4d6' : '#1b1f27'); // (shut: a line of shade)
+    });
+  }
+  function snowmanSneaks(v, now, dt) {
+    if (v.state === 'peek') {
+      const t = now - v.peekAt;
+      let how = 0;
+      for (const [at, h] of SNOW_LOOK) if (t >= at) how = h;
+      snowmanEyes(v, how);
+      if (t > 3000) {
+        v.state = 'hop';
+        v.hopAt = now;
+        v.speed = rand(26, 34);
+        v.trips = Math.random() < 0.1 ? rand(1200, 3000) : 0; // (it trips, or loses its head, this far in)
+        api.botEvent('snowman-sneak');
+      }
+    } else if (v.state === 'hop') {
+      const t = now - v.hopAt;
+      const p = (t % 520) / 520; // (a hop: up and down, moving only in the air)
+      v.y = Math.sin(p * Math.PI) * 7;
+      if (p > 0.08 && p < 0.92) v.x += v.dir * v.speed * dt;
+      if (v.trips && t > v.trips && p < 0.1) {
+        v.state = 'fallen';
+        v.y = 0;
+        v.fallAt = now;
+        if (Math.random() < 0.5) { v.svgT = ' rotate(78deg)'; say(v, 'oof', 1400); } // (on its face)
+        else { v.svgT = ' translateY(2px)'; say(v, 'my head!', 1400); } // (its head off, rolled to its feet)
+        api.botEvent('snowman-fall');
+      }
+    } else if (v.state === 'fallen') {
+      const t = now - v.fallAt;
+      if (t < 2000) return;
+      // (slumping: shorter and wider, the shape going, then flattening and fading)
+      const slump = Math.min(1, (t - 2000) / 4000);
+      const fade = Math.max(0, Math.min(1, (t - 6000) / 2000));
+      v.svgT = ` scale(${(1 + slump * 0.5).toFixed(2)}, ${(1 - slump * 0.8 - fade * 0.15).toFixed(2)})`;
+      v.el.querySelector(':scope > svg').style.transformOrigin = '50% 100%';
+      v.el.style.opacity = String(1 - fade);
+      if (fade >= 1) v.gone = true;
+    }
+  }
+
   function decay(v) {
     const g = shownFrame(v);
     if (!g) { v.gone = true; return; }
@@ -693,15 +756,52 @@ function createVisitors(api) {
     }
   }
   // The TROJAN unmasked: its disguise pixelates off, the horse pixelates in, it laughs and bolts
+  // The disguise coming off: the bot's pixels peel away from the top down, each flying off on its
+  // own, while the horse resolves underneath them, top first, as they go
   function unmask(v) {
     v.disguised = false;
-    v.el.classList.add('unmasking');
-    setTimeout(() => { v.el.classList.remove('disguised'); v.el.classList.add('unmasked'); }, 450);
+    const look = v.el.querySelector('.trojan-look');
+    const box = v.el.getBoundingClientRect();
+    const bits = [];
+    if (look) {
+      const lb = look.getBoundingClientRect();
+      for (const r of look.querySelectorAll('rect')) {
+        const cs = getComputedStyle(r);
+        if (cs.display === 'none' || cs.visibility === 'hidden' || !cs.fill || cs.fill === 'none' || r.closest('[style*="display: none"]')) continue;
+        const rb = r.getBoundingClientRect();
+        const n = Math.max(1, Number(r.getAttribute('width')) || 1);
+        const m = Math.max(1, Number(r.getAttribute('height')) || 1);
+        const px = rb.width / n;
+        const py = rb.height / m;
+        if (!px || !py) continue;
+        for (let j = 0; j < m; j++) { // (every pixel of it on its own)
+          for (let i = 0; i < n; i++) {
+            const y = rb.top - box.top + j * py;
+            bits.push({ x: rb.left - box.left + i * px, y, w: px, h: py, c: cs.fill, row: (rb.top + j * py - lb.top) / (lb.height || 1) });
+          }
+        }
+      }
+      look.remove();
+    }
+    v.el.classList.remove('disguised');
+    v.el.classList.add('unmasked', 'unmasking');
+    const cx = box.width / 2;
+    for (const b of bits) {
+      const d = document.createElement('i');
+      d.className = 'trojan-peel';
+      Object.assign(d.style, { left: `${b.x}px`, top: `${b.y}px`, width: `${b.w}px`, height: `${b.h}px`, background: b.c });
+      v.el.appendChild(d);
+      const dx = (b.x - cx) * rand(0.4, 1.1) + rand(-8, 8);
+      const dy = -rand(6, 22) + b.row * rand(4, 14);
+      d.animate([
+        { transform: 'translate(0, 0)', opacity: 1 },
+        { transform: `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px)`, opacity: 0 },
+      ], { duration: rand(380, 620), delay: b.row * 320 + rand(0, 60), easing: 'cubic-bezier(.2,.7,.4,1)', fill: 'both' });
+    }
     setTimeout(() => {
-      const look = v.el.querySelector('.trojan-look');
-      if (look) look.remove();
+      v.el.querySelectorAll('.trojan-peel').forEach((d) => d.remove());
       v.el.classList.remove('unmasking');
-    }, 950);
+    }, 1100);
     say(v, pick(['HEHE', 'BUSTED', '>:)']), 1200);
     api.botEvent('trojan-unmasked');
     api.startle(v, 70);
@@ -1053,7 +1153,7 @@ function createVisitors(api) {
     const bob = k.bob && going ? Math.round(Math.abs(Math.sin(t * 5 + v.phase)) * k.bob) * U : 0;
     const y = Math.round(v.y / U) * U;
     v.el.style.transform = `translate(${(v.x + shuffle).toFixed(1)}px, ${(-y - bob - FLOOR).toFixed(1)}px)`;
-    v.el.querySelector('svg').style.transform = `scaleX(${v.dir})`;
+    v.el.querySelector('svg').style.transform = `scaleX(${v.dir})${v.svgT || ''}`;
   }
 
   function frame(now, dt) {
@@ -1114,6 +1214,9 @@ function createVisitors(api) {
         wraithFrame(v, now, dt, W);
       } else if (v.state === 'scenery') {
         // (scenery: pushed by a wanderer, or standing where it was left)
+        if (v.kind === 'snowman') snowmanWaits(v, now);
+      } else if (v.kind === 'snowman') {
+        snowmanSneaks(v, now, dt);
       } else if (v.kind === 'dreidel') { // (spins along, wobbles to a stop, lands on a letter; then on)
         if (v.state === 'go') {
           v.x += v.dir * v.speed * dt;

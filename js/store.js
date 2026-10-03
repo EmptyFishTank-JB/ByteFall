@@ -86,7 +86,7 @@ const Store = (() => {
       say(Unlocks.hasNoAds() || Unlocks.hasFullAccess()
         ? 'RESTORED // YOUR PURCHASES ARE BACK'
         : 'NOTHING TO RESTORE YET // PURCHASES OPEN WITH THE APP');
-    }, 1300);
+    }, 2000);
   }
 
   menu.querySelectorAll('[data-buy]').forEach((b) => b.addEventListener('click', () => buy(b.dataset.buy)));

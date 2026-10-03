@@ -8,11 +8,6 @@ Ideas queued for later (not built yet).
   an 8% chance that it's an 8; only they can push one (their 8x8 board). EASY and NORMAL bots dislike
   the 8 or are frightened of it (a start, backing away or bolting when they come near it). A hidden
   achievement unlocks once you've seen all of 1–8 (track which numbers have been seen in progress).
-- **Snowman sneaks off**: a while after it's pushed in, the snowman's eyes shift side to side, then
-  blink, as if checking that no one's watching. Then it hops forward the way it faces, and keeps
-  hopping until it leaves the card. 10% chance it trips or its head falls off: it stays put about
-  2 seconds, then its snow loses its shape and slumps into a pile over about 4 seconds, and the
-  pile flattens and fades away the way the falling snow does.
 - **Exploit loadouts**: 3 saved loadouts, picked on the game setup (before a run). A 3rd or 4th
   loadout would be BLACK BOX only.
 - **More VIRUS types** (up to 8; the PHAGE, BUG and TROJAN are in), each with its own way about:
@@ -24,9 +19,6 @@ Ideas queued for later (not built yet).
   - **ADWARE**: a pop-up window that keeps popping in at new spots (WIN $$$! / CLICK ME / FREE RAM).
   - **LOGIC BOMB**: a walking bomb with a lit fuse; if it isn't poked (DEFUSED) in time it goes off,
     a big burst, every bot near it scared.
-- **TROJAN: a smoother disguise reveal.** Right now the bot disguise pixelates out and the horse
-  pixelates in on top, a bit abruptly; make it read as the disguise coming off (e.g. the bot's
-  pixels peeling or scattering away from the horse underneath, the horse resolving through them).
 - **Scary October ideas** (pick from): the lights go out (only the bots' eyes blinking; back on, one
   has moved or a monster stands there), a hand from under the floor grabs a bot, glowing eyes
   blinking between the fog's trees, the scary tree uprooting and shuffling after the bots, a bot
