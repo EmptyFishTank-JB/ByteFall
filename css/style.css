@@ -3001,5 +3001,6 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 .visitor-logicbomb.v-fuse-hot > svg { animation: fuse-hot 0.3s steps(1) infinite; }
 @keyframes fuse-hot { 50% { filter: brightness(1.8) drop-shadow(0 0 3px #ff7a1f); } }
 :is(.visitor-worm, .visitor-spyware, .visitor-ransomware) > svg { animation: virus-glitch 3.2s steps(1) infinite; }
-/* PUSHED BITs (visitors.js): the grid's own bit (.cell.disc), a bot's size, on the floor */
-.visitor-bit .pushed-bit { position: absolute; left: 0; bottom: 0; width: 32px; height: 32px; font-size: 13px; box-sizing: border-box; }
+/* PUSHED BITs (visitors.js): the grid's own bit (.cell.disc), half again a bot's size, on the floor */
+.visitor-bit .pushed-bit { position: absolute; left: 0; bottom: 0; width: 51px; height: 51px; font-size: 19px; box-sizing: border-box; }
+.visitor-bit .pushed-bit .glyph-num { font-size: 12px; right: 4px; bottom: 2px; }
