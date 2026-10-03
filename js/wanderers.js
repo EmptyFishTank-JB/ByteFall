@@ -457,7 +457,19 @@ function createWanderers(lane, active = () => true) {
 
   // (o, from the dev page's bot sandbox: { bot, level, enter: 'left' | 'right' | 'pop' | 'run' |
   // 'push', skate, phones, costume: false }; left out, chance decides as ever)
+  // PUSHED BITs: now and then one arrives pushing a numbered BIT onto the card instead of the
+  // season's scenery (any time of year). How often goes by personality: GRIFTER's mischief the
+  // most, GLITCH and BOT now and then, lazy BUNKER hardly ever. EASY and NORMAL ones push a 1 to 7;
+  // HARD and INSANE (from their 8x8 board) a 1 to 8, an 8 one time in twelve or so (8%)
+  const BIT_ODDS = { grifter: 0.035, glitch: 0.03, bot: 0.025, bunker: 0.01 };
+  let pushBit = null; // (decided once a spawn: whether this one pushes a BIT)
+  const bitPush = (bot, o) => {
+    if (pushBit === null) pushBit = o.enter === 'bit' || (!o.enter && Math.random() < (BIT_ODDS[bot] || 0.02));
+    return pushBit;
+  };
+  const bitValue = (level) => (MAD.includes(level) && Math.random() < 0.08 ? 8 : 1 + Math.floor(Math.random() * 7));
   function spawn(now, o = {}) {
+    pushBit = null;
     const free = BOTS.filter((b) => !walkers.some((w) => w.bot === b));
     if (!free.length && !o.bot) return;
     const bot = o.bot || pick(free);
@@ -497,8 +509,10 @@ function createWanderers(lane, active = () => true) {
     if (how < 0.25) { // (15%) arrives at a run, then stops to catch its breath
       w.running = true;
       w.winded = true;
-    } else if (visitors && !foggy() && (forcePush || (!o.enter && Math.random() < 0.15)) && (pushed = visitors.makeScenery(w.dir, (x) => !walkers.some((o) => o !== w && !o.leaving && Math.abs((o.state === 'walk' ? o.target : o.x) - x) < APART)))) {
+    } else if (visitors && !foggy() && (bitPush(bot, o) || forcePush || (!o.enter && Math.random() < 0.15))
+      && (pushed = visitors.makeScenery(w.dir, (x) => !walkers.some((o) => o !== w && !o.leaving && Math.abs((o.state === 'walk' ? o.target : o.x) - x) < APART), bitPush(bot, o) ? bitValue(el.dataset.level) : 0))) {
       forcePush = false;
+      pushBit = null;
       // It arrives pushing the season's scenery ahead of it (the scary tree, a snowman, the
       // evergreen, a menorah, a kinara, the new year's sign: visitors.js), slowly, straining, and
       // leaves it standing somewhere along the card (at a spot clear of any already there)
@@ -829,6 +843,9 @@ function createWanderers(lane, active = () => true) {
     say: (w, m, text) => mood(w, m, text),
     startle: (src, radius) => startle(src, performance.now(), radius),
     fright: (w) => { if (!w.leaving && w.state !== 'vanish' && w.state !== 'startled') fright(w, performance.now()); },
+    // (a visitor holding one where it stands: RANSOMWARE; and turning one to look: SPYWARE)
+    hold: (w, ms) => { if (!w.leaving && (w.state === 'walk' || w.state === 'idle')) { w.state = 'idle'; w.until = performance.now() + ms; w.target = w.x; place(w); } },
+    face: (w, x) => { w.look = x > w.x + SIZE / 2 ? 1 : -1; place(w); },
   }) : null;
   const foggy = () => !!visitors && visitors.foggy();
 

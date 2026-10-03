@@ -3727,11 +3727,13 @@ const vizBtn = document.getElementById('viz-toggle');
 const playlistViz = createVisualizer(document.getElementById('playlist-viz'), Music.getAnalyser, { modes: ['bars', 'wave', 'scope', 'spectro', 'vu', 'plasma'] });
 
 function updateVizLabel() {
-  vizBtn.setAttribute('aria-label', `Visualizer: ${playlistViz.name}. Click to switch.`);
-  vizBtn.title = `${playlistViz.name} (tap to switch)`;
+  vizBtn.setAttribute('aria-label', `Visualizer: ${playlistViz.name}. Tap the right side for the next style, the left side for the one before.`);
+  vizBtn.title = `${playlistViz.name} (tap right: next / left: back)`;
 }
-vizBtn.addEventListener('click', () => {
-  playlistViz.toggle();
+// (a tap on its left half: the style before; on its right half: the next one)
+vizBtn.addEventListener('click', (e) => {
+  const r = vizBtn.getBoundingClientRect();
+  playlistViz.toggle(e.clientX && e.clientX < r.left + r.width / 2 ? -1 : 1);
   updateVizLabel();
 });
 updateVizLabel();

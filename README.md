@@ -668,12 +668,12 @@ on the card reacts right there, peeking in.
 switch, or `?season=halloween`, forces one or turns them OFF). They STACK: when
 several are on at once (Hanukkah during winter, Christmas and Kwanzaa
 overlapping), each adds its touches, a bot picks its costume from any of them and
-the visitors and scenery come from all of them. The windows: HALLOWEEN Oct 15 to
+the visitors and scenery come from all of them. The windows: HALLOWEEN Oct 1 to
 31, NOVEMBER the month, WINTER Dec 1 to Jan 6 (the base under the December
 holidays), HANUKKAH its eight nights (a table of first nights, 2025 to 2035),
 CHRISTMAS Dec 18 to 26, KWANZAA Dec 26 to Jan 1, NEW YEAR'S EVE Dec 31 and NEW
 YEAR Jan 1 and 2. Forcing a holiday brings WINTER along with it. **HALLOWEEN**
-(October 15 to 31): most wanderers (80%) arrive in costume, drawn in their own
+(October 1 to 31): most wanderers (80%) arrive in costume, drawn in their own
 pixel grid over the body and under the face, so every face, hop and snap still
 shows: BUNKER is a pumpkin (its face the carved one), BOT a see-through bedsheet
 ghost (80% opaque; it still walks, its legs showing under the hem),

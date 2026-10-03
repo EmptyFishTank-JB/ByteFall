@@ -2,7 +2,7 @@
 // snacks, visitors.js's visitors, scenery and weather). By the player's own date, and STACKED:
 // several can be on at once, each adding its touches (a bot picks a costume from any of them,
 // visitors and scenery come from all of them).
-//   HALLOWEEN  October 15 to 31
+//   HALLOWEEN  the whole of October (from the 1st, to set the mood)
 //   NOVEMBER   the whole month
 //   WINTER     December 1 to January 6 (the base under the December holidays: snow and all)
 //   HANUKKAH   its eight nights (from the evening of its first night; the dates move each year)
@@ -36,7 +36,7 @@ const Season = (() => {
     return 0;
   }
   const SEASONS = {
-    halloween: (d) => d.getMonth() === 9 && d.getDate() >= 15,
+    halloween: (d) => d.getMonth() === 9,
     november: (d) => d.getMonth() === 10,
     winter: (d) => d.getMonth() === 11 || (d.getMonth() === 0 && d.getDate() <= 6),
     hanukkah: (d) => hanukkahNight(d) > 0,

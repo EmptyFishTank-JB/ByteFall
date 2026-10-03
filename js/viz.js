@@ -709,8 +709,9 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     get mode() { return mode; },
     get name() { return VIZ_NAMES[mode]; },
     // The next style in this one's list
-    toggle() {
-      mode = modes[(modes.indexOf(mode) + 1) % modes.length];
+    // (step: +1 the next style, -1 the one before)
+    toggle(step = 1) {
+      mode = modes[(modes.indexOf(mode) + step + modes.length) % modes.length];
       try { localStorage.setItem(MODE_KEY, mode); } catch (e) {}
       const { w, h } = fit();
       g.clearRect(0, 0, w, h);

@@ -417,6 +417,7 @@ const Progress = (() => {
         { id: 'uprooted', name: 'UPROOTED', desc: 'Watch a bot push a scary tree onto the card', value: n('push-tree'), goal: 1, hidden: true },
         { id: 'gobble-gobble', name: 'GOBBLE GOBBLE', desc: 'Meet the November turkey', value: n('visit-turkey'), goal: 1, hidden: true },
         { id: 'snow-day', name: 'SNOW DAY', desc: 'Poke a snowman a bot pushed onto the card', value: n('snowman-pokes'), goal: 1, hidden: true },
+        { id: 'full-byte', name: 'FULL BYTE', desc: 'See the bots push out every BIT from 1 to 8', value: () => [1, 2, 3, 4, 5, 6, 7, 8].filter((n) => d.bots[`seen-bit-${n}`]).length, goal: 8, hidden: true },
         { id: 'belly-slide', name: 'BELLY SLIDE', desc: 'Poke the winter penguin and send it sliding', value: n('penguin-slide'), goal: 1, hidden: true },
         { id: 'red-nose', name: 'RED NOSE', desc: 'See the reindeer with the glowing red nose', value: n('visit-rudolph'), goal: 1, hidden: true },
         { id: 'eight-nights', name: 'EIGHT NIGHTS', desc: 'Watch a bot push a menorah onto the card during Hanukkah', value: n('push-menorah'), goal: 1, hidden: true },
