@@ -881,7 +881,8 @@ stack heights the game settles on, eased between as the intensity moves.
 - **CORE DUMP (track 09)**: its trial layers still wait for picks.
 - **Sound effect themes**: on hold.
 - **Future games** (separate from ByteFall): BYTERRIUM, a Tamagotchi-style spin-off for the CPU
-  bots, and a Jumanji / Zathura-style board game of events the players survive together. See
+  bots, a Jumanji / Zathura-style board game of events the players survive together, and three Halo
+  game types to rebuild in Halo Infinite (AVALANCHE, WARTHOG ARENA, PAC-MAN ARENA FIESTA). See
   [TODO.md](TODO.md#future-games-separate-from-bytefall).
 
 ### Seasonal stuff (ideas, by the player's own date)
