@@ -189,8 +189,8 @@ function createWanderers(lane, active = () => true) {
       else hairOff(w);
       if (feeling) {
         for (const h of felt) {
-          if (h.feel === 'blast') move(w, 'spin', P);
-          else if (h.feel === 'gallop' || h.half) move(w, h.feel === 'half' ? 'bang-heavy' : 'bang', P);
+          if (h.feel === 'blast') pose(w, 'mill', P);
+          else if (h.feel === 'gallop' || h.half) pose(w, h.feel === 'half' ? 'bang-heavy' : 'bang', P);
         }
         continue;
       }
@@ -263,6 +263,7 @@ function createWanderers(lane, active = () => true) {
   // (the frame playing now, applied: offsets by the bot's own transform, turns redrawn; and the
   // skaters' forward lean, redrawn too, its legs read again every few frames)
   function pxPlay(w, now) {
+    if (w.pose) return; // (a pose is drawing it: posePlay)
     const svg = w.el.querySelector('svg');
     const bot = w.el.querySelector('.bot');
     let f = null;
@@ -285,6 +286,83 @@ function createWanderers(lane, active = () => true) {
       bot.style.transform = head.dx || head.dy ? `translate(${Pixel.snap(head.dx)}px, ${Pixel.snap(head.dy)}px)` : '';
     }
     if (w.pxHair) w.pxHair.step(w.pxDt || 0.016, { ...head, worldX: w.x / (SIZE / 16) });
+  }
+  // CORE DUMP'S POSES (drawn as pixel sprites, pixel mode or not): the bot BENT OVER, the top of
+  // its head to you (the headphones' band across it) and its hair hanging down in front to the
+  // floor. A HEADBANG is four frames a beat: up, tilting forward (the hair falling over its face),
+  // face down on the beat, tilting back. The WINDMILL stays bent over while the hair sweeps a full
+  // circle round the crown each beat (eight frames, trailing strands behind), the head swaying.
+  const HAIR = ['#7a5236', '#a2774f'];
+  const shade = (c) => { const m = /(\d+),\s*(\d+),\s*(\d+)/.exec(c); return m ? `rgb(${m.slice(1).map((v) => Math.round(v * 0.62)).join(', ')})` : c; };
+  function pose(w, kind, P) {
+    let frames;
+    if (kind === 'mill') {
+      frames = [];
+      for (let k = 0; k < 8; k++) frames.push({ at: (k / 8) * P, pose: 'mill', a: (k / 8) * Math.PI * 2 * (w.look < 0 ? -1 : 1) });
+    } else if (kind === 'bang-heavy') frames = [{ at: 0, pose: 'tilt' }, { at: P * 0.15, pose: 'down' }, { at: P * 1.0, pose: 'tilt' }, { at: P * 1.4, pose: 'up' }];
+    else frames = [{ at: 0, pose: 'tilt' }, { at: P * 0.12, pose: 'down' }, { at: P * 0.42, pose: 'tilt' }, { at: P * 0.66, pose: 'up' }];
+    const svg = w.el.querySelector('svg');
+    if (!w.pose) w.poseBase = Pixel.snapshot(svg); // (its own pixels, upright: what the poses are made from)
+    w.pose = { start: performance.now(), frames, end: frames[frames.length - 1].at + (kind === 'mill' ? P / 8 : 60) };
+  }
+  function posePlay(w, now) {
+    const svg = w.el.querySelector('svg');
+    const t = now - w.pose.start;
+    if (t > w.pose.end) { w.pose = null; w.poseKey = null; Pixel.clear(svg); svg.classList.remove('px-pose'); return; }
+    let f = w.pose.frames[0];
+    for (const fr of w.pose.frames) if (fr.at <= t) f = fr;
+    const key = `${f.pose}${f.a || 0}`;
+    if (key === w.poseKey) return;
+    w.poseKey = key;
+    if (f.pose === 'up') { Pixel.clear(svg); svg.classList.remove('px-pose'); return; }
+    svg.classList.add('px-pose');
+    Pixel.draw(svg, poseCells(w, f));
+  }
+  function poseCells(w, f) {
+    const base = w.poseBase;
+    const cells = new Map();
+    const set = (x, y, c) => cells.set(`${x},${y}`, c);
+    // (the body's color: the one most of its pixels are)
+    const count = {};
+    for (const c of base.values()) count[c] = (count[c] || 0) + 1;
+    const body = Object.keys(count).sort((a, b) => count[b] - count[a])[0];
+    const LEGS = 13;
+    for (const [k, c] of base) { const [x, y] = k.split(',').map(Number); if (y >= LEGS) set(x, y, c); } // (the legs stay planted)
+    if (f.pose === 'tilt') { // (the head pitched forward and down two pixels, hair falling over its brow)
+      for (const [k, c] of base) { const [x, y] = k.split(',').map(Number); if (y < LEGS && y + 2 <= LEGS) set(x, y + 2, c); }
+      for (let x = 2; x <= 13; x++) for (let y = 3; y <= 5 + ((x * 7) % 3); y++) set(x, y, HAIR[(x + y) % 5 === 0 ? 1 : 0]);
+      return cells;
+    }
+    // Bent over: a flatter head, lower, its top to you; the headphones' band across it
+    const sway = f.pose === 'mill' ? Math.round(1.5 * Math.sin(f.a)) : 0;
+    for (let y = 7; y <= 12; y++) for (let x = 1 + (y === 7 ? 1 : 0); x <= 14 - (y === 7 ? 1 : 0); x++) set(x + sway, y, body);
+    if (w.phones) {
+      for (let x = 1; x <= 14; x++) set(x + sway, 8, '#2b2f36');
+      for (let y = 8; y <= 11; y++) { set(sway, y, '#e0455f'); set(15 + sway, y, '#e0455f'); }
+    }
+    // The crown's hair over the top of the head
+    for (let y = 9; y <= 12; y++) for (let x = 4 - (y > 10 ? 1 : 0); x <= 11 + (y > 10 ? 1 : 0); x++) set(x + sway, y, HAIR[(x * 3 + y) % 7 === 0 ? 1 : 0]); // (its crown, the body's color showing round it)
+    for (let x = 2; x <= 13; x++) set(x + sway, 12, cells.get(`${x + sway},12`) === body ? shade(body) : cells.get(`${x + sway},12`)); // (the underside, in shadow)
+    if (f.pose === 'down') { // (hanging straight down in front, ragged at the ends)
+      for (let x = 2; x <= 13; x++) {
+        const len = 3 + ((x * 5) % 3);
+        for (let y = 13; y < 13 + len; y++) set(x, y, HAIR[(x + y) % 6 === 0 ? 1 : 0]);
+      }
+      return cells;
+    }
+    // The windmill: the hair a blade sweeping round the crown, two fainter strands trailing it
+    const cx = 7.5 + sway;
+    const cy = 11;
+    [[0, 11, HAIR[0]], [-0.45, 9, HAIR[0]], [-0.9, 6, HAIR[1]]].forEach(([lag, len, c]) => {
+      const a = f.a + lag * (w.look < 0 ? -1 : 1);
+      for (let r = 1; r <= len; r += 0.5) {
+        const x = Math.round(cx + Math.sin(a) * r);
+        const y = Math.round(cy + Math.cos(a) * r);
+        set(x, y, c);
+        set(x + 1, y, c); // (as thick as a lock of hair)
+      }
+    });
+    return cells;
   }
   let partySeen = false;
   let forcePush = false; // (the dev tests: the next arrival pushes the tree)
@@ -842,7 +920,8 @@ function createWanderers(lane, active = () => true) {
         else walkTo(w, freeSpot(w));
       }
       place(w);
-      if (pixelOn()) { w.pxDt = dt; pxPlay(w, now); } else if (w.prog || w.el.querySelector('svg.px-drawn')) { w.prog = null; Pixel.clear(w.el.querySelector('svg')); w.el.querySelector('.bot').style.transform = ''; }
+      if (w.pose) posePlay(w, now);
+      if (pixelOn()) { w.pxDt = dt; pxPlay(w, now); } else if (!w.pose && (w.prog || w.el.querySelector('svg.px-drawn'))) { w.prog = null; Pixel.clear(w.el.querySelector('svg')); w.el.querySelector('.bot').style.transform = ''; }
     }
     // Two that meet may stop and make faces at each other (in the heavy fog, they don't see each
     // other coming: they bump, and now and then one gives the other a fright)
@@ -891,6 +970,6 @@ function createWanderers(lane, active = () => true) {
   }
   start();
   // (start: after being switched back on; list / startle / crowd / dress / visit / snack / push: for the dev tests)
-  return { start, clearAll: () => { walkers.forEach((w) => w.el.remove()); walkers = []; want = 0; nextReroll = performance.now() + 1e9; if (visitors) visitors.clear(); }, mood, fright: (w) => fright(w, performance.now()), rabid: (w) => rabid(w, performance.now()), spawn: (o) => spawn(performance.now(), o), poke: (w) => poke(w, performance.now()), depart: (w) => depart(w, performance.now()), phonesOff, phones: (w) => phonesOn(w, performance.now()), list: () => walkers, startle: (w) => startle(w, performance.now()), crowd: (n) => { want = n; nextReroll = performance.now() + 60000; }, dress, visit: (what) => visitors && visitors.visit(what), snack: (w) => snack(w, performance.now()), push: () => { forcePush = true; nextSpawn = 0; } };
+  return { start, poseAt: (w, kind, t, P = 316) => { pose(w, kind, P); w.pose.start = performance.now() - t; }, clearAll: () => { walkers.forEach((w) => w.el.remove()); walkers = []; want = 0; nextReroll = performance.now() + 1e9; if (visitors) visitors.clear(); }, mood, fright: (w) => fright(w, performance.now()), rabid: (w) => rabid(w, performance.now()), spawn: (o) => spawn(performance.now(), o), poke: (w) => poke(w, performance.now()), depart: (w) => depart(w, performance.now()), phonesOff, phones: (w) => phonesOn(w, performance.now()), list: () => walkers, startle: (w) => startle(w, performance.now()), crowd: (n) => { want = n; nextReroll = performance.now() + 60000; }, dress, visit: (what) => visitors && visitors.visit(what), snack: (w) => snack(w, performance.now()), push: () => { forcePush = true; nextSpawn = 0; } };
 
 }

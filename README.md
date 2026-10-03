@@ -673,11 +673,13 @@ put a pair on (15% of its stops): then it vibes, eyes closed (♪). Standing, it
 on the kicks, at most every half beat, and a tapper taps its foot on the hi-hats, at most every
 eighth (the music engine logs each drum hit as it schedules it, kicks, hats and snares, and the
 bots move as each is heard); with nothing to follow (a breakdown) they keep time anyway, a nod each
-bar, a tap each beat. Walking, its steps fall two to a beat (kept in sync as the tempo moves). CORE DUMP (track 09) tells its feel, and to it the headphone bots go metal: they
-grow long hair (behind the head, hanging past the body) and in the blast-beat sections do the
-helicopter, the head whirled round on the neck a turn a beat with the hair whipping round wider
-behind it; in the gallop they headbang every beat, and in the half-time breakdown a heavy bang on
-1 and 3, the hair flung down each time. The hair goes when the track does. It keeps them on until it leaves; if the music's switched off, it
+bar, a tap each beat. Walking, its steps fall two to a beat (kept in sync as the tempo moves). CORE DUMP (track 09) tells its feel, and to it the headphone bots go metal, in poses drawn
+as pixel sprites: they grow long hair, and in the gallop they HEADBANG, four frames a beat (up,
+tilting forward with the hair falling over the brow, bent face-down on the beat with the top of the
+head to you, the headphones' band across it and the hair hanging to the floor, tilting back); the
+half-time breakdown's bang holds face-down longer, on 1 and 3. In the blast beats they bend over and
+WINDMILL: the hair a blade sweeping a full circle round the crown each beat (eight frames, two
+fainter strands trailing it), the head swaying with it. The hair goes when the track does. It keeps them on until it leaves; if the music's switched off, it
 goes -_- and puts them away. Besides the scary tree, a bot may push in a JACK O' LANTERN: a carved grin lit from inside, its
 candle flickering; poked, it flares up and cackles (HAHAHA!), the bots near it jumping. HALLOWEEN also sends the GREMLIN: a little green creature with big
 ears, red eyes and a toothy grin that scurries up to one bot after another to prank it (hehehe; the

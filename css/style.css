@@ -2919,6 +2919,7 @@ body:not(.vs-mode) .hud-bits #next-stat > :is(.bit-row, .bit-sq, .value) { posit
    at twice the art's resolution, everything in whole screen pixels (half an art pixel). The
    animations that squashed, stretched or turned the picture move by those pixels instead. */
 svg.px-drawn > .bot-swap { visibility: hidden; } /* (its pixels redrawn in .px-body, turned) */
+svg.px-pose > .px-hair { visibility: hidden; } /* (CORE DUMP's poses draw their own hair) */
 html.pixel-mode .px-layer rect { shape-rendering: crispEdges; }
 html.pixel-mode .cpu-face :is(.eyes) { transform-box: view-box; }
 html.pixel-mode .cpu-face[data-mood="idle"] .eyes,
