@@ -163,13 +163,16 @@ const SFX = (() => {
       osc.connect(lp); lp.connect(envelope(c, VOL * 0.22, t, 0.035));
       osc.start(t); osc.stop(t + 0.04);
     },
-    // RESTORE PURCHASES: a little dial-up modem: the number dialed (touch tones), then the
-    // handshake's carrier warbling against bursts of static (about a second)
+    // RESTORE PURCHASES: a little dial-up modem: a number dialed (touch tones), the answer tone,
+    // the handshake's carrier warbling against bursts of static, and the line opening up (the
+    // kshhht). Never quite the same twice, like the narrator's voice: its number, its pace, the
+    // carrier's pitch and warble, the static's pattern and how long each part goes on all vary
     dialup(c) {
+      const r = (a, b) => a + Math.random() * (b - a);
       const t0 = c.currentTime;
       const gn = c.createGain();
-      gn.gain.value = VOL * 0.35;
-      const lp = filter(c, 'lowpass', 3400);
+      gn.gain.value = VOL * r(0.3, 0.38);
+      const lp = filter(c, 'lowpass', r(3000, 3800));
       gn.connect(lp); lp.connect(dest(c));
       const tone = (f, t, dur, type = 'sine', vol = 1) => {
         const o = c.createOscillator();
@@ -183,21 +186,47 @@ const SFX = (() => {
         o.start(t); o.stop(t + dur);
         return o;
       };
-      // (touch tones: each digit two tones at once)
-      [[697, 1209], [770, 1336], [852, 1477], [697, 1336], [941, 1336]].forEach(([lo, hi], i) => {
-        const t = t0 + i * 0.075;
-        tone(lo, t, 0.06, 'sine', 0.5);
-        tone(hi, t, 0.06, 'sine', 0.5);
-      });
-      // (the answer tone, then the carrier warbling between 1650 and 2100 Hz with static over it)
-      const t1 = t0 + 0.42;
-      tone(2100, t1, 0.16, 'sine', 0.6);
-      const car = tone(1650, t1 + 0.18, 0.55, 'square', 0.25);
-      for (let k = 0; k < 11; k++) car.frequency.setValueAtTime(k % 2 ? 2100 : 1650, t1 + 0.18 + k * 0.05);
-      const hiss = noiseBuffer(c, 0.5, (i, n) => (Math.floor(i / 400) % 3 ? 0.5 : 0.1) * (1 - i / n));
-      const bp = filter(c, 'bandpass', 2400, 0.7);
+      // (touch tones: 4 to 7 digits, each two tones at once, dialed at its own pace)
+      const ROWS = [697, 770, 852, 941];
+      const COLS = [1209, 1336, 1477];
+      const digits = 4 + Math.floor(Math.random() * 4);
+      const gap = r(0.062, 0.09);
+      let t = t0;
+      for (let i = 0; i < digits; i++) {
+        const lo = ROWS[Math.floor(Math.random() * ROWS.length)];
+        const hi = COLS[Math.floor(Math.random() * COLS.length)];
+        const len = gap * r(0.65, 0.85);
+        tone(lo, t, len, 'sine', 0.5);
+        tone(hi, t, len, 'sine', 0.5);
+        t += gap * r(0.9, 1.15);
+      }
+      // (the answer tone)
+      t += r(0.08, 0.18);
+      const answer = r(0.12, 0.22);
+      tone(r(2080, 2120), t, answer, 'sine', 0.6);
+      t += answer + 0.02;
+      // (the carrier warbling between two pitches, with static over it)
+      const loF = r(1550, 1700);
+      const hiF = loF + r(380, 500);
+      const warble = r(0.04, 0.065);
+      const carLen = r(0.45, 0.7);
+      const car = tone(loF, t, carLen, 'square', 0.25);
+      for (let k = 0; k * warble < carLen; k++) car.frequency.setValueAtTime(k % 2 ? hiF : loF, t + k * warble);
+      const chunk = 300 + Math.floor(Math.random() * 300);
+      const hiss = noiseBuffer(c, carLen, (i, n) => (Math.floor(i / chunk) % 3 ? 0.5 : 0.1) * (1 - i / n));
+      const bp = filter(c, 'bandpass', r(2100, 2700), 0.7);
       hiss.connect(bp); bp.connect(gn);
-      hiss.start(t1 + 0.24); hiss.stop(t1 + 0.74);
+      hiss.start(t + 0.05); hiss.stop(t + carLen);
+      t += carLen;
+      // (kshhht: the line opening up, a wash of static that swells, holds and fades out)
+      const ksh = r(0.35, 0.55);
+      const wash = noiseBuffer(c, ksh, (i, n) => { const x = i / n; return Math.min(1, x * 8) * Math.pow(1 - x, 0.6); });
+      const hp = filter(c, 'highpass', r(700, 1100));
+      const top = filter(c, 'lowpass', r(5000, 7000));
+      const wg = c.createGain(); // (its own level, past the modem's lowpass: brighter)
+      wg.gain.value = VOL * r(0.3, 0.42);
+      wash.connect(hp); hp.connect(top); top.connect(wg); wg.connect(dest(c));
+      wash.start(t); wash.stop(t + ksh);
     },
   };
 
