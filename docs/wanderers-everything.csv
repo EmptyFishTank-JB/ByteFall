@@ -66,17 +66,18 @@ Visitor,RANSOMWARE (virus),"All year, rare","A padlock creature that demands pay
 Visitor,SPYWARE (virus),"All year, rare","A floating eye that tails a bot; the bot notices, suspicious",✓,In game,js/visitors.js VIRUS_WAYS
 Visitor,ADWARE (virus),"All year, rare",A pop-up window popping in at new spots (WIN $$$! / CLICK ME / FREE RAM),✓,In game,js/visitors.js VIRUS_WAYS
 Visitor,LOGIC BOMB (virus),"All year, rare","A walking bomb with a lit fuse; not poked (DEFUSED) in time, it goes off and scares every bot near",✓,In game,js/visitors.js VIRUS_WAYS
-Visitor,Big SPIDER,HALLOWEEN,The size of the viruses; scuttles and leaps about (a bot it lands near jumps); poked: hisses and leaps away,✓,In game,TODO.md
+Visitor,Big SPIDER,HALLOWEEN,The size of the viruses; scuttles and leaps about (a bot it lands near jumps); poked: hisses and leaps away,✓,In game,js/visitors.js
 Pushed scenery,Scary tree,HALLOWEEN,Pushed in by a bot; black eyes and a frown; poked: creaks and a bat flies out,✓,In game,js/visitors.js SCENERY
 Pushed scenery,Jack o' lantern,HALLOWEEN,"Pushed in; glows, candle flickering; poked: flares and cackles, bots near jump",✓,In game,js/visitors.js SCENERY
-Pushed scenery,"Foggy trees (pines, bare trees)","NOVEMBER, HALLOWEEN (fog)","Fade in with the fog front, stay in the light mist after (bare trees only at Halloween)",✓,In game,js/visitors.js SCENERY
+Pushed scenery,"Foggy trees (pines, bare trees)","NOVEMBER, HALLOWEEN (fog)","Fade in with the fog front, stay in the light mist after (at Halloween bigger, and they stay all month)",✓,In game,js/visitors.js SCENERY
 Pushed scenery,Snowman,WINTER,Pushed in; poked: brrr,✓,In game,js/visitors.js SCENERY
 Pushed scenery,Evergreen,CHRISTMAS,"Pushed in; blinking lights, twinkling star, presents; poked: jingle",✓,In game,js/visitors.js SCENERY
 Pushed scenery,Menorah,HANUKKAH,Pushed in; that night's candles lit; poked: glows,✓,In game,js/visitors.js SCENERY
 Pushed scenery,Kinara,KWANZAA,Pushed in; that day's candles lit; poked: glows,✓,In game,js/visitors.js SCENERY
 Pushed scenery,Year sign,"NEW YEAR'S EVE, NEW YEAR",Pushed in; the year; poked: cheer,✓,In game,js/visitors.js SCENERY
 Pushed scenery,Numbered BITs (1–8),All year,"A wanderer now and then pushes a numbered BIT onto the card (GRIFTER 3.5%, GLITCH 3%, BOT 2.5%, BUNKER 1%); 1–7 from EASY/NORMAL, 1–8 from HARD/INSANE (8% an 8); EASY/NORMAL bots flee the 8; poked or left a while, it decrypts; hidden FULL BYTE for seeing all 1–8",✓,In game,"js/wanderers.js, js/visitors.js"
-Weather / event,Fog,"NOVEMBER (and HALLOWEEN, scarier)","Heavy fog rolls in (other events pause; bots bump and startle), then a light mist for a couple of minutes; the grid behind fades to black",✓,In game,js/visitors.js
+Weather / event,HAUNTED FOREST,HALLOWEEN (all October once it comes),"The fog's forest stays on every card: pines and bare trees, big gnarled ones in front at the edges, the mist breathing and swelling again for its wanderer",✓,In game,js/visitors.js
+Weather / event,Fog,"NOVEMBER (and HALLOWEEN, as the haunted forest)","Heavy fog rolls in (other events pause; bots bump and startle), then a light mist for a couple of minutes; the grid behind fades to black",✓,In game,js/visitors.js
 Weather / event,Falling snow,WINTER,Snow falling over the lane,✓,In game,js/visitors.js
 Weather / event,Fireworks,"NEW YEAR'S EVE, NEW YEAR","A rocket up, bursting into pixel sparks",✓,In game,js/visitors.js
 Weather / event,Midnight countdown,NEW YEAR'S EVE,At the player's own midnight the bots count down from 10 and cheer; the sky fills with fireworks,✓,In game,js/visitors.js
@@ -119,13 +120,13 @@ Mood (face),SKEPTIC,All year,A face the bots make (with its emotes),✓,In game,
 Mood (face),ANGRY,All year,A face the bots make (with its emotes),✓,In game,js/wanderers.js MOOD_EMOTES
 Mood (face),SNARL,All year,A face the bots make (with its emotes),✓,In game,js/wanderers.js MOOD_EMOTES
 Mood (face),MUNCH,All year,A face the bots make (with its emotes),✓,In game,js/wanderers.js MOOD_EMOTES
-Idea: scary October,"The lights go out (only the bots' eyes blinking; back on, one has moved or a monster stands there)",HALLOWEEN,,,Planned (TODO),TODO.md: Scary October ideas (pick from)
-Idea: scary October,A hand from under the floor grabs a bot,HALLOWEEN,,,Planned (TODO),TODO.md: Scary October ideas (pick from)
-Idea: scary October,Glowing eyes blinking between the fog's trees,HALLOWEEN,,,Planned (TODO),TODO.md: Scary October ideas (pick from)
-Idea: scary October,The scary tree uprooting and shuffling after the bots,HALLOWEEN,,,Planned (TODO),TODO.md: Scary October ideas (pick from)
-Idea: scary October,"A bot possessed (red eyes, stiff walk; poked, a little ghost shakes out)",HALLOWEEN,,,Planned (TODO),TODO.md: Scary October ideas (pick from)
-Idea: scary October,A full-moon night with a werewolf's howl,HALLOWEEN,,,Planned (TODO),TODO.md: Scary October ideas (pick from)
-Idea: scary October,A rare blood-red fog where the wanderer chases a bot,HALLOWEEN,,,Planned (TODO),TODO.md: Scary October ideas (pick from)
+Animation / behaviour,LIGHTS OUT,HALLOWEEN,"The card goes dark, only the bots' eyes blinking; back on, one has moved or a monster stands among them",✓,In game,js/visitors.js
+Visitor,The HAND from under the floor,HALLOWEEN,"Rises under a bot and grabs it; it struggles, breaks free and runs; poked: lets go",✓,In game,js/visitors.js
+Visitor,Glowing eyes,HALLOWEEN (haunted forest),"Blink between the trees, edging after the bots; poked: shut",✓,In game,js/visitors.js
+Animation / behaviour,Tree uprooting,HALLOWEEN (haunted forest; the pushed scary tree too),"Pulls up its roots and shuffles after the bots (one it reaches bolts), then plants itself again; poked: stops",✓,In game,js/visitors.js
+Animation / behaviour,POSSESSED bot,HALLOWEEN,"Red glowing eyes, stiff slow walk, others scared of it; poked: a little ghost shakes out and floats away",✓,In game,"js/wanderers.js, js/visitors.js"
+Visitor,WEREWOLF (full moon),HALLOWEEN,"Night falls, a full moon rises; it lopes in and howls (bots near bolt), then runs off; poked: growls and runs",✓,In game,js/visitors.js
+Weather / event,BLOOD FOG,HALLOWEEN (haunted forest; rare),"The mist turns from white to red as a blood moon rises behind the trees; the wanderer chases a bot",✓,In game,js/visitors.js
 Idea: by month,Resolution runner,January,,,Idea,WANDERERS.md
 Idea: by month,Soup cart vendor,January,,,Idea,WANDERERS.md
 Idea: by month,Firewood gatherer,January,,,Idea,WANDERERS.md

@@ -729,7 +729,7 @@ goes -_- and puts them away. Besides the scary tree, a bot may push in a JACK O'
 candle flickering; poked, it flares up and cackles (HAHAHA!), the bots near it jumping. HALLOWEEN also sends the GREMLIN: a little green creature with big
 ears, red eyes and a toothy grin that scurries up to one bot after another to prank it (hehehe; the
 bot jumps), then runs off; poked, it screeches (SKREE!) and bolts. Now and then (15% of NOVEMBER's visits, and HALLOWEEN's) a FOG
-rolls in instead (on HALLOWEEN, scarier: bare, twisted trees only, and out of the fog comes either the
+rolls in instead (on HALLOWEEN, scarier: it becomes the HAUNTED FOREST, below, and out of the fog comes either the
 wanderer, its eyes glowing red as it moans ooOOoo, or (60%) one of the monsters, Frankenstein, the
 mummy, the creature, Nosferatu or the ghost, fading in by a tree near one side, crossing, and
 fading back into the mist before the other; most bots it nears bolt): a heavy bank of coarse-pixel mist drifts in from one side and fills the lane
@@ -744,7 +744,30 @@ light mist with the trees standing in it for two minutes, and lifts. While it's 
 comes by and the bots keep to themselves, walking slower (no meetings, snacks, hops or pushed
 scenery; now and then a worried ? or ...); two that walk into each other jump apart (!?), and now
 and then one bolts. The dev page's FOG: OFTEN brings it at the next visit, in any season, its light
-mist lifting after 20 seconds (or ?fog=1). Any time of year, rarely (6% of the times a visit comes due, about
+mist lifting after 20 seconds (or ?fog=1).
+
+**OCTOBER's scares.** On HALLOWEEN (the whole of October) the fog is the HAUNTED FOREST, and once it's
+come it STAYS, on every card (the start screen, the game card, the screen saver) for the rest of the
+month: pines and bare, twisted trees, bigger than November's and a shade lighter so they show
+against the dark, and two big gnarled trees in front of everything at either edge, the path the
+bots walk between them. The mist never lifts; it breathes, thinning and thickening a little, and
+now and then swells heavy again for its wanderer (or a monster) to come out of. In the forest:
+GLOWING EYES blink between the trees (yellow, red or green, a pair or three, edging after the
+bots; poked, they shut); a TREE pulls up its roots and shuffles after the bots (one it reaches
+bolts), then plants itself again where it stopped (poked, it stops; the scary tree a bot pushed in
+does it too); and rarely the BLOOD FOG: the mist thickens and turns from white to red as a blood moon
+rises behind the trees, and the red-eyed wanderer comes out of it after a bot, which runs for it;
+then the red drains away and the moon sinks. Anywhere in October: the WEREWOLF (night falls on the
+card and a pale full moon rises; it lopes in, stops and howls AWOOOOOO, the bots near it bolting
+and the rest jumping, then runs off; poked, a growl and off), LIGHTS OUT (the card goes dark,
+flickering, nothing but the bots' eyes blinking in it; when the lights come back on one of the bots
+has moved, or a monster stands among them, red eyes showing in the dark first), the HAND (the floor
+rumbles under a bot and a hand comes up and grabs it; it struggles, breaks free and runs; poked, the
+hand lets go) and the POSSESSED bot (red, glowing eyes and a stiff, slow walk; the others it meets
+are scared of it; poked, it shakes, a little ghost shakes out of it and floats away, ooOOoo, and it
+comes to, dizzy). The bot sandbox has each on a button (OCTOBER SCARES).
+
+Any time of year, rarely (6% of the times a visit comes due, about
 one every ten minutes): a VIRUS, one of three. The PHAGE, a bacteriophage taller than the bots (a
 hexagonal blue head with its pink DNA coiled inside, a striped tail, and four kinked tail fibers it
 walks on, stepping in turn); the BUG, a spiky little red one that scuttles fast; and the TROJAN, which walks about as one
@@ -860,7 +883,7 @@ stack heights the game settles on, eased between as the intensity moves.
 
 ### Seasonal stuff (ideas, by the player's own date)
 
-Done: **HALLOWEEN** (costumes, candy snacks, nine visitors with the gremlin, the scary tree and the jack o' lantern, the fog),
+Done: **HALLOWEEN** (costumes, candy snacks, nine visitors with the gremlin, the scary tree and the jack o' lantern, the HAUNTED FOREST and October's scares),
 **NOVEMBER** (the turkey, the crows, migrating birds), and the stacked December and new year
 seasons: **WINTER**, **HANUKKAH**, **CHRISTMAS**, **KWANZAA**, **NEW YEAR'S
 EVE** and **NEW YEAR**. Each new season plugs into the same
