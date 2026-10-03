@@ -3,14 +3,15 @@
 // Nosferatu, a floating ghost, a flock of bats, a crow or two and a spider on its thread; NOVEMBER:
 // a turkey, the crows, and migrating birds (geese in a V, ducks, songbirds, swallows; now and then
 // one lands, pecks about and calls to a bot; poked, the flock bolts). Any time of year, rarely: the
-// VIRUSES (the PHAGE, the BUG, the TROJAN: below). The PHAGE, a bacteriophage (taller than the bots), walks in or pixelates in on the card, scuttles from spot to spot, glitching, and makes any bot it nears
+// VIRUSES (the PHAGE, the BUG, the TROJAN, the WORM, RANSOMWARE, SPYWARE, ADWARE and the LOGIC BOMB: below), and
+// numbered BITs a wanderer pushes in (makeScenery). The PHAGE, a bacteriophage (taller than the bots), walks in or pixelates in on the card, scuttles from spot to spot, glitching, and makes any bot it nears
 // jump; poked, it's DELETED (pixelates out). Every so often one comes by (one visit at a time), crosses the card
 // and goes; the monsters give a bot they pass a fright. Each can be poked: FRANKENSTEIN roars and
 // stomps, the MUMMY groans, the CREATURE gurgles and splashes, NOSFERATU hisses and turns into
 // bats, the GHOST says BOO (every bot near it jumps) and fades, bats scatter, crows take off
 // cawing, the SPIDER scurries back up and the TURKEY gobbles and runs. The GREMLIN scurries up to
 // the bots one after another to prank them (hehehe; they jump), then runs off; poked, it screeches
-// and bolts.
+// and bolts. The BIG SPIDER scuttles and leaps about the card; poked, it hisses and leaps away.
 // SCENERY: the scary tree a wanderer pushes onto the card (HALLOWEEN; makeScenery, wanderers.js does
 // the pushing): black eyes and a frown. It stays for the visit, behind everything else; poked, it
 // creaks and a bat flies out.
@@ -104,6 +105,39 @@ function createVisitors(api) {
       b: { 20: '.f.f.......f.f.', 21: '...f.......f...' },
     },
     // The BUG: the first virus, a spiky little red one that scuttles fast, lurching
+    // HALLOWEEN's BIG SPIDER: the size of the viruses, eight legs stepping, red eyes, a red mark
+    bigspider: {
+      pal: { b: '#3d2f4a', B: '#d0283e', h: '#4c3c5c', r: '#ff3030', l: '#6a5880', f: '#6f5d86' },
+      a: ['......l.l..l.l......', '.....l.l....l.l.....', '....l.lbbbbbbl.l....', '...l.bbbfbbbbbbhhh..', '..l.bbBbBbbbbbhrhrh.', '..l.bbbBbbbbbbhhhhh.', '...l.bbbbbbbbbbhhh..', '....l.l.bbbbbl.l....', '...l..l......l..l...', '..l..l........l..l..'],
+      b: { 0: '.....l.l..l.l.......', 1: '....l.l....l.l......', 8: '....l.l......l.l....', 9: '...l.l........l.l...' },
+    },
+    // The other VIRUSES: the WORM (segments that bunch and stretch as it inches), RANSOMWARE (a
+    // padlock on legs), SPYWARE (a floating eye, its pupil darting), ADWARE (a pop-up window) and
+    // the LOGIC BOMB (a walking bomb, its fuse sparking)
+    worm: {
+      pal: { g: '#7ed957', G: '#4e9e35', k: '#111111' },
+      a: ['...............gg.', 'GgG.GgG.GgG.GgGgkg', 'GgG.GgG.GgG.GgGggg'],
+      b: { 0: '......GgG.....gg..', 1: '...GgG...GgGGgGgkg', 2: '...GgG...GgGGgGggg' },
+    },
+    ransomware: {
+      pal: { s: '#c0c6cf', S: '#7d848f', b: '#e8b923', B: '#a57f12', k: '#111111', r: '#ff3030', l: '#5a4a12' },
+      a: ['...ssssss...', '..sS....Ss..', '..s......s..', '..s......s..', '.bbbbbbbbbb.', '.bBbbbbbbBb.', '.bbrbbbbrbb.', '.bbbbkkbbbb.', '.bbbbkkbbbb.', '.bbbbbkbbbb.', '.bBbbbbbbBb.', '.bbbbbbbbbb.', '..l......l..', '.l........l.'],
+      b: { 12: '...l....l...', 13: '..l......l..' },
+    },
+    spyware: {
+      pal: { W: '#c9ccd6', w: '#f2f2f2', i: '#2f7de0', k: '#111111', v: '#c92a3a' },
+      a: ['..WWWWW..', '.WwwwvwW.', 'WwwiiiwwW', 'WwikkkiwW', 'WwikkkivW', 'WwikkkiwW', 'WwwiiiwwW', '.WwvwwwW.', '..WWWWW..'],
+      b: { 3: 'WikkkiwwW', 4: 'WikkkivwW', 5: 'WikkkiwwW' },
+    },
+    adware: {
+      pal: { t: '#1f3fbf', x: '#ff3b3b', F: '#808080', w: '#ffffff' },
+      a: ['tttttttttttttttxxt', 'tttttttttttttttxxt', 'FwwwwwwwwwwwwwwwwF', 'FwwwwwwwwwwwwwwwwF', 'FwwwwwwwwwwwwwwwwF', 'FwwwwwwwwwwwwwwwwF', 'FwwwwwwwwwwwwwwwwF', 'FwwwwwwwwwwwwwwwwF', 'FwwwwwwwwwwwwwwwwF', 'FwwwwwwwwwwwwwwwwF', 'FFFFFFFFFFFFFFFFFF'],
+    },
+    logicbomb: {
+      pal: { k: '#1b1b22', K: '#4a4a5c', f: '#b88a4a', s: '#ffd23f', S: '#ff7a1f', w: '#ffffff' },
+      a: ['........s..', '.......sSs.', '......f.s..', '.....f.....', '....kkk....', '..kkkkkkk..', '.kKkkkkkkk.', 'kKkkkkkkkkk', 'kkkwkkkwkkk', 'kkkkkkkkkkk', '.kkkkkkkkk.', '..kkkkkkk..', '..k.....k..'],
+      b: { 0: '.......s...', 1: '......SsS..', 12: '...k...k...' },
+    },
     bug: {
       pal: { v: '#ff3b6b', s: '#c41f4a', o: '#ffd23f', w: '#ffffff', k: '#111111', m: '#3a0a14', l: '#c41f4a' },
       a: ['.....o.....', '..o..s..o..', '...svvvs...', '..vvvvvvv..', 'osvwkvwkvso', '..vvvvvvv..', '..vvmmmvv..', '...svvvs...', '..o.l.l.o..', '....l.l....'],
@@ -298,6 +332,12 @@ function createVisitors(api) {
     // (bird: wave, how far it rises and dips as it flies, over waveMs; beatMs, a wingbeat; call)
     virus: { speed: 24, frameMs: 160, poke: 'delete' },
     bug: { speed: 34, frameMs: 120, poke: 'delete' },
+    worm: { speed: 16, frameMs: 260, poke: 'delete' },
+    ransomware: { speed: 22, frameMs: 180, poke: 'delete' },
+    spyware: { speed: 30, frameMs: 700, poke: 'delete' },
+    adware: { speed: 0, frameMs: 0, poke: 'delete' },
+    logicbomb: { speed: 20, frameMs: 140, poke: 'delete' },
+    bigspider: { speed: 46, frameMs: 110, poke: 'hiss' },
     trojan: { speed: 18, frameMs: 200, poke: 'delete' },
     pine: { speed: 0, frameMs: 0 },
     baretree: { speed: 0, frameMs: 0 },
@@ -317,11 +357,12 @@ function createVisitors(api) {
     menorah: { speed: 0, frameMs: 220, fixed: true, poke: 'glow' },
     kinara: { speed: 0, frameMs: 240, fixed: true, poke: 'glow' },
     sign: { speed: 0, frameMs: 600, fixed: true, poke: 'cheer' },
+    bit: { speed: 0, frameMs: 0, fixed: true, poke: 'decrypt' },
   };
   // (fixed: never mirrored, its order matters: the candles, the year's digits)
   // What each season sends (one visit at a time)
   const VISITS = {
-    halloween: ['frank', 'mummy', 'creature', 'nosferatu', 'ghost', 'bats', 'crows', 'spider', 'gremlin'],
+    halloween: ['frank', 'mummy', 'creature', 'nosferatu', 'ghost', 'bats', 'crows', 'spider', 'gremlin', 'bigspider'],
     november: ['turkey', 'turkey', 'crows', 'geese', 'ducks', 'songbirds', 'swallows'],
     winter: ['penguin'],
     christmas: ['reindeer', 'reindeer'],
@@ -389,7 +430,12 @@ function createVisitors(api) {
       s.el.style.setProperty('--thread', `${ceiling() + 60}px`);
     } else if (FLOCKS[what]) flock(what, dir, edge, W);
     else if (what === 'virus') virusVisit(nextVirus(), dir, edge, W); // (or one by name, for tests: phage, bug, trojan)
-    else if (['phage', 'bug', 'trojan'].includes(what)) virusVisit(what === 'phage' ? 'virus' : what, dir, edge, W);
+    else if (['phage', 'bug', 'trojan', 'worm', 'ransomware', 'spyware', 'adware', 'logicbomb'].includes(what)) virusVisit(what === 'phage' ? 'virus' : what, dir, edge, W);
+    else if (what === 'bigspider') { // (in from the side, about the card in scuttles and leaps, out)
+      const v = add('bigspider', edge(SPRITES.bigspider.a[0].length * U), dir, { state: 'roam', target: rand(0.15, 0.85) * W, stops: 3 + Math.floor(Math.random() * 3) });
+      api.botEvent('visit-bigspider');
+      if (v.x > W / 2) v.dir = -1;
+    }
     else if (what === 'turkey') add('turkey', edge(12 * U), dir, { stopAt: rand(0.25, 0.65) * W, life: rand(2500, 4500) });
     else if (what === 'reindeer' || what === 'rudolph') { // (now and then, the one with the red nose)
       const red = what === 'rudolph' || Math.random() < 0.25;
@@ -601,7 +647,7 @@ function createVisitors(api) {
   // in from a side or pixelates in right on the card, scuttles from spot to spot and leaves; a bot
   // it comes near jumps (not the TROJAN's: it looks like one of them, until it's poked). Poked, it's
   // DELETED: it bursts into its own pixels (as a bit bursts, finer) or deteriorates, pixel by pixel.
-  const VIRUS_KINDS = ['virus', 'bug', 'trojan'];
+  const VIRUS_KINDS = ['virus', 'bug', 'trojan', 'worm', 'ransomware', 'spyware', 'adware', 'logicbomb'];
   let virusTurn = 0;
   const nextVirus = () => (virusOften() ? VIRUS_KINDS[virusTurn++ % VIRUS_KINDS.length] : pick(VIRUS_KINDS));
   function virusVisit(kind, dir, edge, W) {
@@ -616,7 +662,18 @@ function createVisitors(api) {
       v.disguised = true;
       v.speed = rand(18, 26);
     }
-    if (pop) {
+    if (kind === 'logicbomb') v.boomAt = performance.now() + rand(8000, 11000); // (its fuse)
+    if (kind === 'spyware') { v.fly = rand(20, 30); v.y = v.fly; }
+    if (kind === 'adware') { // (no walking: it pops up, here, there, everywhere)
+      v.dir = 1; // (never mirrored: its close box stays top right)
+      v.state = 'popup';
+      v.pops = 4 + Math.floor(Math.random() * 3);
+      v.until = 0;
+      v.ad = document.createElement('span');
+      v.ad.className = 'adware-text';
+      v.el.appendChild(v.ad);
+    }
+    if (pop && kind !== 'adware') {
       v.state = 'lurk';
       v.still = true;
       v.until = performance.now() + rand(1000, 1600);
@@ -625,6 +682,189 @@ function createVisitors(api) {
       if (!v.disguised) api.startle(v, 60); // (the bots near where it appears jump)
     }
   }
+  // The other viruses, each its own way about (each returns true when it's handled the frame; false
+  // leaves it to the PHAGE's scuttle from spot to spot)
+  const nearest = (v) => api.walkers().slice().sort((a, b) => Math.abs(a.x - v.x) - Math.abs(b.x - v.x))[0];
+  const VIRUS_WAYS = {
+    // WORM: inches along; at a stop it tunnels, sinking into the floor and popping up elsewhere
+    worm(v, now, dt, W) {
+      const H = SPRITES.worm.a.length * U + 2;
+      if (v.state === 'lurk' && now > v.until && v.stops > 1 && !v.dug) {
+        v.dug = true;
+        v.state = 'sink';
+        v.t0 = now;
+        v.el.style.clipPath = 'inset(-80px -80px 0 -80px)'; // (below the floor, out of sight)
+        return true;
+      }
+      if (v.state === 'sink' || v.state === 'rise') {
+        const p = Math.min(1, (now - v.t0) / 650);
+        v.svgT = ` translateY(${((v.state === 'sink' ? p : 1 - p) * H).toFixed(1)}px)`;
+        if (p >= 1 && v.state === 'sink') {
+          v.x = rand(0.1, 0.85) * W;
+          v.state = 'rise';
+          v.t0 = now;
+        } else if (p >= 1) {
+          v.svgT = '';
+          v.dug = false;
+          v.stops--;
+          v.state = 'roam';
+          v.target = rand(0.1, 0.85) * W;
+          if (Math.random() < 0.5) say(v, pick(['pop!', '>:)', '01']), 800);
+          api.startle(v, 40);
+        }
+        return true;
+      }
+      return false;
+    },
+    // RANSOMWARE: walks up to a bot and demands payment; the bot freezes, worried, till it goes
+    ransomware(v, now, dt, W) {
+      if (v.state === 'roam' && !v.victim) {
+        const b = nearest(v);
+        if (b && Math.abs(b.x - v.x) < W * 0.7) { v.victim = b; v.state = 'approach'; }
+      }
+      if (v.state === 'approach') {
+        const b = v.victim;
+        if (!api.walkers().includes(b)) { v.victim = null; v.state = 'roam'; return false; }
+        const to = v.x < b.x ? b.x - 26 : b.x + 36;
+        v.dir = to > v.x ? 1 : -1;
+        v.x += v.dir * Math.min(v.speed * dt, Math.abs(to - v.x));
+        v.el.classList.add('moving');
+        if (Math.abs(to - v.x) < 1) {
+          v.state = 'demand';
+          v.still = true;
+          v.dir = b.x > v.x ? 1 : -1;
+          v.until = now + 4200;
+          v.el.classList.remove('moving');
+          say(v, 'PAY UP', 1800);
+          setTimeout(() => { if (v.state === 'demand') say(v, '1 BTC', 1800); }, 2000);
+          api.hold(b, 4400);
+          api.face(b, v.x);
+          api.say(b, 'worried', '?!');
+          api.botEvent('ransomware');
+        }
+        return true;
+      }
+      if (v.state === 'demand') {
+        if (now > v.until) {
+          v.still = false;
+          v.state = 'out';
+          v.dir = v.x < W / 2 ? -1 : 1;
+          if (api.walkers().includes(v.victim)) api.say(v.victim, 'annoyed', '-_-');
+        }
+        return true;
+      }
+      return false;
+    },
+    // SPYWARE: a floating eye that tails a bot, peeking at it; the bot notices, suspicious
+    spyware(v, now, dt, W) {
+      v.y = v.fly + Math.sin(v.age / 420) * 3;
+      if (v.state === 'roam' && !v.mark) {
+        const b = pick(api.walkers());
+        if (b) { v.mark = b; v.state = 'tail'; v.tailUntil = now + rand(7000, 10000); v.noticeAt = now + rand(1500, 2500); }
+      }
+      if (v.state === 'tail') {
+        const b = v.mark;
+        if (!api.walkers().includes(b) || now > v.tailUntil) {
+          v.state = 'out';
+          v.dir = v.x < W / 2 ? -1 : 1;
+          return true;
+        }
+        const to = b.x + SIZE_BOT / 2 - (b.look || 1) * 30;
+        const d = to - v.x;
+        if (Math.abs(d) > 1) { v.dir = d > 0 ? 1 : -1; v.x += v.dir * Math.min(v.speed * dt, Math.abs(d)); }
+        if (now > v.noticeAt) {
+          api.face(b, v.x);
+          api.say(b, 'skeptic', v.noticed ? 'hm' : '?');
+          if (!v.noticed) api.botEvent('spyware-noticed');
+          v.noticed = true;
+          v.noticeAt = now + rand(2500, 3500);
+        }
+        return true;
+      }
+      return false;
+    },
+    // ADWARE: no walking: it pops up here, there, everywhere (WIN $$$!), then it's gone
+    adware(v, now, dt, W) {
+      if (v.state !== 'popup') return true;
+      if (now < v.until) return true;
+      if (v.pops-- <= 0) {
+        v.state = 'gone';
+        v.still = true;
+        v.el.classList.add('v-popout');
+        setTimeout(() => { v.gone = true; }, 500);
+        return true;
+      }
+      v.x = rand(0.05, 0.8) * W;
+      v.y = rand(0, 28);
+      v.ad.textContent = pick(['WIN $$$!', 'CLICK ME', 'FREE RAM', 'HOT BITS', 'U WON!!', '1 NEW MSG', 'XXL RAM']);
+      v.el.classList.remove('v-popin');
+      void v.el.offsetWidth;
+      v.el.classList.add('v-popin');
+      if (Math.random() < 0.5) api.startle(v, 45);
+      v.until = now + rand(1300, 2100);
+      return true;
+    },
+    // LOGIC BOMB: walks about with its fuse lit; not poked (DEFUSED) in time, it goes off: a big
+    // burst, and every bot near it is scared off
+    logicbomb(v, now, dt, W) {
+      if (v.state === 'gone') return true;
+      const left = v.boomAt - now;
+      v.el.classList.toggle('v-fuse-hot', left < 3000);
+      if (left < 3000) {
+        const n = String(Math.max(1, Math.ceil(left / 1000)));
+        if (v.count !== n) { v.count = n; say(v, n, 700); }
+      }
+      if (left > 0) return false;
+      v.state = 'gone';
+      v.still = true;
+      if (inSight(v.el) && typeof FX !== 'undefined' && FX.shatter) {
+        const px = pixelsOf(v);
+        FX.shatter(px.concat(px.map((p) => ({ ...p, color: '255, 160, 40' }))));
+      }
+      v.el.querySelector(':scope > svg').style.visibility = 'hidden';
+      say(v, 'BOOM', 900);
+      api.startle(v, 140);
+      for (const b of api.walkers()) if (Math.abs(b.x - v.x) < 120) api.fright(b);
+      api.botEvent('logic-bomb');
+      setTimeout(() => { v.gone = true; }, 900);
+      return true;
+    },
+  };
+  const SIZE_BOT = 34;
+
+  // HALLOWEEN's BIG SPIDER: scuttles from spot to spot about the card, leaping now and then (a
+  // bot it lands near jumps), and out; poked, it hisses and leaps away
+  function bigSpider(v, now, dt, W) {
+    if (v.leap) {
+      const p = Math.min(1, (now - v.leap.t0) / v.leap.ms);
+      v.x = v.leap.from + (v.leap.to - v.leap.from) * p;
+      v.y = Math.sin(p * Math.PI) * v.leap.h;
+      if (p >= 1) { v.y = 0; v.leap = null; api.startle(v, 55); }
+      return;
+    }
+    if (v.state === 'roam') {
+      v.dir = v.target > v.x ? 1 : -1;
+      v.x += v.dir * Math.min(v.speed * dt, Math.abs(v.target - v.x));
+      if (Math.random() < dt * 0.45) { // (a leap: up and over, toward where it's going)
+        const to = Math.max(0, Math.min(W - 40, v.x + v.dir * rand(30, 60)));
+        v.leap = { t0: now, from: v.x, to, h: rand(14, 26), ms: rand(420, 560) };
+      } else if (Math.abs(v.target - v.x) < 0.5) {
+        v.state = 'lurk';
+        v.still = true;
+        v.until = now + rand(700, 1600);
+      }
+    } else if (v.state === 'lurk' && now > v.until) {
+      v.still = false;
+      if (--v.stops > 0) { v.state = 'roam'; v.target = rand(0.1, 0.85) * W; } else { v.state = 'out'; v.dir = v.x < W / 2 ? -1 : 1; }
+    } else if (v.state === 'out') v.x += v.dir * v.speed * 1.5 * dt;
+    v.el.classList.toggle('moving', v.state === 'roam' || v.state === 'out' || !!v.leap);
+    for (const b of api.walkers()) { // (a bot it comes near jumps, once each)
+      if (v.scared.has(b) || Math.abs(b.x - v.x) > 40) continue;
+      v.scared.add(b);
+      api.startle(v, 45);
+    }
+  }
+
   // Whether it's in sight where it stands (not under a card or menu): what's on top at its middle
   function inSight(el) {
     const r = el.getBoundingClientRect();
@@ -654,7 +894,7 @@ function createVisitors(api) {
   function kill(v) {
     v.state = 'gone';
     v.still = true;
-    say(v, pick(['DELETED', 'ERR!', 'NOOO', '404']), 1000);
+    say(v, v.kind === 'logicbomb' ? 'DEFUSED' : pick(['DELETED', 'ERR!', 'NOOO', '404']), 1000);
     api.botEvent('virus-deleted');
     const seen = inSight(v.el);
     if (Math.random() < 0.5) {
@@ -669,8 +909,10 @@ function createVisitors(api) {
   // random order, in steps
   // THE SNOWMAN SNEAKS OFF: a while after it's left standing, its eyes shift side to side and it
   // blinks, checking no one's watching; then it hops off the way it faces, hop after hop, off the
-  // card. One time in ten it trips, or its head falls off: it stays put a couple of seconds, then
-  // slumps into a pile of snow, and the pile flattens and fades away as the falling snow does.
+  // card. One time in five it trips, or its head falls off: it stays put a couple of seconds, then
+  // comes apart into a fine powder of snow, every pixel of it breaking off (in finer specks),
+  // drifting down as the falling snow does, from the top first so it slumps little by little,
+  // settling in a heap at its feet and melting away a speck at a time.
   function snowmanWaits(v, now) {
     if (v.x !== v.lastX) { // (still being pushed, or just left)
       v.lastX = v.x;
@@ -701,7 +943,7 @@ function createVisitors(api) {
         v.state = 'hop';
         v.hopAt = now;
         v.speed = rand(26, 34);
-        v.trips = Math.random() < 0.1 ? rand(1200, 3000) : 0; // (it trips, or loses its head, this far in)
+        v.trips = Math.random() < 0.2 ? rand(1200, 3000) : 0; // (it trips, or loses its head, this far in)
         api.botEvent('snowman-sneak');
       }
     } else if (v.state === 'hop') {
@@ -713,21 +955,112 @@ function createVisitors(api) {
         v.state = 'fallen';
         v.y = 0;
         v.fallAt = now;
-        if (Math.random() < 0.5) { v.svgT = ' rotate(78deg)'; say(v, 'oof', 1400); } // (on its face)
-        else { v.svgT = ' translateY(2px)'; say(v, 'my head!', 1400); } // (its head off, rolled to its feet)
+        // (leaning by rows, as pixel art leans: stumbling forward, or its head knocked loose)
+        v.el.querySelector(':scope > svg').style.transformOrigin = '50% 100%';
+        if (Math.random() < 0.5) { v.svgT = ' skewX(-22deg)'; say(v, 'oof', 1400); }
+        else { v.svgT = ' skewX(14deg)'; say(v, 'my head!', 1400); }
         api.botEvent('snowman-fall');
       }
-    } else if (v.state === 'fallen') {
-      const t = now - v.fallAt;
-      if (t < 2000) return;
-      // (slumping: shorter and wider, the shape going, then flattening and fading)
-      const slump = Math.min(1, (t - 2000) / 4000);
-      const fade = Math.max(0, Math.min(1, (t - 6000) / 2000));
-      v.svgT = ` scale(${(1 + slump * 0.5).toFixed(2)}, ${(1 - slump * 0.8 - fade * 0.15).toFixed(2)})`;
-      v.el.querySelector(':scope > svg').style.transformOrigin = '50% 100%';
-      v.el.style.opacity = String(1 - fade);
-      if (fade >= 1) v.gone = true;
+    } else if (v.state === 'fallen' && now - v.fallAt > 2000) {
+      v.state = 'powder';
+      snowPowder(v);
     }
+  }
+  // The snowman's powder: each pixel of it as it stands now, split in four, on a canvas over it
+  function snowPowder(v) {
+    const g = shownFrame(v);
+    const box = v.el.getBoundingClientRect();
+    if (!g || !box.width) { v.gone = true; return; }
+    const PAD = 44; // (room either side for the heap to spread)
+    const W = Math.ceil(box.width + PAD * 2);
+    const H = Math.ceil(box.height + 4);
+    const specks = [];
+    for (const r of g.querySelectorAll('rect')) {
+      const b = r.getBoundingClientRect();
+      const n = Math.max(1, Number(r.getAttribute('width')) || 1);
+      const u = b.width / n;
+      if (!u || !b.height) continue;
+      const fill = r.getAttribute('fill');
+      for (let i = 0; i < n; i++) {
+        for (let sy = 0; sy < 2; sy++) {
+          for (let sx = 0; sx < 2; sx++) {
+            const x = b.left - box.left + PAD + i * u + sx * u / 2;
+            const y = b.top - box.top + sy * b.height / 2;
+            specks.push({ x, y, s: u / 2, c: fill, vx: 0, vy: 0, top: y });
+          }
+        }
+      }
+    }
+    if (!specks.length) { v.gone = true; return; }
+    const minY = Math.min(...specks.map((p) => p.top));
+    const span = Math.max(1, Math.max(...specks.map((p) => p.top)) - minY);
+    const floor = H - 2;
+    const heap = new Map(); // (how high the heap stands at each column of specks)
+    for (const p of specks) {
+      // (from the top down, so it slumps: the higher a speck, the sooner it lets go)
+      p.go = ((p.top - minY) / span) * 2600 + rand(0, 700);
+      p.vx = rand(-9, 9);
+      p.sway = rand(0, 6.28);
+    }
+    const cv = document.createElement('canvas');
+    cv.className = 'snow-powder';
+    const dpr = window.devicePixelRatio || 1;
+    cv.width = W * dpr; cv.height = H * dpr;
+    Object.assign(cv.style, { width: `${W}px`, height: `${H}px`, left: `${-PAD}px` });
+    v.el.appendChild(cv);
+    v.el.querySelector(':scope > svg').style.visibility = 'hidden';
+    const ctx = cv.getContext('2d');
+    ctx.scale(dpr, dpr);
+    const t0 = performance.now();
+    let last = t0;
+    const step = (now) => {
+      const t = now - t0;
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      ctx.clearRect(0, 0, W, H);
+      let alive = 0;
+      for (const p of specks) {
+        if (p.done) continue;
+        alive++;
+        if (t > p.go && !p.landed) { // (drifting down like the falling snow, a gentle sway)
+          p.vy = Math.min(p.vy + 140 * dt, 38);
+          p.x += (p.vx + Math.sin(t / 300 + p.sway) * 6) * dt;
+          p.y += p.vy * dt;
+          let col = Math.round(p.x / p.s);
+          const h = (c) => heap.get(c) || 0;
+          const LAYER = p.s * 0.34; // (a heap has depth: three specks to a layer of it)
+          if (p.y >= floor - h(col) * LAYER) {
+            // (a heap of powder: a speck rolls off to the lower side while it's higher than its
+            // neighbors, so the snow spreads out low and wide rather than piling up)
+            for (let k = 0; k < 40; k++) {
+              const l = h(col - 1);
+              const r = h(col + 1);
+              if (h(col) <= Math.min(l, r) + 1) break;
+              col += l < r || (l === r && Math.random() < 0.5) ? -1 : 1;
+            }
+            p.x = col * p.s;
+            p.y = floor - h(col) * LAYER;
+            p.col = col;
+            p.landed = t;
+            heap.set(col, h(col) + 1);
+            p.melt = rand(300, 1800); // (then it melts, a speck at a time)
+          }
+        }
+        let a = 1;
+        if (p.landed) {
+          a = 1 - (t - p.landed - p.melt) / 1400;
+          if (a <= 0) { p.done = true; heap.set(p.col, Math.max(0, (heap.get(p.col) || 0) - 1)); continue; }
+          a = Math.min(1, a);
+        }
+        ctx.globalAlpha = a;
+        ctx.fillStyle = p.c;
+        ctx.fillRect(p.x, p.y, p.s, p.s);
+      }
+      ctx.globalAlpha = 1;
+      if (alive && !v.gone) requestAnimationFrame(step);
+      else v.gone = true;
+    };
+    requestAnimationFrame(step);
   }
 
   function decay(v) {
@@ -874,9 +1207,12 @@ function createVisitors(api) {
     return kinds.length ? pick(kinds) : null;
   }
   // (ok(x): whether its pusher, stopping at x beside it, has room there among the bots)
-  function makeScenery(dir, ok = () => true) {
-    const kind = nextScenery();
+  // (bit: a numbered BIT to push instead, its number: wanderers.js)
+  function makeScenery(dir, ok = () => true, bit = 0) {
+    if (bit && standing().some((v) => v.kind === 'bit')) return null; // (one at a time)
+    const kind = bit ? 'bit' : nextScenery();
     if (!kind) return null;
+    if (bit) SPRITES.bit = bitSprite();
     if (kind === 'menorah') SPRITES.menorah = menorah(Season.hanukkahNight() || 8);
     if (kind === 'kinara') SPRITES.kinara = kinara(Season.kwanzaaDay() || 7);
     if (kind === 'sign') SPRITES.sign = sign(Season.newYear());
@@ -898,7 +1234,54 @@ function createVisitors(api) {
     t.spot = rand(lo, hi);
     for (let i = 0; i < 12 && !ok(pusherAt(t.spot)); i++) t.spot = rand(lo, hi);
     t.x = dir > 0 ? -w - 40 : api.laneW() + 40;
+    if (bit) {
+      t.value = bit;
+      bitCell(t, bit);
+      t.decryptAt = performance.now() + rand(45000, 90000); // (left alone, it decrypts itself)
+    }
     return t;
+  }
+  // A numbered BIT: the very bit the grid drops (a .cell.disc, [n], in the theme's look: style.css),
+  // over an empty sprite its size
+  function bitSprite() {
+    return { pal: {}, a: Array.from({ length: 15 }, () => '.'.repeat(15)) };
+  }
+  function bitCell(t, n) {
+    const c = document.createElement('div');
+    c.className = 'cell disc pushed-bit';
+    if (typeof fillBit === 'function') fillBit(c, n); // (the game's own: GLYPH draws its glyph)
+    else c.textContent = `[${n}]`;
+    t.el.appendChild(c);
+    t.cell = c;
+  }
+  // A BIT on the card: an EASY or NORMAL bot coming near an 8 is frightened off (only the mad ones
+  // push those); poked, or left long enough, it decrypts in a burst of its pixels. Each number seen
+  // counts toward a hidden achievement
+  function bitFrame(v, now) {
+    if (!v.seen && v.x >= 0 && v.x <= api.laneW() - v.w) {
+      v.seen = true;
+      api.botEvent(`seen-bit-${v.value}`);
+    }
+    if (v.value === 8) {
+      for (const b of api.walkers()) {
+        if (v.scared.has(b) || ['hard', 'insane'].includes(b.el.dataset.level) || b.pushing === v) continue;
+        if (Math.abs(b.x + 17 - (v.x + v.w / 2)) > 46) continue;
+        v.scared.add(b);
+        api.say(b, 'scared', '!!');
+        api.fright(b);
+      }
+    }
+    if (now > v.decryptAt && v.seen) decryptBit(v);
+  }
+  function decryptBit(v) {
+    if (v.state !== 'scenery') return;
+    v.state = 'gone';
+    v.still = true;
+    say(v, `[${v.value}]`, 700);
+    if (inSight(v.el) && typeof FX !== 'undefined' && FX.burst) FX.burst([{ el: v.cell, type: 'number' }]); // (as a bit decrypts in the grid)
+    v.cell.style.visibility = 'hidden';
+    api.startle(v, 50);
+    setTimeout(() => { v.gone = true; }, 700);
   }
   function moveTree(t, x) {
     t.x = x;
@@ -906,6 +1289,10 @@ function createVisitors(api) {
   }
 
   function poke(v) {
+    if (v.kind === 'bit') { // (a poked BIT decrypts)
+      if (v.state === 'scenery' && v.seen) { api.botEvent('bit-poke'); decryptBit(v); }
+      return;
+    }
     if (v.state === 'scenery') {
       const k = KINDS[v.kind];
       const cls = k.poke === 'glow' ? 'v-glow' : 'v-creak';
@@ -958,6 +1345,18 @@ function createVisitors(api) {
       api.botEvent('visitor-pokes');
       if (v.disguised) unmask(v);
       else kill(v);
+      return;
+    }
+    if (v.kind === 'bigspider') { // (a hiss, a big leap away, and off it scuttles)
+      if (v.state === 'out' && v.spooked) return;
+      api.botEvent('visitor-pokes');
+      say(v, 'HSSS!', 900);
+      v.spooked = true;
+      v.dir = v.x < api.laneW() / 2 ? -1 : 1;
+      v.leap = { t0: performance.now(), from: v.x, to: v.x + v.dir * 70, h: 30, ms: 600 };
+      v.state = 'out';
+      v.speed *= 1.8;
+      api.startle(v, 70);
       return;
     }
     if (v.state !== 'go' && v.state !== 'peck' && v.state !== 'land') return;
@@ -1215,6 +1614,7 @@ function createVisitors(api) {
       } else if (v.state === 'scenery') {
         // (scenery: pushed by a wanderer, or standing where it was left)
         if (v.kind === 'snowman') snowmanWaits(v, now);
+        if (v.kind === 'bit') bitFrame(v, now);
       } else if (v.kind === 'snowman') {
         snowmanSneaks(v, now, dt);
       } else if (v.kind === 'dreidel') { // (spins along, wobbles to a stop, lands on a letter; then on)
@@ -1249,6 +1649,10 @@ function createVisitors(api) {
           v.x += v.dir * v.speed * dt;
           if (!v.pecked && !v.ran && ((v.dir > 0 && v.x >= v.stopAt) || (v.dir < 0 && v.x <= W - v.stopAt))) { v.state = 'peck'; v.until = now + v.life; v.pecked = true; }
         } else if (v.state === 'peck' && now > v.until) v.state = 'go';
+      } else if (v.kind === 'bigspider') {
+        bigSpider(v, now, dt, W);
+      } else if (v.virus && VIRUS_WAYS[v.kind] && VIRUS_WAYS[v.kind](v, now, dt, W)) {
+        // (its own way about, this frame: VIRUS_WAYS)
       } else if (v.virus) { // (scuttles from spot to spot, lurching; bots near it panic)
         if (v.state === 'roam') {
           const step = v.speed * dt * (!v.disguised && Math.random() < 0.08 ? 4 : 1); // (a disguised one walks like a bot)

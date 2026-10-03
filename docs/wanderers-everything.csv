@@ -1,6 +1,6 @@
 ﻿Category,Item,Season / when,What it does,In game,Status,Where
 Season,ALL YEAR,Every day,"Headphones, viruses, the bots' everyday behaviour",✓,In game,js/seasons.js
-Season,HALLOWEEN,Oct 15 – 31,"Costumes, gummy-drop snacks, monsters, the scary tree, the jack o' lantern, the scary fog",✓,In game,js/seasons.js
+Season,HALLOWEEN,Oct 1 – 31,"Costumes, gummy-drop snacks, monsters, the scary tree, the jack o' lantern, the scary fog",✓,In game,js/seasons.js
 Season,NOVEMBER,All of November,"Turkey, crows, migrating birds, the fog and the fog wanderer",✓,In game,js/seasons.js
 Season,WINTER,Dec 1 – Jan 6,"Snow, beanies/earmuffs/scarves, cookie bites, the penguin, skaters, the snowman (sits under the December holidays)",✓,In game,js/seasons.js
 Season,HANUKKAH,Its 8 nights (dates move each year),"Blue beanie and scarf, gelt, the dreidel, the menorah with that night's candles",✓,In game,js/seasons.js
@@ -61,12 +61,12 @@ Visitor,Dreidel,HANUKKAH,"Spins across, wobbles, lands on a letter (GIMEL is a b
 Visitor,PHAGE (virus),"All year, rare","A bacteriophage, taller than the bots; walks or pixelates in, scuttles; poked: DELETED (bursts into pixels or decays)",✓,In game,js/visitors.js
 Visitor,BUG (virus),"All year, rare","Spiky, fast, glitching",✓,In game,js/visitors.js
 Visitor,TROJAN (virus),"All year, rare","Disguised as a bot; poked: the disguise peels off pixel by pixel, a wooden horse that bolts",✓,In game,js/visitors.js
-Visitor,WORM (virus),"All year, rare","Segmented; inches along, tunnels into the floor and pops up elsewhere",,Planned (TODO),TODO.md: More VIRUS types
-Visitor,RANSOMWARE (virus),"All year, rare","A padlock creature that demands payment (PAY UP / 1 BTC); the bot freezes, worried",,Planned (TODO),TODO.md: More VIRUS types
-Visitor,SPYWARE (virus),"All year, rare","A floating eye that tails a bot; the bot notices, suspicious",,Planned (TODO),TODO.md: More VIRUS types
-Visitor,ADWARE (virus),"All year, rare",A pop-up window popping in at new spots (WIN $$$! / CLICK ME / FREE RAM),,Planned (TODO),TODO.md: More VIRUS types
-Visitor,LOGIC BOMB (virus),"All year, rare","A walking bomb with a lit fuse; not poked (DEFUSED) in time, it goes off and scares every bot near",,Planned (TODO),TODO.md: More VIRUS types
-Visitor,Big SPIDER,HALLOWEEN,The size of the viruses; walks around and jumps about,,Planned (TODO),TODO.md
+Visitor,WORM (virus),"All year, rare","Segmented; inches along, tunnels into the floor and pops up elsewhere",✓,In game,js/visitors.js VIRUS_WAYS
+Visitor,RANSOMWARE (virus),"All year, rare","A padlock creature that demands payment (PAY UP / 1 BTC); the bot freezes, worried",✓,In game,js/visitors.js VIRUS_WAYS
+Visitor,SPYWARE (virus),"All year, rare","A floating eye that tails a bot; the bot notices, suspicious",✓,In game,js/visitors.js VIRUS_WAYS
+Visitor,ADWARE (virus),"All year, rare",A pop-up window popping in at new spots (WIN $$$! / CLICK ME / FREE RAM),✓,In game,js/visitors.js VIRUS_WAYS
+Visitor,LOGIC BOMB (virus),"All year, rare","A walking bomb with a lit fuse; not poked (DEFUSED) in time, it goes off and scares every bot near",✓,In game,js/visitors.js VIRUS_WAYS
+Visitor,Big SPIDER,HALLOWEEN,The size of the viruses; scuttles and leaps about (a bot it lands near jumps); poked: hisses and leaps away,✓,In game,TODO.md
 Pushed scenery,Scary tree,HALLOWEEN,Pushed in by a bot; black eyes and a frown; poked: creaks and a bat flies out,✓,In game,js/visitors.js SCENERY
 Pushed scenery,Jack o' lantern,HALLOWEEN,"Pushed in; glows, candle flickering; poked: flares and cackles, bots near jump",✓,In game,js/visitors.js SCENERY
 Pushed scenery,"Foggy trees (pines, bare trees)","NOVEMBER, HALLOWEEN (fog)","Fade in with the fog front, stay in the light mist after (bare trees only at Halloween)",✓,In game,js/visitors.js SCENERY
@@ -75,7 +75,7 @@ Pushed scenery,Evergreen,CHRISTMAS,"Pushed in; blinking lights, twinkling star, 
 Pushed scenery,Menorah,HANUKKAH,Pushed in; that night's candles lit; poked: glows,✓,In game,js/visitors.js SCENERY
 Pushed scenery,Kinara,KWANZAA,Pushed in; that day's candles lit; poked: glows,✓,In game,js/visitors.js SCENERY
 Pushed scenery,Year sign,"NEW YEAR'S EVE, NEW YEAR",Pushed in; the year; poked: cheer,✓,In game,js/visitors.js SCENERY
-Pushed scenery,Numbered BITs (1–8),All year,"A wanderer now and then pushes a numbered BIT onto the card (about 2%, varies by bot and personality); 1–7 from EASY/NORMAL, 1–8 from HARD/INSANE (8% an 8); EASY/NORMAL fear the 8; hidden achievement for seeing all",,Planned (TODO),TODO.md: Pushed BITs
+Pushed scenery,Numbered BITs (1–8),All year,"A wanderer now and then pushes a numbered BIT onto the card (GRIFTER 3.5%, GLITCH 3%, BOT 2.5%, BUNKER 1%); 1–7 from EASY/NORMAL, 1–8 from HARD/INSANE (8% an 8); EASY/NORMAL bots flee the 8; poked or left a while, it decrypts; hidden FULL BYTE for seeing all 1–8",✓,In game,"js/wanderers.js, js/visitors.js"
 Weather / event,Fog,"NOVEMBER (and HALLOWEEN, scarier)","Heavy fog rolls in (other events pause; bots bump and startle), then a light mist for a couple of minutes; the grid behind fades to black",✓,In game,js/visitors.js
 Weather / event,Falling snow,WINTER,Snow falling over the lane,✓,In game,js/visitors.js
 Weather / event,Fireworks,"NEW YEAR'S EVE, NEW YEAR","A rocket up, bursting into pixel sparks",✓,In game,js/visitors.js
@@ -100,7 +100,7 @@ Animation / behaviour,CORE DUMP windmill,All year,Drawn 16-frame windmill with l
 Animation / behaviour,Snack,All year,"Seasonal snack: pulled out, tossed, caught, chewed",✓,In game,"js/wanderers.js, js/visitors.js"
 Animation / behaviour,Fog bumps,"NOVEMBER, HALLOWEEN (fog)",In the fog two that walk into each other jump and knock apart; now and then one bolts,✓,In game,"js/wanderers.js, js/visitors.js"
 Animation / behaviour,Countdown cheer,NEW YEAR'S EVE,Count down from 10 at midnight NYE and cheer,✓,In game,"js/wanderers.js, js/visitors.js"
-Animation / behaviour,Snowman sneaks off,WINTER,"After a while: eyes shift side to side, a blink, then hops off; 1 in 10 trips or loses its head and slumps into a pile that fades",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behaviour,Snowman sneaks off,WINTER,"After a while: eyes shift side to side, a blink, then hops off; 1 in 5 trips or loses its head, then comes apart into a fine powder of snow from the top down, settling in a heap that melts away",✓,In game,"js/wanderers.js, js/visitors.js"
 Animation / behaviour,TROJAN reveal,All year,"Disguise peels off pixel by pixel from the top, horse resolving under it",✓,In game,"js/wanderers.js, js/visitors.js"
 Animation / behaviour,PIXEL MODE,—,"Bots on a pixel grid at twice the art's resolution: whole-pixel moves, turns redrawn (in the BOT SANDBOX only so far)",,Planned (TODO),"TODO.md: PIXEL MODE, pass 2 (visitors and viruses, then on in the game)"
 Mood (face),HAPPY,All year,A face the bots make (with its emotes),✓,In game,js/wanderers.js MOOD_EMOTES

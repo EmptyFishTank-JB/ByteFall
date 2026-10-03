@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" class="sandbox">
 <head>
-<script src="../js/fonts.js?v=304"></script>
+<script src="../js/fonts.js?v=305"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#020403">
 <title>Bot Sandbox // BYTEFALL</title>
-<link rel="stylesheet" href="../css/style.css?v=304">
+<link rel="stylesheet" href="../css/style.css?v=305">
 <!-- BOT SANDBOX: the wandering bots and everything around them (visitors, viruses, seasons, the fog,
      headphones and the music) running on the game's own code, with every behaviour on a button.
      Progress is stubbed: nothing here touches the saved game (no achievements, no unlocks). -->
@@ -123,9 +123,9 @@
 
       <div class="grp">
         <h2>VISITORS</h2>
-        <p>A visitor comes whatever the season. PUSHED SCENERY brings in a bot pushing the season's piece (pick a season with some first).</p>
+        <p>A visitor comes whatever the season. PUSHED SCENERY brings in a bot pushing the season's piece (pick a season with some first); PUSHED BIT, one pushing a numbered BIT (a HARD or INSANE bot can push an 8).</p>
         <div class="row" id="visits"></div>
-        <div class="row"><button type="button" class="go" id="push">PUSHED SCENERY</button></div>
+        <div class="row"><button type="button" class="go" id="push">PUSHED SCENERY</button><button type="button" class="go" id="push-bit">PUSHED BIT</button></div>
       </div>
 
       <div class="grp">
@@ -139,30 +139,30 @@
 <canvas id="board-fx" aria-hidden="true"></canvas>
 <div class="stat cpu-face" id="cpu-face" hidden aria-hidden="true"></div>
 
-<script src="../js/bot-svg.js?v=304"></script>
-<script src="../js/music/output.js?v=304"></script>
-<script src="../js/music/mixes.js?v=304"></script>
-<script src="../js/sfx.js?v=304"></script>
-<script src="../js/music/music-bytefall-theme.js?v=304"></script>
-<script src="../js/music/music-sleep-mode.js?v=304"></script>
-<script src="../js/music/music-brute-force.js?v=304"></script>
-<script src="../js/music/music-deep-web.js?v=304"></script>
-<script src="../js/music/music-zero-day.js?v=304"></script>
-<script src="../js/music/music-system-restore.js?v=304"></script>
-<script src="../js/music/music-night-drive.js?v=304"></script>
-<script src="../js/music/music-standby-mode.js?v=304"></script>
-<script src="../js/music/music-core-dump.js?v=304"></script>
-<script src="../js/music/music-handshake.js?v=304"></script>
-<script src="../js/music/music-stack-overflow.js?v=304"></script>
-<script src="../js/music/music.js?v=304"></script>
-<script src="../js/fx.js?v=304"></script>
-<script src="../js/pixel.js?v=304"></script>
-<script src="../js/minibot.js?v=304"></script>
-<script src="../js/seasons.js?v=304"></script>
-<script src="../js/visitors.js?v=304"></script>
-<script src="../js/data/bot-anims.js?v=304"></script>
-<script src="../js/wanderers.js?v=304"></script>
-<script src="../js/grid-bg.js?v=304"></script>
+<script src="../js/bot-svg.js?v=305"></script>
+<script src="../js/music/output.js?v=305"></script>
+<script src="../js/music/mixes.js?v=305"></script>
+<script src="../js/sfx.js?v=305"></script>
+<script src="../js/music/music-bytefall-theme.js?v=305"></script>
+<script src="../js/music/music-sleep-mode.js?v=305"></script>
+<script src="../js/music/music-brute-force.js?v=305"></script>
+<script src="../js/music/music-deep-web.js?v=305"></script>
+<script src="../js/music/music-zero-day.js?v=305"></script>
+<script src="../js/music/music-system-restore.js?v=305"></script>
+<script src="../js/music/music-night-drive.js?v=305"></script>
+<script src="../js/music/music-standby-mode.js?v=305"></script>
+<script src="../js/music/music-core-dump.js?v=305"></script>
+<script src="../js/music/music-handshake.js?v=305"></script>
+<script src="../js/music/music-stack-overflow.js?v=305"></script>
+<script src="../js/music/music.js?v=305"></script>
+<script src="../js/fx.js?v=305"></script>
+<script src="../js/pixel.js?v=305"></script>
+<script src="../js/minibot.js?v=305"></script>
+<script src="../js/seasons.js?v=305"></script>
+<script src="../js/visitors.js?v=305"></script>
+<script src="../js/data/bot-anims.js?v=305"></script>
+<script src="../js/wanderers.js?v=305"></script>
+<script src="../js/grid-bg.js?v=305"></script>
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -285,13 +285,14 @@
   }
 
   // ── Visitors ──
-  const VISITS = ['frank', 'mummy', 'creature', 'nosferatu', 'ghost', 'bats', 'crows', 'spider', 'gremlin', 'turkey', 'geese', 'ducks', 'songbirds', 'swallows', 'penguin', 'reindeer', 'rudolph', 'dreidel', 'phage', 'bug', 'trojan', 'fog', 'fireworks', 'countdown'];
+  const VISITS = ['frank', 'mummy', 'creature', 'nosferatu', 'ghost', 'bats', 'crows', 'spider', 'gremlin', 'turkey', 'geese', 'ducks', 'songbirds', 'swallows', 'penguin', 'reindeer', 'rudolph', 'dreidel', 'phage', 'bug', 'trojan', 'worm', 'ransomware', 'spyware', 'adware', 'logicbomb', 'bigspider', 'fog', 'fireworks', 'countdown'];
   for (const v of VISITS) {
     const b = el('button', { type: 'button' }, v.toUpperCase());
     b.addEventListener('click', () => W().visit(v));
     $('visits').appendChild(b);
   }
   $('push').addEventListener('click', () => W().spawn({ enter: 'push', bot: pick.bot === 'random' ? undefined : pick.bot }));
+  $('push-bit').addEventListener('click', () => W().spawn({ enter: 'bit', bot: pick.bot === 'random' ? undefined : pick.bot }));
 
   // ── Music ──
   for (const t of Music.tracks()) $('track').appendChild(el('option', { value: t.id }, t.title));

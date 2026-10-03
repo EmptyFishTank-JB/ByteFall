@@ -2638,7 +2638,8 @@ html.page-twinkle .page-bg { display: block; }
 .visitor-virus.v-vanish svg { animation: walker-pix-out 0.45s steps(1) forwards; }
 /* (the BUG and the unmasked TROJAN glitch too; any virus pixelates in) */
 :is(.visitor-bug, .visitor-trojan.unmasked) > svg { animation: virus-glitch 2.6s steps(1) infinite; }
-:is(.visitor-virus, .visitor-bug, .visitor-trojan).v-popin svg { animation: walker-pix-in 0.45s steps(1) forwards; }
+.visitor.v-popin > svg { animation: walker-pix-in 0.45s steps(1) forwards; }
+.visitor.v-popout > svg, .visitor.v-popout > .adware-text { animation: walker-pix-out 0.45s steps(1) forwards; }
 /* The TROJAN: a bot on the outside (walking like one), the horse hidden until it's poked; then the
    disguise peels off and the horse resolves under it */
 .visitor-trojan .trojan-look { position: absolute; left: 50%; bottom: 0; width: 34px; translate: -50% 0; }
@@ -2992,3 +2993,13 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 :root.text-xl { --ts: 1.3; --label-min: 9; }
 :root:is(.text-l, .text-xl) :is(.mode-info, .settings-note, .cpu-desc, .message, .toast, .tut-text, .tut-points, .overlay-box p, .records .menu-pane > .panel, .home-best, .booster-row, .vs-setup-note) { zoom: var(--ts); }
 :root:is(.text-l, .text-xl) .hud .stat .label { font-size: calc(8px * var(--ts)); }
+/* The snowman's powder as it comes apart (visitors.js) */
+.visitor .snow-powder { position: absolute; bottom: 0; pointer-events: none; }
+/* The other viruses: ADWARE's message on its window, the LOGIC BOMB's last seconds (its fuse
+   flaring, the bomb flashing), the WORM and SPYWARE glitching now and then like the BUG */
+.visitor-adware .adware-text { position: absolute; left: 0; right: 0; top: 34%; text-align: center; font-size: 7px; line-height: 1; letter-spacing: 0; color: #d42a2a; font-weight: bold; white-space: nowrap; pointer-events: none; }
+.visitor-logicbomb.v-fuse-hot > svg { animation: fuse-hot 0.3s steps(1) infinite; }
+@keyframes fuse-hot { 50% { filter: brightness(1.8) drop-shadow(0 0 3px #ff7a1f); } }
+:is(.visitor-worm, .visitor-spyware, .visitor-ransomware) > svg { animation: virus-glitch 3.2s steps(1) infinite; }
+/* PUSHED BITs (visitors.js): the grid's own bit (.cell.disc), a bot's size, on the floor */
+.visitor-bit .pushed-bit { position: absolute; left: 0; bottom: 0; width: 32px; height: 32px; font-size: 13px; box-sizing: border-box; }

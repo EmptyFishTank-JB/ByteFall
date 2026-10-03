@@ -149,8 +149,10 @@
     if (typeof updateBgPlayBtn === 'function') updateBgPlayBtn();
     render();
   });
-  document.getElementById('mp-viz-btn').addEventListener('click', () => {
-    viz.toggle();
+  // (a tap on its left half: the style before; on its right half: the next one)
+  document.getElementById('mp-viz-btn').addEventListener('click', (e) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    viz.toggle(e.clientX && e.clientX < r.left + r.width / 2 ? -1 : 1);
     showVizName();
   });
   // SEQUENCE / SHUFFLE moving on by themselves: the display follows
