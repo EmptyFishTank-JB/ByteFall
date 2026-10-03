@@ -1,6 +1,8 @@
 // After `npx cap add android`: makes the generated Android project ByteFall's.
 //   node tools/setup-android.js
-// - MainActivity: full screen, and the back button working the game (tools/android/MainActivity.java)
+// - MainActivity: full screen on black, the music on at launch, everything resting in the
+//   background, and the back button working the game (tools/android/MainActivity.java)
+// - VIBRATE permission (the game's haptics)
 // - portrait only, as the web app's manifest asks
 // - the version: the game's build number (index.html's ?v=), so each build installs over the last
 // - TEST builds signed with the repo's own test key (tools/android/test.keystore, password
@@ -21,7 +23,11 @@ const edit = (file, fn) => {
 
 fs.copyFileSync(path.join(__dirname, 'android', 'MainActivity.java'), path.join(APP, 'src/main/java/com/emptyfishtank/bytefall/MainActivity.java'));
 
-edit('src/main/AndroidManifest.xml', (s) => s.replace('android:name=".MainActivity"', 'android:name=".MainActivity"\n            android:screenOrientation="portrait"'));
+edit('src/main/AndroidManifest.xml', (s) => s
+  .replace('android:name=".MainActivity"', 'android:name=".MainActivity"\n            android:screenOrientation="portrait"')
+  .replace('<uses-permission android:name="android.permission.INTERNET" />', '<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.VIBRATE" />')); // (VIBRATION: navigator.vibrate needs it)
+// (black behind everything: the strip a system bar leaves, the notch, the splash's edges)
+edit('src/main/res/values/styles.xml', (s) => s.replace('<item name="android:background">@null</item>', '<item name="android:background">@null</item>\n        <item name="android:windowBackground">@android:color/black</item>\n        <item name="android:statusBarColor">@android:color/black</item>\n        <item name="android:navigationBarColor">@android:color/black</item>'));
 
 const build = Number((/\?v=(\d+)/.exec(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')) || [])[1] || 1);
 edit('build.gradle', (s) => s
