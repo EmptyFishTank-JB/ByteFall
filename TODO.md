@@ -41,3 +41,27 @@ Ideas for games of their own, written down so they're not lost; nothing here is 
   A downed player can be rescued at a cost; cheating (moving your piece by hand, quitting
   mid-event) brings a penalty event; fate cards aim the next event at the leader; solo with an
   AI companion. First prototype: one room, a 20-square board, 6-8 events, 2 players.
+
+### Halo game types (to rebuild in Halo Infinite's Forge; any could become a game of its own)
+
+- **AVALANCHE**: 2-8 teams, up to 16 players, lined up on a platform at the top of a hill like the
+  start of a race. Everyone races down to the ball on the bottom platform and carries it back up to
+  a circular goal in the middle of the top platform (just behind one of the launchers, so players
+  sometimes launch themselves back down). The hill: three big staircases wide, a 3x4 grid of them
+  seen from above. Anyone who dies respawns at the top; a dropped ball rolls back down; a pass can
+  go off the side. At the top: Warthogs and Mongooses, and three launchers that throw players about
+  a third of the way down (jumping keeps the momentum, bouncing on down) and send a dropped ball
+  flying back down. Random weapons on spawn. Ideas: shuffled hill layouts, ice and boost pads, a
+  "hot potato" ball. Prototype as a game: one hill, 2 teams of 2-3, launchers, ball and respawns.
+- **WARTHOG ARENA**: 15 Warthogs with things welded on, Robot Wars style, and TIMMY (maybe): a
+  Mongoose with the little whale welded on as its body, a whale on wheels. A floating arena of roads
+  and moving parts, all of it usable to push others off. Leaving the Warthog kills you; you can only
+  swap to the passenger seat to use your random spawn weapon, with no one driving. In Infinite:
+  scripting kills on exit and hands out random weapons; moving parts on timers; a kill zone under
+  the arena (check whether objects can be welded to vehicles). As a game: a build screen of rams,
+  wedges and spinners, Timmy as a secret vehicle, the arena falling away as the match goes on.
+- **PAC-MAN ARENA FIESTA**: everyone spawns in a huge Pac-Man maze in the game's iconography, with
+  random weapons; at a full lobby, super hectic. Ideas: pellets that score, power pellets for a
+  short buff (overshield, speed, sword), four AI ghosts hunting everyone, teleporters as the wrap
+  tunnels, a PAC-MAN JUGGERNAUT variant, a lights-out maze. (As a game for sale it would need its
+  own maze theme: Pac-Man is Bandai Namco's.)
