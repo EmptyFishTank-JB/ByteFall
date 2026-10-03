@@ -880,6 +880,9 @@ stack heights the game settles on, eased between as the intensity moves.
   GLITCH on INSANE as the final boss, achievements per round and for a full clear).
 - **CORE DUMP (track 09)**: its trial layers still wait for picks.
 - **Sound effect themes**: on hold.
+- **Future games** (separate from ByteFall): BYTERRIUM, a Tamagotchi-style spin-off for the CPU
+  bots, and a Jumanji / Zathura-style board game of events the players survive together. See
+  [TODO.md](TODO.md#future-games-separate-from-bytefall).
 
 ### Seasonal stuff (ideas, by the player's own date)
 
