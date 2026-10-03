@@ -2914,3 +2914,22 @@ body:not(.vs-mode) .hud-bits #next-stat > :is(.bit-row, .bit-sq, .value) { posit
 /* SWAP armed: the bits it can pick glow faintly; the one picked is outlined in the accent */
 .board .cell.swap-target { cursor: pointer; box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.35); }
 .board .cell.swap-pick { outline: 2px solid var(--accent); outline-offset: -2px; box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.6); }
+
+/* PIXEL MODE (pixel.js; html.pixel-mode, the bot sandbox's switch for now): the bots on a screen
+   at twice the art's resolution, everything in whole screen pixels (half an art pixel). The
+   animations that squashed, stretched or turned the picture move by those pixels instead. */
+svg.px-drawn > .bot-swap { visibility: hidden; } /* (its pixels redrawn in .px-body, turned) */
+html.pixel-mode .px-layer rect { shape-rendering: crispEdges; }
+html.pixel-mode .cpu-face :is(.eyes) { transform-box: view-box; }
+html.pixel-mode .cpu-face[data-mood="idle"] .eyes,
+html.pixel-mode .cpu-face[data-variant="tapping"] .eyes { animation-name: px-blink; transform-origin: 8px 8px; }
+html.pixel-mode .cpu-face[data-variant="ponder"] .eyes { animation-name: px-blink; transform-origin: 8px 8px; }
+@keyframes px-blink { 0%, 92% { transform: scaleY(1); } 94% { transform: scaleY(0.25); } 97% { transform: scaleY(1); } } /* (2 pixels of eye down to half of one, from the bottom) */
+html.pixel-mode .cpu-face[data-mood="love"] .eyes-heart { animation-name: px-beat; }
+@keyframes px-beat { 0%, 60% { transform: translateY(0); } 61%, 100% { transform: translateY(-0.5px); } }
+html.pixel-mode .cpu-face[data-mood="dizzy"] .bot { animation-name: px-sway; }
+@keyframes px-sway { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-0.5px); } 50% { transform: translateX(0); } 75% { transform: translateX(0.5px); } }
+html.pixel-mode :is(.walker, #cpu-face).snapping .bot { animation-name: px-lunge; }
+@keyframes px-lunge { 0% { transform: translateY(-1px); } 100% { transform: translateY(0.5px); } }
+html.pixel-mode .walker.skater.walking .bot,
+html.pixel-mode .walker.skater.walking[data-look="left"] .bot { transform: none; } /* (its lean is redrawn, pixel.js) */

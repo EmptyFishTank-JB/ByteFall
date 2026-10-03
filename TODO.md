@@ -47,5 +47,7 @@ Ideas queued for later (not built yet).
 - **HALLOWEEN: a big SPIDER visitor** (the size of the viruses) that walks around and jumps about.
 - **SOUND PROFILES section in SETTINGS**: pick a set of game sound effects; the current one is the
   first, already unlocked (more to unlock: see Sound themes).
+- **PIXEL MODE, pass 2**: the visitors and viruses on the same pixel grid (their sways, glitches,
+  floats and pokes in whole screen pixels); then turn PIXEL MODE on in the game.
 
 See [WANDERERS.md](WANDERERS.md) for the season-by-season chart and the full ideas list.

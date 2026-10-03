@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" class="sandbox">
 <head>
-<script src="../js/fonts.js?v=286"></script>
+<script src="../js/fonts.js?v=287"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#020403">
 <title>Bot Sandbox // BYTEFALL</title>
-<link rel="stylesheet" href="../css/style.css?v=286">
+<link rel="stylesheet" href="../css/style.css?v=287">
 <!-- BOT SANDBOX: the wandering bots and everything around them (visitors, viruses, seasons, the fog,
      headphones and the music) running on the game's own code, with every behaviour on a button.
      Progress is stubbed: nothing here touches the saved game (no achievements, no unlocks). -->
@@ -94,6 +94,7 @@
           <button type="button" data-stage="game" class="on">GAME CARD</button><button type="button" data-stage="start">START SCREEN</button><button type="button" data-stage="saver">SCREEN SAVER</button>
         </div>
         <div class="row" id="themes"><b>THEME</b></div>
+        <div class="row"><b>PIXEL MODE (A SCREEN AT TWICE THE ART'S RESOLUTION: EVERY MOVE IN WHOLE PIXELS, TURNS REDRAWN, HAIR THAT FLOWS)</b><button type="button" id="pixelmode">OFF</button></div>
         <div class="row"><b>REDUCED EFFECTS</b><button type="button" id="lowfx">OFF</button></div>
       </div>
 
@@ -138,28 +139,29 @@
 <canvas id="board-fx" aria-hidden="true"></canvas>
 <div class="stat cpu-face" id="cpu-face" hidden aria-hidden="true"></div>
 
-<script src="../js/bot-svg.js?v=286"></script>
-<script src="../js/music/output.js?v=286"></script>
-<script src="../js/music/mixes.js?v=286"></script>
-<script src="../js/sfx.js?v=286"></script>
-<script src="../js/music/music-bytefall-theme.js?v=286"></script>
-<script src="../js/music/music-sleep-mode.js?v=286"></script>
-<script src="../js/music/music-brute-force.js?v=286"></script>
-<script src="../js/music/music-deep-web.js?v=286"></script>
-<script src="../js/music/music-zero-day.js?v=286"></script>
-<script src="../js/music/music-system-restore.js?v=286"></script>
-<script src="../js/music/music-night-drive.js?v=286"></script>
-<script src="../js/music/music-standby-mode.js?v=286"></script>
-<script src="../js/music/music-core-dump.js?v=286"></script>
-<script src="../js/music/music-handshake.js?v=286"></script>
-<script src="../js/music/music-stack-overflow.js?v=286"></script>
-<script src="../js/music/music.js?v=286"></script>
-<script src="../js/fx.js?v=286"></script>
-<script src="../js/minibot.js?v=286"></script>
-<script src="../js/seasons.js?v=286"></script>
-<script src="../js/visitors.js?v=286"></script>
-<script src="../js/wanderers.js?v=286"></script>
-<script src="../js/grid-bg.js?v=286"></script>
+<script src="../js/bot-svg.js?v=287"></script>
+<script src="../js/music/output.js?v=287"></script>
+<script src="../js/music/mixes.js?v=287"></script>
+<script src="../js/sfx.js?v=287"></script>
+<script src="../js/music/music-bytefall-theme.js?v=287"></script>
+<script src="../js/music/music-sleep-mode.js?v=287"></script>
+<script src="../js/music/music-brute-force.js?v=287"></script>
+<script src="../js/music/music-deep-web.js?v=287"></script>
+<script src="../js/music/music-zero-day.js?v=287"></script>
+<script src="../js/music/music-system-restore.js?v=287"></script>
+<script src="../js/music/music-night-drive.js?v=287"></script>
+<script src="../js/music/music-standby-mode.js?v=287"></script>
+<script src="../js/music/music-core-dump.js?v=287"></script>
+<script src="../js/music/music-handshake.js?v=287"></script>
+<script src="../js/music/music-stack-overflow.js?v=287"></script>
+<script src="../js/music/music.js?v=287"></script>
+<script src="../js/fx.js?v=287"></script>
+<script src="../js/pixel.js?v=287"></script>
+<script src="../js/minibot.js?v=287"></script>
+<script src="../js/seasons.js?v=287"></script>
+<script src="../js/visitors.js?v=287"></script>
+<script src="../js/wanderers.js?v=287"></script>
+<script src="../js/grid-bg.js?v=287"></script>
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -199,6 +201,11 @@
     });
     $('themes').appendChild(b);
   }
+  $('pixelmode').addEventListener('click', (e) => {
+    const on = document.documentElement.classList.toggle('pixel-mode');
+    e.target.textContent = on ? 'ON' : 'OFF';
+    e.target.classList.toggle('on', on);
+  });
   $('lowfx').addEventListener('click', (e) => {
     const on = document.documentElement.classList.toggle('low-fx');
     e.target.textContent = on ? 'ON' : 'OFF';

@@ -41,6 +41,8 @@ assets/                 fonts/, icons/, audio/ (WAV renders of the tracks, not u
 dev-tools/audio.html    the audio compendium (tracks-info.js: the track list for it and the mixer)
 dev-tools/mixer.html    the mixer, one track at a time (?track=sleep-mode)
 dev-tools/bots.html     the bot sandbox: the wanderers, visitors, seasons, fog and headphones on buttons
+js/pixel.js             PIXEL MODE (the sandbox's switch, for now): the bots on a screen at twice the
+                        art's resolution: moves in whole pixels, turns redrawn, hair that flows
 js/bot-svg.js           the bots' pixel art (shared by the game and the sandbox)
 docs/achievements.csv   every achievement, grouped
 ```

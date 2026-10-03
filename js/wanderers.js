@@ -116,12 +116,17 @@ function createWanderers(lane, active = () => true) {
   function hairOn(w) {
     if (w.hair) return;
     w.hair = true;
+    if (pixelOn()) { // (PIXEL MODE: strands that flow, drawn pixel by pixel; stepped in the frame loop)
+      w.pxHair = Pixel.hair(w.el.querySelector('svg'), TOP[w.bot] || 3);
+      return;
+    }
     // (behind the body: it flies out around the head's edges, never across the face)
     w.el.querySelector('.bot-body').insertAdjacentHTML('beforebegin', `<g class="metal-hair">${hairSvg(w.bot)}</g>`);
   }
   function hairOff(w) {
     if (!w.hair) return;
     w.hair = false;
+    if (w.pxHair) { w.pxHair.remove(); w.pxHair = null; }
     const g = w.el.querySelector('.metal-hair');
     if (g) g.remove();
   }
@@ -202,6 +207,7 @@ function createWanderers(lane, active = () => true) {
   function move(w, how, P) {
     const bot = w.el.querySelector('.bot');
     if (!bot || !bot.animate) return;
+    if (pixelOn()) return pixelMove(w, how, P);
     if (how === 'spin') { // (the metalhead's helicopter: the head whirled round in a circle on the neck, tilting out as it goes)
       const d = w.look < 0 ? -1 : 1;
       const frames = [];
@@ -224,6 +230,61 @@ function createWanderers(lane, active = () => true) {
       const leg = w.el.querySelector(w.look < 0 ? '.leg-b' : '.leg-a');
       if (leg && leg.animate) leg.animate([{ transform: 'translateY(-1px)' }, { transform: 'translateY(0)' }], { duration: Math.min(160, P * 0.35), easing: 'steps(1, end)' });
     }
+  }
+  // PIXEL MODE (pixel.js): each groove move a few frames of whole screen pixels, played by the frame
+  // loop (pxPlay): the head dropping a pixel or two and back, the helicopter's turn redrawn sprite
+  // pixel by sprite pixel each frame
+  const PX = () => SIZE / 16 / (typeof Pixel !== 'undefined' ? Pixel.RES : 2); // (a screen pixel, on the page)
+  const pixelOn = () => typeof Pixel !== 'undefined' && Pixel.on();
+  function pixelMove(w, how, P) {
+    const d = w.look < 0 ? -1 : 1;
+    let frames;
+    if (how === 'spin') {
+      frames = [];
+      for (let k = 0; k < 16; k++) {
+        const a = (k / 16) * Math.PI * 2;
+        frames.push({ at: (k / 16) * P, dx: d * 2 * Math.sin(a), dy: 1 - Math.cos(a), angle: d * 16 * Math.sin(a) });
+      }
+    } else if (how === 'bang' || how === 'bang-heavy') {
+      const deep = how === 'bang-heavy' ? [2, 3, 3, 2.5, 2, 1.5, 1, 0.5, 0] : [1, 2, 1.5, 1, 0.5, 0];
+      const span = Math.min(how === 'bang-heavy' ? 420 : 260, P * (how === 'bang-heavy' ? 1.6 : 0.8));
+      frames = deep.map((dy, k) => ({ at: (k / deep.length) * span, dy, angle: 0 }));
+    } else if (how === 'nod') {
+      const span = Math.min(280, P * 0.6);
+      frames = [1, 1, 0.5, 0].map((dy, k) => ({ at: (k / 4) * span, dy }));
+    } else { // (a tap: the foot up a pixel, the head dipping half of one)
+      const span = Math.min(160, P * 0.35);
+      frames = [0.5, 0].map((dy, k) => ({ at: (k / 2) * span, dy }));
+      const leg = w.el.querySelector(w.look < 0 ? '.leg-b' : '.leg-a');
+      if (leg && leg.animate) leg.animate([{ transform: 'translateY(-1px)' }, { transform: 'translateY(0)' }], { duration: span, easing: 'steps(1, end)' });
+    }
+    w.prog = { start: performance.now(), frames, sprite: frames.some((f) => f.angle) ? Pixel.snapshot(w.el.querySelector('svg')) : null };
+  }
+  // (the frame playing now, applied: offsets by the bot's own transform, turns redrawn; and the
+  // skaters' forward lean, redrawn too, its legs read again every few frames)
+  function pxPlay(w, now) {
+    const svg = w.el.querySelector('svg');
+    const bot = w.el.querySelector('.bot');
+    let f = null;
+    if (w.prog) {
+      const t = now - w.prog.start;
+      for (const fr of w.prog.frames) if (fr.at <= t) f = fr;
+      const lastAt = w.prog.frames[w.prog.frames.length - 1].at;
+      if (t > lastAt + 60) { w.prog = null; f = null; }
+    }
+    let lean = 0;
+    if (!f && w.skating && w.state === 'walk') lean = w.dir * 9;
+    const head = { dx: f ? f.dx || 0 : 0, dy: f ? f.dy || 0 : 0, angle: f ? f.angle || 0 : lean, pivot: [8, 11] };
+    if (head.angle) {
+      if (!f && (!w.leanSprite || now - (w.leanAt || 0) > 140)) { Pixel.clear(svg); bot.style.transform = ''; w.leanSprite = Pixel.snapshot(svg); w.leanAt = now; }
+      Pixel.draw(svg, f ? w.prog.sprite : w.leanSprite, head);
+      bot.style.transform = '';
+    } else {
+      Pixel.clear(svg);
+      w.leanSprite = null;
+      bot.style.transform = head.dx || head.dy ? `translate(${Pixel.snap(head.dx)}px, ${Pixel.snap(head.dy)}px)` : '';
+    }
+    if (w.pxHair) w.pxHair.step(w.pxDt || 0.016, { ...head, worldX: w.x / (SIZE / 16) });
   }
   let partySeen = false;
   let forcePush = false; // (the dev tests: the next arrival pushes the tree)
@@ -584,7 +645,7 @@ function createWanderers(lane, active = () => true) {
   }
   // (only what changed is written: every write makes the browser re-check the styles)
   function place(w) {
-    const x = w.x.toFixed(1);
+    const x = (pixelOn() ? Math.round(w.x / PX()) * PX() : w.x).toFixed(2); // (PIXEL MODE: on the screen's grid)
     if (w.placedX !== x) {
       w.placedX = x;
       w.el.style.transform = `translateX(${x}px)`;
@@ -781,6 +842,7 @@ function createWanderers(lane, active = () => true) {
         else walkTo(w, freeSpot(w));
       }
       place(w);
+      if (pixelOn()) { w.pxDt = dt; pxPlay(w, now); } else if (w.prog || w.el.querySelector('svg.px-drawn')) { w.prog = null; Pixel.clear(w.el.querySelector('svg')); w.el.querySelector('.bot').style.transform = ''; }
     }
     // Two that meet may stop and make faces at each other (in the heavy fog, they don't see each
     // other coming: they bump, and now and then one gives the other a fright)
