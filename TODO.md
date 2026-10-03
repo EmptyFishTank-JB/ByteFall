@@ -4,11 +4,6 @@ Ideas queued for later (not built yet).
 
 - **Exploit loadouts**: 3 saved loadouts, picked on the game setup (before a run). A 3rd or 4th
   loadout would be BLACK BOX only.
-- **Scary October ideas** (pick from): the lights go out (only the bots' eyes blinking; back on, one
-  has moved or a monster stands there), a hand from under the floor grabs a bot, glowing eyes
-  blinking between the fog's trees, the scary tree uprooting and shuffling after the bots, a bot
-  possessed (red eyes, stiff walk; poked, a little ghost shakes out), a full-moon night with a
-  werewolf's howl, a rare blood-red fog where the wanderer chases a bot.
 - **New tracks**, in the spirit of (not copies of): Cutting Crew's *(I Just) Died in Your Arms*,
   a-ha's *Take On Me*, Starship's *We Built This City*, Duran Duran's *Hungry Like the Wolf*, Paula
   Abdul's *Straight Up* (its funky bass line, not the tapping intro), Sonic Spinball's *Toxic Caves*

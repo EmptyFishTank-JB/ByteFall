@@ -25,6 +25,7 @@
 // Stacked seasons (seasons.js) all send theirs; up to two pieces of scenery stand at once.
 // Sprites are drawn as text: one letter a pixel (its color in `pal`, '.' left empty), in the bots'
 // own pixel size, facing right; a second frame (b) steps the legs, flaps the wings or ripples a hem.
+let hauntedForest = false; // (OCTOBER's HAUNTED FOREST, once it's come: up on every card, visitors.js)
 function createVisitors(api) {
   // The air: on the start screen the lane is the whole card, so what flies, falls or hangs
   // uses its full height (sky(f): that far up it, 0-1); in the game's short lane, the heights
@@ -180,6 +181,30 @@ function createVisitors(api) {
       a: ['...cccc...', '..cCCCCc..', '.cChhhhCc.', '.cCehheCc.', '.cChhhhCc.', '..cChhCc..', '.cccCCccc.', 'ccCcccCccc', 'cCccccccCc', 'cccccccccc', 'cCcccccCcc', 'cccccccccc', 'ccCccccCcc', 'cccccccccc', '.ccCcccccc', '.cccccCcc.', '.c.cc.cc.c', 'c..c..c..c'],
       b: { 16: '.cc.cc.cc.', 17: '.c..c..c..' },
     },
+    // OCTOBER's HAUNTED FOREST: the big gnarled trees in front of everything (dark, near the edges,
+    // framing the path), and the glowing eyes between the trees at the back
+    oak: {
+      pal: { t: '#07090b', T: '#12171c' },
+      a: ['..t.......t.....t.....', '...t...t..t....t..t...', 't..t..t...tt..t..t....', '.t.tt.t....t.tt.t...t.', '..t.tt.t...ttt..t..t..', '...t.ttt...tt..tt.t...', 't...t.ttt..tt.tt.t....', '.tt..t..tt.ttttt.t..tt', '...tt.t..tttttt.tttt..', '.....tttt.tTtt.tt.....',
+        '........ttTtttt.......', '.........tTttt........', '.........tTtt.........', '.........tTtt.........', '........ttTtt.........', '........tTttt.........', '........tTtttt........', '........tTtttt........', '.......ttTtttt........', '.......tTttttt........',
+        '.......tTtttttt.......', '.......tTtttttt.......', '......ttTttttttt......', '......tTtttttttt......', '.....ttTttttttttt.....', '....tttTtttttttttt....', '...tt.tTttttt.tttttt..', '..t..tt.ttt..tt...ttt.'],
+    },
+    eyes: { pal: { e: '#ffd23f' }, a: ['ee...ee', 'ee...ee'] },
+    // The WEREWOLF (under OCTOBER's full moon): hunched, clawed, in torn trousers; c, its howl
+    werewolf: {
+      pal: { f: '#6b5644', F: '#45372b', e: '#ffd23f', t: '#f2f2f2', n: '#111111', c: '#e3dccb', p: '#3b4a6b', P: '#26314a' },
+      a: ['..........F.F...', '.........FfFf...', '........Fffffff.', '........ffeffffn', '........ffffffff', '.......Fffffftft', '......FFfffff...', '....FFFfffffF...', '...FfffffffffF..', '..Fffff.ffffff..', '..ff.ff.Fffffcc.', '.cc..ff.Ffff....', '.....pppppp.....', '.....pPpppPp....', '.....pp..pp.....', '.....ff..ff.....', '....fff..fff....', '...cff..cff.....'],
+      b: { 14: '.....pp..pp.....', 15: '....ff....ff....', 16: '...fff....fff...', 17: '..cff....cff....' },
+      c: ['...........nn...', '..........fff...', '.........fftf...', '.....F..ffftf...', '.....FFfefff....', '......Ffffff....', '......FFffff....', '....FFFfffffF...', '...FfffffffffF..', '..Fffff.ffffff..', '..ff.ff.Fffffcc.', '.cc..ff.Ffff....', '.....pppppp.....', '.....pPpppPp....', '.....pp..pp.....', '.....ff..ff.....', '....fff..fff....', '...cff..cff.....'],
+    },
+    // The HAND from under the floor: reaching (a), grabbing (b)
+    hand: {
+      pal: { h: '#7d9576', H: '#55694f', n: '#d8d0b0', s: '#3a2f26', S: '#241c16' },
+      a: ['.n.n.n..', '.h.h.h..', '.h.h.h.n', '.hhhhh.h', '.hhhhhhh', '.hhhhhh.', '..hhhh..', '..hHhh..', '..ssss..', '..sSss..', '..ssss..'],
+      b: ['........', '........', '..nnn...', '.hhhhhn.', '.hhhhhhh', '.hhhhhh.', '..hhhh..', '..hHhh..', '..ssss..', '..sSss..', '..ssss..'],
+    },
+    // The little ghost shaken out of a POSSESSED bot
+    spirit: { pal: { p: '#e8f0ff', k: '#1a1f2a' }, a: ['..ppp..', '.ppppp.', 'pkpppkp', 'ppppppp', 'ppkkppp', 'ppppppp', '.p.p.p.', 'p..p..p'], b: { 6: 'p.p.p.p', 7: '.p..p..' } },
     // NOVEMBER's migrating birds: a and b on the ground (standing, pecking), c and d flying (wings
     // up, wings down)
     goose: {
@@ -341,6 +366,11 @@ function createVisitors(api) {
     trojan: { speed: 18, frameMs: 200, poke: 'delete' },
     pine: { speed: 0, frameMs: 0 },
     baretree: { speed: 0, frameMs: 0 },
+    oak: { speed: 0, frameMs: 0 },
+    eyes: { speed: 0, frameMs: 0, fixed: true, poke: 'blink' },
+    werewolf: { speed: 30, frameMs: 200, sway: 1, monster: true, poke: 'growl' },
+    hand: { speed: 0, frameMs: 0, poke: 'sink' },
+    spirit: { speed: 0, frameMs: 300, poke: 'mist' },
     wraith: { speed: 9, frameMs: 520, poke: 'mist' },
     gremlin: { speed: 34, frameMs: 130, poke: 'skree' },
     goose: { speed: 42, frameMs: 0, bird: true, wave: 1.5, waveMs: 420, beatMs: 260, call: 'HONK!', poke: 'flush' },
@@ -362,7 +392,7 @@ function createVisitors(api) {
   // (fixed: never mirrored, its order matters: the candles, the year's digits)
   // What each season sends (one visit at a time)
   const VISITS = {
-    halloween: ['frank', 'mummy', 'creature', 'nosferatu', 'ghost', 'bats', 'crows', 'spider', 'gremlin', 'bigspider'],
+    halloween: ['frank', 'mummy', 'creature', 'nosferatu', 'ghost', 'bats', 'crows', 'spider', 'gremlin', 'bigspider', 'werewolf', 'lightsout', 'hand', 'possessed'],
     november: ['turkey', 'turkey', 'crows', 'geese', 'ducks', 'songbirds', 'swallows'],
     winter: ['penguin'],
     christmas: ['reindeer', 'reindeer'],
@@ -404,6 +434,16 @@ function createVisitors(api) {
   function visit(what = pick(visits().length ? visits() : VISITS.halloween)) {
     if (what === 'countdown') return countdown();
     if (what === 'fog') return startFog();
+    // (OCTOBER: the HAUNTED FOREST and what happens in it; the dev page brings each any time)
+    if (what === 'forest') return forest();
+    if (what === 'eyes') return forest() && eyesIn();
+    if (what === 'treewalk') return forest() && treeWalk();
+    if (what === 'swell') return forest() && swell();
+    if (what === 'bloodfog') { const f = forest(); if (f.phase === 'light') bloodFog(); return; }
+    if (what === 'lightsout') return lightsOut();
+    if (lights) return; // (nothing else while the lights are out)
+    if (what === 'hand') return handVisit();
+    if (what === 'possessed') return possessVisit();
     if (what === 'gremlin') { // (in, a few pranks, off at a run)
       add('gremlin', (Math.random() < 0.5 ? -1 : 1) > 0 ? -30 : api.laneW() + 4, 1, { state: 'go', target: rand(0.2, 0.8) * api.laneW(), pranks: 2 + Math.floor(Math.random() * 2) });
       const g = list[list.length - 1];
@@ -436,6 +476,7 @@ function createVisitors(api) {
       api.botEvent('visit-bigspider');
       if (v.x > W / 2) v.dir = -1;
     }
+    else if (what === 'werewolf') werewolfVisit(dir, edge, W);
     else if (what === 'turkey') add('turkey', edge(12 * U), dir, { stopAt: rand(0.25, 0.65) * W, life: rand(2500, 4500) });
     else if (what === 'reindeer' || what === 'rudolph') { // (now and then, the one with the red nose)
       const red = what === 'rudolph' || Math.random() < 0.25;
@@ -479,7 +520,18 @@ function createVisitors(api) {
     api.lane.appendChild(c);
     return c;
   }
-  function startFog() {
+  // (a tree, drawn k times its size)
+  function scaleTree(t, k) {
+    if (k === 1) return;
+    const svg = t.el.querySelector('svg');
+    svg.setAttribute('width', svg.getAttribute('width') * k);
+    svg.setAttribute('height', svg.getAttribute('height') * k);
+    t.el.style.width = `${svg.getAttribute('width')}px`;
+    t.boxW = 0;
+  }
+  // instant: the HAUNTED FOREST put back as it stood (already up: back on this card, or on another);
+  // haunted: OCTOBER's forest (the dev page's FOREST brings it any time)
+  function startFog(instant = false, haunted = spooky()) {
     if (fog) return;
     const now = performance.now();
     // (dark: the twinkling background behind the lane fading to black under the fog)
@@ -487,31 +539,55 @@ function createVisitors(api) {
     dark.className = 'fog-dark';
     dark.setAttribute('aria-hidden', 'true');
     api.lane.appendChild(dark);
-    fog = { phase: 'in', at: now, level: 0, front: 0, dir: Math.random() < 0.5 ? 1 : -1, dark, back: fogCanvas('fog-back'), fore: fogCanvas('fog-fore'), trees: [], drawn: 0, t: 0 };
-    api.botEvent('visit-fog');
+    fog = { phase: 'in', at: now, level: 0, front: 0, dir: Math.random() < 0.5 ? 1 : -1, dark, back: fogCanvas('fog-back'), fore: fogCanvas('fog-fore'), trees: [], drawn: 0, t: 0, haunted, forced: haunted && !spooky(), red: 0 };
+    if (haunted) {
+      hauntedForest = true;
+      fog.nextEyes = now + rand(6000, 14000);
+      fog.nextWalk = now + rand(40000, 80000);
+    }
+    if (!instant) api.botEvent(haunted ? 'visit-forest' : 'visit-fog');
     const W = api.laneW();
     const big = tall(); // (read before the trees go in: a layout read in between would start their fade from full)
-    const n = Math.max(4, Math.round(W / 70));
+    const n = Math.max(haunted ? 5 : 4, Math.round(W / (haunted ? 55 : 70)));
     for (let i = 0; i < n; i++) { // (spread along the card, each nudged a little: some far, some near)
-      const kind = !spooky() && Math.random() < 0.6 ? 'pine' : 'baretree'; // (HALLOWEEN: bare trees only)
+      // (NOVEMBER: mostly pines; the HAUNTED FOREST: pines and bare, twisted trees, bigger)
+      const kind = Math.random() < (haunted ? 0.45 : 0.6) ? 'pine' : 'baretree';
       const far = Math.random() < 0.5;
       const x = ((i + 0.2 + Math.random() * 0.6) / n) * W - 12;
-      const t = add(kind, x, Math.random() < 0.5 ? 1 : -1, { state: 'fogtree' });
+      // (the HAUNTED FOREST's a shade lighter: its trees show against the dark, not only the mist)
+      const t = add(kind, x, Math.random() < 0.5 ? 1 : -1, { state: 'fogtree', ...(haunted ? { pal: { t: '#34414a', T: '#46555f' } } : {}) });
       t.el.style.opacity = '0';
       t.el.classList.add('fog-tree', far ? 'far' : 'near');
-      if (big) { // (on the start screen's tall lane: bigger)
-        const svg = t.el.querySelector('svg');
-        const k = far ? 2.2 : 3;
-        svg.setAttribute('width', svg.getAttribute('width') * k);
-        svg.setAttribute('height', svg.getAttribute('height') * k);
-        t.el.style.width = `${svg.getAttribute('width')}px`;
-      }
+      if (big) scaleTree(t, far ? 2.2 : 3); // (on the start screen's tall lane: bigger)
+      else if (haunted) scaleTree(t, far ? 1.2 : 1.45);
       t.depth = far ? 0.45 : 0.85;
       t.lag = rand(0.08, 0.2); // (it shows once the fog's well past it: fading in with it, not ahead of it)
       fog.trees.push(t);
     }
+    if (haunted) { // (the big ones in front, by either edge: the path between them)
+      for (const side of [0, 1]) {
+        const t = add('oak', 0, side ? -1 : 1, { state: 'fogtree' });
+        scaleTree(t, big ? 3.6 : 1.1);
+        const w = parseFloat(t.el.style.width);
+        t.x = side ? W - w * rand(0.45, 0.62) : -w * rand(0.38, 0.55);
+        t.el.style.opacity = '0';
+        t.el.classList.add('fog-tree', 'fore');
+        t.depth = 1;
+        t.lag = side ? (fog.dir > 0 ? 0.3 : 0) : (fog.dir > 0 ? 0 : 0.3);
+        t.fore = true;
+        place(t);
+        fog.trees.push(t);
+      }
+    }
+    if (instant) { // (as it stands: thinned to its mist, every tree up)
+      fog.phase = 'light';
+      fog.front = 1;
+      fog.level = 0.35;
+      fog.trees.forEach((t) => { t.shown = true; t.el.style.opacity = String(t.depth); });
+    }
   }
   const FOG_IN_MS = 6000;
+  const forestStays = (f) => f.haunted && (f.forced || spooky()); // (the HAUNTED FOREST never lifts in its month)
   function fogFrame(now) {
     const f = fog;
     const age = now - f.at;
@@ -519,13 +595,21 @@ function createVisitors(api) {
       f.front = Math.min(1, age / FOG_IN_MS);
       f.level = f.front;
       if (age > FOG_IN_MS + 2000) { f.phase = 'thick'; f.at = now; wraithIn(); }
+    } else if (f.phase === 'swell') { // (the HAUNTED FOREST's mist thickening again, for its wanderer)
+      f.level = f.from + (1 - f.from) * Math.min(1, age / 5000);
+      if (age > 6500) { f.phase = 'thick'; f.at = now; wraithIn(); }
     } else if (f.phase === 'thick') { // (until the wanderer's gone)
       if (f.wraithGone) { f.phase = 'thin'; f.at = now; }
     } else if (f.phase === 'thin') {
       f.level = 1 - 0.65 * Math.min(1, age / 5000);
       if (age > 5000) { f.phase = 'light'; f.at = now; }
+    } else if (f.phase === 'blood') {
+      bloodFrame(f, now, age);
     } else if (f.phase === 'light') {
-      if (age > (fogOften() ? 20000 : 120000)) {
+      if (forestStays(f)) { // (its mist breathing: thickening a little, thinning out)
+        f.level = 0.3 + 0.1 * Math.sin(age / 9000) + 0.04 * Math.sin(age / 2300 + 1);
+        forestFrame(f, now);
+      } else if (age > (fogOften() ? 20000 : 120000)) {
         f.phase = 'lift';
         f.at = now;
         f.trees.forEach((t) => { t.el.style.opacity = '0'; });
@@ -544,11 +628,122 @@ function createVisitors(api) {
       }
     } else f.trees.forEach((t) => { if (!t.shown && f.phase !== 'lift') { t.shown = true; t.el.style.opacity = String(t.depth); } });
     const low = document.documentElement.classList.contains('low-fx');
-    if (now - f.drawn < (low ? 220 : 110)) return;
+    // (its mist, redrawn: less often while it only breathes)
+    if (now - f.drawn < (low ? 220 : 110) * (f.phase === 'light' ? 2 : 1)) return;
     f.t += (now - (f.drawn || now)) / 1000;
     f.drawn = now;
     drawFog(f.back, f, 0.78, 0, low);
-    drawFog(f.fore, f, f.phase === 'in' || f.phase === 'thick' ? 0.42 : 0.16, 31, low);
+    drawFog(f.fore, f, f.phase === 'in' || f.phase === 'thick' || f.phase === 'swell' || f.phase === 'blood' ? 0.42 : 0.16, 31, low);
+  }
+  // THE HAUNTED FOREST (OCTOBER): once its fog has rolled in, it stays (on every card, all month):
+  // the trees stand, the big ones in front, and the mist thins and thickens. Between the trees, now
+  // and then, glowing eyes blink; a tree pulls up its roots and shuffles after the bots; the mist
+  // swells again for the wanderer; and rarely the BLOOD FOG rolls in, the mist turning red as a
+  // blood moon rises behind the trees, and the wanderer comes out of it after a bot.
+  function forestFrame(f, now) {
+    if (now > f.nextEyes) {
+      f.nextEyes = now + rand(14000, 32000);
+      if (!list.some((v) => v.kind === 'eyes')) eyesIn();
+    }
+    if (now > f.nextWalk) {
+      f.nextWalk = now + rand(60000, 120000);
+      if (!list.some((v) => v.walkTree)) treeWalk();
+    }
+  }
+  // (forest(): the HAUNTED FOREST up, at once if it isn't already: what needs it calls this first)
+  function forest() {
+    if (fog && !fog.haunted) endFog();
+    if (!fog) startFog(true, true);
+    return fog;
+  }
+  // GLOWING EYES between the trees: a pair or three, blinking, watching the bots; then gone
+  function eyesIn(n = 1 + Math.floor(Math.random() * 3)) {
+    const W = api.laneW();
+    const now = performance.now();
+    const col = pick(['#ffd23f', '#ff2a2a', '#9dff5a', '#ffd23f']);
+    for (let i = 0; i < n; i++) {
+      const v = add('eyes', rand(0.06, 0.88) * W, 1, { state: 'eyes', y: tall() ? rand(0.05, 0.3) * api.laneH() : rand(10, 34), until: now + rand(3500, 7000) + i * 600, blinkAt: now + rand(500, 2000), pal: { e: col } });
+      v.el.classList.add('fog-eyes');
+      if (tall()) scaleTree(v, 2);
+      v.el.style.color = col;
+      v.el.style.opacity = '0';
+      setTimeout(() => { v.el.style.opacity = '1'; }, i * 600);
+    }
+    api.botEvent('visit-eyes');
+  }
+  function eyesFrame(v, now) {
+    if (now > v.blinkAt) { // (a blink)
+      v.el.classList.add('blink');
+      setTimeout(() => v.el.classList.remove('blink'), 140);
+      v.blinkAt = now + rand(900, 2600);
+    }
+    const b = nearest(v);
+    if (b) v.x += Math.sign(b.x - v.x) * Math.min(Math.abs(b.x - v.x), 2) * 0.02; // (following a bot, a little)
+    if (now > v.until && v.state === 'eyes') {
+      v.state = 'shut';
+      v.el.style.opacity = '0';
+      setTimeout(() => { v.gone = true; }, 900);
+    }
+  }
+  // A TREE UPROOTED: it shakes, pulls up its roots and shuffles after the bots (one it reaches
+  // bolts); then it plants itself again where it stopped. The forest's trees, and the scary tree a
+  // bot pushed in, in OCTOBER
+  function treeWalk(t) {
+    if (!t) {
+      const trees = list.filter((v) => (v.state === 'fogtree' && !v.fore && v.el.classList.contains('near')) || (v.kind === 'tree' && v.state === 'scenery'));
+      if (!trees.length) return;
+      t = pick(trees);
+    }
+    if (t.walkTree) return;
+    const now = performance.now();
+    t.walkTree = { home: t.state, z: t.el.style.zIndex, opacity: t.el.style.opacity, frights: 0, until: now + rand(11000, 16000) };
+    t.state = 'uproot';
+    t.until = now + 1100;
+    t.el.classList.add('v-uproot', 'v-shake');
+    t.el.style.opacity = '1';
+    say(t, pick(['creeeak', 'CRACK', '...']), 1000);
+    api.startle(t, 70);
+    api.botEvent('visit-treewalk');
+  }
+  function treeWalkFrame(t, now, dt, W) {
+    const w = t.boxW || (t.boxW = t.el.offsetWidth) || 30;
+    if (t.state === 'uproot') {
+      t.y = Math.min(U * 2, (1 - (t.until - now) / 1100) * U * 2); // (up out of the ground)
+      if (now > t.until) { t.el.classList.remove('v-shake'); t.state = 'stalk'; }
+    } else if (t.state === 'stalk') {
+      const b = nearest({ x: t.x + w / 2 - 17 });
+      const goal = b ? b.x + 17 - w / 2 : t.x;
+      if (b) t.dir = goal > t.x ? 1 : -1;
+      t.x += Math.sign(goal - t.x) * Math.min(Math.abs(goal - t.x), 13 * dt);
+      t.x = Math.max(-w * 0.3, Math.min(W - w * 0.7, t.x));
+      t.y = U * 2 + Math.round(Math.abs(Math.sin(t.age / 240))) * U; // (a heavy shuffle)
+      t.svgT = ` rotate(${Math.sin(t.age / 240) > 0 ? 3 : -3}deg)`;
+      if (b && Math.abs(goal - t.x) < 24 && !t.scared.has(b)) {
+        t.scared.add(b);
+        api.fright(b);
+        t.walkTree.frights++;
+        say(t, pick(['GRRROAN', 'creeeak']), 900);
+      }
+      if (now > t.walkTree.until || t.walkTree.frights >= 2 || (!b && now > t.walkTree.until - 6000)) plantTree(t, now);
+    } else if (t.state === 'plant') {
+      t.y = Math.max(0, ((t.until - now) / 900) * U * 2);
+      if (now > t.until) {
+        const wt = t.walkTree;
+        t.walkTree = null;
+        t.state = wt.home;
+        t.y = 0;
+        t.el.classList.remove('v-shake', 'v-uproot');
+        t.el.style.opacity = wt.opacity;
+        t.scared.clear();
+        if (t.kind === 'tree') t.walkAt = now + rand(40000, 90000);
+      }
+    }
+  }
+  function plantTree(t, now) {
+    t.state = 'plant';
+    t.until = now + 900;
+    t.svgT = '';
+    t.el.classList.add('v-shake');
   }
   function drawFog(c, f, maxA, seed, low) {
     const cell = low ? 6 : 4;
@@ -560,21 +755,24 @@ function createVisitors(api) {
     const ctx = c.getContext('2d');
     const img = ctx.createImageData(cw, ch);
     const light = ['paper', 'daylight'].includes(document.documentElement.dataset.theme);
-    const [r, g, b] = light ? [110, 118, 128] : [200, 208, 220];
+    const [r0, g0, b0] = light ? [110, 118, 128] : [200, 208, 220];
+    const red = f.red || 0; // (the BLOOD FOG: the mist turning red)
+    const [r, g, b] = [r0 + (170 - r0) * red, g0 + (14 - g0) * red, b0 + (24 - b0) * red].map(Math.round);
     const band = H > 150 ? 0.42 : 1;
     const sides = api.lane.classList.contains('saver-lane'); // (the screen saver's lane: fading out at its ends too)
     const sx = cell / 22;
     const sy = cell / 12;
     for (let y = 0; y < ch; y++) {
+      // (thinning out toward the top: no hard edge; on the start screen's tall lane, only its
+      // lower part, clear of the title)
+      const rise = Math.max(0, Math.min(1, ((y / ch) - (1 - band)) / band * 1.8));
+      if (!rise) continue; // (clear air: nothing to draw)
       for (let x = 0; x < cw; x++) {
         const px = f.dir > 0 ? x / cw : 1 - x / cw;
         const edge = Math.max(0, Math.min(1, (f.front * 1.35 - px) * 4)); // (the bank rolling in)
         if (!edge) continue;
         const side = sides ? Math.min(1, Math.min(x, cw - 1 - x) / (cw * 0.12)) : 1;
         const n = 0.65 * noise(x * sx + seed + f.t * 0.35 * f.dir, y * sy + seed) + 0.35 * noise(x * sx * 2.3 + seed + f.t * 0.6 * f.dir, y * sy * 2.3 + f.t * 0.1);
-        // (thinning out toward the top: no hard edge; on the start screen's tall lane, only its
-        // lower part, clear of the title)
-        const rise = Math.max(0, Math.min(1, ((y / ch) - (1 - band)) / band * 1.8));
         const d = Math.max(0, Math.min(1, (n * 1.1 + 0.25 + (y / ch) * 0.25) * f.level - 0.15)) * edge * rise * rise * side;
         const i = (y * cw + x) * 4;
         img.data[i] = r;
@@ -589,9 +787,298 @@ function createVisitors(api) {
     fog.back.remove();
     fog.fore.remove();
     fog.dark.remove();
+    if (fog.moon) fog.moon.remove();
     fog.trees.forEach((t) => { t.gone = true; });
     fog = null;
   }
+  function forestVisit() {
+    const r = Math.random();
+    if (r < 0.12) bloodFog();
+    else if (r < 0.42) swell();
+    else if (r < 0.72) treeWalk();
+    else eyesIn();
+  }
+  function swell() {
+    const f = forest();
+    if (f.phase !== 'light') return;
+    f.phase = 'swell';
+    f.at = performance.now();
+    f.from = f.level;
+    f.wraithGone = false;
+  }
+  // A MOON rising behind the trees: the BLOOD FOG's, or the WEREWOLF's full moon (moonSet: it sinks)
+  function moonSprite(blood) {
+    const R = 7;
+    const craters = new Set(['3,4', '4,4', '4,5', '9,3', '10,3', '10,4', '10,9', '11,9', '10,10', '11,10', '9,10', '5,10', '6,10', '5,11', '7,6', '8,6', '12,6']);
+    const a = [];
+    for (let y = -R; y <= R; y++) {
+      let row = '';
+      for (let x = -R; x <= R; x++) {
+        if (x * x + y * y > R * R + 2) row += '.';
+        else row += craters.has(`${x + R},${y + R}`) ? 'M' : 'm';
+      }
+      a.push(row);
+    }
+    return { pal: blood ? { m: '#d8261e', M: '#9c1510' } : { m: '#f3edcf', M: '#cfc7a2' }, a };
+  }
+  function moonRise(blood) {
+    const sky = document.createElement('div');
+    sky.className = `moon-sky${blood ? ' blood' : ''}`;
+    sky.setAttribute('aria-hidden', 'true');
+    const def = moonSprite(blood);
+    const size = 15 * (tall() ? 6 : 1.7);
+    sky.innerHTML = `<svg class="moon" viewBox="0 0 15 15" width="${size}" height="${size}" shape-rendering="crispEdges">${rects(def.a, def.pal)}</svg>`;
+    api.lane.insertBefore(sky, api.lane.firstChild); // (behind the trees)
+    const m = sky.firstChild;
+    m.style.left = `${(rand(0.55, 0.8) * api.laneW()).toFixed(0)}px`;
+    m.style.bottom = `${-size - 4}px`;
+    const to = tall() ? 0.34 * api.laneH() : 30;
+    requestAnimationFrame(() => requestAnimationFrame(() => { m.style.bottom = `${to.toFixed(0)}px`; }));
+    return sky;
+  }
+  function moonSet(sky) {
+    if (!sky || sky.setting) return;
+    sky.setting = true;
+    const m = sky.firstChild;
+    m.style.transitionDuration = '7s';
+    m.style.bottom = `${-parseFloat(m.getAttribute('height')) - 4}px`;
+    sky.style.opacity = '0';
+    setTimeout(() => sky.remove(), 7500);
+  }
+  // THE BLOOD FOG (rare, in the HAUNTED FOREST): the mist thickens and turns from white to red as a
+  // blood moon rises behind the trees; the wanderer comes out of it, red-eyed, after a bot (which
+  // runs for it); gone, the red drains from the mist and the moon sinks
+  function bloodFog() {
+    const f = forest();
+    if (f.phase !== 'light') return;
+    f.phase = 'blood';
+    f.at = performance.now();
+    f.bstage = 'rise';
+    f.chaser = false;
+    f.wraithGone = false;
+    f.from = f.level;
+    f.moon = moonRise(true);
+    api.botEvent('visit-bloodfog');
+  }
+  function bloodFrame(f, now, age) {
+    if (f.bstage === 'rise') {
+      const p = Math.min(1, age / 12000);
+      f.red = p;
+      f.level = f.from + (0.8 - f.from) * p;
+      if (age > 9000 && !f.chaser) { f.chaser = true; chaseIn(); }
+      if (f.chaser && f.wraithGone) {
+        f.bstage = 'drain';
+        f.drainAt = now;
+        f.red0 = f.red;
+        f.from = f.level;
+        moonSet(f.moon);
+        f.moon = null;
+      }
+    } else {
+      const p = Math.min(1, (now - f.drainAt) / 10000);
+      f.red = f.red0 * (1 - p);
+      f.level = f.from + (0.35 - f.from) * p;
+      if (p >= 1) { f.red = 0; f.phase = 'light'; f.at = now; }
+    }
+  }
+  function chaseIn() {
+    const W = api.laneW();
+    const v = add('wraith', rand(0.15, 0.85) * W, Math.random() < 0.5 ? 1 : -1, { state: 'fadein', until: performance.now() + 1500, stops: 1, target: 0, scary: true, chaser: true, pal: { e: '#ff2a2a', c: '#9aa3ae', C: '#6b7480', h: '#0d0f13' } });
+    v.el.classList.add('fog-wraith', 'scary');
+    v.fogVisitor = true;
+    v.el.style.opacity = '0';
+    requestAnimationFrame(() => { v.el.style.opacity = '0.85'; });
+    say(v, 'ooOOoo', 1400);
+  }
+
+  // THE WEREWOLF (OCTOBER): night falls over the card and a pale full moon rises; the werewolf
+  // lopes in, stops, throws its head back and howls (the bots near it bolt, the rest jump), then
+  // runs off at a sprint, and the moon sinks. Poked: a growl, and off
+  function werewolfVisit(dir, edge, W) {
+    const night = document.createElement('div');
+    night.className = 'night-dark';
+    night.setAttribute('aria-hidden', 'true');
+    if (!fog) { api.lane.appendChild(night); requestAnimationFrame(() => requestAnimationFrame(() => night.classList.add('on'))); }
+    const moon = moonRise(false);
+    const v = add('werewolf', edge(21 * U), dir, { state: 'wait', until: performance.now() + 3500, stopAt: rand(0.3, 0.6) * W });
+    scaleTree(v, 1.3); // (bigger than the bots)
+    v.onGone = () => {
+      moonSet(moon);
+      night.classList.remove('on');
+      setTimeout(() => night.remove(), 3000);
+    };
+  }
+  function werewolfFrame(v, now, dt, W) {
+    if (v.state === 'wait') { if (now > v.until) v.state = 'go'; } // (the moon up first)
+    else if (v.state === 'stand') { if (now > v.until) lopeOff(v); } // (there when the lights came on)
+    else if (v.state === 'go') {
+      v.x += v.dir * v.speed * dt;
+      if ((v.dir > 0 && v.x >= v.stopAt) || (v.dir < 0 && v.x <= W - v.stopAt)) howl(v, now);
+    } else if (v.state === 'howl' && now > v.until) {
+      v.el.classList.remove('v-howl');
+      lopeOff(v);
+    } else if (v.state === 'run') v.x += v.dir * v.speed * dt;
+  }
+  function howl(v, now) {
+    v.state = 'howl';
+    v.still = true;
+    v.until = now + 2800;
+    v.el.classList.add('v-howl');
+    say(v, 'AWOOOOOO', 2600);
+    api.botEvent('werewolf-howl');
+    for (const b of api.walkers()) { // (the bots near it bolt; the rest jump)
+      if (Math.abs(b.x - v.x) < 110) api.fright(b);
+    }
+    api.startle(v, 1e4);
+  }
+  function lopeOff(v) {
+    v.state = 'run';
+    v.still = false;
+    v.speed *= 4;
+    v.dir = v.x < api.laneW() / 2 ? -1 : 1;
+  }
+
+  // LIGHTS OUT (OCTOBER): the card goes dark, nothing showing but the bots' eyes, blinking. When the
+  // lights flicker back on, one of the bots has moved, or a monster stands among them
+  let lights = null;
+  const EYE_X = [5, 9].map((x) => x * 34 / 16); // (the bots' eyes, on their 16-wide grid)
+  function lightsOut() {
+    const bots = api.walkers();
+    if (lights || !bots.length) return;
+    const now = performance.now();
+    const dark = document.createElement('div');
+    dark.className = 'lights-out';
+    dark.setAttribute('aria-hidden', 'true');
+    api.lane.appendChild(dark);
+    lights = { dark, at: now, eyes: new Map(), outcome: Math.random() < 0.5 && bots.length > 1 ? 'moved' : 'monster', step: 0 };
+    for (const b of bots) {
+      api.hold(b, 6500);
+      lights.eyes.set(b, darkEyes(b.x, b.look));
+    }
+    api.botEvent('visit-lightsout');
+  }
+  function darkEyes(x, look = 0, red = false) {
+    const e = document.createElement('div');
+    e.className = `dark-eyes${red ? ' red' : ''}`;
+    e.style.left = `${(x + (look > 0 ? 1 : look < 0 ? -1 : 0)).toFixed(0)}px`;
+    e.style.animationDelay = `${rand(0, 2).toFixed(2)}s`;
+    e.innerHTML = EYE_X.map((ex) => `<i style="left:${ex.toFixed(1)}px"></i>`).join('');
+    api.lane.appendChild(e);
+    return e;
+  }
+  function lightsFrame(now) {
+    const L = lights;
+    const t = now - L.at;
+    const W = api.laneW();
+    if (L.step === 0 && t > 1800) { // (in the dark: one's eyes gone, or new ones open)
+      L.step = 1;
+      if (L.outcome === 'moved') {
+        L.who = pick([...L.eyes.keys()].filter((b) => !b.leaving));
+        if (L.who) L.eyes.get(L.who).style.opacity = '0';
+      } else {
+        const xs = [...L.eyes.keys()].map((b) => b.x);
+        let x = rand(0.1, 0.8) * W;
+        for (let k = 0; k < 10 && xs.some((bx) => Math.abs(bx - x) < 40); k++) x = rand(0.1, 0.8) * W;
+        L.spot = x;
+        L.monster = pick(['frank', 'mummy', 'nosferatu', 'creature', 'werewolf']);
+        L.red = darkEyes(x + (L.monster === 'werewolf' ? 14 : 0), 0, true);
+      }
+    } else if (L.step === 1 && t > 2700) {
+      L.step = 2;
+      if (L.who) { // (somewhere else, in the dark)
+        const xs = [...L.eyes.keys()].filter((b) => b !== L.who).map((b) => b.x);
+        let x = rand(0.05, 0.85) * W;
+        for (let k = 0; k < 12 && (xs.some((bx) => Math.abs(bx - x) < 40) || Math.abs(x - L.who.x) < 80); k++) x = rand(0.05, 0.85) * W;
+        api.move(L.who, x);
+        const e = L.eyes.get(L.who);
+        e.style.left = `${x.toFixed(0)}px`;
+        e.style.opacity = '1';
+      }
+    } else if (L.step === 2 && t > 4300) { // (the lights flicker back on)
+      L.step = 3;
+      L.dark.classList.add('on');
+      L.eyes.forEach((e) => e.remove());
+      if (L.red) L.red.remove();
+      if (L.monster) {
+        const m = add(L.monster, L.spot, Math.random() < 0.5 ? 1 : -1, { state: 'stand', until: now + 1600 });
+        if (L.monster === 'werewolf') scaleTree(m, 1.3);
+        say(m, pick(['BOO!', 'RAAH!', 'GRRR']), 1200);
+        api.botEvent(`visit-${L.monster}`);
+        for (const b of api.walkers()) {
+          if (Math.abs(b.x - L.spot) < 80) api.fright(b);
+          else api.say(b, 'scared', '!!');
+        }
+      } else if (L.who) {
+        api.say(L.who, 'surprised', '?!');
+        for (const b of api.walkers()) if (b !== L.who) { api.face(b, L.who.x); api.say(b, 'surprised', pick(['!?', '?'])); }
+        api.botEvent('lights-moved');
+      }
+    } else if (L.step === 3 && t > 5100) {
+      L.dark.remove();
+      lights = null;
+    }
+  }
+
+  // THE HAND (OCTOBER): the floor rumbles under a bot and a hand comes up through it and grabs it;
+  // the bot struggles, breaks free and runs for it, and the hand sinks back. Poked: it lets go
+  function handVisit() {
+    const bots = api.walkers().filter((b) => !['startled', 'vanish', 'poked'].includes(b.state));
+    if (!bots.length) return;
+    const b = pick(bots);
+    if (b.partner) b.partner.partner = null;
+    b.partner = null;
+    b.state = 'idle'; // (stopped where it stands)
+    api.hold(b, 5200);
+    const now = performance.now();
+    const H = SPRITES.hand.a.length * U;
+    const side = Math.random() < 0.5 ? -1 : 1; // (at its feet, to one side: a leg)
+    const v = add('hand', b.x + 17 - 4 * U + side * 13, -side, { state: 'rumble', until: now + 700, prey: b, t0: now, depth: H + 2 });
+    v.el.classList.add('v-front');
+    v.el.style.clipPath = 'inset(-80px -80px 0 -80px)'; // (below the floor, out of sight)
+    v.svgT = ` translateY(${v.depth}px)`;
+    api.say(b, 'worried', '?');
+    api.botEvent('visit-hand');
+  }
+  function handFrame(v, now) {
+    const b = v.prey;
+    if (v.state === 'rumble') {
+      v.svgT = ` translateY(${v.depth - (Math.random() < 0.5 ? 1 : 0)}px)`; // (the floor shaking)
+      if (now > v.until) { v.state = 'rise'; v.t0 = now; }
+    } else if (v.state === 'rise' || v.state === 'sink') {
+      const p = Math.min(1, (now - v.t0) / 600);
+      v.svgT = ` translateY(${(v.depth * (v.state === 'rise' ? 1 - p : p)).toFixed(1)}px)`;
+      if (p < 1) return;
+      if (v.state === 'sink') { v.gone = true; return; }
+      v.state = 'grab'; // (got it)
+      v.until = now + 1700;
+      v.el.classList.add('step');
+      if (b && !b.leaving) { api.hold(b, 2000); api.say(b, 'scared', '!!'); b.el.classList.add('shaking'); }
+    } else if (v.state === 'grab' && now > v.until) letGo(v, now);
+    else if (v.state === 'lost' && now > v.until) { v.state = 'sink'; v.t0 = now; }
+  }
+  function letGo(v, now) { // (the bot breaks free and runs; the hand grasps at the air)
+    const b = v.prey;
+    v.state = 'lost';
+    v.until = now + 900;
+    v.el.classList.remove('step');
+    if (b) { b.el.classList.remove('shaking'); api.fright(b); }
+    v.prey = null;
+  }
+
+  // THE POSSESSED BOT (OCTOBER): one of the bots, red-eyed, walking stiffly (wanderers.js); poked,
+  // a little ghost shakes out of it (spirit()) and floats away
+  function possessVisit() {
+    const bots = api.walkers().filter((b) => !b.possessed);
+    if (bots.length) api.possess(pick(bots));
+  }
+  function spirit(x) {
+    const v = add('spirit', x - 3.5 * U, Math.random() < 0.5 ? 1 : -1, { state: 'rise', y: 12, until: performance.now() + 2600 });
+    v.el.classList.add('v-front');
+    say(v, 'ooOOoo', 1400);
+    requestAnimationFrame(() => { v.el.style.transition = 'opacity 2.4s ease-in'; v.el.style.opacity = '0'; });
+    api.botEvent('exorcise');
+  }
+
   // The FOG WANDERER: out of the mist, from spot to spot, and back into it by a tree
   function wraithIn() {
     const W = api.laneW();
@@ -617,7 +1104,26 @@ function createVisitors(api) {
   }
   function wraithFrame(v, now, dt, W) {
     v.y = 2 + Math.sin(v.age / 600) * 2; // (floating)
-    if (v.state === 'fadein' && now > v.until) { v.state = 'roam'; v.target = rand(0.1, 0.85) * W; }
+    if (v.state === 'fadein' && now > v.until) {
+      v.state = 'roam';
+      v.target = rand(0.1, 0.85) * W;
+      const bots = api.walkers();
+      if (v.chaser && bots.length) { // (the BLOOD FOG's: after a bot)
+        v.state = 'chase';
+        v.prey = pick(bots);
+        v.speed = 40;
+        v.until = now + 14000;
+        say(v, pick(['ooOOOO', '...']), 1200);
+      }
+    } else if (v.state === 'chase') {
+      const b = v.prey;
+      if (!b || b.gone || b.x < -30 || b.x > W - 4 || now > v.until) fadeAway(v, now, 1600);
+      else {
+        v.dir = b.x > v.x ? 1 : -1;
+        v.x += v.dir * Math.min(v.speed * dt, Math.abs(b.x - v.x));
+        if (!v.caught && Math.abs(b.x - v.x) < 34) { v.caught = true; api.fright(b); api.botEvent('bloodfog-chase'); }
+      }
+    }
     else if (v.state === 'roam') {
       v.dir = v.target > v.x ? 1 : -1;
       v.x += v.dir * Math.min(v.speed * dt, Math.abs(v.target - v.x));
@@ -1332,7 +1838,28 @@ function createVisitors(api) {
       api.startle(v, 60); // (the bots near it don't like spiders)
       return;
     }
-    if (v.state === 'fogtree') return;
+    if (v.walkTree) { // (an uprooted tree, poked: it stops and roots again)
+      if (v.state === 'stalk') { say(v, '...', 800); plantTree(v, performance.now()); }
+      return;
+    }
+    if (v.state === 'fogtree' || v.kind === 'spirit') return;
+    if (v.kind === 'eyes') { // (they shut, and they're gone)
+      if (v.state === 'eyes') { api.botEvent('visitor-pokes'); v.until = 0; }
+      return;
+    }
+    if (v.kind === 'hand') { // (it lets go)
+      if (['rumble', 'rise', 'grab'].includes(v.state)) { api.botEvent('visitor-pokes'); letGo(v, performance.now()); }
+      return;
+    }
+    if (v.kind === 'werewolf') { // (a growl, and off on all fours)
+      if (v.state === 'run') return;
+      api.botEvent('visitor-pokes');
+      say(v, pick(['GRRR!', 'SNARL']), 900);
+      v.el.classList.remove('v-howl');
+      api.startle(v, 60);
+      lopeOff(v);
+      return;
+    }
     if (v.kind === 'gremlin') { // (a screech, and off at a run)
       if (v.state === 'out') return;
       api.botEvent('visitor-pokes');
@@ -1568,11 +2095,14 @@ function createVisitors(api) {
 
   function frame(now, dt) {
     const W = api.laneW();
+    if (!fog && hauntedForest && spooky()) startFog(true); // (the HAUNTED FOREST stands, all month)
     if (fog) fogFrame(now);
-    if (!foggy() && !list.some((v) => v.state !== 'scenery' && v.state !== 'fogtree') && now > nextVisit) {
+    if (lights) lightsFrame(now);
+    if (!foggy() && !lights && !list.some((v) => v.state !== 'scenery' && v.state !== 'fogtree') && now > nextVisit) {
       // (the VIRUS: any time of year, now and then; a FOG now and then in NOVEMBER; otherwise the
       // season's visitors, if any)
       if (virusOften() || Math.random() < VIRUS_ODDS) visit('virus');
+      else if (fog && fog.haunted && fog.phase === 'light' && Math.random() < 0.4) forestVisit();
       else if (!fog && (fogOften() || ((Season.is('november') || Season.is('halloween')) && Math.random() < FOG_ODDS))) startFog();
       else if (visits().length) visit();
       nextVisit = now + (virusOften() ? rand(3000, 6000) : rand(20000, 45000));
@@ -1594,8 +2124,22 @@ function createVisitors(api) {
         v.frame = 1 - v.frame;
         v.el.classList.toggle('step', !!v.frame);
       }
-      if (v.state === 'fogtree') {
+      if (v.walkTree) {
+        treeWalkFrame(v, now, dt, W); // (uprooted: shuffling after the bots)
+      } else if (v.state === 'fogtree') {
         // (standing in the fog)
+      } else if (v.kind === 'eyes') {
+        eyesFrame(v, now);
+      } else if (v.kind === 'hand') {
+        handFrame(v, now);
+      } else if (v.kind === 'werewolf') {
+        werewolfFrame(v, now, dt, W);
+      } else if (v.kind === 'spirit') { // (up and away, swaying, fading)
+        v.y += 22 * dt;
+        v.x += Math.sin(v.age / 300) * 10 * dt;
+        if (now > v.until) v.gone = true;
+      } else if (v.state === 'stand') { // (there when the lights came on: a moment, then off)
+        if (now > v.until) { v.state = 'go'; v.dir = v.x < W / 2 ? -1 : 1; }
       } else if (v.kind === 'gremlin') { // (up to a bot, a prank, the next; then off)
         if (v.state === 'go') {
           v.dir = v.target > v.x ? 1 : -1;
@@ -1626,6 +2170,10 @@ function createVisitors(api) {
         // (scenery: pushed by a wanderer, or standing where it was left)
         if (v.kind === 'snowman') snowmanWaits(v, now);
         if (v.kind === 'bit') bitFrame(v, now);
+        if (v.kind === 'tree' && spooky()) { // (OCTOBER: now and then it pulls up its roots)
+          if (!v.walkAt) v.walkAt = now + rand(30000, 70000);
+          else if (now > v.walkAt && !api.walkers().some((b) => b.pushing === v)) { v.walkAt = now + rand(40000, 90000); if (api.walkers().length && Math.random() < 0.5) treeWalk(v); }
+        }
       } else if (v.kind === 'snowman') {
         snowmanSneaks(v, now, dt);
       } else if (v.kind === 'dreidel') { // (spins along, wobbles to a stop, lands on a letter; then on)
@@ -1758,24 +2306,29 @@ function createVisitors(api) {
         v.el.style.opacity = '0';
         setTimeout(() => { v.gone = true; }, 2000);
       }
-      if (v.state === 'scenery' || v.state === 'fogtree') continue; // (it stays)
+      if (v.state === 'scenery' || v.state === 'fogtree' || v.walkTree) continue; // (it stays)
       const w = v.boxW || (v.boxW = v.el.offsetWidth) || 30; // (measured once: read every frame between the moves, it forced a layout per visitor)
       if (v.x < -w - 40 || v.x > W + 40 || v.y > ceiling() + 40) v.gone = true;
     }
     list = list.filter((v) => {
       if (v.gone && v.fogVisitor && fog) fog.wraithGone = true; // (the fog's visitor gone: it thins)
+      if (v.gone && v.onGone) v.onGone();
       if (v.gone) v.el.remove();
       return !v.gone;
     });
   }
   // (while the fog's heavy: rolling in, or the wanderer about)
-  function foggy() { return !!fog && (fog.phase === 'in' || fog.phase === 'thick'); }
-  function clear() {
-    if (fog) { fog.back.remove(); fog.fore.remove(); fog.dark.remove(); fog = null; }
+  function foggy() { return !!fog && ['in', 'thick', 'swell', 'blood'].includes(fog.phase); }
+  // (forget: the dev page's CLEAR ALL, the HAUNTED FOREST too)
+  function clear(forget = false) {
+    if (forget) hauntedForest = false;
+    if (fog) { fog.back.remove(); fog.fore.remove(); fog.dark.remove(); if (fog.moon) fog.moon.remove(); fog = null; }
+    if (lights) { lights.dark.remove(); lights.eyes.forEach((e) => e.remove()); if (lights.red) lights.red.remove(); lights = null; }
+    api.lane.querySelectorAll('.moon-sky, .night-dark').forEach((e) => e.remove());
     list.forEach((v) => v.el.remove());
     list = [];
     flakes.forEach((f) => f.el.remove());
     flakes = [];
   }
-  return { frame, clear, visit, list: () => list, makeScenery, moveTree, foggy };
+  return { frame, clear, visit, list: () => list, makeScenery, moveTree, foggy, spirit };
 }

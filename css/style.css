@@ -2684,6 +2684,45 @@ html.page-twinkle .page-bg { display: block; }
 .visitor.fog-wraith.scary .walker-emote { color: #ff8a8a; }
 .visitor-tree svg { filter: drop-shadow(0 0 1px rgba(220, 225, 240, 0.3)); }
 .visitor-tree.v-creak svg { animation: visitor-shake 0.1s steps(1) 6 alternate; }
+/* OCTOBER's HAUNTED FOREST (visitors.js): the big trees in front of everything (the fog drifting
+   over them), a tree uprooted (in front of the others), the glowing eyes between the trees */
+:is(.start-walkers, .game-walkers) .visitor.fog-tree.fore { z-index: 2; }
+.visitor.fog-tree.fore svg { filter: drop-shadow(0 0 1px rgba(150, 162, 178, 0.35)) !important; }
+:is(.start-walkers, .game-walkers) .visitor.v-uproot { z-index: 0; }
+:is(.start-walkers, .game-walkers) .visitor.v-front { z-index: 2; }
+:is(.start-walkers, .game-walkers) .visitor.fog-eyes { z-index: -2; transition: opacity 0.8s ease; }
+.visitor.fog-eyes svg { filter: drop-shadow(0 0 2px currentColor); }
+.visitor.fog-eyes.blink svg { opacity: 0; }
+/* A MOON rising behind the trees: the BLOOD FOG's, or the WEREWOLF's full moon; the night falling
+   for it (as under the fog) */
+:is(.start-walkers, .game-walkers) .moon-sky { position: absolute; left: 0; right: 0; top: 0; bottom: 0; overflow: hidden; z-index: -2; pointer-events: none; transition: opacity 6s ease-in; }
+.game-walkers .moon-sky { top: -28px; clip-path: inset(0 round 0 0 8px 8px); }
+.moon-sky .moon { position: absolute; transition: bottom 12s cubic-bezier(0.2, 0.6, 0.3, 1); filter: drop-shadow(0 0 6px rgba(255, 244, 205, 0.55)); }
+.moon-sky.blood .moon { filter: drop-shadow(0 0 8px rgba(255, 40, 30, 0.7)); }
+:is(.start-walkers, .game-walkers) .night-dark { position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: -4; pointer-events: none; opacity: 0; transition: opacity 3s ease;
+  background: linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0.92) 55%, rgba(0, 0, 0, 0) 100%); }
+.night-dark.on { opacity: 0.85; }
+.game-walkers .night-dark { top: -28px; bottom: -6px; clip-path: inset(0 round 0 0 8px 8px); }
+.start-walkers:not(.saver-lane) .night-dark { top: auto; height: 55%; bottom: -10px; }
+.saver-lane .night-dark, [data-theme="paper"] .night-dark, [data-theme="daylight"] .night-dark { display: none; }
+.visitor.v-howl :is(.f-a, .f-b) { display: none; }
+.visitor.v-howl .f-c { display: inline; }
+/* LIGHTS OUT: the card dark (flickering off, and back on), nothing but the bots' eyes */
+:is(.start-walkers, .game-walkers) .lights-out { position: absolute; left: 0; right: 0; top: 0; bottom: -2px; z-index: 5; background: #000; pointer-events: none; animation: lights-off 0.7s steps(1) both; }
+.game-walkers .lights-out { top: -60px; bottom: -6px; clip-path: inset(0 round 0 0 8px 8px); }
+.start-walkers:not(.saver-lane) .lights-out { bottom: -10px; }
+.lights-out.on { animation: lights-on 0.8s steps(1) forwards; }
+@keyframes lights-off { 0% { opacity: 0; } 15% { opacity: 1; } 30% { opacity: 0; } 45% { opacity: 1; } 55% { opacity: 0.3; } 70%, 100% { opacity: 1; } }
+@keyframes lights-on { 0% { opacity: 1; } 20% { opacity: 0; } 35% { opacity: 1; } 55% { opacity: 0; } 70% { opacity: 0.8; } 85%, 100% { opacity: 0; } }
+:is(.start-walkers, .game-walkers) .dark-eyes { position: absolute; bottom: 19px; width: 34px; height: 5px; z-index: 6; pointer-events: none; transition: opacity 0.3s ease; animation: dark-blink 3.1s steps(1) infinite; }
+.dark-eyes i { position: absolute; top: 0; width: 4.25px; height: 4.25px; background: #eaf6ff; box-shadow: 0 0 4px rgba(200, 230, 255, 0.85); }
+.dark-eyes.red i { background: #ff2a2a; box-shadow: 0 0 5px rgba(255, 42, 42, 0.9); }
+@keyframes dark-blink { 0%, 90% { transform: scaleY(1); } 93% { transform: scaleY(0.1); } 96%, 100% { transform: scaleY(1); } }
+/* POSSESSED: red, glowing eyes and a stiff walk (no bounce, slow steps) */
+.walker.possessed .cpu-bot .eyes { fill: #ff2a2a !important; filter: drop-shadow(0 0 1px #ff2a2a); }
+.walker.possessed.walking .bot { animation: none; }
+.walker.possessed.walking :is(.leg-a, .leg-b) { animation-duration: 0.7s; }
+.walker.possessed.walking .leg-b { animation-delay: 0.35s; }
 /* The spider's silk thread, up out of sight */
 .visitor-thread { position: absolute; left: 50%; bottom: 60%; width: 1px; height: var(--thread, 160px); background: rgba(220, 225, 240, 0.45); pointer-events: none; }
 .visitor-spider svg { filter: drop-shadow(0 0 1px rgba(220, 225, 240, 0.45)); }

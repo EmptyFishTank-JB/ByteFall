@@ -606,6 +606,7 @@ function createWanderers(lane, active = () => true) {
   // (HARD and INSANE) never bolt: they go rabid (rabid()).
   function poke(w, now) {
     if (w.leaving || ['vanish', 'startled', 'poked'].includes(w.state)) return;
+    if (w.possessed) return exorcise(w, now);
     letGo(w);
     botEvent('pokes');
     if (w.partner) {
@@ -650,6 +651,33 @@ function createWanderers(lane, active = () => true) {
       mood(w, 'skeptic', true); // (the raised eyebrow, at you)
       botEvent(`eyebrow-${w.bot}`);
     }, 1400);
+  }
+
+  // POSSESSED (OCTOBER, visitors.js): red eyes and a stiff, slow walk; the others it meets are scared
+  // of it. Poked, it shakes and a little ghost shakes out of it and floats away; it comes to, dizzy
+  function possess(w) {
+    if (w.possessed || w.leaving) return;
+    w.possessed = true;
+    w.speed *= 0.6;
+    w.el.classList.add('possessed');
+    mood(w, 'idle', pick(['...', 'ooo']));
+    botEvent('visit-possessed');
+  }
+  function exorcise(w, now) {
+    letGo(w);
+    w.state = 'poked';
+    w.until = now + 2800;
+    w.look = 0;
+    w.el.classList.add('shaking');
+    mood(w, 'surprised', '!!');
+    place(w);
+    setTimeout(() => {
+      w.possessed = false;
+      w.speed /= 0.6;
+      w.el.classList.remove('possessed', 'shaking');
+      if (visitors && !w.gone) visitors.spirit(w.x + SIZE / 2);
+      mood(w, 'dizzy', '@_@');
+    }, 800);
   }
 
   // A mad one poked: it shakes its head, bares its teeth and snaps at you like a rabid dog, three
@@ -846,6 +874,9 @@ function createWanderers(lane, active = () => true) {
     // (a visitor holding one where it stands: RANSOMWARE; and turning one to look: SPYWARE)
     hold: (w, ms) => { if (!w.leaving && (w.state === 'walk' || w.state === 'idle')) { w.state = 'idle'; w.until = performance.now() + ms; w.target = w.x; place(w); } },
     face: (w, x) => { w.look = x > w.x + SIZE / 2 ? 1 : -1; place(w); },
+    // (LIGHTS OUT: one somewhere else when they come back on; and the POSSESSED bot)
+    move: (w, x) => { w.x = Math.max(0, Math.min(laneW() - SIZE, x)); w.target = w.x; place(w); },
+    possess: (w) => possess(w),
   }) : null;
   const foggy = () => !!visitors && visitors.foggy();
 
@@ -995,6 +1026,7 @@ function createWanderers(lane, active = () => true) {
         let pair = pick(MEETINGS);
         for (let k = 0; k < 12 && !pairFits(a, b, pair); k++) pair = pick(MEETINGS);
         if (!pairFits(a, b, pair)) pair = ['surprised', 'surprised'];
+        if (a.possessed || b.possessed) pair = [a.possessed ? 'devious' : 'scared', b.possessed ? 'devious' : 'scared']; // (one of them isn't itself)
         const [ma, mb] = pair;
         if (ma === 'love' && mb === 'love') botEvent('love-pair');
         const until = now + rand(1500, 2300);
@@ -1033,6 +1065,6 @@ function createWanderers(lane, active = () => true) {
     const out = fr.map((f, i) => ({ ms: Math.round((i + 1 < fr.length ? fr[i + 1].at : w.pose.end) - f.at), cells: f.pose === 'up' ? new Map(w.poseBase) : poseCells(w, f) }));
     w.pose = null; w.poseKey = null; Pixel.clear(svg); svg.classList.remove('px-pose');
     return out;
-  }, poseAt: (w, kind, t, P = 316) => { pose(w, kind, P); w.pose.start = performance.now() - t; }, clearAll: () => { walkers.forEach((w) => w.el.remove()); walkers = []; want = 0; nextReroll = performance.now() + 1e9; if (visitors) visitors.clear(); }, mood, fright: (w) => fright(w, performance.now()), rabid: (w) => rabid(w, performance.now()), spawn: (o) => spawn(performance.now(), o), poke: (w) => poke(w, performance.now()), depart: (w) => depart(w, performance.now()), phonesOff, phones: (w) => phonesOn(w, performance.now()), list: () => walkers, startle: (w) => startle(w, performance.now()), crowd: (n) => { want = n; nextReroll = performance.now() + 60000; }, dress, visit: (what) => visitors && visitors.visit(what), visitorList: () => (visitors ? visitors.list() : []), snack: (w) => snack(w, performance.now()), push: () => { forcePush = true; nextSpawn = 0; } };
+  }, poseAt: (w, kind, t, P = 316) => { pose(w, kind, P); w.pose.start = performance.now() - t; }, clearAll: () => { walkers.forEach((w) => w.el.remove()); walkers = []; want = 0; nextReroll = performance.now() + 1e9; if (visitors) visitors.clear(true); }, mood, fright: (w) => fright(w, performance.now()), rabid: (w) => rabid(w, performance.now()), spawn: (o) => spawn(performance.now(), o), poke: (w) => poke(w, performance.now()), depart: (w) => depart(w, performance.now()), phonesOff, phones: (w) => phonesOn(w, performance.now()), list: () => walkers, startle: (w) => startle(w, performance.now()), crowd: (n) => { want = n; nextReroll = performance.now() + 60000; }, dress, visit: (what) => visitors && visitors.visit(what), visitorList: () => (visitors ? visitors.list() : []), snack: (w) => snack(w, performance.now()), push: () => { forcePush = true; nextSpawn = 0; } };
 
 }
