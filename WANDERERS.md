@@ -5,16 +5,16 @@ year: what's **in the game** now, what's **planned** (see [TODO.md](TODO.md)), a
 pick from as we go. Seasons are set in `js/seasons.js` by the player's own date and can stack (WINTER
 sits under the December holidays).
 
-Legend: ✅ in the game · 🛠️ planned (TODO.md) · 💡 idea
+Legend: ✅ in the game · 🛠️ planned (TODO.md) · 💡 idea. Everything as one list: [docs/wanderers-everything.csv](docs/wanderers-everything.csv).
 
 ## Seasons in the game
 
 | Season | Dates | Costumes | Snacks | Visitors | Scenery (pushed in) | Weather / other |
 |---|---|---|---|---|---|---|
-| **All year** | ✅ HEADPHONES (with music playing: worn in, or put on; eyes closed, nodding and stepping on the beat; -_- and put away if the music stops) | — | — | ✅ VIRUSES (rare; walk or pixelate in, scuttle about, bots near them jump; poked, DELETED: they burst into their pixels or deteriorate): PHAGE (a bacteriophage, taller than the bots), BUG (spiky, fast), TROJAN (disguised as a bot; the first poke pixelates the disguise off: a wooden horse that bolts) · 🛠️ WORM, RANSOMWARE, SPYWARE, ADWARE, LOGIC BOMB | 🛠️ numbered BITs 1–8 (8 only from HARD / INSANE; EASY / NORMAL fear it) | — |
+| **All year** | ✅ HEADPHONES (with music playing: worn in, or put on; eyes closed, nodding and stepping on the beat; -_- and put away if the music stops) | — | — | ✅ VIRUSES (rare; walk or pixelate in, scuttle about, bots near them jump; poked, DELETED: they burst into their pixels or deteriorate): PHAGE (a bacteriophage, taller than the bots), BUG (spiky, fast), TROJAN (disguised as a bot; poked, the disguise peels off pixel by pixel: a wooden horse that bolts) · 🛠️ WORM, RANSOMWARE, SPYWARE, ADWARE, LOGIC BOMB | 🛠️ numbered BITs 1–8 (8 only from HARD / INSANE; EASY / NORMAL fear it) | — |
 | **HALLOWEEN** | Oct 15 – 31 | ✅ pumpkin, ghost sheet, witch hat, devil horns & tail | ✅ gummy drops | ✅ Frankenstein, mummy, creature from the black lagoon, Nosferatu, ghost, bats, crows, spider, GREMLIN (pranks the bots one after another) · 🛠️ big SPIDER (walks and jumps about) | ✅ scary tree (a bat flies out when poked) · ✅ jack o' lantern (glows, its candle flickering; poked, it flares and cackles, the bots near it jump) | ✅ the FOG, scarier: bare trees only; out of it comes the red-eyed wanderer or one of the monsters (Frankenstein, the mummy, the creature, Nosferatu, the ghost), fading back into the mist; most bots bolt |
 | **NOVEMBER** | all month | — | — | ✅ turkey, crows · ✅ migrating birds (geese in a V, ducks in a line, songbirds — robins, bluebirds, goldfinches, cardinals — and swallows; now and then one lands, pecks and calls to a bot; poked, the flock bolts) · ✅ FOG WANDERER (a pale hooded figure out of the fog; scares bots it nears) | ✅ foggy trees (fade in with the fog, stay in the light mist after) | ✅ heavy fog rolls in (pauses other events; bots bump and startle), then a light mist stays a couple of minutes and lifts |
-| **WINTER** | Dec 1 – Jan 6 | ✅ beanie, earmuffs, scarves | ✅ cookie bites | ✅ penguin (belly slide) · ✅ bots skating in with a powder trail · 🛠️ skate blades | ✅ snowman · 🛠️ snowman sneaks off hopping (and may collapse into a pile of snow) | ✅ falling snow |
+| **WINTER** | Dec 1 – Jan 6 | ✅ beanie, earmuffs, scarves | ✅ cookie bites | ✅ penguin (belly slide) · ✅ bots skating in with a powder trail, a blade under each foot | ✅ snowman · ✅ snowman sneaks off hopping (1 in 10 trips or loses its head and slumps into a pile of snow) | ✅ falling snow |
 | **HANUKKAH** | its 8 nights | ✅ blue beanie, scarf | ✅ gelt | ✅ dreidel (lands on a letter) | ✅ menorah (that night's candles) | — |
 | **CHRISTMAS** | Dec 18 – 26 | ✅ santa hat, elf hat, antlers | ✅ candy cane bits | ✅ reindeer (sometimes the red-nosed one) | ✅ evergreen with blinking lights | — |
 | **KWANZAA** | Dec 26 – Jan 1 | ✅ red / green scarves | — | — | ✅ kinara (that day's candles) | — |

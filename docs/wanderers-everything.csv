@@ -1,0 +1,174 @@
+﻿Category,Item,Season / when,What it does,In game,Status,Where
+Season,ALL YEAR,Every day,"Headphones, viruses, the bots' everyday behaviour",✓,In game,js/seasons.js
+Season,HALLOWEEN,Oct 15 – 31,"Costumes, gummy-drop snacks, monsters, the scary tree, the jack o' lantern, the scary fog",✓,In game,js/seasons.js
+Season,NOVEMBER,All of November,"Turkey, crows, migrating birds, the fog and the fog wanderer",✓,In game,js/seasons.js
+Season,WINTER,Dec 1 – Jan 6,"Snow, beanies/earmuffs/scarves, cookie bites, the penguin, skaters, the snowman (sits under the December holidays)",✓,In game,js/seasons.js
+Season,HANUKKAH,Its 8 nights (dates move each year),"Blue beanie and scarf, gelt, the dreidel, the menorah with that night's candles",✓,In game,js/seasons.js
+Season,CHRISTMAS,Dec 18 – 26,"Santa/elf hats, antlers, candy cane bits, reindeer, the evergreen",✓,In game,js/seasons.js
+Season,KWANZAA,Dec 26 – Jan 1,"Red/green scarves, the kinara with that day's candles",✓,In game,js/seasons.js
+Season,NEW YEAR'S EVE,Dec 31,"Party hats, the year sign, fireworks, the midnight countdown",✓,In game,js/seasons.js
+Season,NEW YEAR,Jan 1 – 2,"Party hats, the year sign, fireworks",✓,In game,js/seasons.js
+Bot,BOT,All year,"The original: green, antennas",✓,In game,"js/bot-svg.js, js/wanderers.js"
+Bot,GRIFTER,All year,Ear tips; the witch at Halloween,✓,In game,"js/bot-svg.js, js/wanderers.js"
+Bot,BUNKER,All year,Stocky and slow; the pumpkin at Halloween,✓,In game,"js/bot-svg.js, js/wanderers.js"
+Bot,GLITCH,All year,Never happy or smitten; lurches as it walks; the devil at Halloween,✓,In game,"js/bot-svg.js, js/wanderers.js"
+Bot level (resting face),EASY,All year,Smiling resting face (35% of wanderers),✓,In game,js/wanderers.js
+Bot level (resting face),NORMAL,All year,Neutral resting face (45%),✓,In game,js/wanderers.js
+Bot level (resting face),HARD,All year,Angry resting face (14%); goes rabid when poked,✓,In game,js/wanderers.js
+Bot level (resting face),INSANE,All year,Red-eyed resting face (6%); goes rabid when poked,✓,In game,js/wanderers.js
+Costume,Pumpkin (BUNKER),HALLOWEEN,"Body turns orange, darker ribs, stem and leaf; most bots arrive dressed (80%)",✓,In game,js/wanderers.js COSTUMES
+Costume,Bedsheet ghost (BOT),HALLOWEEN,"See-through sheet with a wavy hem, its face on top; most bots arrive dressed (80%)",✓,In game,js/wanderers.js COSTUMES
+Costume,Witch hat (GRIFTER),HALLOWEEN,"Orange band, bent tip; most bots arrive dressed (80%)",✓,In game,js/wanderers.js COSTUMES
+Costume,Devil horns and tail (GLITCH),HALLOWEEN,Horns and a pointed tail; most bots arrive dressed (80%),✓,In game,js/wanderers.js COSTUMES
+Costume,Beanie (red / white),WINTER,Any bot; most bots arrive dressed (80%),✓,In game,js/wanderers.js COSTUMES
+Costume,Earmuffs (pink),WINTER,Any bot; most bots arrive dressed (80%),✓,In game,js/wanderers.js COSTUMES
+Costume,Scarf (blue / white),WINTER,Any bot; most bots arrive dressed (80%),✓,In game,js/wanderers.js COSTUMES
+Costume,Scarf (green / white),WINTER,Any bot; most bots arrive dressed (80%),✓,In game,js/wanderers.js COSTUMES
+Costume,Beanie (blue / white),HANUKKAH,Any bot; most bots arrive dressed (80%),✓,In game,js/wanderers.js COSTUMES
+Costume,Scarf (blue / white),HANUKKAH,Any bot; most bots arrive dressed (80%),✓,In game,js/wanderers.js COSTUMES
+Costume,Santa hat,CHRISTMAS,Any bot; most bots arrive dressed (80%),✓,In game,js/wanderers.js COSTUMES
+Costume,Elf hat,CHRISTMAS,Any bot; most bots arrive dressed (80%),✓,In game,js/wanderers.js COSTUMES
+Costume,Reindeer antlers (and red nose),CHRISTMAS,Any bot; most bots arrive dressed (80%),✓,In game,js/wanderers.js COSTUMES
+Costume,Scarf (red / green),KWANZAA,Any bot; most bots arrive dressed (80%),✓,In game,js/wanderers.js COSTUMES
+Costume,Scarf (green / red),KWANZAA,Any bot; most bots arrive dressed (80%),✓,In game,js/wanderers.js COSTUMES
+Costume,Party hats (4 color sets),"NEW YEAR'S EVE, NEW YEAR",Any bot; most bots arrive dressed (80%),✓,In game,js/wanderers.js COSTUMES
+Accessory,Headphones,All year (with music playing),"Worn in, or pulled out and put on; eyes closed; nod on the kicks or tap on the hats; -_- and put away if the music stops",✓,In game,js/wanderers.js
+Accessory,Retro-futuristic glasses and other CPU wear,—,Simple things for the bots to wear,,Planned (TODO),TODO.md: CPU customization
+Snack,Gummy drops (6 colors),HALLOWEEN,"Pulled from its side, tossed up and caught, a quick chew (nom / mmm / *crunch*)",✓,In game,js/wanderers.js SNACKS
+Snack,Cookie bites,WINTER,"Pulled from its side, tossed up and caught, a quick chew (nom / mmm / *crunch*)",✓,In game,js/wanderers.js SNACKS
+Snack,Gelt,HANUKKAH,"Pulled from its side, tossed up and caught, a quick chew (nom / mmm / *crunch*)",✓,In game,js/wanderers.js SNACKS
+Snack,Candy cane bits,CHRISTMAS,"Pulled from its side, tossed up and caught, a quick chew (nom / mmm / *crunch*)",✓,In game,js/wanderers.js SNACKS
+Visitor,Frankenstein's monster,HALLOWEEN,Stomps past; poked: roars and stomps; frightens bots it passes,✓,In game,js/visitors.js
+Visitor,Mummy,HALLOWEEN,Shuffles past; poked: groans,✓,In game,js/visitors.js
+Visitor,Creature from the black lagoon,HALLOWEEN,Drips; poked: gurgles and splashes,✓,In game,js/visitors.js
+Visitor,Nosferatu,HALLOWEEN,Glides; poked: hisses and turns into bats,✓,In game,js/visitors.js
+Visitor,Ghost,HALLOWEEN,Floats; poked: BOO (every bot near it jumps) and fades,✓,In game,js/visitors.js
+Visitor,Bats (flock),HALLOWEEN,Fly over; poked: scatter,✓,In game,js/visitors.js
+Visitor,Crows,"HALLOWEEN, NOVEMBER",Hop about; poked: take off cawing,✓,In game,js/visitors.js
+Visitor,Spider on its thread,HALLOWEEN,"Drops down, dangles, back up; poked: scurries up",✓,In game,js/visitors.js
+Visitor,GREMLIN,HALLOWEEN,"Scurries to the bots one after another to prank them (hehehe; they jump), runs off; poked: screeches and bolts",✓,In game,js/visitors.js
+Visitor,Turkey,NOVEMBER,Wanders by; poked: gobbles and runs,✓,In game,js/visitors.js
+Visitor,Geese (in a V),NOVEMBER,"Migrating flock; one may land, peck and call to a bot; poked: the flock bolts",✓,In game,js/visitors.js
+Visitor,Ducks (in a line),NOVEMBER,Migrating flock,✓,In game,js/visitors.js
+Visitor,"Songbirds (robins, bluebirds, goldfinches, cardinals)",NOVEMBER,Migrating scatter,✓,In game,js/visitors.js
+Visitor,Swallows,NOVEMBER,"Fast, swooping",✓,In game,js/visitors.js
+Visitor,FOG WANDERER (pale hooded figure),NOVEMBER (fog),"Comes out of the fog, scares bots it nears, fades back",✓,In game,js/visitors.js
+Visitor,Red-eyed wanderer / monsters out of the fog,HALLOWEEN (fog),The scary fog: out of it comes the red-eyed wanderer or a monster; most bots bolt,✓,In game,js/visitors.js
+Visitor,Penguin,WINTER,Waddles by; poked: SQUAWK and a belly slide off,✓,In game,js/visitors.js
+Visitor,Reindeer,CHRISTMAS,Trot past; poked: a snort and a prance off,✓,In game,js/visitors.js
+Visitor,Rudolph (red-nosed reindeer),CHRISTMAS,"Now and then, the one with the glowing red nose",✓,In game,js/visitors.js
+Visitor,Dreidel,HANUKKAH,"Spins across, wobbles, lands on a letter (GIMEL is a bot event)",✓,In game,js/visitors.js
+Visitor,PHAGE (virus),"All year, rare","A bacteriophage, taller than the bots; walks or pixelates in, scuttles; poked: DELETED (bursts into pixels or decays)",✓,In game,js/visitors.js
+Visitor,BUG (virus),"All year, rare","Spiky, fast, glitching",✓,In game,js/visitors.js
+Visitor,TROJAN (virus),"All year, rare","Disguised as a bot; poked: the disguise peels off pixel by pixel, a wooden horse that bolts",✓,In game,js/visitors.js
+Visitor,WORM (virus),"All year, rare","Segmented; inches along, tunnels into the floor and pops up elsewhere",,Planned (TODO),TODO.md: More VIRUS types
+Visitor,RANSOMWARE (virus),"All year, rare","A padlock creature that demands payment (PAY UP / 1 BTC); the bot freezes, worried",,Planned (TODO),TODO.md: More VIRUS types
+Visitor,SPYWARE (virus),"All year, rare","A floating eye that tails a bot; the bot notices, suspicious",,Planned (TODO),TODO.md: More VIRUS types
+Visitor,ADWARE (virus),"All year, rare",A pop-up window popping in at new spots (WIN $$$! / CLICK ME / FREE RAM),,Planned (TODO),TODO.md: More VIRUS types
+Visitor,LOGIC BOMB (virus),"All year, rare","A walking bomb with a lit fuse; not poked (DEFUSED) in time, it goes off and scares every bot near",,Planned (TODO),TODO.md: More VIRUS types
+Visitor,Big SPIDER,HALLOWEEN,The size of the viruses; walks around and jumps about,,Planned (TODO),TODO.md
+Pushed scenery,Scary tree,HALLOWEEN,Pushed in by a bot; black eyes and a frown; poked: creaks and a bat flies out,✓,In game,js/visitors.js SCENERY
+Pushed scenery,Jack o' lantern,HALLOWEEN,"Pushed in; glows, candle flickering; poked: flares and cackles, bots near jump",✓,In game,js/visitors.js SCENERY
+Pushed scenery,"Foggy trees (pines, bare trees)","NOVEMBER, HALLOWEEN (fog)","Fade in with the fog front, stay in the light mist after (bare trees only at Halloween)",✓,In game,js/visitors.js SCENERY
+Pushed scenery,Snowman,WINTER,Pushed in; poked: brrr,✓,In game,js/visitors.js SCENERY
+Pushed scenery,Evergreen,CHRISTMAS,"Pushed in; blinking lights, twinkling star, presents; poked: jingle",✓,In game,js/visitors.js SCENERY
+Pushed scenery,Menorah,HANUKKAH,Pushed in; that night's candles lit; poked: glows,✓,In game,js/visitors.js SCENERY
+Pushed scenery,Kinara,KWANZAA,Pushed in; that day's candles lit; poked: glows,✓,In game,js/visitors.js SCENERY
+Pushed scenery,Year sign,"NEW YEAR'S EVE, NEW YEAR",Pushed in; the year; poked: cheer,✓,In game,js/visitors.js SCENERY
+Pushed scenery,Numbered BITs (1–8),All year,"A wanderer now and then pushes a numbered BIT onto the card (about 2%, varies by bot and personality); 1–7 from EASY/NORMAL, 1–8 from HARD/INSANE (8% an 8); EASY/NORMAL fear the 8; hidden achievement for seeing all",,Planned (TODO),TODO.md: Pushed BITs
+Weather / event,Fog,"NOVEMBER (and HALLOWEEN, scarier)","Heavy fog rolls in (other events pause; bots bump and startle), then a light mist for a couple of minutes; the grid behind fades to black",✓,In game,js/visitors.js
+Weather / event,Falling snow,WINTER,Snow falling over the lane,✓,In game,js/visitors.js
+Weather / event,Fireworks,"NEW YEAR'S EVE, NEW YEAR","A rocket up, bursting into pixel sparks",✓,In game,js/visitors.js
+Weather / event,Midnight countdown,NEW YEAR'S EVE,At the player's own midnight the bots count down from 10 and cheer; the sky fills with fireworks,✓,In game,js/visitors.js
+Animation / behaviour,Walk in and out,All year,"From either side, looking the way they go; up to four at once, never the same bot twice",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behaviour,Idle,All year,Stops for a while,✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behaviour,Meet and pull faces,All year,"Two that meet stop a body apart, face each other and pull faces (14 face pairings: happy/happy, smug/annoyed, love/surprised...)",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behaviour,Emotes,All year,"Little speech bits that fit the mood (^^, ?!, -_-, <3, haha, grr...)",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behaviour,Poked: bolt or shake off,All year,"40% bolt off startled; otherwise -_-, shakes itself off as if dirty, a raised eyebrow, wanders on",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behaviour,Poked: rabid (HARD / INSANE),All year,"Shakes its head, bares its teeth, three snapping lunges; then stomps off or glares",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behaviour,Startle,All year,"Bots near a sudden pop, decrypt or bolt face it, startled (cuts a meeting short; the partner is put out)",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behaviour,Spooked bolt,All year,"A start and a !, then off at a sprint; those near flinch",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behaviour,"Run in, out of breath",All year,"Arrives at a run, stops to catch its breath (huff, phew)",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behaviour,Pop in (pixelate in),All year,"Appears in place, pixelating in; those near jump",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behaviour,Decrypt out,All year,5% leave by pixelating away,✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behaviour,GLITCH lurch,All year,GLITCH walks in lurches,✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behaviour,Push scenery,All year,"Arrives pushing the season's piece, slowly, straining, and leaves it standing",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behaviour,Skating (WINTER),WINTER,"Skates in with long pushes, leaning into the glide, powder trail that melts, a blade under each foot",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behaviour,Headphones vibe,All year,"Nodders follow the kicks, tappers the hats; steps on the beat while walking",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behaviour,CORE DUMP headbang,All year,"Drawn 8-frame headbang with long hair, one a beat in the gallop, a heavy one over two beats in the half-time",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behaviour,CORE DUMP windmill,All year,Drawn 16-frame windmill with long hair in the blast beats,✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behaviour,Snack,All year,"Seasonal snack: pulled out, tossed, caught, chewed",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behaviour,Fog bumps,"NOVEMBER, HALLOWEEN (fog)",In the fog two that walk into each other jump and knock apart; now and then one bolts,✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behaviour,Countdown cheer,NEW YEAR'S EVE,Count down from 10 at midnight NYE and cheer,✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behaviour,Snowman sneaks off,WINTER,"After a while: eyes shift side to side, a blink, then hops off; 1 in 10 trips or loses its head and slumps into a pile that fades",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behaviour,TROJAN reveal,All year,"Disguise peels off pixel by pixel from the top, horse resolving under it",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behaviour,PIXEL MODE,—,"Bots on a pixel grid at twice the art's resolution: whole-pixel moves, turns redrawn (in the BOT SANDBOX only so far)",,Planned (TODO),"TODO.md: PIXEL MODE, pass 2 (visitors and viruses, then on in the game)"
+Mood (face),HAPPY,All year,A face the bots make (with its emotes),✓,In game,js/wanderers.js MOOD_EMOTES
+Mood (face),HIT,All year,A face the bots make (with its emotes),✓,In game,js/wanderers.js MOOD_EMOTES
+Mood (face),WORRIED,All year,A face the bots make (with its emotes),✓,In game,js/wanderers.js MOOD_EMOTES
+Mood (face),SMUG,All year,A face the bots make (with its emotes),✓,In game,js/wanderers.js MOOD_EMOTES
+Mood (face),ANNOYED,All year,A face the bots make (with its emotes),✓,In game,js/wanderers.js MOOD_EMOTES
+Mood (face),DEVIOUS,All year,A face the bots make (with its emotes),✓,In game,js/wanderers.js MOOD_EMOTES
+Mood (face),LOVE,All year,A face the bots make (with its emotes),✓,In game,js/wanderers.js MOOD_EMOTES
+Mood (face),SURPRISED,All year,A face the bots make (with its emotes),✓,In game,js/wanderers.js MOOD_EMOTES
+Mood (face),LAUGH,All year,A face the bots make (with its emotes),✓,In game,js/wanderers.js MOOD_EMOTES
+Mood (face),SCARED,All year,A face the bots make (with its emotes),✓,In game,js/wanderers.js MOOD_EMOTES
+Mood (face),DIZZY,All year,A face the bots make (with its emotes),✓,In game,js/wanderers.js MOOD_EMOTES
+Mood (face),TIRED,All year,A face the bots make (with its emotes),✓,In game,js/wanderers.js MOOD_EMOTES
+Mood (face),SKEPTIC,All year,A face the bots make (with its emotes),✓,In game,js/wanderers.js MOOD_EMOTES
+Mood (face),ANGRY,All year,A face the bots make (with its emotes),✓,In game,js/wanderers.js MOOD_EMOTES
+Mood (face),SNARL,All year,A face the bots make (with its emotes),✓,In game,js/wanderers.js MOOD_EMOTES
+Mood (face),MUNCH,All year,A face the bots make (with its emotes),✓,In game,js/wanderers.js MOOD_EMOTES
+Idea: scary October,"The lights go out (only the bots' eyes blinking; back on, one has moved or a monster stands there)",HALLOWEEN,,,Planned (TODO),TODO.md: Scary October ideas (pick from)
+Idea: scary October,A hand from under the floor grabs a bot,HALLOWEEN,,,Planned (TODO),TODO.md: Scary October ideas (pick from)
+Idea: scary October,Glowing eyes blinking between the fog's trees,HALLOWEEN,,,Planned (TODO),TODO.md: Scary October ideas (pick from)
+Idea: scary October,The scary tree uprooting and shuffling after the bots,HALLOWEEN,,,Planned (TODO),TODO.md: Scary October ideas (pick from)
+Idea: scary October,"A bot possessed (red eyes, stiff walk; poked, a little ghost shakes out)",HALLOWEEN,,,Planned (TODO),TODO.md: Scary October ideas (pick from)
+Idea: scary October,A full-moon night with a werewolf's howl,HALLOWEEN,,,Planned (TODO),TODO.md: Scary October ideas (pick from)
+Idea: scary October,A rare blood-red fog where the wanderer chases a bot,HALLOWEEN,,,Planned (TODO),TODO.md: Scary October ideas (pick from)
+Idea: by month,Resolution runner,January,,,Idea,WANDERERS.md
+Idea: by month,Soup cart vendor,January,,,Idea,WANDERERS.md
+Idea: by month,Firewood gatherer,January,,,Idea,WANDERERS.md
+Idea: by month,Warm letter carrier,February,,,Idea,WANDERERS.md
+Idea: by month,Snow sculptor,February,,,Idea,WANDERERS.md
+Idea: by month,Cozy librarian,February,,,Idea,WANDERERS.md
+Idea: by month,Raincoat wanderer,March,,,Idea,WANDERERS.md
+Idea: by month,Puddle jumper,March,,,Idea,WANDERERS.md
+Idea: by month,Kite flyer,March,,,Idea,WANDERERS.md
+Idea: by month,Flower planter,April,,,Idea,WANDERERS.md
+Idea: by month,Bee caretaker,April,,,Idea,WANDERERS.md
+Idea: by month,Umbrella dancer,April,,,Idea,WANDERERS.md
+Idea: by month,Picnic wanderer,May,,,Idea,WANDERERS.md
+Idea: by month,Garden gnome inspector,May,,,Idea,WANDERERS.md
+Idea: by month,Wind chime tuner,May,,,Idea,WANDERERS.md
+Idea: by month,Firefly chaser,June,,,Idea,WANDERERS.md
+Idea: by month,Lemonade vendor,June,,,Idea,WANDERERS.md
+Idea: by month,Sunhat traveler,June,,,Idea,WANDERERS.md
+Idea: by month,Sprinkler runner,July,,,Idea,WANDERERS.md
+Idea: by month,Ice cream wanderer,July,,,Idea,WANDERERS.md
+Idea: by month,Beachcomber,July,,,Idea,WANDERERS.md
+Idea: by month,Back-to-school shopper,August,,,Idea,WANDERERS.md
+Idea: by month,Heatwave napper,August,,,Idea,WANDERERS.md
+Idea: by month,Cicada listener,August,,,Idea,WANDERERS.md
+Idea: by month,Apple picker,September,,,Idea,WANDERERS.md
+Idea: by month,Backpack hiker,September,,,Idea,WANDERERS.md
+Idea: by month,Lantern carrier,September,,,Idea,WANDERERS.md
+Idea: by month,Pumpkin carver,October,,,Idea,WANDERERS.md
+Idea: by month,Mischief sprite,October,,,Idea,WANDERERS.md
+Idea: by month,Foggy morning jogger,October,,,Idea,WANDERERS.md
+Idea: by month,Windblown leaf collector (net or basket),November,,,Idea,WANDERERS.md
+Idea: by month,"Sweater weather (scarves, warm drinks)",November,,,Idea,WANDERERS.md
+Idea: by month,Candle maker,November,,,Idea,WANDERERS.md
+Idea: by month,Leaf raker,November,,,Idea,WANDERERS.md
+Idea: by month,Chilly breeze wanderer,November,,,Idea,WANDERERS.md
+Idea: by month,Early winter prepper,November,,,Idea,WANDERERS.md
+Idea: by month,Gift courier,December,,,Idea,WANDERERS.md
+Idea: by month,Snow globe collector,December,,,Idea,WANDERERS.md
+Idea: by month,Icicle engineer,December,,,Idea,WANDERERS.md
+Idea: by month,"Frost spirits (shimmering, slow, icy footprints)",Winter (Dec – Feb),,,Idea,WANDERERS.md
+Idea: by month,Snow shoveler (tidies paths),Winter (Dec – Feb),,,Idea,WANDERERS.md
+Idea: by month,Hot cocoa vendor (steam puffs from the mug),Winter (Dec – Feb),,,Idea,WANDERERS.md
+Idea: by month,"Aurora watcher (looks up, reacts to sky colors)",Winter (Dec – Feb),,,Idea,WANDERERS.md
+Idea: by month,"Hibernating critter (yawns, waddles slowly)",Winter (Dec – Feb),,,Idea,WANDERERS.md
+Idea: game of its own,Side-scroller starring one bot,—,"Pick BOT, GRIFTER, BUNKER or GLITCH (each with an ability) through seasonal levels; viruses and monsters as enemies",,Idea,WANDERERS.md
+Idea: game of its own,Virtual pet / terrarium,—,Look after a colony of bots; seasons and visitors come by; viruses to poke away,,Idea,WANDERERS.md
