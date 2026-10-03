@@ -55,8 +55,8 @@ tools/android/          its MainActivity, icon and splash images, and the test s
 
 ## Android test APK
 
-GitHub builds the game as an Android app (Capacitor) on each push to `main` that changes
-the game, or by hand: **Actions → Android test APK → Run workflow**. When the run is
+GitHub builds the game as an Android app (Capacitor) when you ask it to: **Actions →
+Android test APK → Run workflow** (pushes don't build it). When the run is
 done, its page has the APK under **Artifacts** (a zip; unzip it on the phone and open the
 `.apk`, allowing installs from that app if Android asks). It's the game as players
 would get it: no dev page or DEV link, dev switches cleared, full screen, portrait.
@@ -64,6 +64,29 @@ Every test build is signed with the same test key (`tools/android/test.keystore`
 secret and not for the Play Store), so a new one installs over the last and keeps the
 progress. To build it locally instead: `npm ci && node tools/build-app.js && npx cap add
 android && node tools/setup-android.js`, then open `android/` in Android Studio.
+
+## Hashes and boosters
+
+HASHES (`#`) are the game's currency, earned by playing and kept on the device
+(progress.js): 1 for every 10 bits decrypted, +2 when a chain reaches 5 links and +5 at 7,
+a first puzzle solve (EASY 2, NORMAL 4, HARD 6), 10 for each achievement and each level,
+5 for the day's first daily game, and 5 with the DAILY DROP (claimed once a day in the
+STORE, with a free exploit for the next game). They're spent on BOOSTERS in the STORE:
+
+| Booster | # | Does |
+|---|---|---|
+| HEAD START | 15 | the CHAIN METER starts half full |
+| FIREWALL DELAY | 20 | the first encryption layer rises 4 drops later |
+| LOOKAHEAD | 15 | the next bit shown all game |
+| OVERTIME | 20 | +15 seconds in BLITZ |
+| SECOND CHANCE | 40 | when the trace completes, the overflow row is wiped and the game goes on (once a game) |
+| HINT | 10 | PUZZLE: lights the column the next bit goes in (worked out by js/puzzle-sim.js) |
+| UNDO | 8 | PUZZLE: takes back the last drop, even after running out of bits |
+
+The first five are switched on from the main menu for the modes they fit and paid for at
+a game's first drop (SECOND CHANCE only when it saves you); HINT and UNDO sit under a
+puzzle's drop buttons, and with none owned a second tap buys one. Never in DAILY or VS. A
+boosted game says so on its result screen.
 
 ## Exploits
 
