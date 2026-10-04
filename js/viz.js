@@ -30,6 +30,13 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
 
   // The signal's colors follow the theme: its bit color (hot parts in its accent), or under
   // SPECTRUM a rainbow cycling like the bits (f: 0-1 across the bars, spokes or particles)
+  // K: how many 120Hz frames this frame stands for, so the fades, trails and movement run at the
+  // same speed whatever the screen's refresh rate (tuned on a 120Hz phone); dec(x) a per-frame
+  // multiplier, ease(a) a per-frame step toward a target, scaled to it
+  let K = 1;
+  let lastDraw = 0;
+  const dec = (x) => Math.pow(x, K);
+  const ease = (a) => 1 - Math.pow(1 - a, K);
   let rainbow = false;
   let hue = 0;
   let fgNow = '57, 255, 143';
@@ -38,8 +45,10 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     ? `hsla(${((hue + f * 360) % 360).toFixed(0)}, 100%, ${hot ? 72 : 62}%, ${a})`
     : `rgba(${hot ? accentNow : fgNow}, ${a})`);
 
+  // (drawn at 2x at least: on a 1x screen the browser scales it down, smoothing the dots and
+  // lines; a phone's 3x is left as it is)
   function fit() {
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = Math.max(2, window.devicePixelRatio || 1);
     const w = canvas.clientWidth;
     const h = canvas.clientHeight;
     if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
@@ -72,7 +81,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
         for (let i = from; i < to && i < freq.length; i++) peak = Math.max(peak, freq[i]);
         level = Math.min(1, (peak / 255) * (1 + 0.7 * (b / bars))); // lift the quieter treble end
       }
-      peaks[b] = Math.max(level, peaks[b] - 0.025);
+      peaks[b] = Math.max(level, peaks[b] - 0.025 * K);
       const lit = Math.round(level * segments);
       const cap = Math.min(segments - 1, Math.round(peaks[b] * segments));
       const x = b * (barW + gap);
@@ -95,7 +104,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     const fg = vizRgb('--fg-rgb', '57, 255, 143');
     // Fade the previous frame instead of clearing it: a short phosphor trail
     g.globalCompositeOperation = 'destination-out';
-    g.fillStyle = an ? 'rgba(0, 0, 0, 0.4)' : 'rgba(0, 0, 0, 1)';
+    g.fillStyle = an ? `rgba(0, 0, 0, ${ease(0.4).toFixed(3)})` : 'rgba(0, 0, 0, 1)';
     g.fillRect(0, 0, w, h);
     g.globalCompositeOperation = 'source-over';
     const mid = h / 2;
@@ -107,7 +116,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       an.getFloatTimeDomainData(wave);
       let max = 0;
       for (let i = 0; i < wave.length; i++) max = Math.max(max, Math.abs(wave[i]));
-      loudness = Math.max(max, loudness * 0.97, 0.004);
+      loudness = Math.max(max, loudness * dec(0.97), 0.004);
       const gain = Math.min(14, 0.9 / loudness);
       for (let i = 0; i < wave.length; i++) {
         const x = (i / (wave.length - 1)) * w;
@@ -157,7 +166,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   // A phosphor trail: fade the last frame instead of clearing it
   function fade(w, h, amount) {
     g.globalCompositeOperation = 'destination-out';
-    g.fillStyle = `rgba(0, 0, 0, ${amount})`;
+    g.fillStyle = `rgba(0, 0, 0, ${ease(amount).toFixed(3)})`;
     g.fillRect(0, 0, w, h);
     g.globalCompositeOperation = 'source-over';
   }
@@ -215,7 +224,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     fade(w, h, 0.55);
     const n = radialLevels.length;
     const lv = bands(an, n);
-    for (let b = 0; b < n; b++) radialLevels[b] = lv ? Math.max(lv[b], radialLevels[b] * 0.86) : radialLevels[b] * 0.9;
+    for (let b = 0; b < n; b++) radialLevels[b] = lv ? Math.max(lv[b], radialLevels[b] * dec(0.86)) : radialLevels[b] * dec(0.9);
     const bass = (radialLevels[0] + radialLevels[1] + radialLevels[2]) / 3;
     const cx = w / 2;
     const cy = h / 2;
@@ -255,7 +264,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     fade(w, h, 0.22);
     const n = blobLevels.length;
     const lv = bands(an, n);
-    for (let b = 0; b < n; b++) blobLevels[b] += ((lv ? lv[b] : 0) - blobLevels[b]) * 0.18;
+    for (let b = 0; b < n; b++) blobLevels[b] += ((lv ? lv[b] : 0) - blobLevels[b]) * ease(0.18);
     let energy = 0;
     for (let b = 0; b < n; b++) energy += blobLevels[b];
     energy /= n;
@@ -289,7 +298,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     g.lineWidth = 1.5;
     g.stroke();
     // New particles from the blob's edge, more and faster with more energy
-    const spawn = an ? Math.floor(energy * 10 + (Math.random() < energy * 3 ? 1 : 0)) : 0;
+    const spawn = an ? Math.floor(energy * 10 * K + (Math.random() < energy * 3 * K ? 1 : 0)) : 0;
     for (let k = 0; k < spawn && particles.length < 260; k++) {
       const a = Math.random() * Math.PI * 2;
       const r = radiusAt(a);
@@ -298,13 +307,13 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     }
     for (let k = particles.length - 1; k >= 0; k--) {
       const q = particles[k];
-      q.x += q.vx; q.y += q.vy;
-      q.vx *= 0.985; q.vy *= 0.985;
+      q.x += q.vx * K; q.y += q.vy * K;
+      q.vx *= dec(0.985); q.vy *= dec(0.985);
       // a slow swirl
       const dx = q.x - cx;
       const dy = q.y - cy;
-      q.x += -dy * 0.004; q.y += dx * 0.004;
-      q.life -= 0.012;
+      q.x += -dy * 0.004 * K; q.y += dx * 0.004 * K;
+      q.life -= 0.012 * K;
       if (q.life <= 0 || q.x < -4 || q.y < -4 || q.x > w + 4 || q.y > h + 4) { particles.splice(k, 1); continue; }
       g.fillStyle = paint(q.f, q.life.toFixed(2), q.hot);
       g.fillRect(q.x - 1, q.y - 1, 2, 2);
@@ -357,15 +366,15 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       }
       // scaled by the average level (not the peaks), so the shape fills the scope
       const rms = Math.sqrt((ll + rr) / (2 * wave.length));
-      vectorLevel += (Math.max(rms, 0.002) - vectorLevel) * 0.08;
+      vectorLevel += (Math.max(rms, 0.002) - vectorLevel) * ease(0.08);
       const gain = Math.min(60, 0.22 / vectorLevel) * r;
       // (the side's own level, and the left's and right's, for the scales that stretch them)
       let ss = 0;
       for (let i = 0; i < wave.length; i++) { const sd = vectorR[i] - wave[i]; ss += sd * sd; }
       const sideRms = Math.sqrt(ss / (2 * wave.length));
-      vectorSide += (Math.max(sideRms, 0.0005) - vectorSide) * 0.06;
-      vectorL += (Math.max(Math.sqrt(ll / wave.length), 0.002) - vectorL) * 0.08;
-      vectorRl += (Math.max(Math.sqrt(rr / wave.length), 0.002) - vectorRl) * 0.08;
+      vectorSide += (Math.max(sideRms, 0.0005) - vectorSide) * ease(0.06);
+      vectorL += (Math.max(Math.sqrt(ll / wave.length), 0.002) - vectorL) * ease(0.08);
+      vectorRl += (Math.max(Math.sqrt(rr / wave.length), 0.002) - vectorRl) * ease(0.08);
       // (the side stretched to about the mid's spread, at most 10 times: near-silent stereo isn't blown up)
       const sideGain = kind === 'wide' ? Math.min(gain * 10, Math.max(gain, (0.17 / vectorSide) * r)) : gain;
       const gl = Math.min(60, 0.25 / vectorL) * r;
@@ -384,7 +393,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
         g.fillRect(cx + x, cy + y, 1.5, 1.5);
       }
       const now = ll > 1e-9 && rr > 1e-9 ? lr / Math.sqrt(ll * rr) : 1;
-      correlation += (now - correlation) * 0.15;
+      correlation += (now - correlation) * ease(0.15);
     }
     // correlation: -1 (out of phase) to +1 (mono)
     const y = h - meterH + 4;
@@ -417,9 +426,13 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   }
 
   // SPECTROGRAM: the spectrum as a heat-map scrolling left, low notes at the bottom
+  let spectroAcc = 0;
   function drawSpectro(an, w, h) {
     const rows = Math.max(8, Math.min(64, Math.floor(h / 3)));
-    const colW = 2;
+    spectroAcc += 2 * K; // (2px a 120Hz frame)
+    const colW = Math.floor(spectroAcc);
+    if (!colW) return;
+    spectroAcc -= colW;
     scrollLeft(w, h, colW);
     const lv = bands(an, rows);
     const cellH = h / rows;
@@ -456,8 +469,8 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
         const db = 20 * Math.log10(Math.sqrt(sq / vuBuf.length) + 1e-6) + 12; // (+12: the mix sits low)
         level = Math.max(0, Math.min(1, (db + 48) / 48));
       }
-      vuLevel[ch] = Math.max(level, vuLevel[ch] - 0.03);
-      vuPeak[ch] = Math.max(vuLevel[ch], vuPeak[ch] - 0.006);
+      vuLevel[ch] = Math.max(level, vuLevel[ch] - 0.03 * K);
+      vuPeak[ch] = Math.max(vuLevel[ch], vuPeak[ch] - 0.006 * K);
       const y = top + gap + ch * (barH + gap);
       if (!small) {
         g.fillStyle = paint(0, 0.6);
@@ -491,7 +504,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     for (let c = 0; c < cols; c++) {
       const level = lv ? lv[(c * 7) % cols] : 0.08; // (bands scattered so the bass isn't all at the left)
       const drop = rain[c];
-      drop.acc += 0.08 + level * 0.9;
+      drop.acc += (0.08 + level * 0.9) * K;
       while (drop.acc >= 1) {
         drop.acc -= 1;
         drop.y += size;
@@ -518,10 +531,10 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     g.textBaseline = 'middle';
     for (let c = 0; c < 7; c++) {
       const level = lv ? lv[c] : 0;
-      gridLevels[c] = Math.max(level, gridLevels[c] - 0.04);
+      gridLevels[c] = Math.max(level, gridLevels[c] - 0.04 * K);
       const n = Math.round(gridLevels[c] * 7);
       if (n >= 7 && gridFlash[c] <= 0) gridFlash[c] = 1;
-      gridFlash[c] = Math.max(0, gridFlash[c] - 0.06);
+      gridFlash[c] = Math.max(0, gridFlash[c] - 0.06 * K);
       for (let r = 0; r < 7; r++) {
         const x = x0 + c * cell + 2;
         const y = y0 + (6 - r) * cell + 2;
@@ -569,7 +582,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   function drawTerrain(an, w, h, now) {
     g.clearRect(0, 0, w, h);
     const lv = bands(an, 12);
-    for (let b = 0; b < 12; b++) tLevels[b] = Math.max(lv ? lv[b] : 0, tLevels[b] * 0.9); // (quick up, eased down)
+    for (let b = 0; b < 12; b++) tLevels[b] = Math.max(lv ? lv[b] : 0, tLevels[b] * dec(0.9)); // (quick up, eased down)
     const bass = (tLevels[0] + tLevels[1] + tLevels[2]) / 3;
     const dt = tLast ? Math.min(0.1, (now - tLast) / 1000) : 0;
     tLast = now;
@@ -665,7 +678,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     const lv = bands(an, 12);
     const bass = lv ? (lv[0] + lv[1] + lv[2]) / 3 : 0.1;
     const treble = lv ? (lv[8] + lv[9] + lv[10] + lv[11]) / 4 : 0.05;
-    plasmaT += 0.02 + treble * 0.08;
+    plasmaT += (0.02 + treble * 0.08) * K;
     const cw = Math.max(16, Math.round(w / 6));
     const chh = Math.max(4, Math.round(h / 6));
     if (plasmaCanvas.width !== cw || plasmaCanvas.height !== chh) { plasmaCanvas.width = cw; plasmaCanvas.height = chh; }
@@ -728,7 +741,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     if (!orb) orb = orbMake();
     fade(w, h, 0.5);
     const lv = bands(an, ORB_BANDS);
-    for (let b = 0; b < ORB_BANDS; b++) orbLevels[b] = lv ? Math.max(lv[b], orbLevels[b] * 0.88) : orbLevels[b] * 0.92;
+    for (let b = 0; b < ORB_BANDS; b++) orbLevels[b] = lv ? Math.max(lv[b], orbLevels[b] * dec(0.88)) : orbLevels[b] * dec(0.92);
     const energy = orbLevels.reduce((t, v) => t + v, 0) / ORB_BANDS;
     const cx = w / 2;
     const cy = h / 2;
@@ -781,7 +794,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     const cx = w / 2 + Math.sin(t * 0.7) * w * 0.06;
     const cy = h / 2 + Math.cos(t * 0.9) * h * 0.06;
     const sides = 8;
-    for (const ring of tunnelRings) ring.z -= speed * (0.4 + (1 - ring.z));
+    for (const ring of tunnelRings) ring.z -= speed * (0.4 + (1 - ring.z)) * K;
     tunnelRings = tunnelRings.filter((ring) => ring.z > 0.02);
     for (const ring of tunnelRings) {
       const r = Math.min(w, h) * 0.06 / ring.z;
@@ -813,6 +826,8 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       return mode;
     },
     draw(now = performance.now()) {
+      K = lastDraw ? Math.max(0.25, Math.min(6, (now - lastDraw) / (1000 / 120))) : 1;
+      lastDraw = now;
       const { w, h } = fit();
       rainbow = document.documentElement.dataset.theme === 'spectrum';
       hue = (now / 40) % 360;
