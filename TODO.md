@@ -16,15 +16,60 @@ See [WANDERERS.md](WANDERERS.md) for the season-by-season chart and the full ide
 
 Ideas for games of their own, written down so they're not lost; nothing here is for ByteFall.
 
-- **BYTERRIUM** (working title; a ByteFall spin-off): a Tamagotchi-style pet game with a
-  Terraria look, in a closed little world (a terrarium) where you raise the CPU bots, your
-  "cache critters". Ideas: a BIT GARDEN to plant and tend; check-ins through the day; the full
-  animation depth left out of ByteFall on purpose (every reaction, costume and effect as drawn,
-  editable frames: costumes, skating, poke reactions, snacks, sweat, pixelating in and out, hair,
-  and the visitors' floats, flights and effects). Carries over: the bots' pixel art
-  (js/bot-svg.js), the visitor sprites (js/visitors.js), the motion code and the frame editor
-  (dev-tools/frames.html) with any exported animations. Check the name on the Play Store, Steam
-  and a trademark search before settling on it.
+### BYTERRIUM (working title; the ByteFall spin-off)
+
+A Tamagotchi-style pet game with a Terraria look, in a closed little world (a terrarium) where you
+raise the CPU bots, your "cache critters". ByteFall stays a puzzle game; the deeper wanderer ideas
+below are kept for this one (any could still come back to ByteFall as an update). Check the name on
+the Play Store, Steam and a trademark search before settling on it.
+
+- **The frame**: the CPUs' world is the game, and ByteFall is the arcade cabinet in their room:
+  playing it earns the KEYS that build and decorate everything. The bits you decrypt power their
+  world (they cheer after a good run); never a chore, nothing lost for skipping a day.
+- **The world as a strip of places, the lane a camera following the bots**: HOME (your room,
+  decorated with keys), THE STORE (the bots browse the shelves, try on what you're looking at, queue
+  at the till when the store page is open), THE ARCADE, and seasonal places (THE WOODS: the haunted
+  forest in October; a frozen pond in winter). Bots walk out of frame to other places and come back
+  carrying things (a snack, a pumpkin).
+- **Decorating**: placeables the bots use: a bench (two sit and pull faces at each other), a vending
+  machine (snacks), an arcade cabinet (a bot plays, rage-quits now and then), a jukebox (bots near it
+  put on headphones), a lamp post (glows at night and in the fog); lures that bring visitors (a bird
+  feeder, a pumpkin patch, a fog machine). Spots along the room, more of them as an upgrade.
+- **The crew**: outfits bought with keys (retro-futuristic glasses, hats); choose who visits most;
+  each bot's own stats.
+- **The BIT GARDEN**: plant bits, they grow and pay out keys or snacks.
+- **The full animation depth** left out of ByteFall on purpose: every reaction, costume and effect as
+  drawn, editable frames (costumes, skating, poke reactions, snacks, sweat, pixelating in and out,
+  hair, and the visitors' floats, flights and effects).
+- **Day and night by the player's clock**: stars at night, the bots yawning and slower late, a
+  sunrise glow; **real moon phases** (a full moon on the real nights, the werewolf likeliest then in
+  October); **weather mixed by season** (rain now and then in summer, a late snow in spring).
+- **Seasons filling the year** (ByteFall's lane is empty from Jan 7 to Sep 30, viruses aside):
+
+  | Season | Dates | Costume | Snack | Visitors | Scenery / weather |
+  |---|---|---|---|---|---|
+  | DEEP WINTER | Jan 7 – Feb | winter's | hot cocoa | cocoa vendor, frost spirit (icy footprints) | light snow, a frozen pond they slide on, an aurora some nights |
+  | SPRING | Mar 20 – May | raincoats, umbrellas | jelly beans | ducklings in a line, frogs, bees, a kite flyer | showers and puddles they splash in, flowers sprouting after rain |
+  | SUMMER | Jun 21 – Aug | sunglasses, sun hats | popsicles | an ice-cream truck (they queue), fireflies at dusk | heat shimmer, a beach ball kicked around, a sandcastle |
+  | AUTUMN | Sep 22 – 30 | scarves | apple slices | an apple picker, squirrels | falling leaves, leaf piles they jump into |
+
+- **Holidays and days**: LUNAR NEW YEAR (red lanterns, firecrackers, a dragon dance the bots join, red
+  envelopes); VALENTINE'S (Feb 7 – 14: a cupid whose arrows make two bots fall for each other, heart
+  balloons, chocolate); PI DAY (Mar 14: pie, the bots lining up as 3.14); ST PATRICK'S (Mar 14 – 17:
+  green hats, a leprechaun's pot of gold, a few keys when poked); APRIL FOOLS (Apr 1: costumes and
+  faces swapped, one walking upside down, a fake virus that's a bot in a mask, a whoopee cushion on
+  the bench); EASTER (eggs hidden along the lane for the bots to hunt, a bunny); PROGRAMMERS' DAY
+  (the 256th day, Sep 13: glasses, a 0x100 sign, binary confetti); FRIDAY THE 13TH (a black cat
+  whose path they won't cross, a ladder they won't walk under).
+- **From the monthly ideas list** (WANDERERS.md): resolution runner, snow sculptor, puddle jumper,
+  flower planter, picnic wanderer, lemonade vendor, beachcomber, back-to-school shopper, backpack
+  hiker, pumpkin carver, leaf raker, gift courier and the rest.
+- **Carries over from ByteFall**: the bots' pixel art (js/bot-svg.js), the visitor sprites
+  (js/visitors.js), seasons (js/seasons.js), the motion code, and the frame editor
+  (dev-tools/frames.html) with any exported animations.
+
+### Other games
+
 - **The board game** (title open: ideas DON'T ROLL, BOARDBOUND, HOUSE RULES, THE LAST TURN, FATE
   BOARD; in the spirit of Jumanji and Zathura, but its own): a board game where each player's
   roll sets off an event the whole table has to survive to keep going. Top-down (the board in

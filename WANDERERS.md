@@ -23,6 +23,9 @@ Legend: ✅ in the game · 🛠️ planned (TODO.md) · 💡 idea. Everything as
 
 ## The whole year: ideas by month
 
+The ideas to fill the rest of the year (the four seasons, the holidays, day and night) are kept
+for the BYTERRIUM spin-off: see [TODO.md](TODO.md#byterrium-working-title-the-bytefall-spin-off).
+
 Built seasons are listed with each month for reference; every 💡 is from the idea list, not built.
 
 | Month | In the game | Ideas |
