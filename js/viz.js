@@ -1,7 +1,7 @@
 // Shared music visualizer for the game's playlist and the dev audio page.
 // Styles, switched by clicking: 'bars' (retro LED spectrum with falling peak caps) and 'wave'
 // (a line with auto-gain and a CRT trail) everywhere; the MUSIC PLAYER also has an
-// oscilloscope, a radial spectrum, a particle blob and a stereo vectorscope.
+// oscilloscope, a radial spectrum, a particle blob, a stereo vectorscope, a particle orb and more.
 // Each visualizer remembers its style.
 // Theme color as an 'r, g, b' triplet from style.css (falls back where the page has no theme vars).
 function vizRgb(name, fallback) {
@@ -12,7 +12,7 @@ function vizRgb(name, fallback) {
 const VIZ_NAMES = {
   bars: 'SPECTRUM', wave: 'WAVE', scope: 'OSCILLOSCOPE', spectro: 'SPECTROGRAM', vu: 'LEVEL METERS', radial: 'RADIAL',
   fluid: 'PARTICLES', vector: 'VECTORSCOPE', matrix: 'MATRIX RAIN', bitgrid: 'BIT GRID', terrain: 'SYNTHWAVE GRID',
-  plasma: 'PLASMA', tunnel: 'TUNNEL',
+  plasma: 'PLASMA', tunnel: 'TUNNEL', orb: 'ORB',
 };
 
 // modes: the styles this one cycles through (the playlist's small one: bars and wave);
@@ -674,6 +674,75 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     g.drawImage(plasmaCanvas, 0, 0, w, h);
   }
 
+  // ORB: a sphere of particles in the middle, turning slowly clockwise (seen from above) on its
+  // tilted axis. Each patch of it listens to its own part of the spectrum (the bass around its
+  // foot, the treble at its crown, the bands wandering around it with the longitude): a patch
+  // swells out and glows as its band plays, its hottest particles in the theme's accent
+  const ORB_N = 720;
+  const ORB_BANDS = 16;
+  let orb = null;
+  const orbLevels = new Float32Array(ORB_BANDS);
+  function orbMake() {
+    const pts = [];
+    const golden = Math.PI * (3 - Math.sqrt(5)); // (a Fibonacci sphere: evenly spread)
+    for (let i = 0; i < ORB_N; i++) {
+      const y = 1 - (i / (ORB_N - 1)) * 2;
+      const r = Math.sqrt(1 - y * y);
+      const a = i * golden;
+      const x = Math.cos(a) * r;
+      const z = Math.sin(a) * r;
+      const lon = (Math.atan2(z, x) / (Math.PI * 2) + 1) % 1;
+      // (its band: up the sphere from bass to treble, shifted a little around it, so the areas
+      // that light up are patches, not rings)
+      const band = Math.max(0, Math.min(ORB_BANDS - 1, Math.floor(((1 - y) / 2) * ORB_BANDS * 0.85 + Math.sin(lon * Math.PI * 6) * 1.6 + 1)));
+      pts.push({ x, y, z, band, jit: Math.random() * Math.PI * 2, f: lon });
+    }
+    return pts;
+  }
+  function drawOrb(an, w, h, now) {
+    if (!orb) orb = orbMake();
+    fade(w, h, 0.5);
+    const lv = bands(an, ORB_BANDS);
+    for (let b = 0; b < ORB_BANDS; b++) orbLevels[b] = lv ? Math.max(lv[b], orbLevels[b] * 0.88) : orbLevels[b] * 0.92;
+    const energy = orbLevels.reduce((t, v) => t + v, 0) / ORB_BANDS;
+    const cx = w / 2;
+    const cy = h / 2;
+    const R = Math.min(w, h) * 0.32 * (1 + energy * 0.06);
+    const spin = -now / 6000; // (clockwise from above: its front moving left)
+    const tilt = 0.38; // (its axis leaning toward you a little, so the top shows)
+    const cs = Math.cos(spin);
+    const sn = Math.sin(spin);
+    const ct = Math.cos(tilt);
+    const st = Math.sin(tilt);
+    const t = now / 1000;
+    const shown = [];
+    for (const p of orb) {
+      const lvl = orbLevels[p.band];
+      // (out from the middle as its band plays, with a shimmer so a loud patch fizzes)
+      const push = 1 + lvl * 0.32 + (lvl > 0.5 ? Math.sin(t * 9 + p.jit) * 0.04 * lvl : 0);
+      let x = p.x * cs + p.z * sn;
+      let z = -p.x * sn + p.z * cs;
+      let y = p.y;
+      const y2 = y * ct - z * st;
+      z = y * st + z * ct;
+      y = y2;
+      x *= push; y *= push; z *= push;
+      shown.push({ x, y, z, lvl, f: p.f });
+    }
+    shown.sort((a, b) => a.z - b.z); // (the far side first, faint and small)
+    const dot = Math.max(1.5, Math.min(w, h) / 160);
+    for (const q of shown) {
+      const depth = (q.z + 1.3) / 2.6; // (0 at the back, 1 at the front)
+      const persp = 1 / (1.9 - q.z * 0.45);
+      const px = cx + q.x * R * persp * 1.6;
+      const py = cy + q.y * R * persp * 1.6;
+      const size = dot * (0.5 + depth * 0.8) * (1 + q.lvl * 0.9);
+      const hot = q.lvl > 0.72 && depth > 0.35;
+      g.fillStyle = paint(q.f, Math.min(1, 0.12 + depth * 0.45 + q.lvl * 0.55).toFixed(2), hot);
+      g.fillRect(px - size / 2, py - size / 2, size, size);
+    }
+  }
+
   // TUNNEL: rings rushing toward you, thicker and brighter on the beat, the tunnel swaying
   let tunnelRings = [];
   function drawTunnel(an, w, h, now) {
@@ -737,6 +806,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       else if (mode === 'terrain') drawTerrain(an, w, h, now);
       else if (mode === 'plasma') drawPlasma(an, w, h);
       else if (mode === 'tunnel') drawTunnel(an, w, h, now);
+      else if (mode === 'orb') drawOrb(an, w, h, now);
       else drawBars(an, w, h);
     },
   };

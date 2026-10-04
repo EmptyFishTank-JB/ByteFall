@@ -938,7 +938,7 @@ body.vs-mode .hud #pulse-stat > .layer-mark { top: auto; bottom: 7px; } /* (VS: 
 }
 .free-exploit-btn[hidden] { display: none; }
 .free-exploit-btn:disabled { animation: none; opacity: 0.4; cursor: default; }
-#vibrate-btn, #fullscreen-btn { margin-top: 6px; }
+#vibrate-btn { margin-top: 6px; }
 .rec-reset { margin-top: 14px; width: 100%; padding: 6px; background: none; border: 1px solid var(--grid-line); border-radius: 4px; color: var(--fg-dim); font-family: inherit; font-size: 11px; letter-spacing: 1px; cursor: pointer; }
 
 @media (hover: hover) { #restart-btn:hover, #overlay-restart-btn:hover {
