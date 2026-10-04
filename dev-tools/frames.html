@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" class="sandbox">
 <head>
-<script src="../js/fonts.js?v=320"></script>
+<script src="../js/fonts.js?v=321"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#020403">
 <title>Frame Editor // BYTEFALL</title>
-<link rel="stylesheet" href="../css/style.css?v=320">
+<link rel="stylesheet" href="../css/style.css?v=321">
 <!-- FRAME EDITOR: the bots' animations a frame at a time, on their pixel grid. Start from a bot (any
      of the four, any level, mood, with or without headphones) or from one of the game's own
      animations (CORE DUMP's headbang and windmill), draw and erase pixels in the bots' colors, add
@@ -24,14 +24,18 @@
   .fe .lede { font-size: 12px; color: var(--fg-dim); margin: 0 0 14px; line-height: 1.5; }
   /* The canvas and its drawing tools on the left, as wide as the canvas; the panels beside it in as
      many columns as fit (one on a laptop, two or three on a wide screen); one column on a phone */
+  #bgs { display: inline-flex; gap: 4px; }
+  #bgs button { width: 26px; height: 26px; padding: 0; }
+  #bgs button.on { outline: 2px solid var(--accent, #ffd166); outline-offset: 1px; }
+  #brushes { display: inline-flex; gap: 4px; }
   .fe-grid { display: grid; grid-template-columns: 602px minmax(0, 1fr); gap: 18px; align-items: start; }
   .fe-main { min-width: 0; }
   .fe-side { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; align-items: start; }
   .fe-side .grp { margin-bottom: 0; }
   @media (max-width: 980px) { .fe-grid { grid-template-columns: minmax(0, 1fr); } }
   /* The canvas in a window it zooms and pans inside (the mouse wheel, HAND or Space / middle-button drag) */
-  .canvas-wrap { position: relative; overflow: hidden; width: 602px; max-width: 100%; border: 1px solid var(--grid-line); border-radius: 6px; background: #0b1512; touch-action: none; overscroll-behavior: contain; }
-  #canvas { display: block; max-width: 100%; height: auto; image-rendering: pixelated; cursor: crosshair; transform-origin: 0 0; touch-action: none; background: #0b1512; }
+  .canvas-wrap { position: relative; overflow: hidden; width: 602px; max-width: 100%; border: 1px solid var(--grid-line); border-radius: 6px; background: var(--fe-bg, #0b1512); touch-action: none; overscroll-behavior: contain; }
+  #canvas { display: block; max-width: 100%; height: auto; image-rendering: pixelated; cursor: crosshair; transform-origin: 0 0; touch-action: none; background: var(--fe-bg, #0b1512); }
   .canvas-wrap.panning #canvas, .canvas-wrap.can-pan #canvas { cursor: grab; }
   .canvas-wrap.grabbing #canvas { cursor: grabbing; }
   .zoom-row { display: flex; align-items: center; gap: 5px; margin-top: 6px; }
@@ -54,11 +58,11 @@
   .swatch.erase { background: repeating-linear-gradient(45deg, #333 0 4px, #111 4px 8px); }
   #strip { display: flex; gap: 6px; flex-wrap: wrap; }
   .thumb { display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; font-size: 9px; color: var(--fg-dim); }
-  .thumb canvas { image-rendering: pixelated; border: 1px solid var(--grid-line); border-radius: 3px; background: #0b1512; }
+  .thumb canvas { image-rendering: pixelated; border: 1px solid var(--grid-line); border-radius: 3px; background: var(--fe-bg, #0b1512); }
   .thumb.on canvas { border-color: var(--accent); }
   .previews { display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
   .previews canvas { max-width: 100%; }
-  .previews canvas { image-rendering: pixelated; background: #0b1512; border-radius: 4px; }
+  .previews canvas { image-rendering: pixelated; background: var(--fe-bg, #0b1512); border-radius: 4px; }
   .note { font-size: 10px; color: var(--fg-dim); margin-top: 6px; }
   #status { font-size: 11px; color: var(--accent); min-height: 14px; margin-top: 6px; }
 </style>
@@ -75,8 +79,14 @@
       <div class="zoom-row"><button type="button" id="zoom-out" title="Zoom out (mouse wheel down)">&minus;</button><button type="button" id="zoom-in" title="Zoom in (mouse wheel up)">+</button><button type="button" id="zoom-fit">FIT</button><button type="button" id="t-hand" title="Drag to move the view (or hold Space, or drag with the middle button)">HAND</button>
         <span class="note" id="zoom-v">100%</span><span class="note">wheel to zoom at the cursor; HAND, Space or the middle button to grab and move the view; Alt-drag (or MOVE IMAGE) to move the trace image</span></div>
       <div class="row" style="margin-top: 8px;">
-        <button type="button" id="t-paint" class="on">PAINT</button><button type="button" id="t-erase">ERASE</button><button type="button" id="t-pick">PICK COLOR</button><button type="button" id="t-fill">FILL</button>
+        <button type="button" id="t-paint" class="on">PAINT</button><button type="button" id="t-erase">ERASE</button><button type="button" id="t-pick">PICK COLOR</button><button type="button" id="t-fill">FILL</button><button type="button" id="t-erasefill" title="Clears the joined patch of the color you click">ERASE FILL</button>
         <button type="button" id="onion">ONION SKIN</button><button type="button" id="undo" title="Ctrl+Z">UNDO</button><button type="button" id="redo" title="Ctrl+Y or Ctrl+Shift+Z">REDO</button>
+      </div>
+      <div class="row"><b>BACKGROUND</b><span id="bgs"></span><input type="color" id="bg-custom" value="#0b1512" title="Any color">
+        <span class="note">behind the pixels (only here: not part of the animation)</span>
+      </div>
+      <div class="row"><b>BRUSH</b><span id="brushes"></span>
+        <span class="note">how many pixels across PAINT and ERASE cover at once ([ and ] to change)</span>
       </div>
       <div class="row"><b>PIXELS</b><button type="button" id="res1" class="on">1x (THE GAME'S)</button><button type="button" id="res2">2x (FINER)</button>
         <span class="note">2x: each pixel of a bot is four, for finer detail (switching back to 1x merges each four into one)</span>
@@ -161,13 +171,13 @@
 <div class="stat cpu-face" id="cpu-face" hidden aria-hidden="true"></div>
 <div id="stage" style="position: absolute; left: -9999px; top: 0; width: 200px; height: 60px;"><div class="game-walkers" id="lane"></div></div>
 <canvas id="board-fx" hidden></canvas>
-<script src="../js/bot-svg.js?v=320"></script>
-<script src="../js/pixel.js?v=320"></script>
-<script src="../js/minibot.js?v=320"></script>
-<script src="../js/data/bot-anims.js?v=320"></script>
-<script src="../js/seasons.js?v=320"></script>
-<script src="../js/visitors.js?v=320"></script>
-<script src="../js/wanderers.js?v=320"></script>
+<script src="../js/bot-svg.js?v=321"></script>
+<script src="../js/pixel.js?v=321"></script>
+<script src="../js/minibot.js?v=321"></script>
+<script src="../js/data/bot-anims.js?v=321"></script>
+<script src="../js/seasons.js?v=321"></script>
+<script src="../js/visitors.js?v=321"></script>
+<script src="../js/wanderers.js?v=321"></script>
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -222,8 +232,36 @@
   let tool = 'paint';
   let color = '#39ff8f';
   let onion = false;
+  // (the grid's background: the game's dark green, black, white and a few more; grid lines that
+  // show on it)
+  const BGS = [['GREEN (THE GAME\'S)', '#0b1512'], ['BLACK', '#000000'], ['GRAY', '#6b6f76'], ['WHITE', '#ffffff'], ['SKY', '#7ec8f0'], ['MAGENTA (SPOTS GAPS)', '#ff00ff']];
+  const BG = { c: '#0b1512', line: [] };
+  function setBg(c, keep = true) {
+    BG.c = c;
+    const n = parseInt(c.slice(1), 16);
+    const light = ((n >> 16) * 299 + (n >> 8 & 255) * 587 + (n & 255) * 114) / 1000 > 140;
+    BG.light = light;
+    BG.line = light ? ['rgba(0, 0, 0, 0.06)', 'rgba(0, 0, 0, 0.16)'] : ['rgba(57, 255, 143, 0.04)', 'rgba(57, 255, 143, 0.1)'];
+    document.documentElement.style.setProperty('--fe-bg', c);
+    if (keep) try { localStorage.setItem('bytefall-dev-frames-bg', c); } catch (e) {}
+    const el = document.getElementById('bgs');
+    if (el) {
+      el.innerHTML = BGS.map(([name, v]) => `<button type="button" data-bg="${v}" title="${name}" class="${v === c ? 'on' : ''}" style="background: ${v};"></button>`).join('');
+      document.getElementById('bg-custom').value = c;
+    }
+  }
+  try { const c = localStorage.getItem('bytefall-dev-frames-bg'); setBg(/^#[0-9a-f]{6}$/i.test(c || '') ? c : '#0b1512', false); } catch (e) { setBg('#0b1512', false); }
+  $('bgs').addEventListener('click', (e) => { const b = e.target.closest('[data-bg]'); if (b) { setBg(b.dataset.bg); draw(); } });
+  $('bg-custom').addEventListener('input', (e) => { setBg(e.target.value); draw(); });
+  let hover = null; // (the cell under the cursor)
   function draw() {
-    ctx.fillStyle = '#0b1512';
+    drawCanvasOnly();
+    renderStrip();
+    paletteIfChanged();
+    drawPreview(F().cells);
+  }
+  function drawCanvasOnly() { // (the grid alone: for the brush's outline following the cursor)
+    ctx.fillStyle = BG.c;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     if (!trace.top) drawTrace();
     if (onion && frame > 0) drawCells(A().frames[frame - 1].cells, 0.25);
@@ -232,12 +270,12 @@
     ctx.lineWidth = 1;
     const r = R();
     for (let i = 0; i <= W * r; i++) { // (the game's pixels; at 2x, fainter lines between their halves)
-      ctx.strokeStyle = i % r ? 'rgba(57, 255, 143, 0.04)' : 'rgba(57, 255, 143, 0.1)';
+      ctx.strokeStyle = i % r ? BG.line[0] : BG.line[1];
       const p = Math.round((i * SCALE) / r) + 0.5;
       ctx.beginPath(); ctx.moveTo(p, 0); ctx.lineTo(p, H * SCALE); ctx.stroke();
     }
     for (let i = 0; i <= H * r; i++) {
-      ctx.strokeStyle = i % r ? 'rgba(57, 255, 143, 0.04)' : 'rgba(57, 255, 143, 0.1)';
+      ctx.strokeStyle = i % r ? BG.line[0] : BG.line[1];
       const p = Math.round((i * SCALE) / r) + 0.5;
       ctx.beginPath(); ctx.moveTo(0, p); ctx.lineTo(W * SCALE, p); ctx.stroke();
     }
@@ -247,9 +285,12 @@
     ctx.setLineDash([]);
     ctx.strokeStyle = 'rgba(255, 209, 102, 0.35)'; // (the floor)
     ctx.beginPath(); ctx.moveTo(0, (17 - Y0) * SCALE + 0.5); ctx.lineTo(W * SCALE, (17 - Y0) * SCALE + 0.5); ctx.stroke();
-    renderStrip();
-    paletteIfChanged();
-    drawPreview(F().cells);
+    if (hover && (tool === 'paint' || tool === 'erase')) { // (the brush's outline under the cursor)
+      const lo = -Math.floor((brush - 1) / 2);
+      const cs = SCALE / r;
+      ctx.strokeStyle = tool === 'erase' ? 'rgba(230, 60, 60, 0.95)' : BG.light ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.8)';
+      ctx.strokeRect(Math.round((hover[0] + lo - X0 * r) * cs) + 0.5, Math.round((hover[1] + lo - Y0 * r) * cs) + 0.5, Math.round(brush * cs) - 1, Math.round(brush * cs) - 1);
+    }
   }
   // (s: page pixels to a bot pixel; at 2x each cell is half that)
   function drawCells(cells, alpha, c2 = ctx, s = SCALE, r = R()) {
@@ -271,7 +312,7 @@
   function drawPreview(cells) {
     for (const [cv, s] of [[prev1, PU], [prev3, PU * 2]]) {
       const c2 = cv.getContext('2d');
-      c2.fillStyle = '#0b1512'; c2.fillRect(0, 0, cv.width, cv.height);
+      c2.fillStyle = BG.c; c2.fillRect(0, 0, cv.width, cv.height);
       drawCells(cells, 1, c2, s);
     }
   }
@@ -280,15 +321,30 @@
     const k = R();
     return [Math.floor(((e.clientX - r.left) / r.width) * W * k) + X0 * k, Math.floor(((e.clientY - r.top) / r.height) * H * k) + Y0 * k];
   };
+  // (the brush: a square of pixels around the one under the cursor, inside the grid)
+  const BRUSHES = [1, 2, 3, 4, 6, 8];
+  let brush = 1;
+  function brushCells(x, y) {
+    const r = R();
+    const lo = -Math.floor((brush - 1) / 2);
+    const out = [];
+    for (let dy = lo; dy < lo + brush; dy++) for (let dx = lo; dx < lo + brush; dx++) {
+      const cx = x + dx;
+      const cy = y + dy;
+      if (cx >= X0 * r && cy >= Y0 * r && cx < (X0 + W) * r && cy < (Y0 + H) * r) out.push(`${cx},${cy}`);
+    }
+    return out;
+  }
   function apply(x, y) {
     const k = `${x},${y}`;
     const cells = F().cells;
-    if (tool === 'paint') cells[k] = color;
-    else if (tool === 'erase') delete cells[k];
+    if (tool === 'paint') brushCells(x, y).forEach((kk) => { cells[kk] = color; });
+    else if (tool === 'erase') brushCells(x, y).forEach((kk) => { delete cells[kk]; });
     else if (tool === 'pick') { if (cells[k]) setColor(cells[k]); }
-    else if (tool === 'fill') {
+    else if (tool === 'fill' || tool === 'erasefill') { // (ERASE FILL: the joined patch of one color, cleared)
       const from = cells[k] || null;
-      if (from === color) return;
+      const to = tool === 'fill' ? color : null;
+      if (from === to) return;
       const stack = [[x, y]];
       const seen = new Set();
       while (stack.length) {
@@ -297,7 +353,7 @@
         const r = R();
         if (seen.has(kk) || cx < X0 * r || cy < Y0 * r || cx >= (X0 + W) * r || cy >= (Y0 + H) * r || (cells[kk] || null) !== from) continue;
         seen.add(kk);
-        cells[kk] = color;
+        if (to) cells[kk] = to; else delete cells[kk];
         stack.push([cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]);
       }
     }
@@ -574,7 +630,8 @@
     const all = [];
     // (with the found lines: each square between two of them; else even squares)
     const lat = lattice && lattice.src === trace.src && lattice.r === r && lattice.w === trace.w && lattice.h === trace.h ? lattice : null;
-    const spans = (lines, pos, scale) => lines.slice(0, -1).map((a, i) => ({ g: Math.round(pos * r + ((a + lines[i + 1]) / 2) / scale - 0.5), a, b: lines[i + 1] }));
+    // (one square per gap between lines, in order: rounding each on its own could put two in one)
+    const spans = (lines, pos, scale) => { const g0 = Math.round(pos * r + ((lines[0] + lines[1]) / 2) / scale - 0.5); return lines.slice(0, -1).map((a, i) => ({ g: g0 + i, a, b: lines[i + 1] })); };
     const cols = lat ? spans(lat.xs, trace.x, sx) : null;
     const rows = lat ? spans(lat.ys, trace.y, sy) : null;
     const colAt = new Map(cols ? cols.map((c) => [c.g, c]) : []);
@@ -717,8 +774,12 @@
       showTrace(); draw();
       return;
     }
-    if (!painting) return; const [x, y] = cellAt(e); apply(x, y); draw();
+    const [x, y] = cellAt(e);
+    const moved = !hover || hover[0] !== x || hover[1] !== y;
+    hover = [x, y];
+    if (painting) { apply(x, y); draw(); } else if (moved && brush > 1) drawCanvasOnly();
   });
+  canvas.addEventListener('pointerleave', () => { if (hover) { hover = null; if (brush > 1) drawCanvasOnly(); } });
   canvas.addEventListener('pointerup', () => {
     if (panning) { panning = null; wrap.classList.remove('grabbing'); return; }
     if (dragging) { dragging = null; saveTrace(); return; }
@@ -729,8 +790,20 @@
   canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
   // ── Tools, palette ──
-  const tools = ['paint', 'erase', 'pick', 'fill'];
-  tools.forEach((t) => $(`t-${t}`).addEventListener('click', () => { tool = t; tools.forEach((u) => $(`t-${u}`).classList.toggle('on', u === t)); }));
+  function showBrushes() {
+    $('brushes').innerHTML = BRUSHES.map((b) => `<button type="button" data-brush="${b}" class="${b === brush ? 'on' : ''}">${b}</button>`).join('');
+  }
+  function setBrush(b) { brush = b; showBrushes(); try { localStorage.setItem('bytefall-dev-frames-brush', b); } catch (e) {} drawCanvasOnly(); }
+  $('brushes').addEventListener('click', (e) => { const b = e.target.closest('[data-brush]'); if (b) setBrush(Number(b.dataset.brush)); });
+  document.addEventListener('keydown', (e) => {
+    if (/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName) || (e.key !== '[' && e.key !== ']')) return;
+    const i = BRUSHES.indexOf(brush) + (e.key === ']' ? 1 : -1);
+    if (i >= 0 && i < BRUSHES.length) setBrush(BRUSHES[i]);
+  });
+  try { const b = Number(localStorage.getItem('bytefall-dev-frames-brush')); if (BRUSHES.includes(b)) brush = b; } catch (e) {}
+  showBrushes();
+  const tools = ['paint', 'erase', 'pick', 'fill', 'erasefill'];
+  tools.forEach((t) => $(`t-${t}`).addEventListener('click', () => { tool = t; tools.forEach((u) => $(`t-${u}`).classList.toggle('on', u === t)); drawCanvasOnly(); }));
   $('onion').addEventListener('click', (e) => { onion = !onion; e.target.classList.toggle('on', onion); draw(); });
   $('undo').addEventListener('click', doUndo);
   $('redo').addEventListener('click', doRedo);
