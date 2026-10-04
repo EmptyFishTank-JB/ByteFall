@@ -778,9 +778,7 @@ against the dark, and two big gnarled trees in front of everything at either edg
 bots walk between them. The mist never lifts; it breathes, thinning and thickening a little, and
 now and then swells heavy again for its wanderer (or a monster) to come out of. In the forest:
 GLOWING EYES blink between the trees (yellow, red or green, a pair or three, edging after the
-bots; poked, they shut); a TREE pulls up its roots and shuffles after the bots (one it reaches
-bolts), then plants itself again where it stopped (poked, it stops; the scary tree a bot pushed in
-does it too); and rarely the BLOOD FOG: the mist thickens and turns from white to red as a blood moon
+bots; poked, they shut); and rarely the BLOOD FOG: the mist thickens and turns from white to red as a blood moon
 rises behind the trees, and the red-eyed wanderer comes out of it after a bot, which runs for it;
 then the red drains away and the moon sinks. Anywhere in October: the WEREWOLF (night falls on the
 card and a pale full moon rises; it lopes in, stops and howls AWOOOOOO, the bots near it bolting

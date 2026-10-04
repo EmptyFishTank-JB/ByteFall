@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" class="sandbox">
 <head>
-<script src="../js/fonts.js?v=318"></script>
+<script src="../js/fonts.js?v=319"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#020403">
 <title>Bot Sandbox // BYTEFALL</title>
-<link rel="stylesheet" href="../css/style.css?v=318">
+<link rel="stylesheet" href="../css/style.css?v=319">
 <!-- BOT SANDBOX: the wandering bots and everything around them (visitors, viruses, seasons, the fog,
      headphones and the music) running on the game's own code, with every behaviour on a button.
      Progress is stubbed: nothing here touches the saved game (no achievements, no unlocks). -->
@@ -130,7 +130,7 @@
 
       <div class="grp">
         <h2>OCTOBER SCARES</h2>
-        <p>FOREST brings up the HAUNTED FOREST (it stays, as it does all October, until CLEAR ALL); EYES, TREEWALK, SWELL (the mist thickening for its wanderer) and BLOODFOG happen in it (each brings the forest up first). WEREWOLF, LIGHTSOUT, HAND and POSSESSED happen anywhere (the last three need bots on the stage). Pick HALLOWEEN in SEASON for the scary tree a bot pushes in to walk too.</p>
+        <p>FOREST brings up the HAUNTED FOREST (it stays, as it does all October, until CLEAR ALL); EYES, SWELL (the mist thickening for its wanderer) and BLOODFOG happen in it (each brings the forest up first). WEREWOLF, LIGHTSOUT, HAND and POSSESSED happen anywhere (the last three need bots on the stage). Pick HALLOWEEN in SEASON for the scary tree a bot pushes in to walk too.</p>
         <div class="row" id="scares"></div>
       </div>
 
@@ -145,30 +145,30 @@
 <canvas id="board-fx" aria-hidden="true"></canvas>
 <div class="stat cpu-face" id="cpu-face" hidden aria-hidden="true"></div>
 
-<script src="../js/bot-svg.js?v=318"></script>
-<script src="../js/music/output.js?v=318"></script>
-<script src="../js/music/mixes.js?v=318"></script>
-<script src="../js/sfx.js?v=318"></script>
-<script src="../js/music/music-bytefall-theme.js?v=318"></script>
-<script src="../js/music/music-sleep-mode.js?v=318"></script>
-<script src="../js/music/music-brute-force.js?v=318"></script>
-<script src="../js/music/music-deep-web.js?v=318"></script>
-<script src="../js/music/music-zero-day.js?v=318"></script>
-<script src="../js/music/music-system-restore.js?v=318"></script>
-<script src="../js/music/music-night-drive.js?v=318"></script>
-<script src="../js/music/music-standby-mode.js?v=318"></script>
-<script src="../js/music/music-core-dump.js?v=318"></script>
-<script src="../js/music/music-handshake.js?v=318"></script>
-<script src="../js/music/music-stack-overflow.js?v=318"></script>
-<script src="../js/music/music.js?v=318"></script>
-<script src="../js/fx.js?v=318"></script>
-<script src="../js/pixel.js?v=318"></script>
-<script src="../js/minibot.js?v=318"></script>
-<script src="../js/seasons.js?v=318"></script>
-<script src="../js/visitors.js?v=318"></script>
-<script src="../js/data/bot-anims.js?v=318"></script>
-<script src="../js/wanderers.js?v=318"></script>
-<script src="../js/grid-bg.js?v=318"></script>
+<script src="../js/bot-svg.js?v=319"></script>
+<script src="../js/music/output.js?v=319"></script>
+<script src="../js/music/mixes.js?v=319"></script>
+<script src="../js/sfx.js?v=319"></script>
+<script src="../js/music/music-bytefall-theme.js?v=319"></script>
+<script src="../js/music/music-sleep-mode.js?v=319"></script>
+<script src="../js/music/music-brute-force.js?v=319"></script>
+<script src="../js/music/music-deep-web.js?v=319"></script>
+<script src="../js/music/music-zero-day.js?v=319"></script>
+<script src="../js/music/music-system-restore.js?v=319"></script>
+<script src="../js/music/music-night-drive.js?v=319"></script>
+<script src="../js/music/music-standby-mode.js?v=319"></script>
+<script src="../js/music/music-core-dump.js?v=319"></script>
+<script src="../js/music/music-handshake.js?v=319"></script>
+<script src="../js/music/music-stack-overflow.js?v=319"></script>
+<script src="../js/music/music.js?v=319"></script>
+<script src="../js/fx.js?v=319"></script>
+<script src="../js/pixel.js?v=319"></script>
+<script src="../js/minibot.js?v=319"></script>
+<script src="../js/seasons.js?v=319"></script>
+<script src="../js/visitors.js?v=319"></script>
+<script src="../js/data/bot-anims.js?v=319"></script>
+<script src="../js/wanderers.js?v=319"></script>
+<script src="../js/grid-bg.js?v=319"></script>
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -293,7 +293,7 @@
   // ── Visitors ──
   const VISITS = ['frank', 'mummy', 'creature', 'nosferatu', 'ghost', 'bats', 'crows', 'spider', 'gremlin', 'turkey', 'geese', 'ducks', 'songbirds', 'swallows', 'penguin', 'reindeer', 'rudolph', 'dreidel', 'phage', 'bug', 'trojan', 'worm', 'ransomware', 'spyware', 'adware', 'logicbomb', 'bigspider', 'fog', 'fireworks', 'countdown'];
   // (OCTOBER's scares: the HAUNTED FOREST and what goes on in it, and the rest)
-  const SCARES = ['forest', 'eyes', 'treewalk', 'swell', 'bloodfog', 'werewolf', 'lightsout', 'hand', 'possessed'];
+  const SCARES = ['forest', 'eyes', 'swell', 'bloodfog', 'werewolf', 'lightsout', 'hand', 'possessed'];
   for (const v of SCARES) {
     const b = el('button', { type: 'button' }, v.toUpperCase());
     b.addEventListener('click', () => W().visit(v));

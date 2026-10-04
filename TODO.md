@@ -9,6 +9,8 @@ Ideas queued for later (not built yet).
 - **Sound themes**: more unlockable sets of game sound effects (like the color themes and fonts), each
   in the style of one of the tracks. Done: TERMINAL (the first, free) and HANDSHAKE (with TRACK 10).
 - **CPU customization**: simple things for the bots to wear, e.g. retro-futuristic glasses.
+- **The walking tree** (October's haunted forest, and the pushed scary tree): to come back once its
+  walking frames are drawn (the frame editor's TREE-, BARETREE- and PINE-WALKING are a start).
 
 See [WANDERERS.md](WANDERERS.md) for the season-by-season chart and the full ideas list.
 

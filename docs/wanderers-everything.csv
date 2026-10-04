@@ -123,7 +123,6 @@ Mood (face),MUNCH,All year,A face the bots make (with its emotes),✓,In game,js
 Animation / behaviour,LIGHTS OUT,HALLOWEEN,"The card goes dark, only the bots' eyes blinking; back on, one has moved or a monster stands among them",✓,In game,js/visitors.js
 Visitor,The HAND from under the floor,HALLOWEEN,"Rises under a bot and grabs it; it struggles, breaks free and runs; poked: lets go",✓,In game,js/visitors.js
 Visitor,Glowing eyes,HALLOWEEN (haunted forest),"Blink between the trees, edging after the bots; poked: shut",✓,In game,js/visitors.js
-Animation / behaviour,Tree uprooting,HALLOWEEN (haunted forest; the pushed scary tree too),"Pulls up its roots and shuffles after the bots (one it reaches bolts), then plants itself again; poked: stops",✓,In game,js/visitors.js
 Animation / behaviour,POSSESSED bot,HALLOWEEN,"Red glowing eyes, stiff slow walk, others scared of it; poked: a little ghost shakes out and floats away",✓,In game,"js/wanderers.js, js/visitors.js"
 Visitor,WEREWOLF (full moon),HALLOWEEN,"Night falls, a full moon rises; it lopes in and howls (bots near bolt), then runs off; poked: growls and runs",✓,In game,js/visitors.js
 Weather / event,BLOOD FOG,HALLOWEEN (haunted forest; rare),"The mist turns from white to red as a blood moon rises behind the trees; the wanderer chases a bot",✓,In game,js/visitors.js

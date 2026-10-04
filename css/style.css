@@ -2701,10 +2701,9 @@ html.page-twinkle .page-bg { display: block; }
 .visitor-tree svg { filter: drop-shadow(0 0 1px rgba(220, 225, 240, 0.3)); }
 .visitor-tree.v-creak svg { animation: visitor-shake 0.1s steps(1) 6 alternate; }
 /* OCTOBER's HAUNTED FOREST (visitors.js): the big trees in front of everything (the fog drifting
-   over them), a tree uprooted (in front of the others), the glowing eyes between the trees */
+   over them), the glowing eyes between the trees */
 :is(.start-walkers, .game-walkers) .visitor.fog-tree.fore { z-index: 2; }
 .visitor.fog-tree.fore svg { filter: drop-shadow(0 0 1px rgba(150, 162, 178, 0.35)) !important; }
-:is(.start-walkers, .game-walkers) .visitor.v-uproot { z-index: 0; }
 :is(.start-walkers, .game-walkers) .visitor.v-front { z-index: 2; }
 :is(.start-walkers, .game-walkers) .visitor.fog-eyes { z-index: -2; transition: opacity 0.8s ease; }
 .visitor.fog-eyes svg { filter: drop-shadow(0 0 2px currentColor); }

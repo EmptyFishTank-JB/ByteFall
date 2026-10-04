@@ -437,7 +437,6 @@ function createVisitors(api) {
     // (OCTOBER: the HAUNTED FOREST and what happens in it; the dev page brings each any time)
     if (what === 'forest') return forest();
     if (what === 'eyes') return forest() && eyesIn();
-    if (what === 'treewalk') return forest() && treeWalk();
     if (what === 'swell') return forest() && swell();
     if (what === 'bloodfog') { const f = forest(); if (f.phase === 'light') bloodFog(); return; }
     if (what === 'lightsout') return lightsOut();
@@ -543,7 +542,6 @@ function createVisitors(api) {
     if (haunted) {
       hauntedForest = true;
       fog.nextEyes = now + rand(6000, 14000);
-      fog.nextWalk = now + rand(40000, 80000);
     }
     if (!instant) api.botEvent(haunted ? 'visit-forest' : 'visit-fog');
     const W = api.laneW();
@@ -637,17 +635,13 @@ function createVisitors(api) {
   }
   // THE HAUNTED FOREST (OCTOBER): once its fog has rolled in, it stays (on every card, all month):
   // the trees stand, the big ones in front, and the mist thins and thickens. Between the trees, now
-  // and then, glowing eyes blink; a tree pulls up its roots and shuffles after the bots; the mist
+  // and then, glowing eyes blink; the mist
   // swells again for the wanderer; and rarely the BLOOD FOG rolls in, the mist turning red as a
   // blood moon rises behind the trees, and the wanderer comes out of it after a bot.
   function forestFrame(f, now) {
     if (now > f.nextEyes) {
       f.nextEyes = now + rand(14000, 32000);
       if (!list.some((v) => v.kind === 'eyes')) eyesIn();
-    }
-    if (now > f.nextWalk) {
-      f.nextWalk = now + rand(60000, 120000);
-      if (!list.some((v) => v.walkTree)) treeWalk();
     }
   }
   // (forest(): the HAUNTED FOREST up, at once if it isn't already: what needs it calls this first)
@@ -685,27 +679,8 @@ function createVisitors(api) {
       setTimeout(() => { v.gone = true; }, 900);
     }
   }
-  // A TREE UPROOTED: it shakes, pulls up its roots and shuffles after the bots (one it reaches
-  // bolts); then it plants itself again where it stopped. The forest's trees, and the scary tree a
-  // bot pushed in, in OCTOBER
-  function treeWalk(t) {
-    if (!t) {
-      const trees = list.filter((v) => (v.state === 'fogtree' && !v.fore && v.el.classList.contains('near')) || (v.kind === 'tree' && v.state === 'scenery'));
-      if (!trees.length) return;
-      t = pick(trees);
-    }
-    if (t.walkTree) return;
-    const now = performance.now();
-    t.walkTree = { home: t.state, z: t.el.style.zIndex, opacity: t.el.style.opacity, frights: 0, until: now + rand(11000, 16000) };
-    t.state = 'uproot';
-    t.until = now + 1500;
-    t.el.classList.add('v-uproot', 'v-shake');
-    t.el.style.opacity = '1';
-    say(t, pick(['creeeak', 'CRACK', '...']), 1000);
-    api.startle(t, 70);
-    api.botEvent('visit-treewalk');
-  }
-  // THE WALKING TREE's legs: its own pixel art with the foot of its trunk turned into roots, in
+  // THE WALKING TREE's legs (not in the game for now: its frames are in the frame editor, to draw
+  // from): its own pixel art with the foot of its trunk turned into roots, in
   // four frames: planted (spread wide), the back root lifted and swung forward, passing (gathered
   // under the trunk), the front root lifted and reaching ahead. Made from each kind's sprite: the
   // trunk found a few rows up, the roots grown out of it (thicker on a thick trunk)
@@ -751,100 +726,6 @@ function createVisitors(api) {
       }
       return body.concat(roots);
     });
-  }
-  // (on: the tree's sprite swapped for its walking frames; off: back as it was)
-  function rigTree(t, on) {
-    const svg = t.el.querySelector('svg');
-    if (on) {
-      const def = SPRITES[t.kind];
-      const k = Number(svg.getAttribute('width')) / (def.a[0].length * U);
-      const frames = rootFrames(t.kind);
-      const pal = { ...def.pal, ...(t.pal || {}) };
-      t.rig = { html: svg.innerHTML, w: svg.getAttribute('width'), h: svg.getAttribute('height'), vb: svg.getAttribute('viewBox'), elW: t.el.style.width, shift: ROOT_PAD * U * k, k };
-      const fw = frames[0][0].length;
-      const fh = frames[0].length;
-      svg.setAttribute('viewBox', `0 0 ${fw} ${fh}`);
-      svg.setAttribute('width', fw * U * k);
-      svg.setAttribute('height', fh * U * k);
-      svg.innerHTML = frames.map((rows, i) => `<g class="rf" style="display:${i ? 'none' : 'inline'}">${rects(rows, pal)}</g>`).join('');
-      t.el.style.width = `${fw * U * k}px`;
-      t.x -= t.rig.shift;
-      t.rigFrame = 0;
-      t.rigAt = 0;
-    } else if (t.rig) {
-      svg.innerHTML = t.rig.html;
-      svg.setAttribute('viewBox', t.rig.vb);
-      svg.setAttribute('width', t.rig.w);
-      svg.setAttribute('height', t.rig.h);
-      t.el.style.width = t.rig.elW;
-      t.x += t.rig.shift;
-      t.rig = null;
-    }
-    t.boxW = 0;
-  }
-  function showRigFrame(t, f) {
-    t.rigFrame = f;
-    t.el.querySelectorAll('svg > .rf').forEach((g, i) => { g.style.display = i === f ? 'inline' : 'none'; });
-  }
-  const rootDepth = (t) => (ROOT_ROWS - 2) * U * t.rig.k + 2; // (how far its roots reach below where it stood)
-  function treeWalkFrame(t, now, dt, W) {
-    const w = t.boxW || (t.boxW = t.el.offsetWidth) || 30;
-    if (t.state === 'uproot') { // (shaking, then rising up out of the ground on its roots)
-      if (!t.rig && now > t.until - 700) {
-        rigTree(t, true);
-        t.el.style.clipPath = 'inset(-1000px -1000px 0 -1000px)'; // (its roots below the floor, out of sight)
-        t.el.classList.remove('v-shake');
-      }
-      if (t.rig) {
-        const p = Math.min(1, 1 - (t.until - now) / 700);
-        t.svgT = ` translateY(${(rootDepth(t) * (1 - p)).toFixed(1)}px)`;
-      }
-      if (now > t.until) { t.state = 'stalk'; t.svgT = ''; }
-    } else if (t.state === 'stalk') { // (step by step: it only moves while a root is lifted)
-      const b = nearest({ x: t.x + w / 2 - 17 });
-      const goal = b ? b.x + 17 - w / 2 : t.x;
-      if (now - t.rigAt > 190) {
-        t.rigAt = now;
-        showRigFrame(t, (t.rigFrame + 1) % 4);
-        if (b && Math.abs(goal - t.x) > 4) t.dir = goal > t.x ? 1 : -1;
-      }
-      const lifting = t.rigFrame === 1 || t.rigFrame === 3;
-      if (lifting) t.x += Math.sign(goal - t.x) * Math.min(Math.abs(goal - t.x), 26 * dt);
-      t.x = Math.max(-w * 0.3, Math.min(W - w * 0.7, t.x));
-      t.y = lifting ? U * t.rig.k * 0.5 : 0; // (heaving itself up a little on each step)
-      if (b && Math.abs(goal - t.x) < 24 && !t.scared.has(b)) {
-        t.scared.add(b);
-        api.fright(b);
-        t.walkTree.frights++;
-        say(t, pick(['GRRROAN', 'creeeak']), 900);
-      }
-      if (now > t.walkTree.until || t.walkTree.frights >= 2 || (!b && now > t.walkTree.until - 6000)) plantTree(t, now);
-    } else if (t.state === 'plant') { // (roots spread, sinking back into the ground)
-      if (t.rig) {
-        const p = Math.min(1, 1 - (t.until - now) / 900);
-        t.svgT = ` translateY(${(rootDepth(t) * p).toFixed(1)}px)`;
-      }
-      if (now > t.until) {
-        const wt = t.walkTree;
-        rigTree(t, false);
-        t.el.style.clipPath = '';
-        t.svgT = '';
-        t.walkTree = null;
-        t.state = wt.home;
-        t.y = 0;
-        t.el.classList.remove('v-shake', 'v-uproot');
-        t.el.style.opacity = wt.opacity;
-        t.scared.clear();
-        if (t.kind === 'tree') t.walkAt = now + rand(40000, 90000);
-      }
-    }
-  }
-  function plantTree(t, now) {
-    t.state = 'plant';
-    t.until = now + 900;
-    t.y = 0;
-    if (t.rig) showRigFrame(t, 0); // (planted: spread wide)
-    t.svgT = '';
   }
   function drawFog(c, f, maxA, seed, low) {
     const cell = low ? 6 : 4;
@@ -896,7 +777,6 @@ function createVisitors(api) {
     const r = Math.random();
     if (r < 0.12) bloodFog();
     else if (r < 0.42) swell();
-    else if (r < 0.72) treeWalk();
     else eyesIn();
   }
   function swell() {
@@ -1940,10 +1820,6 @@ function createVisitors(api) {
       api.startle(v, 60); // (the bots near it don't like spiders)
       return;
     }
-    if (v.walkTree) { // (an uprooted tree, poked: it stops and roots again)
-      if (v.state === 'stalk') { say(v, '...', 800); plantTree(v, performance.now()); }
-      return;
-    }
     if (v.state === 'fogtree' || v.kind === 'spirit') return;
     if (v.kind === 'eyes') { // (they shut, and they're gone)
       if (v.state === 'eyes') { api.botEvent('visitor-pokes'); v.until = 0; }
@@ -2226,9 +2102,7 @@ function createVisitors(api) {
         v.frame = 1 - v.frame;
         v.el.classList.toggle('step', !!v.frame);
       }
-      if (v.walkTree) {
-        treeWalkFrame(v, now, dt, W); // (uprooted: shuffling after the bots)
-      } else if (v.state === 'fogtree') {
+      if (v.state === 'fogtree') {
         // (standing in the fog)
       } else if (v.kind === 'eyes') {
         eyesFrame(v, now);
@@ -2272,10 +2146,6 @@ function createVisitors(api) {
         // (scenery: pushed by a wanderer, or standing where it was left)
         if (v.kind === 'snowman') snowmanWaits(v, now);
         if (v.kind === 'bit') bitFrame(v, now);
-        if (v.kind === 'tree' && spooky()) { // (OCTOBER: now and then it pulls up its roots)
-          if (!v.walkAt) v.walkAt = now + rand(30000, 70000);
-          else if (now > v.walkAt && !api.walkers().some((b) => b.pushing === v)) { v.walkAt = now + rand(40000, 90000); if (api.walkers().length && Math.random() < 0.5) treeWalk(v); }
-        }
       } else if (v.kind === 'snowman') {
         snowmanSneaks(v, now, dt);
       } else if (v.kind === 'dreidel') { // (spins along, wobbles to a stop, lands on a letter; then on)
@@ -2408,7 +2278,7 @@ function createVisitors(api) {
         v.el.style.opacity = '0';
         setTimeout(() => { v.gone = true; }, 2000);
       }
-      if (v.state === 'scenery' || v.state === 'fogtree' || v.walkTree) continue; // (it stays)
+      if (v.state === 'scenery' || v.state === 'fogtree') continue; // (it stays)
       const w = v.boxW || (v.boxW = v.el.offsetWidth) || 30; // (measured once: read every frame between the moves, it forced a layout per visitor)
       if (v.x < -w - 40 || v.x > W + 40 || v.y > ceiling() + 40) v.gone = true;
     }
