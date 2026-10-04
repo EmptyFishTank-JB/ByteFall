@@ -326,7 +326,28 @@ function createVisitors(api) {
     });
     return out;
   }
+  // HALLOWEEN's BIG SPIDER drawn from its frames (js/bigspider.js: at half a bot pixel, its walk and
+  // its jump); one <g> a frame, only the one showing drawn
+  const BS = window.BIG_SPIDER || null;
+  const bsRows = (rows) => rows.map((r) => r.replace(/(\d+)(.)/g, (m, n, c) => c.repeat(Number(n))));
+  function bigSpiderEl() {
+    const el = document.createElement('div');
+    el.className = 'visitor visitor-bigspider';
+    el.style.width = `${(BS.w * U) / 2}px`;
+    const groups = ['walk', 'jump'].map((name) => BS[name].map((f, i) => `<g class="bs-${name}${i}" style="display: ${name === 'walk' && !i ? 'inline' : 'none'}">${rects(bsRows(f.rows), BS.pal)}</g>`).join('')).join('');
+    el.innerHTML = `<svg viewBox="0 0 ${BS.w} ${BS.h}" width="${(BS.w * U) / 2}" height="${(BS.h * U) / 2}" shape-rendering="crispEdges" aria-hidden="true">${groups}</svg><span class="walker-emote"></span>`;
+    return el;
+  }
+  function bigSpiderShow(v, name, i) {
+    const key = `${name}${i}`;
+    if (v.bsShown === key) return;
+    const svg = v.el.querySelector('svg');
+    if (v.bsShown) svg.querySelector(`.bs-${v.bsShown}`).style.display = 'none';
+    svg.querySelector(`.bs-${key}`).style.display = 'inline';
+    v.bsShown = key;
+  }
   function spriteEl(kind, pal) {
+    if (kind === 'bigspider' && BS) return bigSpiderEl();
     const def = { ...SPRITES[kind], ...(pal ? { pal: { ...SPRITES[kind].pal, ...pal } } : {}) };
     const w = def.a[0].length;
     const h = def.a.length;
@@ -362,7 +383,7 @@ function createVisitors(api) {
     spyware: { speed: 30, frameMs: 700, poke: 'delete' },
     adware: { speed: 0, frameMs: 0, poke: 'delete' },
     logicbomb: { speed: 20, frameMs: 140, poke: 'delete' },
-    bigspider: { speed: 46, frameMs: 110, poke: 'hiss' },
+    bigspider: { speed: 32, frameMs: 0, poke: 'hiss' }, // (its own frames: bigSpider)
     trojan: { speed: 18, frameMs: 200, poke: 'delete' },
     pine: { speed: 0, frameMs: 0 },
     baretree: { speed: 0, frameMs: 0 },
@@ -471,7 +492,7 @@ function createVisitors(api) {
     else if (what === 'virus') virusVisit(nextVirus(), dir, edge, W); // (or one by name, for tests: phage, bug, trojan)
     else if (['phage', 'bug', 'trojan', 'worm', 'ransomware', 'spyware', 'adware', 'logicbomb'].includes(what)) virusVisit(what === 'phage' ? 'virus' : what, dir, edge, W);
     else if (what === 'bigspider') { // (in from the side, about the card in scuttles and leaps, out)
-      const v = add('bigspider', edge(SPRITES.bigspider.a[0].length * U), dir, { state: 'roam', target: rand(0.15, 0.85) * W, stops: 3 + Math.floor(Math.random() * 3) });
+      const v = add('bigspider', edge(BS ? (BS.w * U) / 2 : SPRITES.bigspider.a[0].length * U), dir, { state: 'roam', target: rand(0.15, 0.85) * W, stops: 3 + Math.floor(Math.random() * 3) });
       api.botEvent('visit-bigspider');
       if (v.x > W / 2) v.dir = -1;
     }
@@ -1321,7 +1342,39 @@ function createVisitors(api) {
 
   // HALLOWEEN's BIG SPIDER: scuttles from spot to spot about the card, leaping now and then (a
   // bot it lands near jumps), and out; poked, it hisses and leaps away
+  // (its jump: a crouch where it stands, the frames in the air carrying it over, a landing; its
+  // walk's frames stepping while it goes, faster the faster it goes, and standing still when it stops)
+  const BS_AIR = [3, 8];
+  const BS_STEP = ((6 * U) / 2 / 4) * 1000; // (a foot's push back: 6 of its pixels over 4 frames) // (the jump's frames off the ground: from the 4th up to the 8th)
+  function bigSpiderJump(v, now) {
+    const L = v.leap;
+    if (!L.times) {
+      let t = 0;
+      L.times = BS.jump.map((f) => { const at = t; t += f.ms * (L.big ? 1 : 0.8); return at; });
+      L.total = t;
+      L.air0 = L.times[BS_AIR[0]];
+      L.air1 = L.times[BS_AIR[1]];
+    }
+    const t = now - L.t0;
+    let i = L.times.length - 1;
+    while (i > 0 && t < L.times[i]) i--;
+    bigSpiderShow(v, 'jump', i);
+    const p = Math.max(0, Math.min(1, (t - L.air0) / (L.air1 - L.air0)));
+    v.x = L.from + (L.to - L.from) * p;
+    v.y = 0; // (its frames lift it)
+    if (t >= L.total) { v.leap = null; v.frameAt = now; bigSpiderShow(v, 'walk', 0); api.startle(v, 55); }
+  }
   function bigSpider(v, now, dt, W) {
+    if (v.leap && BS) { bigSpiderJump(v, now); return; }
+    if (BS) { // (its walk's frames while it goes)
+      const going = v.state === 'roam' || v.state === 'out';
+      if (!going) bigSpiderShow(v, 'walk', 0);
+      else if (now - v.frameAt > BS_STEP / (v.speed * (v.state === 'out' ? 1.5 : 1))) { // (its feet keeping pace with the floor)
+        v.frameAt = now;
+        v.frame = ((v.frame || 0) + 1) % BS.walk.length;
+        bigSpiderShow(v, 'walk', v.frame);
+      }
+    }
     if (v.leap) {
       const p = Math.min(1, (now - v.leap.t0) / v.leap.ms);
       v.x = v.leap.from + (v.leap.to - v.leap.from) * p;
@@ -1333,7 +1386,7 @@ function createVisitors(api) {
       v.dir = v.target > v.x ? 1 : -1;
       v.x += v.dir * Math.min(v.speed * dt, Math.abs(v.target - v.x));
       if (Math.random() < dt * 0.45) { // (a leap: up and over, toward where it's going)
-        const to = Math.max(0, Math.min(W - 40, v.x + v.dir * rand(30, 60)));
+        const to = Math.max(0, Math.min(W - (BS ? (BS.w * U) / 2 : 40), v.x + v.dir * rand(30, 60)));
         v.leap = { t0: now, from: v.x, to, h: rand(14, 26), ms: rand(420, 560) };
       } else if (Math.abs(v.target - v.x) < 0.5) {
         v.state = 'lurk';
@@ -1869,7 +1922,7 @@ function createVisitors(api) {
       say(v, 'HSSS!', 900);
       v.spooked = true;
       v.dir = v.x < api.laneW() / 2 ? -1 : 1;
-      v.leap = { t0: performance.now(), from: v.x, to: v.x + v.dir * 70, h: 30, ms: 600 };
+      v.leap = { t0: performance.now(), from: v.x, to: v.x + v.dir * 70, h: 30, ms: 600, big: true };
       v.state = 'out';
       v.speed *= 1.8;
       api.startle(v, 70);
@@ -2310,7 +2363,19 @@ function createVisitors(api) {
       const [a, b, c, d] = rootFrames(kind);
       sprites[`${kind}-walking`] = { pal: SPRITES[kind].pal, a, b, c, d };
     }
-    return { sprites, kinds: { ...KINDS, 'tree-walking': { frameMs: 190 }, 'baretree-walking': { frameMs: 190 }, 'pine-walking': { frameMs: 190 } } };
+    // (the big spider: its 2x frames as they are, for the editor's 2x grid)
+    const anims = {};
+    if (BS) {
+      delete sprites.bigspider;
+      for (const name of ['walk', 'jump']) {
+        anims[`bigspider-${name}`] = BS[name].map((f) => {
+          const cells = {};
+          bsRows(f.rows).forEach((row, y) => [...row].forEach((ch, x) => { if (BS.pal[ch]) cells[`${BS.x0 + x},${BS.y0 + y}`] = BS.pal[ch]; }));
+          return { ms: f.ms, cells };
+        });
+      }
+    }
+    return { sprites, anims, kinds: { ...KINDS, 'tree-walking': { frameMs: 190 }, 'baretree-walking': { frameMs: 190 }, 'pine-walking': { frameMs: 190 } } };
   }
   return { frame, clear, visit, list: () => list, makeScenery, moveTree, foggy, spirit, art };
 }
