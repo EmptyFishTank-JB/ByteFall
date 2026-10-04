@@ -410,6 +410,20 @@ const SFX = (() => {
         o.start(t); o.stop(t + dur + 0.01);
       } catch (e) {}
     },
+    // (the score racking up on the result screen: a tick, higher as it nears the total, p 0-1)
+    count(p = 0) {
+      if (muted) return;
+      try {
+        const c = getCtx();
+        const t = c.currentTime;
+        const o = c.createOscillator();
+        o.type = 'square';
+        o.frequency.value = 880 + 700 * p;
+        const lp = filter(c, 'lowpass', 3000);
+        o.connect(lp); lp.connect(envelope(c, VOL * 0.09, t, 0.028));
+        o.start(t); o.stop(t + 0.03);
+      } catch (e) {}
+    },
     levelUp() {
       if (muted) return;
       try {

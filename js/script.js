@@ -1883,7 +1883,7 @@ function endGame(reason = 'trace') {
   render();
   Music.setIntensity(0);
   setMessage('');
-  finalScoreEl.textContent = score;
+  finalScoreEl.textContent = mode === 'vs' ? score : 0; // (racked up once the result shows: rackScore)
   newBestEl.hidden = !(score > bestAtStart);
   const endings = {
     trace: ['TRACE COMPLETE', 'They found you.'],
@@ -1941,7 +1941,7 @@ function endGame(reason = 'trace') {
   setTimeout(() => {
     if (run !== runId) return;
     overlayEl.classList.remove('hidden');
-    playXpMeter(run); // (the level meter fills with the game's bits)
+    rackScore(run, () => playXpMeter(run)); // (the score racks up, then the level meter fills with the game's bits)
   }, 1200);
 }
 
@@ -4494,6 +4494,32 @@ function flushEarned() {
   pendingEarned = [];
   if (held.length) announce(held);
 }
+// The result screen's score, racking up from 0 to the game's (quickly: under a second and a half,
+// however big), ticking as it counts; then done(). A tap on the result box skips to the end
+function rackScore(run, done) {
+  const total = score;
+  if (total <= 0 || mode === 'vs') { finalScoreEl.textContent = fmt(total); done(); return; }
+  const ms = Math.min(1400, 400 + Math.log10(total + 1) * 280);
+  const box = overlayEl.querySelector('.overlay-box');
+  let skip = false;
+  const onTap = () => { skip = true; };
+  box.addEventListener('click', onTap, { once: true });
+  finalScoreEl.textContent = '0';
+  const t0 = performance.now();
+  let lastTick = 0;
+  const frame = (now) => {
+    if (run !== runId) return;
+    const p = skip ? 1 : Math.min(1, (now - t0) / ms);
+    const eased = 1 - Math.pow(1 - p, 2); // (slowing toward the total)
+    finalScoreEl.textContent = fmt(Math.round(total * eased));
+    if (now - lastTick > 45 && p < 1) { lastTick = now; SFX.count(eased); }
+    if (p < 1) { requestAnimationFrame(frame); return; }
+    box.removeEventListener('click', onTap);
+    SFX.play('punct');
+    setTimeout(() => { if (run === runId) done(); }, 250);
+  };
+  requestAnimationFrame(frame);
+}
 function playXpMeter(run) {
   const box = document.getElementById('overlay-xp');
   const start = runXp;
@@ -4557,7 +4583,7 @@ function playXpMeter(run) {
     };
     requestAnimationFrame(tick);
   };
-  setTimeout(step, 350);
+  setTimeout(step, 150);
 }
 
 // Level bar under the title: level, DECRYPTOR rank and XP (bits) toward the next level
