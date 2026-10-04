@@ -518,6 +518,7 @@ function createWanderers(lane, active = () => true) {
       // leaves it standing somewhere along the card (at a spot clear of any already there)
       const t = pushed;
       w.pushing = t;
+      w.pushed = t; // (what it brought in: it minds if it's poked away later)
       w.speed *= 0.6;
       const W = laneW();
       const treeX = t.spot;
@@ -877,6 +878,22 @@ function createWanderers(lane, active = () => true) {
     // (LIGHTS OUT: one somewhere else when they come back on; and the POSSESSED bot)
     move: (w, x) => { w.x = Math.max(0, Math.min(laneW() - SIZE, x)); w.target = w.x; place(w); },
     possess: (w) => possess(w),
+    // (the BIT a bot was pushing, poked away from under its hands: it stops, put out)
+    lostPush: (t) => {
+      for (const w of walkers) {
+        if ((w.pushing !== t && w.pushed !== t) || w.leaving || ['startled', 'vanish', 'poked'].includes(w.state)) continue;
+        letGo(w);
+        w.pushed = null;
+        w.state = 'idle';
+        w.target = w.x;
+        w.until = performance.now() + rand(1400, 2000);
+        w.look = t.x + t.w / 2 > w.x + SIZE / 2 ? 1 : -1; // (at it)
+        if (w.partner) w.partner.partner = null;
+        w.partner = null;
+        mood(w, 'annoyed', pick(['-_-', 'hey!', '...']));
+        place(w);
+      }
+    },
   }) : null;
   const foggy = () => !!visitors && visitors.foggy();
 

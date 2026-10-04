@@ -698,26 +698,120 @@ function createVisitors(api) {
     const now = performance.now();
     t.walkTree = { home: t.state, z: t.el.style.zIndex, opacity: t.el.style.opacity, frights: 0, until: now + rand(11000, 16000) };
     t.state = 'uproot';
-    t.until = now + 1100;
+    t.until = now + 1500;
     t.el.classList.add('v-uproot', 'v-shake');
     t.el.style.opacity = '1';
     say(t, pick(['creeeak', 'CRACK', '...']), 1000);
     api.startle(t, 70);
     api.botEvent('visit-treewalk');
   }
+  // THE WALKING TREE's legs: its own pixel art with the foot of its trunk turned into roots, in
+  // four frames: planted (spread wide), the back root lifted and swung forward, passing (gathered
+  // under the trunk), the front root lifted and reaching ahead. Made from each kind's sprite: the
+  // trunk found a few rows up, the roots grown out of it (thicker on a thick trunk)
+  const ROOT_ROWS = 6;
+  const ROOT_PAD = 5;
+  function rootFrames(kind) {
+    const rows = SPRITES[kind].a;
+    const h = rows.length;
+    const probe = rows[h - 4];
+    let c0 = probe.search(/[^.]/);
+    let c1 = probe.length - 1 - [...probe].reverse().join('').search(/[^.]/);
+    const ch = probe[Math.floor((c0 + c1) / 2)];
+    const body = rows.slice(0, h - 2).map((r) => '.'.repeat(ROOT_PAD) + r + '.'.repeat(ROOT_PAD));
+    c0 += ROOT_PAD;
+    c1 += ROOT_PAD;
+    const width = body[0].length;
+    const thick = c1 - c0 >= 3 ? 2 : 1;
+    const R = ROOT_ROWS;
+    const out = (n) => Math.round(n);
+    // (each leg: its x on each root row, or null where it's off the ground; + is forward)
+    const FRAMES = [
+      [(r) => c0 - out(r * 0.9), (r) => c1 + out(r * 0.9)], // planted
+      [(r) => (r <= 3 ? c0 + out(r * 0.8) : null), (r) => c1 + out(r * 0.45)], // back root swung forward
+      [(r) => c0 - out(r * 0.3), (r) => c1 + out(r * 0.3)], // passing
+      [(r) => c0 - out(r * 0.45), (r) => (r <= 3 ? c1 + 1 + out(r * 1.1) : null)], // front root reaching
+    ];
+    return FRAMES.map(([left, right], f) => {
+      const roots = [];
+      for (let r = 0; r < R; r++) {
+        const row = Array(width).fill('.');
+        if (r === 0) for (let x = c0; x <= c1; x++) row[x] = ch; // (the trunk, on into its roots)
+        else {
+          for (const [leg, inward] of [[left, 1], [right, -1]]) {
+            const x = leg(r);
+            if (x === null) continue;
+            for (let k = 0; k < thick; k++) if (row[x + k * inward] !== undefined) row[x + k * inward] = ch;
+            const planted = (f === 0 || f === 2 || (f === 1 && leg === right) || (f === 3 && leg === left));
+            if (planted && r === R - 1 && row[x - inward] !== undefined) row[x - inward] = ch; // (a toe, gripping)
+            if (r === 2 && row[x - inward] !== undefined && f !== 2) row[x - inward] = ch; // (a rootlet off it)
+          }
+        }
+        roots.push(row.join(''));
+      }
+      return body.concat(roots);
+    });
+  }
+  // (on: the tree's sprite swapped for its walking frames; off: back as it was)
+  function rigTree(t, on) {
+    const svg = t.el.querySelector('svg');
+    if (on) {
+      const def = SPRITES[t.kind];
+      const k = Number(svg.getAttribute('width')) / (def.a[0].length * U);
+      const frames = rootFrames(t.kind);
+      const pal = { ...def.pal, ...(t.pal || {}) };
+      t.rig = { html: svg.innerHTML, w: svg.getAttribute('width'), h: svg.getAttribute('height'), vb: svg.getAttribute('viewBox'), elW: t.el.style.width, shift: ROOT_PAD * U * k, k };
+      const fw = frames[0][0].length;
+      const fh = frames[0].length;
+      svg.setAttribute('viewBox', `0 0 ${fw} ${fh}`);
+      svg.setAttribute('width', fw * U * k);
+      svg.setAttribute('height', fh * U * k);
+      svg.innerHTML = frames.map((rows, i) => `<g class="rf" style="display:${i ? 'none' : 'inline'}">${rects(rows, pal)}</g>`).join('');
+      t.el.style.width = `${fw * U * k}px`;
+      t.x -= t.rig.shift;
+      t.rigFrame = 0;
+      t.rigAt = 0;
+    } else if (t.rig) {
+      svg.innerHTML = t.rig.html;
+      svg.setAttribute('viewBox', t.rig.vb);
+      svg.setAttribute('width', t.rig.w);
+      svg.setAttribute('height', t.rig.h);
+      t.el.style.width = t.rig.elW;
+      t.x += t.rig.shift;
+      t.rig = null;
+    }
+    t.boxW = 0;
+  }
+  function showRigFrame(t, f) {
+    t.rigFrame = f;
+    t.el.querySelectorAll('svg > .rf').forEach((g, i) => { g.style.display = i === f ? 'inline' : 'none'; });
+  }
+  const rootDepth = (t) => (ROOT_ROWS - 2) * U * t.rig.k + 2; // (how far its roots reach below where it stood)
   function treeWalkFrame(t, now, dt, W) {
     const w = t.boxW || (t.boxW = t.el.offsetWidth) || 30;
-    if (t.state === 'uproot') {
-      t.y = Math.min(U * 2, (1 - (t.until - now) / 1100) * U * 2); // (up out of the ground)
-      if (now > t.until) { t.el.classList.remove('v-shake'); t.state = 'stalk'; }
-    } else if (t.state === 'stalk') {
+    if (t.state === 'uproot') { // (shaking, then rising up out of the ground on its roots)
+      if (!t.rig && now > t.until - 700) {
+        rigTree(t, true);
+        t.el.style.clipPath = 'inset(-1000px -1000px 0 -1000px)'; // (its roots below the floor, out of sight)
+        t.el.classList.remove('v-shake');
+      }
+      if (t.rig) {
+        const p = Math.min(1, 1 - (t.until - now) / 700);
+        t.svgT = ` translateY(${(rootDepth(t) * (1 - p)).toFixed(1)}px)`;
+      }
+      if (now > t.until) { t.state = 'stalk'; t.svgT = ''; }
+    } else if (t.state === 'stalk') { // (step by step: it only moves while a root is lifted)
       const b = nearest({ x: t.x + w / 2 - 17 });
       const goal = b ? b.x + 17 - w / 2 : t.x;
-      if (b) t.dir = goal > t.x ? 1 : -1;
-      t.x += Math.sign(goal - t.x) * Math.min(Math.abs(goal - t.x), 13 * dt);
+      if (now - t.rigAt > 190) {
+        t.rigAt = now;
+        showRigFrame(t, (t.rigFrame + 1) % 4);
+        if (b && Math.abs(goal - t.x) > 4) t.dir = goal > t.x ? 1 : -1;
+      }
+      const lifting = t.rigFrame === 1 || t.rigFrame === 3;
+      if (lifting) t.x += Math.sign(goal - t.x) * Math.min(Math.abs(goal - t.x), 26 * dt);
       t.x = Math.max(-w * 0.3, Math.min(W - w * 0.7, t.x));
-      t.y = U * 2 + Math.round(Math.abs(Math.sin(t.age / 240))) * U; // (a heavy shuffle)
-      t.svgT = ` rotate(${Math.sin(t.age / 240) > 0 ? 3 : -3}deg)`;
+      t.y = lifting ? U * t.rig.k * 0.5 : 0; // (heaving itself up a little on each step)
       if (b && Math.abs(goal - t.x) < 24 && !t.scared.has(b)) {
         t.scared.add(b);
         api.fright(b);
@@ -725,10 +819,16 @@ function createVisitors(api) {
         say(t, pick(['GRRROAN', 'creeeak']), 900);
       }
       if (now > t.walkTree.until || t.walkTree.frights >= 2 || (!b && now > t.walkTree.until - 6000)) plantTree(t, now);
-    } else if (t.state === 'plant') {
-      t.y = Math.max(0, ((t.until - now) / 900) * U * 2);
+    } else if (t.state === 'plant') { // (roots spread, sinking back into the ground)
+      if (t.rig) {
+        const p = Math.min(1, 1 - (t.until - now) / 900);
+        t.svgT = ` translateY(${(rootDepth(t) * p).toFixed(1)}px)`;
+      }
       if (now > t.until) {
         const wt = t.walkTree;
+        rigTree(t, false);
+        t.el.style.clipPath = '';
+        t.svgT = '';
         t.walkTree = null;
         t.state = wt.home;
         t.y = 0;
@@ -742,8 +842,9 @@ function createVisitors(api) {
   function plantTree(t, now) {
     t.state = 'plant';
     t.until = now + 900;
+    t.y = 0;
+    if (t.rig) showRigFrame(t, 0); // (planted: spread wide)
     t.svgT = '';
-    t.el.classList.add('v-shake');
   }
   function drawFog(c, f, maxA, seed, low) {
     const cell = low ? 6 : 4;
@@ -1763,7 +1864,7 @@ function createVisitors(api) {
   // (drawn as the grid draws its bits, and again whenever the theme changes: GLYPH's glyph,
   // SPECTRUM's own hue cycle)
   function bitLook(t) {
-    const theme = document.documentElement.dataset.theme;
+    const theme = document.documentElement.dataset.theme || 'terminal'; // (TERMINAL sets none)
     if (t.theme === theme) return;
     t.theme = theme;
     if (typeof fillBit === 'function') fillBit(t.cell, t.value);
@@ -1798,6 +1899,7 @@ function createVisitors(api) {
     if (inSight(v.el) && typeof FX !== 'undefined' && FX.burst) FX.burst([{ el: v.cell, type: 'number' }]); // (as a bit decrypts in the grid)
     v.cell.style.visibility = 'hidden';
     api.startle(v, 50);
+    if (api.lostPush) api.lostPush(v); // (the bot that pushed it in: put out, -_-, not just startled)
     setTimeout(() => { v.gone = true; }, 700);
   }
   function moveTree(t, x) {
@@ -2334,7 +2436,11 @@ function createVisitors(api) {
   function art() {
     const sprites = { ...SPRITES, menorah: menorah(8), kinara: kinara(7), sign: sign(new Date().getFullYear()), 'moon-full': moonSprite(false), 'moon-blood': moonSprite(true) };
     delete sprites.bit;
-    return { sprites, kinds: KINDS };
+    for (const kind of ['tree', 'baretree', 'pine']) { // (the walking trees' four steps)
+      const [a, b, c, d] = rootFrames(kind);
+      sprites[`${kind}-walking`] = { pal: SPRITES[kind].pal, a, b, c, d };
+    }
+    return { sprites, kinds: { ...KINDS, 'tree-walking': { frameMs: 190 }, 'baretree-walking': { frameMs: 190 }, 'pine-walking': { frameMs: 190 } } };
   }
   return { frame, clear, visit, list: () => list, makeScenery, moveTree, foggy, spirit, art };
 }
