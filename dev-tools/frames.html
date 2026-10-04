@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" class="sandbox">
 <head>
-<script src="../js/fonts.js?v=315"></script>
+<script src="../js/fonts.js?v=316"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#020403">
 <title>Frame Editor // BYTEFALL</title>
-<link rel="stylesheet" href="../css/style.css?v=315">
+<link rel="stylesheet" href="../css/style.css?v=316">
 <!-- FRAME EDITOR: the bots' animations a frame at a time, on their pixel grid. Start from a bot (any
      of the four, any level, mood, with or without headphones) or from one of the game's own
      animations (CORE DUMP's headbang and windmill), draw and erase pixels in the bots' colors, add
@@ -18,13 +18,18 @@
 <style>
   html.sandbox, html.sandbox body { min-height: 100%; }
   html.sandbox body { display: block; margin: 0; padding: 20px 16px 60px; overflow-x: hidden; background: #020403; color: var(--fg); font-family: var(--game-font, 'Courier New', Courier, monospace); }
-  .fe { max-width: 1100px; margin: 0 auto; }
+  .fe { max-width: 1680px; margin: 0 auto; }
   .fe a.back { color: var(--fg-dim); text-decoration: none; font-size: 12px; letter-spacing: 2px; }
   .fe h1 { font-size: 20px; letter-spacing: 3px; margin: 12px 0 4px; color: var(--accent); }
   .fe .lede { font-size: 12px; color: var(--fg-dim); margin: 0 0 14px; line-height: 1.5; }
-  .fe-grid { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px; align-items: start; }
-  @media (max-width: 900px) { .fe-grid { grid-template-columns: minmax(0, 1fr); } }
-  #canvas { display: block; image-rendering: pixelated; cursor: crosshair; border: 1px solid var(--grid-line); border-radius: 6px; touch-action: none; background: #0b1512; }
+  /* The canvas and its drawing tools on the left, as wide as the canvas; the panels beside it in as
+     many columns as fit (one on a laptop, two or three on a wide screen); one column on a phone */
+  .fe-grid { display: grid; grid-template-columns: 602px minmax(0, 1fr); gap: 18px; align-items: start; }
+  .fe-main { min-width: 0; }
+  .fe-side { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; align-items: start; }
+  .fe-side .grp { margin-bottom: 0; }
+  @media (max-width: 980px) { .fe-grid { grid-template-columns: minmax(0, 1fr); } }
+  #canvas { display: block; max-width: 100%; height: auto; image-rendering: pixelated; cursor: crosshair; border: 1px solid var(--grid-line); border-radius: 6px; touch-action: none; background: #0b1512; }
   .grp { border: 1px solid var(--grid-line); border-radius: 8px; padding: 10px 12px 12px; margin-bottom: 12px; background: rgba(0, 0, 0, 0.25); }
   .grp h2 { font-size: 11px; letter-spacing: 2px; color: var(--accent); margin: 0 0 8px; font-weight: normal; }
   .grp p { font-size: 10px; color: var(--fg-dim); margin: 0 0 8px; line-height: 1.5; }
@@ -32,6 +37,7 @@
   .row > b { font-weight: normal; font-size: 10px; color: var(--fg-dim); width: 100%; letter-spacing: 1px; }
   .fe button { font-family: inherit; font-size: 10px; letter-spacing: 1px; padding: 5px 8px; cursor: pointer; background: transparent; color: var(--fg); border: 1px solid var(--fg-dim); border-radius: 4px; }
   .fe button:hover { background: rgba(var(--fg-rgb), 0.12); }
+  .fe button:disabled, .fe input:disabled { opacity: 0.35; cursor: default; }
   .fe button.on { background: var(--fg); color: #020403; border-color: var(--fg); }
   .fe button.go { border-color: var(--accent); color: var(--accent); }
   .fe select, .fe input[type="text"], .fe input[type="number"] { font-family: inherit; font-size: 11px; background: transparent; color: var(--fg); border: 1px solid var(--fg-dim); border-radius: 4px; padding: 4px; }
@@ -44,7 +50,8 @@
   .thumb { display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; font-size: 9px; color: var(--fg-dim); }
   .thumb canvas { image-rendering: pixelated; border: 1px solid var(--grid-line); border-radius: 3px; background: #0b1512; }
   .thumb.on canvas { border-color: var(--accent); }
-  .previews { display: flex; gap: 16px; align-items: flex-end; margin-top: 10px; }
+  .previews { display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
+  .previews canvas { max-width: 100%; }
   .previews canvas { image-rendering: pixelated; background: #0b1512; border-radius: 4px; }
   .note { font-size: 10px; color: var(--fg-dim); margin-top: 6px; }
   #status { font-size: 11px; color: var(--accent); min-height: 14px; margin-top: 6px; }
@@ -57,7 +64,7 @@
   <p class="lede">Draw the bots' animations a frame at a time, on their own pixel grid (each square is one pixel of a bot; the dashed box is the bot's 16x17). Start from any of the game's characters (every bot and what it does, every visitor's frames) or a blank, paint and erase (at the game's pixels or 2x for finer detail), add frames and time them, and play it back at game size. TRACE IMAGE puts a picture of your own under or over the grid to trace (its opacity, scale, size and place yours to set). UNDO and REDO (Ctrl+Z, Ctrl+Y) cover everything: painting, and adding, deleting, moving and timing frames. Your animations are kept in this browser; EXPORT saves one as a file to hand over to be built into the game.</p>
 
   <div class="fe-grid">
-    <div>
+    <div class="fe-main">
       <canvas id="canvas"></canvas>
       <div class="row" style="margin-top: 8px;">
         <button type="button" id="t-paint" class="on">PAINT</button><button type="button" id="t-erase">ERASE</button><button type="button" id="t-pick">PICK COLOR</button><button type="button" id="t-fill">FILL</button>
@@ -73,23 +80,14 @@
       </div>
       <div id="palette" style="margin: 6px 0;"></div>
       <div class="row"><b>ANY COLOR</b><input type="color" id="custom" value="#2c2833"><button type="button" id="add-color">ADD TO PALETTE</button></div>
-      <div class="grp" style="margin-top: 10px;">
-        <h2>TRACE IMAGE</h2>
-        <p class="note" style="margin: 0 0 6px;">A picture under (or over) the grid to trace: it isn't part of the animation and isn't exported. Drag it with MOVE IMAGE on, or nudge it a pixel at a time.</p>
-        <div class="row"><label class="note" style="cursor: pointer;"><input type="file" id="trace-file" accept="image/*" hidden><u>IMPORT IMAGE</u></label>
-          <button type="button" id="trace-show" class="on">SHOWN</button><button type="button" id="trace-top">UNDER THE PIXELS</button><button type="button" id="trace-move">MOVE IMAGE</button><button type="button" id="trace-smooth">SHARP</button><button type="button" id="trace-remove">REMOVE</button></div>
-        <div class="row"><b>OPACITY</b><input type="range" id="trace-opacity" min="5" max="100" value="45" style="flex: 1;"><span class="note" id="trace-opacity-v">45%</span></div>
-        <div class="row"><b>SCALE</b><input type="range" id="trace-scale" min="5" max="400" value="100" style="flex: 1;"><span class="note" id="trace-scale-v">100%</span></div>
-        <div class="row"><b>SIZE (BOT PIXELS)</b> W <input type="number" id="trace-w" min="1" step="0.5" style="width: 64px;"> H <input type="number" id="trace-h" min="1" step="0.5" style="width: 64px;">
-          <label class="note"><input type="checkbox" id="trace-lock" checked> KEEP ITS SHAPE</label><button type="button" id="trace-fit">FIT THE BOT</button></div>
-        <div class="row"><b>NUDGE</b><button type="button" data-nudge="-1,0">&larr;</button><button type="button" data-nudge="1,0">&rarr;</button><button type="button" data-nudge="0,-1">&uarr;</button><button type="button" data-nudge="0,1">&darr;</button>
-          <span class="note" id="trace-pos"></span></div>
-      </div>
-      <div class="previews"><div><div class="note">GAME SIZE</div><canvas id="prev1"></canvas></div><div><div class="note">3x</div><canvas id="prev3"></canvas></div></div>
-      <div class="row" style="margin-top: 8px;"><button type="button" class="go" id="play">PLAY</button><button type="button" id="stop">STOP</button><span class="note" id="playing"></span></div>
     </div>
 
-    <div>
+    <div class="fe-side">
+      <div class="grp">
+        <h2>PLAYBACK</h2>
+        <div class="previews"><div><div class="note">GAME SIZE</div><canvas id="prev1"></canvas></div><div><div class="note">2x</div><canvas id="prev3"></canvas></div></div>
+        <div class="row" style="margin-top: 8px;"><button type="button" class="go" id="play">PLAY</button><button type="button" id="stop">STOP</button><span class="note" id="playing"></span></div>
+      </div>
       <div class="grp">
         <h2>ANIMATION</h2>
         <div class="row"><select id="anims"></select><button type="button" id="new-anim">NEW</button><button type="button" id="dup-anim">COPY</button><button type="button" id="del-anim">DELETE</button></div>
@@ -130,6 +128,19 @@
         <div class="row"><b>THE GAME'S OWN (CORE DUMP)</b><button type="button" id="from-bang">HEADBANG</button><button type="button" id="from-heavy">HEAVY HEADBANG</button><button type="button" id="from-mill">WINDMILL</button></div>
         <div class="row"><b>ADD ONE FRAME OF A BOT TO THE END</b><button type="button" id="add-bot">+ BOT FRAME</button></div>
       </div>
+
+      <div class="grp">
+        <h2>TRACE IMAGE</h2>
+        <p class="note" style="margin: 0 0 6px;">A picture under (or over) the grid to trace: it isn't part of the animation and isn't exported. Drag it with MOVE IMAGE on, or nudge it a pixel at a time.</p>
+        <div class="row"><label class="note" style="cursor: pointer;"><input type="file" id="trace-file" accept="image/*" hidden><u>IMPORT IMAGE</u></label>
+          <button type="button" id="trace-show" class="on">SHOWN</button><button type="button" id="trace-top">UNDER THE PIXELS</button><button type="button" id="trace-move">MOVE IMAGE</button><button type="button" id="trace-smooth">SHARP</button><button type="button" id="trace-remove">REMOVE</button></div>
+        <div class="row"><b>OPACITY</b><input type="range" id="trace-opacity" min="5" max="100" value="45" style="flex: 1;"><span class="note" id="trace-opacity-v">45%</span></div>
+        <div class="row"><b>SCALE</b><input type="range" id="trace-scale" min="5" max="400" value="100" style="flex: 1;"><span class="note" id="trace-scale-v">100%</span></div>
+        <div class="row"><b>SIZE (BOT PIXELS)</b> W <input type="number" id="trace-w" min="1" step="0.5" style="width: 64px;"> H <input type="number" id="trace-h" min="1" step="0.5" style="width: 64px;">
+          <label class="note"><input type="checkbox" id="trace-lock" checked> KEEP ITS SHAPE</label><button type="button" id="trace-fit">FIT THE BOT</button></div>
+        <div class="row"><b>NUDGE</b><button type="button" data-nudge="-1,0">&larr;</button><button type="button" data-nudge="1,0">&rarr;</button><button type="button" data-nudge="0,-1">&uarr;</button><button type="button" data-nudge="0,1">&darr;</button>
+          <span class="note" id="trace-pos"></span></div>
+      </div>
     </div>
   </div>
 </div>
@@ -137,13 +148,13 @@
 <div class="stat cpu-face" id="cpu-face" hidden aria-hidden="true"></div>
 <div id="stage" style="position: absolute; left: -9999px; top: 0; width: 200px; height: 60px;"><div class="game-walkers" id="lane"></div></div>
 <canvas id="board-fx" hidden></canvas>
-<script src="../js/bot-svg.js?v=315"></script>
-<script src="../js/pixel.js?v=315"></script>
-<script src="../js/minibot.js?v=315"></script>
-<script src="../js/data/bot-anims.js?v=315"></script>
-<script src="../js/seasons.js?v=315"></script>
-<script src="../js/visitors.js?v=315"></script>
-<script src="../js/wanderers.js?v=315"></script>
+<script src="../js/bot-svg.js?v=316"></script>
+<script src="../js/pixel.js?v=316"></script>
+<script src="../js/minibot.js?v=316"></script>
+<script src="../js/data/bot-anims.js?v=316"></script>
+<script src="../js/seasons.js?v=316"></script>
+<script src="../js/visitors.js?v=316"></script>
+<script src="../js/wanderers.js?v=316"></script>
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -243,9 +254,9 @@
   const prev1 = $('prev1'); const prev3 = $('prev3');
   const PU = 34 / 16;
   prev1.width = Math.round(W * PU); prev1.height = Math.round(H * PU);
-  prev3.width = Math.round(W * PU * 3); prev3.height = Math.round(H * PU * 3);
+  prev3.width = Math.round(W * PU * 2); prev3.height = Math.round(H * PU * 2);
   function drawPreview(cells) {
-    for (const [cv, s] of [[prev1, PU], [prev3, PU * 3]]) {
+    for (const [cv, s] of [[prev1, PU], [prev3, PU * 2]]) {
       const c2 = cv.getContext('2d');
       c2.fillStyle = '#0b1512'; c2.fillRect(0, 0, cv.width, cv.height);
       drawCells(cells, 1, c2, s);
@@ -304,9 +315,10 @@
     $('trace-smooth').textContent = trace.smooth ? 'SMOOTH' : 'SHARP';
     $('trace-opacity').value = Math.round(trace.opacity * 100);
     $('trace-opacity-v').textContent = `${Math.round(trace.opacity * 100)}%`;
-    const scale = Math.round((trace.w / trace.natW) * 100);
+    const scale = has ? Math.round((trace.w / trace.natW) * 100) : 100;
     $('trace-scale').value = Math.min(400, Math.max(5, scale));
-    $('trace-scale-v').textContent = `${scale}%`;
+    $('trace-scale-v').textContent = has ? `${scale}%` : '';
+    document.querySelectorAll('#trace-opacity, #trace-scale, #trace-w, #trace-h, #trace-fit, [data-nudge], #trace-show, #trace-top, #trace-move, #trace-smooth, #trace-remove').forEach((el) => { el.disabled = !has; });
     $('trace-w').value = +trace.w.toFixed(2);
     $('trace-h').value = +trace.h.toFixed(2);
     $('trace-pos').textContent = has ? `at ${+trace.x.toFixed(2)}, ${+trace.y.toFixed(2)} · ${trace.natW}x${trace.natH} image` : 'no image';
@@ -471,7 +483,7 @@
     const row = (label, colors) => {
       const r = document.createElement('div');
       r.className = 'row';
-      r.style.margin = '0';
+      r.style.margin = '0 0 8px';
       r.innerHTML = `<b>${label}</b>`;
       for (const c of colors) {
         const s = document.createElement('button');
