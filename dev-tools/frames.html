@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" class="sandbox">
 <head>
-<script src="../js/fonts.js?v=316"></script>
+<script src="../js/fonts.js?v=317"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#020403">
 <title>Frame Editor // BYTEFALL</title>
-<link rel="stylesheet" href="../css/style.css?v=316">
+<link rel="stylesheet" href="../css/style.css?v=317">
 <!-- FRAME EDITOR: the bots' animations a frame at a time, on their pixel grid. Start from a bot (any
      of the four, any level, mood, with or without headphones) or from one of the game's own
      animations (CORE DUMP's headbang and windmill), draw and erase pixels in the bots' colors, add
@@ -29,7 +29,13 @@
   .fe-side { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; align-items: start; }
   .fe-side .grp { margin-bottom: 0; }
   @media (max-width: 980px) { .fe-grid { grid-template-columns: minmax(0, 1fr); } }
-  #canvas { display: block; max-width: 100%; height: auto; image-rendering: pixelated; cursor: crosshair; border: 1px solid var(--grid-line); border-radius: 6px; touch-action: none; background: #0b1512; }
+  /* The canvas in a window it zooms and pans inside (the mouse wheel, HAND or Space / middle-button drag) */
+  .canvas-wrap { position: relative; overflow: hidden; width: 602px; max-width: 100%; border: 1px solid var(--grid-line); border-radius: 6px; background: #0b1512; touch-action: none; overscroll-behavior: contain; }
+  #canvas { display: block; max-width: 100%; height: auto; image-rendering: pixelated; cursor: crosshair; transform-origin: 0 0; touch-action: none; background: #0b1512; }
+  .canvas-wrap.panning #canvas, .canvas-wrap.can-pan #canvas { cursor: grab; }
+  .canvas-wrap.grabbing #canvas { cursor: grabbing; }
+  .zoom-row { display: flex; align-items: center; gap: 5px; margin-top: 6px; }
+  .zoom-row .note { margin: 0; }
   .grp { border: 1px solid var(--grid-line); border-radius: 8px; padding: 10px 12px 12px; margin-bottom: 12px; background: rgba(0, 0, 0, 0.25); }
   .grp h2 { font-size: 11px; letter-spacing: 2px; color: var(--accent); margin: 0 0 8px; font-weight: normal; }
   .grp p { font-size: 10px; color: var(--fg-dim); margin: 0 0 8px; line-height: 1.5; }
@@ -61,11 +67,13 @@
 <div class="fe">
   <a class="back" href="audio.html#dev">&larr; DEV PAGE</a>
   <h1>// FRAME EDITOR</h1>
-  <p class="lede">Draw the bots' animations a frame at a time, on their own pixel grid (each square is one pixel of a bot; the dashed box is the bot's 16x17). Start from any of the game's characters (every bot and what it does, every visitor's frames) or a blank, paint and erase (at the game's pixels or 2x for finer detail), add frames and time them, and play it back at game size. TRACE IMAGE puts a picture of your own under or over the grid to trace (its opacity, scale, size and place yours to set). UNDO and REDO (Ctrl+Z, Ctrl+Y) cover everything: painting, and adding, deleting, moving and timing frames. Your animations are kept in this browser; EXPORT saves one as a file to hand over to be built into the game.</p>
+  <p class="lede">Draw the bots' animations a frame at a time, on their own pixel grid (each square is one pixel of a bot; the dashed box is the bot's 16x17). Start from any of the game's characters (every bot and what it does, every visitor's frames) or a blank, paint and erase (at the game's pixels or 2x for finer detail), add frames and time them, and play it back at game size. TRACE IMAGE puts a picture of your own under or over the grid to trace (its opacity, scale, size and place yours to set). The mouse wheel zooms in and out at the cursor; HAND, Space or the middle button grabs the view to move it. UNDO and REDO (Ctrl+Z, Ctrl+Y) cover everything: painting, and adding, deleting, moving and timing frames. Your animations are kept in this browser; EXPORT saves one as a file to hand over to be built into the game.</p>
 
   <div class="fe-grid">
     <div class="fe-main">
-      <canvas id="canvas"></canvas>
+      <div class="canvas-wrap" id="canvas-wrap"><canvas id="canvas"></canvas></div>
+      <div class="zoom-row"><button type="button" id="zoom-out" title="Zoom out (mouse wheel down)">&minus;</button><button type="button" id="zoom-in" title="Zoom in (mouse wheel up)">+</button><button type="button" id="zoom-fit">FIT</button><button type="button" id="t-hand" title="Drag to move the view (or hold Space, or drag with the middle button)">HAND</button>
+        <span class="note" id="zoom-v">100%</span><span class="note">wheel to zoom at the cursor; HAND, Space or the middle button to grab and move the view; Alt-drag (or MOVE IMAGE) to move the trace image</span></div>
       <div class="row" style="margin-top: 8px;">
         <button type="button" id="t-paint" class="on">PAINT</button><button type="button" id="t-erase">ERASE</button><button type="button" id="t-pick">PICK COLOR</button><button type="button" id="t-fill">FILL</button>
         <button type="button" id="onion">ONION SKIN</button><button type="button" id="undo" title="Ctrl+Z">UNDO</button><button type="button" id="redo" title="Ctrl+Y or Ctrl+Shift+Z">REDO</button>
@@ -148,13 +156,13 @@
 <div class="stat cpu-face" id="cpu-face" hidden aria-hidden="true"></div>
 <div id="stage" style="position: absolute; left: -9999px; top: 0; width: 200px; height: 60px;"><div class="game-walkers" id="lane"></div></div>
 <canvas id="board-fx" hidden></canvas>
-<script src="../js/bot-svg.js?v=316"></script>
-<script src="../js/pixel.js?v=316"></script>
-<script src="../js/minibot.js?v=316"></script>
-<script src="../js/data/bot-anims.js?v=316"></script>
-<script src="../js/seasons.js?v=316"></script>
-<script src="../js/visitors.js?v=316"></script>
-<script src="../js/wanderers.js?v=316"></script>
+<script src="../js/bot-svg.js?v=317"></script>
+<script src="../js/pixel.js?v=317"></script>
+<script src="../js/minibot.js?v=317"></script>
+<script src="../js/data/bot-anims.js?v=317"></script>
+<script src="../js/seasons.js?v=317"></script>
+<script src="../js/visitors.js?v=317"></script>
+<script src="../js/wanderers.js?v=317"></script>
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -393,9 +401,61 @@
   const at = (e) => { const r = canvas.getBoundingClientRect(); return [((e.clientX - r.left) / r.width) * W, ((e.clientY - r.top) / r.height) * H]; };
 
   let painting = false;
+  // ── ZOOM AND PAN: the canvas scaled (zoom) and moved (panX, panY) inside its window; the mouse
+  // wheel zooms at the cursor; HAND, Space held or the middle button grabs the view and moves it ──
+  const wrap = $('canvas-wrap');
+  let zoom = 1;
+  let panX = 0;
+  let panY = 0;
+  let spaceDown = false;
+  let handTool = false;
+  let panning = null;
+  function applyView() {
+    const ww = wrap.clientWidth;
+    const wh = wrap.clientHeight;
+    const cw = canvas.offsetWidth * zoom;
+    const ch = canvas.offsetHeight * zoom;
+    panX = Math.min(0, Math.max(ww - cw, panX)); // (never past an edge)
+    panY = Math.min(0, Math.max(wh - ch, panY));
+    canvas.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+    $('zoom-v').textContent = `${Math.round(zoom * 100)}%`;
+    wrap.classList.toggle('can-pan', handTool || spaceDown);
+  }
+  function zoomAt(k, mx, my) { // (mx, my: a point in the window kept under the cursor)
+    const z = Math.min(8, Math.max(1, zoom * k));
+    if (z === zoom) return;
+    panX = mx - ((mx - panX) / zoom) * z;
+    panY = my - ((my - panY) / zoom) * z;
+    zoom = z;
+    applyView();
+  }
+  wrap.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const r = wrap.getBoundingClientRect();
+    zoomAt(e.deltaY < 0 ? 1.2 : 1 / 1.2, e.clientX - r.left, e.clientY - r.top);
+  }, { passive: false });
+  $('zoom-in').addEventListener('click', () => zoomAt(1.4, wrap.clientWidth / 2, wrap.clientHeight / 2));
+  $('zoom-out').addEventListener('click', () => zoomAt(1 / 1.4, wrap.clientWidth / 2, wrap.clientHeight / 2));
+  $('zoom-fit').addEventListener('click', () => { zoom = 1; panX = 0; panY = 0; applyView(); });
+  $('t-hand').addEventListener('click', () => { handTool = !handTool; $('t-hand').classList.toggle('on', handTool); applyView(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.code !== 'Space' || /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return;
+    e.preventDefault(); // (not a page scroll)
+    if (!spaceDown) { spaceDown = true; applyView(); }
+  });
+  document.addEventListener('keyup', (e) => { if (e.code === 'Space') { spaceDown = false; applyView(); } });
+  window.addEventListener('resize', applyView);
+  applyView();
+
   canvas.addEventListener('pointerdown', (e) => {
     canvas.setPointerCapture(e.pointerId);
-    if (trace.move && trace.img) { // (dragging the trace image, not painting)
+    if (handTool || spaceDown || e.button === 1) { // (grabbing the view)
+      e.preventDefault();
+      panning = { x: e.clientX, y: e.clientY, px: panX, py: panY };
+      wrap.classList.add('grabbing');
+      return;
+    }
+    if (trace.img && (trace.move || e.altKey)) { // (dragging the trace image, not painting)
       const [px, py] = at(e);
       dragging = { px, py, x: trace.x, y: trace.y };
       return;
@@ -407,6 +467,12 @@
     draw(); save();
   });
   canvas.addEventListener('pointermove', (e) => {
+    if (panning) {
+      panX = panning.px + (e.clientX - panning.x);
+      panY = panning.py + (e.clientY - panning.y);
+      applyView();
+      return;
+    }
     if (dragging) {
       const [px, py] = at(e);
       trace.x = dragging.x + (px - dragging.px);
@@ -416,7 +482,13 @@
     }
     if (!painting) return; const [x, y] = cellAt(e); apply(x, y); draw();
   });
-  canvas.addEventListener('pointerup', () => { if (dragging) { dragging = null; saveTrace(); return; } painting = false; save(); });
+  canvas.addEventListener('pointerup', () => {
+    if (panning) { panning = null; wrap.classList.remove('grabbing'); return; }
+    if (dragging) { dragging = null; saveTrace(); return; }
+    painting = false; save();
+  });
+  canvas.addEventListener('auxclick', (e) => e.preventDefault()); // (no middle-click autoscroll)
+  canvas.addEventListener('mousedown', (e) => { if (e.button === 1) e.preventDefault(); });
   canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
   // ── Tools, palette ──
