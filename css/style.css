@@ -3036,6 +3036,16 @@ html.pixel-mode .walker.skater.walking[data-look="left"] .bot { transform: none;
 /* The KEYS a game earned, under its score */
 .overlay-keys { margin: 4px 0 0; font-size: 12px; letter-spacing: 1px; color: var(--accent); }
 .overlay-keys[hidden] { display: none; }
+/* THE LEVEL METER after a game: this game's bits filling it; a flash at each LEVEL UP */
+.overlay-xp { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 10px 0 14px; font-size: 12px; letter-spacing: 1px; color: var(--fg-dim); cursor: pointer; }
+.overlay-xp[hidden] { display: none; }
+.oxp-level { min-width: 52px; text-align: right; color: var(--fg); }
+.oxp-bar { display: block; width: 120px; height: 6px; background: rgba(var(--fg-rgb), 0.12); border-radius: 3px; overflow: hidden; }
+.oxp-bar i { display: block; height: 100%; width: 0; background: var(--fg); box-shadow: 0 0 6px rgba(var(--fg-rgb), 0.6); }
+.oxp-gain { min-width: 70px; text-align: left; }
+.overlay-xp.leveled .oxp-level { color: var(--accent); animation: oxp-flash 0.6s steps(2) 2; }
+.overlay-xp.leveled .oxp-bar i { background: var(--accent); }
+@keyframes oxp-flash { 50% { opacity: 0.3; } }
 .key-ico { width: 1em; height: 1em; vertical-align: -0.15em; }
 /* STORE: the ===== line between what KEYS buy and what money buys, as the other menus have them */
 .store-rule { margin: 16px 0 4px; overflow: hidden; white-space: nowrap; font-size: 11px; line-height: 11px; letter-spacing: 2px; color: var(--accent); opacity: 0.7; } /* (as RECORDS' .rec-sep) */

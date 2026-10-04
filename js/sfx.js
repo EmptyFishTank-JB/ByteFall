@@ -389,6 +389,58 @@ const SFX = (() => {
         osc.start(t); osc.stop(t + 0.055);
       } catch (e) {}
     },
+    // THE LEVEL METER after a game: a rising square tone while it fills (from f0 to f1 of the level,
+    // 0-1, over dur seconds), and a little fanfare at each LEVEL UP
+    xpFill(f0, f1, dur) {
+      if (muted || dur <= 0) return;
+      try {
+        const c = getCtx();
+        const t = c.currentTime;
+        const o = c.createOscillator();
+        o.type = 'square';
+        o.frequency.setValueAtTime(320 + 900 * f0, t);
+        o.frequency.linearRampToValueAtTime(320 + 900 * f1, t + dur);
+        const lp = filter(c, 'lowpass', 2600);
+        const g = c.createGain();
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(VOL * 0.1, t + 0.02);
+        g.gain.setValueAtTime(VOL * 0.1, t + Math.max(0.02, dur - 0.03));
+        g.gain.linearRampToValueAtTime(0, t + dur);
+        o.connect(lp); lp.connect(g); g.connect(dest(c));
+        o.start(t); o.stop(t + dur + 0.01);
+      } catch (e) {}
+    },
+    levelUp() {
+      if (muted) return;
+      try {
+        const c = getCtx();
+        const t0 = c.currentTime;
+        const note = (m, t, dur, vol, vib = false) => {
+          const o = c.createOscillator();
+          o.type = 'square';
+          o.frequency.value = 440 * Math.pow(2, (m - 69) / 12);
+          if (vib) { // (the held note's vibrato)
+            const lfo = c.createOscillator();
+            const depth = c.createGain();
+            lfo.frequency.value = 7;
+            depth.gain.value = o.frequency.value * 0.012;
+            lfo.connect(depth); depth.connect(o.frequency);
+            lfo.start(t + 0.08); lfo.stop(t + dur);
+          }
+          const lp = filter(c, 'lowpass', 3200);
+          const g = c.createGain();
+          g.gain.setValueAtTime(VOL * vol, t);
+          g.gain.setValueAtTime(VOL * vol, t + dur * 0.7);
+          g.gain.linearRampToValueAtTime(0.0001, t + dur);
+          o.connect(lp); lp.connect(g); g.connect(dest(c));
+          o.start(t); o.stop(t + dur + 0.01);
+        };
+        // (a quick climb, then a held top note over a third below)
+        [67, 72, 76, 79].forEach((m, i) => note(m, t0 + i * 0.075, 0.07, 0.16));
+        note(84, t0 + 0.3, 0.5, 0.18, true);
+        note(79, t0 + 0.3, 0.5, 0.07);
+      } catch (e) {}
+    },
     isMuted: () => muted,
     // (the sound themes: every one, whether it's open, the one picked)
     themes: () => THEMES.map((t) => ({ ...t, open: themeOpen(t) })),

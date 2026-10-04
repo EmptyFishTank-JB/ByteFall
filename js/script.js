@@ -416,6 +416,9 @@ function refillQueue() {
 const dailyBitsLeft = () => dealLimit() - dealt + queue.filter((p) => p.type === 'number').length;
 
 function initGame() {
+  if (pendingEarned.length) flushEarned(); // (a game left before its meter finished)
+  runXp = Progress.levelInfo();
+  xpHold = mode !== 'tutorial' && mode !== 'puzzle'; // (a solved puzzle has no result screen)
   runId++;
   // (VS plays on the CPU level's board: HARD's 8x8 against HARD and INSANE, NORMAL's 7x7 otherwise)
   difficulty = mode === 'classic' ? classicDifficulty : mode === 'puzzle' && !daily ? puzzleTier
@@ -1936,7 +1939,9 @@ function endGame(reason = 'trace') {
   const run = runId;
   meltBoard(run);
   setTimeout(() => {
-    if (run === runId) overlayEl.classList.remove('hidden');
+    if (run !== runId) return;
+    overlayEl.classList.remove('hidden');
+    playXpMeter(run); // (the level meter fills with the game's bits)
   }, 1200);
 }
 
@@ -3073,6 +3078,7 @@ function updateTopIcons() {
   document.getElementById('records-btn').setAttribute('aria-label', !inGame ? 'Menu: rules, exploits and records' : vsPaused ? 'Resume' : canPause() ? 'Pause' : 'Back to the main menu');
 }
 function showHome() {
+  if (xpHold || pendingEarned.length) flushEarned(); // (out of a game: what it held back shows now)
   if (mode === 'tutorial') return; // (the lesson leaves by its own EXIT, which comes here)
   disarmReset();
   setRecordsOpen(false);
@@ -4462,12 +4468,96 @@ function unlockLabel(name) {
 
 function announce(earned) {
   updateLevelBar();
+  if (xpHold) { // (in a game: LEVEL UP and what it unlocks wait for the level meter, after it)
+    pendingEarned.push(...earned.filter((e) => e.type === 'LEVEL UP' || e.type === 'UNLOCKED'));
+    earned = earned.filter((e) => e.type !== 'LEVEL UP' && e.type !== 'UNLOCKED');
+    if (!earned.length) { showKeys(); return; }
+  }
   if (!earned.length) return;
   SFX.play('egg');
   for (const e of earned) showToast(`${e.type} // ${unlockLabel(e.name)}${e.keys ? ` +${e.keys} KEYS` : ''}`);
   showKeys();
   applyUnlocks();
   if (!recordsEl.hidden) renderRecords();
+}
+
+// THE LEVEL METER (Pokemon-style): through a game the level stays as it was; once it's over, the
+// result screen's meter fills with the game's bits (a rising tone), a fanfare at each LEVEL UP,
+// and then the LEVEL UP and UNLOCKED pop-ups held back during the game. A tap on it skips to the end.
+let xpHold = false;
+let pendingEarned = [];
+let runXp = null; // the level at the start of the game
+const xpTotal = (lv) => lv.level * lv.need + lv.into;
+function flushEarned() {
+  xpHold = false;
+  const held = pendingEarned;
+  pendingEarned = [];
+  if (held.length) announce(held);
+}
+function playXpMeter(run) {
+  const box = document.getElementById('overlay-xp');
+  const start = runXp;
+  const end = Progress.levelInfo();
+  const gained = start ? xpTotal(end) - xpTotal(start) : 0;
+  if (!start || gained <= 0 || start.maxed || end.decryptor !== start.decryptor) { box.hidden = true; flushEarned(); return; }
+  box.hidden = false;
+  box.classList.remove('leveled');
+  const lvEl = document.getElementById('oxp-level');
+  const fill = document.getElementById('oxp-fill');
+  const gainEl = document.getElementById('oxp-gain');
+  const need = start.need;
+  const from = xpTotal(start);
+  const to = Math.min(xpTotal(end), end.rankBits || Infinity);
+  const show = (x) => {
+    const level = Math.floor(x / need);
+    const capped = end.maxed && x >= to;
+    lvEl.textContent = `LV ${level}`;
+    fill.style.width = `${capped ? 100 : ((x - level * need) / need) * 100}%`;
+    gainEl.textContent = `+${fmt(Math.round(x - from))} BITS`;
+  };
+  show(from);
+  // (a level's worth takes about 1.2s, sped up so the whole fill is over in about 4s)
+  const perBit = Math.min(12, 4000 / Math.max(1, to - from));
+  let x = from;
+  let skip = false;
+  let done = false;
+  box.onclick = () => { skip = true; };
+  const finish = () => {
+    if (done) return;
+    done = true;
+    show(to);
+    box.onclick = null;
+    flushEarned();
+  };
+  const step = () => {
+    if (run !== runId || done) return finish();
+    if (skip) return finish();
+    const levelEnd = (Math.floor(x / need) + 1) * need;
+    const target = Math.min(to, levelEnd);
+    const dur = ((target - x) * perBit) / 1000;
+    SFX.xpFill((x % need) / need, target === levelEnd ? 1 : (target % need) / need, dur);
+    const t0 = performance.now();
+    const x0 = x;
+    const tick = (now) => {
+      if (run !== runId || skip) return finish();
+      const p = Math.min(1, (now - t0) / (dur * 1000));
+      x = x0 + (target - x0) * p;
+      show(Math.min(x, target - (target === levelEnd && p < 1 ? 0.001 : 0)));
+      if (p < 1) { requestAnimationFrame(tick); return; }
+      x = target;
+      if (target === levelEnd) { // (LEVEL UP: the fanfare, a flash, a moment)
+        show(x);
+        box.classList.remove('leveled');
+        void box.offsetWidth;
+        box.classList.add('leveled');
+        SFX.levelUp();
+        if (x < to) setTimeout(step, 750);
+        else setTimeout(finish, 750);
+      } else finish();
+    };
+    requestAnimationFrame(tick);
+  };
+  setTimeout(step, 350);
 }
 
 // Level bar under the title: level, DECRYPTOR rank and XP (bits) toward the next level

@@ -168,6 +168,12 @@ fresh when it moved to 8×8).
 
 ## Levels, DECRYPTOR ranks and unlocks
 
+**The level meter.** Through a game the level stays as it was: LEVEL UP and what it unlocks aren't
+announced until it's over. Then the result screen's meter fills with the game's bits, a rising tone
+as it fills, a little fanfare and a flash at each LEVEL UP (about 1.2 seconds a level, the whole fill
+over in about 4), and after it the LEVEL UP and UNLOCKED pop-ups. A tap on the meter skips to the
+end. (Not in PUZZLE, which has no result screen for a solve.)
+
 **Levels.** Every bit you decrypt is XP: **100 bits (12.5 bytes) per level**,
 from Lv 0 to **Lv 80**. Lv 80 comes at 8,000 bits, so a full DECRYPTOR rank
 is exactly **1 kilobyte**. The level bar sits under the title.
