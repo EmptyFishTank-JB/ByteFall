@@ -418,7 +418,7 @@ const dailyBitsLeft = () => dealLimit() - dealt + queue.filter((p) => p.type ===
 function initGame() {
   if (pendingEarned.length) flushEarned(); // (a game left before its meter finished)
   runXp = Progress.levelInfo();
-  xpHold = mode !== 'tutorial' && mode !== 'puzzle'; // (a solved puzzle has no result screen)
+  xpHold = mode !== 'tutorial';
   runId++;
   // (VS plays on the CPU level's board: HARD's 8x8 against HARD and INSANE, NORMAL's 7x7 otherwise)
   difficulty = mode === 'classic' ? classicDifficulty : mode === 'puzzle' && !daily ? puzzleTier
@@ -604,12 +604,15 @@ function showPuzzleResult(solved, firstTime = false) {
   shareBtn.textContent = 'SHARE';
   document.getElementById('overlay-restart-btn').textContent = overlayNext === 'next' ? 'NEXT PUZZLE'
     : daily && dailyOfficial && !solved && triesLeft > 0 ? 'NEXT TRY' : daily && dailyOfficial ? 'PRACTICE' : 'RETRY';
+  if (!daily && !Progress.runPays()) note.textContent += ' // A REPLAY: XP AND KEYS ONCE A DAY, AGAIN TOMORROW';
   if (!daily) updatePuzzleNav();
   showRunKeys();
   refreshPuzzleTools();
   const run = runId;
   setTimeout(() => {
-    if (run === runId) overlayEl.classList.remove('hidden');
+    if (run !== runId) return;
+    overlayEl.classList.remove('hidden');
+    playXpMeter(run); // (the level meter fills with the puzzle's bits)
   }, solved ? 500 : 700);
 }
 

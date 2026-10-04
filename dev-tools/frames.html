@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" class="sandbox">
 <head>
-<script src="../js/fonts.js?v=314"></script>
+<script src="../js/fonts.js?v=315"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#020403">
 <title>Frame Editor // BYTEFALL</title>
-<link rel="stylesheet" href="../css/style.css?v=314">
+<link rel="stylesheet" href="../css/style.css?v=315">
 <!-- FRAME EDITOR: the bots' animations a frame at a time, on their pixel grid. Start from a bot (any
      of the four, any level, mood, with or without headphones) or from one of the game's own
      animations (CORE DUMP's headbang and windmill), draw and erase pixels in the bots' colors, add
@@ -54,7 +54,7 @@
 <div class="fe">
   <a class="back" href="audio.html#dev">&larr; DEV PAGE</a>
   <h1>// FRAME EDITOR</h1>
-  <p class="lede">Draw the bots' animations a frame at a time, on their own pixel grid (each square is one pixel of a bot; the dashed box is the bot's 16x17). Start from any of the game's characters (every bot and what it does, every visitor's frames) or a blank, paint and erase (at the game's pixels or 2x for finer detail), add frames and time them, and play it back at game size. UNDO and REDO (Ctrl+Z, Ctrl+Y) cover everything: painting, and adding, deleting, moving and timing frames. Your animations are kept in this browser; EXPORT saves one as a file to hand over to be built into the game.</p>
+  <p class="lede">Draw the bots' animations a frame at a time, on their own pixel grid (each square is one pixel of a bot; the dashed box is the bot's 16x17). Start from any of the game's characters (every bot and what it does, every visitor's frames) or a blank, paint and erase (at the game's pixels or 2x for finer detail), add frames and time them, and play it back at game size. TRACE IMAGE puts a picture of your own under or over the grid to trace (its opacity, scale, size and place yours to set). UNDO and REDO (Ctrl+Z, Ctrl+Y) cover everything: painting, and adding, deleting, moving and timing frames. Your animations are kept in this browser; EXPORT saves one as a file to hand over to be built into the game.</p>
 
   <div class="fe-grid">
     <div>
@@ -73,6 +73,18 @@
       </div>
       <div id="palette" style="margin: 6px 0;"></div>
       <div class="row"><b>ANY COLOR</b><input type="color" id="custom" value="#2c2833"><button type="button" id="add-color">ADD TO PALETTE</button></div>
+      <div class="grp" style="margin-top: 10px;">
+        <h2>TRACE IMAGE</h2>
+        <p class="note" style="margin: 0 0 6px;">A picture under (or over) the grid to trace: it isn't part of the animation and isn't exported. Drag it with MOVE IMAGE on, or nudge it a pixel at a time.</p>
+        <div class="row"><label class="note" style="cursor: pointer;"><input type="file" id="trace-file" accept="image/*" hidden><u>IMPORT IMAGE</u></label>
+          <button type="button" id="trace-show" class="on">SHOWN</button><button type="button" id="trace-top">UNDER THE PIXELS</button><button type="button" id="trace-move">MOVE IMAGE</button><button type="button" id="trace-smooth">SHARP</button><button type="button" id="trace-remove">REMOVE</button></div>
+        <div class="row"><b>OPACITY</b><input type="range" id="trace-opacity" min="5" max="100" value="45" style="flex: 1;"><span class="note" id="trace-opacity-v">45%</span></div>
+        <div class="row"><b>SCALE</b><input type="range" id="trace-scale" min="5" max="400" value="100" style="flex: 1;"><span class="note" id="trace-scale-v">100%</span></div>
+        <div class="row"><b>SIZE (BOT PIXELS)</b> W <input type="number" id="trace-w" min="1" step="0.5" style="width: 64px;"> H <input type="number" id="trace-h" min="1" step="0.5" style="width: 64px;">
+          <label class="note"><input type="checkbox" id="trace-lock" checked> KEEP ITS SHAPE</label><button type="button" id="trace-fit">FIT THE BOT</button></div>
+        <div class="row"><b>NUDGE</b><button type="button" data-nudge="-1,0">&larr;</button><button type="button" data-nudge="1,0">&rarr;</button><button type="button" data-nudge="0,-1">&uarr;</button><button type="button" data-nudge="0,1">&darr;</button>
+          <span class="note" id="trace-pos"></span></div>
+      </div>
       <div class="previews"><div><div class="note">GAME SIZE</div><canvas id="prev1"></canvas></div><div><div class="note">3x</div><canvas id="prev3"></canvas></div></div>
       <div class="row" style="margin-top: 8px;"><button type="button" class="go" id="play">PLAY</button><button type="button" id="stop">STOP</button><span class="note" id="playing"></span></div>
     </div>
@@ -125,13 +137,13 @@
 <div class="stat cpu-face" id="cpu-face" hidden aria-hidden="true"></div>
 <div id="stage" style="position: absolute; left: -9999px; top: 0; width: 200px; height: 60px;"><div class="game-walkers" id="lane"></div></div>
 <canvas id="board-fx" hidden></canvas>
-<script src="../js/bot-svg.js?v=314"></script>
-<script src="../js/pixel.js?v=314"></script>
-<script src="../js/minibot.js?v=314"></script>
-<script src="../js/data/bot-anims.js?v=314"></script>
-<script src="../js/seasons.js?v=314"></script>
-<script src="../js/visitors.js?v=314"></script>
-<script src="../js/wanderers.js?v=314"></script>
+<script src="../js/bot-svg.js?v=315"></script>
+<script src="../js/pixel.js?v=315"></script>
+<script src="../js/minibot.js?v=315"></script>
+<script src="../js/data/bot-anims.js?v=315"></script>
+<script src="../js/seasons.js?v=315"></script>
+<script src="../js/visitors.js?v=315"></script>
+<script src="../js/wanderers.js?v=315"></script>
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -189,8 +201,10 @@
   function draw() {
     ctx.fillStyle = '#0b1512';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (!trace.top) drawTrace();
     if (onion && frame > 0) drawCells(A().frames[frame - 1].cells, 0.25);
     drawCells(F().cells, 1);
+    if (trace.top) drawTrace();
     ctx.lineWidth = 1;
     const r = R();
     for (let i = 0; i <= W * r; i++) { // (the game's pixels; at 2x, fainter lines between their halves)
@@ -264,17 +278,133 @@
       }
     }
   }
+  // ── TRACE IMAGE: a picture to trace, under or over the pixels (kept in this browser, apart from
+  // the animations): its place and size in bot pixels (x, y from the bot's top left), its opacity ──
+  const TRACE_KEY = 'bytefall-dev-frames-trace';
+  const trace = { img: null, src: '', x: 0, y: 0, w: 16, h: 17, opacity: 0.45, on: true, top: false, smooth: false, move: false, natW: 1, natH: 1 };
+  try { Object.assign(trace, JSON.parse(localStorage.getItem(TRACE_KEY)) || {}); } catch (e) {}
+  trace.move = false;
+  const saveTrace = () => {
+    try { const { img, move, ...keep } = trace; localStorage.setItem(TRACE_KEY, JSON.stringify(keep)); } catch (e) { /* (too big to keep: it stays for this visit) */ }
+  };
+  function drawTrace() {
+    if (!trace.img || !trace.on) return;
+    ctx.save();
+    ctx.globalAlpha = trace.opacity;
+    ctx.imageSmoothingEnabled = trace.smooth;
+    ctx.drawImage(trace.img, (trace.x - X0) * SCALE, (trace.y - Y0) * SCALE, trace.w * SCALE, trace.h * SCALE);
+    ctx.restore();
+  }
+  function showTrace() {
+    const has = !!trace.img;
+    $('trace-show').classList.toggle('on', trace.on);
+    $('trace-show').textContent = trace.on ? 'SHOWN' : 'HIDDEN';
+    $('trace-top').textContent = trace.top ? 'OVER THE PIXELS' : 'UNDER THE PIXELS';
+    $('trace-move').classList.toggle('on', trace.move);
+    $('trace-smooth').textContent = trace.smooth ? 'SMOOTH' : 'SHARP';
+    $('trace-opacity').value = Math.round(trace.opacity * 100);
+    $('trace-opacity-v').textContent = `${Math.round(trace.opacity * 100)}%`;
+    const scale = Math.round((trace.w / trace.natW) * 100);
+    $('trace-scale').value = Math.min(400, Math.max(5, scale));
+    $('trace-scale-v').textContent = `${scale}%`;
+    $('trace-w').value = +trace.w.toFixed(2);
+    $('trace-h').value = +trace.h.toFixed(2);
+    $('trace-pos').textContent = has ? `at ${+trace.x.toFixed(2)}, ${+trace.y.toFixed(2)} · ${trace.natW}x${trace.natH} image` : 'no image';
+    canvas.style.cursor = trace.move ? 'move' : '';
+  }
+  function loadTrace(src, fresh) {
+    const img = new Image();
+    img.onload = () => {
+      trace.img = img;
+      trace.src = src;
+      if (fresh) { // (its own width at 100%, a pixel of it a bot pixel... unless that's huge: then fitted to the bot)
+        trace.natW = img.naturalWidth;
+        trace.natH = img.naturalHeight;
+        fitBot();
+      }
+      saveTrace(); showTrace(); draw();
+    };
+    img.src = src;
+  }
+  // (FIT THE BOT: as tall as the bot's 17 pixels, at its top left, its shape kept)
+  function fitBot() {
+    const k = 17 / trace.natH;
+    trace.w = trace.natW * k;
+    trace.h = 17;
+    trace.x = 0;
+    trace.y = 0;
+  }
+  if (trace.src) loadTrace(trace.src, false);
+  $('trace-file').addEventListener('change', (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = () => { trace.on = true; loadTrace(r.result, true); status('Image in: trace over it.'); };
+    r.readAsDataURL(f);
+    e.target.value = '';
+  });
+  $('trace-show').addEventListener('click', () => { trace.on = !trace.on; saveTrace(); showTrace(); draw(); });
+  $('trace-top').addEventListener('click', () => { trace.top = !trace.top; saveTrace(); showTrace(); draw(); });
+  $('trace-move').addEventListener('click', () => { trace.move = !trace.move; showTrace(); });
+  $('trace-smooth').addEventListener('click', () => { trace.smooth = !trace.smooth; saveTrace(); showTrace(); draw(); });
+  $('trace-remove').addEventListener('click', () => { trace.img = null; trace.src = ''; trace.move = false; saveTrace(); showTrace(); draw(); });
+  $('trace-opacity').addEventListener('input', () => { trace.opacity = $('trace-opacity').value / 100; saveTrace(); showTrace(); draw(); });
+  $('trace-scale').addEventListener('input', () => { // (scaled about its center)
+    const k = $('trace-scale').value / 100;
+    const cx = trace.x + trace.w / 2;
+    const cy = trace.y + trace.h / 2;
+    const ratio = trace.h / trace.w;
+    trace.w = trace.natW * k;
+    trace.h = trace.w * ratio;
+    trace.x = cx - trace.w / 2;
+    trace.y = cy - trace.h / 2;
+    saveTrace(); showTrace(); draw();
+  });
+  for (const id of ['trace-w', 'trace-h']) {
+    $(id).addEventListener('change', () => {
+      const v = Math.max(0.5, Number($(id).value) || 1);
+      const ratio = trace.h / trace.w;
+      if (id === 'trace-w') { trace.w = v; if ($('trace-lock').checked) trace.h = v * ratio; }
+      else { trace.h = v; if ($('trace-lock').checked) trace.w = v / ratio; }
+      saveTrace(); showTrace(); draw();
+    });
+  }
+  $('trace-fit').addEventListener('click', () => { if (!trace.img) return; fitBot(); saveTrace(); showTrace(); draw(); });
+  document.querySelectorAll('[data-nudge]').forEach((b) => b.addEventListener('click', () => {
+    const [dx, dy] = b.dataset.nudge.split(',').map(Number);
+    trace.x += dx / R(); // (a pixel of the grid shown: half a bot pixel at 2x)
+    trace.y += dy / R();
+    saveTrace(); showTrace(); draw();
+  }));
+  showTrace();
+  let dragging = null; // (MOVE IMAGE: where the drag began)
+  const at = (e) => { const r = canvas.getBoundingClientRect(); return [((e.clientX - r.left) / r.width) * W, ((e.clientY - r.top) / r.height) * H]; };
+
   let painting = false;
   canvas.addEventListener('pointerdown', (e) => {
     canvas.setPointerCapture(e.pointerId);
+    if (trace.move && trace.img) { // (dragging the trace image, not painting)
+      const [px, py] = at(e);
+      dragging = { px, py, x: trace.x, y: trace.y };
+      return;
+    }
     snapshotUndo();
     painting = tool === 'paint' || tool === 'erase';
     const [x, y] = cellAt(e);
     if (e.button === 2) { const keep = tool; tool = 'erase'; apply(x, y); tool = keep; } else apply(x, y);
     draw(); save();
   });
-  canvas.addEventListener('pointermove', (e) => { if (!painting) return; const [x, y] = cellAt(e); apply(x, y); draw(); });
-  canvas.addEventListener('pointerup', () => { painting = false; save(); });
+  canvas.addEventListener('pointermove', (e) => {
+    if (dragging) {
+      const [px, py] = at(e);
+      trace.x = dragging.x + (px - dragging.px);
+      trace.y = dragging.y + (py - dragging.py);
+      showTrace(); draw();
+      return;
+    }
+    if (!painting) return; const [x, y] = cellAt(e); apply(x, y); draw();
+  });
+  canvas.addEventListener('pointerup', () => { if (dragging) { dragging = null; saveTrace(); return; } painting = false; save(); });
   canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
   // ── Tools, palette ──

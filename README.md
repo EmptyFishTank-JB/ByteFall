@@ -173,7 +173,9 @@ announced until it's over. Then the result screen's score racks up from 0 (well 
 a half, ticking higher as it nears the total), and its meter fills with the game's bits, a rising tone
 as it fills, a little fanfare and a flash at each LEVEL UP (about 1.2 seconds a level, the whole fill
 over in about 4), and after it the LEVEL UP and UNLOCKED pop-ups. A tap on the meter skips to the
-end. (Not in PUZZLE, which has no result screen for a solve.)
+end. PUZZLE too: its bits count toward the level and KEYS as in any mode, but a puzzle already
+solved, played again, pays them once a day (its first solve, or a replay's solve, marks the day;
+another replay that day pays nothing, and the result says so).
 
 **Levels.** Every bit you decrypt is XP: **100 bits (12.5 bytes) per level**,
 from Lv 0 to **Lv 80**. Lv 80 comes at 8,000 bits, so a full DECRYPTOR rank

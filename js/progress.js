@@ -95,6 +95,7 @@ const Progress = (() => {
     keyBits: 0, // bits decrypted toward the next key (one every KEY_BITS)
     boosters: {}, // booster id -> how many owned
     reserves: {}, // RESERVE EXPLOITS: exploit id -> how many owned
+    puzzlePaid: {}, // puzzle key -> the day a solve of it last paid XP and KEYS (a replay pays once a day)
     reservesTaken: [], // the (up to 3) the player takes into each game
   });
 
@@ -603,10 +604,12 @@ const Progress = (() => {
     setTrackCount(n) { trackCount = n; },
     setThemeCount(n) { themeCount = n; },
     puzzleSolved: (i) => !!d.puzzles[i],
+    runPays: () => !run.noPay,
     solvePuzzle(i) {
       if (!d.puzzles[i] && d.puzzleTries[i] === 1) d.firstTries++;
       if (!d.puzzles[i]) earn(KEY_PAY.puzzle[typeof i === 'number' ? 'n' : String(i)[0]] || 0); // (a first solve: EASY 2, NORMAL 4, HARD 6)
       d.puzzles[i] = true;
+      d.puzzlePaid = { ...(d.puzzlePaid || {}), [i]: localDay() }; // (today's pay for it is had)
       d.puzzleStreak++;
       d.bestPuzzleStreak = Math.max(d.bestPuzzleStreak, d.puzzleStreak);
     },
@@ -620,8 +623,11 @@ const Progress = (() => {
     // Run events from script.js
     // mode: the game played ('decrypt', 'breach' and the others); daily: a daily game
     startRun(difficulty, mode = 'classic', puzzle = null, daily = false) {
+      // (a solved puzzle played again pays XP and KEYS once a day: the first solve, and a replay's
+      // solve, mark the day; another replay that day pays nothing)
+      const noPay = !!puzzle && !!d.puzzles[puzzle] && (d.puzzlePaid || {})[puzzle] === localDay();
       run = {
-        difficulty, mode, puzzle, daily, drops: 0, started: false, bits: 0, chain: 0, bytes: 0,
+        noPay, difficulty, mode, puzzle, daily, drops: 0, started: false, bits: 0, chain: 0, bytes: 0,
         exploits: 0, closeCalls: 0, clearStreak: 0, dropBits: 0, dropSevens: 0, dropBroken: 0, pivoted: false, fullCols: new Set(),
       };
     },
@@ -755,16 +761,18 @@ const Progress = (() => {
     decrypted(values, chain) {
       if (run.mode === 'tutorial') return; // (the tutorial counts toward nothing)
       d.bits += values.length;
-      d.xp += values.length;
       run.bits += values.length;
       run.dropBits += values.length;
       run.dropSevens += values.filter((v) => v === 7).length;
       run.chain = Math.max(run.chain, chain);
-      d.keyBits += values.length;
-      earn(Math.floor(d.keyBits / KEY_BITS));
-      d.keyBits %= KEY_BITS;
-      if (chain === 5) earn(KEY_PAY.chain5); // (a chain reaching 5 links, and 7)
-      if (chain === 7) earn(KEY_PAY.chain7);
+      if (!run.noPay) { // (XP and KEYS: not on a replay already paid for today)
+        d.xp += values.length;
+        d.keyBits += values.length;
+        earn(Math.floor(d.keyBits / KEY_BITS));
+        d.keyBits %= KEY_BITS;
+        if (chain === 5) earn(KEY_PAY.chain5); // (a chain reaching 5 links, and 7)
+        if (chain === 7) earn(KEY_PAY.chain7);
+      }
       for (const v of values) d.bitsByValue[v] = (d.bitsByValue[v] || 0) + 1;
       d.bestChain = Math.max(d.bestChain, chain);
     },
