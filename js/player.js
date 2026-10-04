@@ -13,7 +13,7 @@
   bgBtn.hidden = !!window.BYTEFALL_APP; // (the app: the player always plays on in the background)
   if (window.BYTEFALL_APP) document.querySelector('#music-player .mp-note').textContent = 'Every track plays with all its layers in. With the player open, the music keeps going with the screen off or in another app.';
   const viz = createVisualizer(document.getElementById('mp-viz'), Music.getAnalyser, {
-    bars: 40, modes: ['bars', 'wave', 'scope', 'spectro', 'vu', 'radial', 'fluid', 'vector', 'matrix', 'bitgrid', 'terrain', 'plasma', 'tunnel', 'orb'], key: 'bytefall-player-viz', getStereo: Music.getStereo,
+    bars: 40, modes: ['bars', 'wave', 'scope', 'spectro', 'vu', 'radial', 'fluid', 'vector', 'vectorwide', 'lissajous', 'matrix', 'bitgrid', 'terrain', 'plasma', 'tunnel', 'orb'], key: 'bytefall-player-viz', getStereo: Music.getStereo,
   });
   const vizNameEl = document.getElementById('mp-viz-name');
   const showVizName = () => { vizNameEl.textContent = `// ${viz.name}`; };

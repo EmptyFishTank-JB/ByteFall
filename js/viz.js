@@ -11,7 +11,7 @@ function vizRgb(name, fallback) {
 // The styles, in the order a tap cycles them, with the names the MUSIC PLAYER shows
 const VIZ_NAMES = {
   bars: 'SPECTRUM', wave: 'WAVE', scope: 'OSCILLOSCOPE', spectro: 'SPECTROGRAM', vu: 'LEVEL METERS', radial: 'RADIAL',
-  fluid: 'PARTICLES', vector: 'VECTORSCOPE', matrix: 'MATRIX RAIN', bitgrid: 'BIT GRID', terrain: 'SYNTHWAVE GRID',
+  fluid: 'PARTICLES', vector: 'VECTORSCOPE', vectorwide: 'STEREO FIELD', lissajous: 'LISSAJOUS', matrix: 'MATRIX RAIN', bitgrid: 'BIT GRID', terrain: 'SYNTHWAVE GRID',
   plasma: 'PLASMA', tunnel: 'TUNNEL', orb: 'ORB',
 };
 
@@ -314,7 +314,11 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   // VECTORSCOPE: left against right, turned 45 degrees (mono is a vertical line, wide stereo
   // spreads sideways, out of phase lies flat), with the phase correlation meter along the bottom
   let correlation = 1;
-  function drawVector(w, h) {
+  // (kind: 'vector' the true vectorscope, mid up and side across at one scale; 'wide' the STEREO
+  // FIELD, the side given its own scale so the quieter stereo parts fill the width, leaning to
+  // whichever side plays; 'lissajous' left across, right up, each at its own scale, mono a
+  // diagonal)
+  function drawVector(w, h, kind = 'vector') {
     const fg = vizRgb('--fg-rgb', '57, 255, 143');
     const accent = vizRgb('--accent-rgb', '255, 209, 102');
     fade(w, h, 0.35);
@@ -333,8 +337,10 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     g.stroke();
     g.fillStyle = `rgba(${fg}, 0.35)`;
     g.font = `9px ${getComputedStyle(canvas).fontFamily}`;
-    g.fillText('L', cx - r * 0.7 - 8, cy - r * 0.7 + 3);
-    g.fillText('R', cx + r * 0.7 + 3, cy - r * 0.7 + 3);
+    if (kind === 'lissajous') { g.fillText('L', cx + r - 8, cy - 3); g.fillText('R', cx + 3, cy - r + 9); } else {
+      g.fillText('L', cx - r * 0.7 - 8, cy - r * 0.7 + 3);
+      g.fillText('R', cx + r * 0.7 + 3, cy - r * 0.7 + 3);
+    }
     const pair = getStereo();
     if (pair) {
       if (!wave || wave.length !== pair[0].fftSize) wave = new Float32Array(pair[0].fftSize);
@@ -353,12 +359,28 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       const rms = Math.sqrt((ll + rr) / (2 * wave.length));
       vectorLevel += (Math.max(rms, 0.002) - vectorLevel) * 0.08;
       const gain = Math.min(60, 0.22 / vectorLevel) * r;
+      // (the side's own level, and the left's and right's, for the scales that stretch them)
+      let ss = 0;
+      for (let i = 0; i < wave.length; i++) { const sd = vectorR[i] - wave[i]; ss += sd * sd; }
+      const sideRms = Math.sqrt(ss / (2 * wave.length));
+      vectorSide += (Math.max(sideRms, 0.0005) - vectorSide) * 0.06;
+      vectorL += (Math.max(Math.sqrt(ll / wave.length), 0.002) - vectorL) * 0.08;
+      vectorRl += (Math.max(Math.sqrt(rr / wave.length), 0.002) - vectorRl) * 0.08;
+      // (the side stretched to about the mid's spread, at most 10 times: near-silent stereo isn't blown up)
+      const sideGain = kind === 'wide' ? Math.min(gain * 10, Math.max(gain, (0.17 / vectorSide) * r)) : gain;
+      const gl = Math.min(60, 0.25 / vectorL) * r;
+      const gr = Math.min(60, 0.25 / vectorRl) * r;
       g.fillStyle = paint(0, 0.7);
       for (let i = 0; i < wave.length; i += 2) {
-        let x = (vectorR[i] - wave[i]) * gain * 0.7071;
-        let y = -(wave[i] + vectorR[i]) * gain * 0.7071;
+        let x;
+        let y;
+        if (kind === 'lissajous') { x = wave[i] * gl * 0.7; y = -vectorR[i] * gr * 0.7; } else {
+          x = (vectorR[i] - wave[i]) * sideGain * 0.7071;
+          y = -(wave[i] + vectorR[i]) * gain * 0.7071;
+        }
         const d = Math.hypot(x, y);
         if (d > r) { x *= r / d; y *= r / d; } // (loud peaks pinned to the edge)
+        if (kind !== 'vector') g.fillStyle = paint((Math.atan2(y, x) / (Math.PI * 2) + 1) % 1, Math.min(1, 0.45 + (d / r) * 0.55).toFixed(2), d > r * 0.85);
         g.fillRect(cx + x, cy + y, 1.5, 1.5);
       }
       const now = ll > 1e-9 && rr > 1e-9 ? lr / Math.sqrt(ll * rr) : 1;
@@ -378,6 +400,9 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   }
   let vectorR = null;
   let vectorLevel = 0.02; // a running average of the level, for the scale
+  let vectorSide = 0.005; // (and of the side, the left's and the right's: the STEREO FIELD's and LISSAJOUS's scales)
+  let vectorL = 0.02;
+  let vectorRl = 0.02;
 
   const rgbOf = (str) => str.split(',').map((n) => parseFloat(n));
   const hsl = (f, l, a) => `hsla(${((hue + f * 360) % 360).toFixed(0)}, 100%, ${l}%, ${a})`;
@@ -799,6 +824,8 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       else if (mode === 'radial') drawRadial(an, w, h, now);
       else if (mode === 'fluid') drawFluid(an, w, h, now);
       else if (mode === 'vector') drawVector(w, h);
+      else if (mode === 'vectorwide') drawVector(w, h, 'wide');
+      else if (mode === 'lissajous') drawVector(w, h, 'lissajous');
       else if (mode === 'spectro') drawSpectro(an, w, h);
       else if (mode === 'vu') drawVu(an, w, h);
       else if (mode === 'matrix') drawMatrix(an, w, h);
