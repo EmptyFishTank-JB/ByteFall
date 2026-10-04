@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" class="sandbox">
 <head>
-<script src="../js/fonts.js?v=319"></script>
+<script src="../js/fonts.js?v=320"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#020403">
 <title>Frame Editor // BYTEFALL</title>
-<link rel="stylesheet" href="../css/style.css?v=319">
+<link rel="stylesheet" href="../css/style.css?v=320">
 <!-- FRAME EDITOR: the bots' animations a frame at a time, on their pixel grid. Start from a bot (any
      of the four, any level, mood, with or without headphones) or from one of the game's own
      animations (CORE DUMP's headbang and windmill), draw and erase pixels in the bots' colors, add
@@ -146,6 +146,11 @@
         <div class="row"><b>SCALE</b><input type="range" id="trace-scale" min="5" max="400" value="100" style="flex: 1;"><span class="note" id="trace-scale-v">100%</span></div>
         <div class="row"><b>SIZE (BOT PIXELS)</b> W <input type="number" id="trace-w" min="1" step="0.5" style="width: 64px;"> H <input type="number" id="trace-h" min="1" step="0.5" style="width: 64px;">
           <label class="note"><input type="checkbox" id="trace-lock" checked> KEEP ITS SHAPE</label><button type="button" id="trace-fit">FIT THE BOT</button></div>
+        <div class="row"><b>TURN INTO FRAME (THE IMAGE'S PIXELS INTO THIS FRAME'S: UNDO TAKES IT BACK)</b>
+          <button type="button" id="trace-grid" title="Size the image so each of its pixel blocks is one square of the grid (at 1x or 2x)">FIND ITS PIXEL GRID</button>
+          <select id="trace-colors" title="How many colors to keep"><option value="0">ALL COLORS</option><option value="32">32 COLORS</option><option value="16" selected>16 COLORS</option><option value="8">8 COLORS</option></select>
+          <label class="note"><input type="checkbox" id="trace-bg" checked> DROP THE BACKGROUND</label>
+          <button type="button" class="go" id="trace-convert">TURN INTO FRAME</button></div>
         <div class="row"><b>NUDGE</b><button type="button" data-nudge="-1,0">&larr;</button><button type="button" data-nudge="1,0">&rarr;</button><button type="button" data-nudge="0,-1">&uarr;</button><button type="button" data-nudge="0,1">&darr;</button>
           <span class="note" id="trace-pos"></span></div>
       </div>
@@ -156,20 +161,20 @@
 <div class="stat cpu-face" id="cpu-face" hidden aria-hidden="true"></div>
 <div id="stage" style="position: absolute; left: -9999px; top: 0; width: 200px; height: 60px;"><div class="game-walkers" id="lane"></div></div>
 <canvas id="board-fx" hidden></canvas>
-<script src="../js/bot-svg.js?v=319"></script>
-<script src="../js/pixel.js?v=319"></script>
-<script src="../js/minibot.js?v=319"></script>
-<script src="../js/data/bot-anims.js?v=319"></script>
-<script src="../js/seasons.js?v=319"></script>
-<script src="../js/visitors.js?v=319"></script>
-<script src="../js/wanderers.js?v=319"></script>
+<script src="../js/bot-svg.js?v=320"></script>
+<script src="../js/pixel.js?v=320"></script>
+<script src="../js/minibot.js?v=320"></script>
+<script src="../js/data/bot-anims.js?v=320"></script>
+<script src="../js/seasons.js?v=320"></script>
+<script src="../js/visitors.js?v=320"></script>
+<script src="../js/wanderers.js?v=320"></script>
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
   // The grid: art pixels, x from X0 and y from Y0 (room around the 16x17 bot for hair, arms, horns)
   // (big enough for the tallest visitors: the scary tree, the big trees)
-  const X0 = -12; const Y0 = -20; const W = 40; const H = 40;
-  const SCALE = 15;
+  const X0 = -22; const Y0 = -34; const W = 60; const H = 60; // (room for the big ones: spiders, werewolves)
+  const SCALE = 10;
   const canvas = $('canvas');
   canvas.width = W * SCALE; canvas.height = H * SCALE;
   const ctx = canvas.getContext('2d');
@@ -326,7 +331,7 @@
     const scale = has ? Math.round((trace.w / trace.natW) * 100) : 100;
     $('trace-scale').value = Math.min(400, Math.max(5, scale));
     $('trace-scale-v').textContent = has ? `${scale}%` : '';
-    document.querySelectorAll('#trace-opacity, #trace-scale, #trace-w, #trace-h, #trace-fit, [data-nudge], #trace-show, #trace-top, #trace-move, #trace-smooth, #trace-remove').forEach((el) => { el.disabled = !has; });
+    document.querySelectorAll('#trace-opacity, #trace-scale, #trace-w, #trace-h, #trace-fit, [data-nudge], #trace-show, #trace-top, #trace-move, #trace-smooth, #trace-remove, #trace-grid, #trace-convert, #trace-colors, #trace-bg').forEach((el) => { el.disabled = !has; });
     $('trace-w').value = +trace.w.toFixed(2);
     $('trace-h').value = +trace.h.toFixed(2);
     $('trace-pos').textContent = has ? `at ${+trace.x.toFixed(2)}, ${+trace.y.toFixed(2)} · ${trace.natW}x${trace.natH} image` : 'no image';
@@ -396,6 +401,238 @@
     trace.y += dy / R();
     saveTrace(); showTrace(); draw();
   }));
+  // ── TURN INTO FRAME: the trace image's pixels as this frame's, a grid square at a time (the
+  // image's colors in each square's middle, the most common one taken), its colors cut down to a
+  // set (the most used, merged), the background (its corners' color, or see-through) left empty.
+  // FIND ITS PIXEL GRID first sizes a pixel-art image so each of its blocks is one square ──
+  function imageData() {
+    const c = document.createElement('canvas');
+    c.width = trace.natW;
+    c.height = trace.natH;
+    const x = c.getContext('2d');
+    x.drawImage(trace.img, 0, 0);
+    return x.getImageData(0, 0, c.width, c.height).data;
+  }
+  const near = (a, b, tol) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]) < tol;
+  function bgColor(d) { // (its corners' most common color)
+    const W = trace.natW;
+    const H = trace.natH;
+    const at = (X, Y) => { const i = (Y * W + X) * 4; return [d[i], d[i + 1], d[i + 2], d[i + 3]]; };
+    return at(2, H - 3); // (bottom left: clear of a corner badge)
+  }
+  // (the joined-up pieces of a mask, biggest first: neighbours within gap squares count as joined)
+  function pieces(mask, mw, mh, gap = 1) {
+    const seen = new Uint8Array(mask.length);
+    const out = [];
+    for (let s0 = 0; s0 < mask.length; s0++) {
+      if (!mask[s0] || seen[s0]) continue;
+      const piece = [];
+      const stack = [s0];
+      seen[s0] = 1;
+      while (stack.length) {
+        const i = stack.pop();
+        piece.push(i);
+        const x = i % mw;
+        const y = Math.floor(i / mw);
+        for (let dy = -gap; dy <= gap; dy++) for (let dx = -gap; dx <= gap; dx++) {
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx < 0 || ny < 0 || nx >= mw || ny >= mh) continue;
+          const j = ny * mw + nx;
+          if (mask[j] && !seen[j]) { seen[j] = 1; stack.push(j); }
+        }
+      }
+      out.push(piece);
+    }
+    return out.sort((a, b) => b.length - a.length);
+  }
+  let lattice = null; // (FIND ITS PIXEL GRID's lines, in image pixels: while the image isn't resized)
+  function findGrid() {
+    if (!trace.img) return;
+    const d = imageData();
+    const W = trace.natW;
+    const H = trace.natH;
+    const at = (X, Y) => { const i = (Y * W + X) * 4; return [d[i], d[i + 1], d[i + 2]]; };
+    const diff = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]);
+    const ex = new Float32Array(W);
+    const ey = new Float32Array(H);
+    const step = Math.max(1, Math.floor(Math.min(W, H) / 400)); // (big images: every other line or so)
+    for (let Y = 0; Y < H; Y += step) for (let X = 1; X < W; X++) if (diff(at(X, Y), at(X - 1, Y)) > 60) ex[X]++;
+    for (let X = 0; X < W; X += step) for (let Y = 1; Y < H; Y++) if (diff(at(X, Y), at(X, Y - 1)) > 60) ey[Y]++;
+    // (the period whose lines catch the most edges; halved while its half catches nearly as many)
+    const score = (e, P, ph) => { let s = 0; let n = 0; for (let k = ph; k < e.length; k += P) { const i = Math.round(k); s += e[i] + 0.5 * ((e[i - 1] || 0) + (e[i + 1] || 0)); n++; } return n ? s / n : 0; };
+    // (the edges' repeat: the first strong peak of how the edge counts line up with themselves
+    // shifted, sharpened on its multiples, then the shift that puts lines on the most edges)
+    const fit = (e) => {
+      const n = e.length;
+      const sm = Array.from(e, (v, i) => (e[i - 1] || 0) + v + (e[i + 1] || 0));
+      const m = sm.reduce((t, v) => t + v, 0) / n;
+      const z = sm.map((v) => v - m);
+      const ac = [];
+      for (let L = 0; L <= Math.min(80, n / 3); L++) { let t = 0; for (let i = 0; i + L < n; i++) t += z[i] * z[i + L]; ac[L] = t / (n - L); }
+      let top = 0;
+      for (let L = 3; L < ac.length; L++) top = Math.max(top, ac[L]);
+      let P = 3;
+      for (let L = 3; L < ac.length - 1; L++) if (ac[L] >= ac[L - 1] && ac[L] >= ac[L + 1] && ac[L] > top * 0.5) { P = L; break; }
+      for (let k = 2; k * P < ac.length - 3; k++) { const c = Math.round(k * P); let bL = c; for (let L = c - 2; L <= c + 2; L++) if (ac[L] > ac[bL]) bL = L; P = bL / k; }
+      let best = { P, ph: 0, sc: -1 };
+      for (let ph = 0; ph < P; ph += 0.25) { const sc = score(e, P, ph); if (sc > best.sc) best = { P, ph, sc }; }
+      return best;
+    };
+    const fx = fit(ex);
+    const fy = fit(ey);
+    // (AI pixel art's blocks drift a little across the picture: walk the lines out from its
+    // strongest edge, each one moved onto a real edge close to where the last one says it'd be)
+    const walk = (e, P) => {
+      const n = e.length;
+      const sm = Array.from(e, (v, i) => (e[i - 1] || 0) + v + (e[i + 1] || 0));
+      const mean = sm.reduce((t, v) => t + v, 0) / n;
+      let seed = 0;
+      for (let i = 1; i < n; i++) if (sm[i] > sm[seed]) seed = i;
+      const snap = (at) => {
+        let b = -1;
+        for (let i = Math.max(1, Math.round(at - P * 0.3)); i <= Math.min(n - 1, Math.round(at + P * 0.3)); i++) if (sm[i] > mean * 2 && (b < 0 || sm[i] > sm[b])) b = i;
+        return b < 0 ? at : b;
+      };
+      const out = [seed];
+      for (let at = seed; at + P < n;) { at = snap(at + P); out.push(at); }
+      for (let at = seed; at - P > 0;) { at = snap(at - P); out.unshift(at); }
+      return out;
+    };
+    lattice = { xs: walk(ex, fx.P), ys: walk(ey, fy.P), src: trace.src };
+    const P = (fx.P + fy.P) / 2;
+    const r = R();
+    trace.w = trace.natW / P / r; // (a block of it: one square of the grid)
+    trace.h = trace.natH / P / r;
+    // (the drawing, not its background, stood on the floor in the middle of the bot's box; its
+    // blocks' edges on the grid's lines)
+    const bg = bgColor(d);
+    // (its biggest piece: not a "Made with AI" badge in a corner)
+    const st = 4;
+    const mw = Math.ceil(W / st);
+    const mh = Math.ceil(H / st);
+    const mask = new Uint8Array(mw * mh);
+    for (let my = 0; my < mh; my++) for (let mx = 0; mx < mw; mx++) {
+      const i = (my * st * W + mx * st) * 4;
+      mask[my * mw + mx] = d[i + 3] >= 128 && !near([d[i], d[i + 1], d[i + 2]], bg, 60) ? 1 : 0;
+    }
+    let x0 = W; let x1 = 0; let y0 = H; let y1 = 0;
+    const piece = pieces(mask, mw, mh, 2)[0];
+    if (piece) {
+      const xs = piece.map((i) => i % mw);
+      const ys = piece.map((i) => Math.floor(i / mw));
+      x0 = Math.min(...xs) * st; x1 = Math.max(...xs) * st; y0 = Math.min(...ys) * st; y1 = Math.max(...ys) * st;
+    }
+    const k = 1 / P / r; // (bot pixels per image pixel)
+    if (x1 > x0) { trace.x = 8 - ((x0 + x1) / 2) * k; trace.y = 17 - y1 * k; }
+    trace.x = Math.round((trace.x + lattice.xs[0] * k) * r) / r - lattice.xs[0] * k;
+    trace.y = Math.round((trace.y + lattice.ys[0] * k) * r) / r - lattice.ys[0] * k;
+    lattice.r = r; lattice.w = trace.w; lattice.h = trace.h;
+    saveTrace(); showTrace(); draw();
+    status(`Its pixels are ${P.toFixed(1)} image pixels across: ${Math.round(trace.natW / P)} x ${Math.round(trace.natH / P)} of them. Move it into place (MOVE IMAGE, or the arrows), then TURN INTO FRAME.`);
+  }
+  function quantize(colors, n) { // (k-means, from the most common colors)
+    if (!n || colors.length <= n) return null;
+    const count = new Map();
+    for (const c of colors) { const k = (c[0] >> 3) << 10 | (c[1] >> 3) << 5 | (c[2] >> 3); count.set(k, (count.get(k) || 0) + 1); }
+    // (seeds: the most common color, then each time the one furthest from those picked, so a
+    // small bright patch, red eyes or white fangs, keeps its own color)
+    const bins = [...count.entries()].filter(([, c]) => c >= 3).map(([k]) => [(k >> 10 & 31) * 8 + 4, (k >> 5 & 31) * 8 + 4, (k & 31) * 8 + 4]);
+    const top = [...count.entries()].sort((a, b) => b[1] - a[1])[0][0];
+    let centers = [[(top >> 10 & 31) * 8 + 4, (top >> 5 & 31) * 8 + 4, (top & 31) * 8 + 4]];
+    const dist = (a, b) => (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2;
+    while (centers.length < n && centers.length < bins.length) {
+      let far = null; let fd = -1;
+      for (const b of bins) { const dd = Math.min(...centers.map((m) => dist(m, b))); if (dd > fd) { fd = dd; far = b; } }
+      centers.push(far);
+    }
+    const nearest = (c) => { let bi = 0; let bd = Infinity; centers.forEach((m, i) => { const dd = (m[0] - c[0]) ** 2 + (m[1] - c[1]) ** 2 + (m[2] - c[2]) ** 2; if (dd < bd) { bd = dd; bi = i; } }); return bi; };
+    for (let it = 0; it < 8; it++) {
+      const sum = centers.map(() => [0, 0, 0, 0]);
+      for (const c of colors) { const i = nearest(c); sum[i][0] += c[0]; sum[i][1] += c[1]; sum[i][2] += c[2]; sum[i][3]++; }
+      centers = centers.map((m, i) => (sum[i][3] ? [sum[i][0] / sum[i][3], sum[i][1] / sum[i][3], sum[i][2] / sum[i][3]] : m));
+    }
+    return (c) => centers[nearest(c)].map(Math.round);
+  }
+  function convertTrace() {
+    if (!trace.img) return;
+    const d = imageData();
+    const W = trace.natW;
+    const H = trace.natH;
+    const r = R();
+    const bg = $('trace-bg').checked ? bgColor(d) : null;
+    const isBg = (c) => c[3] < 128 || (bg && near(c, bg, 60));
+    const at = (X, Y) => { const i = (Y * W + X) * 4; return [d[i], d[i + 1], d[i + 2], d[i + 3]]; };
+    // (image pixels per grid square, and where the squares fall on it)
+    const sx = W / (trace.w * r);
+    const sy = H / (trace.h * r);
+    const gx0 = Math.ceil(trace.x * r - 1e-6);
+    const gy0 = Math.ceil(trace.y * r - 1e-6);
+    const gx1 = Math.floor((trace.x + trace.w) * r + 1e-6);
+    const gy1 = Math.floor((trace.y + trace.h) * r + 1e-6);
+    const samples = []; // (each square's samples from its middle)
+    const all = [];
+    // (with the found lines: each square between two of them; else even squares)
+    const lat = lattice && lattice.src === trace.src && lattice.r === r && lattice.w === trace.w && lattice.h === trace.h ? lattice : null;
+    const spans = (lines, pos, scale) => lines.slice(0, -1).map((a, i) => ({ g: Math.round(pos * r + ((a + lines[i + 1]) / 2) / scale - 0.5), a, b: lines[i + 1] }));
+    const cols = lat ? spans(lat.xs, trace.x, sx) : null;
+    const rows = lat ? spans(lat.ys, trace.y, sy) : null;
+    const colAt = new Map(cols ? cols.map((c) => [c.g, c]) : []);
+    const rowAt = new Map(rows ? rows.map((c) => [c.g, c]) : []);
+    for (let gy = gy0; gy < gy1; gy++) {
+      for (let gx = gx0; gx < gx1; gx++) {
+        let u0 = (gx - trace.x * r) * sx;
+        let v0 = (gy - trace.y * r) * sy;
+        let su = sx;
+        let sv = sy;
+        if (lat) {
+          const c = colAt.get(gx);
+          const w = rowAt.get(gy);
+          if (!c || !w) continue;
+          u0 = c.a; su = c.b - c.a; v0 = w.a; sv = w.b - w.a;
+        }
+        const pts = [];
+        for (const fy of [0.3, 0.5, 0.7]) {
+          for (const fx of [0.3, 0.5, 0.7]) {
+            const X = Math.min(W - 1, Math.max(0, Math.floor(u0 + fx * su)));
+            const Y = Math.min(H - 1, Math.max(0, Math.floor(v0 + fy * sv)));
+            pts.push(at(X, Y));
+          }
+        }
+        const fg = pts.filter((c) => !isBg(c));
+        if (fg.length < 5) continue; // (mostly background: empty)
+        samples.push({ gx, gy, fg });
+        all.push(...fg);
+      }
+    }
+    if (!samples.length) { status('Nothing there to turn into pixels: move the image over the grid.'); return; }
+    const snap = quantize(all, Number($('trace-colors').value));
+    const hex2 = (c) => `#${c.slice(0, 3).map((v) => v.toString(16).padStart(2, '0')).join('')}`;
+    const cells = {};
+    for (const { gx, gy, fg } of samples) {
+      const votes = new Map();
+      for (const c of fg) { const k = hex2(snap ? snap(c) : c.map((v) => Math.round(v / 8) * 8).map((v) => Math.min(255, v))); votes.set(k, (votes.get(k) || 0) + 1); }
+      cells[`${gx},${gy}`] = [...votes.entries()].sort((a, b) => b[1] - a[1])[0][0];
+    }
+    // (specks on their own, a few pixels from anything: left out)
+    const keys = Object.keys(cells);
+    if (keys.length) {
+      const pts = keys.map((k) => k.split(',').map(Number));
+      const mx0 = Math.min(...pts.map((q) => q[0]));
+      const my0 = Math.min(...pts.map((q) => q[1]));
+      const mw = Math.max(...pts.map((q) => q[0])) - mx0 + 1;
+      const mh = Math.max(...pts.map((q) => q[1])) - my0 + 1;
+      const mask = new Uint8Array(mw * mh);
+      pts.forEach(([x, y]) => { mask[(y - my0) * mw + x - mx0] = 1; });
+      for (const piece of pieces(mask, mw, mh, 2)) if (piece.length < 6) piece.forEach((i) => delete cells[`${(i % mw) + mx0},${Math.floor(i / mw) + my0}`]);
+    }
+    snapshotUndo();
+    F().cells = cells;
+    draw(); save();
+    status(`Turned into ${Object.keys(cells).length} pixels in ${new Set(Object.values(cells)).size} colors (UNDO takes it back).`);
+  }
+  $('trace-grid').addEventListener('click', findGrid);
+  $('trace-convert').addEventListener('click', convertTrace);
   showTrace();
   let dragging = null; // (MOVE IMAGE: where the drag began)
   const at = (e) => { const r = canvas.getBoundingClientRect(); return [((e.clientX - r.left) / r.width) * W, ((e.clientY - r.top) / r.height) * H]; };
