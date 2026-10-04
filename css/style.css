@@ -1922,6 +1922,12 @@ header { margin-bottom: 6px; }
 .exploit-icon.ready { color: var(--fg); opacity: 1; border-color: var(--fg); box-shadow: 0 0 12px rgba(var(--fg-rgb), 0.7); text-shadow: 0 0 8px rgba(var(--fg-rgb), 0.9); }
 /* Armed as the next drop: glowing, pulsing amber */
 .exploit-icon.armed { color: var(--accent); opacity: 1; border-color: var(--accent); animation: amber-pulse 0.9s ease-in-out infinite; }
+/* RESERVE EXPLOITS (the STORE): beside the exploit button, each ready to arm, an R in its corner */
+.exploit-row { gap: 8px; }
+.exploit-icon.reserve-btn { color: var(--accent); opacity: 1; border-color: rgba(var(--accent-rgb), 0.7); }
+.exploit-icon.reserve-btn:disabled { opacity: 0.35; cursor: default; }
+.reserve-tag { position: absolute; top: 1px; right: 3px; font-size: 8px; line-height: 1; color: var(--accent); }
+.store-item.reserve-item.locked { opacity: 0.45; }
 @keyframes amber-pulse {
   0%, 100% { box-shadow: 0 0 4px rgba(var(--accent-rgb), 0.4); }
   50% { box-shadow: 0 0 18px rgba(var(--accent-rgb), 0.95); }

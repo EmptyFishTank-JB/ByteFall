@@ -221,6 +221,14 @@ const BOOSTERS = {
   undo: { name: 'UNDO', cost: 8, desc: 'PUZZLE: takes back your last drop, even after running out of bits.', modes: ['puzzle'], inGame: true },
 };
 window.BOOSTERS = BOOSTERS;
+// RESERVE EXPLOITS (bought in the STORE with KEYS, Progress keeps them): up to 3 taken into a game
+// (picked on the main menu), each on its own button beside the exploit button, used once a game (a
+// tap arms it as the next drop, as an earned one), then gone; the ones not used stay owned. Only
+// exploits unlocked by level; in CLASSIC, BLITZ and ZEN (not DAILY, PUZZLE, VS or the tutorial).
+// A game they were used in says so.
+const RESERVE_MAX = 3;
+const reserveFits = (m = mode) => !daily && ['classic', 'blitz', 'zen'].includes(m);
+let runReserves = []; // this game's: [{ id, used }]
 const boosterFits = (id, m = mode) => !daily && BOOSTERS[id].modes.includes(m);
 // (switched on per mode: CLASSIC's choice isn't BLITZ's)
 const armedKey = () => `bytefall-boosters-on-${mode}`;
@@ -456,6 +464,7 @@ function initGame() {
   runBoosts = new Set([...armedBoosts].filter((id) => !BOOSTERS[id].inGame && id !== 'second-chance' && boosterFits(id) && Progress.boosters(id) > 0));
   boostsSpent = false;
   secondChanceUsed = false;
+  runReserves = reserveFits() ? Progress.reservesTaken().map((id) => ({ id, used: false })) : [];
   puzzleHistory = [];
   hintCol = null;
   if (runBoosts.has('head-start')) streak = Math.floor(streakCap() / 2);
@@ -1878,6 +1887,9 @@ function endGame(reason = 'trace') {
     note.hidden = false;
     note.textContent += ` // BOOSTED: ${[...runBoosts, ...(secondChanceUsed ? ['second-chance'] : [])].map((id) => BOOSTERS[id].name).join(', ')}`;
   }
+  if (runReserves.some((r) => r.used)) { // (and one that used RESERVE EXPLOITS)
+    note.textContent += ` // RESERVES: ${runReserves.filter((r) => r.used).map((r) => HACKS[r.id].name).join(', ')}`;
+  }
   showRunKeys();
   shareBtn.hidden = !daily || mode === 'puzzle';
   shareBtn.textContent = 'SHARE';
@@ -3025,6 +3037,7 @@ function updateHome() {
     : `${daily ? 'TODAY' : 'BEST'} <b>${fmt(Number(kept) || 0)}</b>`;
   homePlayBtn.textContent = inAGame() && mode !== 'tutorial' ? 'RESUME' : 'PLAY';
   refreshBoosterRow();
+  refreshReserveRow();
 }
 function updateTopIcons() {
   const inGame = !homeOpen; // (the tutorial too: PAUSE, as in a game)
@@ -3945,6 +3958,7 @@ function showKeys() {
     if (b) b.classList.toggle('has-drop', !!freeExploit.claimable);
   }
   refreshBoosterRow();
+  refreshReserveRow();
   refreshPuzzleTools();
 }
 
@@ -3983,6 +3997,46 @@ function refreshBoosterRow() {
       // (a game not yet under way takes it now; one under way, from the next game)
       if (!started && !gameOver && !busy && !inAGame()) initGame();
       refreshBoosterRow();
+  refreshReserveRow();
+    });
+    row.appendChild(b);
+  }
+}
+
+// The main menu's RESERVES: every reserve exploit owned (and unlocked), each a switch to take it
+// into the next game, up to 3; none owned, a way to the STORE
+function refreshReserveRow() {
+  const row = document.getElementById('reserve-row');
+  if (!row) return;
+  row.hidden = !reserveFits() || mode === 'tutorial';
+  if (row.hidden) return;
+  row.innerHTML = `<span class="booster-title">RESERVE EXPLOITS (UP TO ${RESERVE_MAX} A GAME)</span>`;
+  const owned = Progress.exploitOrder().filter((id) => Progress.reserves(id) > 0 && Progress.exploitInfo(id).unlocked);
+  if (!owned.length) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'booster-chip get';
+    b.textContent = 'GET SOME IN THE STORE';
+    b.addEventListener('click', () => setRecordsOpen(true, 'store'));
+    row.appendChild(b);
+    return;
+  }
+  const taken = Progress.reservesTaken();
+  for (const id of owned) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    const on = taken.includes(id);
+    b.className = `booster-chip${on ? ' on' : ''}`;
+    b.textContent = `${HACKS[id].name} \u00d7${Progress.reserves(id)}`;
+    b.setAttribute('aria-pressed', String(on));
+    b.addEventListener('click', () => {
+      const now = Progress.reservesTaken();
+      if (now.includes(id)) Progress.setReservesTaken(now.filter((x) => x !== id));
+      else if (now.length >= RESERVE_MAX) { SFX.play('denied'); return; }
+      else Progress.setReservesTaken([...now, id]);
+      // (a game not yet under way takes them now; one under way, from the next game)
+      if (!started && !gameOver && !busy && !inAGame()) initGame();
+      refreshReserveRow();
     });
     row.appendChild(b);
   }
@@ -4154,14 +4208,40 @@ function updateFreeBtn() {
   const countEl = document.getElementById('exploit-count');
   countEl.hidden = count < 2 || !!armedHack;
   countEl.textContent = `x${count}`;
+  renderReserves();
+}
+// The RESERVE buttons beside the exploit button: one per reserve taken into this game, until it's used
+function renderReserves() {
+  const row = exploitBtn.parentElement;
+  row.querySelectorAll('.reserve-btn').forEach((b) => b.remove());
+  if (gameOver || mode === 'tutorial') return;
+  runReserves.forEach((r, i) => {
+    if (r.used) return;
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'exploit-icon reserve-btn';
+    b.innerHTML = `<span class="exploit-glyph">${iconHtml(r.id)}</span><span class="reserve-tag">R</span>`;
+    b.title = `RESERVE // ${HACKS[r.id].name}: tap to arm it as your next drop`;
+    b.setAttribute('aria-label', `Reserve exploit: ${HACKS[r.id].name}`);
+    b.disabled = !!armedHack;
+    b.addEventListener('click', () => {
+      if (!armExploit(i)) SFX.play('denied');
+    });
+    row.appendChild(b);
+  });
 }
 
 // Arm the ready exploit as the next drop. Committed: it can't be taken back.
-function armExploit() {
+function armExploit(reserve = null) {
   if (armedHack || gameOver || busy || pivotFrom !== null) return false;
-  let id = heldHacks.shift();
+  let id = reserve === null ? heldHacks.shift() : null;
   let free = false;
-  if (!id) {
+  if (reserve !== null) { // (a RESERVE: used up as it's armed)
+    const r = runReserves[reserve];
+    if (!r || r.used || !Progress.useReserve(r.id)) return false;
+    r.used = true;
+    id = r.id;
+  } else if (!id) {
     if (!freeAllowed()) return false;
     id = freeExploitId();
     freeExploit.ready = false;
@@ -4186,7 +4266,7 @@ function armExploit() {
   armedHack = id;
   queue.unshift({ type: 'hack', id });
   swapPicks = [];
-  setMessage(opened ? `BLACK BOX // OPENED: ${HACKS[id].name}` : id === 'swap' ? 'SWAP // TAP TWO BITS TO TRADE PLACES' : `${free ? 'FREE EXPLOIT' : 'ARMED'} // ${HACKS[id].name}`);
+  setMessage(opened ? `BLACK BOX // OPENED: ${HACKS[id].name}` : id === 'swap' ? 'SWAP // TAP TWO BITS TO TRADE PLACES' : `${free ? 'FREE EXPLOIT' : reserve !== null ? 'RESERVE' : 'ARMED'} // ${HACKS[id].name}`);
   burstMessage('warning');
   SFX.play('egg');
   updateHud();

@@ -94,6 +94,8 @@ const Progress = (() => {
     keysEarned: 0, // every one ever earned
     keyBits: 0, // bits decrypted toward the next key (one every KEY_BITS)
     boosters: {}, // booster id -> how many owned
+    reserves: {}, // RESERVE EXPLOITS: exploit id -> how many owned
+    reservesTaken: [], // the (up to 3) the player takes into each game
   });
 
   let d = fresh();
@@ -842,5 +844,18 @@ const Progress = (() => {
       save();
       return true;
     },
+    // RESERVE EXPLOITS: bought with KEYS (the price by how late the exploit unlocks), taken into a
+    // game (up to 3: reservesTaken), each used once there, then gone
+    reservePrice: (id) => [25, 35, 45][Math.min(2, Math.floor(EXPLOIT_ORDER.indexOf(id) / 5))],
+    reserves: (id) => d.reserves[id] || 0,
+    addReserve(id, n = 1) { d.reserves[id] = (d.reserves[id] || 0) + n; save(); },
+    useReserve(id) {
+      if (!d.reserves[id]) return false;
+      d.reserves[id]--;
+      save();
+      return true;
+    },
+    reservesTaken: () => (d.reservesTaken || []).filter((id) => d.reserves[id] > 0 && exploitInfo(id).unlocked).slice(0, 3),
+    setReservesTaken(ids) { d.reservesTaken = ids.slice(0, 3); save(); },
   };
 })();

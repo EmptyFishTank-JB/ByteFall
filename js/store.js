@@ -43,6 +43,31 @@ const Store = (() => {
     });
     shop.appendChild(item);
   }
+  // RESERVE EXPLOITS: every exploit, in the order they unlock; the locked ones show their level
+  const reserveShop = document.getElementById('reserve-shop');
+  for (const id of Progress.exploitOrder()) {
+    const name = (typeof HACKS !== 'undefined' && HACKS[id] && HACKS[id].name) || id.toUpperCase();
+    const price = Progress.reservePrice(id);
+    const item = document.createElement('div');
+    item.className = 'store-item booster-item reserve-item';
+    item.dataset.reserve = id;
+    item.innerHTML = `<h3>${name} <span class="store-price">${price} KEYS</span></h3>`
+      + '<div class="booster-buy-row"><span class="booster-owned"></span><button type="button" class="store-buy">BUY</button></div>';
+    item.querySelector('.store-buy').addEventListener('click', () => {
+      if (!Progress.exploitInfo(id).unlocked) { SFX.play('denied'); return; }
+      if (!Progress.spendKeys(price)) {
+        SFX.play('denied');
+        say(`NOT ENOUGH KEYS // ${name} IS ${price} KEYS`);
+        return;
+      }
+      Progress.addReserve(id);
+      SFX.play('egg');
+      say(`BOUGHT // RESERVE ${name}: TAKE IT INTO A GAME FROM THE MAIN MENU`);
+      if (typeof showKeys === 'function') showKeys();
+      render();
+    });
+    reserveShop.appendChild(item);
+  }
   const claimBtn = document.getElementById('daily-claim');
   claimBtn.addEventListener('click', () => {
     if (window.dailyDrop && window.dailyDrop.claim()) say('CLAIMED // YOUR FREE EXPLOIT IS ON THE EXPLOIT BUTTON');
@@ -51,11 +76,21 @@ const Store = (() => {
 
   function render() {
     const keys = Progress.keys();
-    menu.querySelectorAll('.booster-item').forEach((item) => {
+    menu.querySelectorAll('.booster-item:not(.reserve-item)').forEach((item) => {
       const b = boosters[item.dataset.booster];
       const n = Progress.boosters(item.dataset.booster);
       item.querySelector('.booster-owned').textContent = n ? `OWNED \u00d7${n}` : '';
       item.querySelector('.store-buy').classList.toggle('short', keys < b.cost);
+    });
+    menu.querySelectorAll('.reserve-item').forEach((item) => {
+      const id = item.dataset.reserve;
+      const info = Progress.exploitInfo(id);
+      const n = Progress.reserves(id);
+      item.classList.toggle('locked', !info.unlocked);
+      item.querySelector('.booster-owned').textContent = !info.unlocked ? `UNLOCKS AT LV ${info.level}` : n ? `OWNED \u00d7${n}` : '';
+      const btn = item.querySelector('.store-buy');
+      btn.disabled = !info.unlocked;
+      btn.classList.toggle('short', keys < Progress.reservePrice(id));
     });
     const claimable = !!(window.dailyDrop && window.dailyDrop.claimable());
     claimBtn.disabled = !claimable;
