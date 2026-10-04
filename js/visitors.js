@@ -326,29 +326,49 @@ function createVisitors(api) {
     });
     return out;
   }
-  // HALLOWEEN's BIG SPIDER drawn from its frames (js/bigspider.js: at the bots' pixels, or half
-  // pixels at res 2; its walk and its jump); one <g> a frame, only the one showing drawn
-  const BS = window.BIG_SPIDER || null;
-  const BS_PX = BS ? U / (BS.res || 1) : U; // (a pixel of its frames, in screen pixels)
-  const bsRows = (rows) => rows.map((r) => r.replace(/(\d+)(.)/g, (m, n, c) => c.repeat(Number(n))));
-  function bigSpiderEl() {
+  // The visitors drawn frame by frame in the frame editor (js/bigart.js: the BIG SPIDER, the
+  // WEREWOLF), at the bots' pixels or half pixels at res 2; one <g> a frame, only the one showing drawn
+  const ART = window.BIG_ART || {};
+  const BS = ART.bigspider || null;
+  const artPx = (kind) => U / (ART[kind].res || 1); // (a pixel of its frames, in screen pixels)
+  const BS_PX = BS ? artPx('bigspider') : U;
+  const artRows = (rows) => rows.map((r) => r.replace(/(\d+)(.)/g, (m, n, c) => c.repeat(Number(n))));
+  function artEl(kind) {
+    const d = ART[kind];
+    const px = artPx(kind);
     const el = document.createElement('div');
-    el.className = 'visitor visitor-bigspider';
-    el.style.width = `${BS.w * BS_PX}px`;
-    const groups = ['walk', 'jump'].map((name) => BS[name].map((f, i) => `<g class="bs-${name}${i}" style="display: ${name === 'walk' && !i ? 'inline' : 'none'}">${rects(bsRows(f.rows), BS.pal)}</g>`).join('')).join('');
-    el.innerHTML = `<svg viewBox="0 0 ${BS.w} ${BS.h}" width="${BS.w * BS_PX}" height="${BS.h * BS_PX}" shape-rendering="crispEdges" aria-hidden="true">${groups}</svg><span class="walker-emote"></span>`;
+    el.className = `visitor visitor-${kind}`;
+    el.style.width = `${d.w * px}px`;
+    const groups = d.anims.map((name, n) => d[name].map((f, i) => `<g class="art-${name}${i}" style="display: ${!n && !i ? 'inline' : 'none'}">${rects(artRows(f.rows), d.pal)}</g>`).join('')).join('');
+    el.innerHTML = `<svg viewBox="0 0 ${d.w} ${d.h}" width="${d.w * px}" height="${d.h * px}" shape-rendering="crispEdges" aria-hidden="true">${groups}</svg><span class="walker-emote"></span>`;
     return el;
   }
-  function bigSpiderShow(v, name, i) {
+  function artShow(v, name, i) {
     const key = `${name}${i}`;
-    if (v.bsShown === key) return;
+    if (v.artShown === key) return;
     const svg = v.el.querySelector('svg');
-    if (v.bsShown) svg.querySelector(`.bs-${v.bsShown}`).style.display = 'none';
-    svg.querySelector(`.bs-${key}`).style.display = 'inline';
-    v.bsShown = key;
+    svg.querySelector(`.art-${v.artShown || `${ART[v.kind].anims[0]}0`}`).style.display = 'none';
+    svg.querySelector(`.art-${key}`).style.display = 'inline';
+    v.artShown = key;
+  }
+  const bigSpiderShow = artShow;
+  // (an animation played from when it started: the frame showing at that time, the last one held)
+  function artPlay(v, name, t0, now, speed = 1) {
+    const frames = ART[v.kind][name];
+    let t = (now - t0) * speed;
+    let i = 0;
+    while (i < frames.length - 1 && t >= frames[i].ms) { t -= frames[i].ms; i++; }
+    artShow(v, name, i);
+  }
+  // (a looping walk stepped on by time: every ms, the next frame)
+  function artStep(v, now, ms) {
+    if (now - (v.frameAt || 0) < ms) return;
+    v.frameAt = now;
+    v.frame = ((v.frame || 0) + 1) % ART[v.kind].walk.length;
+    artShow(v, 'walk', v.frame);
   }
   function spriteEl(kind, pal) {
-    if (kind === 'bigspider' && BS) return bigSpiderEl();
+    if (ART[kind]) return artEl(kind);
     const def = { ...SPRITES[kind], ...(pal ? { pal: { ...SPRITES[kind].pal, ...pal } } : {}) };
     const w = def.a[0].length;
     const h = def.a.length;
@@ -390,7 +410,7 @@ function createVisitors(api) {
     baretree: { speed: 0, frameMs: 0 },
     oak: { speed: 0, frameMs: 0 },
     eyes: { speed: 0, frameMs: 0, fixed: true, poke: 'blink' },
-    werewolf: { speed: 30, frameMs: 200, sway: 1, monster: true, poke: 'growl' },
+    werewolf: { speed: 30, frameMs: window.BIG_ART && window.BIG_ART.werewolf ? 0 : 200, sway: window.BIG_ART && window.BIG_ART.werewolf ? 0 : 1, monster: true, poke: 'growl' }, // (drawn frames: werewolfFrame)
     hand: { speed: 0, frameMs: 0, poke: 'sink' },
     spirit: { speed: 0, frameMs: 300, poke: 'mist' },
     wraith: { speed: 9, frameMs: 520, poke: 'mist' },
@@ -903,8 +923,8 @@ function createVisitors(api) {
     night.setAttribute('aria-hidden', 'true');
     if (!fog) { api.lane.appendChild(night); requestAnimationFrame(() => requestAnimationFrame(() => night.classList.add('on'))); }
     const moon = moonRise(false);
-    const v = add('werewolf', edge(21 * U), dir, { state: 'wait', until: performance.now() + 3500, stopAt: rand(0.3, 0.6) * W });
-    scaleTree(v, 1.3); // (bigger than the bots)
+    const v = add('werewolf', edge(ART.werewolf ? ART.werewolf.w * artPx('werewolf') : 21 * U), dir, { state: 'wait', until: performance.now() + 3500, stopAt: rand(0.3, 0.6) * W });
+    if (!ART.werewolf) scaleTree(v, 1.3); // (bigger than the bots; its drawn frames already are)
     v.onGone = () => {
       moonSet(moon);
       night.classList.remove('on');
@@ -912,6 +932,11 @@ function createVisitors(api) {
     };
   }
   function werewolfFrame(v, now, dt, W) {
+    if (ART.werewolf) { // (its walk while it goes, faster at a run; its howl from when it began)
+      if (v.state === 'howl') artPlay(v, 'howl', v.howlAt, now);
+      else if (v.state === 'go' || v.state === 'run') artStep(v, now, v.state === 'run' ? 55 : 110);
+      else artShow(v, 'walk', 0);
+    }
     if (v.state === 'wait') { if (now > v.until) v.state = 'go'; } // (the moon up first)
     else if (v.state === 'stand') { if (now > v.until) lopeOff(v); } // (there when the lights came on)
     else if (v.state === 'go') {
@@ -924,6 +949,7 @@ function createVisitors(api) {
   }
   function howl(v, now) {
     v.state = 'howl';
+    v.howlAt = now;
     v.still = true;
     v.until = now + 2800;
     v.el.classList.add('v-howl');
@@ -1004,7 +1030,7 @@ function createVisitors(api) {
       if (L.red) L.red.remove();
       if (L.monster) {
         const m = add(L.monster, L.spot, Math.random() < 0.5 ? 1 : -1, { state: 'stand', until: now + 1600 });
-        if (L.monster === 'werewolf') scaleTree(m, 1.3);
+        if (L.monster === 'werewolf' && !ART.werewolf) scaleTree(m, 1.3);
         say(m, pick(['BOO!', 'RAAH!', 'GRRR']), 1200);
         api.botEvent(`visit-${L.monster}`);
         for (const b of api.walkers()) {
@@ -2364,16 +2390,19 @@ function createVisitors(api) {
       const [a, b, c, d] = rootFrames(kind);
       sprites[`${kind}-walking`] = { pal: SPRITES[kind].pal, a, b, c, d };
     }
-    // (the big spider: its frames as they are, at its own resolution)
+    // (the frame-by-frame ones: each animation as it is, at its own resolution)
     const anims = {};
-    if (BS) {
-      delete sprites.bigspider;
-      for (const name of ['walk', 'jump']) {
-        anims[`bigspider-${name}`] = BS[name].map((f) => {
-          const cells = {};
-          bsRows(f.rows).forEach((row, y) => [...row].forEach((ch, x) => { if (BS.pal[ch]) cells[`${BS.x0 + x},${BS.y0 + y}`] = BS.pal[ch]; }));
-          return { ms: f.ms, cells };
-        });
+    for (const [kind, d] of Object.entries(ART)) {
+      delete sprites[kind];
+      for (const name of d.anims) {
+        anims[`${kind}-${name}`] = {
+          res: d.res || 1,
+          frames: d[name].map((f) => {
+            const cells = {};
+            artRows(f.rows).forEach((row, y) => [...row].forEach((ch, x) => { if (d.pal[ch]) cells[`${d.x0 + x},${d.y0 + y}`] = d.pal[ch]; }));
+            return { ms: f.ms, cells };
+          }),
+        };
       }
     }
     return { sprites, anims, kinds: { ...KINDS, 'tree-walking': { frameMs: 190 }, 'baretree-walking': { frameMs: 190 }, 'pine-walking': { frameMs: 190 } } };
