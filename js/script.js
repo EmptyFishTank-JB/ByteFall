@@ -221,14 +221,28 @@ const BOOSTERS = {
   undo: { name: 'UNDO', cost: 8, desc: 'PUZZLE: takes back your last drop, even after running out of bits.', modes: ['puzzle'], inGame: true },
 };
 window.BOOSTERS = BOOSTERS;
-// RESERVE EXPLOITS (bought in the STORE with KEYS, Progress keeps them): up to 3 taken into a game
-// (picked on the main menu), each on its own button beside the exploit button, used once a game (a
-// tap arms it as the next drop, as an earned one), then gone; the ones not used stay owned. Only
-// exploits unlocked by level; in CLASSIC, BLITZ and ZEN (not DAILY, PUZZLE, VS or the tutorial).
-// A game they were used in says so.
-const RESERVE_MAX = 3;
+// THE SIDE SLOTS, one each side of the exploit button (CLASSIC, BLITZ and ZEN; not DAILY, PUZZLE,
+// VS or the tutorial). RESERVE EXPLOITS (bought in the STORE with KEYS, Progress keeps them): up to
+// 2 taken into a game (picked on the main menu), one in each slot; a tap arms it as the next drop,
+// as an earned one, and it's used up (the ones not used stay owned). A slot with no reserve in it,
+// or whose reserve is used, is the BLACK MARKET: a random exploit (of the ones unlocked by level)
+// and its price in KEYS (the STORE's), changing every MARKET_EVERY drops. A tap shows the price, a
+// second buys it, and it waits in the slot until it's armed; one buy a slot, a game. Only
+// exploits unlocked by level. A game that used them says so.
+const RESERVE_MAX = 2;
+const MARKET_EVERY = 4;
 const reserveFits = (m = mode) => !daily && ['classic', 'blitz', 'zen'].includes(m);
-let runReserves = []; // this game's: [{ id, used }]
+let sideSlots = []; // this game's: [{ state: 'reserve' | 'bought' | 'market' | 'closed', id, buys, confirm }]
+let marketDrops = 0;
+let usedReserves = []; // (for the result screen)
+let marketBought = [];
+const marketPool = () => Progress.exploitOrder().filter((id) => Progress.exploitInfo(id).unlocked);
+function marketPick(not = []) {
+  const all = marketPool();
+  const pool = all.filter((id) => !not.includes(id));
+  const from = pool.length ? pool : all;
+  return from[Math.floor(Math.random() * from.length)] || null;
+}
 const boosterFits = (id, m = mode) => !daily && BOOSTERS[id].modes.includes(m);
 // (switched on per mode: CLASSIC's choice isn't BLITZ's)
 const armedKey = () => `bytefall-boosters-on-${mode}`;
@@ -464,7 +478,17 @@ function initGame() {
   runBoosts = new Set([...armedBoosts].filter((id) => !BOOSTERS[id].inGame && id !== 'second-chance' && boosterFits(id) && Progress.boosters(id) > 0));
   boostsSpent = false;
   secondChanceUsed = false;
-  runReserves = reserveFits() ? Progress.reservesTaken().map((id) => ({ id, used: false })) : [];
+  usedReserves = [];
+  marketBought = [];
+  marketDrops = 0;
+  const taken = Progress.reservesTaken();
+  sideSlots = reserveFits() && mode !== 'tutorial'
+    ? [0, 1].map((i) => (taken[i] ? { state: 'reserve', id: taken[i], buys: 0 } : { state: 'market', id: null, buys: 0 })) : [];
+  for (const sl of sideSlots) {
+    if (sl.state !== 'market') continue;
+    sl.id = marketPick(sideSlots.map((x) => x.id));
+    if (!sl.id) sl.state = 'closed'; // (nothing unlocked yet)
+  }
   puzzleHistory = [];
   hintCol = null;
   if (runBoosts.has('head-start')) streak = Math.floor(streakCap() / 2);
@@ -1282,6 +1306,7 @@ async function attemptDrop(col) {
   if (piece.type === 'hack') await runHack(piece.id, landing, col);
   await resolveChains();
   await tickBombs();
+  marketTick();
 
   if (!overflowed() && !MODES[mode].noLayers) {
     dropsSinceLastPulse++;
@@ -1887,8 +1912,9 @@ function endGame(reason = 'trace') {
     note.hidden = false;
     note.textContent += ` // BOOSTED: ${[...runBoosts, ...(secondChanceUsed ? ['second-chance'] : [])].map((id) => BOOSTERS[id].name).join(', ')}`;
   }
-  if (runReserves.some((r) => r.used)) { // (and one that used RESERVE EXPLOITS)
-    note.textContent += ` // RESERVES: ${runReserves.filter((r) => r.used).map((r) => HACKS[r.id].name).join(', ')}`;
+  if (usedReserves.length) note.textContent += ` // RESERVES: ${usedReserves.map((id) => HACKS[id].name).join(', ')}`; // (and one that used side slots)
+  if (marketBought.length) {
+    note.textContent += ` // BLACK MARKET: ${marketBought.map((id) => HACKS[id].name).join(', ')}`;
   }
   showRunKeys();
   shareBtn.hidden = !daily || mode === 'puzzle';
@@ -4010,7 +4036,7 @@ function refreshReserveRow() {
   if (!row) return;
   row.hidden = !reserveFits() || mode === 'tutorial';
   if (row.hidden) return;
-  row.innerHTML = `<span class="booster-title">RESERVE EXPLOITS (UP TO ${RESERVE_MAX} A GAME)</span>`;
+  row.innerHTML = `<span class="booster-title">RESERVE EXPLOITS (UP TO ${RESERVE_MAX} A GAME, ONE EACH SIDE OF THE EXPLOIT BUTTON)</span>`;
   const owned = Progress.exploitOrder().filter((id) => Progress.reserves(id) > 0 && Progress.exploitInfo(id).unlocked);
   if (!owned.length) {
     const b = document.createElement('button');
@@ -4210,37 +4236,111 @@ function updateFreeBtn() {
   countEl.textContent = `x${count}`;
   renderReserves();
 }
-// The RESERVE buttons beside the exploit button: one per reserve taken into this game, until it's used
+// The side slots: built once, either side of the exploit button, redrawn as they change
+let slotEls = null;
+const sideSlotEls = () => slotEls || (slotEls = [0, 1].map((i) => {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'exploit-icon side-slot';
+  b.hidden = true;
+  b.addEventListener('click', () => slotTap(i));
+  const btn = document.getElementById('exploit-btn');
+  if (i === 0) btn.before(b);
+  else btn.after(b);
+  return b;
+}));
 function renderReserves() {
-  const row = exploitBtn.parentElement;
-  row.querySelectorAll('.reserve-btn').forEach((b) => b.remove());
-  if (gameOver || mode === 'tutorial') return;
-  runReserves.forEach((r, i) => {
-    if (r.used) return;
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'exploit-icon reserve-btn';
-    b.innerHTML = `<span class="exploit-glyph">${iconHtml(r.id)}</span><span class="reserve-tag">R</span>`;
-    b.title = `RESERVE // ${HACKS[r.id].name}: tap to arm it as your next drop`;
-    b.setAttribute('aria-label', `Reserve exploit: ${HACKS[r.id].name}`);
-    b.disabled = !!armedHack;
-    b.addEventListener('click', () => {
-      if (!armExploit(i)) SFX.play('denied');
-    });
-    row.appendChild(b);
+  const keys = Progress.keys();
+  sideSlotEls().forEach((b, i) => {
+    const sl = sideSlots[i];
+    const show = !!sl && !gameOver && mode !== 'tutorial';
+    b.hidden = !sideSlots.length || gameOver || mode === 'tutorial';
+    b.classList.toggle('closed', !show || sl.state === 'closed');
+    if (!show || sl.state === 'closed') { b.innerHTML = ''; b.disabled = true; return; }
+    const market = sl.state === 'market';
+    const price = Progress.reservePrice(sl.id);
+    b.disabled = false;
+    b.classList.toggle('market', market);
+    b.classList.toggle('owned', !market);
+    b.classList.toggle('confirm', market && !!sl.confirm);
+    b.classList.toggle('short', market && keys < price);
+    b.innerHTML = `<span class="exploit-glyph">${iconHtml(sl.id)}</span>`
+      + (market ? `<span class="slot-price">${price}</span>` : `<span class="reserve-tag">${sl.state === 'reserve' ? 'R' : '\u2713'}</span>`);
+    const name = HACKS[sl.id].name;
+    b.title = market ? `BLACK MARKET // ${name}: ${price} KEYS (tap, then tap again to buy)` : `${sl.state === 'reserve' ? 'RESERVE' : 'BOUGHT'} // ${name}: tap to arm it`;
+    b.setAttribute('aria-label', b.title);
+    if (!market && armedHack) b.disabled = true;
   });
+}
+function slotTap(i) {
+  const sl = sideSlots[i];
+  if (!sl || gameOver || sl.state === 'closed') return;
+  if (sl.state === 'reserve' || sl.state === 'bought') {
+    if (!armExploit(i)) SFX.play('denied');
+    return;
+  }
+  const name = HACKS[sl.id].name;
+  const price = Progress.reservePrice(sl.id);
+  if (!sl.confirm) { // (the first tap: its price)
+    sideSlots.forEach((x) => { x.confirm = false; });
+    sl.confirm = true;
+    setMessage(`BLACK MARKET // ${name}: ${price} KEYS, TAP AGAIN TO BUY`);
+    SFX.play('click');
+    renderReserves();
+    return;
+  }
+  sl.confirm = false;
+  if (!Progress.spendKeys(price)) {
+    SFX.play('denied');
+    setMessage(`BLACK MARKET // NOT ENOUGH KEYS FOR ${name}`);
+    renderReserves();
+    return;
+  }
+  sl.state = 'bought';
+  sl.buys++;
+  SFX.play('egg');
+  setMessage(`BLACK MARKET // BOUGHT ${name}: TAP IT TO ARM`);
+  if (typeof showKeys === 'function') showKeys();
+  renderReserves();
+}
+// Every MARKET_EVERY drops, the market's slots turn over (a price shown and not taken up goes too)
+function marketTick() {
+  if (!sideSlots.length) return;
+  sideSlots.forEach((x) => { x.confirm = false; });
+  if (++marketDrops % MARKET_EVERY) { renderReserves(); return; }
+  sideSlots.forEach((sl, i) => {
+    if (sl.state !== 'market') return;
+    sl.id = marketPick(sideSlots.map((x) => x.id));
+    const b = sideSlotEls()[i];
+    b.classList.remove('turned');
+    void b.offsetWidth;
+    b.classList.add('turned');
+  });
+  renderReserves();
 }
 
 // Arm the ready exploit as the next drop. Committed: it can't be taken back.
-function armExploit(reserve = null) {
+function armExploit(slot = null) {
   if (armedHack || gameOver || busy || pivotFrom !== null) return false;
-  let id = reserve === null ? heldHacks.shift() : null;
+  let id = slot === null ? heldHacks.shift() : null;
   let free = false;
-  if (reserve !== null) { // (a RESERVE: used up as it's armed)
-    const r = runReserves[reserve];
-    if (!r || r.used || !Progress.useReserve(r.id)) return false;
-    r.used = true;
-    id = r.id;
+  let label = 'ARMED';
+  if (slot !== null) { // (a side slot's: a RESERVE, used up as it's armed, or one bought on the BLACK MARKET)
+    const sl = sideSlots[slot];
+    if (!sl || (sl.state !== 'reserve' && sl.state !== 'bought')) return false;
+    if (sl.state === 'reserve') {
+      if (!Progress.useReserve(sl.id)) return false;
+      usedReserves.push(sl.id);
+      label = 'RESERVE';
+    } else {
+      marketBought.push(sl.id);
+      label = 'BLACK MARKET';
+    }
+    id = sl.id;
+    // (the slot opens to the market: until it's been bought from once this game)
+    sl.state = sl.buys < 1 ? 'market' : 'closed';
+    sl.confirm = false;
+    if (sl.state === 'market') sl.id = marketPick(sideSlots.map((x) => x.id).concat(id));
   } else if (!id) {
     if (!freeAllowed()) return false;
     id = freeExploitId();
@@ -4266,7 +4366,7 @@ function armExploit(reserve = null) {
   armedHack = id;
   queue.unshift({ type: 'hack', id });
   swapPicks = [];
-  setMessage(opened ? `BLACK BOX // OPENED: ${HACKS[id].name}` : id === 'swap' ? 'SWAP // TAP TWO BITS TO TRADE PLACES' : `${free ? 'FREE EXPLOIT' : reserve !== null ? 'RESERVE' : 'ARMED'} // ${HACKS[id].name}`);
+  setMessage(opened ? `BLACK BOX // OPENED: ${HACKS[id].name}` : id === 'swap' ? 'SWAP // TAP TWO BITS TO TRADE PLACES' : `${free ? 'FREE EXPLOIT' : label} // ${HACKS[id].name}`);
   burstMessage('warning');
   SFX.play('egg');
   updateHud();

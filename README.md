@@ -71,7 +71,7 @@ KEYS are the game's currency, earned by playing and kept on the device
 (progress.js): 1 for every 10 bits decrypted, +2 when a chain reaches 5 links and +5 at 7,
 a first puzzle solve (EASY 2, NORMAL 4, HARD 6), 10 for each achievement and each level,
 5 for the day's first daily game, and 5 with the DAILY DROP (claimed once a day in the
-STORE, with a free exploit for the next game). They're spent in the STORE on BOOSTERS and RESERVE EXPLOITS:
+STORE, with a free exploit for the next game). They're spent on BOOSTERS and RESERVE EXPLOITS in the STORE, and on the BLACK MARKET in a game:
 
 | Booster | Keys | Does |
 |---|---|---|
@@ -88,17 +88,20 @@ a game's first drop (SECOND CHANCE only when it saves you); HINT and UNDO sit un
 puzzle's drop buttons, and with none owned a second tap buys one. Never in DAILY or VS. A
 boosted game says so on its result screen.
 
-**RESERVE EXPLOITS** (STORE, with KEYS): an exploit of your own, any you've unlocked by level, at
-25 KEYS (the first five to unlock: RNG, BITFLIP, BUFFER OVERFLOW, TROJAN, PIVOT), 35 (SWAP, WORM
-VIRUS, KEYLOGGER, PACKET SNIFFER, BACKDOOR) or 45 (LOGIC BOMB, HONEYPOT, DICTIONARY ATTACK, RAINBOW
-TABLE, BLACK BOX). Pick up to 3 to take into a game on the main menu (RESERVE EXPLOITS); each sits
-on its own button beside the exploit button, marked R, and a tap arms it as your next drop, as an
-earned one. Each is used once and gone; the ones not used stay yours. CLASSIC, BLITZ and ZEN only;
-a game that used them says so on its result screen (RESERVES: ...).
+**THE SIDE SLOTS**: one each side of the exploit button (CLASSIC, BLITZ and ZEN only).
+**RESERVE EXPLOITS** (STORE, with KEYS) are exploits of your own, any you've unlocked by level, at 25
+KEYS (the first five to unlock: RNG, BITFLIP, BUFFER OVERFLOW, TROJAN, PIVOT), 35 (SWAP, WORM VIRUS,
+KEYLOGGER, PACKET SNIFFER, BACKDOOR) or 45 (LOGIC BOMB, HONEYPOT, DICTIONARY ATTACK, RAINBOW TABLE,
+BLACK BOX). Pick up to 2 on the main menu to take into a game, one in each slot (marked R); a tap arms
+it as your next drop, as an earned one, and it's used up (the ones not used stay yours). A slot with
+no reserve, or once its reserve is used, is the **BLACK MARKET**: a random exploit you've unlocked
+and its price (the same as a reserve's) under it, changing every 4 drops. Tap it for its price, tap
+again to buy; it waits in the slot (a tick in its corner) until you tap it to arm it. One buy each
+slot, a game. A game that used them says so on its result screen (RESERVES: ... // BLACK MARKET: ...).
 
 How far KEYS go (a simulation of CLASSIC games on the CPU's own board code: node tools/keysim.js): a game
 decrypts about 90 to 110 bits, so it earns about 14 to 18 KEYS, or 20 to 23 all in with the levels,
-achievements, first puzzle solves and the daily 10. That's about one booster or one reserve a game,
+achievements, first puzzle solves and the daily 10. That's about one booster, reserve or black-market buy a game,
 or a few saved up for a game with everything on.
 
 ## Exploits
