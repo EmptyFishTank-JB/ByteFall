@@ -12,7 +12,7 @@ function vizRgb(name, fallback) {
 const VIZ_NAMES = {
   bars: 'SPECTRUM', wave: 'WAVE', scope: 'OSCILLOSCOPE', spectro: 'SPECTROGRAM', vu: 'LEVEL METERS', radial: 'RADIAL',
   fluid: 'PARTICLES', vector: 'VECTORSCOPE', vectorwide: 'STEREO FIELD', lissajous: 'LISSAJOUS', matrix: 'MATRIX RAIN', bitgrid: 'BIT GRID', terrain: 'SYNTHWAVE GRID',
-  plasma: 'PLASMA', tunnel: 'TUNNEL', orb: 'ORB', ocean: 'OCEAN GRID', oceantri: 'OCEAN MESH', oceanhex: 'OCEAN HEX', topo: 'TOPOGRAPHY',
+  plasma: 'PLASMA', tunnel: 'TUNNEL', orb: 'ORB', ocean: 'OCEAN GRID', oceantri: 'OCEAN MESH', oceanhex: 'OCEAN HEX', oceantopo: 'OCEAN TOPO', topo: 'TOPOGRAPHY',
   cloud: 'PARTICLE CLOUD',
 };
 
@@ -986,6 +986,117 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     }
   }
 
+  // OCEAN TOPO: the travelling sea (the same view, swell and music as OCEAN GRID) drawn as a map's
+  // contour lines: a ring for each height, so as the sea rises its higher rings appear and as it
+  // falls they shrink away; the highest in the accent, all fading into the distance
+  function drawOceanTopo(an, w, h, now) {
+    g.clearRect(0, 0, w, h);
+    const lv = bands(an, SEA_BANDS);
+    let energy = 0;
+    for (let b = 0; b < SEA_BANDS; b++) { seaLv[b] = lv ? Math.max(lv[b], seaLv[b] * dec(0.86)) : seaLv[b] * dec(0.9); energy += seaLv[b] / SEA_BANDS; }
+    if (!seaHist.length || now - seaAt > 45) {
+      seaAt = now;
+      seaHist.unshift(Float32Array.from(seaLv));
+      if (seaHist.length > SEA_ROWS) seaHist.length = SEA_ROWS;
+    }
+    const dt = seaCam.last ? Math.min(0.1, (now - seaCam.last) / 1000) : 0;
+    seaCam.last = now;
+    seaCam.turn = Math.max(-0.35, Math.min(0.35, seaCam.turn + (Math.random() - 0.5) * dt * 1.2));
+    seaCam.ang += seaCam.turn * dt;
+    const speed = 0.8 + energy * 1.2;
+    seaCam.x += Math.sin(seaCam.ang) * speed * dt;
+    seaCam.z += Math.cos(seaCam.ang) * speed * dt;
+    const t = now / 1000;
+    const cx = w / 2;
+    const horizon = h * 0.3;
+    const f = h * 0.95;
+    const camH = 1.1;
+    const zNear = 0.95;
+    const histDz = 0.6; // (the music's history: a row of it every 0.6 out, as in OCEAN GRID)
+    const zFar = zNear + (SEA_ROWS - 1) * histDz;
+    const fx = f * 0.42;
+    // (the map sampled evenly over the screen, finer up close: rows spaced out with the distance,
+    // columns even across; each point's height read off the sea itself, so the rings stay put on it)
+    const nRows = 56;
+    const nCols = Math.max(60, Math.min(120, Math.round(w / 6)));
+    const zMin = 0.3;
+    const H = new Float32Array(nRows * nCols);
+    const SX = new Float32Array(nRows * nCols);
+    const SZ = new Float32Array(nRows);
+    const hAt = (row, b) => { const r0 = seaHist[Math.max(0, Math.min(seaHist.length - 1, row))]; return r0 ? r0[b] : 0; };
+    for (let r = 0; r < nRows; r++) {
+      const zv = zMin * Math.pow(zFar / zMin, r / (nRows - 1));
+      SZ[r] = zv;
+      const wz = seaCam.z + zv;
+      const mz = mirror(wz);
+      const hr = Math.max(0, (zv - zNear) / histDz);
+      for (let c = 0; c < nCols; c++) {
+        const sx = (c / (nCols - 1)) * (w + 120) - 60;
+        const wx = seaCam.x + ((sx - cx) * zv) / fx;
+        // (the music, blended across the bands and over a few moments, so the rings stay round)
+        const bp = Math.min(1, Math.abs(sx - cx) / (w / 2)) * (SEA_BANDS - 1);
+        const b0 = Math.floor(bp);
+        const b1 = Math.min(SEA_BANDS - 1, b0 + 1);
+        const bf = bp - b0;
+        let m = 0;
+        for (let d = -1; d <= 1; d++) { const row = Math.round(hr) + d; m += (hAt(row, b0) * (1 - bf) + hAt(row, b1) * bf) / 3; }
+        const mx = mirror(wx);
+        H[r * nCols + c] = 0.08 * Math.sin(mx * 0.9 + t * 0.8) + 0.06 * Math.sin(mz * 1.1 - t * 0.6 + mx * 0.4) + 0.05 * Math.sin((mx + mz) * 0.5 + t * 1.1) + m * 0.45;
+        SX[r * nCols + c] = sx;
+      }
+    }
+    // (a point on the map to the screen: its height lifting it)
+    const proj = (r, c, y) => [SX[r * nCols + c] + 0, horizon + ((camH - y) / SZ[r]) * f];
+    const LEVELS = 10;
+    const lo = -0.15;
+    const gap = 0.065;
+    g.lineWidth = 0.9;
+    for (let L = 0; L < LEVELS; L++) {
+      const iso = lo + L * gap;
+      const frac = L / (LEVELS - 1);
+      // (in bands of distance, each fading a little more)
+      for (let band = 0; band < 4; band++) {
+        const rA = Math.floor((band * (nRows - 1)) / 4);
+        const rB = Math.floor(((band + 1) * (nRows - 1)) / 4);
+        const zMid = (SZ[rA] + SZ[Math.min(nRows - 1, rB)]) / 2;
+        const fadeD = Math.pow(Math.min(1, Math.max(0, 1 - (zMid - zNear) / (zFar - zNear))), 1.2);
+        if (fadeD <= 0.01) continue;
+        g.strokeStyle = paint(frac, ((0.45 + frac * 0.5) * fadeD).toFixed(3), frac > 0.7);
+        g.beginPath();
+        for (let r = rA; r < rB; r++) {
+          for (let c = 0; c < nCols - 1; c++) {
+            const a = H[r * nCols + c];
+            const b = H[r * nCols + c + 1];
+            const cc = H[(r + 1) * nCols + c + 1];
+            const d = H[(r + 1) * nCols + c];
+            const idx = (a > iso ? 8 : 0) | (b > iso ? 4 : 0) | (cc > iso ? 2 : 0) | (d > iso ? 1 : 0);
+            if (idx === 0 || idx === 15) continue;
+            // (where the height crosses each edge of the cell, on the map, then to the screen)
+            const lerp = (p, q, u) => [p[0] + (q[0] - p[0]) * u, p[1] + (q[1] - p[1]) * u];
+            const P = (rr, ccc) => proj(rr, ccc, iso);
+            const top = () => lerp(P(r, c), P(r, c + 1), (iso - a) / (b - a));
+            const right = () => lerp(P(r, c + 1), P(r + 1, c + 1), (iso - b) / (cc - b));
+            const bottom = () => lerp(P(r + 1, c), P(r + 1, c + 1), (iso - d) / (cc - d));
+            const left = () => lerp(P(r, c), P(r + 1, c), (iso - a) / (d - a));
+            const seg = (p, q) => { const u = p(); const v = q(); g.moveTo(u[0], u[1]); g.lineTo(v[0], v[1]); };
+            switch (idx) {
+              case 1: case 14: seg(left, bottom); break;
+              case 2: case 13: seg(bottom, right); break;
+              case 3: case 12: seg(left, right); break;
+              case 4: case 11: seg(top, right); break;
+              case 5: seg(left, top); seg(bottom, right); break;
+              case 6: case 9: seg(top, bottom); break;
+              case 7: case 8: seg(left, top); break;
+              case 10: seg(top, right); seg(left, bottom); break;
+              default: break;
+            }
+          }
+        }
+        g.stroke();
+      }
+    }
+  }
+
   // TOPOGRAPHY: a map's contour lines over a landscape the music raises: a hill for each band of
   // the spectrum (the bass broad, the treble small and sharp), drifting slowly about; the louder
   // a band, the higher its hill and the closer its rings; the highest rings in the accent
@@ -1251,6 +1362,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       else if (mode === 'ocean') drawOcean(an, w, h, now, false);
       else if (mode === 'oceantri') drawOcean(an, w, h, now, true);
       else if (mode === 'oceanhex') drawOceanHex(an, w, h, now);
+      else if (mode === 'oceantopo') drawOceanTopo(an, w, h, now);
       else if (mode === 'topo') drawTopo(an, w, h, now);
       else if (mode === 'cloud') drawCloud(an, w, h, now);
       else drawBars(an, w, h);
