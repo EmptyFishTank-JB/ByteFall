@@ -3374,7 +3374,6 @@ function updateOutputBtn() {
   const out = SOUND_OUTPUTS.find((o) => o.id === Music.getOutput());
   outputBtn.textContent = `SOUND OUTPUT: ${out.label}`;
   mpOutputBtn.textContent = `SOUND OUTPUT: ${out.label}`;
-  document.getElementById('output-note').textContent = `${out.note} On earbuds or headphones, pick HEADPHONES.`;
 }
 [outputBtn, mpOutputBtn].forEach((b) => b.addEventListener('click', () => {
   const i = SOUND_OUTPUTS.findIndex((o) => o.id === Music.getOutput());
@@ -3410,27 +3409,15 @@ buttonsPosBtn.addEventListener('click', () => {
 });
 updateButtonsPos();
 
-// DROP BY: BOTH (default) or NUMBERS. BOTH: the numbered buttons, or touch (or click) and hold
-// on the grid and the bit appears in the top row over that column, following the thumb (or the
-// cursor) from column to column, its button lit; letting go drops it there (let go well off the
-// grid to call it off). NUMBERS: the buttons only. The tutorial takes both whatever this says.
-const dropCtlBtn = document.getElementById('drop-controls-btn');
-const DROP_CONTROLS = ['both', 'buttons'];
-let dropControls = DROP_CONTROLS.includes(storage.get('bytefall-drop-controls')) ? storage.get('bytefall-drop-controls') : 'both';
-const columnsTouchable = () => dropControls === 'both' || mode === 'tutorial';
+// DROPPING: the numbered buttons, or touch (or click) and hold on the grid and the bit appears in
+// the top row over that column, following the thumb (or the cursor) from column to column, its
+// button lit; letting go drops it there (let go well off the grid to call it off). Always both
+// (there was a DROP BY setting for the buttons only; it's gone)
+const columnsTouchable = () => true;
 function applyDropControls() {
   boardEl.classList.toggle('touch-drop', columnsTouchable());
 }
-function updateDropControls() {
-  dropCtlBtn.textContent = `DROP BY: ${dropControls === 'both' ? 'BOTH' : 'NUMBERS'}`;
-  applyDropControls();
-}
-dropCtlBtn.addEventListener('click', () => {
-  dropControls = DROP_CONTROLS[(DROP_CONTROLS.indexOf(dropControls) + 1) % DROP_CONTROLS.length];
-  storage.set('bytefall-drop-controls', dropControls);
-  updateDropControls();
-});
-updateDropControls();
+applyDropControls();
 var dropCtlReady = true; // (var: updateColumnButtons can run before this, and sees it undefined)
 
 // Dragging a bit across the top row (COLUMNS). aim: the column it's over, or null
@@ -3486,7 +3473,7 @@ function endAim() {
   aimGhost = null;
 }
 // SWAP armed: a tap on the grid picks a bit (again to put it back); the second pick drops it
-// (whatever DROP BY says: the bits are picked on the grid)
+// (the bits are picked on the grid)
 function pickSwapBit(e) {
   const el = e.target.closest('.cell[data-pos]');
   const [r, c] = el ? el.dataset.pos.split(',').map(Number) : [-1, -1];
@@ -3829,7 +3816,6 @@ function updateSfxThemeBtn() {
   const all = SFX.themes();
   const cur = all.find((t) => t.id === SFX.theme() && t.open) || all[0];
   sfxThemeBtn.textContent = `SOUND EFFECTS: ${cur.name}`;
-  sfxThemeBtn.classList.toggle('on', cur.id !== 'terminal');
   const locked = all.filter((t) => !t.open).map((t) => `${t.name} opens with the ${t.track} track (LV ${Progress.unlock(t.unlock).goal})`);
   sfxThemeNote.textContent = `${cur.desc}${locked.length ? ` ${locked.join('; ')}.` : ''}`;
 }
@@ -3883,7 +3869,6 @@ function applyTextSize() {
   document.documentElement.classList.remove('text-l', 'text-xl');
   if (TEXT_SIZES[textSize]) document.documentElement.classList.add(TEXT_SIZES[textSize]);
   textSizeBtn.textContent = `TEXT SIZE: ${textSize.toUpperCase()}`;
-  textSizeBtn.classList.toggle('on', textSize !== 'normal');
 }
 textSizeBtn.addEventListener('click', () => {
   const order = Object.keys(TEXT_SIZES);
@@ -5011,6 +4996,22 @@ function applyUnlocks() {
 Unlocks.onChange(applyUnlocks);
 applyUnlocks();
 document.getElementById('dev-badge').hidden = !Unlocks.isDevUnlock();
+// UNLOCK EVERYTHING in the Android test app, where the web's DEV link is (the dev page's switch,
+// the same flag): the padlock lit while it's on; the game starts over with it
+if (window.BYTEFALL_APP) {
+  const unlockBtn = document.getElementById('dev-unlock-btn');
+  const devLink = document.querySelector('a.dev-link');
+  if (devLink) devLink.hidden = true;
+  unlockBtn.hidden = false;
+  const on = Unlocks.isDevUnlock();
+  unlockBtn.classList.toggle('on', on);
+  unlockBtn.setAttribute('aria-pressed', String(on));
+  document.getElementById('dev-unlock-state').textContent = on ? 'ON' : 'OFF';
+  unlockBtn.addEventListener('click', () => {
+    storage.set('bytefall-dev-unlockall', on ? 'off' : 'on');
+    location.reload();
+  });
+}
 document.body.classList.toggle('dev-unlock', Unlocks.isDevUnlock());
 
 initGame();

@@ -107,3 +107,5 @@ the Play Store, Steam and a trademark search before settling on it.
   short buff (overshield, speed, sword), four AI ghosts hunting everyone, teleporters as the wrap
   tunnels, a PAC-MAN JUGGERNAUT variant, a lights-out maze. (As a game for sale it would need its
   own maze theme: Pac-Man is Bandai Namco's.)
+
+- Before the Play Store build: take out the app's UNLOCK EVERYTHING padlock (SETTINGS footer; `js/script.js`, `index.html` `#dev-unlock-btn`, `tools/build-app.js` keeps its flag).

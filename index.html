@@ -31,8 +31,8 @@
   } catch (e) {}
 </script>
 <title>BYTEFALL // decryption terminal</title>
-<script src="js/fonts.js?v=329"></script>
-<link rel="stylesheet" href="css/style.css?v=329">
+<script src="js/fonts.js?v=330"></script>
+<link rel="stylesheet" href="css/style.css?v=330">
 </head>
 <body>
   <!-- Dev: TWINKLE BACKGROUND (grid-bg.js): the starlight behind the whole game, off by default -->
@@ -286,35 +286,19 @@
       </button>
       <div id="settings" class="settings" hidden>
         <div class="card-head"><button type="button" class="card-back" data-close="settings">&larr; BACK</button><span>// SETTINGS</span></div>
+        <!-- In sections: SOUND, PLAYLIST (a quick track change mid-game; the MUSIC PLAYER is for
+             listening), CONTROLS, DISPLAY, EXTRAS; notes only where an option isn't plain from
+             its name -->
+        <p class="settings-title settings-section settings-first">// SOUND</p>
         <div class="settings-row">
           <button type="button" id="sound-btn" class="toggle-btn">SOUND: ON</button>
           <button type="button" id="music-btn" class="toggle-btn">MUSIC: ON</button>
         </div>
-        <button type="button" id="sfx-theme-btn" class="toggle-btn">SOUND EFFECTS: TERMINAL</button>
+        <button type="button" id="sfx-theme-btn" class="toggle-btn on">SOUND EFFECTS: TERMINAL</button>
         <p class="settings-note" id="sfx-theme-note"></p>
         <button type="button" id="output-btn" class="toggle-btn on">SOUND OUTPUT: HEADPHONES</button>
-        <p class="settings-note" id="output-note"></p>
         <button type="button" id="music-layers-btn" class="toggle-btn on">GAME MUSIC: LAYERED</button>
         <p class="settings-note">LAYERED: the music builds with your stack, a layer at a time, more coming in as the danger climbs. FULL: every layer in, the whole game long (as in the MUSIC PLAYER).</p>
-        <button type="button" id="text-size-btn" class="toggle-btn">TEXT SIZE: NORMAL</button>
-        <p class="settings-note">LARGE and LARGER: bigger notes, descriptions, menu pages, messages and HUD labels.</p>
-        <button type="button" id="vibrate-btn" class="toggle-btn" hidden>VIBRATION: ON</button>
-        <button type="button" id="drop-controls-btn" class="toggle-btn on">DROP BY: BOTH</button>
-        <p class="settings-note">BOTH: tap a numbered button, or touch and hold the grid, slide to a column (the bit follows in the top row) and let go to drop. NUMBERS: the buttons only.</p>
-        <button type="button" id="buttons-pos-btn" class="toggle-btn on">DROP BUTTONS: BOTTOM</button>
-        <p class="settings-note">Where the drop buttons sit: under the grid (easier to reach on a phone) or above it.</p>
-        <button type="button" id="wanderers-btn" class="toggle-btn on">WANDERING BOTS: ON</button>
-        <p class="settings-note">The CPUs strolling along the bottom of the game card. Tap one to poke it.</p>
-        <button type="button" id="effects-btn" class="toggle-btn on">EFFECTS: FULL</button>
-        <p class="settings-note">REDUCED, for slower phones: the twinkling backgrounds hold still, the glows go, and exploded bits break into fewer, bigger pieces.</p>
-        <button type="button" id="saver-btn" class="toggle-btn on">SCREEN SAVER: ON</button>
-        <p class="settings-note">After 90 seconds untouched (not during a timed game), the screen goes black but for the wandering bots, to save battery. Tap to come back.</p>
-        <p class="settings-title settings-section">// THEME</p>
-        <div id="theme-list" class="theme-list" role="group" aria-label="Color theme"></div>
-        <p class="settings-note" id="theme-note"></p>
-        <p class="settings-title settings-section">// FONT</p>
-        <div id="font-list" class="theme-list font-list" role="group" aria-label="Font"></div>
-        <p class="settings-note" id="font-note"></p>
         <p class="settings-title settings-section">// PLAYLIST</p>
         <button type="button" id="open-player-btn" class="toggle-btn on">OPEN MUSIC PLAYER</button>
         <button type="button" id="viz-toggle" class="viz-toggle">
@@ -325,8 +309,26 @@
           <button type="button" id="play-mode-btn" class="toggle-btn">MODE: REPEAT</button>
           <p class="settings-note">REPEAT loops the track. SEQUENCE and SHUFFLE play each track 4 times, then fade into the next (in order, or at random).</p>
           <button type="button" id="bg-play-btn" class="toggle-btn">BACKGROUND PLAY: OFF</button>
-          <p class="settings-note">ON keeps the music going when you switch tabs or apps. OFF pauses it until you come back.</p>
+          <p class="settings-note">ON keeps the music going when you switch tabs or apps.</p>
         </div>
+        <p class="settings-title settings-section">// CONTROLS</p>
+        <button type="button" id="buttons-pos-btn" class="toggle-btn on">DROP BUTTONS: BOTTOM</button>
+        <button type="button" id="vibrate-btn" class="toggle-btn" hidden>VIBRATION: ON</button>
+        <p class="settings-title settings-section">// DISPLAY</p>
+        <p class="settings-title">THEME</p>
+        <div id="theme-list" class="theme-list" role="group" aria-label="Color theme"></div>
+        <p class="settings-note" id="theme-note"></p>
+        <p class="settings-title settings-sub">FONT</p>
+        <div id="font-list" class="theme-list font-list" role="group" aria-label="Font"></div>
+        <p class="settings-note" id="font-note"></p>
+        <button type="button" id="text-size-btn" class="toggle-btn on settings-gap">TEXT SIZE: NORMAL</button>
+        <button type="button" id="effects-btn" class="toggle-btn on">EFFECTS: FULL</button>
+        <p class="settings-note">REDUCED, for slower phones: the backgrounds hold still, the glows go, and exploded bits break into fewer, bigger pieces.</p>
+        <p class="settings-title settings-section">// EXTRAS</p>
+        <button type="button" id="wanderers-btn" class="toggle-btn on">WANDERING BOTS: ON</button>
+        <p class="settings-note">The CPUs strolling along the bottom of the game card. Tap one to poke it.</p>
+        <button type="button" id="saver-btn" class="toggle-btn on">SCREEN SAVER: ON</button>
+        <p class="settings-note">After 90 seconds untouched (not in a timed game), the screen goes black but for the wandering bots, to save battery. Tap to come back.</p>
       </div>
       <!-- MAIN MENU (script.js, showHome): between the start screen and the game. The modes, the
            picked mode's panel (its options, what it is, your best, PLAY) and the level bar; the
@@ -573,6 +575,11 @@
       </p>
     </div>
     <a class="dev-link" href="dev-tools/audio.html" title="Dev tools: audio compendium">&lt;/&gt; DEV</a>
+    <!-- (the Android test app: UNLOCK EVERYTHING here, where the DEV link is on the web; script.js) -->
+    <button type="button" class="dev-link dev-unlock-btn" id="dev-unlock-btn" hidden aria-pressed="false" title="UNLOCK EVERYTHING (testing): every level, theme, track and exploit open">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.6-1.7"/></svg>
+      <span id="dev-unlock-state">OFF</span>
+    </button>
   </footer>
 
   <!-- MUSIC PLAYER: the soundtrack on its own (every layer in), over the whole page -->
@@ -640,44 +647,44 @@
     </div>
   </div>
 
-  <script src="js/bot-svg.js?v=329"></script>
-  <script src="js/unlocks.js?v=329"></script>
-  <script src="js/progress.js?v=329"></script>
-  <script src="js/music/output.js?v=329"></script>
-  <script src="js/music/mixes.js?v=329"></script>
-  <script src="js/sfx.js?v=329"></script>
-  <script src="js/music/music-bytefall-theme.js?v=329"></script>
-  <script src="js/music/music-sleep-mode.js?v=329"></script>
-  <script src="js/music/music-brute-force.js?v=329"></script>
-  <script src="js/music/music-deep-web.js?v=329"></script>
-  <script src="js/music/music-zero-day.js?v=329"></script>
-  <script src="js/music/music-system-restore.js?v=329"></script>
-  <script src="js/music/music-night-drive.js?v=329"></script>
-  <script src="js/music/music-standby-mode.js?v=329"></script>
-  <script src="js/music/music-core-dump.js?v=329"></script>
-  <script src="js/music/music-handshake.js?v=329"></script>
-  <script src="js/music/music-stack-overflow.js?v=329"></script>
-  <script src="js/music/music.js?v=329"></script>
-  <script src="js/data/puzzles.js?v=329"></script>
-  <script src="js/data/daily-puzzles.js?v=329"></script>
-  <script src="js/cpu.js?v=329"></script>
-  <script src="js/fx.js?v=329"></script>
-  <script src="js/viz.js?v=329"></script>
-  <script src="js/pixel.js?v=329"></script>
-  <script src="js/minibot.js?v=329"></script>
-  <script src="js/seasons.js?v=329"></script>
-  <script src="js/bigart.js?v=329"></script>
-  <script src="js/visitors.js?v=329"></script>
-  <script src="js/data/bot-anims.js?v=329"></script>
-<script src="js/wanderers.js?v=329"></script>
-  <script src="js/tutorial.js?v=329"></script>
-  <script src="js/puzzle-sim.js?v=329"></script>
-  <script src="js/script.js?v=329"></script>
-  <script src="js/grid-bg.js?v=329"></script>
-  <script src="js/player.js?v=329"></script>
-  <script src="js/store.js?v=329"></script>
-  <script src="js/start.js?v=329"></script>
-  <script src="js/place.js?v=329"></script>
-  <script src="js/saver.js?v=329"></script>
+  <script src="js/bot-svg.js?v=330"></script>
+  <script src="js/unlocks.js?v=330"></script>
+  <script src="js/progress.js?v=330"></script>
+  <script src="js/music/output.js?v=330"></script>
+  <script src="js/music/mixes.js?v=330"></script>
+  <script src="js/sfx.js?v=330"></script>
+  <script src="js/music/music-bytefall-theme.js?v=330"></script>
+  <script src="js/music/music-sleep-mode.js?v=330"></script>
+  <script src="js/music/music-brute-force.js?v=330"></script>
+  <script src="js/music/music-deep-web.js?v=330"></script>
+  <script src="js/music/music-zero-day.js?v=330"></script>
+  <script src="js/music/music-system-restore.js?v=330"></script>
+  <script src="js/music/music-night-drive.js?v=330"></script>
+  <script src="js/music/music-standby-mode.js?v=330"></script>
+  <script src="js/music/music-core-dump.js?v=330"></script>
+  <script src="js/music/music-handshake.js?v=330"></script>
+  <script src="js/music/music-stack-overflow.js?v=330"></script>
+  <script src="js/music/music.js?v=330"></script>
+  <script src="js/data/puzzles.js?v=330"></script>
+  <script src="js/data/daily-puzzles.js?v=330"></script>
+  <script src="js/cpu.js?v=330"></script>
+  <script src="js/fx.js?v=330"></script>
+  <script src="js/viz.js?v=330"></script>
+  <script src="js/pixel.js?v=330"></script>
+  <script src="js/minibot.js?v=330"></script>
+  <script src="js/seasons.js?v=330"></script>
+  <script src="js/bigart.js?v=330"></script>
+  <script src="js/visitors.js?v=330"></script>
+  <script src="js/data/bot-anims.js?v=330"></script>
+<script src="js/wanderers.js?v=330"></script>
+  <script src="js/tutorial.js?v=330"></script>
+  <script src="js/puzzle-sim.js?v=330"></script>
+  <script src="js/script.js?v=330"></script>
+  <script src="js/grid-bg.js?v=330"></script>
+  <script src="js/player.js?v=330"></script>
+  <script src="js/store.js?v=330"></script>
+  <script src="js/start.js?v=330"></script>
+  <script src="js/place.js?v=330"></script>
+  <script src="js/saver.js?v=330"></script>
 </body>
 </html>

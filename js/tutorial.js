@@ -120,7 +120,7 @@ const Tutorial = (() => {
       paused: true, closeMenus: true, tap: '#pause-settings', pass: true, float: true,
     },
     {
-      text: 'SETTINGS has sound and music, SOUND OUTPUT (PHONE, HEADPHONES or SPEAKERS, to suit what you’re listening on), DROP BY (buttons, sliding on the grid, or both) and where the drop buttons sit, vibration on phones, the wandering bots, REDUCED EFFECTS for slower phones, the screen saver, color THEMES and FONTS (more unlock as you level up), and the PLAYLIST, with the MUSIC PLAYER for listening on its own.',
+      text: 'SETTINGS has SOUND (sound and music, the sound effects, SOUND OUTPUT for what you’re listening on), the PLAYLIST to change tracks (with the MUSIC PLAYER for listening on its own), CONTROLS (where the drop buttons sit, vibration on phones), DISPLAY (color THEMES and FONTS, more unlocking as you level up; text size; REDUCED EFFECTS for slower phones) and EXTRAS (the wandering bots, the screen saver).',
       paused: true, settings: true, float: 'middle', next: true,
     },
     {

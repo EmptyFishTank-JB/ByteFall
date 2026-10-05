@@ -5,7 +5,8 @@
 //   dev tools, the docs, the soundtrack's .wav archive or the screenshots)
 // - the settings' DEV link taken out
 // - the build, commit and date baked in (the web version asks GitHub for them on each load)
-// - any dev switches left in storage cleared on launch (UNLOCK EVERYTHING, VIRUSES: OFTEN, ...)
+// - any dev switches left in storage cleared on launch (VIRUSES: OFTEN, ...), but for UNLOCK
+//   EVERYTHING: the app's padlock in SETTINGS switches it, for testing
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
@@ -32,7 +33,8 @@ html = html.replace(devLink, '');
 const boot = `<script>
   // (the app build: tools/build-app.js)
   window.BYTEFALL_APP = ${JSON.stringify(app)};
-  try { Object.keys(localStorage).forEach(function (k) { if (k.indexOf('bytefall-dev-') === 0) localStorage.removeItem(k); }); } catch (e) {}
+  // (UNLOCK EVERYTHING stays: the app's own padlock switch, for testing; TODO before the Play Store: take it out)
+  try { Object.keys(localStorage).forEach(function (k) { if (k.indexOf('bytefall-dev-') === 0 && k !== 'bytefall-dev-unlockall') localStorage.removeItem(k); }); } catch (e) {}
 </script>
 `;
 const first = html.indexOf('<script>');

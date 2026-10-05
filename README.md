@@ -71,6 +71,9 @@ has the DEV link, as the site does. **bundled** has its own copy, as players wou
 what the Play Store builds will be (updated through the store). Either one installs over the other;
 only a change to the Android side itself (`tools/android/`, the Capacitor setup) needs a new APK.
 The game knows it's in the app from its user agent (`ByteFallApp`, `capacitor.config.json`).
+In the app, SETTINGS' footer has a padlock where the web has the DEV link: **UNLOCK EVERYTHING**
+(the dev page's switch, the same `bytefall-dev-unlockall` flag; the game reloads with it). It's
+for testing, kept through launches; take it out before the Play Store build.
 
 To build it locally instead: `npm ci && node tools/build-app.js && npx cap add
 android && node tools/setup-android.js`, then open `android/` in Android Studio.
@@ -347,9 +350,7 @@ Or touch the grid itself: touch (or click) and hold, and the bit appears in the 
 row over that column, following your thumb (or the cursor) from column to column;
 let go to drop it there (let go well off the grid to call it off). A quick tap on
 a column drops straight in. PIVOT's choice of side shows as arrows in the top row
-too, and the button over the aimed column lights up. SETTINGS → DROP BY: BOTH
-(default) or NUMBERS (the buttons only; the grid ignores touches). The tutorial
-takes both whatever the setting.
+too, and the button over the aimed column lights up. Both ways always work.
 RESTART (two taps) is on the pause screen; there's no corner button for it.
 
 The HUD (not VS): BEST over SCORE on the left, CURRENT large in the middle (on Easy, NEXT in a

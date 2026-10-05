@@ -1748,8 +1748,16 @@ body.vs-mode header #mode-info { display: none; }
   margin: 6px 2px 0;
   font-size: 10px;
   line-height: 1.4;
-  color: var(--fg-dim);
+  color: rgba(var(--fg-rgb), 0.78); /* (brighter than --fg-dim: easy to read) */
 }
+.settings-first { margin-top: 0; padding-top: 0; border-top: 0; }
+.settings-sub { margin-top: 12px; }
+.settings .settings-gap { margin-top: 4px; }
+.settings-title + .toggle-btn { margin-top: 0; }
+/* The app's UNLOCK EVERYTHING padlock, where the DEV link is on the web */
+.settings .dev-unlock-btn, .dev-unlock-btn { display: inline-flex; align-items: center; gap: 5px; width: auto; padding: 4px 2px; border: 0; background: none; color: var(--fg); font-family: inherit; font-size: 11px; letter-spacing: 1px; cursor: pointer; }
+.dev-link[hidden], .dev-unlock-btn[hidden] { display: none !important; }
+.dev-unlock-btn.on { opacity: 1; color: var(--accent); filter: drop-shadow(0 0 4px rgba(var(--accent-rgb), 0.6)); }
 
 /* Under the game card (inside SETTINGS on phones): the text, then the dev link */
 footer {
