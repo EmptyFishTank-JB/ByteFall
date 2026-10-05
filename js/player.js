@@ -234,28 +234,37 @@
   document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && isFull()) setFull(false); }); // (the browser's own way out)
   document.addEventListener('visibilitychange', () => { if (!document.hidden && isFull()) { wake = null; keepAwake(true); } });
 
-  // SOURCE: BYTEFALL, or OTHER APPS (the app: whatever the phone is playing, Pandora and all) /
-  // MICROPHONE (the web); switching to it pauses ByteFall's music, so the two don't mix
+  // SOURCE: BYTEFALL, then (the app) OTHER APPS (whatever the phone is playing, Pandora and all) and
+  // MICROPHONE, or (the web) MICROPHONE; a tap moves on to the next. Another source pauses
+  // ByteFall's music, so the two don't mix; while one listens, the corner shows what's coming in
   const sourceBtn = document.getElementById('mp-viz-source-btn');
-  let wantOther = false;
+  const hintEl = document.querySelector('#mp-viz-btn .mp-viz-hint');
+  let want = null; // (the source picked: kept for when the player opens again)
   function showSource(note) {
     const other = ExtSource.isOn();
     sourceBtn.textContent = note || (other ? ExtSource.label() : 'BYTEFALL');
     sourceBtn.classList.toggle('other', other);
+    if (!other) hintEl.textContent = 'TAP TO SWITCH';
   }
-  async function useOther(on) {
-    wantOther = on;
-    if (!on) { ExtSource.stop(); showSource(); return; }
+  async function useSource(kind) {
+    want = kind;
+    ExtSource.stop();
+    if (!kind) { showSource(); return; }
     if (Music.isEnabled()) { Music.toggle(); after(); }
     showSource('ASKING...');
-    const st = await ExtSource.start();
+    const st = await ExtSource.start(kind);
     if (st === 'on') { showSource(); return; }
-    wantOther = false;
+    want = null;
     showSource(st === 'denied' ? 'NO ACCESS' : 'UNAVAILABLE');
     setTimeout(() => showSource(), 2200);
   }
-  sourceBtn.addEventListener('click', () => useOther(!ExtSource.isOn()));
-  window.playerSource = { toBytefall: () => useOther(false), resume: () => { if (wantOther && !ExtSource.isOn()) useOther(true); }, rest: () => { if (ExtSource.isOn()) { ExtSource.stop(); showSource(); } } };
+  sourceBtn.addEventListener('click', () => {
+    const list = [null, ...ExtSource.kinds()];
+    const at = ExtSource.isOn() ? list.indexOf(ExtSource.kind()) : 0;
+    useSource(list[(at + 1) % list.length]);
+  });
+  setInterval(() => { if (!el.hidden && ExtSource.isOn()) hintEl.textContent = ExtSource.info(); }, 300);
+  window.playerSource = { toBytefall: () => useSource(null), resume: () => { if (want && !ExtSource.isOn()) useSource(want); }, rest: () => { if (ExtSource.isOn()) { const keep = want; ExtSource.stop(); showSource(); want = keep; } } };
 
   // The STYLES drawer: every style by name, the one showing lit; a tap goes straight to it
   const drawerBtn = document.getElementById('mp-viz-drawer-btn');
