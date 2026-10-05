@@ -870,6 +870,20 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     }
     return Math.min(1, m);
   }
+  let seaInView = 0; // (the points the last sea drew in view: on screen, short of where they fade away)
+  // DENSITY of the seas with points (GRID, MESH, HEX, DEPTHS): how many points are in view at once
+  // (on screen, out to where they fade away), the same on any screen; the defaults are what each
+  // drew before it could be set (on a phone). Saved per style. From it, the sea per point: the
+  // view's footprint on the sea (its width at each distance, a little past the edges) over the count
+  const SEA_DENSITY = { ocean: 1250, oceantri: 740, oceanhex: 520, oceandepth: 1100 };
+  const DENSITY_KEY = `${MODE_KEY}-sea-density`;
+  const seaDensity = { ...SEA_DENSITY };
+  try { Object.assign(seaDensity, JSON.parse(localStorage.getItem(DENSITY_KEY) || '{}')); } catch (e) {}
+  const seaPerPoint = (w, h, m) => {
+    const V = seaView(w, h);
+    const area = (((w / 2 + 30) / V.fx) * (V.zFar * V.zFar - V.zMin * V.zMin)) * 0.95;
+    return area / Math.max(50, seaDensity[m] || SEA_DENSITY[m]);
+  };
   // (the swells ease off right in front of the camera, so one passing under it doesn't lift the
   // nearest sea up over the view)
   const seaNear = (zv) => { const u = Math.min(1, Math.max(0, (zv - 0.5) / 1.4)); return u * u * (3 - 2 * u); };
@@ -984,10 +998,12 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     }
     // (the dots, grouped by their color, so each color is set once)
     const dots = new Map();
+    let inView = 0;
     for (const p of pts) {
       if (!p || off(p)) continue;
       const a = fadeAt(p.zv);
       if (a <= 0.005) continue;
+      inView++;
       const dot = 1 + Math.min(1, Math.max(0, 1 - (p.zv - V.zNear) / (V.zFar - V.zNear))) * 1.6;
       const col = paint(rainbow ? Math.round(p.f * 24) / 24 : 0, Math.min(1, a * (0.5 + p.lvl * 0.7)).toFixed(2), p.lvl > 0.75 && p.zv < V.zFar * 0.5);
       let list = dots.get(col);
@@ -998,6 +1014,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       g.fillStyle = col;
       for (let n = 0; n < list.length; n += 3) g.fillRect(list[n], list[n + 1], list[n + 2], list[n + 2]);
     }
+    seaInView = inView;
   }
 
   function drawOcean(an, w, h, now, tri) {
@@ -1005,9 +1022,8 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     seaStep(an, now, w, h);
     const V = seaView(w, h);
     // (even cells, so the grid looks the same whichever way the view turns: a mesh's rows closer,
-    // for even triangles; bigger on a wide screen, which sees much more of the sea, as the old
-    // grid's columns were, so a monitor draws about what a phone does)
-    const cell = (tri ? 0.42 : 0.3) * Math.max(1, Math.sqrt(w / h / 0.45));
+    // for even triangles; sized for its DENSITY, so a monitor draws as many as a phone)
+    const cell = Math.sqrt(seaPerPoint(w, h, tri ? 'oceantri' : 'ocean') / (tri ? 0.866 : 1));
     const rowStep = tri ? cell * 0.866 : cell;
     const SQUARE = [[1, 0], [0, 1]];
     drawSeaLattice(w, h, now, cell, rowStep,
@@ -1018,12 +1034,11 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   // OCEAN DEPTHS: the travelling sea (the same view, turns, swell and music's swells as OCEAN GRID)
   // as its points alone, each with a thin line hanging straight down from it into the depths,
   // fading to black the deeper it goes; the points on OCEAN HEX's honeycomb (its corners), which
-  // leaves the fewest open lanes between them, half again as close as the old staggered rows
-  // (one point to every ~0.1 of sea; bigger on a wide screen, as OCEAN GRID's cells)
+  // leaves the fewest open lanes between them, sized for its DENSITY
   function drawOceanDepths(an, w, h, now) {
     g.clearRect(0, 0, w, h);
     seaStep(an, now, w, h);
-    const rowStep = 0.412 * Math.max(1, Math.sqrt(w / h / 0.45));
+    const rowStep = Math.sqrt(seaPerPoint(w, h, 'oceandepth') / 0.6);
     const dx = rowStep * 0.6; // (as OCEAN HEX's: across, and each row's zigzag)
     const zig = rowStep / 6;
     drawSeaLattice(w, h, now, dx, rowStep,
@@ -1037,13 +1052,13 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   function drawOceanHex(an, w, h, now) {
     g.clearRect(0, 0, w, h);
     seaStep(an, now, w, h);
-    const V = seaView(w, h);
-    const dx = V.dz * 0.6; // (the honeycomb's step across)
-    const zig = V.dz / 6; // (each row's zigzag: a regular-looking hexagon)
+    const rowStep = Math.sqrt(seaPerPoint(w, h, 'oceanhex') / 0.6); // (for its DENSITY)
+    const dx = rowStep * 0.6; // (the honeycomb's step across)
+    const zig = rowStep / 6; // (each row's zigzag: a regular-looking hexagon)
     const ALONG = [[1, 0]];
     const BOTH = [[1, 0], [0, 1]];
-    drawSeaLattice(w, h, now, dx, V.dz,
-      (k, j) => [k * dx, j * V.dz + ((k + j) & 1 ? -zig : zig)],
+    drawSeaLattice(w, h, now, dx, rowStep,
+      (k, j) => [k * dx, j * rowStep + ((k + j) & 1 ? -zig : zig)],
       (k, j) => ((k + j) & 1 ? ALONG : BOTH));
   }
 
@@ -1358,6 +1373,23 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   return {
     get mode() { return mode; },
     get name() { return VIZ_NAMES[mode]; },
+    // (DENSITY, for the seas with points: { value: points in view wanted, min, max, inView: how many
+    // the last frame drew }, or null for any other style; setDensity(n) for the style showing)
+    get density() {
+      if (!(mode in SEA_DENSITY)) return null;
+      return { value: seaDensity[mode], def: SEA_DENSITY[mode], min: 100, max: 6000, inView: seaInView };
+    },
+    setDensity(n) {
+      if (!(mode in SEA_DENSITY) || !Number.isFinite(n)) return;
+      seaDensity[mode] = Math.round(Math.max(100, Math.min(6000, n)));
+      try { localStorage.setItem(DENSITY_KEY, JSON.stringify(seaDensity)); } catch (e) {}
+    },
+    // (every ocean's DENSITY back to its default)
+    resetDensities() {
+      Object.assign(seaDensity, SEA_DENSITY);
+      try { localStorage.removeItem(DENSITY_KEY); } catch (e) {}
+    },
+    get densitiesChanged() { return Object.keys(SEA_DENSITY).some((k) => seaDensity[k] !== SEA_DENSITY[k]); },
     // (every style it has, with the names shown, for a picker)
     styles: () => modes.map((m) => ({ id: m, name: VIZ_NAMES[m] })),
     // (straight to one style)

@@ -129,6 +129,7 @@
   document.getElementById('mp-close').addEventListener('click', close);
   document.addEventListener('keydown', (e) => {
     if (el.hidden) return;
+    if (e.target.closest && e.target.closest('input')) { e.stopImmediatePropagation(); return; } // (typing a DENSITY: the keys are the box's)
     if (e.key === 'Escape' && isFull()) setFull(false);
     else if (e.key === 'Escape') close();
     else if (e.key === ' ') { e.preventDefault(); playBtn.click(); }
@@ -270,8 +271,27 @@
   // The STYLES drawer: every style by name, the one showing lit; a tap goes straight to it
   const drawerBtn = document.getElementById('mp-viz-drawer-btn');
   const drawer = document.getElementById('mp-viz-drawer');
-  drawer.innerHTML = viz.styles().map((st) => `<button type="button" data-style="${st.id}">${st.name}</button>`).join('');
-  function markStyle() { drawer.querySelectorAll('button').forEach((b) => b.classList.toggle('active', b.dataset.style === viz.mode)); }
+  drawer.innerHTML = viz.styles().map((st) => `<button type="button" data-style="${st.id}">${st.name}</button>`).join('')
+    + '<div class="mp-density" hidden><label for="mp-density-in">DENSITY</label><input id="mp-density-in" type="number" inputmode="numeric" min="100" max="6000" step="50"><span>POINTS IN VIEW</span><span class="mp-density-now"></span><span class="mp-density-btns"><button type="button" class="mp-density-reset">DEFAULT</button><button type="button" class="mp-density-all">ALL DEFAULTS</button></span></div>';
+  // DENSITY: for the oceans with points, how many points are in view at once (saved per style); the
+  // count drawn just now beside it; DEFAULT puts this style's back, ALL DEFAULTS every ocean's
+  const densityEl = drawer.querySelector('.mp-density');
+  const densityIn = densityEl.querySelector('input');
+  function showDensity() {
+    const d = viz.density;
+    densityEl.hidden = !d;
+    if (!d) return;
+    if (document.activeElement !== densityIn) densityIn.value = d.value;
+    densityEl.querySelector('.mp-density-now').textContent = d.inView ? `NOW ${d.inView.toLocaleString('en-US')}` : '';
+    densityEl.querySelector('.mp-density-reset').disabled = d.value === d.def;
+    densityEl.querySelector('.mp-density-all').disabled = !viz.densitiesChanged;
+  }
+  densityIn.addEventListener('change', () => { viz.setDensity(Number(densityIn.value)); showDensity(); });
+  densityIn.addEventListener('keydown', (e) => { if (e.key === 'Enter') densityIn.blur(); });
+  densityEl.querySelector('.mp-density-reset').addEventListener('click', () => { const d = viz.density; if (d) viz.setDensity(d.def); showDensity(); });
+  densityEl.querySelector('.mp-density-all').addEventListener('click', () => { viz.resetDensities(); showDensity(); }); // (every ocean's)
+  setInterval(() => { if (!drawer.hidden) showDensity(); }, 400);
+  function markStyle() { drawer.querySelectorAll('[data-style]').forEach((b) => b.classList.toggle('active', b.dataset.style === viz.mode)); showDensity(); }
   markStyle();
   const setDrawer = (open) => { drawer.hidden = !open; drawerBtn.setAttribute('aria-expanded', String(open)); };
   drawerBtn.addEventListener('click', () => setDrawer(drawer.hidden));

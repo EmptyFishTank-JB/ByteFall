@@ -34,6 +34,9 @@ game's MUSIC PLAYER (`js/viz.js`, shared with the game), edge to edge, turning w
   ⋮ → Allow restricted settings (the card links there). SONG hides or shows the card.
 - **COLOR**: ALBUM ART (the default: the two strongest colors of the song's art, brightened),
   MATRIX, CIPHER, AMBER, NEON, MONO, SPECTRUM (a cycling rainbow).
+- **DENSITY** (in STYLES, while an ocean with points shows: GRID, MESH, HEX, DEPTHS): how many
+  points are in view at once, the same on any screen, saved per style, the count drawn just now beside
+  it; DEFAULT puts this style's back, ALL DEFAULTS every ocean's.
 - **Taps**: the left or right quarter changes the style; the middle shows or hides the controls,
   which fade after 5 seconds untouched. STYLES lists every style.
 - **MORE**: PICTURE IN PICTURE (on: leaving the app for another shrinks it to a little window over

@@ -221,7 +221,24 @@
       b.addEventListener('click', () => { viz.set(s.id); showStyle(); fillDrawer(); });
       list.append(b);
     }
+    showDensity();
   }
+  // DENSITY: for the oceans with points, how many points are in view at once (saved per style); the
+  // count drawn just now beside it; DEFAULT puts this style's back, ALL DEFAULTS every ocean's
+  function showDensity() {
+    const d = viz.density;
+    $('density').hidden = !d;
+    if (!d) return;
+    if (document.activeElement !== $('density-in')) $('density-in').value = d.value;
+    $('density-now').textContent = d.inView ? `NOW ${d.inView.toLocaleString('en-US')}` : '';
+    $('density-reset').disabled = d.value === d.def;
+    $('density-all').disabled = !viz.densitiesChanged;
+  }
+  $('density-in').addEventListener('change', () => { viz.setDensity(Number($('density-in').value)); showDensity(); });
+  $('density-in').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('density-in').blur(); });
+  $('density-reset').addEventListener('click', () => { const d = viz.density; if (d) viz.setDensity(d.def); showDensity(); });
+  $('density-all').addEventListener('click', () => { viz.resetDensities(); showDensity(); }); // (every ocean's)
+  setInterval(() => { if (!$('drawer').hidden) showDensity(); }, 400);
   $('btn-styles').addEventListener('click', () => { const open = $('drawer').hidden; closePanels(); $('drawer').hidden = !open; fillDrawer(); });
   $('btn-more').addEventListener('click', () => { const open = $('more').hidden; closePanels(); $('more').hidden = !open; });
   $('more-close').addEventListener('click', closePanels);
