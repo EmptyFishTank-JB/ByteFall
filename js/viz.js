@@ -106,8 +106,9 @@ const vizSettings = (bars) => {
       { ...pct('drift', 'DRIFT') },
     ],
     cloud: [
-      { id: 'count', name: 'PARTICLES', unit: '', min: 50, max: 3000, step: 10, def: 420 },
-      { id: 'flocks', name: 'FLOCKS', unit: '', min: 1, max: 8, step: 1, def: 3 },
+      { id: 'count', name: 'FISH', unit: '', min: 50, max: 3000, step: 10, def: 700 },
+      { id: 'flocks', name: 'SCHOOLS', unit: '', min: 1, max: 6, step: 1, def: 2 },
+      { ...pct('speed', 'SPEED') },
       { id: 'spin', name: 'SPIN', unit: 'RPM', min: 0, max: 30, step: 0.1, def: 1.4 },
     ],
     stars: [
@@ -1413,119 +1414,218 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     }
   }
 
-  // PARTICLE CLOUD: a swarm loose in open, endless 3D space, the view following it as it drifts
-  // and circling it slowly like the ORB turns; nothing holds it in, so it has no edges to show.
-  // With no music it's a murmuration: a few flocks, each following its own wandering leader,
-  // wheeling, merging and splitting like starlings or gnats. The music stirs it: the bass puffs
-  // each flock outward (it gathers back), every particle's own band of the spectrum kicks it about
-  // as it plays, and the louder it gets the faster they fly; the loudest glow in the accent.
-  // Nearer particles bigger and brighter, the far ones fading into the dark
+  // NARROW BANDS (STAR FIELD's stars, PARTICLE CLOUD's fish): one picked at random anywhere from
+  // 20Hz to 20kHz (evenly by pitch; a sixth of an octave to most of one wide), read straight off the
+  // FFT's bins; narrowLevel: 0 to 1, how far it has risen above its own floor and toward its own
+  // peak of late (so one in a band that's always loud still moves, and each moves its own way)
+  const narrowBand = () => {
+    const pos = Math.random();
+    const lo = 20 * Math.pow(1000, pos);
+    return { lo, hi: lo * Math.pow(2, 0.17 + Math.random() * 0.75), pos, b0: 0, b1: 0, binHz: 0, fl: 1, pk: 0, lvl: 0 };
+  };
+  function narrowLevel(o, an, binHz, nyq, dt) {
+    if (!an || !binHz) return 0;
+    if (o.binHz !== binHz) { o.binHz = binHz; o.b0 = Math.max(1, Math.round(o.lo / binHz)); o.b1 = Math.max(o.b0, Math.min(freq.length - 1, Math.round(Math.min(o.hi, nyq) / binHz))); }
+    let v = 0;
+    for (let i = o.b0; i <= o.b1; i++) if (freq[i] > v) v = freq[i];
+    v /= 255;
+    o.pk = Math.max(v, o.pk - dt * 0.12);
+    o.fl = v < o.fl ? v : o.fl + (v - o.fl) * Math.min(1, dt * 0.25);
+    const room = Math.max(0.12, o.pk - o.fl);
+    return Math.pow(Math.max(0, Math.min(1, (v - o.fl) / room)), 1.4) * Math.min(1, v * 2.5); // (silence stays dark)
+  }
+
+  // PARTICLE CLOUD: a school of fish, one great fluid swarm (or a few), loose in open 3D space, the
+  // view following it and circling it slowly. Each fish swims as a school does: matching the heading
+  // of the fish around it, keeping close to them but not crowded, and following its school's lead;
+  // drawn as a short streak along the way it swims. The music: how loud it is sets the pace (louder,
+  // faster); each beat (a kick in the bass) the lead swerves, and the turn ripples back through the
+  // school neighbor by neighbor as a real school's does, a flash of light running out through it
+  // from the lead with the turn; and each fish glints as its own narrow band of the spectrum rises
+  // (NARROW BANDS), like scales catching the light. With no music it cruises, turning now and then
   const SWARM_BANDS = 12;
-  let swarm = null;
+  let swarm = [];
   let swarmLast = 0;
   const swarmLv = new Float32Array(SWARM_BANDS);
-  const swarmLeader = () => ({ ph: [0, 1, 2].map(() => Math.random() * 6.28), fr: [0, 1, 2].map(() => 0.18 + Math.random() * 0.22) });
-  const swarmLead = Array.from({ length: 3 }, swarmLeader);
-  const swarmHome = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0 }; // (where the whole swarm is headed, drifting on through space)
-  const swarmCam = { x: 0, y: 0, z: 0 }; // (the view's center, following the swarm)
+  const swarmHome = { x: 0, y: 0, z: 0, vx: 0.1, vy: 0, vz: 0 }; // (where the schools roam about, drifting on through space)
+  const swarmCam = { x: 0, y: 0, z: 0 }; // (the view's center, following the schools)
   let swarmSpin = 0;
+  let swarmBass = 0.2; // (the bass's running average, for hearing a beat)
+  let swarmBeatAt = 0;
+  const swarmLeads = [];
+  const newLead = (k) => {
+    const a = Math.random() * Math.PI * 2;
+    return { x: swarmHome.x + Math.cos(a) * 0.6, y: swarmHome.y, z: swarmHome.z + Math.sin(a) * 0.6, vx: Math.cos(a + 1.6), vy: (Math.random() - 0.5) * 0.3, vz: Math.sin(a + 1.6), beatAt: -1e9, bx: 0, by: 0, bz: 0, next: 2 + Math.random() * 3, k };
+  };
+  const newFish = (L) => ({
+    x: L.x + (Math.random() - 0.5) * 0.8, y: L.y + (Math.random() - 0.5) * 0.5, z: L.z + (Math.random() - 0.5) * 0.8,
+    vx: L.vx * 0.6, vy: 0, vz: L.vz * 0.6, school: L.k, ...narrowBand(), rate: 2 + Math.random() * 10,
+  });
+  // (a vector turned by angle a about a unit axis)
+  const turnVec = (v, ax, a) => {
+    const c = Math.cos(a); const sn = Math.sin(a);
+    const d = v[0] * ax[0] + v[1] * ax[1] + v[2] * ax[2];
+    const cr = [ax[1] * v[2] - ax[2] * v[1], ax[2] * v[0] - ax[0] * v[2], ax[0] * v[1] - ax[1] * v[0]];
+    return [0, 1, 2].map((i) => v[i] * c + cr[i] * sn + ax[i] * d * (1 - c));
+  };
+  // (a swerve: the lead's heading turned 50° to 110°, about an axis across it, mostly level)
+  function swerve(L, now) {
+    const sp = Math.hypot(L.vx, L.vy, L.vz) || 1;
+    const v = [L.vx / sp, L.vy / sp, L.vz / sp];
+    let ax = [(Math.random() - 0.5) * 0.5, 1, (Math.random() - 0.5) * 0.5];
+    const d = ax[0] * v[0] + ax[1] * v[1] + ax[2] * v[2];
+    ax = [ax[0] - v[0] * d, ax[1] - v[1] * d, ax[2] - v[2] * d];
+    const al = Math.hypot(...ax) || 1;
+    ax = ax.map((x) => x / al);
+    const nv = turnVec(v, ax, (Math.random() < 0.5 ? -1 : 1) * (0.9 + Math.random() * 1.0));
+    L.vx = nv[0] * sp; L.vy = nv[1] * sp * 0.5; L.vz = nv[2] * sp;
+    L.beatAt = now; L.bx = L.x; L.by = L.y; L.bz = L.z;
+  }
   function drawCloud(an, w, h, now) {
-    // (PARTICLES and FLOCKS: more join near the swarm's middle, extras leave; each in a flock in turn)
-    const SWARM_N = opt('count');
-    const SWARM_FLOCKS = opt('flocks');
-    if (!swarm) swarm = [];
-    while (swarm.length < SWARM_N) {
-      swarm.push({ x: swarmCam.x + (Math.random() - 0.5) * 1.4, y: swarmCam.y + (Math.random() - 0.5) * 1.4, z: swarmCam.z + (Math.random() - 0.5) * 1.4, vx: 0, vy: 0, vz: 0, flock: 0, band: Math.floor(Math.random() * SWARM_BANDS), jit: Math.random() * 6.28 });
-    }
-    if (swarm.length > SWARM_N) swarm.length = SWARM_N;
-    while (swarmLead.length < SWARM_FLOCKS) swarmLead.push(swarmLeader());
-    for (let i = 0; i < swarm.length; i++) swarm[i].flock = i % SWARM_FLOCKS;
-    fade(w, h, 0.38);
-    const lv = bands(an, SWARM_BANDS);
+    fade(w, h, 0.45);
+    const count = opt('count');
+    const nSchools = opt('flocks');
+    while (swarmLeads.length < nSchools) swarmLeads.push(newLead(swarmLeads.length));
+    while (swarm.length < count) swarm.push(newFish(swarmLeads[swarm.length % nSchools]));
+    if (swarm.length > count) swarm.length = count;
+    for (let i = 0; i < swarm.length; i++) swarm[i].school = i % nSchools;
+    const lv = bands(an, SWARM_BANDS); // (and the FFT's bins, in freq, for each fish's own band)
+    const binHz = an ? an.context.sampleRate / an.fftSize : 0;
+    const nyq = binHz * (freq ? freq.length : 0);
     let energy = 0;
     for (let b = 0; b < SWARM_BANDS; b++) { swarmLv[b] = lv ? Math.max(lv[b], swarmLv[b] * dec(0.85)) : swarmLv[b] * dec(0.9); energy += swarmLv[b] / SWARM_BANDS; }
-    const bass = (swarmLv[0] + swarmLv[1] + swarmLv[2]) / 3;
     const dt = swarmLast ? Math.min(0.05, (now - swarmLast) / 1000) : 0.016;
     swarmLast = now;
     const t = now / 1000;
-    // (the swarm's heading wanders; it travels on through space)
-    swarmHome.vx += (Math.random() - 0.5) * dt * 0.3; swarmHome.vy += (Math.random() - 0.5) * dt * 0.2; swarmHome.vz += (Math.random() - 0.5) * dt * 0.3;
+    // (the pace: louder, faster)
+    const cruise = (0.45 + energy * 1.5) * (opt('speed') / 100);
+    // (a beat: the bass jumping well over its running average)
+    const bassNow = lv ? (lv[0] + lv[1] + lv[2]) / 3 : 0;
+    const beat = lv && bassNow > swarmBass * 1.25 + 0.06 && bassNow > 0.3 && now - swarmBeatAt > 260;
+    swarmBass += (bassNow - swarmBass) * Math.min(1, dt * 1.5);
+    if (beat) swarmBeatAt = now;
+    // (where they roam: drifting on through space)
+    swarmHome.vx += (Math.random() - 0.5) * dt * 0.2; swarmHome.vy += (Math.random() - 0.5) * dt * 0.1; swarmHome.vz += (Math.random() - 0.5) * dt * 0.2;
     const hv = Math.hypot(swarmHome.vx, swarmHome.vy, swarmHome.vz);
-    if (hv > 0.25) { swarmHome.vx *= 0.25 / hv; swarmHome.vy *= 0.25 / hv; swarmHome.vz *= 0.25 / hv; }
+    if (hv > 0.2) { swarmHome.vx *= 0.2 / hv; swarmHome.vy *= 0.2 / hv; swarmHome.vz *= 0.2 / hv; }
     swarmHome.x += swarmHome.vx * dt; swarmHome.y += swarmHome.vy * dt; swarmHome.z += swarmHome.vz * dt;
-    // (the leaders, wandering about it; the flocks' middles)
-    const leads = swarmLead.slice(0, SWARM_FLOCKS).map((L) => {
-      const p = L.fr.map((f, a) => [swarmHome.x, swarmHome.y, swarmHome.z][a] + 0.7 * Math.sin(t * f + L.ph[a]));
-      const v = L.fr.map((f, a) => [swarmHome.vx, swarmHome.vy, swarmHome.vz][a] + 0.7 * f * Math.cos(t * f + L.ph[a]));
-      return { p, v, c: [0, 0, 0], n: 0 };
+    // (the leads: swimming at the school's pace, curving back toward home, swerving on the beat
+    // (or now and then, with no music); each beat to one lead or another, the bigger ones to all)
+    const leads = swarmLeads.slice(0, nSchools);
+    leads.forEach((L, k) => {
+      if (beat && (bassNow > 0.6 || k === Math.floor(Math.random() * nSchools))) swerve(L, now);
+      if (!lv) { L.next -= dt; if (L.next <= 0) { swerve(L, now); L.beatAt = -1e9; L.next = 3 + Math.random() * 4; } }
+      // (kept near home, so the schools swim around each other, meeting, merging and parting)
+      L.vx += (swarmHome.x - L.x) * dt * 1.6 + (Math.random() - 0.5) * dt * 0.6;
+      L.vy += (swarmHome.y - L.y) * dt * 2.2 - L.vy * dt * 0.8;
+      L.vz += (swarmHome.z - L.z) * dt * 1.6 + (Math.random() - 0.5) * dt * 0.6;
+      const sp = Math.hypot(L.vx, L.vy, L.vz) || 1;
+      const want = cruise * 1.1;
+      L.vx *= want / sp; L.vy *= want / sp; L.vz *= want / sp;
+      L.x += L.vx * dt; L.y += L.vy * dt; L.z += L.vz * dt;
     });
-    for (const q of swarm) { const c = leads[q.flock]; c.c[0] += q.x; c.c[1] += q.y; c.c[2] += q.z; c.n++; }
-    for (const c of leads) if (c.n) { c.c[0] /= c.n; c.c[1] /= c.n; c.c[2] /= c.n; }
-    const maxV = 0.55 + energy * 1.3;
+    // (the neighbors: a grid of cells a neighbor's reach across, each cell's fish summed, then each
+    // cell's neighborhood, the 27 cells around it)
+    const RCH = 0.22;
+    const cells = new Map();
+    const keyOf = (ix, iy, iz) => (ix * 92837111) ^ (iy * 689287499) ^ (iz * 283923481);
     for (const q of swarm) {
-      const L = leads[q.flock];
-      const lvl = swarmLv[q.band];
-      // (toward the leader and along with it; a little wander of its own)
-      let ax = (L.p[0] - q.x) * 1.1 + (L.v[0] - q.vx) * 0.9 + Math.sin(t * 1.7 + q.jit) * 0.35;
-      let ay = (L.p[1] - q.y) * 1.1 + (L.v[1] - q.vy) * 0.9 + Math.sin(t * 1.3 + q.jit * 1.7) * 0.35;
-      let az = (L.p[2] - q.z) * 1.1 + (L.v[2] - q.vz) * 0.9 + Math.cos(t * 1.5 + q.jit * 2.3) * 0.35;
-      // (not all on one spot: pushed off the flock's middle when crowded, and puffed out by the bass)
-      const dx = q.x - L.c[0];
-      const dy = q.y - L.c[1];
-      const dz = q.z - L.c[2];
-      const d = Math.hypot(dx, dy, dz) + 1e-4;
-      const push = (d < 0.22 ? (0.22 - d) * 9 : 0) + bass * bass * 3.2;
-      ax += (dx / d) * push; ay += (dy / d) * push; az += (dz / d) * push;
-      if (lvl > 0.2) { // (its own band playing: a kick about)
-        const k = (lvl - 0.2) * 4;
-        ax += (Math.random() - 0.5) * k; ay += (Math.random() - 0.5) * k; az += (Math.random() - 0.5) * k;
-      }
-      q.vx += ax * dt; q.vy += ay * dt; q.vz += az * dt;
-      const v = Math.hypot(q.vx, q.vy, q.vz);
-      if (v > maxV) { q.vx *= maxV / v; q.vy *= maxV / v; q.vz *= maxV / v; }
-      q.x += q.vx * dt; q.y += q.vy * dt; q.z += q.vz * dt;
+      q.ix = Math.floor(q.x / RCH); q.iy = Math.floor(q.y / RCH); q.iz = Math.floor(q.z / RCH);
+      const key = keyOf(q.ix, q.iy, q.iz);
+      let c = cells.get(key);
+      if (!c) { c = { n: 0, x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, ix: q.ix, iy: q.iy, iz: q.iz, near: null }; cells.set(key, c); }
+      c.n++; c.x += q.x; c.y += q.y; c.z += q.z; c.vx += q.vx; c.vy += q.vy; c.vz += q.vz;
     }
-    // (the view: centered on the swarm, eased so it glides after it)
-    let mx = 0;
-    let my = 0;
-    let mz = 0;
-    for (const q of swarm) { mx += q.x; my += q.y; mz += q.z; }
-    mx /= swarm.length; my /= swarm.length; mz /= swarm.length;
-    const k = ease(0.02);
-    swarmCam.x += (mx - swarmCam.x) * k; swarmCam.y += (my - swarmCam.y) * k; swarmCam.z += (mz - swarmCam.z) * k;
-    // (circling it, as the ORB turns: clockwise from above, tipped toward you, at its SPIN)
-    swarmSpin -= ((opt('spin') * Math.PI * 2) / 60) * (K / 120);
-    const spin = swarmSpin;
-    const cs = Math.cos(spin);
-    const sn = Math.sin(spin);
-    const tilt = 0.4;
-    const ct = Math.cos(tilt);
-    const st = Math.sin(tilt);
-    const cx = w / 2;
-    const cy = h / 2;
-    const D = 3.4; // (the view's distance from the swarm's middle)
-    const R = Math.min(w, h) * 0.26;
-    const dot = Math.max(1.4, Math.min(w, h) / 200);
+    for (const c of cells.values()) {
+      const s0 = { n: 0, x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0 };
+      for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) for (let d = -1; d <= 1; d++) {
+        const o = cells.get(keyOf(c.ix + a, c.iy + b, c.iz + d));
+        if (!o) continue;
+        s0.n += o.n; s0.x += o.x; s0.y += o.y; s0.z += o.z; s0.vx += o.vx; s0.vy += o.vy; s0.vz += o.vz;
+      }
+      c.near = s0;
+    }
     for (const q of swarm) {
-      const rx = q.x - swarmCam.x;
-      const ry = q.y - swarmCam.y;
-      const rz = q.z - swarmCam.z;
+      const L = leads[q.school];
+      const nb = cells.get(keyOf(q.ix, q.iy, q.iz)).near;
+      const n = nb.n;
+      // (along with the fish around it, toward them but not crowded, and after its lead)
+      const mx = nb.x / n - q.x; const my = nb.y / n - q.y; const mz = nb.z / n - q.z;
+      const crowd = 1.4 - 4 * Math.min(1, n / 22); // (toward the middle of them, or away when crowded)
+      let ax = (nb.vx / n - q.vx) * 2.6 + mx * crowd * 3 + (L.x - q.x) * 0.55 + (L.vx - q.vx) * 0.35;
+      let ay = (nb.vy / n - q.vy) * 2.6 + my * crowd * 3 + (L.y - q.y) * 0.55 + (L.vy - q.vy) * 0.35;
+      let az = (nb.vz / n - q.vz) * 2.6 + mz * crowd * 3 + (L.z - q.z) * 0.55 + (L.vz - q.vz) * 0.35;
+      ax += Math.sin(t * 1.3 + q.pos * 40) * 0.12; ay += Math.cos(t * 1.1 + q.pos * 60) * 0.08; az += Math.sin(t * 1.7 + q.pos * 50) * 0.12;
+      q.vx += ax * dt; q.vy += ay * dt; q.vz += az * dt;
+      // (fish swim at about the pace: eased toward it)
+      const sp = Math.hypot(q.vx, q.vy, q.vz) || 1;
+      const k = 1 + (cruise / sp - 1) * Math.min(1, dt * 2.5);
+      q.vx *= k; q.vy *= k; q.vz *= k;
+      q.x += q.vx * dt; q.y += q.vy * dt; q.z += q.vz * dt;
+      q.lvl += (narrowLevel(q, an, binHz, nyq, dt) - q.lvl) * Math.min(1, q.rate * dt);
+    }
+    // (the view: centered on the schools, eased so it glides after them; circling them at its SPIN,
+    // clockwise from above, tipped toward you)
+    let cxw = 0; let cyw = 0; let czw = 0;
+    for (const q of swarm) { cxw += q.x; cyw += q.y; czw += q.z; }
+    cxw /= swarm.length; cyw /= swarm.length; czw /= swarm.length;
+    const ke = ease(0.03);
+    swarmCam.x += (cxw - swarmCam.x) * ke; swarmCam.y += (cyw - swarmCam.y) * ke; swarmCam.z += (czw - swarmCam.z) * ke;
+    swarmSpin -= ((opt('spin') * Math.PI * 2) / 60) * (K / 120);
+    const cs = Math.cos(swarmSpin); const sn = Math.sin(swarmSpin);
+    const ct = Math.cos(0.4); const st = Math.sin(0.4);
+    const cx = w / 2; const cy = h / 2;
+    const D = 3.6;
+    const R = Math.min(w, h) * 0.24;
+    const proj = (x, y, z) => {
+      const rx = x - swarmCam.x; const ry = y - swarmCam.y; const rz = z - swarmCam.z;
       const x2 = rx * cs + rz * sn;
       let z2 = -rx * sn + rz * cs;
       const y2 = ry * ct - z2 * st;
       z2 = ry * st + z2 * ct;
-      if (z2 > D - 0.4) continue; // (behind the view)
-      const persp = D / (D - z2);
-      const far = Math.hypot(rx, ry, rz); // (far from the swarm's middle: fading into the dark)
-      const fadeFar = Math.max(0, Math.min(1, 1.6 - far * 0.45));
-      const depth = Math.max(0, Math.min(1, (z2 + 1.3) / 2.6));
-      const lvl = swarmLv[q.band];
-      const size = dot * persp * (0.6 + depth * 0.6) * (1 + lvl * 0.5);
-      const a = fadeFar * Math.min(1, 0.18 + depth * 0.62 + lvl * 0.3);
+      const p = Math.min(3, D / (D - z2));
+      return [cx + x2 * R * p, cy - y2 * R * p, z2, p];
+    };
+    const width = Math.max(0.8, Math.min(w, h) / 380);
+    const strokes = new Map();
+    for (const q of swarm) {
+      const [x1, y1, z2, p] = proj(q.x, q.y, q.z);
+      if (z2 > D - 1.2) continue; // (too near the view, or behind it)
+      const tail = 0.07 + Math.hypot(q.vx, q.vy, q.vz) * 0.05; // (a streak along the way it swims, longer when fast)
+      const sp = Math.hypot(q.vx, q.vy, q.vz) || 1;
+      const [x0, y0] = proj(q.x - (q.vx / sp) * tail, q.y - (q.vy / sp) * tail, q.z - (q.vz / sp) * tail);
+      const depth = Math.max(0, Math.min(1, (z2 + 1.5) / 3));
+      const far = Math.hypot(q.x - swarmCam.x, q.y - swarmCam.y, q.z - swarmCam.z);
+      const fadeFar = Math.max(0, Math.min(1, 1.9 - far * 0.42));
+      // (the beat's flash, running out from where its lead swerved)
+      const L = leads[q.school];
+      const since = (now - L.beatAt) / 1000;
+      let flash = 0;
+      if (since < 1.6) {
+        const dist = Math.hypot(q.x - L.bx, q.y - L.by, q.z - L.bz);
+        const front = since * 1.8;
+        flash = Math.exp(-((dist - front) ** 2) / 0.03) * (1 - since / 1.6);
+      }
+      const a = fadeFar * Math.min(1, 0.16 + depth * 0.5 + q.lvl * 0.55 + flash * 0.8);
       if (a < 0.02) continue;
-      g.fillStyle = paint(q.flock / SWARM_FLOCKS + q.band / 60, a.toFixed(2), lvl > 0.7 && depth > 0.3);
-      g.fillRect(cx + x2 * R * persp - size / 2, cy - y2 * R * persp - size / 2, size, size);
+      const hot = flash > 0.45 || q.lvl > 0.85;
+      const col = paint(rainbow ? Math.round(q.pos * 24) / 24 : q.school / Math.max(1, nSchools), (Math.round(a * 20) / 20).toFixed(2), hot);
+      const lw = Math.round(width * p * (0.7 + depth * 0.5) * (1 + q.lvl * 0.8 + flash * 0.6) * 2) / 2;
+      const key = `${col}|${lw}`;
+      let list = strokes.get(key);
+      if (!list) { list = []; strokes.set(key, list); }
+      list.push(x0, y0, x1, y1);
     }
+    g.lineCap = 'round';
+    for (const [key, list] of strokes) {
+      const [col, lw] = key.split('|');
+      g.strokeStyle = col;
+      g.lineWidth = Number(lw);
+      g.beginPath();
+      for (let n = 0; n < list.length; n += 4) { g.moveTo(list[n], list[n + 1]); g.lineTo(list[n + 2], list[n + 3]); }
+      g.stroke();
+    }
+    g.lineCap = 'butt';
   }
 
   // STAR FIELD: flying through a galaxy, as a galaxy map does it: star systems all around in open
@@ -1545,13 +1645,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   const starCam = { x: 0, y: 0, z: 0, yaw: Math.random() * Math.PI * 2, pitch: 0, dyaw: 0, dpitch: 0, last: 0 };
   const newStar = () => ({
     x: (Math.random() * 2 - 1) * STAR_SPAN, y: (Math.random() * 2 - 1) * STAR_SPAN, z: (Math.random() * 2 - 1) * STAR_SPAN,
-    ...(() => { // (its band: where, evenly by pitch, and how wide)
-      const pos = Math.random();
-      const lo = 20 * Math.pow(1000, pos);
-      return { lo, hi: lo * Math.pow(2, 0.17 + Math.random() * 0.75), pos };
-    })(),
-    b0: 0, b1: 0, binHz: 0, // (its band in the FFT's bins, for the rate they're at)
-    fl: 1, pk: 0, // (its band's floor and peak of late)
+    ...narrowBand(),
     rate: 0.6 + Math.random() * Math.random() * 9, // (how quickly it follows its band: per second)
     tw: 0.4 + Math.random() * 2.2, ph: Math.random() * Math.PI * 2, // (its twinkle)
     size: 0.5 + Math.random() * Math.random() * 1.6, // (some systems bigger than others)
@@ -1594,18 +1688,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     const glows = [];
     const dots = new Map();
     for (const st of stars) {
-      // (its band's loudness now, against its own floor and peak of late: how far up it's come)
-      let target = 0;
-      if (an && binHz) {
-        if (st.binHz !== binHz) { st.binHz = binHz; st.b0 = Math.max(1, Math.round(st.lo / binHz)); st.b1 = Math.max(st.b0, Math.min(freq.length - 1, Math.round(Math.min(st.hi, nyq) / binHz))); }
-        let v = 0;
-        for (let i = st.b0; i <= st.b1; i++) if (freq[i] > v) v = freq[i];
-        v /= 255;
-        st.pk = Math.max(v, st.pk - dt * 0.12);
-        st.fl = v < st.fl ? v : st.fl + (v - st.fl) * Math.min(1, dt * 0.25);
-        const room = Math.max(0.12, st.pk - st.fl);
-        target = Math.pow(Math.max(0, Math.min(1, (v - st.fl) / room)), 1.4) * Math.min(1, v * 2.5); // (silence stays dark)
-      }
+      const target = narrowLevel(st, an, binHz, nyq, dt);
       // (its own pace toward it: quick ones flare, slow ones swell and settle)
       st.lvl += (target - st.lvl) * Math.min(1, st.rate * dt);
       const rx = wrap(st.x - starCam.x);
