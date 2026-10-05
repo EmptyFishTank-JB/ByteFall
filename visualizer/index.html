@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#000000">
   <title>ByteFall Viz</title>
   <link rel="icon" href="../assets/icons/icon-192.png">
-  <link rel="stylesheet" href="viz.css?v=1">
+  <link rel="stylesheet" href="viz.css?v=2">
 </head>
 <body>
   <!-- BYTEFALL VIZ: ByteFall's music visualizers on their own, for whatever the phone plays
@@ -63,12 +63,14 @@
   <div id="more" hidden>
     <div class="drawer-head">MORE</div>
     <button id="more-pip" data-app>PICTURE IN PICTURE: ON</button>
-    <button id="more-calm">CALM WHEN PAUSED: ON</button>
+    <button id="more-calm" data-app>CALM WHEN PAUSED: ON</button>
     <button id="more-access" data-app>NOTIFICATION ACCESS</button>
     <button id="more-full" data-web>FULL SCREEN</button>
     <p class="small">SOURCE &mdash; AUTO hears the other apps directly where they allow it, and through the microphone
       where they don't (Pandora is one that doesn't). OTHER APPS: only directly. MICROPHONE: only the microphone.
-      Tap the left or right edge to change style; the middle shows or hides the controls.</p>
+      SCREEN AUDIO (a computer's browser): the sound of a shared tab, or on Windows the whole computer's.
+      Tap the left or right edge to change style; the middle shows or hides the controls (on a computer:
+      &larr; &rarr; change style, F full screen, H hides the controls).</p>
     <button id="more-close">CLOSE</button>
   </div>
 
@@ -78,8 +80,8 @@
     <button id="start-btn">START</button>
   </div>
 
-  <script src="../js/viz.js?v=1"></script>
-  <script src="../js/extsource.js?v=1"></script>
-  <script src="app.js?v=1"></script>
+  <script src="../js/viz.js?v=2"></script>
+  <script src="../js/extsource.js?v=2"></script>
+  <script src="app.js?v=2"></script>
 </body>
 </html>

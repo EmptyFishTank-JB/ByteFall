@@ -1,7 +1,9 @@
 // BYTEFALL VIZ (visualizer/README.md): ByteFall's music visualizers (js/viz.js) for whatever the
 // phone plays. In the app (visualizer/native/): the other apps' sound captured directly where they
 // allow it (js/extsource.js, CaptureService), the microphone where they don't, and the song from
-// any app with its art and play / pause / skip (NowPlayingService). On the web: the microphone.
+// any app with its art and play / pause / skip (NowPlayingService). On the web: on a computer,
+// SCREEN AUDIO (the browser's screen share with its sound: a tab, or the whole computer's on
+// Windows and ChromeOS), and the microphone.
 (() => {
   const NATIVE = window.BytefallAndroid || null;
   const APP = !!(NATIVE && NATIVE.extStart);
@@ -15,8 +17,10 @@
 
   // ---- SOURCE: AUTO (the app: the other apps directly, the microphone where they say no), OTHER
   // APPS (directly only), MICROPHONE
-  const SOURCES = APP ? ['auto', 'apps', 'mic'] : ['mic'];
-  const SOURCE_NAMES = { auto: 'AUTO', apps: 'OTHER APPS', mic: 'MICROPHONE' };
+  // (the web: SCREEN AUDIO where the browser can share a screen with its sound, a computer's)
+  const CAN_SCREEN = !APP && !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) && !/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
+  const SOURCES = APP ? ['auto', 'apps', 'mic'] : CAN_SCREEN ? ['screen', 'mic'] : ['mic'];
+  const SOURCE_NAMES = { auto: 'AUTO', apps: 'OTHER APPS', mic: 'MICROPHONE', screen: 'SCREEN AUDIO' };
   let source = SOURCES.includes(store.get('source', SOURCES[0])) ? store.get('source', SOURCES[0]) : SOURCES[0];
   let started = false;
   let capOn = false; // (capture listening)
@@ -26,7 +30,40 @@
   let capEnded = false; // (stopped from its notification: a tap on SOURCE listens again)
   let mic = null; // ({ stream, ctx, an })
   let micFailed = false;
-  let using = null; // ('cap' or 'mic': where AUTO is listening now)
+  let using = null; // ('cap', 'mic' or 'scr': where it's listening now)
+  // SCREEN AUDIO (the web, a computer): the screen share's sound, left and right
+  let scr = null; // ({ stream, ctx, an, pair })
+  let scrNote = ''; // (why it's not listening: ENDED, NOT SHARED, NO AUDIO)
+  async function startScreen() {
+    if (scr) return;
+    scrNote = '';
+    let stream;
+    try {
+      // (the picture has to be asked for with the sound: kept tiny, and never shown)
+      stream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 1, width: 320, height: 180 }, audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }, systemAudio: 'include', selfBrowserSurface: 'exclude' });
+    } catch (e) { scrNote = 'NOT SHARED'; return; }
+    if (!stream.getAudioTracks().length) { stream.getTracks().forEach((t) => t.stop()); scrNote = 'NO AUDIO'; return; }
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const src = ctx.createMediaStreamSource(new MediaStream(stream.getAudioTracks()));
+    const mk = () => { const a = ctx.createAnalyser(); a.fftSize = 2048; a.smoothingTimeConstant = 0.8; return a; };
+    const an = mk();
+    const l = mk();
+    const r = mk();
+    src.connect(an);
+    const split = ctx.createChannelSplitter(2);
+    src.connect(split);
+    split.connect(l, 0);
+    split.connect(r, 1);
+    if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+    stream.getAudioTracks()[0].addEventListener('ended', () => { stopScreen(); scrNote = 'ENDED'; });
+    scr = { stream, ctx, an, pair: [l, r] };
+  }
+  function stopScreen() {
+    if (!scr) return;
+    scr.stream.getTracks().forEach((t) => t.stop());
+    scr.ctx.close().catch(() => {});
+    scr = null;
+  }
 
   async function startMic() {
     if (mic || micFailed) return;
@@ -66,6 +103,8 @@
   }
   async function applySource() {
     using = null;
+    if (source === 'screen') { stopMic(); await startScreen(); showSource(); return; }
+    stopScreen();
     if (source === 'mic') { stopCapture(); micFailed = false; await startMic(); }
     else {
       if (source === 'apps') stopMic();
@@ -75,16 +114,17 @@
     showSource();
   }
   // (the analyser to draw this frame, or null: the calm signal)
-  function micLevel() {
-    if (!mic) return 0;
-    const d = new Float32Array(mic.an.fftSize);
-    mic.an.getFloatTimeDomainData(d);
+  function micLevel(an = mic && mic.an) {
+    if (!an) return 0;
+    const d = new Float32Array(an.fftSize);
+    an.getFloatTimeDomainData(d);
     let m = 0;
     for (let i = 0; i < d.length; i++) m = Math.max(m, Math.abs(d[i]));
     return m;
   }
   function analyser() {
     if (!started) return null;
+    if (source === 'screen') { using = scr ? 'scr' : null; return scr ? scr.an : null; }
     const now = performance.now();
     let capAn = null;
     if (capOn) {
@@ -106,6 +146,7 @@
     return null;
   }
   function stereo() {
+    if (using === 'scr' && scr) return scr.pair;
     if (using === 'cap') return ExtSource.stereo();
     if (using === 'mic' && mic) return [mic.an, mic.an];
     return null;
@@ -116,6 +157,11 @@
   }
   function readout() {
     if (!started) return '';
+    if (source === 'screen') {
+      if (scr && scr.stream.getAudioTracks()[0].readyState === 'ended') { stopScreen(); scrNote = 'ENDED'; }
+      if (scr) { const m = micLevel(scr.an); return m > 0 ? `${Math.round(20 * Math.log10(m))} DB` : 'SILENT'; }
+      return scrNote === 'NO AUDIO' ? 'NO SOUND SHARED: TAP SOURCE' : scrNote ? `${scrNote}: TAP SOURCE` : '';
+    }
     if (capEnded && source !== 'mic' && using !== 'mic') return 'STOPPED: TAP SOURCE';
     if (using === 'cap') {
       const { frames, peak } = ExtSource.level();
@@ -180,7 +226,7 @@
   $('btn-more').addEventListener('click', () => { const open = $('more').hidden; closePanels(); $('more').hidden = !open; });
   $('more-close').addEventListener('click', closePanels);
   $('btn-source').addEventListener('click', () => {
-    if (!capEnded) source = SOURCES[(SOURCES.indexOf(source) + 1) % SOURCES.length];
+    if (!capEnded && !(source === 'screen' && !scr && scrNote)) source = SOURCES[(SOURCES.indexOf(source) + 1) % SOURCES.length];
     store.set('source', source);
     showSource();
     if (started) applySource();
@@ -312,7 +358,17 @@
     pollSong();
   });
   if (!NP) $('btn-song').hidden = true;
-  if (!APP) $('btn-source').hidden = true;
+  if (SOURCES.length < 2) $('btn-source').hidden = true;
+  // (a computer: the mouse brings the controls up, and keys: ← → styles, F full screen, H hides)
+  window.addEventListener('mousemove', () => { if (started && ui.classList.contains('gone')) showUi(true); });
+  window.addEventListener('keydown', (e) => {
+    if (e.target.closest && e.target.closest('input, textarea')) return;
+    if (e.key === 'ArrowLeft') step(-1);
+    else if (e.key === 'ArrowRight') step(1);
+    else if (e.key === 'f' || e.key === 'F') $('more-full').click();
+    else if (e.key === 'h' || e.key === 'H') showUi(ui.classList.contains('gone'));
+    else if (e.key === 'Escape') closePanels();
+  });
 
   // ---- MORE
   let pip = store.get('pip', 'on') === 'on';
@@ -331,7 +387,9 @@
   // ---- START: listening needs a tap first (Android's questions, the browser's microphone)
   $('start-text').textContent = APP
     ? 'Moves to whatever your phone plays. Android will ask to record or share the screen: that is how it hears the other apps (only the sound is used, nothing is recorded or kept). Apps that won\'t allow it, like Pandora, are heard through the microphone instead.'
-    : 'Moves to whatever is playing near you, through the microphone. (The Android app hears the other apps on the phone directly.)';
+    : CAN_SCREEN
+      ? 'Moves to whatever your computer plays. The browser will ask what to share: pick the TAB that plays the music (Pandora, YouTube, ...), or on Windows the ENTIRE SCREEN for everything, and switch on its SHARE AUDIO. Only the sound is used, nothing is recorded or kept. (SOURCE: MICROPHONE hears the room instead.)'
+      : 'Moves to whatever is playing near you, through the microphone. (The Android app hears the other apps on the phone directly.)';
   $('start-btn').addEventListener('click', async () => {
     $('start').hidden = true;
     started = true;

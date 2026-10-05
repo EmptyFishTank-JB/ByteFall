@@ -3,8 +3,14 @@
 ByteFall's music visualizers on their own, for whatever the phone plays: all 22 styles from the
 game's MUSIC PLAYER (`js/viz.js`, shared with the game), edge to edge, turning with the phone.
 
-- **Web:** `visualizer/index.html` (on GitHub Pages at `/ByteFall/visualizer/`): the microphone only,
-  as a page can't hear other apps.
+- **Web:** `visualizer/index.html`, live on GitHub Pages at
+  <https://emptyfishtank-jb.github.io/ByteFall/visualizer/> (linked from ByteFall's DEV page). On a
+  computer, SOURCE: SCREEN AUDIO (the default) hears what the browser's screen share carries: pick the
+  tab playing the music (Pandora, YouTube, ...) or, on Windows and ChromeOS, the entire screen for the
+  whole computer's sound, with SHARE AUDIO on (the picture is asked for too, as browsers require, but
+  never used); stopping the share shows ENDED: TAP SOURCE, and a tap asks again. MICROPHONE: the
+  room. Phones' browsers: the microphone only. Keys: ← → styles, F full screen, H hides the controls;
+  the mouse brings them back.
 - **Android app:** `com.emptyfishtank.bytefallviz`, built by Actions → **ByteFall Viz APK**
   (`.github/workflows/visualizer-apk.yml`; LIVE loads the page from GitHub Pages, so pushes show up
   without a new APK; bundled has its own copy).
