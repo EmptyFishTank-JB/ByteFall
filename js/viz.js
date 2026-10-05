@@ -1531,9 +1531,12 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   // STAR FIELD: flying through a galaxy, as a galaxy map does it: star systems all around in open
   // space, near ones bigger and brighter, far ones fading into the dark, the view sailing on through
   // them on a slowly wandering course (turning now one way, now the other, rising and dipping), a
-  // little faster with the music. Each star listens to its own band of the spectrum and swells and
-  // brightens as it plays, at its own pace (some quick to flare, some slow to rise and settle), and
-  // twinkles at its own rate besides; a few are of the accent's color, and the loudest glow in it.
+  // little faster with the music. Each star listens to a narrow band of its own, picked at random
+  // anywhere from 20Hz to 20kHz (evenly by pitch, so lows, mids and highs alike; a sixth of an
+  // octave to most of one wide), and swells and brightens as its band rises above what it's been
+  // doing lately (its own floor and peak, so a star in a band that's always loud still moves, and
+  // the stars move each their own way), at its own pace (some quick to flare, some slow to rise and
+  // settle), and twinkles at its own rate besides; in the SPECTRUM theme, colored by its pitch; a few are of the accent's color, and the loudest glow in it.
   // Space is a cube around the view that wraps on itself, so the stars never run out
   const STAR_BANDS = 12;
   const STAR_SPAN = 10; // (the cube's half-width, in light years: as far as a star is seen)
@@ -1542,18 +1545,26 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   const starCam = { x: 0, y: 0, z: 0, yaw: Math.random() * Math.PI * 2, pitch: 0, dyaw: 0, dpitch: 0, last: 0 };
   const newStar = () => ({
     x: (Math.random() * 2 - 1) * STAR_SPAN, y: (Math.random() * 2 - 1) * STAR_SPAN, z: (Math.random() * 2 - 1) * STAR_SPAN,
-    band: Math.floor(Math.random() * STAR_BANDS),
+    ...(() => { // (its band: where, evenly by pitch, and how wide)
+      const pos = Math.random();
+      const lo = 20 * Math.pow(1000, pos);
+      return { lo, hi: lo * Math.pow(2, 0.17 + Math.random() * 0.75), pos };
+    })(),
+    b0: 0, b1: 0, binHz: 0, // (its band in the FFT's bins, for the rate they're at)
+    fl: 1, pk: 0, // (its band's floor and peak of late)
     rate: 0.6 + Math.random() * Math.random() * 9, // (how quickly it follows its band: per second)
     tw: 0.4 + Math.random() * 2.2, ph: Math.random() * Math.PI * 2, // (its twinkle)
     size: 0.5 + Math.random() * Math.random() * 1.6, // (some systems bigger than others)
-    f: Math.random(), hot: Math.random() < 0.18, lvl: 0,
+    hot: Math.random() < 0.18, lvl: 0,
   });
   function drawStars(an, w, h, now) {
     g.clearRect(0, 0, w, h);
     const count = opt('count');
     while (stars.length < count) stars.push(newStar());
     if (stars.length > count) stars.length = count;
-    const lv = bands(an, STAR_BANDS);
+    const lv = bands(an, STAR_BANDS); // (and the FFT's bins, in freq, for each star's own band)
+    const binHz = an ? an.context.sampleRate / an.fftSize : 0;
+    const nyq = binHz * (freq ? freq.length : 0);
     let energy = 0;
     for (let b = 0; b < STAR_BANDS; b++) { starLv[b] = lv ? Math.max(lv[b], starLv[b] * dec(0.86)) : starLv[b] * dec(0.9); energy += starLv[b] / STAR_BANDS; }
     const dt = starCam.last ? Math.min(0.1, (now - starCam.last) / 1000) : 0;
@@ -1583,8 +1594,20 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     const glows = [];
     const dots = new Map();
     for (const st of stars) {
-      // (its own pace toward its band's level: quick ones flare, slow ones swell and settle)
-      st.lvl += (starLv[st.band] - st.lvl) * Math.min(1, st.rate * dt);
+      // (its band's loudness now, against its own floor and peak of late: how far up it's come)
+      let target = 0;
+      if (an && binHz) {
+        if (st.binHz !== binHz) { st.binHz = binHz; st.b0 = Math.max(1, Math.round(st.lo / binHz)); st.b1 = Math.max(st.b0, Math.min(freq.length - 1, Math.round(Math.min(st.hi, nyq) / binHz))); }
+        let v = 0;
+        for (let i = st.b0; i <= st.b1; i++) if (freq[i] > v) v = freq[i];
+        v /= 255;
+        st.pk = Math.max(v, st.pk - dt * 0.12);
+        st.fl = v < st.fl ? v : st.fl + (v - st.fl) * Math.min(1, dt * 0.25);
+        const room = Math.max(0.12, st.pk - st.fl);
+        target = Math.pow(Math.max(0, Math.min(1, (v - st.fl) / room)), 1.4) * Math.min(1, v * 2.5); // (silence stays dark)
+      }
+      // (its own pace toward it: quick ones flare, slow ones swell and settle)
+      st.lvl += (target - st.lvl) * Math.min(1, st.rate * dt);
       const rx = wrap(st.x - starCam.x);
       const ry = wrap(st.y - starCam.y);
       const rz = wrap(st.z - starCam.z);
@@ -1600,12 +1623,12 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       const near = Math.min(1, z / 0.8); // (and in as it comes past, not popping)
       const twinkle = 0.75 + 0.25 * Math.sin(t * st.tw * 2.4 + st.ph);
       const lvl = st.lvl;
-      const a = Math.min(1, far * near * (0.3 + 0.45 * twinkle * (0.5 + st.size * 0.4) + lvl * 0.7));
+      const a = Math.min(1, far * near * (0.2 + 0.4 * twinkle * (0.5 + st.size * 0.4) + lvl * 0.95));
       if (a < 0.015) continue;
-      const r = Math.max(0.5, Math.min(14, (st.size * (1 + lvl * 1.6) * sizeK * F * 0.012) / z * (0.85 + 0.15 * twinkle)));
+      const r = Math.max(0.5, Math.min(16, (st.size * (1 + lvl * 2.6) * sizeK * F * 0.012) / z * (0.85 + 0.15 * twinkle)));
       const hot = st.hot || (lvl > 0.9 && st.size > 1.1); // (the accent's own class, and the big ones at their loudest)
-      if (r > 2.2 && a > 0.15) glows.push(sx, sy, r * (2.4 + lvl * 2), a, hot ? 1 : 0, st.f);
-      const col = paint(rainbow ? Math.round(st.f * 24) / 24 : 0, a.toFixed(2), hot);
+      if (r > 2.2 && a > 0.15) glows.push(sx, sy, r * (2.4 + lvl * 2), a, hot ? 1 : 0, st.pos);
+      const col = paint(rainbow ? Math.round(st.pos * 24) / 24 : 0, a.toFixed(2), hot);
       let list = dots.get(col);
       if (!list) { list = []; dots.set(col, list); }
       list.push(sx, sy, r);
