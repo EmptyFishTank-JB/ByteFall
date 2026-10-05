@@ -106,11 +106,12 @@ function createVisitors(api) {
       b: { 20: '.f.f.......f.f.', 21: '...f.......f...' },
     },
     // The BUG: the first virus, a spiky little red one that scuttles fast, lurching
-    // HALLOWEEN's BIG SPIDER: the size of the viruses, eight legs stepping, red eyes, a red mark
+    // HALLOWEEN's BIG SPIDER: the size of the viruses, seen from the front: a round body with a red
+    // hourglass, red eyes, and four bent legs each side, the pairs lifting and reaching in turn
     bigspider: {
-      pal: { b: '#3d2f4a', B: '#d0283e', h: '#4c3c5c', r: '#ff3030', l: '#6a5880', f: '#6f5d86' },
-      a: ['......l.l..l.l......', '.....l.l....l.l.....', '....l.lbbbbbbl.l....', '...l.bbbfbbbbbbhhh..', '..l.bbBbBbbbbbhrhrh.', '..l.bbbBbbbbbbhhhhh.', '...l.bbbbbbbbbbhhh..', '....l.l.bbbbbl.l....', '...l..l......l..l...', '..l..l........l..l..'],
-      b: { 0: '.....l.l..l.l.......', 1: '....l.l....l.l......', 8: '....l.l......l.l....', 9: '...l.l........l.l...' },
+      pal: { b: '#2b2236', m: '#e0283e', h: '#3d3150', r: '#ff3030', l: '#6a5a84' },
+      a: ['..l....bbbbb....l..', '..lll.bbbbbbb.lll..', '..ll.bbbmmmbbb.ll..', '.l.llbbbbmbbbbll.l.', '.l.l.bbbmmmbbb.l.l.', '.l.l.lbbbbbbbl.l.l.', '.l.l.llhhhhhll.l.l.', 'l..ll.hhrhrhh.ll..l', 'l..ll..hhhhh..ll..l', 'l..ll..l...l..ll..l'],
+      b: ['..ll...bbbbb...ll..', '..l.l.bbbbbbb.l.l..', '..l..bbbmmmbbb..l..', '..lllbbbbmbbbblll..', '.l.l.bbbmmmbbb.l.l.', '.l.l.lbbbbbbbl.l.l.', '.ll..llhhhhhll..ll.', '.ll..lhhrhrhhl..ll.', '.ll..llhhhhhll..ll.', '.ll..ll.....ll..ll.'],
     },
     // The other VIRUSES: the WORM (segments that bunch and stretch as it inches), RANSOMWARE (a
     // padlock on legs), SPYWARE (a floating eye, its pupil darting), ADWARE (a pop-up window) and
@@ -190,12 +191,16 @@ function createVisitors(api) {
         '.......tTtttttt.......', '.......tTtttttt.......', '......ttTttttttt......', '......tTtttttttt......', '.....ttTttttttttt.....', '....tttTtttttttttt....', '...tt.tTttttt.tttttt..', '..t..tt.ttt..tt...ttt.'],
     },
     eyes: { pal: { e: '#ffd23f' }, a: ['ee...ee', 'ee...ee'] },
-    // The WEREWOLF (under OCTOBER's full moon): hunched, clawed, in torn trousers; c, its howl
+    // The WEREWOLF (under OCTOBER's full moon): the old movie kind, a man gone to fur: pointed ears,
+    // a furred face, yellow eyes, a dark nose and fangs, in his work shirt and trousers, clawed hands
+    // and bare furred feet; c, its howl (eyes shut, mouth wide)
     werewolf: {
-      pal: { f: '#6b5644', F: '#45372b', e: '#ffd23f', t: '#f2f2f2', n: '#111111', c: '#e3dccb', p: '#3b4a6b', P: '#26314a' },
+      pal: { F: '#4a3426', f: '#8a6a4e', e: '#ffd23f', n: '#111111', t: '#f2f2f2', s: '#3b4560', S: '#2a3146', p: '#4a3d30', c: '#e3dccb' },
       a: ['..........F.F...', '.........FfFf...', '........Fffffff.', '........ffeffffn', '........ffffffff', '.......Fffffftft', '......FFfffff...', '....FFFfffffF...', '...FfffffffffF..', '..Fffff.ffffff..', '..ff.ff.Fffffcc.', '.cc..ff.Ffff....', '.....pppppp.....', '.....pPpppPp....', '.....pp..pp.....', '.....ff..ff.....', '....fff..fff....', '...cff..cff.....'],
       b: { 14: '.....pp..pp.....', 15: '....ff....ff....', 16: '...fff....fff...', 17: '..cff....cff....' },
-      c: ['...........nn...', '..........fff...', '.........fftf...', '.....F..ffftf...', '.....FFfefff....', '......Ffffff....', '......FFffff....', '....FFFfffffF...', '...FfffffffffF..', '..Fffff.ffffff..', '..ff.ff.Fffffcc.', '.cc..ff.Ffff....', '.....pppppp.....', '.....pPpppPp....', '.....pp..pp.....', '.....ff..ff.....', '....fff..fff....', '...cff..cff.....'],
+      a: ['.F........F.', '.FF......FF.', '.FFFFFFFFFF.', '.FFFffffFFF.', '.FFffffffFF.', '.FfeffffefF.', '.FffffffffF.', '.FFffnnffFF.', '..FftfftfF..', '...FFFFFF...', '..sssSSsss..', '.ssssSSssss.', '.ssssssssss.', '.ssssssssss.', '.f.ssssss.f.', '.c.pppppp.c.', '...pp..pp...', '...pp..pp...', '..FFF..FFF..'],
+      b: { 16: '..pp....pp..', 17: '..pp....pp..', 18: '.FFF....FFF.' },
+      c: ['............', '.F........F.', '.FF......FF.', '.FFFFFFFFFF.', '.FFFffffFFF.', '.FnnffffnnF.', '.FffffffffF.', '.FFftnntfFF.', '..FfnnnnfF..', '...FnnnnF...', '..sssSSsss..', '.ssssSSssss.', '.ssssssssss.', '.ssssssssss.', '.f.ssssss.f.', '.c.pppppp.c.', '...pp..pp...', '...pp..pp...', '..FFF..FFF..'],
     },
     // The HAND from under the floor: reaching (a), grabbing (b)
     hand: {
@@ -326,12 +331,10 @@ function createVisitors(api) {
     });
     return out;
   }
-  // The visitors drawn frame by frame in the frame editor (js/bigart.js: the BIG SPIDER, the
-  // WEREWOLF), at the bots' pixels or half pixels at res 2; one <g> a frame, only the one showing drawn
+  // Visitors drawn frame by frame in the frame editor (js/bigart.js; none at the moment), at the
+  // bots' pixels or half pixels at res 2; one <g> a frame, only the one showing drawn
   const ART = window.BIG_ART || {};
-  const BS = ART.bigspider || null;
   const artPx = (kind) => U / (ART[kind].res || 1); // (a pixel of its frames, in screen pixels)
-  const BS_PX = BS ? artPx('bigspider') : U;
   const artRows = (rows) => rows.map((r) => r.replace(/(\d+)(.)/g, (m, n, c) => c.repeat(Number(n))));
   function artEl(kind) {
     const d = ART[kind];
@@ -351,7 +354,6 @@ function createVisitors(api) {
     svg.querySelector(`.art-${key}`).style.display = 'inline';
     v.artShown = key;
   }
-  const bigSpiderShow = artShow;
   // (an animation played from when it started: the frame showing at that time, the last one held)
   function artPlay(v, name, t0, now, speed = 1) {
     const frames = ART[v.kind][name];
@@ -404,13 +406,13 @@ function createVisitors(api) {
     spyware: { speed: 30, frameMs: 700, poke: 'delete' },
     adware: { speed: 0, frameMs: 0, poke: 'delete' },
     logicbomb: { speed: 20, frameMs: 140, poke: 'delete' },
-    bigspider: { speed: 32, frameMs: 0, poke: 'hiss' }, // (its own frames: bigSpider)
+    bigspider: { speed: 32, frameMs: 140, poke: 'hiss' },
     trojan: { speed: 18, frameMs: 200, poke: 'delete' },
     pine: { speed: 0, frameMs: 0 },
     baretree: { speed: 0, frameMs: 0 },
     oak: { speed: 0, frameMs: 0 },
     eyes: { speed: 0, frameMs: 0, fixed: true, poke: 'blink' },
-    werewolf: { speed: 30, frameMs: window.BIG_ART && window.BIG_ART.werewolf ? 0 : 200, sway: window.BIG_ART && window.BIG_ART.werewolf ? 0 : 1, monster: true, poke: 'growl' }, // (drawn frames: werewolfFrame)
+    werewolf: { speed: 30, frameMs: 200, sway: 1, monster: true, poke: 'growl' },
     hand: { speed: 0, frameMs: 0, poke: 'sink' },
     spirit: { speed: 0, frameMs: 300, poke: 'mist' },
     wraith: { speed: 9, frameMs: 520, poke: 'mist' },
@@ -513,7 +515,7 @@ function createVisitors(api) {
     else if (what === 'virus') virusVisit(nextVirus(), dir, edge, W); // (or one by name, for tests: phage, bug, trojan)
     else if (['phage', 'bug', 'trojan', 'worm', 'ransomware', 'spyware', 'adware', 'logicbomb'].includes(what)) virusVisit(what === 'phage' ? 'virus' : what, dir, edge, W);
     else if (what === 'bigspider') { // (in from the side, about the card in scuttles and leaps, out)
-      const v = add('bigspider', edge(BS ? BS.w * BS_PX : SPRITES.bigspider.a[0].length * U), dir, { state: 'roam', target: rand(0.15, 0.85) * W, stops: 3 + Math.floor(Math.random() * 3) });
+      const v = add('bigspider', edge(SPRITES.bigspider.a[0].length * U), dir, { state: 'roam', target: rand(0.15, 0.85) * W, stops: 3 + Math.floor(Math.random() * 3) });
       api.botEvent('visit-bigspider');
       if (v.x > W / 2) v.dir = -1;
     }
@@ -923,8 +925,8 @@ function createVisitors(api) {
     night.setAttribute('aria-hidden', 'true');
     if (!fog) { api.lane.appendChild(night); requestAnimationFrame(() => requestAnimationFrame(() => night.classList.add('on'))); }
     const moon = moonRise(false);
-    const v = add('werewolf', edge(ART.werewolf ? ART.werewolf.w * artPx('werewolf') : 21 * U), dir, { state: 'wait', until: performance.now() + 3500, stopAt: rand(0.3, 0.6) * W });
-    if (!ART.werewolf) scaleTree(v, 1.3); // (bigger than the bots; its drawn frames already are)
+    const v = add('werewolf', edge(SPRITES.werewolf.a[0].length * U * 1.15), dir, { state: 'wait', until: performance.now() + 3500, stopAt: rand(0.3, 0.6) * W });
+    scaleTree(v, 1.15); // (a little bigger than the bots)
     v.onGone = () => {
       moonSet(moon);
       night.classList.remove('on');
@@ -932,11 +934,6 @@ function createVisitors(api) {
     };
   }
   function werewolfFrame(v, now, dt, W) {
-    if (ART.werewolf) { // (its walk while it goes, faster at a run; its howl from when it began)
-      if (v.state === 'howl') artPlay(v, 'howl', v.howlAt, now);
-      else if (v.state === 'go' || v.state === 'run') artStep(v, now, v.state === 'run' ? 55 : 110);
-      else artShow(v, 'walk', 0);
-    }
     if (v.state === 'wait') { if (now > v.until) v.state = 'go'; } // (the moon up first)
     else if (v.state === 'stand') { if (now > v.until) lopeOff(v); } // (there when the lights came on)
     else if (v.state === 'go') {
@@ -1030,7 +1027,7 @@ function createVisitors(api) {
       if (L.red) L.red.remove();
       if (L.monster) {
         const m = add(L.monster, L.spot, Math.random() < 0.5 ? 1 : -1, { state: 'stand', until: now + 1600 });
-        if (L.monster === 'werewolf' && !ART.werewolf) scaleTree(m, 1.3);
+        if (L.monster === 'werewolf') scaleTree(m, 1.15);
         say(m, pick(['BOO!', 'RAAH!', 'GRRR']), 1200);
         api.botEvent(`visit-${L.monster}`);
         for (const b of api.walkers()) {
@@ -1369,39 +1366,7 @@ function createVisitors(api) {
 
   // HALLOWEEN's BIG SPIDER: scuttles from spot to spot about the card, leaping now and then (a
   // bot it lands near jumps), and out; poked, it hisses and leaps away
-  // (its jump: a crouch where it stands, the frames in the air carrying it over, a landing; its
-  // walk's frames stepping while it goes, faster the faster it goes, and standing still when it stops)
-  const BS_AIR = [3, 8];
-  const BS_STEP = ((3 * U) / 4) * 1000; // (a foot's push back: 3 bot pixels over 4 frames) // (the jump's frames off the ground: from the 4th up to the 8th)
-  function bigSpiderJump(v, now) {
-    const L = v.leap;
-    if (!L.times) {
-      let t = 0;
-      L.times = BS.jump.map((f) => { const at = t; t += f.ms * (L.big ? 1 : 0.8); return at; });
-      L.total = t;
-      L.air0 = L.times[BS_AIR[0]];
-      L.air1 = L.times[BS_AIR[1]];
-    }
-    const t = now - L.t0;
-    let i = L.times.length - 1;
-    while (i > 0 && t < L.times[i]) i--;
-    bigSpiderShow(v, 'jump', i);
-    const p = Math.max(0, Math.min(1, (t - L.air0) / (L.air1 - L.air0)));
-    v.x = L.from + (L.to - L.from) * p;
-    v.y = 0; // (its frames lift it)
-    if (t >= L.total) { v.leap = null; v.frameAt = now; bigSpiderShow(v, 'walk', 0); api.startle(v, 55); }
-  }
   function bigSpider(v, now, dt, W) {
-    if (v.leap && BS) { bigSpiderJump(v, now); return; }
-    if (BS) { // (its walk's frames while it goes)
-      const going = v.state === 'roam' || v.state === 'out';
-      if (!going) bigSpiderShow(v, 'walk', 0);
-      else if (now - v.frameAt > BS_STEP / (v.speed * (v.state === 'out' ? 1.5 : 1))) { // (its feet keeping pace with the floor)
-        v.frameAt = now;
-        v.frame = ((v.frame || 0) + 1) % BS.walk.length;
-        bigSpiderShow(v, 'walk', v.frame);
-      }
-    }
     if (v.leap) {
       const p = Math.min(1, (now - v.leap.t0) / v.leap.ms);
       v.x = v.leap.from + (v.leap.to - v.leap.from) * p;
@@ -1413,7 +1378,7 @@ function createVisitors(api) {
       v.dir = v.target > v.x ? 1 : -1;
       v.x += v.dir * Math.min(v.speed * dt, Math.abs(v.target - v.x));
       if (Math.random() < dt * 0.45) { // (a leap: up and over, toward where it's going)
-        const to = Math.max(0, Math.min(W - (BS ? BS.w * BS_PX : 40), v.x + v.dir * rand(30, 60)));
+        const to = Math.max(0, Math.min(W - SPRITES.bigspider.a[0].length * U, v.x + v.dir * rand(30, 60)));
         v.leap = { t0: now, from: v.x, to, h: rand(14, 26), ms: rand(420, 560) };
       } else if (Math.abs(v.target - v.x) < 0.5) {
         v.state = 'lurk';

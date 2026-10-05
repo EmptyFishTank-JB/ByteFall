@@ -2278,6 +2278,8 @@ body.player-open { overflow: hidden; }
   animation: mp-drawer-in 0.18s ease-out;
 }
 .mp-viz-drawer[hidden] { display: none; }
+.mp-viz-group { grid-column: 1 / -1; font-size: 9px; letter-spacing: 2px; color: var(--accent); padding: 6px 2px 0; } /* (a group's heading among the styles) */
+.mp-viz-group:first-child { padding-top: 0; }
 /* (SETTINGS, under the styles: the style showing's own; vizSettingsPanel in viz.js) */
 .mp-viz-set { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 6px; margin-top: 4px; padding-top: 8px; border-top: 1px solid var(--grid-line); font-size: 9px; letter-spacing: 1px; color: var(--fg-dim); }
 .mp-viz-set[hidden] { display: none; }

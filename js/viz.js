@@ -16,6 +16,18 @@ const VIZ_NAMES = {
   cloud: 'PARTICLE CLOUD', stars: 'STAR FIELD',
 };
 
+// The styles in groups, as the STYLES drawers list them and a tap cycles them
+const VIZ_GROUPS = [
+  ['CLASSIC', ['bars', 'wave', 'scope', 'spectro', 'vu']],
+  ['STEREO', ['vector', 'vectorwide', 'lissajous']],
+  ['SHAPES', ['radial', 'fluid', 'orb', 'plasma', 'tunnel']],
+  ['RETRO', ['matrix', 'bitgrid', 'terrain']],
+  ['OCEANS', ['ocean', 'oceantri', 'oceanhex', 'oceandepth', 'oceantopo']],
+  ['LAND & SPACE', ['topo', 'cloud', 'stars']],
+];
+const VIZ_ALL = VIZ_GROUPS.flatMap(([, ids]) => ids); // (every style, in order: the music player's and ByteFall Viz's list)
+const vizGroupOf = (id) => (VIZ_GROUPS.find(([, ids]) => ids.includes(id)) || [''])[0];
+
 // SETTINGS: each style's own, the ones that shape it (in real units where there are any), saved per
 // style. num: a number from min to max (unit shown after it); toggle: on or off. (bars: the number
 // of bars this visualizer starts with)
@@ -1711,7 +1723,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     get settingsChanged() { return !!changed[mode]; },
     get anySettingsChanged() { return Object.keys(changed).length > 0; },
     // (every style it has, with the names shown, for a picker)
-    styles: () => modes.map((m) => ({ id: m, name: VIZ_NAMES[m] })),
+    styles: () => modes.map((m) => ({ id: m, name: VIZ_NAMES[m], group: vizGroupOf(m) })),
     // (straight to one style)
     set(next) {
       if (!modes.includes(next) || next === mode) return mode;

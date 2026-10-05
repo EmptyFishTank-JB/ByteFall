@@ -174,7 +174,7 @@
   }
 
   // ---- the visualizer
-  const ALL = ['bars', 'wave', 'scope', 'spectro', 'vu', 'radial', 'fluid', 'vector', 'vectorwide', 'lissajous', 'matrix', 'bitgrid', 'terrain', 'plasma', 'tunnel', 'orb', 'ocean', 'oceantri', 'oceanhex', 'oceantopo', 'oceandepth', 'topo', 'cloud', 'stars'];
+  const ALL = VIZ_ALL; // (viz.js: every style, in its groups)
   const viz = createVisualizer($('viz'), analyser, { bars: 48, modes: ALL, key: 'bfviz-style', getStereo: stereo });
   const showStyle = () => { $('style-name').textContent = `// ${viz.name}`; };
   showStyle();
@@ -214,7 +214,15 @@
   function fillDrawer() {
     const list = $('drawer-list');
     list.textContent = '';
+    let group = '';
     for (const s of viz.styles()) {
+      if (s.group !== group) { // (each group under its heading)
+        group = s.group;
+        const head = document.createElement('div');
+        head.className = 'drawer-group';
+        head.textContent = group;
+        list.append(head);
+      }
       const b = document.createElement('button');
       b.textContent = s.name;
       b.classList.toggle('lit', s.id === viz.mode);

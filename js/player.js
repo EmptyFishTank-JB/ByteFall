@@ -16,7 +16,7 @@
   const vizAnalyser = () => (ExtSource.isOn() ? ExtSource.analyser() : Music.getAnalyser());
   const vizStereo = () => (ExtSource.isOn() ? ExtSource.stereo() : Music.getStereo());
   const viz = createVisualizer(document.getElementById('mp-viz'), vizAnalyser, {
-    bars: 40, modes: ['bars', 'wave', 'scope', 'spectro', 'vu', 'radial', 'fluid', 'vector', 'vectorwide', 'lissajous', 'matrix', 'bitgrid', 'terrain', 'plasma', 'tunnel', 'orb', 'ocean', 'oceantri', 'oceanhex', 'oceantopo', 'oceandepth', 'topo', 'cloud', 'stars'], key: 'bytefall-player-viz', getStereo: vizStereo,
+    bars: 40, modes: VIZ_ALL, key: 'bytefall-player-viz', getStereo: vizStereo,
   });
   const vizNameEl = document.getElementById('mp-viz-name');
   const showVizName = () => { vizNameEl.textContent = `// ${viz.name}`; };
@@ -271,7 +271,7 @@
   // The STYLES drawer: every style by name, the one showing lit; a tap goes straight to it
   const drawerBtn = document.getElementById('mp-viz-drawer-btn');
   const drawer = document.getElementById('mp-viz-drawer');
-  drawer.innerHTML = viz.styles().map((st) => `<button type="button" data-style="${st.id}">${st.name}</button>`).join('') + '<div class="viz-set mp-viz-set" hidden></div>';
+  drawer.innerHTML = viz.styles().map((st, i, all) => `${!i || all[i - 1].group !== st.group ? `<div class="mp-viz-group">${st.group}</div>` : ''}<button type="button" data-style="${st.id}">${st.name}</button>`).join('') + '<div class="viz-set mp-viz-set" hidden></div>'; // (under each group's heading)
   // SETTINGS: the style showing's own (vizSettingsPanel, viz.js), under the styles
   const setPanel = vizSettingsPanel(drawer.querySelector('.viz-set'), viz);
   setInterval(() => { if (!drawer.hidden) setPanel.refresh(); }, 400);
