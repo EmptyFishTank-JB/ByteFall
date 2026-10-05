@@ -1017,14 +1017,17 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
 
   // OCEAN DEPTHS: the travelling sea (the same view, turns, swell and music's swells as OCEAN GRID)
   // as its points alone, each with a thin line hanging straight down from it into the depths,
-  // fading to black the deeper it goes; the points staggered row to row, so no lines line up
+  // fading to black the deeper it goes; the points on OCEAN HEX's honeycomb (its corners), which
+  // leaves the fewest open lanes between them, half again as close as the old staggered rows
+  // (one point to every ~0.1 of sea; bigger on a wide screen, as OCEAN GRID's cells)
   function drawOceanDepths(an, w, h, now) {
     g.clearRect(0, 0, w, h);
     seaStep(an, now, w, h);
-    const cell = 0.42 * Math.max(1, Math.sqrt(w / h / 0.45));
-    const rowStep = cell * 0.866;
-    drawSeaLattice(w, h, now, cell, rowStep,
-      (i, j) => [(i + (j & 1 ? 0.5 : 0)) * cell, j * rowStep],
+    const rowStep = 0.412 * Math.max(1, Math.sqrt(w / h / 0.45));
+    const dx = rowStep * 0.6; // (as OCEAN HEX's: across, and each row's zigzag)
+    const zig = rowStep / 6;
+    drawSeaLattice(w, h, now, dx, rowStep,
+      (k, j) => [k * dx, j * rowStep + ((k + j) & 1 ? -zig : zig)],
       () => [], 1.6);
   }
 
