@@ -38,6 +38,11 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   let lastDraw = 0;
   const dec = (x) => Math.pow(x, K);
   const ease = (a) => 1 - Math.pow(1 - a, K);
+  // CALM: with nothing playing, the styles that would otherwise sit empty show a quiet made-up
+  // signal (as WAVE does): low levels drifting across the bands, a slow two-tone wave
+  let T = 0; // (now, for the calm signal)
+  const calm = (n) => Float32Array.from({ length: n }, (_, b) => Math.max(0, Math.min(1, 0.16 + 0.1 * Math.sin(T / 1100 + b * 0.55) + 0.06 * Math.sin(T / 590 - b * 0.9) - (b / n) * 0.06)));
+  const calmWave = (out, side = 0) => { for (let i = 0; i < out.length; i++) out[i] = 0.2 * Math.sin(i * 0.021 + T / 700 + side * 0.7) + 0.08 * Math.sin(i * 0.053 - T / 430 + side * 1.9); return out; };
   let rainbow = false;
   let hue = 0;
   let fgNow = '57, 255, 143';
@@ -73,6 +78,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     const segments = Math.floor((h + 1) / (SEGMENT + 1));
     const gap = 2;
     const barW = (w - gap * (bars - 1)) / bars;
+    const calmBars = an ? null : calm(bars);
     for (let b = 0; b < bars; b++) {
       let level = 0;
       if (an) {
@@ -84,7 +90,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
         let peak = 0;
         for (let i = from; i < to && i < freq.length; i++) peak = Math.max(peak, freq[i]);
         level = Math.min(1, (peak / 255) * (1 + 0.7 * (b / bars))); // lift the quieter treble end
-      }
+      } else level = calmBars ? calmBars[b] : 0;
       peaks[b] = Math.max(level, peaks[b] - 0.025 * K);
       const lit = Math.round(level * segments);
       const cap = Math.min(segments - 1, Math.round(peaks[b] * segments));
@@ -94,7 +100,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
         if (seg < lit) {
           const hot = seg / segments;
           g.fillStyle = hot > 0.8 ? paint(b / bars, 0.9, true) : paint(b / bars, (0.55 + hot * 0.45).toFixed(2));
-        } else if (an && seg === cap && cap > 0) {
+        } else if (seg === cap && cap > 0) {
           g.fillStyle = paint(b / bars, 0.75, true);
         } else {
           g.fillStyle = `rgba(${fg}, 0.08)`;
@@ -208,10 +214,14 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
         const y = mid - d[start + i] * gain * mid;
         if (i) g.lineTo(x, y); else g.moveTo(x, y);
       }
-    } else {
-      g.moveTo(0, mid); g.lineTo(w, mid);
+    } else { // (calm: the slow made-up wave)
+      for (let x = 0; x <= w; x += 2) {
+        const p = x / w;
+        const y = mid - (0.22 * Math.sin(p * 18 + T / 600) + 0.08 * Math.sin(p * 47 - T / 380)) * mid;
+        if (x) g.lineTo(x, y); else g.moveTo(x, y);
+      }
     }
-    g.strokeStyle = paint(0, an ? 0.95 : 0.4);
+    g.strokeStyle = paint(0, an ? 0.95 : 0.5);
     g.lineWidth = 1.6;
     g.shadowColor = paint(0, 0.8);
     g.shadowBlur = an ? 6 : 0;
@@ -227,7 +237,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     const accent = vizRgb('--accent-rgb', '255, 209, 102');
     fade(w, h, 0.55);
     const n = radialLevels.length;
-    const lv = bands(an, n);
+    const lv = bands(an, n) || calm(n);
     for (let b = 0; b < n; b++) radialLevels[b] = lv ? Math.max(lv[b], radialLevels[b] * dec(0.86)) : radialLevels[b] * dec(0.9);
     const bass = (radialLevels[0] + radialLevels[1] + radialLevels[2]) / 3;
     const cx = w / 2;
@@ -359,11 +369,11 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       g.fillText('R', cx + r * 0.7 + 3, cy - r * 0.7 + 3);
     }
     const pair = getStereo();
-    if (pair) {
-      if (!wave || wave.length !== pair[0].fftSize) wave = new Float32Array(pair[0].fftSize);
-      if (!vectorR || vectorR.length !== pair[1].fftSize) vectorR = new Float32Array(pair[1].fftSize);
-      pair[0].getFloatTimeDomainData(wave);
-      pair[1].getFloatTimeDomainData(vectorR);
+    { // (with nothing playing: the calm made-up wave, a little apart on the two sides)
+      const n = pair ? pair[0].fftSize : 1024;
+      if (!wave || wave.length !== n) wave = new Float32Array(n);
+      if (!vectorR || vectorR.length !== n) vectorR = new Float32Array(n);
+      if (pair) { pair[0].getFloatTimeDomainData(wave); pair[1].getFloatTimeDomainData(vectorR); } else { calmWave(wave, 0); calmWave(vectorR, 1); }
       let max = 0;
       let lr = 0;
       let ll = 0;
@@ -442,7 +452,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     if (!colW) return;
     spectroAcc -= colW;
     scrollLeft(w, h, colW);
-    const lv = bands(an, rows);
+    const lv = bands(an, rows) || calm(rows).map((v) => Math.max(0, v - 0.1) * 0.9); // (calm: faint threads)
     const cellH = h / rows;
     for (let r = 0; r < rows; r++) {
       const level = lv ? lv[r] : 0;
@@ -459,6 +469,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   function drawVu(an, w, h) {
     g.clearRect(0, 0, w, h);
     const pair = getStereo() || (an ? [an, an] : null);
+    const calmVu = pair ? null : calm(2);
     const small = h < 60;
     const labelW = small ? 0 : 14;
     const gap = small ? 3 : 10;
@@ -476,7 +487,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
         for (let i = 0; i < vuBuf.length; i++) sq += vuBuf[i] * vuBuf[i];
         const db = 20 * Math.log10(Math.sqrt(sq / vuBuf.length) + 1e-6) + 12; // (+12: the mix sits low)
         level = Math.max(0, Math.min(1, (db + 48) / 48));
-      }
+      } else level = calmVu[ch] * 1.4;
       vuLevel[ch] = Math.max(level, vuLevel[ch] - 0.03 * K);
       vuPeak[ch] = Math.max(vuLevel[ch], vuPeak[ch] - 0.006 * K);
       const y = top + gap + ch * (barH + gap);
@@ -530,7 +541,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   const gridFlash = new Float32Array(7);
   function drawBitGrid(an, w, h) {
     g.clearRect(0, 0, w, h);
-    const lv = bands(an, 7);
+    const lv = bands(an, 7) || calm(7).map((v) => v * 1.9); // (calm: a few bits stacking and settling)
     const cell = Math.min((w - 16) / 7, (h - 12) / 7);
     const x0 = (w - cell * 7) / 2;
     const y0 = (h - cell * 7) / 2;
@@ -895,7 +906,8 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   function drawTopo(an, w, h, now) {
     g.clearRect(0, 0, w, h);
     const lv = bands(an, TOPO_BANDS);
-    for (let b = 0; b < TOPO_BANDS; b++) topoLv[b] += ((lv ? lv[b] : 0) - topoLv[b]) * ease(0.15);
+    const cl = lv ? null : calm(TOPO_BANDS);
+    for (let b = 0; b < TOPO_BANDS; b++) topoLv[b] += ((lv ? lv[b] : cl[b] * 2.2) - topoLv[b]) * ease(0.15);
     const t = now / 1000;
     const GX = Math.max(24, Math.min(64, Math.round(w / 9)));
     const GY = Math.max(14, Math.round(GX * (h / w)));
@@ -1104,6 +1116,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     },
     draw(now = performance.now()) {
       K = lastDraw ? Math.max(0.25, Math.min(6, (now - lastDraw) / (1000 / 120))) : 1;
+      T = now;
       lastDraw = now;
       const { w, h } = fit();
       rainbow = document.documentElement.dataset.theme === 'spectrum';
