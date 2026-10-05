@@ -123,10 +123,10 @@ const vizSettings = (bars) => {
       { id: 'spin', name: 'SPIN', unit: 'RPM', min: 0, max: 30, step: 0.1, def: 1.4 },
     ],
     stars: [
-      { id: 'count', name: 'STARS', unit: 'AROUND YOU', min: 100, max: 8000, step: 50, def: 2500 },
-      { id: 'speed', name: 'SPEED', unit: 'LY/S', min: 0, max: 30, step: 0.5, def: 3 },
-      { id: 'turn', name: 'TURNING', unit: '°/S AT MOST', min: 0, max: 90, step: 1, def: 8 },
-      { ...pct('size', 'STAR SIZE'), min: 20, max: 400 },
+      { id: 'count', name: 'STARS', unit: 'AROUND YOU', min: 100, max: 12000, step: 50, def: 8000 },
+      { id: 'speed', name: 'SPEED', unit: 'LY/S', min: 0, max: 30, step: 0.5, def: 0.5 },
+      { id: 'turn', name: 'TURNING', unit: '°/S AT MOST', min: 0, max: 90, step: 1, def: 4 },
+      { ...pct('size', 'STAR SIZE'), min: 20, max: 400, def: 50 },
     ],
   };
 };
