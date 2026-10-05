@@ -13,7 +13,7 @@
   bgBtn.hidden = !!window.BYTEFALL_APP; // (the app: the player always plays on in the background)
   if (window.BYTEFALL_APP) document.querySelector('#music-player .mp-note').textContent = 'Every track plays with all its layers in. With the player open, the music keeps going with the screen off or in another app.';
   const viz = createVisualizer(document.getElementById('mp-viz'), Music.getAnalyser, {
-    bars: 40, modes: ['bars', 'wave', 'scope', 'spectro', 'vu', 'radial', 'fluid', 'vector', 'vectorwide', 'lissajous', 'matrix', 'bitgrid', 'terrain', 'plasma', 'tunnel', 'orb'], key: 'bytefall-player-viz', getStereo: Music.getStereo,
+    bars: 40, modes: ['bars', 'wave', 'scope', 'spectro', 'vu', 'radial', 'fluid', 'vector', 'vectorwide', 'lissajous', 'matrix', 'bitgrid', 'terrain', 'plasma', 'tunnel', 'orb', 'ocean', 'oceantri', 'topo', 'cloud'], key: 'bytefall-player-viz', getStereo: Music.getStereo,
   });
   const vizNameEl = document.getElementById('mp-viz-name');
   const showVizName = () => { vizNameEl.textContent = `// ${viz.name}`; };
@@ -154,6 +154,24 @@
     const r = e.currentTarget.getBoundingClientRect();
     viz.toggle(e.clientX && e.clientX < r.left + r.width / 2 ? -1 : 1);
     showVizName();
+    markStyle();
+  });
+  // The STYLES drawer: every style by name, the one showing lit; a tap goes straight to it
+  const drawerBtn = document.getElementById('mp-viz-drawer-btn');
+  const drawer = document.getElementById('mp-viz-drawer');
+  drawer.innerHTML = viz.styles().map((st) => `<button type="button" data-style="${st.id}">${st.name}</button>`).join('');
+  function markStyle() { drawer.querySelectorAll('button').forEach((b) => b.classList.toggle('active', b.dataset.style === viz.mode)); }
+  markStyle();
+  drawerBtn.addEventListener('click', () => {
+    drawer.hidden = !drawer.hidden;
+    drawerBtn.setAttribute('aria-expanded', String(!drawer.hidden));
+  });
+  drawer.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-style]');
+    if (!b) return;
+    viz.set(b.dataset.style);
+    showVizName();
+    markStyle();
   });
   // SEQUENCE / SHUFFLE moving on by themselves: the display follows
   let shown = '';

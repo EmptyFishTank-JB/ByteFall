@@ -12,7 +12,8 @@ function vizRgb(name, fallback) {
 const VIZ_NAMES = {
   bars: 'SPECTRUM', wave: 'WAVE', scope: 'OSCILLOSCOPE', spectro: 'SPECTROGRAM', vu: 'LEVEL METERS', radial: 'RADIAL',
   fluid: 'PARTICLES', vector: 'VECTORSCOPE', vectorwide: 'STEREO FIELD', lissajous: 'LISSAJOUS', matrix: 'MATRIX RAIN', bitgrid: 'BIT GRID', terrain: 'SYNTHWAVE GRID',
-  plasma: 'PLASMA', tunnel: 'TUNNEL', orb: 'ORB',
+  plasma: 'PLASMA', tunnel: 'TUNNEL', orb: 'ORB', ocean: 'OCEAN GRID', oceantri: 'OCEAN MESH', topo: 'TOPOGRAPHY',
+  cloud: 'PARTICLE CLOUD',
 };
 
 // modes: the styles this one cycles through (the playlist's small one: bars and wave);
@@ -781,6 +782,203 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     }
   }
 
+  // OCEAN (GRID or MESH): a sea of particles stretching away to the horizon, each joined to its
+  // neighbors by a thin line (a square grid, or a triangle mesh), fading out with the distance.
+  // Across it the spectrum (the bass in the middle, the treble out at the sides), the nearest row
+  // the music now and each row further out a moment older, so the swells roll away from you
+  const SEA_COLS = 34;
+  const SEA_ROWS = 22;
+  const SEA_BANDS = 12;
+  let seaHist = [];
+  let seaAt = 0;
+  const seaLv = new Float32Array(SEA_BANDS);
+  function drawOcean(an, w, h, now, tri) {
+    g.clearRect(0, 0, w, h);
+    const lv = bands(an, SEA_BANDS);
+    for (let b = 0; b < SEA_BANDS; b++) seaLv[b] = lv ? Math.max(lv[b], seaLv[b] * dec(0.86)) : seaLv[b] * dec(0.9);
+    if (!seaHist.length || now - seaAt > 45) { // (a row of the spectrum's history every 45ms)
+      seaAt = now;
+      seaHist.unshift(Float32Array.from(seaLv));
+      if (seaHist.length > SEA_ROWS) seaHist.length = SEA_ROWS;
+    }
+    const t = now / 1000;
+    const cx = w / 2;
+    const horizon = h * 0.3;
+    const f = h * 0.95;
+    const camH = 1.1;
+    const half = (SEA_COLS - 1) / 2;
+    const pts = [];
+    for (let r = 0; r < SEA_ROWS; r++) {
+      const row = seaHist[Math.min(r, seaHist.length - 1)];
+      const z = 1.6 + r * 0.55;
+      const span = 2.2 + z * 0.75; // (the rows widen as they go out, so the sea reaches the sides)
+      const shift = tri && r % 2 ? 0.5 : 0;
+      const line = [];
+      for (let c = 0; c < SEA_COLS; c++) {
+        const off = Math.abs(c + shift - half) / half; // (0 in the middle, 1 at the sides)
+        const band = Math.min(SEA_BANDS - 1, Math.floor(off * SEA_BANDS));
+        const lvl = row[band];
+        const swell = 0.09 * Math.sin(c * 0.45 + t * 1.2 + r * 0.6) + 0.06 * Math.sin(r * 0.8 - t * 1.6 + c * 0.2);
+        const y = swell + lvl * 0.6;
+        const x = ((c + shift) / (SEA_COLS - 1) - 0.5) * span * 2;
+        line.push({ x: cx + (x / z) * f * 0.42, y: horizon + ((camH - y) / z) * f, lvl, f: c / SEA_COLS });
+      }
+      pts.push(line);
+    }
+    const fadeAt = (r) => Math.pow(1 - r / SEA_ROWS, 1.4); // (nearer, brighter)
+    g.lineWidth = 0.7;
+    for (let r = SEA_ROWS - 1; r >= 0; r--) { // (the far rows first)
+      const a = fadeAt(r);
+      g.strokeStyle = paint(0.5, (a * 0.45).toFixed(3));
+      g.beginPath();
+      const row = pts[r];
+      for (let c = 0; c < SEA_COLS; c++) { if (c) g.lineTo(row[c].x, row[c].y); else g.moveTo(row[c].x, row[c].y); }
+      if (r + 1 < SEA_ROWS) { // (to the row behind)
+        const back = pts[r + 1];
+        for (let c = 0; c < SEA_COLS; c++) {
+          if (!tri) { g.moveTo(row[c].x, row[c].y); g.lineTo(back[c].x, back[c].y); continue; }
+          const other = r % 2 ? c + 1 : c - 1; // (a triangle lattice: the two nearest in the row behind)
+          g.moveTo(row[c].x, row[c].y); g.lineTo(back[c].x, back[c].y);
+          if (other >= 0 && other < SEA_COLS) { g.moveTo(row[c].x, row[c].y); g.lineTo(back[other].x, back[other].y); }
+        }
+      }
+      g.stroke();
+      const dot = 1 + (1 - r / SEA_ROWS) * 1.6;
+      for (const p of row) {
+        g.fillStyle = paint(p.f, Math.min(1, a * (0.5 + p.lvl * 0.7)).toFixed(3), p.lvl > 0.75 && r < SEA_ROWS * 0.5);
+        g.fillRect(p.x - dot / 2, p.y - dot / 2, dot, dot);
+      }
+    }
+  }
+
+  // TOPOGRAPHY: a map's contour lines over a landscape the music raises: a hill for each band of
+  // the spectrum (the bass broad, the treble small and sharp), drifting slowly about; the louder
+  // a band, the higher its hill and the closer its rings; the highest rings in the accent
+  const TOPO_BANDS = 12;
+  const topoLv = new Float32Array(TOPO_BANDS);
+  let topoField = null;
+  function drawTopo(an, w, h, now) {
+    g.clearRect(0, 0, w, h);
+    const lv = bands(an, TOPO_BANDS);
+    for (let b = 0; b < TOPO_BANDS; b++) topoLv[b] += ((lv ? lv[b] : 0) - topoLv[b]) * ease(0.15);
+    const t = now / 1000;
+    const GX = Math.max(24, Math.min(64, Math.round(w / 9)));
+    const GY = Math.max(14, Math.round(GX * (h / w)));
+    if (!topoField || topoField.length !== (GX + 1) * (GY + 1)) topoField = new Float32Array((GX + 1) * (GY + 1));
+    const hills = [];
+    for (let b = 0; b < TOPO_BANDS; b++) {
+      const k = b / (TOPO_BANDS - 1);
+      hills.push({
+        x: 0.5 + 0.38 * Math.sin(t * (0.05 + k * 0.04) + b * 2.4),
+        y: 0.5 + 0.36 * Math.cos(t * (0.04 + k * 0.05) + b * 1.7),
+        s2: Math.pow(0.24 - k * 0.15, 2),
+        a: topoLv[b] * (1.1 - k * 0.3),
+      });
+    }
+    for (let j = 0; j <= GY; j++) {
+      for (let i = 0; i <= GX; i++) {
+        const x = i / GX;
+        const y = j / GY;
+        let v = 0.18 * (Math.sin(x * 5 + t * 0.13) + Math.sin(y * 6 - t * 0.11) + Math.sin((x + y) * 4 + t * 0.07)) / 3; // (the land under it)
+        for (const hl of hills) { const dx = (x - hl.x) * (w / h); const dy = y - hl.y; v += hl.a * Math.exp(-(dx * dx + dy * dy) / hl.s2); }
+        topoField[j * (GX + 1) + i] = v;
+      }
+    }
+    const cw = w / GX;
+    const ch = h / GY;
+    const LEVELS = 12;
+    g.lineWidth = 1;
+    for (let L = 0; L < LEVELS; L++) {
+      const iso = -0.12 + L * 0.11;
+      const frac = L / (LEVELS - 1);
+      g.strokeStyle = paint(frac, (0.28 + frac * 0.62).toFixed(2), frac > 0.7);
+      g.beginPath();
+      for (let j = 0; j < GY; j++) {
+        for (let i = 0; i < GX; i++) {
+          const a = topoField[j * (GX + 1) + i];
+          const b = topoField[j * (GX + 1) + i + 1];
+          const c = topoField[(j + 1) * (GX + 1) + i + 1];
+          const d = topoField[(j + 1) * (GX + 1) + i];
+          const idx = (a > iso ? 8 : 0) | (b > iso ? 4 : 0) | (c > iso ? 2 : 0) | (d > iso ? 1 : 0);
+          if (idx === 0 || idx === 15) continue;
+          // (marching squares: where the level crosses each edge, joined)
+          const x0 = i * cw;
+          const y0 = j * ch;
+          const top = [x0 + cw * ((iso - a) / (b - a)), y0];
+          const right = [x0 + cw, y0 + ch * ((iso - b) / (c - b))];
+          const bottom = [x0 + cw * ((iso - d) / (c - d)), y0 + ch];
+          const left = [x0, y0 + ch * ((iso - a) / (d - a))];
+          const seg = (p, q) => { g.moveTo(p[0], p[1]); g.lineTo(q[0], q[1]); };
+          switch (idx) {
+            case 1: case 14: seg(left, bottom); break;
+            case 2: case 13: seg(bottom, right); break;
+            case 3: case 12: seg(left, right); break;
+            case 4: case 11: seg(top, right); break;
+            case 5: seg(left, top); seg(bottom, right); break;
+            case 6: case 9: seg(top, bottom); break;
+            case 7: case 8: seg(left, top); break;
+            case 10: seg(top, right); seg(left, bottom); break;
+            default: break;
+          }
+        }
+      }
+      g.stroke();
+    }
+  }
+
+  // PARTICLE CLOUD: the sound itself in three dimensions, turning slowly clockwise like the ORB:
+  // each particle a moment of the wave, placed by its level now and a moment and two moments
+  // later (a shape that's the music's own: a pure tone a ring, a chord a knot, noise a cloud),
+  // spread sideways by the stereo; nearer particles bigger and brighter
+  let cloudL = null;
+  let cloudR = null;
+  let cloudLevel = 0.02;
+  function drawCloud(an, w, h, now) {
+    fade(w, h, 0.35);
+    const pair = getStereo();
+    const src = pair ? pair[0] : an;
+    if (!src) return;
+    const n = src.fftSize;
+    if (!cloudL || cloudL.length !== n) { cloudL = new Float32Array(n); cloudR = new Float32Array(n); }
+    src.getFloatTimeDomainData(cloudL);
+    if (pair) pair[1].getFloatTimeDomainData(cloudR); else cloudR.set(cloudL);
+    let sq = 0;
+    for (let i = 0; i < n; i++) { const m = (cloudL[i] + cloudR[i]) / 2; sq += m * m; }
+    cloudLevel += (Math.max(Math.sqrt(sq / n), 0.002) - cloudLevel) * ease(0.08);
+    const gain = Math.min(40, 0.32 / cloudLevel);
+    const tau = 9; // (samples between the three moments)
+    const spin = -now / 7000;
+    const cs = Math.cos(spin);
+    const sn = Math.sin(spin);
+    const tilt = 0.45;
+    const ct = Math.cos(tilt);
+    const st = Math.sin(tilt);
+    const cx = w / 2;
+    const cy = h / 2;
+    const R = Math.min(w, h) * 0.34;
+    const dot = Math.max(1.2, Math.min(w, h) / 220);
+    for (let i = 0; i + 2 * tau < n; i += 2) {
+      const m0 = (cloudL[i] + cloudR[i]) / 2;
+      const m1 = (cloudL[i + tau] + cloudR[i + tau]) / 2;
+      const m2 = (cloudL[i + 2 * tau] + cloudR[i + 2 * tau]) / 2;
+      const side = (cloudR[i] - cloudL[i]) / 2;
+      let x = (m0 + side * 2.5) * gain;
+      let y = -m1 * gain;
+      let z = m2 * gain;
+      const d = Math.hypot(x, y, z);
+      if (d > 1.4) { x *= 1.4 / d; y *= 1.4 / d; z *= 1.4 / d; }
+      const x2 = x * cs + z * sn;
+      let z2 = -x * sn + z * cs;
+      const y2 = y * ct - z2 * st;
+      z2 = y * st + z2 * ct;
+      const persp = 1 / (2.2 - z2 * 0.6);
+      const depth = Math.max(0, Math.min(1, (z2 + 1.4) / 2.8));
+      const size = dot * (0.6 + depth * 1.1);
+      g.fillStyle = paint((Math.atan2(y2, x2) / (Math.PI * 2) + 1) % 1, (0.15 + depth * 0.75).toFixed(2), d > 1.1);
+      g.fillRect(cx + x2 * R * persp * 2 - size / 2, cy + y2 * R * persp * 2 - size / 2, size, size);
+    }
+  }
+
   // TUNNEL: rings rushing toward you, thicker and brighter on the beat, the tunnel swaying
   let tunnelRings = [];
   function drawTunnel(an, w, h, now) {
@@ -815,6 +1013,13 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   return {
     get mode() { return mode; },
     get name() { return VIZ_NAMES[mode]; },
+    // (every style it has, with the names shown, for a picker)
+    styles: () => modes.map((m) => ({ id: m, name: VIZ_NAMES[m] })),
+    // (straight to one style)
+    set(next) {
+      if (!modes.includes(next) || next === mode) return mode;
+      return this.toggle(modes.indexOf(next) - modes.indexOf(mode));
+    },
     // The next style in this one's list
     // (step: +1 the next style, -1 the one before)
     toggle(step = 1) {
@@ -849,6 +1054,10 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       else if (mode === 'plasma') drawPlasma(an, w, h);
       else if (mode === 'tunnel') drawTunnel(an, w, h, now);
       else if (mode === 'orb') drawOrb(an, w, h, now);
+      else if (mode === 'ocean') drawOcean(an, w, h, now, false);
+      else if (mode === 'oceantri') drawOcean(an, w, h, now, true);
+      else if (mode === 'topo') drawTopo(an, w, h, now);
+      else if (mode === 'cloud') drawCloud(an, w, h, now);
       else drawBars(an, w, h);
     },
   };

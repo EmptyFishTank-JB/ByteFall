@@ -2230,12 +2230,34 @@ body.player-open { overflow: hidden; }
   display: block; width: 100%; height: min(38vh, 300px); padding: 0; cursor: pointer;
   border: 1px solid var(--grid-line); border-radius: 6px; background: var(--inset-bg);
 }
-.mp-viz { position: relative; overflow: hidden; }
+.mp-viz { position: relative; overflow: hidden; flex-shrink: 0; } /* (its full height whatever's open under it) */
 .mp-viz canvas { display: block; width: 100%; height: 100%; }
 /* The style's name, top left; TAP TO SWITCH, top right */
 .mp-viz-name, .mp-viz-hint { position: absolute; top: 6px; font-family: inherit; font-size: 10px; letter-spacing: 1px; pointer-events: none; }
 .mp-viz-name { left: 8px; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
 .mp-viz-hint { right: 8px; color: var(--fg-dim); }
+/* The styles drawer: an arrow just under the visualizer's lower left, pulling out every style */
+.mp-viz-drawer-wrap { margin-top: -10px; }
+.mp-drawer-btn {
+  display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px 4px 6px; cursor: pointer;
+  font-family: inherit; font-size: 10px; letter-spacing: 1px; color: var(--fg); background: transparent;
+  border: 1px solid var(--grid-line); border-top: 0; border-radius: 0 0 5px 5px;
+}
+.mp-drawer-btn svg { transition: transform 0.2s ease; }
+.mp-drawer-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
+.mp-viz-drawer {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin-top: 6px;
+  animation: mp-drawer-in 0.18s ease-out;
+}
+.mp-viz-drawer[hidden] { display: none; }
+@keyframes mp-drawer-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.mp-viz-drawer button {
+  padding: 6px 4px; cursor: pointer; font-family: inherit; font-size: 9px; letter-spacing: 1px; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; color: var(--fg-dim); background: transparent;
+  border: 1px solid var(--grid-line); border-radius: 4px;
+}
+.music-player .mp-viz-drawer button.active { color: var(--accent); border-color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+@media (hover: hover) { .mp-viz-drawer button:hover { color: var(--fg); border-color: var(--fg-dim); } }
 .mp-now { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
 .mp-label { font-size: 10px; letter-spacing: 2px; color: var(--fg-dim); }
 .mp-track { font-size: 20px; letter-spacing: 2px; color: var(--fg); text-shadow: 0 0 8px rgba(var(--fg-rgb), 0.5); }
