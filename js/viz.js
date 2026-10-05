@@ -806,31 +806,80 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   // and turns slowly about as it goes, now one way, now the other (its heading drawn along after
   // it, so it mostly looks where it's going). The sea is endless: its swell is one big square tile
   // mirrored on all four sides, so it carries on seamlessly however far it goes, and its grid stays
-  // put on it as the view turns. The music rides on it: across the screen the spectrum (the bass in
-  // the middle, the treble out at the sides), the nearest the music now and further out a moment
-  // older, so the swells roll away
+  // put on it as the view turns. The music swims in it: soft round swells under the surface, each
+  // one band of the spectrum (the bass broad, the treble small), drifting and wandering about the
+  // sea, coming up ahead and fading as they pass out of sight, so the music rises from the sea
+  // itself, wherever they've wandered (not from the screen)
   const SEA_ROWS = 22;
   const SEA_BANDS = 12;
   const SEA_TILE = 14; // (the swell's tile, in the sea's own units, mirrored at each edge)
-  let seaHist = [];
-  let seaAt = 0;
   const seaLv = new Float32Array(SEA_BANDS);
   const seaStart = Math.random() * Math.PI * 2;
   const seaCam = { x: 0, z: 0, ang: seaStart, turn: 0, yaw: seaStart, spin: 0, last: 0 };
   const mirror = (u) => { const m = ((u % (2 * SEA_TILE)) + 2 * SEA_TILE) % (2 * SEA_TILE); return m > SEA_TILE ? 2 * SEA_TILE - m : m; };
   const swellAt = (wx, wz, t) => { const mx = mirror(wx); const mz = mirror(wz); return 0.08 * Math.sin(mx * 0.9 + t * 0.8) + 0.06 * Math.sin(mz * 1.1 - t * 0.6 + mx * 0.4) + 0.05 * Math.sin((mx + mz) * 0.5 + t * 1.1); };
-  // (the three seas' shared step: the music's levels and history, then the camera: the view's yaw
+  // THE MUSIC'S SWELLS: blobs loose in the sea, each a band (k % SEA_BANDS), its size by the band
+  // (bass about 1.4 across, treble 0.45), wandering at its own slow pace and turning as it goes;
+  // they fade in at a random spot in sight ahead (spread evenly over the sea there), and fade out
+  // once they pass out of sight (behind, too far, or off a side), to come up somewhere ahead again.
+  // More on a wide screen, which sees more sea
+  const SEA_BLOBS = 44;
+  const seaBlobs = Array.from({ length: SEA_BLOBS }, (_, k) => {
+    const band = k % SEA_BANDS;
+    return { band, r: 0.45 + (1 - band / (SEA_BANDS - 1)) * 0.95, x: 0, z: 0, dir: Math.random() * Math.PI * 2, speed: 0.15 + Math.random() * 0.35, a: 0, on: false, fresh: true };
+  });
+  function seaBlobsStep(dt, V, w, h) {
+    const c = Math.cos(seaCam.yaw);
+    const sn = Math.sin(seaCam.yaw);
+    const reach = (w / 2) / V.fx; // (how far across is in sight, per unit out)
+    const want = Math.min(SEA_BLOBS, Math.round(12 + 9 * (w / h)));
+    const zTop = V.zFar * 0.8;
+    for (let k = 0; k < SEA_BLOBS; k++) {
+      const b = seaBlobs[k];
+      if (!b.on) {
+        if (k >= want) { b.a = 0; continue; }
+        // (up somewhere in sight ahead, spread evenly over the sea there)
+        const zv = 1 + Math.sqrt(Math.random()) * (zTop - 1);
+        const xv = (Math.random() * 2 - 1) * reach * zv * 0.95;
+        [b.x, b.z] = toSea(xv, zv);
+        b.on = true;
+        b.a = b.fresh ? Math.random() : 0; // (the first ones already up, some way along)
+        b.fresh = false;
+      }
+      b.dir += (Math.random() - 0.5) * dt * 2.4;
+      b.x += Math.sin(b.dir) * b.speed * dt;
+      b.z += Math.cos(b.dir) * b.speed * dt;
+      const rx = b.x - seaCam.x;
+      const rz = b.z - seaCam.z;
+      const zv = rx * sn + rz * c;
+      const xv = rx * c - rz * sn;
+      const gone = k >= want || zv < 0.4 || zv > V.zFar * 0.95 || Math.abs(xv) > reach * zv * 1.25 + b.r;
+      b.a = gone ? b.a - dt * 1.2 : Math.min(1, b.a + dt * 0.7);
+      if (gone && b.a <= 0) { b.a = 0; b.on = false; }
+    }
+  }
+  // (the music at a point of the sea: each blob's band, by how near, softly; about 0 to 1)
+  let seaLive = [];
+  function seaMusic(wx, wz) {
+    let m = 0;
+    for (let k = 0; k < seaLive.length; k += 4) {
+      const dx = wx - seaLive[k];
+      const dz = wz - seaLive[k + 1];
+      const d2 = (dx * dx + dz * dz) * seaLive[k + 2];
+      if (d2 < 6) m += seaLive[k + 3] * Math.exp(-d2);
+    }
+    return Math.min(1, m);
+  }
+  // (the swells ease off right in front of the camera, so one passing under it doesn't lift the
+  // nearest sea up over the view)
+  const seaNear = (zv) => { const u = Math.min(1, Math.max(0, (zv - 0.5) / 1.4)); return u * u * (3 - 2 * u); };
+  // (the three seas' shared step: the music's levels, the camera, then the blobs: the view's yaw
   // wanders (a slow random turn, never more than about 14° a second), the heading wanders too and
   // is drawn after the yaw, the speed a little faster with the music)
-  function seaStep(an, now) {
+  function seaStep(an, now, w, h) {
     const lv = bands(an, SEA_BANDS);
     let energy = 0;
     for (let b = 0; b < SEA_BANDS; b++) { seaLv[b] = lv ? Math.max(lv[b], seaLv[b] * dec(0.86)) : seaLv[b] * dec(0.9); energy += seaLv[b] / SEA_BANDS; }
-    if (!seaHist.length || now - seaAt > 45) { // (a row of the spectrum's history every 45ms)
-      seaAt = now;
-      seaHist.unshift(Float32Array.from(seaLv));
-      if (seaHist.length > SEA_ROWS) seaHist.length = SEA_ROWS;
-    }
     const dt = seaCam.last ? Math.min(0.1, (now - seaCam.last) / 1000) : 0;
     seaCam.last = now;
     seaCam.spin = Math.max(-0.25, Math.min(0.25, seaCam.spin + (Math.random() - 0.5) * dt * 0.8 - seaCam.spin * dt * 0.05));
@@ -843,6 +892,12 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     const speed = 0.8 + energy * 1.2;
     seaCam.x += Math.sin(seaCam.ang) * speed * dt;
     seaCam.z += Math.cos(seaCam.ang) * speed * dt;
+    seaBlobsStep(dt, seaView(w, h), w, h);
+    seaLive = [];
+    for (const b of seaBlobs) {
+      const amp = seaLv[b.band] * b.a;
+      if (amp > 0.01) seaLive.push(b.x, b.z, 1 / (b.r * b.r), amp);
+    }
   }
   // (the view: where the horizon sits, the focal lengths, the near and far edges of the music)
   const seaView = (w, h) => {
@@ -855,7 +910,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   const toSea = (xv, zv) => { const c = Math.cos(seaCam.yaw); const s = Math.sin(seaCam.yaw); return [seaCam.x + xv * c + zv * s, seaCam.z - xv * s + zv * c]; };
 
   // (a lattice fixed on the sea, drawn from the turning camera: every point in sight (and a step
-  // past) projected, the music by its distance and place across the screen; links: [di, dj] to
+  // past) projected, the music by the swells under it; links: [di, dj] to
   // the neighbors each point joins, by the point's own i and j. The lines go in a few batches by
   // distance, each its own fade, the dots after)
   function drawSeaLattice(w, h, now, step, rowStep, pointAt, links) {
@@ -885,11 +940,9 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
         const xv = rx * c - rz * sn;
         const sx = V.cx + (xv / zv) * V.fx;
         if (sx < -(w * 0.6) || sx > w * 1.6) continue;
-        const hist = seaHist[Math.max(0, Math.min(seaHist.length - 1, Math.floor((zv - V.zNear) / V.dz)))];
-        const band = Math.min(SEA_BANDS - 1, Math.floor(Math.min(1, Math.abs(sx - V.cx) / (w / 2)) * SEA_BANDS));
-        const lvl = hist ? hist[band] : 0;
+        const lvl = seaMusic(wx, wz) * seaNear(zv);
         const y = swellAt(wx, wz, t) + lvl * 0.6;
-        pts[(j - j0) * nI + (i - i0)] = { i, j, x: sx, y: V.horizon + ((V.camH - y) / zv) * V.f, zv, lvl, f: (Math.sin(mirror(wx) * 0.2) + 1) / 2 };
+        pts[(j - j0) * nI + (i - i0)] = { i, j, x: sx, y: V.horizon + ((V.camH - y) / zv) * V.f, zv, lvl: Math.min(1, lvl), f: (Math.sin(mirror(wx) * 0.2) + 1) / 2 };
       }
     }
     const at = (i, j) => (i < i0 || i > i1 || j < j0 || j > j1 ? null : pts[(j - j0) * nI + (i - i0)]);
@@ -936,7 +989,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
 
   function drawOcean(an, w, h, now, tri) {
     g.clearRect(0, 0, w, h);
-    seaStep(an, now);
+    seaStep(an, now, w, h);
     const V = seaView(w, h);
     // (even cells, so the grid looks the same whichever way the view turns: a mesh's rows closer,
     // for even triangles; bigger on a wide screen, which sees much more of the sea, as the old
@@ -949,12 +1002,12 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       tri ? (i, j) => [[1, 0], [0, 1], [j & 1 ? 1 : -1, 1]] : () => SQUARE);
   }
 
-  // OCEAN HEX: the travelling sea again (the same view, turns, swell and music as OCEAN GRID), its
+  // OCEAN HEX: the travelling sea again (the same view, turns, swell and music's swells as OCEAN GRID), its
   // particles joined in a honeycomb: each row a zigzag, every other point linked to the row
   // behind, so the lines close into hexagons
   function drawOceanHex(an, w, h, now) {
     g.clearRect(0, 0, w, h);
-    seaStep(an, now);
+    seaStep(an, now, w, h);
     const V = seaView(w, h);
     const dx = V.dz * 0.6; // (the honeycomb's step across)
     const zig = V.dz / 6; // (each row's zigzag: a regular-looking hexagon)
@@ -965,21 +1018,20 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       (k, j) => ((k + j) & 1 ? ALONG : BOTH));
   }
 
-  // OCEAN TOPO: the travelling sea (the same view, turns, swell and music as OCEAN GRID) drawn as a map's
+  // OCEAN TOPO: the travelling sea (the same view, turns, swell and music's swells as OCEAN GRID) drawn as a map's
   // contour lines over hills of its own, fixed on the sea so the rings flow by as it travels (the
   // music raising them): a ring for each height, so as the sea rises its higher rings appear and
   // as it falls they shrink away; the highest in the accent, all fading into the distance
   function drawOceanTopo(an, w, h, now) {
     g.clearRect(0, 0, w, h);
-    seaStep(an, now);
+    seaStep(an, now, w, h);
     const t = now / 1000;
     const cx = w / 2;
     const horizon = h * 0.3;
     const f = h * 0.95;
     const camH = 1.1;
     const zNear = 0.95;
-    const histDz = 0.6; // (the music's history: a row of it every 0.6 out, as in OCEAN GRID)
-    const zFar = zNear + (SEA_ROWS - 1) * histDz;
+    const zFar = seaView(w, h).zFar;
     const fx = f * 0.42;
     // (the map sampled evenly over the screen, finer up close: rows spaced out with the distance,
     // columns even across; each point's height read off the sea itself, so the rings stay put on it)
@@ -989,27 +1041,19 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     const H = new Float32Array(nRows * nCols);
     const SX = new Float32Array(nRows * nCols);
     const SZ = new Float32Array(nRows);
-    const hAt = (row, b) => { const r0 = seaHist[Math.max(0, Math.min(seaHist.length - 1, row))]; return r0 ? r0[b] : 0; };
     for (let r = 0; r < nRows; r++) {
       const zv = zMin * Math.pow(zFar / zMin, r / (nRows - 1));
       SZ[r] = zv;
-      const hr = Math.max(0, (zv - zNear) / histDz);
       for (let c = 0; c < nCols; c++) {
         const sx = (c / (nCols - 1)) * (w + 120) - 60;
         const [wx, wz] = toSea(((sx - cx) * zv) / fx, zv); // (turned with the view)
-        // (the music, blended across the bands and over a few moments, so the rings stay round)
-        const bp = Math.min(1, Math.abs(sx - cx) / (w / 2)) * (SEA_BANDS - 1);
-        const b0 = Math.floor(bp);
-        const b1 = Math.min(SEA_BANDS - 1, b0 + 1);
-        const bf = bp - b0;
-        let m = 0;
-        for (let d = -1; d <= 1; d++) { const row = Math.round(hr) + d; m += (hAt(row, b0) * (1 - bf) + hAt(row, b1) * bf) / 3; }
-        // (the sea's own hills, fixed on it, so the rings flow by as it travels, the music raising
-        // them; and a little of the music straight, as the other seas have it)
+        // (the music's swells under it, as in OCEAN GRID; and the sea's own hills, fixed on it, so the
+        // rings flow by as it travels, the music raising them too)
+        const m = seaMusic(wx, wz) * seaNear(zv);
         const mx = mirror(wx);
         const mz = mirror(wz);
         const hills = 0.075 * Math.sin(mx * 2.1 + mz * 0.7) + 0.06 * Math.sin(mz * 2.6 - mx * 1.3) + 0.045 * Math.sin((mx - mz) * 3.4);
-        H[r * nCols + c] = swellAt(wx, wz, t) + hills * (0.7 + m * 1.6) + m * 0.22;
+        H[r * nCols + c] = swellAt(wx, wz, t) + hills * (0.7 + m * 1.2) + m * 0.4;
         SX[r * nCols + c] = sx;
       }
     }
