@@ -48,10 +48,13 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
 
   // (drawn at 2x at least: on a 1x screen the browser scales it down, smoothing the dots and
   // lines; a phone's 3x is left as it is)
+  // (and at most about 3.5 million pixels: a big monitor in FULL SCREEN at 2x would be four
+  // times that, every fade and fill with it; a phone's full screen stays under it)
+  const MAX_PX = 3.5e6;
   function fit() {
-    const dpr = Math.max(2, window.devicePixelRatio || 1);
     const w = canvas.clientWidth;
     const h = canvas.clientHeight;
+    const dpr = Math.max(1, Math.min(Math.max(2, window.devicePixelRatio || 1), Math.sqrt(MAX_PX / Math.max(1, w * h))));
     if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
@@ -299,11 +302,14 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     g.lineWidth = 1.5;
     g.stroke();
     // New particles from the blob's edge, more and faster with more energy
-    const spawn = an ? Math.floor(energy * 10 * K + (Math.random() < energy * 3 * K ? 1 : 0)) : 0;
-    for (let k = 0; k < spawn && particles.length < 260; k++) {
+    // (bigger screens: more of them and faster, so they still fly out to the edges)
+    const scale = Math.max(1, Math.min(w, h) / 240);
+    const cap = Math.round(260 * Math.min(4, scale * scale));
+    const spawn = an ? Math.floor(energy * 10 * K * Math.min(4, scale) + (Math.random() < energy * 3 * K ? 1 : 0)) : 0;
+    for (let k = 0; k < spawn && particles.length < cap; k++) {
       const a = Math.random() * Math.PI * 2;
       const r = radiusAt(a);
-      const speed = 0.4 + energy * 3 + Math.random() * 1.2;
+      const speed = (0.4 + energy * 3 + Math.random() * 1.2) * scale;
       particles.push({ x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r, vx: Math.cos(a) * speed, vy: Math.sin(a) * speed, life: 1, hot: Math.random() < energy * 0.6, f: a / (Math.PI * 2) });
     }
     for (let k = particles.length - 1; k >= 0; k--) {
@@ -317,7 +323,8 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       q.life -= 0.012 * K;
       if (q.life <= 0 || q.x < -4 || q.y < -4 || q.x > w + 4 || q.y > h + 4) { particles.splice(k, 1); continue; }
       g.fillStyle = paint(q.f, q.life.toFixed(2), q.hot);
-      g.fillRect(q.x - 1, q.y - 1, 2, 2);
+      const ps = Math.max(2, Math.min(w, h) / 200);
+      g.fillRect(q.x - ps / 2, q.y - ps / 2, ps, ps);
     }
   }
 
@@ -651,8 +658,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       const poly = (path, ...ps) => { path.moveTo(ps[0][0], ps[0][1]); for (let n = 1; n < ps.length; n++) path.lineTo(ps[n][0], ps[n][1]); path.closePath(); };
       for (let j = 0; j < 2 * T_COLS; j++) {
         const a = near[j]; const b = near[j + 1]; const c = far[j + 1]; const d = far[j];
-        if (!a[2] && !b[2] && !c[2] && !d[2]) { // (the road: plain squares)
-          poly(faces, a, b, c, d);
+        if (!a[2] && !b[2] && !c[2] && !d[2]) { // (the road: plain squares, flat, hiding nothing: not filled)
           poly(road, a, b, c, d);
         } else { // (the hills: two triangles)
           poly(faces, a, b, c, d);
@@ -782,81 +788,99 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     }
   }
 
-  // OCEAN (GRID or MESH): a sea of particles stretching away to the horizon and out past every
-  // edge of the screen, each joined to its neighbors by a thin line (a square grid, or a triangle
-  // mesh), fading out with the distance. Across the screen the spectrum (the bass in the middle,
-  // the treble out at the sides), the nearest row the music now and each row further out a moment
-  // older, so the swells roll away from you
-  const SEA_COLS = 96; // (a wide sea: the far rows still reach past the sides)
+  // OCEAN (GRID or MESH): a sea of particles out to the horizon and past every edge of the screen,
+  // each joined to its neighbors by a thin line (a square grid, or a triangle mesh), fading out
+  // with the distance, and travelling: the view drifts over it in a slowly wandering direction
+  // (always looking the same way). The sea is endless: its swell is one big square tile mirrored
+  // on all four sides, so it carries on seamlessly however far it goes. The music rides on it:
+  // across the screen the spectrum (the bass in the middle, the treble out at the sides), the
+  // nearest row the music now and each row further out a moment older, so the swells roll away
+  const SEA_COLS = 96;
   const SEA_ROWS = 22;
   const SEA_BANDS = 12;
+  const SEA_TILE = 14; // (the swell's tile, in the sea's own units, mirrored at each edge)
   let seaHist = [];
   let seaAt = 0;
   const seaLv = new Float32Array(SEA_BANDS);
+  const seaCam = { x: 0, z: 0, ang: Math.random() * Math.PI * 2, turn: 0, last: 0 };
+  const mirror = (u) => { const m = ((u % (2 * SEA_TILE)) + 2 * SEA_TILE) % (2 * SEA_TILE); return m > SEA_TILE ? 2 * SEA_TILE - m : m; };
   function drawOcean(an, w, h, now, tri) {
     g.clearRect(0, 0, w, h);
     const lv = bands(an, SEA_BANDS);
-    for (let b = 0; b < SEA_BANDS; b++) seaLv[b] = lv ? Math.max(lv[b], seaLv[b] * dec(0.86)) : seaLv[b] * dec(0.9);
+    let energy = 0;
+    for (let b = 0; b < SEA_BANDS; b++) { seaLv[b] = lv ? Math.max(lv[b], seaLv[b] * dec(0.86)) : seaLv[b] * dec(0.9); energy += seaLv[b] / SEA_BANDS; }
     if (!seaHist.length || now - seaAt > 45) { // (a row of the spectrum's history every 45ms)
       seaAt = now;
       seaHist.unshift(Float32Array.from(seaLv));
       if (seaHist.length > SEA_ROWS) seaHist.length = SEA_ROWS;
     }
+    // (on the move: the heading wanders, a little faster with the music)
+    const dt = seaCam.last ? Math.min(0.1, (now - seaCam.last) / 1000) : 0;
+    seaCam.last = now;
+    seaCam.turn = Math.max(-0.35, Math.min(0.35, seaCam.turn + (Math.random() - 0.5) * dt * 1.2));
+    seaCam.ang += seaCam.turn * dt;
+    const speed = 0.8 + energy * 1.2;
+    seaCam.x += Math.sin(seaCam.ang) * speed * dt;
+    seaCam.z += Math.cos(seaCam.ang) * speed * dt;
     const t = now / 1000;
     const cx = w / 2;
     const horizon = h * 0.3;
     const f = h * 0.95;
     const camH = 1.1;
     const zNear = 0.95; // (the nearest row just below the bottom edge)
-    const zStep = 0.6;
-    const zFar = zNear + (SEA_ROWS - 1) * zStep;
+    const dz = 0.6;
+    const zFar = zNear + (SEA_ROWS - 1) * dz;
     const fx = f * 0.42;
-    // (the sea's width: enough that its farthest row still runs past both sides)
-    const halfW = ((w * 0.62) * zFar) / fx;
-    const half = (SEA_COLS - 1) / 2;
+    const halfW = ((w * 0.62) * zFar) / fx; // (wide enough that the farthest row runs past both sides)
+    const dx = (2 * halfW) / (SEA_COLS - 1);
+    const j0 = Math.ceil((seaCam.z + zNear) / dz);
+    const i0 = Math.floor((seaCam.x - halfW) / dx);
     const pts = [];
-    for (let r = 0; r < SEA_ROWS; r++) {
-      const row = seaHist[Math.min(r, seaHist.length - 1)];
-      const z = zNear + r * zStep;
-      const shift = tri && r % 2 ? 0.5 : 0;
+    for (let r = 0; r <= SEA_ROWS; r++) {
+      const j = j0 + r;
+      const zv = j * dz - seaCam.z;
+      const hist = seaHist[Math.max(0, Math.min(seaHist.length - 1, Math.floor((zv - zNear) / dz)))];
+      const shift = tri && (j & 1) ? 0.5 : 0;
       const line = [];
-      for (let c = 0; c < SEA_COLS; c++) {
-        const u = (c + shift - half) / half; // (-1 to 1 across the sea)
-        const x = u * halfW;
-        const sx = cx + (x / z) * fx;
-        const off = Math.min(1, Math.abs(sx - cx) / (w / 2)); // (its band: by where it is on the screen)
-        const band = Math.min(SEA_BANDS - 1, Math.floor(off * SEA_BANDS));
-        const lvl = row[band];
-        const swell = 0.09 * Math.sin(u * 16 + t * 1.2 + r * 0.6) + 0.06 * Math.sin(r * 0.8 - t * 1.6 + u * 7);
+      for (let k = 0; k <= SEA_COLS; k++) {
+        const wx = (i0 + k + shift) * dx;
+        const wz = j * dz;
+        const xv = wx - seaCam.x;
+        const sx = cx + (xv / zv) * fx;
+        const band = Math.min(SEA_BANDS - 1, Math.floor(Math.min(1, Math.abs(sx - cx) / (w / 2)) * SEA_BANDS));
+        const lvl = hist[band];
+        const mx = mirror(wx);
+        const mz = mirror(wz);
+        const swell = 0.08 * Math.sin(mx * 0.9 + t * 0.8) + 0.06 * Math.sin(mz * 1.1 - t * 0.6 + mx * 0.4) + 0.05 * Math.sin((mx + mz) * 0.5 + t * 1.1);
         const y = swell + lvl * 0.6;
-        line.push({ x: sx, y: horizon + ((camH - y) / z) * f, lvl, f: (u + 1) / 2 });
+        line.push({ x: sx, y: horizon + ((camH - y) / zv) * f, lvl, f: (Math.sin(mx * 0.2) + 1) / 2, zv });
       }
-      pts.push(line);
+      pts.push({ j, zv, line });
     }
-    const fadeAt = (r) => Math.pow(1 - r / SEA_ROWS, 1.4); // (nearer, brighter)
+    const fadeAt = (zv) => Math.pow(Math.max(0, 1 - (zv - zNear) / (zFar - zNear)), 1.4); // (nearer, brighter; nothing at the far edge, so rows come in softly)
     const off = (p) => p.x < -30 || p.x > w + 30 || p.y > h + 30; // (out of sight: not drawn)
     g.lineWidth = 0.7;
     for (let r = SEA_ROWS - 1; r >= 0; r--) { // (the far rows first)
-      const a = fadeAt(r);
+      const { j, zv, line: row } = pts[r];
+      const a = fadeAt(zv);
+      if (a <= 0.005) continue;
       g.strokeStyle = paint(0.5, (a * 0.45).toFixed(3));
       g.beginPath();
-      const row = pts[r];
-      const back = r + 1 < SEA_ROWS ? pts[r + 1] : null;
+      const back = pts[r + 1].line;
       const link = (p, q) => { if (off(p) && off(q)) return; g.moveTo(p.x, p.y); g.lineTo(q.x, q.y); };
-      for (let c = 0; c < SEA_COLS; c++) {
-        if (c) link(row[c - 1], row[c]);
-        if (!back) continue;
-        link(row[c], back[c]); // (to the row behind)
+      for (let k = 0; k <= SEA_COLS; k++) {
+        if (k) link(row[k - 1], row[k]);
+        link(row[k], back[k]); // (to the row behind)
         if (tri) { // (a triangle lattice: the other nearest in the row behind too)
-          const other = r % 2 ? c + 1 : c - 1;
-          if (other >= 0 && other < SEA_COLS) link(row[c], back[other]);
+          const other = j & 1 ? k + 1 : k - 1;
+          if (other >= 0 && other <= SEA_COLS) link(row[k], back[other]);
         }
       }
       g.stroke();
-      const dot = 1 + (1 - r / SEA_ROWS) * 1.6;
+      const dot = 1 + Math.max(0, 1 - (zv - zNear) / (zFar - zNear)) * 1.6;
       for (const p of row) {
         if (off(p)) continue;
-        g.fillStyle = paint(p.f, Math.min(1, a * (0.5 + p.lvl * 0.7)).toFixed(3), p.lvl > 0.75 && r < SEA_ROWS * 0.5);
+        g.fillStyle = paint(p.f, Math.min(1, a * (0.5 + p.lvl * 0.7)).toFixed(3), p.lvl > 0.75 && zv < zFar * 0.5);
         g.fillRect(p.x - dot / 2, p.y - dot / 2, dot, dot);
       }
     }
@@ -937,56 +961,93 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     }
   }
 
-  // PARTICLE CLOUD: the sound itself in three dimensions, turning slowly clockwise like the ORB:
-  // each particle a moment of the wave, placed by its level now and a moment and two moments
-  // later (a shape that's the music's own: a pure tone a ring, a chord a knot, noise a cloud),
-  // spread sideways by the stereo; nearer particles bigger and brighter
-  let cloudL = null;
-  let cloudR = null;
-  let cloudLevel = 0.02;
+  // PARTICLE CLOUD: a swarm inside an unseen cube that turns slowly like the ORB, its particles
+  // free to fly anywhere in it (across, up and down, toward you and away). With no music it's a
+  // murmuration: a few flocks, each following its own wandering leader, wheeling, merging and
+  // splitting like starlings or gnats. The music stirs it: the bass bursts each flock outward,
+  // every particle's own band of the spectrum kicks it about as it plays, and the louder it gets
+  // the faster they fly; the loudest glow in the accent. Nearer particles bigger and brighter
+  const SWARM_N = 420;
+  const SWARM_FLOCKS = 3;
+  const SWARM_BANDS = 12;
+  let swarm = null;
+  let swarmLast = 0;
+  const swarmLv = new Float32Array(SWARM_BANDS);
+  const swarmLead = Array.from({ length: SWARM_FLOCKS }, () => ({ ph: [0, 1, 2].map(() => Math.random() * 6.28), fr: [0, 1, 2].map(() => 0.18 + Math.random() * 0.22) }));
   function drawCloud(an, w, h, now) {
-    fade(w, h, 0.35);
-    const pair = getStereo();
-    const src = pair ? pair[0] : an;
-    if (!src) return;
-    const n = src.fftSize;
-    if (!cloudL || cloudL.length !== n) { cloudL = new Float32Array(n); cloudR = new Float32Array(n); }
-    src.getFloatTimeDomainData(cloudL);
-    if (pair) pair[1].getFloatTimeDomainData(cloudR); else cloudR.set(cloudL);
-    let sq = 0;
-    for (let i = 0; i < n; i++) { const m = (cloudL[i] + cloudR[i]) / 2; sq += m * m; }
-    cloudLevel += (Math.max(Math.sqrt(sq / n), 0.002) - cloudLevel) * ease(0.08);
-    const gain = Math.min(40, 0.32 / cloudLevel);
-    const tau = 9; // (samples between the three moments)
+    if (!swarm) {
+      swarm = Array.from({ length: SWARM_N }, (_, i) => ({
+        x: (Math.random() - 0.5) * 1.4, y: (Math.random() - 0.5) * 1.4, z: (Math.random() - 0.5) * 1.4,
+        vx: 0, vy: 0, vz: 0, flock: i % SWARM_FLOCKS, band: Math.floor(Math.random() * SWARM_BANDS), jit: Math.random() * 6.28,
+      }));
+    }
+    fade(w, h, 0.38);
+    const lv = bands(an, SWARM_BANDS);
+    let energy = 0;
+    for (let b = 0; b < SWARM_BANDS; b++) { swarmLv[b] = lv ? Math.max(lv[b], swarmLv[b] * dec(0.85)) : swarmLv[b] * dec(0.9); energy += swarmLv[b] / SWARM_BANDS; }
+    const bass = (swarmLv[0] + swarmLv[1] + swarmLv[2]) / 3;
+    const dt = swarmLast ? Math.min(0.05, (now - swarmLast) / 1000) : 0.016;
+    swarmLast = now;
+    const t = now / 1000;
+    // (the leaders, wandering the cube; the flocks' middles)
+    const leads = swarmLead.map((L) => {
+      const p = L.fr.map((f, a) => 0.62 * Math.sin(t * f + L.ph[a]));
+      const v = L.fr.map((f, a) => 0.62 * f * Math.cos(t * f + L.ph[a]));
+      return { p, v, c: [0, 0, 0], n: 0 };
+    });
+    for (const q of swarm) { const c = leads[q.flock]; c.c[0] += q.x; c.c[1] += q.y; c.c[2] += q.z; c.n++; }
+    for (const c of leads) if (c.n) { c.c[0] /= c.n; c.c[1] /= c.n; c.c[2] /= c.n; }
+    const maxV = 0.55 + energy * 1.4;
+    for (const q of swarm) {
+      const L = leads[q.flock];
+      const lvl = swarmLv[q.band];
+      // (toward the leader and along with it; a little wander of its own)
+      let ax = (L.p[0] - q.x) * 1.1 + (L.v[0] - q.vx) * 0.9 + Math.sin(t * 1.7 + q.jit) * 0.35;
+      let ay = (L.p[1] - q.y) * 1.1 + (L.v[1] - q.vy) * 0.9 + Math.sin(t * 1.3 + q.jit * 1.7) * 0.35;
+      let az = (L.p[2] - q.z) * 1.1 + (L.v[2] - q.vz) * 0.9 + Math.cos(t * 1.5 + q.jit * 2.3) * 0.35;
+      // (not all on one spot: pushed off the flock's middle when crowded, and burst out by the bass)
+      const dx = q.x - L.c[0];
+      const dy = q.y - L.c[1];
+      const dz = q.z - L.c[2];
+      const d = Math.hypot(dx, dy, dz) + 1e-4;
+      const push = (d < 0.22 ? (0.22 - d) * 9 : 0) + bass * bass * 7;
+      ax += (dx / d) * push; ay += (dy / d) * push; az += (dz / d) * push;
+      if (lvl > 0.2) { // (its own band playing: a kick about)
+        const k = (lvl - 0.2) * 5;
+        ax += (Math.random() - 0.5) * k; ay += (Math.random() - 0.5) * k; az += (Math.random() - 0.5) * k;
+      }
+      // (the cube's unseen walls turn them back)
+      for (const [key, acc] of [['x', 0], ['y', 1], ['z', 2]]) {
+        const over = Math.abs(q[key]) - 1;
+        if (over > 0) { const pushIn = -Math.sign(q[key]) * over * 10; if (acc === 0) ax += pushIn; else if (acc === 1) ay += pushIn; else az += pushIn; }
+      }
+      q.vx += ax * dt; q.vy += ay * dt; q.vz += az * dt;
+      const v = Math.hypot(q.vx, q.vy, q.vz);
+      if (v > maxV) { q.vx *= maxV / v; q.vy *= maxV / v; q.vz *= maxV / v; }
+      q.x += q.vx * dt; q.y += q.vy * dt; q.z += q.vz * dt;
+    }
+    // (the cube turning, as the ORB does: clockwise from above, tipped toward you)
     const spin = -now / 7000;
     const cs = Math.cos(spin);
     const sn = Math.sin(spin);
-    const tilt = 0.45;
+    const tilt = 0.4;
     const ct = Math.cos(tilt);
     const st = Math.sin(tilt);
     const cx = w / 2;
     const cy = h / 2;
-    const R = Math.min(w, h) * 0.34;
-    const dot = Math.max(1.2, Math.min(w, h) / 220);
-    for (let i = 0; i + 2 * tau < n; i += 2) {
-      const m0 = (cloudL[i] + cloudR[i]) / 2;
-      const m1 = (cloudL[i + tau] + cloudR[i + tau]) / 2;
-      const m2 = (cloudL[i + 2 * tau] + cloudR[i + 2 * tau]) / 2;
-      const side = (cloudR[i] - cloudL[i]) / 2;
-      let x = (m0 + side * 2.5) * gain;
-      let y = -m1 * gain;
-      let z = m2 * gain;
-      const d = Math.hypot(x, y, z);
-      if (d > 1.4) { x *= 1.4 / d; y *= 1.4 / d; z *= 1.4 / d; }
-      const x2 = x * cs + z * sn;
-      let z2 = -x * sn + z * cs;
-      const y2 = y * ct - z2 * st;
-      z2 = y * st + z2 * ct;
-      const persp = 1 / (2.2 - z2 * 0.6);
-      const depth = Math.max(0, Math.min(1, (z2 + 1.4) / 2.8));
-      const size = dot * (0.6 + depth * 1.1);
-      g.fillStyle = paint((Math.atan2(y2, x2) / (Math.PI * 2) + 1) % 1, (0.15 + depth * 0.75).toFixed(2), d > 1.1);
-      g.fillRect(cx + x2 * R * persp * 2 - size / 2, cy + y2 * R * persp * 2 - size / 2, size, size);
+    const R = Math.min(w, h) * 0.36;
+    const dot = Math.max(1.4, Math.min(w, h) / 200);
+    for (const q of swarm) {
+      const x2 = q.x * cs + q.z * sn;
+      let z2 = -q.x * sn + q.z * cs;
+      const y2 = q.y * ct - z2 * st;
+      z2 = q.y * st + z2 * ct;
+      const persp = 1 / (2.4 - z2 * 0.7);
+      const depth = Math.max(0, Math.min(1, (z2 + 1.3) / 2.6));
+      const lvl = swarmLv[q.band];
+      const size = dot * (0.55 + depth * 1.1) * (1 + lvl * 0.5);
+      g.fillStyle = paint(q.flock / SWARM_FLOCKS + q.band / 60, Math.min(1, 0.18 + depth * 0.62 + lvl * 0.3).toFixed(2), lvl > 0.7 && depth > 0.3);
+      g.fillRect(cx + x2 * R * persp * 2.4 - size / 2, cy - y2 * R * persp * 2.4 - size / 2, size, size);
     }
   }
 
