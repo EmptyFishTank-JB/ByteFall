@@ -3367,18 +3367,21 @@ effectsBtn.addEventListener('click', () => {
 });
 updateEffectsBtn();
 
+// (SETTINGS' switch, and the same one in the MUSIC PLAYER)
 const outputBtn = document.getElementById('output-btn');
+const mpOutputBtn = document.getElementById('mp-output-btn');
 function updateOutputBtn() {
   const out = SOUND_OUTPUTS.find((o) => o.id === Music.getOutput());
   outputBtn.textContent = `SOUND OUTPUT: ${out.label}`;
+  mpOutputBtn.textContent = `SOUND OUTPUT: ${out.label}`;
   document.getElementById('output-note').textContent = `${out.note} On earbuds or headphones, pick HEADPHONES.`;
 }
-outputBtn.addEventListener('click', () => {
+[outputBtn, mpOutputBtn].forEach((b) => b.addEventListener('click', () => {
   const i = SOUND_OUTPUTS.findIndex((o) => o.id === Music.getOutput());
   Music.setOutput(SOUND_OUTPUTS[(i + 1) % SOUND_OUTPUTS.length].id);
   updateOutputBtn();
   SFX.play('punct');
-});
+}));
 updateOutputBtn();
 
 const musicBtn = document.getElementById('music-btn');
