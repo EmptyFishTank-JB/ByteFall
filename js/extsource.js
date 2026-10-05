@@ -17,6 +17,7 @@ const ExtSource = (() => {
   let on = false;
   let frames = 0;
   let lastLoud = 0; // (the loudest raw level in the last frame)
+  let lastPeak = 0; // (by capture: the loudest sample, 0 to 1, for the readout in dB: even a faint sound shows)
   let state = 'off'; // (off, asking, on, denied, error)
   // (the app's: frames from Android, as an analyser)
   let fft = null;
@@ -66,6 +67,7 @@ const ExtSource = (() => {
     rate = pcm.rate;
     frames++;
     lastLoud = Math.round(loud * 128);
+    lastPeak = loud;
   }
   const win = new Float32Array(N);
   for (let i = 0; i < N; i++) win[i] = 0.42 - 0.5 * Math.cos((2 * Math.PI * i) / N) + 0.08 * Math.cos((4 * Math.PI * i) / N);
@@ -184,7 +186,9 @@ const ExtSource = (() => {
         let st = 'on';
         try { st = window.BytefallAndroid.extState(); } catch (e) {}
         if (st === 'ended') return 'STOPPED: TAP SOURCE';
-        return frames ? `IN: ${lastLoud ? `LEVEL ${lastLoud}` : 'SILENT'}` : 'IN: NO DATA';
+        if (!frames) return 'IN: NO DATA';
+        if (pcm) return `IN: ${lastPeak > 0 ? `${Math.round(20 * Math.log10(lastPeak))} DB` : 'SILENT'}`; // (SILENT: only zeros come over)
+        return `IN: ${lastLoud ? `LEVEL ${lastLoud}` : 'SILENT'}`;
       }
       if (!mic) return '';
       const d = new Uint8Array(mic.an.fftSize);
@@ -214,7 +218,7 @@ const ExtSource = (() => {
       on = false;
       state = 'off';
       if (app()) { try { window.BytefallAndroid.extStop(); } catch (e) {} }
-      frames = 0; lastLoud = 0;
+      frames = 0; lastLoud = 0; lastPeak = 0;
       if (mic) { mic.stream.getTracks().forEach((tr) => tr.stop()); mic.ctx.close().catch(() => {}); mic = null; }
       fft = null; wave = null; smooth = null; peakDb = 20; pcm = null;
     },
