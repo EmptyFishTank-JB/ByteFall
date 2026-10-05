@@ -12,7 +12,7 @@ function vizRgb(name, fallback) {
 const VIZ_NAMES = {
   bars: 'SPECTRUM', wave: 'WAVE', scope: 'OSCILLOSCOPE', spectro: 'SPECTROGRAM', vu: 'LEVEL METERS', radial: 'RADIAL',
   fluid: 'PARTICLES', vector: 'VECTORSCOPE', vectorwide: 'STEREO FIELD', lissajous: 'LISSAJOUS', matrix: 'MATRIX RAIN', bitgrid: 'BIT GRID', terrain: 'SYNTHWAVE GRID',
-  plasma: 'PLASMA', tunnel: 'TUNNEL', orb: 'ORB', ocean: 'OCEAN GRID', oceantri: 'OCEAN MESH', topo: 'TOPOGRAPHY',
+  plasma: 'PLASMA', tunnel: 'TUNNEL', orb: 'ORB', ocean: 'OCEAN GRID', oceantri: 'OCEAN MESH', oceanhex: 'OCEAN HEX', topo: 'TOPOGRAPHY',
   cloud: 'PARTICLE CLOUD',
 };
 
@@ -127,7 +127,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       let max = 0;
       for (let i = 0; i < wave.length; i++) max = Math.max(max, Math.abs(wave[i]));
       loudness = Math.max(max, loudness * dec(0.97), 0.004);
-      const gain = Math.min(14, 0.9 / loudness);
+      const gain = Math.min(6, 0.42 / loudness); // (its peaks to about two fifths of the height: a line, not a wall)
       for (let i = 0; i < wave.length; i++) {
         const x = (i / (wave.length - 1)) * w;
         const y = mid - wave[i] * gain * mid;
@@ -207,8 +207,8 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       }
       let max = 0;
       for (let i = start; i < start + span; i++) max = Math.max(max, Math.abs(d[i]));
-      loudness = Math.max(max, loudness * 0.97, 0.004);
-      const gain = Math.min(14, 0.85 / loudness);
+      loudness = Math.max(max, loudness * dec(0.97), 0.004);
+      const gain = Math.min(6, 0.45 / loudness); // (peaks to under half the height)
       for (let i = 0; i < span; i++) {
         const x = (i / (span - 1)) * w;
         const y = mid - d[start + i] * gain * mid;
@@ -535,40 +535,41 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     g.textAlign = 'start';
   }
 
-  // BIT GRID: a 7x7 board, each column a band of the spectrum stacking bits as high as it's
+  // BIT GRID: an 8x8 board (HARD's), each column a band of the spectrum stacking bits as high as it's
   // loud, each bit showing its column's height; a full column flashes like a decrypt
-  const gridLevels = new Float32Array(7);
-  const gridFlash = new Float32Array(7);
+  const GRID_N = 8;
+  const gridLevels = new Float32Array(GRID_N);
+  const gridFlash = new Float32Array(GRID_N);
   function drawBitGrid(an, w, h) {
     g.clearRect(0, 0, w, h);
-    const lv = bands(an, 7) || calm(7).map((v) => v * 1.9); // (calm: a few bits stacking and settling)
-    const cell = Math.min((w - 16) / 7, (h - 12) / 7);
-    const x0 = (w - cell * 7) / 2;
-    const y0 = (h - cell * 7) / 2;
+    const lv = bands(an, GRID_N) || calm(GRID_N).map((v) => v * 1.9); // (calm: a few bits stacking and settling)
+    const cell = Math.min((w - 16) / GRID_N, (h - 12) / GRID_N);
+    const x0 = (w - cell * GRID_N) / 2;
+    const y0 = (h - cell * GRID_N) / 2;
     g.font = `${Math.floor(cell * 0.42)}px ${getComputedStyle(canvas).fontFamily}`;
     g.textAlign = 'center';
     g.textBaseline = 'middle';
-    for (let c = 0; c < 7; c++) {
+    for (let c = 0; c < GRID_N; c++) {
       const level = lv ? lv[c] : 0;
       gridLevels[c] = Math.max(level, gridLevels[c] - 0.04 * K);
-      const n = Math.round(gridLevels[c] * 7);
-      if (n >= 7 && gridFlash[c] <= 0) gridFlash[c] = 1;
+      const n = Math.round(gridLevels[c] * GRID_N);
+      if (n >= GRID_N && gridFlash[c] <= 0) gridFlash[c] = 1;
       gridFlash[c] = Math.max(0, gridFlash[c] - 0.06 * K);
-      for (let r = 0; r < 7; r++) {
+      for (let r = 0; r < GRID_N; r++) {
         const x = x0 + c * cell + 2;
-        const y = y0 + (6 - r) * cell + 2;
+        const y = y0 + (GRID_N - 1 - r) * cell + 2;
         const s = cell - 4;
         if (r < n) {
           const hot = gridFlash[c] > 0;
-          g.fillStyle = hot ? paint(c / 7, (0.25 + 0.5 * gridFlash[c]).toFixed(2), true) : paint(c / 7, 0.12);
+          g.fillStyle = hot ? paint(c / GRID_N, (0.25 + 0.5 * gridFlash[c]).toFixed(2), true) : paint(c / GRID_N, 0.12);
           g.fillRect(x, y, s, s);
-          g.strokeStyle = paint(c / 7, 0.9, hot);
+          g.strokeStyle = paint(c / GRID_N, 0.9, hot);
           g.lineWidth = 1;
           g.strokeRect(x + 0.5, y + 0.5, s - 1, s - 1);
-          g.fillStyle = paint(c / 7, 0.95, hot);
+          g.fillStyle = paint(c / GRID_N, 0.95, hot);
           g.fillText(String(n), x + s / 2, y + s / 2 + 1);
         } else {
-          g.strokeStyle = paint(c / 7, 0.1);
+          g.strokeStyle = paint(c / GRID_N, 0.1);
           g.strokeRect(x + 0.5, y + 0.5, s - 1, s - 1);
         }
       }
@@ -900,6 +901,91 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     }
   }
 
+  // OCEAN HEX: the travelling sea again (the same view, swell and music as OCEAN GRID), its
+  // particles joined in a honeycomb: each row a zigzag, every other point linked to the row
+  // behind, so the lines close into hexagons
+  function drawOceanHex(an, w, h, now) {
+    g.clearRect(0, 0, w, h);
+    const lv = bands(an, SEA_BANDS);
+    let energy = 0;
+    for (let b = 0; b < SEA_BANDS; b++) { seaLv[b] = lv ? Math.max(lv[b], seaLv[b] * dec(0.86)) : seaLv[b] * dec(0.9); energy += seaLv[b] / SEA_BANDS; }
+    if (!seaHist.length || now - seaAt > 45) {
+      seaAt = now;
+      seaHist.unshift(Float32Array.from(seaLv));
+      if (seaHist.length > SEA_ROWS) seaHist.length = SEA_ROWS;
+    }
+    const dt = seaCam.last ? Math.min(0.1, (now - seaCam.last) / 1000) : 0;
+    seaCam.last = now;
+    seaCam.turn = Math.max(-0.35, Math.min(0.35, seaCam.turn + (Math.random() - 0.5) * dt * 1.2));
+    seaCam.ang += seaCam.turn * dt;
+    const speed = 0.8 + energy * 1.2;
+    seaCam.x += Math.sin(seaCam.ang) * speed * dt;
+    seaCam.z += Math.cos(seaCam.ang) * speed * dt;
+    const t = now / 1000;
+    const cx = w / 2;
+    const horizon = h * 0.3;
+    const f = h * 0.95;
+    const camH = 1.1;
+    const zNear = 0.95;
+    const dz = 0.6;
+    const zFar = zNear + (SEA_ROWS - 1) * dz;
+    const fx = f * 0.42;
+    const dx = dz * 0.6; // (the honeycomb's step across)
+    const zig = dz / 6; // (each row's zigzag: a regular-looking hexagon)
+    const j0 = Math.ceil((seaCam.z + 0.3) / dz);
+    const rows = SEA_ROWS + Math.ceil((zNear - 0.3) / dz);
+    const pts = [];
+    for (let r = 0; r <= rows + 1; r++) {
+      const j = j0 + r;
+      const zRow = j * dz - seaCam.z;
+      // (only the points in sight in this row, and one past each side)
+      const span = ((w / 2 + 60) * (zRow + zig)) / fx;
+      const k0 = Math.floor((seaCam.x - span) / dx) - 1;
+      const k1 = Math.ceil((seaCam.x + span) / dx) + 1;
+      const hist = seaHist[Math.max(0, Math.min(seaHist.length - 1, Math.floor((zRow - zNear) / dz)))];
+      const line = [];
+      for (let k = k0; k <= k1; k++) {
+        const up = (k + j) & 1; // (the zigzag: every other point a little nearer)
+        const wx = k * dx;
+        const wz = j * dz + (up ? -zig : zig);
+        const zv = wz - seaCam.z;
+        const sx = cx + ((wx - seaCam.x) / zv) * fx;
+        const band = Math.min(SEA_BANDS - 1, Math.floor(Math.min(1, Math.abs(sx - cx) / (w / 2)) * SEA_BANDS));
+        const lvl = hist[band];
+        const mx = mirror(wx);
+        const mz = mirror(wz);
+        const swell = 0.08 * Math.sin(mx * 0.9 + t * 0.8) + 0.06 * Math.sin(mz * 1.1 - t * 0.6 + mx * 0.4) + 0.05 * Math.sin((mx + mz) * 0.5 + t * 1.1);
+        const y = swell + lvl * 0.6;
+        line.push({ k, x: sx, y: horizon + ((camH - y) / zv) * f, lvl, f: (Math.sin(mx * 0.2) + 1) / 2 });
+      }
+      pts.push({ j, zv: zRow, k0, line });
+    }
+    const fadeAt = (zv) => Math.pow(Math.min(1, Math.max(0, 1 - (zv - zNear) / (zFar - zNear))), 1.4);
+    const off = (p) => p.x < -30 || p.x > w + 30 || p.y > h + 30;
+    g.lineWidth = 0.7;
+    for (let r = rows; r >= 0; r--) {
+      const { j, zv, k0, line: row } = pts[r];
+      const a = fadeAt(zv);
+      if (a <= 0.005) continue;
+      g.strokeStyle = paint(0.5, (a * 0.45).toFixed(3));
+      g.beginPath();
+      const back = pts[r + 1];
+      const link = (p, q) => { if (!q || (off(p) && off(q))) return; g.moveTo(p.x, p.y); g.lineTo(q.x, q.y); };
+      for (let n = 0; n < row.length; n++) {
+        const p = row[n];
+        if (n) link(row[n - 1], p); // (along the zigzag)
+        if (!((p.k + j) & 1)) link(p, back.line[p.k - back.k0]); // (every other point: on to the row behind)
+      }
+      g.stroke();
+      const dot = 1 + Math.min(1, Math.max(0, 1 - (zv - zNear) / (zFar - zNear))) * 1.6;
+      for (const p of row) {
+        if (off(p)) continue;
+        g.fillStyle = paint(p.f, Math.min(1, a * (0.5 + p.lvl * 0.7)).toFixed(3), p.lvl > 0.75 && zv < zFar * 0.5);
+        g.fillRect(p.x - dot / 2, p.y - dot / 2, dot, dot);
+      }
+    }
+  }
+
   // TOPOGRAPHY: a map's contour lines over a landscape the music raises: a hill for each band of
   // the spectrum (the bass broad, the treble small and sharp), drifting slowly about; the louder
   // a band, the higher its hill and the closer its rings; the highest rings in the accent
@@ -976,12 +1062,13 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     }
   }
 
-  // PARTICLE CLOUD: a swarm inside an unseen cube that turns slowly like the ORB, its particles
-  // free to fly anywhere in it (across, up and down, toward you and away). With no music it's a
-  // murmuration: a few flocks, each following its own wandering leader, wheeling, merging and
-  // splitting like starlings or gnats. The music stirs it: the bass bursts each flock outward,
-  // every particle's own band of the spectrum kicks it about as it plays, and the louder it gets
-  // the faster they fly; the loudest glow in the accent. Nearer particles bigger and brighter
+  // PARTICLE CLOUD: a swarm loose in open, endless 3D space, the view following it as it drifts
+  // and circling it slowly like the ORB turns; nothing holds it in, so it has no edges to show.
+  // With no music it's a murmuration: a few flocks, each following its own wandering leader,
+  // wheeling, merging and splitting like starlings or gnats. The music stirs it: the bass puffs
+  // each flock outward (it gathers back), every particle's own band of the spectrum kicks it about
+  // as it plays, and the louder it gets the faster they fly; the loudest glow in the accent.
+  // Nearer particles bigger and brighter, the far ones fading into the dark
   const SWARM_N = 420;
   const SWARM_FLOCKS = 3;
   const SWARM_BANDS = 12;
@@ -989,6 +1076,8 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   let swarmLast = 0;
   const swarmLv = new Float32Array(SWARM_BANDS);
   const swarmLead = Array.from({ length: SWARM_FLOCKS }, () => ({ ph: [0, 1, 2].map(() => Math.random() * 6.28), fr: [0, 1, 2].map(() => 0.18 + Math.random() * 0.22) }));
+  const swarmHome = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0 }; // (where the whole swarm is headed, drifting on through space)
+  const swarmCam = { x: 0, y: 0, z: 0 }; // (the view's center, following the swarm)
   function drawCloud(an, w, h, now) {
     if (!swarm) {
       swarm = Array.from({ length: SWARM_N }, (_, i) => ({
@@ -1004,15 +1093,20 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     const dt = swarmLast ? Math.min(0.05, (now - swarmLast) / 1000) : 0.016;
     swarmLast = now;
     const t = now / 1000;
-    // (the leaders, wandering the cube; the flocks' middles)
+    // (the swarm's heading wanders; it travels on through space)
+    swarmHome.vx += (Math.random() - 0.5) * dt * 0.3; swarmHome.vy += (Math.random() - 0.5) * dt * 0.2; swarmHome.vz += (Math.random() - 0.5) * dt * 0.3;
+    const hv = Math.hypot(swarmHome.vx, swarmHome.vy, swarmHome.vz);
+    if (hv > 0.25) { swarmHome.vx *= 0.25 / hv; swarmHome.vy *= 0.25 / hv; swarmHome.vz *= 0.25 / hv; }
+    swarmHome.x += swarmHome.vx * dt; swarmHome.y += swarmHome.vy * dt; swarmHome.z += swarmHome.vz * dt;
+    // (the leaders, wandering about it; the flocks' middles)
     const leads = swarmLead.map((L) => {
-      const p = L.fr.map((f, a) => 0.62 * Math.sin(t * f + L.ph[a]));
-      const v = L.fr.map((f, a) => 0.62 * f * Math.cos(t * f + L.ph[a]));
+      const p = L.fr.map((f, a) => [swarmHome.x, swarmHome.y, swarmHome.z][a] + 0.7 * Math.sin(t * f + L.ph[a]));
+      const v = L.fr.map((f, a) => [swarmHome.vx, swarmHome.vy, swarmHome.vz][a] + 0.7 * f * Math.cos(t * f + L.ph[a]));
       return { p, v, c: [0, 0, 0], n: 0 };
     });
     for (const q of swarm) { const c = leads[q.flock]; c.c[0] += q.x; c.c[1] += q.y; c.c[2] += q.z; c.n++; }
     for (const c of leads) if (c.n) { c.c[0] /= c.n; c.c[1] /= c.n; c.c[2] /= c.n; }
-    const maxV = 0.55 + energy * 1.4;
+    const maxV = 0.55 + energy * 1.3;
     for (const q of swarm) {
       const L = leads[q.flock];
       const lvl = swarmLv[q.band];
@@ -1020,28 +1114,31 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       let ax = (L.p[0] - q.x) * 1.1 + (L.v[0] - q.vx) * 0.9 + Math.sin(t * 1.7 + q.jit) * 0.35;
       let ay = (L.p[1] - q.y) * 1.1 + (L.v[1] - q.vy) * 0.9 + Math.sin(t * 1.3 + q.jit * 1.7) * 0.35;
       let az = (L.p[2] - q.z) * 1.1 + (L.v[2] - q.vz) * 0.9 + Math.cos(t * 1.5 + q.jit * 2.3) * 0.35;
-      // (not all on one spot: pushed off the flock's middle when crowded, and burst out by the bass)
+      // (not all on one spot: pushed off the flock's middle when crowded, and puffed out by the bass)
       const dx = q.x - L.c[0];
       const dy = q.y - L.c[1];
       const dz = q.z - L.c[2];
       const d = Math.hypot(dx, dy, dz) + 1e-4;
-      const push = (d < 0.22 ? (0.22 - d) * 9 : 0) + bass * bass * 7;
+      const push = (d < 0.22 ? (0.22 - d) * 9 : 0) + bass * bass * 3.2;
       ax += (dx / d) * push; ay += (dy / d) * push; az += (dz / d) * push;
       if (lvl > 0.2) { // (its own band playing: a kick about)
-        const k = (lvl - 0.2) * 5;
+        const k = (lvl - 0.2) * 4;
         ax += (Math.random() - 0.5) * k; ay += (Math.random() - 0.5) * k; az += (Math.random() - 0.5) * k;
-      }
-      // (the cube's unseen walls turn them back)
-      for (const [key, acc] of [['x', 0], ['y', 1], ['z', 2]]) {
-        const over = Math.abs(q[key]) - 1;
-        if (over > 0) { const pushIn = -Math.sign(q[key]) * over * 10; if (acc === 0) ax += pushIn; else if (acc === 1) ay += pushIn; else az += pushIn; }
       }
       q.vx += ax * dt; q.vy += ay * dt; q.vz += az * dt;
       const v = Math.hypot(q.vx, q.vy, q.vz);
       if (v > maxV) { q.vx *= maxV / v; q.vy *= maxV / v; q.vz *= maxV / v; }
       q.x += q.vx * dt; q.y += q.vy * dt; q.z += q.vz * dt;
     }
-    // (the cube turning, as the ORB does: clockwise from above, tipped toward you)
+    // (the view: centered on the swarm, eased so it glides after it)
+    let mx = 0;
+    let my = 0;
+    let mz = 0;
+    for (const q of swarm) { mx += q.x; my += q.y; mz += q.z; }
+    mx /= SWARM_N; my /= SWARM_N; mz /= SWARM_N;
+    const k = ease(0.02);
+    swarmCam.x += (mx - swarmCam.x) * k; swarmCam.y += (my - swarmCam.y) * k; swarmCam.z += (mz - swarmCam.z) * k;
+    // (circling it, as the ORB turns: clockwise from above, tipped toward you)
     const spin = -now / 7000;
     const cs = Math.cos(spin);
     const sn = Math.sin(spin);
@@ -1050,19 +1147,28 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     const st = Math.sin(tilt);
     const cx = w / 2;
     const cy = h / 2;
-    const R = Math.min(w, h) * 0.36;
+    const D = 3.4; // (the view's distance from the swarm's middle)
+    const R = Math.min(w, h) * 0.26;
     const dot = Math.max(1.4, Math.min(w, h) / 200);
     for (const q of swarm) {
-      const x2 = q.x * cs + q.z * sn;
-      let z2 = -q.x * sn + q.z * cs;
-      const y2 = q.y * ct - z2 * st;
-      z2 = q.y * st + z2 * ct;
-      const persp = 1 / (2.4 - z2 * 0.7);
+      const rx = q.x - swarmCam.x;
+      const ry = q.y - swarmCam.y;
+      const rz = q.z - swarmCam.z;
+      const x2 = rx * cs + rz * sn;
+      let z2 = -rx * sn + rz * cs;
+      const y2 = ry * ct - z2 * st;
+      z2 = ry * st + z2 * ct;
+      if (z2 > D - 0.4) continue; // (behind the view)
+      const persp = D / (D - z2);
+      const far = Math.hypot(rx, ry, rz); // (far from the swarm's middle: fading into the dark)
+      const fadeFar = Math.max(0, Math.min(1, 1.6 - far * 0.45));
       const depth = Math.max(0, Math.min(1, (z2 + 1.3) / 2.6));
       const lvl = swarmLv[q.band];
-      const size = dot * (0.55 + depth * 1.1) * (1 + lvl * 0.5);
-      g.fillStyle = paint(q.flock / SWARM_FLOCKS + q.band / 60, Math.min(1, 0.18 + depth * 0.62 + lvl * 0.3).toFixed(2), lvl > 0.7 && depth > 0.3);
-      g.fillRect(cx + x2 * R * persp * 2.4 - size / 2, cy - y2 * R * persp * 2.4 - size / 2, size, size);
+      const size = dot * persp * (0.6 + depth * 0.6) * (1 + lvl * 0.5);
+      const a = fadeFar * Math.min(1, 0.18 + depth * 0.62 + lvl * 0.3);
+      if (a < 0.02) continue;
+      g.fillStyle = paint(q.flock / SWARM_FLOCKS + q.band / 60, a.toFixed(2), lvl > 0.7 && depth > 0.3);
+      g.fillRect(cx + x2 * R * persp - size / 2, cy - y2 * R * persp - size / 2, size, size);
     }
   }
 
@@ -1144,6 +1250,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       else if (mode === 'orb') drawOrb(an, w, h, now);
       else if (mode === 'ocean') drawOcean(an, w, h, now, false);
       else if (mode === 'oceantri') drawOcean(an, w, h, now, true);
+      else if (mode === 'oceanhex') drawOceanHex(an, w, h, now);
       else if (mode === 'topo') drawTopo(an, w, h, now);
       else if (mode === 'cloud') drawCloud(an, w, h, now);
       else drawBars(an, w, h);

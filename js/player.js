@@ -13,7 +13,7 @@
   bgBtn.hidden = !!window.BYTEFALL_APP; // (the app: the player always plays on in the background)
   if (window.BYTEFALL_APP) document.querySelector('#music-player .mp-note').textContent = 'Every track plays with all its layers in. With the player open, the music keeps going with the screen off or in another app.';
   const viz = createVisualizer(document.getElementById('mp-viz'), Music.getAnalyser, {
-    bars: 40, modes: ['bars', 'wave', 'scope', 'spectro', 'vu', 'radial', 'fluid', 'vector', 'vectorwide', 'lissajous', 'matrix', 'bitgrid', 'terrain', 'plasma', 'tunnel', 'orb', 'ocean', 'oceantri', 'topo', 'cloud'], key: 'bytefall-player-viz', getStereo: Music.getStereo,
+    bars: 40, modes: ['bars', 'wave', 'scope', 'spectro', 'vu', 'radial', 'fluid', 'vector', 'vectorwide', 'lissajous', 'matrix', 'bitgrid', 'terrain', 'plasma', 'tunnel', 'orb', 'ocean', 'oceantri', 'oceanhex', 'topo', 'cloud'], key: 'bytefall-player-viz', getStereo: Music.getStereo,
   });
   const vizNameEl = document.getElementById('mp-viz-name');
   const showVizName = () => { vizNameEl.textContent = `// ${viz.name}`; };
@@ -210,7 +210,11 @@
     freeRotation(on);
     if (on) {
       stir();
-      if (!window.BYTEFALL_APP && document.documentElement.requestFullscreen && !document.fullscreenElement) document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+      if (!window.BYTEFALL_APP && document.documentElement.requestFullscreen && !document.fullscreenElement) {
+        document.documentElement.requestFullscreen({ navigationUI: 'hide' })
+          .then(() => { try { if (screen.orientation && screen.orientation.lock) screen.orientation.lock('any').catch(() => {}); } catch (e) {} }) // (turning with the phone)
+          .catch(() => {});
+      }
     } else {
       el.classList.remove('viz-calm');
       if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
