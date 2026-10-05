@@ -5033,8 +5033,8 @@ function formatCentral(isoDate) {
   const build = (window.BYTEFALL_APP && window.BYTEFALL_APP.build) || (document.currentScript && new URL(document.currentScript.src).searchParams.get('v'));
   document.getElementById('buildInfo').textContent = build || '\u2014';
 }
-// (the Android app has them baked in: tools/build-app.js)
-if (window.BYTEFALL_APP) {
+// (the bundled Android app has them baked in: tools/build-app.js; the LIVE one asks, as the web does)
+if (window.BYTEFALL_APP && !window.BYTEFALL_APP.live) {
   document.getElementById('commitInfo').textContent = window.BYTEFALL_APP.commit || '\u2014';
   document.getElementById('updatedInfo').textContent = window.BYTEFALL_APP.date ? formatCentral(window.BYTEFALL_APP.date) : '\u2014';
 } else fetch('https://api.github.com/repos/EmptyFishTank-JB/ByteFall/commits?sha=main&per_page=1')

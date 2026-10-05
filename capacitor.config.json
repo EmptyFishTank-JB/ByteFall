@@ -6,5 +6,6 @@
   "android": {
     "backgroundColor": "#020403",
     "webContentsDebuggingEnabled": false
-  }
+  },
+  "appendUserAgent": "ByteFallApp"
 }

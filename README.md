@@ -62,7 +62,17 @@ done, its page has the APK under **Artifacts** (a zip; unzip it on the phone and
 would get it: no dev page or DEV link, dev switches cleared, full screen, portrait.
 Every test build is signed with the same test key (`tools/android/test.keystore`, not a
 secret and not for the Play Store), so a new one installs over the last and keeps the
-progress. To build it locally instead: `npm ci && node tools/build-app.js && npx cap add
+progress.
+
+**SOURCE** (asked when you run it): **live**, the default, is the testing build: it loads the game
+from GitHub Pages each time it opens (its cache off), so every push to main shows up on the phone
+with no new APK; offline it falls back to the copy it was built with (`tools/live-app.js`). It
+has the DEV link, as the site does. **bundled** has its own copy, as players would get it, and is
+what the Play Store builds will be (updated through the store). Either one installs over the other;
+only a change to the Android side itself (`tools/android/`, the Capacitor setup) needs a new APK.
+The game knows it's in the app from its user agent (`ByteFallApp`, `capacitor.config.json`).
+
+To build it locally instead: `npm ci && node tools/build-app.js && npx cap add
 android && node tools/setup-android.js`, then open `android/` in Android Studio.
 
 ## Keys and boosters
