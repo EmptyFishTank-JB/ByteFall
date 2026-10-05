@@ -78,7 +78,7 @@ const vizSettings = (bars) => {
     lissajous: [{ id: 'dot', name: 'DOTS', unit: 'PX', min: 0.5, max: 6, step: 0.5, def: 1.5 }, { ...pct('zoom', 'ZOOM'), min: 20, def: 200 }, trail(13)],
     matrix: [
       { id: 'size', name: 'CHARACTERS', unit: 'PX', min: 6, max: 48, step: 1, def: 12 },
-      { ...pct('speed', 'SPEED') },
+      { ...pct('speed', 'SPEED'), def: 50 },
       trail(61),
     ],
     bitgrid: [
