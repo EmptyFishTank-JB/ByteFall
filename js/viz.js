@@ -844,10 +844,13 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     const fx = f * 0.42;
     const halfW = ((w * 0.62) * zFar) / fx; // (wide enough that the farthest row runs past both sides)
     const dx = (2 * halfW) / (SEA_COLS - 1);
-    const j0 = Math.ceil((seaCam.z + zNear) / dz);
+    // (from just in front of the camera, so the sea runs on past the bottom of the screen whatever
+    // the rows' spacing as it travels: no cut-off along the bottom)
+    const j0 = Math.ceil((seaCam.z + 0.3) / dz);
     const i0 = Math.floor((seaCam.x - halfW) / dx);
     const pts = [];
-    for (let r = 0; r <= SEA_ROWS; r++) {
+    const rows = SEA_ROWS + Math.ceil((zNear - 0.3) / dz);
+    for (let r = 0; r <= rows; r++) {
       const j = j0 + r;
       const zv = j * dz - seaCam.z;
       const hist = seaHist[Math.max(0, Math.min(seaHist.length - 1, Math.floor((zv - zNear) / dz)))];
@@ -868,10 +871,10 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       }
       pts.push({ j, zv, line });
     }
-    const fadeAt = (zv) => Math.pow(Math.max(0, 1 - (zv - zNear) / (zFar - zNear)), 1.4); // (nearer, brighter; nothing at the far edge, so rows come in softly)
+    const fadeAt = (zv) => Math.pow(Math.min(1, Math.max(0, 1 - (zv - zNear) / (zFar - zNear))), 1.4); // (nearer, brighter; nothing at the far edge, so rows come in softly)
     const off = (p) => p.x < -30 || p.x > w + 30 || p.y > h + 30; // (out of sight: not drawn)
     g.lineWidth = 0.7;
-    for (let r = SEA_ROWS - 1; r >= 0; r--) { // (the far rows first)
+    for (let r = rows - 1; r >= 0; r--) { // (the far rows first)
       const { j, zv, line: row } = pts[r];
       const a = fadeAt(zv);
       if (a <= 0.005) continue;
@@ -888,7 +891,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
         }
       }
       g.stroke();
-      const dot = 1 + Math.max(0, 1 - (zv - zNear) / (zFar - zNear)) * 1.6;
+      const dot = 1 + Math.min(1, Math.max(0, 1 - (zv - zNear) / (zFar - zNear))) * 1.6;
       for (const p of row) {
         if (off(p)) continue;
         g.fillStyle = paint(p.f, Math.min(1, a * (0.5 + p.lvl * 0.7)).toFixed(3), p.lvl > 0.75 && zv < zFar * 0.5);

@@ -2244,6 +2244,16 @@ body.player-open { overflow: hidden; }
 .music-player.viz-full .mp-viz-hint { display: none; }
 .music-player.viz-full .mp-viz-name { top: max(10px, env(safe-area-inset-top)); left: 12px; transition: opacity 0.6s ease; }
 .music-player.viz-full.viz-calm .mp-viz-name { opacity: 0; }
+/* Play / pause, flashing up in the middle of the full screen visualizer */
+.mp-viz-flash {
+  position: absolute; left: 50%; top: 50%; width: 76px; height: 76px; margin: -38px 0 0 -38px; display: grid; place-items: center;
+  color: var(--fg); background: rgba(0, 0, 0, 0.45); border: 1px solid var(--fg-dim); border-radius: 50%; opacity: 0; pointer-events: none;
+}
+.mp-viz-flash svg { width: 32px; height: 32px; }
+.mp-viz-flash .mp-flash-pause, .mp-viz-flash.paused .mp-flash-play { display: none; }
+.mp-viz-flash.paused .mp-flash-pause { display: block; }
+.mp-viz-flash.show { animation: mp-flash 0.9s ease-out; }
+@keyframes mp-flash { 0% { opacity: 0; transform: scale(0.8); } 15% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.15); } }
 .mp-viz-exit {
   position: fixed; z-index: 211; top: max(8px, env(safe-area-inset-top)); right: 10px; width: 40px; height: 40px;
   display: grid; place-items: center; padding: 0; cursor: pointer; color: var(--fg); background: rgba(0, 0, 0, 0.45);

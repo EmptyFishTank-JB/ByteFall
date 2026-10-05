@@ -152,9 +152,21 @@
     render();
   });
   // (a tap on its left half: the style before; on its right half: the next one)
+  // (FULL SCREEN: the outer quarter on either side switches styles, left the one before, right the
+  // next; anywhere between plays or pauses the music, a sign flashing in the middle)
+  const flashEl = document.getElementById('mp-viz-flash');
   document.getElementById('mp-viz-btn').addEventListener('click', (e) => {
     const r = e.currentTarget.getBoundingClientRect();
-    viz.toggle(e.clientX && e.clientX < r.left + r.width / 2 ? -1 : 1);
+    const at = e.clientX ? (e.clientX - r.left) / r.width : 0.9;
+    if (el.classList.contains('viz-full') && at > 0.25 && at < 0.75) {
+      playBtn.click();
+      flashEl.classList.toggle('paused', !Music.isEnabled());
+      flashEl.classList.remove('show');
+      void flashEl.offsetWidth; // (the flash again)
+      flashEl.classList.add('show');
+      return;
+    }
+    viz.toggle(at < 0.5 ? -1 : 1);
     showVizName();
     markStyle();
   });
