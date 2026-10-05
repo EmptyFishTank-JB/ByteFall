@@ -1,6 +1,6 @@
 # ByteFall Viz
 
-ByteFall's music visualizers on their own, for whatever the phone plays: all 22 styles from the
+ByteFall's music visualizers on their own, for whatever the phone plays: all 23 styles from the
 game's MUSIC PLAYER (`js/viz.js`, shared with the game), edge to edge, turning with the phone.
 
 - **Web:** `visualizer/index.html`, live on GitHub Pages at

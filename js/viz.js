@@ -12,7 +12,7 @@ function vizRgb(name, fallback) {
 const VIZ_NAMES = {
   bars: 'SPECTRUM', wave: 'WAVE', scope: 'OSCILLOSCOPE', spectro: 'SPECTROGRAM', vu: 'LEVEL METERS', radial: 'RADIAL',
   fluid: 'PARTICLES', vector: 'VECTORSCOPE', vectorwide: 'STEREO FIELD', lissajous: 'LISSAJOUS', matrix: 'MATRIX RAIN', bitgrid: 'BIT GRID', terrain: 'SYNTHWAVE GRID',
-  plasma: 'PLASMA', tunnel: 'TUNNEL', orb: 'ORB', ocean: 'OCEAN GRID', oceantri: 'OCEAN MESH', oceanhex: 'OCEAN HEX', oceantopo: 'OCEAN TOPO', topo: 'TOPOGRAPHY',
+  plasma: 'PLASMA', tunnel: 'TUNNEL', orb: 'ORB', ocean: 'OCEAN GRID', oceantri: 'OCEAN MESH', oceanhex: 'OCEAN HEX', oceantopo: 'OCEAN TOPO', oceandepth: 'OCEAN DEPTHS', topo: 'TOPOGRAPHY',
   cloud: 'PARTICLE CLOUD',
 };
 
@@ -912,8 +912,9 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   // (a lattice fixed on the sea, drawn from the turning camera: every point in sight (and a step
   // past) projected, the music by the swells under it; links: [di, dj] to
   // the neighbors each point joins, by the point's own i and j. The lines go in a few batches by
-  // distance, each its own fade, the dots after)
-  function drawSeaLattice(w, h, now, step, rowStep, pointAt, links) {
+  // distance, each its own fade, the dots after. drop: how deep each point's line runs straight
+  // down into the sea (0: none), in a few pieces, each fainter, so it fades to black in the depths)
+  function drawSeaLattice(w, h, now, step, rowStep, pointAt, links, drop = 0) {
     const V = seaView(w, h);
     const t = now / 1000;
     const halfFar = ((w / 2 + 80) * (V.zFar + V.dz)) / V.fx; // (the farthest row's reach, past both sides)
@@ -942,7 +943,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
         if (sx < -(w * 0.6) || sx > w * 1.6) continue;
         const lvl = seaMusic(wx, wz) * seaNear(zv);
         const y = swellAt(wx, wz, t) + lvl * 0.6;
-        pts[(j - j0) * nI + (i - i0)] = { i, j, x: sx, y: V.horizon + ((V.camH - y) / zv) * V.f, zv, lvl: Math.min(1, lvl), f: (Math.sin(mirror(wx) * 0.2) + 1) / 2 };
+        pts[(j - j0) * nI + (i - i0)] = { i, j, x: sx, y: V.horizon + ((V.camH - y) / zv) * V.f, zv, lvl: Math.min(1, lvl), f: (Math.sin(mirror(wx) * 0.2) + 1) / 2, sea: y };
       }
     }
     const at = (i, j) => (i < i0 || i > i1 || j < j0 || j > j1 ? null : pts[(j - j0) * nI + (i - i0)]);
@@ -958,6 +959,18 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
         const a = fadeAt((p.zv + q.zv) / 2);
         if (a <= 0.005) continue;
         segs[Math.min(BATCHES - 1, Math.round(a * (BATCHES - 1)))].push(p.x, p.y, q.x, q.y);
+      }
+      if (drop && !off(p)) { // (down into the depths: brighter as the music lifts it)
+        const a = fadeAt(p.zv) * (0.75 + p.lvl * 0.6);
+        if (a <= 0.005) continue;
+        const PIECES = 5;
+        let prev = p.y;
+        for (let k = 1; k <= PIECES; k++) {
+          const yk = V.horizon + ((V.camH - (p.sea - (drop * k) / PIECES)) / p.zv) * V.f;
+          const ak = a * Math.pow(1 - (k - 0.5) / PIECES, 1.6);
+          if (ak > 0.005 && prev < h + 2) segs[Math.min(BATCHES - 1, Math.round(Math.min(1, ak) * (BATCHES - 1)))].push(p.x, prev, p.x, yk);
+          prev = yk;
+        }
       }
     }
     g.lineWidth = 0.7;
@@ -1000,6 +1013,19 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     drawSeaLattice(w, h, now, cell, rowStep,
       (i, j) => [(i + (tri && (j & 1) ? 0.5 : 0)) * cell, j * rowStep],
       tri ? (i, j) => [[1, 0], [0, 1], [j & 1 ? 1 : -1, 1]] : () => SQUARE);
+  }
+
+  // OCEAN DEPTHS: the travelling sea (the same view, turns, swell and music's swells as OCEAN GRID)
+  // as its points alone, each with a thin line hanging straight down from it into the depths,
+  // fading to black the deeper it goes; the points staggered row to row, so no lines line up
+  function drawOceanDepths(an, w, h, now) {
+    g.clearRect(0, 0, w, h);
+    seaStep(an, now, w, h);
+    const cell = 0.42 * Math.max(1, Math.sqrt(w / h / 0.45));
+    const rowStep = cell * 0.866;
+    drawSeaLattice(w, h, now, cell, rowStep,
+      (i, j) => [(i + (j & 1 ? 0.5 : 0)) * cell, j * rowStep],
+      () => [], 1.6);
   }
 
   // OCEAN HEX: the travelling sea again (the same view, turns, swell and music's swells as OCEAN GRID), its
@@ -1375,6 +1401,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       else if (mode === 'oceantri') drawOcean(an, w, h, now, true);
       else if (mode === 'oceanhex') drawOceanHex(an, w, h, now);
       else if (mode === 'oceantopo') drawOceanTopo(an, w, h, now);
+      else if (mode === 'oceandepth') drawOceanDepths(an, w, h, now);
       else if (mode === 'topo') drawTopo(an, w, h, now);
       else if (mode === 'cloud') drawCloud(an, w, h, now);
       else drawBars(an, w, h);

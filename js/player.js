@@ -16,7 +16,7 @@
   const vizAnalyser = () => (ExtSource.isOn() ? ExtSource.analyser() : Music.getAnalyser());
   const vizStereo = () => (ExtSource.isOn() ? ExtSource.stereo() : Music.getStereo());
   const viz = createVisualizer(document.getElementById('mp-viz'), vizAnalyser, {
-    bars: 40, modes: ['bars', 'wave', 'scope', 'spectro', 'vu', 'radial', 'fluid', 'vector', 'vectorwide', 'lissajous', 'matrix', 'bitgrid', 'terrain', 'plasma', 'tunnel', 'orb', 'ocean', 'oceantri', 'oceanhex', 'oceantopo', 'topo', 'cloud'], key: 'bytefall-player-viz', getStereo: vizStereo,
+    bars: 40, modes: ['bars', 'wave', 'scope', 'spectro', 'vu', 'radial', 'fluid', 'vector', 'vectorwide', 'lissajous', 'matrix', 'bitgrid', 'terrain', 'plasma', 'tunnel', 'orb', 'ocean', 'oceantri', 'oceanhex', 'oceantopo', 'oceandepth', 'topo', 'cloud'], key: 'bytefall-player-viz', getStereo: vizStereo,
   });
   const vizNameEl = document.getElementById('mp-viz-name');
   const showVizName = () => { vizNameEl.textContent = `// ${viz.name}`; };
