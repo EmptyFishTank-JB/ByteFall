@@ -12,8 +12,11 @@
   const speedBtn = document.getElementById('mp-speed-btn');
   bgBtn.hidden = !!window.BYTEFALL_APP; // (the app: the player always plays on in the background)
   if (window.BYTEFALL_APP) document.querySelector('#music-player .mp-note').textContent = 'Every track plays with all its layers in. With the player open, the music keeps going with the screen off or in another app.';
-  const viz = createVisualizer(document.getElementById('mp-viz'), Music.getAnalyser, {
-    bars: 40, modes: ['bars', 'wave', 'scope', 'spectro', 'vu', 'radial', 'fluid', 'vector', 'vectorwide', 'lissajous', 'matrix', 'bitgrid', 'terrain', 'plasma', 'tunnel', 'orb', 'ocean', 'oceantri', 'oceanhex', 'oceantopo', 'topo', 'cloud'], key: 'bytefall-player-viz', getStereo: Music.getStereo,
+  // (the visualizer's SOURCE: ByteFall's own music, or another source's, js/extsource.js)
+  const vizAnalyser = () => (ExtSource.isOn() ? ExtSource.analyser() : Music.getAnalyser());
+  const vizStereo = () => (ExtSource.isOn() ? null : Music.getStereo());
+  const viz = createVisualizer(document.getElementById('mp-viz'), vizAnalyser, {
+    bars: 40, modes: ['bars', 'wave', 'scope', 'spectro', 'vu', 'radial', 'fluid', 'vector', 'vectorwide', 'lissajous', 'matrix', 'bitgrid', 'terrain', 'plasma', 'tunnel', 'orb', 'ocean', 'oceantri', 'oceanhex', 'oceantopo', 'topo', 'cloud'], key: 'bytefall-player-viz', getStereo: vizStereo,
   });
   const vizNameEl = document.getElementById('mp-viz-name');
   const showVizName = () => { vizNameEl.textContent = `// ${viz.name}`; };
@@ -105,11 +108,13 @@
     toApp(true);
     Music.setFullMix(true);
     render();
+    if (window.playerSource) window.playerSource.resume(); // (OTHER APPS picked last time: listening again)
     requestAnimationFrame(loop);
   }
   // (X, Esc or the phone's back: back to SETTINGS, where it was opened from)
   function close() {
     setFull(false);
+    if (window.playerSource) window.playerSource.rest(); // (not listening with the player shut; back on when it opens)
     el.hidden = true;
     document.body.classList.remove('player-open');
     toApp(false);
@@ -132,6 +137,7 @@
     e.stopImmediatePropagation(); // (not on to SETTINGS' own Esc, which would close it again)
   }, true);
   playBtn.addEventListener('click', () => {
+    if (!Music.isEnabled() && ExtSource.isOn() && window.playerSource) window.playerSource.toBytefall(); // (ByteFall's music again: its source too)
     Music.toggle();
     after();
   });
@@ -159,6 +165,7 @@
     const r = e.currentTarget.getBoundingClientRect();
     const at = e.clientX ? (e.clientX - r.left) / r.width : 0.9;
     if (el.classList.contains('viz-full') && at > 0.25 && at < 0.75) {
+      if (ExtSource.isOn()) return; // (another app's music: its own player plays and pauses it)
       playBtn.click();
       flashEl.classList.toggle('paused', !Music.isEnabled());
       flashEl.classList.remove('show');
@@ -226,6 +233,29 @@
   el.addEventListener('pointerdown', () => { if (isFull()) stir(); }, true);
   document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && isFull()) setFull(false); }); // (the browser's own way out)
   document.addEventListener('visibilitychange', () => { if (!document.hidden && isFull()) { wake = null; keepAwake(true); } });
+
+  // SOURCE: BYTEFALL, or OTHER APPS (the app: whatever the phone is playing, Pandora and all) /
+  // MICROPHONE (the web); switching to it pauses ByteFall's music, so the two don't mix
+  const sourceBtn = document.getElementById('mp-viz-source-btn');
+  let wantOther = false;
+  function showSource(note) {
+    const other = ExtSource.isOn();
+    sourceBtn.textContent = note || (other ? ExtSource.label() : 'BYTEFALL');
+    sourceBtn.classList.toggle('other', other);
+  }
+  async function useOther(on) {
+    wantOther = on;
+    if (!on) { ExtSource.stop(); showSource(); return; }
+    if (Music.isEnabled()) { Music.toggle(); after(); }
+    showSource('ASKING...');
+    const st = await ExtSource.start();
+    if (st === 'on') { showSource(); return; }
+    wantOther = false;
+    showSource(st === 'denied' ? 'NO ACCESS' : 'UNAVAILABLE');
+    setTimeout(() => showSource(), 2200);
+  }
+  sourceBtn.addEventListener('click', () => useOther(!ExtSource.isOn()));
+  window.playerSource = { toBytefall: () => useOther(false), resume: () => { if (wantOther && !ExtSource.isOn()) useOther(true); }, rest: () => { if (ExtSource.isOn()) { ExtSource.stop(); showSource(); } } };
 
   // The STYLES drawer: every style by name, the one showing lit; a tap goes straight to it
   const drawerBtn = document.getElementById('mp-viz-drawer-btn');
