@@ -13,8 +13,155 @@ const VIZ_NAMES = {
   bars: 'SPECTRUM', wave: 'WAVE', scope: 'OSCILLOSCOPE', spectro: 'SPECTROGRAM', vu: 'LEVEL METERS', radial: 'RADIAL',
   fluid: 'PARTICLES', vector: 'VECTORSCOPE', vectorwide: 'STEREO FIELD', lissajous: 'LISSAJOUS', matrix: 'MATRIX RAIN', bitgrid: 'BIT GRID', terrain: 'SYNTHWAVE GRID',
   plasma: 'PLASMA', tunnel: 'TUNNEL', orb: 'ORB', ocean: 'OCEAN GRID', oceantri: 'OCEAN MESH', oceanhex: 'OCEAN HEX', oceantopo: 'OCEAN TOPO', oceandepth: 'OCEAN DEPTHS', topo: 'TOPOGRAPHY',
-  cloud: 'PARTICLE CLOUD',
+  cloud: 'PARTICLE CLOUD', stars: 'STAR FIELD',
 };
+
+// SETTINGS: each style's own, the ones that shape it (in real units where there are any), saved per
+// style. num: a number from min to max (unit shown after it); toggle: on or off. (bars: the number
+// of bars this visualizer starts with)
+const vizSettings = (bars) => {
+  const pct = (id, name) => ({ id, name, unit: '%', min: 0, max: 400, step: 10, def: 100 });
+  const trail = (def) => ({ id: 'trail', name: 'TRAIL', unit: 'MS HALF-LIFE', min: 1, max: 1000, step: 1, def });
+  const sea = (density) => [
+    { id: 'density', name: 'DENSITY', unit: 'POINTS IN VIEW', min: 100, max: 6000, step: 50, def: density, live: true },
+    { ...pct('speed', 'SPEED') },
+    { id: 'turn', name: 'TURNING', unit: '°/S AT MOST', min: 0, max: 90, step: 1, def: 14 },
+  ];
+  return {
+    bars: [
+      { id: 'bars', name: 'BARS', unit: '', min: 4, max: 128, step: 1, def: bars },
+      { id: 'fall', name: 'PEAK FALL', unit: 'HEIGHTS/S', min: 0.2, max: 20, step: 0.2, def: 3 },
+      { id: 'lift', name: 'TREBLE LIFT', unit: '%', min: 0, max: 300, step: 10, def: 70 },
+    ],
+    wave: [
+      { id: 'height', name: 'HEIGHT', unit: '% OF HALF', min: 5, max: 100, step: 1, def: 42 },
+      { id: 'line', name: 'LINE', unit: 'PX', min: 0.5, max: 8, step: 0.5, def: 1.5 },
+      { id: 'glow', name: 'GLOW', unit: 'PX', min: 0, max: 30, step: 1, def: 6 },
+    ],
+    scope: [
+      { id: 'span', name: 'TIME SHOWN', unit: 'MS', min: 2, max: 30, step: 1, def: 21 },
+      { id: 'height', name: 'HEIGHT', unit: '% OF HALF', min: 5, max: 100, step: 1, def: 45 },
+      { id: 'line', name: 'LINE', unit: 'PX', min: 0.5, max: 8, step: 0.5, def: 1.6 },
+    ],
+    spectro: [
+      { id: 'rows', name: 'BANDS', unit: '', min: 8, max: 128, step: 1, def: 64 },
+      { id: 'speed', name: 'SCROLL', unit: 'PX/S', min: 20, max: 1200, step: 10, def: 240 },
+    ],
+    vu: [
+      { id: 'range', name: 'RANGE', unit: 'DB', min: 12, max: 96, step: 6, def: 48 },
+      { id: 'peak', name: 'PEAK FALL', unit: 'DB/S', min: 1, max: 200, step: 1, def: 35 },
+    ],
+    radial: [
+      { id: 'spokes', name: 'SPOKES', unit: '', min: 16, max: 256, step: 4, def: 96 },
+      { id: 'ring', name: 'RING', unit: '% OF SIZE', min: 5, max: 80, step: 1, def: 34 },
+      { id: 'spin', name: 'SPIN', unit: 'RPM', min: 0, max: 30, step: 0.1, def: 1.1 },
+    ],
+    fluid: [
+      { ...pct('amount', 'PARTICLES') },
+      { ...pct('size', 'BLOB SIZE'), min: 30, max: 200 },
+      trail(23),
+    ],
+    vector: [{ id: 'dot', name: 'DOTS', unit: 'PX', min: 0.5, max: 6, step: 0.5, def: 1.5 }, { ...pct('zoom', 'ZOOM'), min: 20 }, trail(13)],
+    vectorwide: [{ id: 'dot', name: 'DOTS', unit: 'PX', min: 0.5, max: 6, step: 0.5, def: 1.5 }, { ...pct('zoom', 'ZOOM'), min: 20 }, trail(13)],
+    lissajous: [{ id: 'dot', name: 'DOTS', unit: 'PX', min: 0.5, max: 6, step: 0.5, def: 1.5 }, { ...pct('zoom', 'ZOOM'), min: 20 }, trail(13)],
+    matrix: [
+      { id: 'size', name: 'CHARACTERS', unit: 'PX', min: 6, max: 48, step: 1, def: 12 },
+      { ...pct('speed', 'SPEED') },
+      trail(61),
+    ],
+    bitgrid: [
+      { id: 'grid', name: 'BOARD', unit: 'BITS SQUARE', min: 4, max: 16, step: 1, def: 8 },
+      { id: 'fall', name: 'DROP', unit: 'BOARDS/S', min: 0.5, max: 20, step: 0.5, def: 4.8 },
+    ],
+    terrain: [
+      { ...pct('speed', 'SPEED') },
+      { ...pct('peaks', 'PEAK HEIGHT') },
+      { id: 'sun', name: 'SUN', type: 'toggle', def: 1 },
+    ],
+    plasma: [
+      { ...pct('speed', 'SPEED') },
+      { id: 'cell', name: 'PIXEL SIZE', unit: 'PX', min: 2, max: 24, step: 1, def: 6 },
+    ],
+    tunnel: [
+      { id: 'sides', name: 'SIDES', unit: '', min: 3, max: 32, step: 1, def: 8 },
+      { ...pct('speed', 'SPEED') },
+      { ...pct('sway', 'SWAY') },
+    ],
+    orb: [
+      { id: 'count', name: 'PARTICLES', unit: '', min: 100, max: 4000, step: 20, def: 720 },
+      { id: 'spin', name: 'SPIN', unit: 'RPM', min: 0, max: 30, step: 0.1, def: 1.6 },
+      { ...pct('size', 'SIZE'), min: 30, max: 200 },
+    ],
+    ocean: sea(1250),
+    oceantri: sea(740),
+    oceanhex: sea(520),
+    oceandepth: [{ ...sea(1100)[0], max: 3000 }, ...sea(1100).slice(1), { ...pct('depth', 'LINE DEPTH') }], // (its hanging lines: at most 3,000, more bogs down)
+    oceantopo: [
+      { id: 'lines', name: 'CONTOURS', unit: '', min: 3, max: 30, step: 1, def: 10 },
+      { ...pct('speed', 'SPEED') },
+      { id: 'turn', name: 'TURNING', unit: '°/S AT MOST', min: 0, max: 90, step: 1, def: 14 },
+    ],
+    topo: [
+      { id: 'lines', name: 'CONTOURS', unit: '', min: 3, max: 30, step: 1, def: 12 },
+      { ...pct('drift', 'DRIFT') },
+    ],
+    cloud: [
+      { id: 'count', name: 'PARTICLES', unit: '', min: 50, max: 3000, step: 10, def: 420 },
+      { id: 'flocks', name: 'FLOCKS', unit: '', min: 1, max: 8, step: 1, def: 3 },
+      { id: 'spin', name: 'SPIN', unit: 'RPM', min: 0, max: 30, step: 0.1, def: 1.4 },
+    ],
+    stars: [
+      { id: 'count', name: 'STARS', unit: 'AROUND YOU', min: 100, max: 8000, step: 50, def: 2500 },
+      { id: 'speed', name: 'SPEED', unit: 'LY/S', min: 0, max: 30, step: 0.5, def: 3 },
+      { id: 'turn', name: 'TURNING', unit: '°/S AT MOST', min: 0, max: 90, step: 1, def: 8 },
+      { ...pct('size', 'STAR SIZE'), min: 20, max: 400 },
+    ],
+  };
+};
+
+// THE SETTINGS PANEL (the music player's and ByteFall Viz's STYLES drawers): the style showing's
+// settings, a number box for each (its unit after it, and for DENSITY what's drawn now) or an ON /
+// OFF; DEFAULT puts this style's back, ALL DEFAULTS every style's. Built into el; refresh() when the
+// style may have changed (and every so often while it shows, for the live counts)
+function vizSettingsPanel(el, viz) {
+  let shownFor = '';
+  const render = () => {
+    shownFor = viz.mode;
+    const list = viz.settings;
+    el.hidden = !list.length;
+    if (!list.length) { el.innerHTML = ''; return; }
+    el.innerHTML = `<div class="viz-set-head">${viz.name} SETTINGS</div>${list.map((d) => (d.type === 'toggle'
+      ? `<div class="viz-set-row"><span class="viz-set-name">${d.name}</span><button type="button" class="viz-set-toggle" data-id="${d.id}"></button></div>`
+      : `<div class="viz-set-row"><label class="viz-set-name" for="viz-set-${d.id}">${d.name}</label><input id="viz-set-${d.id}" data-id="${d.id}" type="number" inputmode="decimal" min="${d.min}" max="${d.max}" step="${d.step}"><span class="viz-set-unit">${d.unit}</span><span class="viz-set-live" data-live="${d.id}"></span></div>`)).join('')}<div class="viz-set-btns"><button type="button" data-act="def">DEFAULT</button><button type="button" data-act="all">ALL DEFAULTS</button></div>`;
+    update();
+  };
+  const update = () => {
+    if (viz.mode !== shownFor) { render(); return; }
+    for (const d of viz.settings) {
+      if (d.type === 'toggle') { const b = el.querySelector(`.viz-set-toggle[data-id="${d.id}"]`); if (b) { b.textContent = d.value ? 'ON' : 'OFF'; b.classList.toggle('on', !!d.value); } continue; }
+      const inp = el.querySelector(`input[data-id="${d.id}"]`);
+      if (inp && document.activeElement !== inp) inp.value = d.value;
+      const live = el.querySelector(`[data-live="${d.id}"]`);
+      if (live) live.textContent = d.live;
+    }
+    const def = el.querySelector('[data-act="def"]');
+    const all = el.querySelector('[data-act="all"]');
+    if (def) def.disabled = !viz.settingsChanged;
+    if (all) all.disabled = !viz.anySettingsChanged;
+  };
+  el.addEventListener('change', (e) => { const id = e.target.dataset && e.target.dataset.id; if (id && e.target.matches('input')) { viz.setSetting(id, Number(e.target.value)); update(); } });
+  el.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.matches('input')) e.target.blur(); });
+  el.addEventListener('click', (e) => {
+    const t = e.target.closest('button');
+    if (!t) return;
+    if (t.classList.contains('viz-set-toggle')) { const d = viz.settings.find((x) => x.id === t.dataset.id); viz.setSetting(t.dataset.id, d && d.value ? 0 : 1); }
+    else if (t.dataset.act === 'def') viz.resetSettings();
+    else if (t.dataset.act === 'all') viz.resetAllSettings();
+    update();
+  });
+  render();
+  return { refresh: update };
+}
 
 // modes: the styles this one cycles through (the playlist's small one: bars and wave);
 // key: where its pick is saved; getStereo(): [left, right] analysers for the vectorscope
@@ -22,12 +169,33 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   const MODE_KEY = key;
   const SEGMENT = 3; // css px per LED segment, plus a 1px gap
   const g = canvas.getContext('2d');
-  const peaks = new Float32Array(bars);
+  let peaks = new Float32Array(bars);
   let freq = null;
   let wave = null;
   let loudness = 0.02; // rolling peak for the wave's auto-gain
   let mode = modes[0];
   try { if (modes.includes(localStorage.getItem(MODE_KEY))) mode = localStorage.getItem(MODE_KEY); } catch (e) {}
+  // SETTINGS (vizSettings): what's been changed, per style ({ style: { id: value } }); opt(id): the
+  // style showing's value; optOf(style, id) another's. The oceans' DENSITY, saved on its own before
+  // settings came, is carried over
+  const SETTINGS = vizSettings(bars);
+  const SETTINGS_KEY = `${MODE_KEY}-settings`;
+  let changed = {};
+  try { changed = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}') || {}; } catch (e) { changed = {}; }
+  try {
+    const old = JSON.parse(localStorage.getItem(`${MODE_KEY}-sea-density`) || 'null');
+    if (old) {
+      for (const [m, v] of Object.entries(old)) if (SETTINGS[m]) changed[m] = { density: v, ...(changed[m] || {}) };
+      localStorage.removeItem(`${MODE_KEY}-sea-density`);
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(changed));
+    }
+  } catch (e) {}
+  const specOf = (m, id) => (SETTINGS[m] || []).find((d) => d.id === id);
+  const optOf = (m, id) => { const c = changed[m]; return c && id in c ? c[id] : specOf(m, id).def; };
+  const opt = (id) => optOf(mode, id);
+  const saveSettings = () => { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(changed)); } catch (e) {} };
+  // (a phosphor TRAIL as its half-life, to the fade a 120Hz frame takes)
+  const trailFade = (ms) => 1 - Math.pow(0.5, 1000 / 120 / Math.max(1, ms));
 
   // The signal's colors follow the theme: its bit color (hot parts in its accent), or under
   // SPECTRUM a rainbow cycling like the bits (f: 0-1 across the bars, spokes or particles)
@@ -75,6 +243,10 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     if (an && (!freq || freq.length !== an.frequencyBinCount)) freq = new Uint8Array(an.frequencyBinCount);
     if (an) an.getByteFrequencyData(freq);
     const hzPerBin = an ? an.context.sampleRate / an.fftSize : 1;
+    const bars = opt('bars');
+    if (peaks.length !== bars) peaks = new Float32Array(bars);
+    const lift = opt('lift') / 100;
+    const fall = (opt('fall') / 120) * K;
     const segments = Math.floor((h + 1) / (SEGMENT + 1));
     const gap = 2;
     const barW = (w - gap * (bars - 1)) / bars;
@@ -89,9 +261,9 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
         const to = Math.max(from + 1, Math.ceil(hi / hzPerBin));
         let peak = 0;
         for (let i = from; i < to && i < freq.length; i++) peak = Math.max(peak, freq[i]);
-        level = Math.min(1, (peak / 255) * (1 + 0.7 * (b / bars))); // lift the quieter treble end
+        level = Math.min(1, (peak / 255) * (1 + lift * (b / bars))); // lift the quieter treble end
       } else level = calmBars ? calmBars[b] : 0;
-      peaks[b] = Math.max(level, peaks[b] - 0.025 * K);
+      peaks[b] = Math.max(level, peaks[b] - fall);
       const lit = Math.round(level * segments);
       const cap = Math.min(segments - 1, Math.round(peaks[b] * segments));
       const x = b * (barW + gap);
@@ -118,7 +290,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     g.fillRect(0, 0, w, h);
     g.globalCompositeOperation = 'source-over';
     const mid = h / 2;
-    g.lineWidth = 1.5;
+    g.lineWidth = opt('line');
     g.lineJoin = 'round';
     g.beginPath();
     if (an) {
@@ -127,7 +299,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       let max = 0;
       for (let i = 0; i < wave.length; i++) max = Math.max(max, Math.abs(wave[i]));
       loudness = Math.max(max, loudness * dec(0.97), 0.004);
-      const gain = Math.min(6, 0.42 / loudness); // (its peaks to about two fifths of the height: a line, not a wall)
+      const gain = Math.min(6, (opt('height') / 100) / loudness); // (its peaks to about two fifths of the height: a line, not a wall)
       for (let i = 0; i < wave.length; i++) {
         const x = (i / (wave.length - 1)) * w;
         const y = mid - wave[i] * gain * mid;
@@ -135,7 +307,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       }
       g.strokeStyle = paint(0, 0.95);
       g.shadowColor = paint(0, 0.8);
-      g.shadowBlur = 6;
+      g.shadowBlur = opt('glow');
     } else {
       const t = now / 1000;
       for (let x = 0; x <= w; x += 3) {
@@ -200,7 +372,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     g.beginPath();
     if (an) {
       const d = timeData(an);
-      const span = Math.floor(d.length / 2);
+      const span = Math.max(16, Math.min(Math.floor(d.length * 0.75), Math.round((opt('span') / 1000) * an.context.sampleRate)));
       let start = 0;
       for (let i = 1; i < d.length - span; i++) {
         if (d[i - 1] < 0 && d[i] >= 0) { start = i; break; }
@@ -208,7 +380,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       let max = 0;
       for (let i = start; i < start + span; i++) max = Math.max(max, Math.abs(d[i]));
       loudness = Math.max(max, loudness * dec(0.97), 0.004);
-      const gain = Math.min(6, 0.45 / loudness); // (peaks to under half the height)
+      const gain = Math.min(6, (opt('height') / 100) / loudness); // (peaks to under half the height)
       for (let i = 0; i < span; i++) {
         const x = (i / (span - 1)) * w;
         const y = mid - d[start + i] * gain * mid;
@@ -222,7 +394,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       }
     }
     g.strokeStyle = paint(0, an ? 0.95 : 0.5);
-    g.lineWidth = 1.6;
+    g.lineWidth = opt('line');
     g.shadowColor = paint(0, 0.8);
     g.shadowBlur = an ? 6 : 0;
     g.stroke();
@@ -231,11 +403,13 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
 
   // RADIAL: spectrum bars around a ring (bass in the middle of each side, mirrored), the ring
   // swelling with the bass
-  const radialLevels = new Float32Array(48);
+  let radialLevels = new Float32Array(48);
+  let radialSpin = 0;
   function drawRadial(an, w, h, now) {
     const fg = vizRgb('--fg-rgb', '57, 255, 143');
     const accent = vizRgb('--accent-rgb', '255, 209, 102');
     fade(w, h, 0.55);
+    if (radialLevels.length !== opt('spokes') / 2) radialLevels = new Float32Array(Math.round(opt('spokes') / 2));
     const n = radialLevels.length;
     const lv = bands(an, n) || calm(n);
     for (let b = 0; b < n; b++) radialLevels[b] = lv ? Math.max(lv[b], radialLevels[b] * dec(0.86)) : radialLevels[b] * dec(0.9);
@@ -243,10 +417,11 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     const cx = w / 2;
     const cy = h / 2;
     const size = Math.min(w, h) / 2;
-    const r0 = size * (0.34 + 0.08 * bass);
+    const r0 = size * (opt('ring') / 100 + 0.08 * bass);
     const room = size - r0 - 4;
     const spokes = n * 2;
-    const spin = now / 9000;
+    radialSpin += ((opt('spin') * Math.PI * 2) / 60) * (K / 120); // (its RPM)
+    const spin = radialSpin;
     g.lineCap = 'round';
     g.lineWidth = Math.max(2, ((Math.PI * 2 * r0) / spokes) * 0.55);
     for (let k = 0; k < spokes; k++) {
@@ -275,7 +450,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   function drawFluid(an, w, h, now) {
     const fg = vizRgb('--fg-rgb', '57, 255, 143');
     const accent = vizRgb('--accent-rgb', '255, 209, 102');
-    fade(w, h, 0.22);
+    fade(w, h, trailFade(opt('trail')));
     const n = blobLevels.length;
     const lv = bands(an, n);
     for (let b = 0; b < n; b++) blobLevels[b] += ((lv ? lv[b] : 0) - blobLevels[b]) * ease(0.18);
@@ -292,7 +467,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       const i = Math.floor(p);
       const f = p - i;
       const level = blobLevels[i % n] * (1 - f) + blobLevels[(i + 1) % n] * f;
-      return size * (0.3 + 0.32 * level + 0.04 * Math.sin(a * 3 + t * 1.1) + 0.03 * Math.sin(a * 5 - t * 1.7));
+      return size * (opt('size') / 100) * (0.3 + 0.32 * level + 0.04 * Math.sin(a * 3 + t * 1.1) + 0.03 * Math.sin(a * 5 - t * 1.7));
     };
     const pts = 96;
     g.beginPath();
@@ -314,8 +489,9 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     // New particles from the blob's edge, more and faster with more energy
     // (bigger screens: more of them and faster, so they still fly out to the edges)
     const scale = Math.max(1, Math.min(w, h) / 240);
-    const cap = Math.round(260 * Math.min(4, scale * scale));
-    const spawn = an ? Math.floor(energy * 10 * K * Math.min(4, scale) + (Math.random() < energy * 3 * K ? 1 : 0)) : 0;
+    const amount = opt('amount') / 100;
+    const cap = Math.round(260 * Math.min(4, scale * scale) * amount);
+    const spawn = an ? Math.floor(energy * 10 * K * Math.min(4, scale) * amount + (Math.random() < energy * 3 * K * amount ? 1 : 0)) : 0;
     for (let k = 0; k < spawn && particles.length < cap; k++) {
       const a = Math.random() * Math.PI * 2;
       const r = radiusAt(a);
@@ -348,7 +524,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   function drawVector(w, h, kind = 'vector') {
     const fg = vizRgb('--fg-rgb', '57, 255, 143');
     const accent = vizRgb('--accent-rgb', '255, 209, 102');
-    fade(w, h, 0.35);
+    fade(w, h, trailFade(opt('trail')));
     const meterH = 14;
     const cx = w / 2;
     const cy = (h - meterH) / 2;
@@ -385,7 +561,8 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       // scaled by the average level (not the peaks), so the shape fills the scope
       const rms = Math.sqrt((ll + rr) / (2 * wave.length));
       vectorLevel += (Math.max(rms, 0.002) - vectorLevel) * ease(0.08);
-      const gain = Math.min(60, 0.22 / vectorLevel) * r;
+      const zoom = opt('zoom') / 100;
+      const gain = Math.min(60, 0.22 / vectorLevel) * r * zoom;
       // (the side's own level, and the left's and right's, for the scales that stretch them)
       let ss = 0;
       for (let i = 0; i < wave.length; i++) { const sd = vectorR[i] - wave[i]; ss += sd * sd; }
@@ -395,9 +572,10 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       vectorRl += (Math.max(Math.sqrt(rr / wave.length), 0.002) - vectorRl) * ease(0.08);
       // (the side stretched to about the mid's spread, at most 10 times: near-silent stereo isn't blown up)
       const sideGain = kind === 'wide' ? Math.min(gain * 10, Math.max(gain, (0.17 / vectorSide) * r)) : gain;
-      const gl = Math.min(60, 0.25 / vectorL) * r;
-      const gr = Math.min(60, 0.25 / vectorRl) * r;
+      const gl = Math.min(60, 0.25 / vectorL) * r * zoom;
+      const gr = Math.min(60, 0.25 / vectorRl) * r * zoom;
       g.fillStyle = paint(0, 0.7);
+      const dotS = opt('dot');
       for (let i = 0; i < wave.length; i += 2) {
         let x;
         let y;
@@ -408,7 +586,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
         const d = Math.hypot(x, y);
         if (d > r) { x *= r / d; y *= r / d; } // (loud peaks pinned to the edge)
         if (kind !== 'vector') g.fillStyle = paint((Math.atan2(y, x) / (Math.PI * 2) + 1) % 1, Math.min(1, 0.45 + (d / r) * 0.55).toFixed(2), d > r * 0.85);
-        g.fillRect(cx + x, cy + y, 1.5, 1.5);
+        g.fillRect(cx + x - dotS / 2 + 0.75, cy + y - dotS / 2 + 0.75, dotS, dotS);
       }
       const now = ll > 1e-9 && rr > 1e-9 ? lr / Math.sqrt(ll * rr) : 1;
       correlation += (now - correlation) * ease(0.15);
@@ -446,8 +624,8 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   // SPECTROGRAM: the spectrum as a heat-map scrolling left, low notes at the bottom
   let spectroAcc = 0;
   function drawSpectro(an, w, h) {
-    const rows = Math.max(8, Math.min(64, Math.floor(h / 3)));
-    spectroAcc += 2 * K; // (2px a 120Hz frame)
+    const rows = Math.max(8, Math.min(opt('rows'), Math.floor(h / 3)));
+    spectroAcc += (opt('speed') / 120) * K; // (its SCROLL, px a second)
     const colW = Math.floor(spectroAcc);
     if (!colW) return;
     spectroAcc -= colW;
@@ -477,6 +655,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     const barH = (h - top - gap * 3) / 2;
     const segW = small ? 3 : 5;
     const segs = Math.floor((w - labelW - gap * 2 + 1) / (segW + 1));
+    const range = opt('range');
     for (let ch = 0; ch < 2; ch++) {
       let level = 0;
       if (pair) {
@@ -486,10 +665,10 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
         let sq = 0;
         for (let i = 0; i < vuBuf.length; i++) sq += vuBuf[i] * vuBuf[i];
         const db = 20 * Math.log10(Math.sqrt(sq / vuBuf.length) + 1e-6) + 12; // (+12: the mix sits low)
-        level = Math.max(0, Math.min(1, (db + 48) / 48));
+        level = Math.max(0, Math.min(1, (db + range) / range));
       } else level = calmVu[ch] * 1.4;
       vuLevel[ch] = Math.max(level, vuLevel[ch] - 0.03 * K);
-      vuPeak[ch] = Math.max(vuLevel[ch], vuPeak[ch] - 0.006 * K);
+      vuPeak[ch] = Math.max(vuLevel[ch], vuPeak[ch] - (opt('peak') / range / 120) * K);
       const y = top + gap + ch * (barH + gap);
       if (!small) {
         g.fillStyle = paint(0, 0.6);
@@ -513,17 +692,18 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   // faster and brighter)
   let rain = [];
   function drawMatrix(an, w, h) {
-    const size = 12;
+    const size = opt('size');
     const cols = Math.max(4, Math.floor(w / size));
     if (rain.length !== cols) rain = Array.from({ length: cols }, () => ({ y: Math.random() * h, acc: 0 }));
-    fade(w, h, 0.09);
+    fade(w, h, trailFade(opt('trail')));
+    const speed = opt('speed') / 100;
     const lv = bands(an, cols);
     g.font = `${size}px ${getComputedStyle(canvas).fontFamily}`;
     g.textAlign = 'center';
     for (let c = 0; c < cols; c++) {
       const level = lv ? lv[(c * 7) % cols] : 0.08; // (bands scattered so the bass isn't all at the left)
       const drop = rain[c];
-      drop.acc += (0.08 + level * 0.9) * K;
+      drop.acc += (0.08 + level * 0.9) * K * speed;
       while (drop.acc >= 1) {
         drop.acc -= 1;
         drop.y += size;
@@ -537,11 +717,12 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
 
   // BIT GRID: an 8x8 board (HARD's), each column a band of the spectrum stacking bits as high as it's
   // loud, each bit showing its column's height; a full column flashes like a decrypt
-  const GRID_N = 8;
-  const gridLevels = new Float32Array(GRID_N);
-  const gridFlash = new Float32Array(GRID_N);
+  let GRID_N = 8;
+  let gridLevels = new Float32Array(GRID_N);
+  let gridFlash = new Float32Array(GRID_N);
   function drawBitGrid(an, w, h) {
     g.clearRect(0, 0, w, h);
+    if (GRID_N !== opt('grid')) { GRID_N = opt('grid'); gridLevels = new Float32Array(GRID_N); gridFlash = new Float32Array(GRID_N); }
     const lv = bands(an, GRID_N) || calm(GRID_N).map((v) => v * 1.9); // (calm: a few bits stacking and settling)
     const cell = Math.min((w - 16) / GRID_N, (h - 12) / GRID_N);
     const x0 = (w - cell * GRID_N) / 2;
@@ -551,7 +732,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     g.textBaseline = 'middle';
     for (let c = 0; c < GRID_N; c++) {
       const level = lv ? lv[c] : 0;
-      gridLevels[c] = Math.max(level, gridLevels[c] - 0.04 * K);
+      gridLevels[c] = Math.max(level, gridLevels[c] - (opt('fall') / 120) * K);
       const n = Math.round(gridLevels[c] * GRID_N);
       if (n >= GRID_N && gridFlash[c] <= 0) gridFlash[c] = 1;
       gridFlash[c] = Math.max(0, gridFlash[c] - 0.06 * K);
@@ -606,7 +787,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     const bass = (tLevels[0] + tLevels[1] + tLevels[2]) / 3;
     const dt = tLast ? Math.min(0.1, (now - tLast) / 1000) : 0;
     tLast = now;
-    tScroll += dt * (1.2 + bass * 2.5);
+    tScroll += dt * (1.2 + bass * 2.5) * (opt('speed') / 100);
     while (tScroll >= 1) { tScroll -= 1; tRow++; }
     const horizon = h * 0.46;
     const cx = w / 2;
@@ -614,6 +795,8 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     // the sun, sitting on the mesh's far edge (no gap under it)
     const base = horizon + (T_CAM / (T_ROWS - 1)) * f;
     const sunR = Math.min(w, h) * (0.24 + bass * 0.04);
+    const peakH = opt('peaks') / 100;
+    if (opt('sun')) {
     g.save();
     g.beginPath(); g.rect(0, 0, w, base); g.clip();
     const glow = g.createRadialGradient(cx, base, sunR * 0.8, cx, base, sunR * 1.8);
@@ -627,6 +810,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     g.fillStyle = sunGrad;
     g.beginPath(); g.arc(cx, base, sunR, Math.PI, 0); g.fill();
     g.restore();
+    }
     // The mesh: world x (across), y (up), z (away) to the screen
     const px = (x, z) => cx + (x / z) * f;
     const py = (y, z) => horizon + ((T_CAM - y) / z) * f;
@@ -641,7 +825,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
         if (side > 0) {
           const lift = Math.min(1, side / 3) ** 1.3; // (rising toward the edges)
           const band = Math.min(11, Math.floor((side / (T_COLS * 0.5 - T_ROAD)) * 12));
-          y = lift * 2.6 * tSpike(i, tRow + k) * (0.35 + 0.9 * tLevels[band]);
+          y = lift * 2.6 * tSpike(i, tRow + k) * (0.35 + 0.9 * tLevels[band]) * peakH;
         }
         row.push([px(x, z), py(y, z), y]);
       }
@@ -697,9 +881,9 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     const lv = bands(an, 12);
     const bass = lv ? (lv[0] + lv[1] + lv[2]) / 3 : 0.1;
     const treble = lv ? (lv[8] + lv[9] + lv[10] + lv[11]) / 4 : 0.05;
-    plasmaT += (0.02 + treble * 0.08) * K;
-    const cw = Math.max(16, Math.round(w / 6));
-    const chh = Math.max(4, Math.round(h / 6));
+    plasmaT += (0.02 + treble * 0.08) * K * (opt('speed') / 100);
+    const cw = Math.max(16, Math.round(w / opt('cell')));
+    const chh = Math.max(4, Math.round(h / opt('cell')));
     if (plasmaCanvas.width !== cw || plasmaCanvas.height !== chh) { plasmaCanvas.width = cw; plasmaCanvas.height = chh; }
     const img = pg.createImageData(cw, chh);
     const fg = rgbOf(fgNow);
@@ -735,11 +919,11 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   // tilted axis. Each patch of it listens to its own part of the spectrum (the bass around its
   // foot, the treble at its crown, the bands wandering around it with the longitude): a patch
   // swells out and glows as its band plays, its hottest particles in the theme's accent
-  const ORB_N = 720;
   const ORB_BANDS = 16;
   let orb = null;
   const orbLevels = new Float32Array(ORB_BANDS);
-  function orbMake() {
+  let orbSpin = 0;
+  function orbMake(ORB_N) {
     const pts = [];
     const golden = Math.PI * (3 - Math.sqrt(5)); // (a Fibonacci sphere: evenly spread)
     for (let i = 0; i < ORB_N; i++) {
@@ -757,15 +941,16 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     return pts;
   }
   function drawOrb(an, w, h, now) {
-    if (!orb) orb = orbMake();
+    if (!orb || orb.length !== opt('count')) orb = orbMake(opt('count'));
     fade(w, h, 0.5);
     const lv = bands(an, ORB_BANDS);
     for (let b = 0; b < ORB_BANDS; b++) orbLevels[b] = lv ? Math.max(lv[b], orbLevels[b] * dec(0.88)) : orbLevels[b] * dec(0.92);
     const energy = orbLevels.reduce((t, v) => t + v, 0) / ORB_BANDS;
     const cx = w / 2;
     const cy = h / 2;
-    const R = Math.min(w, h) * 0.32 * (1 + energy * 0.06);
-    const spin = -now / 6000; // (clockwise from above: its front moving left)
+    const R = Math.min(w, h) * 0.32 * (1 + energy * 0.06) * (opt('size') / 100);
+    orbSpin -= ((opt('spin') * Math.PI * 2) / 60) * (K / 120); // (its RPM, clockwise from above: its front moving left)
+    const spin = orbSpin;
     const tilt = 0.38; // (its axis leaning toward you a little, so the top shows)
     const cs = Math.cos(spin);
     const sn = Math.sin(spin);
@@ -787,7 +972,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       shown.push({ x, y, z, lvl, f: p.f });
     }
     shown.sort((a, b) => a.z - b.z); // (the far side first, faint and small)
-    const dot = Math.max(1.5, Math.min(w, h) / 160);
+    const dot = Math.max(1.5, Math.min(w, h) / 160) * Math.sqrt(720 / orb.length); // (more particles: smaller)
     for (const q of shown) {
       const depth = (q.z + 1.3) / 2.6; // (0 at the back, 1 at the front)
       const persp = 1 / (1.9 - q.z * 0.45);
@@ -871,18 +1056,14 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     return Math.min(1, m);
   }
   let seaInView = 0; // (the points the last sea drew in view: on screen, short of where they fade away)
-  // DENSITY of the seas with points (GRID, MESH, HEX, DEPTHS): how many points are in view at once
-  // (on screen, out to where they fade away), the same on any screen; the defaults are what each
-  // drew before it could be set (on a phone). Saved per style. From it, the sea per point: the
-  // view's footprint on the sea (its width at each distance, a little past the edges) over the count
-  const SEA_DENSITY = { ocean: 1250, oceantri: 740, oceanhex: 520, oceandepth: 1100 };
-  const DENSITY_KEY = `${MODE_KEY}-sea-density`;
-  const seaDensity = { ...SEA_DENSITY };
-  try { Object.assign(seaDensity, JSON.parse(localStorage.getItem(DENSITY_KEY) || '{}')); } catch (e) {}
+  // DENSITY of the seas with points (GRID, MESH, HEX, DEPTHS, a setting): how many points are in
+  // view at once (on screen, out to where they fade away), the same on any screen; the defaults are
+  // what each drew before it could be set (on a phone). From it, the sea per point: the view's
+  // footprint on the sea (its width at each distance, a little past the edges) over the count
   const seaPerPoint = (w, h, m) => {
     const V = seaView(w, h);
     const area = (((w / 2 + 30) / V.fx) * (V.zFar * V.zFar - V.zMin * V.zMin)) * 0.95;
-    return area / Math.max(50, seaDensity[m] || SEA_DENSITY[m]);
+    return area / Math.max(50, optOf(m, 'density'));
   };
   // (the swells ease off right in front of the camera, so one passing under it doesn't lift the
   // nearest sea up over the view)
@@ -896,14 +1077,15 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     for (let b = 0; b < SEA_BANDS; b++) { seaLv[b] = lv ? Math.max(lv[b], seaLv[b] * dec(0.86)) : seaLv[b] * dec(0.9); energy += seaLv[b] / SEA_BANDS; }
     const dt = seaCam.last ? Math.min(0.1, (now - seaCam.last) / 1000) : 0;
     seaCam.last = now;
-    seaCam.spin = Math.max(-0.25, Math.min(0.25, seaCam.spin + (Math.random() - 0.5) * dt * 0.8 - seaCam.spin * dt * 0.05));
+    const turnMax = (opt('turn') * Math.PI) / 180; // (TURNING: its most, in a second)
+    seaCam.spin = Math.max(-turnMax, Math.min(turnMax, seaCam.spin + (Math.random() - 0.5) * dt * 3.2 * turnMax - seaCam.spin * dt * 0.05));
     seaCam.yaw += seaCam.spin * dt;
     seaCam.turn = Math.max(-0.35, Math.min(0.35, seaCam.turn + (Math.random() - 0.5) * dt * 1.2));
     seaCam.ang += seaCam.turn * dt;
     let off = seaCam.yaw - seaCam.ang;
     off = Math.atan2(Math.sin(off), Math.cos(off));
     seaCam.ang += off * Math.min(1, dt * 0.35);
-    const speed = 0.8 + energy * 1.2;
+    const speed = (0.8 + energy * 1.2) * (opt('speed') / 100);
     seaCam.x += Math.sin(seaCam.ang) * speed * dt;
     seaCam.z += Math.cos(seaCam.ang) * speed * dt;
     seaBlobsStep(dt, seaView(w, h), w, h);
@@ -1043,7 +1225,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     const zig = rowStep / 6;
     drawSeaLattice(w, h, now, dx, rowStep,
       (k, j) => [k * dx, j * rowStep + ((k + j) & 1 ? -zig : zig)],
-      () => [], 1.6);
+      () => [], 1.6 * (opt('depth') / 100));
   }
 
   // OCEAN HEX: the travelling sea again (the same view, turns, swell and music's swells as OCEAN GRID), its
@@ -1103,9 +1285,9 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     }
     // (a point on the map to the screen: its height lifting it)
     const proj = (r, c, y) => [SX[r * nCols + c] + 0, horizon + ((camH - y) / SZ[r]) * f];
-    const LEVELS = 10;
+    const LEVELS = opt('lines');
     const lo = -0.15;
-    const gap = 0.065;
+    const gap = 0.585 / (LEVELS - 1);
     g.lineWidth = 0.9;
     for (let L = 0; L < LEVELS; L++) {
       const iso = lo + L * gap;
@@ -1159,12 +1341,14 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   const TOPO_BANDS = 12;
   const topoLv = new Float32Array(TOPO_BANDS);
   let topoField = null;
+  let topoT = 0;
   function drawTopo(an, w, h, now) {
     g.clearRect(0, 0, w, h);
     const lv = bands(an, TOPO_BANDS);
     const cl = lv ? null : calm(TOPO_BANDS);
     for (let b = 0; b < TOPO_BANDS; b++) topoLv[b] += ((lv ? lv[b] : cl[b] * 2.2) - topoLv[b]) * ease(0.15);
-    const t = now / 1000;
+    topoT += (opt('drift') / 100) * (K / 120); // (its DRIFT)
+    const t = topoT;
     const GX = Math.max(24, Math.min(64, Math.round(w / 9)));
     const GY = Math.max(14, Math.round(GX * (h / w)));
     if (!topoField || topoField.length !== (GX + 1) * (GY + 1)) topoField = new Float32Array((GX + 1) * (GY + 1));
@@ -1189,10 +1373,10 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     }
     const cw = w / GX;
     const ch = h / GY;
-    const LEVELS = 12;
+    const LEVELS = opt('lines');
     g.lineWidth = 1;
     for (let L = 0; L < LEVELS; L++) {
-      const iso = -0.12 + L * 0.11;
+      const iso = -0.12 + L * (1.21 / (LEVELS - 1));
       const frac = L / (LEVELS - 1);
       g.strokeStyle = paint(frac, (0.28 + frac * 0.62).toFixed(2), frac > 0.7);
       g.beginPath();
@@ -1236,22 +1420,26 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   // each flock outward (it gathers back), every particle's own band of the spectrum kicks it about
   // as it plays, and the louder it gets the faster they fly; the loudest glow in the accent.
   // Nearer particles bigger and brighter, the far ones fading into the dark
-  const SWARM_N = 420;
-  const SWARM_FLOCKS = 3;
   const SWARM_BANDS = 12;
   let swarm = null;
   let swarmLast = 0;
   const swarmLv = new Float32Array(SWARM_BANDS);
-  const swarmLead = Array.from({ length: SWARM_FLOCKS }, () => ({ ph: [0, 1, 2].map(() => Math.random() * 6.28), fr: [0, 1, 2].map(() => 0.18 + Math.random() * 0.22) }));
+  const swarmLeader = () => ({ ph: [0, 1, 2].map(() => Math.random() * 6.28), fr: [0, 1, 2].map(() => 0.18 + Math.random() * 0.22) });
+  const swarmLead = Array.from({ length: 3 }, swarmLeader);
   const swarmHome = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0 }; // (where the whole swarm is headed, drifting on through space)
   const swarmCam = { x: 0, y: 0, z: 0 }; // (the view's center, following the swarm)
+  let swarmSpin = 0;
   function drawCloud(an, w, h, now) {
-    if (!swarm) {
-      swarm = Array.from({ length: SWARM_N }, (_, i) => ({
-        x: (Math.random() - 0.5) * 1.4, y: (Math.random() - 0.5) * 1.4, z: (Math.random() - 0.5) * 1.4,
-        vx: 0, vy: 0, vz: 0, flock: i % SWARM_FLOCKS, band: Math.floor(Math.random() * SWARM_BANDS), jit: Math.random() * 6.28,
-      }));
+    // (PARTICLES and FLOCKS: more join near the swarm's middle, extras leave; each in a flock in turn)
+    const SWARM_N = opt('count');
+    const SWARM_FLOCKS = opt('flocks');
+    if (!swarm) swarm = [];
+    while (swarm.length < SWARM_N) {
+      swarm.push({ x: swarmCam.x + (Math.random() - 0.5) * 1.4, y: swarmCam.y + (Math.random() - 0.5) * 1.4, z: swarmCam.z + (Math.random() - 0.5) * 1.4, vx: 0, vy: 0, vz: 0, flock: 0, band: Math.floor(Math.random() * SWARM_BANDS), jit: Math.random() * 6.28 });
     }
+    if (swarm.length > SWARM_N) swarm.length = SWARM_N;
+    while (swarmLead.length < SWARM_FLOCKS) swarmLead.push(swarmLeader());
+    for (let i = 0; i < swarm.length; i++) swarm[i].flock = i % SWARM_FLOCKS;
     fade(w, h, 0.38);
     const lv = bands(an, SWARM_BANDS);
     let energy = 0;
@@ -1266,7 +1454,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     if (hv > 0.25) { swarmHome.vx *= 0.25 / hv; swarmHome.vy *= 0.25 / hv; swarmHome.vz *= 0.25 / hv; }
     swarmHome.x += swarmHome.vx * dt; swarmHome.y += swarmHome.vy * dt; swarmHome.z += swarmHome.vz * dt;
     // (the leaders, wandering about it; the flocks' middles)
-    const leads = swarmLead.map((L) => {
+    const leads = swarmLead.slice(0, SWARM_FLOCKS).map((L) => {
       const p = L.fr.map((f, a) => [swarmHome.x, swarmHome.y, swarmHome.z][a] + 0.7 * Math.sin(t * f + L.ph[a]));
       const v = L.fr.map((f, a) => [swarmHome.vx, swarmHome.vy, swarmHome.vz][a] + 0.7 * f * Math.cos(t * f + L.ph[a]));
       return { p, v, c: [0, 0, 0], n: 0 };
@@ -1302,11 +1490,12 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     let my = 0;
     let mz = 0;
     for (const q of swarm) { mx += q.x; my += q.y; mz += q.z; }
-    mx /= SWARM_N; my /= SWARM_N; mz /= SWARM_N;
+    mx /= swarm.length; my /= swarm.length; mz /= swarm.length;
     const k = ease(0.02);
     swarmCam.x += (mx - swarmCam.x) * k; swarmCam.y += (my - swarmCam.y) * k; swarmCam.z += (mz - swarmCam.z) * k;
-    // (circling it, as the ORB turns: clockwise from above, tipped toward you)
-    const spin = -now / 7000;
+    // (circling it, as the ORB turns: clockwise from above, tipped toward you, at its SPIN)
+    swarmSpin -= ((opt('spin') * Math.PI * 2) / 60) * (K / 120);
+    const spin = swarmSpin;
     const cs = Math.cos(spin);
     const sn = Math.sin(spin);
     const tilt = 0.4;
@@ -1339,6 +1528,110 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     }
   }
 
+  // STAR FIELD: flying through a galaxy, as a galaxy map does it: star systems all around in open
+  // space, near ones bigger and brighter, far ones fading into the dark, the view sailing on through
+  // them on a slowly wandering course (turning now one way, now the other, rising and dipping), a
+  // little faster with the music. Each star listens to its own band of the spectrum and swells and
+  // brightens as it plays, at its own pace (some quick to flare, some slow to rise and settle), and
+  // twinkles at its own rate besides; a few are of the accent's color, and the loudest glow in it.
+  // Space is a cube around the view that wraps on itself, so the stars never run out
+  const STAR_BANDS = 12;
+  const STAR_SPAN = 10; // (the cube's half-width, in light years: as far as a star is seen)
+  let stars = [];
+  const starLv = new Float32Array(STAR_BANDS);
+  const starCam = { x: 0, y: 0, z: 0, yaw: Math.random() * Math.PI * 2, pitch: 0, dyaw: 0, dpitch: 0, last: 0 };
+  const newStar = () => ({
+    x: (Math.random() * 2 - 1) * STAR_SPAN, y: (Math.random() * 2 - 1) * STAR_SPAN, z: (Math.random() * 2 - 1) * STAR_SPAN,
+    band: Math.floor(Math.random() * STAR_BANDS),
+    rate: 0.6 + Math.random() * Math.random() * 9, // (how quickly it follows its band: per second)
+    tw: 0.4 + Math.random() * 2.2, ph: Math.random() * Math.PI * 2, // (its twinkle)
+    size: 0.5 + Math.random() * Math.random() * 1.6, // (some systems bigger than others)
+    f: Math.random(), hot: Math.random() < 0.18, lvl: 0,
+  });
+  function drawStars(an, w, h, now) {
+    g.clearRect(0, 0, w, h);
+    const count = opt('count');
+    while (stars.length < count) stars.push(newStar());
+    if (stars.length > count) stars.length = count;
+    const lv = bands(an, STAR_BANDS);
+    let energy = 0;
+    for (let b = 0; b < STAR_BANDS; b++) { starLv[b] = lv ? Math.max(lv[b], starLv[b] * dec(0.86)) : starLv[b] * dec(0.9); energy += starLv[b] / STAR_BANDS; }
+    const dt = starCam.last ? Math.min(0.1, (now - starCam.last) / 1000) : 0;
+    starCam.last = now;
+    const t = now / 1000;
+    // (the course: the heading and the climb wander, TURNING at most so many degrees a second;
+    // the climb drawn back toward level, so it sails on rather than looping)
+    const turnMax = (opt('turn') * Math.PI) / 180;
+    starCam.dyaw = Math.max(-turnMax, Math.min(turnMax, starCam.dyaw + (Math.random() - 0.5) * dt * 3.2 * turnMax));
+    starCam.dpitch = Math.max(-turnMax * 0.5, Math.min(turnMax * 0.5, starCam.dpitch + (Math.random() - 0.5) * dt * 1.6 * turnMax - starCam.pitch * dt * 0.3));
+    starCam.yaw += starCam.dyaw * dt;
+    starCam.pitch = Math.max(-0.9, Math.min(0.9, starCam.pitch + starCam.dpitch * dt));
+    const cy0 = Math.cos(starCam.yaw);
+    const sy0 = Math.sin(starCam.yaw);
+    const cp = Math.cos(starCam.pitch);
+    const sp = Math.sin(starCam.pitch);
+    const fwd = [sy0 * cp, sp, cy0 * cp];
+    const right = [cy0, 0, -sy0];
+    const up = [-sy0 * sp, cp, -cy0 * sp];
+    const speed = opt('speed') * (1 + energy * 0.8); // (light years a second)
+    starCam.x += fwd[0] * speed * dt; starCam.y += fwd[1] * speed * dt; starCam.z += fwd[2] * speed * dt;
+    const cx = w / 2;
+    const cy = h / 2;
+    const F = Math.min(w, h) * 0.75 + Math.max(w, h) * 0.15; // (the lens)
+    const wrap = (v) => { const L = STAR_SPAN * 2; return ((((v + STAR_SPAN) % L) + L) % L) - STAR_SPAN; };
+    const sizeK = opt('size') / 100;
+    const glows = [];
+    const dots = new Map();
+    for (const st of stars) {
+      // (its own pace toward its band's level: quick ones flare, slow ones swell and settle)
+      st.lvl += (starLv[st.band] - st.lvl) * Math.min(1, st.rate * dt);
+      const rx = wrap(st.x - starCam.x);
+      const ry = wrap(st.y - starCam.y);
+      const rz = wrap(st.z - starCam.z);
+      const z = rx * fwd[0] + ry * fwd[1] + rz * fwd[2];
+      if (z < 0.15) continue;
+      const x = rx * right[0] + ry * right[1] + rz * right[2];
+      const y = rx * up[0] + ry * up[1] + rz * up[2];
+      const sx = cx + (x / z) * F;
+      const sy = cy - (y / z) * F;
+      if (sx < -40 || sx > w + 40 || sy < -40 || sy > h + 40) continue;
+      const dist = Math.hypot(rx, ry, rz);
+      const far = Math.max(0, 1 - Math.pow(dist / STAR_SPAN, 2)); // (fading into the dark as it nears the far edge)
+      const near = Math.min(1, z / 0.8); // (and in as it comes past, not popping)
+      const twinkle = 0.75 + 0.25 * Math.sin(t * st.tw * 2.4 + st.ph);
+      const lvl = st.lvl;
+      const a = Math.min(1, far * near * (0.3 + 0.45 * twinkle * (0.5 + st.size * 0.4) + lvl * 0.7));
+      if (a < 0.015) continue;
+      const r = Math.max(0.5, Math.min(14, (st.size * (1 + lvl * 1.6) * sizeK * F * 0.012) / z * (0.85 + 0.15 * twinkle)));
+      const hot = st.hot || (lvl > 0.9 && st.size > 1.1); // (the accent's own class, and the big ones at their loudest)
+      if (r > 2.2 && a > 0.15) glows.push(sx, sy, r * (2.4 + lvl * 2), a, hot ? 1 : 0, st.f);
+      const col = paint(rainbow ? Math.round(st.f * 24) / 24 : 0, a.toFixed(2), hot);
+      let list = dots.get(col);
+      if (!list) { list = []; dots.set(col, list); }
+      list.push(sx, sy, r);
+    }
+    // (the big and the loud: a soft glow around them first)
+    for (let k = 0; k < glows.length; k += 6) {
+      const [x, y, R, a, hot, f] = glows.slice(k, k + 6);
+      const gr = g.createRadialGradient(x, y, 0, x, y, R);
+      gr.addColorStop(0, paint(f, (a * 0.35).toFixed(3), !!hot));
+      gr.addColorStop(1, paint(f, 0, !!hot));
+      g.fillStyle = gr;
+      g.fillRect(x - R, y - R, R * 2, R * 2);
+    }
+    for (const [col, list] of dots) {
+      g.fillStyle = col;
+      g.beginPath();
+      for (let n = 0; n < list.length; n += 3) {
+        const r = list[n + 2];
+        if (r < 1.2) { g.rect(list[n] - r, list[n + 1] - r, r * 2, r * 2); continue; }
+        g.moveTo(list[n] + r, list[n + 1]);
+        g.arc(list[n], list[n + 1], r, 0, Math.PI * 2);
+      }
+      g.fill();
+    }
+  }
+
   // TUNNEL: rings rushing toward you, thicker and brighter on the beat, the tunnel swaying
   let tunnelRings = [];
   function drawTunnel(an, w, h, now) {
@@ -1346,12 +1639,13 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     const lv = bands(an, 12);
     const bass = lv ? (lv[0] + lv[1] + lv[2]) / 3 : 0;
     const energy = lv ? lv.reduce((a, b) => a + b, 0) / 12 : 0;
-    const speed = 0.006 + energy * 0.03;
+    const speed = (0.006 + energy * 0.03) * (opt('speed') / 100);
     if (!tunnelRings.length || tunnelRings[tunnelRings.length - 1].z < 0.92) tunnelRings.push({ z: 1, beat: bass, f: (now / 3000) % 1 });
     const t = now / 1000;
-    const cx = w / 2 + Math.sin(t * 0.7) * w * 0.06;
-    const cy = h / 2 + Math.cos(t * 0.9) * h * 0.06;
-    const sides = 8;
+    const sway = opt('sway') / 100;
+    const cx = w / 2 + Math.sin(t * 0.7) * w * 0.06 * sway;
+    const cy = h / 2 + Math.cos(t * 0.9) * h * 0.06 * sway;
+    const sides = opt('sides');
     for (const ring of tunnelRings) ring.z -= speed * (0.4 + (1 - ring.z)) * K;
     tunnelRings = tunnelRings.filter((ring) => ring.z > 0.02);
     for (const ring of tunnelRings) {
@@ -1373,23 +1667,26 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   return {
     get mode() { return mode; },
     get name() { return VIZ_NAMES[mode]; },
-    // (DENSITY, for the seas with points: { value: points in view wanted, min, max, inView: how many
-    // the last frame drew }, or null for any other style; setDensity(n) for the style showing)
-    get density() {
-      if (!(mode in SEA_DENSITY)) return null;
-      return { value: seaDensity[mode], def: SEA_DENSITY[mode], min: 100, max: 6000, inView: seaInView };
+    // SETTINGS of the style showing: [{ id, name, unit, type ('num' or 'toggle'), min, max, step,
+    // def, value, live (what it's doing now, for DENSITY: the points drawn in view) }]
+    get settings() {
+      return (SETTINGS[mode] || []).map((d) => ({ type: 'num', ...d, value: opt(d.id), live: d.live ? (seaInView ? `NOW ${seaInView.toLocaleString('en-US')}` : '') : '' }));
     },
-    setDensity(n) {
-      if (!(mode in SEA_DENSITY) || !Number.isFinite(n)) return;
-      seaDensity[mode] = Math.round(Math.max(100, Math.min(6000, n)));
-      try { localStorage.setItem(DENSITY_KEY, JSON.stringify(seaDensity)); } catch (e) {}
+    setSetting(id, v) {
+      const d = specOf(mode, id);
+      if (!d || !Number.isFinite(v)) return;
+      const val = d.type === 'toggle' ? (v ? 1 : 0) : Math.max(d.min, Math.min(d.max, Math.round(v / d.step) * d.step));
+      const clean = Math.round(val * 1000) / 1000;
+      changed[mode] = { ...(changed[mode] || {}), [id]: clean };
+      if (clean === d.def) delete changed[mode][id];
+      if (!Object.keys(changed[mode]).length) delete changed[mode];
+      saveSettings();
     },
-    // (every ocean's DENSITY back to its default)
-    resetDensities() {
-      Object.assign(seaDensity, SEA_DENSITY);
-      try { localStorage.removeItem(DENSITY_KEY); } catch (e) {}
-    },
-    get densitiesChanged() { return Object.keys(SEA_DENSITY).some((k) => seaDensity[k] !== SEA_DENSITY[k]); },
+    // (DEFAULT: the style showing's back as they were; ALL DEFAULTS: every style's)
+    resetSettings() { delete changed[mode]; saveSettings(); },
+    resetAllSettings() { changed = {}; saveSettings(); },
+    get settingsChanged() { return !!changed[mode]; },
+    get anySettingsChanged() { return Object.keys(changed).length > 0; },
     // (every style it has, with the names shown, for a picker)
     styles: () => modes.map((m) => ({ id: m, name: VIZ_NAMES[m] })),
     // (straight to one style)
@@ -1439,6 +1736,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       else if (mode === 'oceandepth') drawOceanDepths(an, w, h, now);
       else if (mode === 'topo') drawTopo(an, w, h, now);
       else if (mode === 'cloud') drawCloud(an, w, h, now);
+      else if (mode === 'stars') drawStars(an, w, h, now);
       else drawBars(an, w, h);
     },
   };

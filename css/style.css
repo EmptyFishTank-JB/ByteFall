@@ -2278,13 +2278,18 @@ body.player-open { overflow: hidden; }
   animation: mp-drawer-in 0.18s ease-out;
 }
 .mp-viz-drawer[hidden] { display: none; }
-/* (DENSITY, under the styles while an ocean with points shows: points in view) */
-.mp-density { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 4px; padding-top: 8px; border-top: 1px solid var(--grid-line); font-size: 9px; letter-spacing: 1px; color: var(--fg-dim); }
-.mp-density[hidden] { display: none; }
-.mp-density label { color: var(--accent); }
-.mp-density input { width: 64px; font-family: inherit; font-size: 12px; color: var(--fg); background: transparent; border: 1px solid var(--fg-dim); border-radius: 4px; padding: 4px 6px; }
-.mp-density-btns { display: flex; gap: 4px; margin-left: auto; }
-.music-player .mp-viz-drawer .mp-density-btns button { padding: 4px 7px; }
+/* (SETTINGS, under the styles: the style showing's own; vizSettingsPanel in viz.js) */
+.mp-viz-set { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 6px; margin-top: 4px; padding-top: 8px; border-top: 1px solid var(--grid-line); font-size: 9px; letter-spacing: 1px; color: var(--fg-dim); }
+.mp-viz-set[hidden] { display: none; }
+.mp-viz-set .viz-set-head { color: var(--accent); letter-spacing: 2px; }
+.mp-viz-set .viz-set-row { display: flex; align-items: center; gap: 6px; }
+.mp-viz-set .viz-set-name { width: 92px; flex: none; color: var(--fg); }
+.mp-viz-set input { width: 68px; font-family: inherit; font-size: 12px; color: var(--fg); background: transparent; border: 1px solid var(--fg-dim); border-radius: 4px; padding: 4px 6px; }
+.mp-viz-set .viz-set-live { margin-left: auto; }
+.music-player .mp-viz-drawer .viz-set-toggle { padding: 4px 10px; font-size: 10px; }
+.music-player .mp-viz-drawer .viz-set-toggle.on { color: var(--accent); border-color: var(--accent); }
+.mp-viz-set .viz-set-btns { display: flex; gap: 4px; justify-content: flex-end; }
+.music-player .mp-viz-drawer .viz-set-btns button { padding: 4px 7px; }
 .mp-viz-drawer button:disabled { opacity: 0.4; cursor: default; }
 @keyframes mp-drawer-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 .mp-viz-drawer button {

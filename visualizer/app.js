@@ -174,7 +174,7 @@
   }
 
   // ---- the visualizer
-  const ALL = ['bars', 'wave', 'scope', 'spectro', 'vu', 'radial', 'fluid', 'vector', 'vectorwide', 'lissajous', 'matrix', 'bitgrid', 'terrain', 'plasma', 'tunnel', 'orb', 'ocean', 'oceantri', 'oceanhex', 'oceantopo', 'oceandepth', 'topo', 'cloud'];
+  const ALL = ['bars', 'wave', 'scope', 'spectro', 'vu', 'radial', 'fluid', 'vector', 'vectorwide', 'lissajous', 'matrix', 'bitgrid', 'terrain', 'plasma', 'tunnel', 'orb', 'ocean', 'oceantri', 'oceanhex', 'oceantopo', 'oceandepth', 'topo', 'cloud', 'stars'];
   const viz = createVisualizer($('viz'), analyser, { bars: 48, modes: ALL, key: 'bfviz-style', getStereo: stereo });
   const showStyle = () => { $('style-name').textContent = `// ${viz.name}`; };
   showStyle();
@@ -221,24 +221,11 @@
       b.addEventListener('click', () => { viz.set(s.id); showStyle(); fillDrawer(); });
       list.append(b);
     }
-    showDensity();
+    setPanel.refresh();
   }
-  // DENSITY: for the oceans with points, how many points are in view at once (saved per style); the
-  // count drawn just now beside it; DEFAULT puts this style's back, ALL DEFAULTS every ocean's
-  function showDensity() {
-    const d = viz.density;
-    $('density').hidden = !d;
-    if (!d) return;
-    if (document.activeElement !== $('density-in')) $('density-in').value = d.value;
-    $('density-now').textContent = d.inView ? `NOW ${d.inView.toLocaleString('en-US')}` : '';
-    $('density-reset').disabled = d.value === d.def;
-    $('density-all').disabled = !viz.densitiesChanged;
-  }
-  $('density-in').addEventListener('change', () => { viz.setDensity(Number($('density-in').value)); showDensity(); });
-  $('density-in').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('density-in').blur(); });
-  $('density-reset').addEventListener('click', () => { const d = viz.density; if (d) viz.setDensity(d.def); showDensity(); });
-  $('density-all').addEventListener('click', () => { viz.resetDensities(); showDensity(); }); // (every ocean's)
-  setInterval(() => { if (!$('drawer').hidden) showDensity(); }, 400);
+  // SETTINGS: the style showing's own (vizSettingsPanel, viz.js), under the styles
+  const setPanel = vizSettingsPanel($('viz-set'), viz);
+  setInterval(() => { if (!$('drawer').hidden) setPanel.refresh(); }, 400);
   $('btn-styles').addEventListener('click', () => { const open = $('drawer').hidden; closePanels(); $('drawer').hidden = !open; fillDrawer(); });
   $('btn-more').addEventListener('click', () => { const open = $('more').hidden; closePanels(); $('more').hidden = !open; });
   $('more-close').addEventListener('click', closePanels);

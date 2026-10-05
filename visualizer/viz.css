@@ -81,12 +81,17 @@ a { color: var(--accent); }
 .source-item.lit { border-color: var(--accent); }
 .source-item.lit span { color: var(--accent); }
 
-/* (DENSITY, under the styles while an ocean with points shows: points in view) */
-#density { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(var(--fg-rgb), 0.25); font-size: 11.5px; letter-spacing: 0.12em; }
-#density[hidden] { display: none; }
-#density label { color: var(--accent); }
-#density-in { width: 84px; font: inherit; font-size: 14px; color: var(--fg); background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(var(--fg-rgb), 0.5); border-radius: 5px; padding: 6px 8px; }
-.density-unit, #density-now { color: rgba(var(--fg-rgb), 0.65); }
-.density-btns { display: flex; gap: 6px; margin-left: auto; }
-.density-btns button { padding: 6px 9px; font-size: 11px; }
-.density-btns button:disabled { opacity: 0.35; cursor: default; }
+/* (SETTINGS, under the styles: the style showing's own; vizSettingsPanel in viz.js) */
+#viz-set { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(var(--fg-rgb), 0.25); font-size: 11px; letter-spacing: 0.1em; }
+#viz-set[hidden] { display: none; }
+.viz-set-head { color: var(--accent); letter-spacing: 0.16em; }
+.viz-set-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.viz-set-name { width: 104px; flex: none; color: var(--fg); }
+#viz-set input { width: 78px; font: inherit; font-size: 14px; color: var(--fg); background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(var(--fg-rgb), 0.5); border-radius: 5px; padding: 5px 7px; }
+.viz-set-unit, .viz-set-live { color: rgba(var(--fg-rgb), 0.65); }
+.viz-set-live { margin-left: auto; }
+.viz-set-toggle { padding: 5px 12px; font-size: 11px; }
+.viz-set-toggle.on { color: var(--accent); border-color: var(--accent); }
+.viz-set-btns { display: flex; gap: 6px; justify-content: flex-end; }
+.viz-set-btns button { padding: 6px 9px; font-size: 11px; }
+.viz-set-btns button:disabled { opacity: 0.35; cursor: default; }

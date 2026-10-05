@@ -1,6 +1,6 @@
 # ByteFall Viz
 
-ByteFall's music visualizers on their own, for whatever the phone plays: all 23 styles from the
+ByteFall's music visualizers on their own, for whatever the phone plays: all 24 styles from the
 game's MUSIC PLAYER (`js/viz.js`, shared with the game), edge to edge, turning with the phone.
 
 - **Web:** `visualizer/index.html`, live on GitHub Pages at
@@ -34,9 +34,12 @@ game's MUSIC PLAYER (`js/viz.js`, shared with the game), edge to edge, turning w
   ⋮ → Allow restricted settings (the card links there). SONG hides or shows the card.
 - **COLOR**: ALBUM ART (the default: the two strongest colors of the song's art, brightened),
   MATRIX, CIPHER, AMBER, NEON, MONO, SPECTRUM (a cycling rainbow).
-- **DENSITY** (in STYLES, while an ocean with points shows: GRID, MESH, HEX, DEPTHS): how many
-  points are in view at once, the same on any screen, saved per style, the count drawn just now beside
-  it; DEFAULT puts this style's back, ALL DEFAULTS every ocean's.
+- **SETTINGS** (in STYLES, under the list): the style showing's own, saved per style, in real units
+  where there are any (bars, px/s, dB, RPM, ms half-lives, light years a second; the oceans'
+  DENSITY as points in view, the count drawn just now beside it); DEFAULT puts this style's back,
+  ALL DEFAULTS every style's. The list is in the main README's MUSIC PLAYER part.
+- **STAR FIELD**: flying through a galaxy, star systems all around swelling and brightening with the
+  music, each at its own pace.
 - **Taps**: the left or right quarter changes the style; the middle shows or hides the controls,
   which fade after 5 seconds untouched. STYLES lists every style.
 - **MORE**: PICTURE IN PICTURE (on: leaving the app for another shrinks it to a little window over

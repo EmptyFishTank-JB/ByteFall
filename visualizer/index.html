@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#000000">
   <title>ByteFall Viz</title>
   <link rel="icon" href="../assets/icons/icon-192.png">
-  <link rel="stylesheet" href="viz.css?v=9">
+  <link rel="stylesheet" href="viz.css?v=10">
 </head>
 <body>
   <!-- BYTEFALL VIZ: ByteFall's music visualizers on their own, for whatever the phone plays
@@ -58,16 +58,7 @@
   <div id="drawer" hidden>
     <div class="drawer-head">STYLES</div>
     <div id="drawer-list"></div>
-    <div id="density" hidden>
-      <label for="density-in">DENSITY</label>
-      <input id="density-in" type="number" inputmode="numeric" min="100" max="6000" step="50">
-      <span class="density-unit">POINTS IN VIEW</span>
-      <span id="density-now"></span>
-      <span class="density-btns">
-        <button id="density-reset">DEFAULT</button>
-        <button id="density-all">ALL DEFAULTS</button>
-      </span>
-    </div>
+    <div id="viz-set" class="viz-set" hidden></div>
   </div>
 
   <div id="sources" hidden>
@@ -95,8 +86,8 @@
     <button id="start-btn">START</button>
   </div>
 
-  <script src="../js/viz.js?v=9"></script>
-  <script src="../js/extsource.js?v=9"></script>
-  <script src="app.js?v=9"></script>
+  <script src="../js/viz.js?v=10"></script>
+  <script src="../js/extsource.js?v=10"></script>
+  <script src="app.js?v=10"></script>
 </body>
 </html>
