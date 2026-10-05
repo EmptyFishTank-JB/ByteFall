@@ -966,8 +966,9 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
   }
 
   // OCEAN TOPO: the travelling sea (the same view, turns, swell and music as OCEAN GRID) drawn as a map's
-  // contour lines: a ring for each height, so as the sea rises its higher rings appear and as it
-  // falls they shrink away; the highest in the accent, all fading into the distance
+  // contour lines over hills of its own, fixed on the sea so the rings flow by as it travels (the
+  // music raising them): a ring for each height, so as the sea rises its higher rings appear and
+  // as it falls they shrink away; the highest in the accent, all fading into the distance
   function drawOceanTopo(an, w, h, now) {
     g.clearRect(0, 0, w, h);
     seaStep(an, now);
@@ -1003,7 +1004,12 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
         const bf = bp - b0;
         let m = 0;
         for (let d = -1; d <= 1; d++) { const row = Math.round(hr) + d; m += (hAt(row, b0) * (1 - bf) + hAt(row, b1) * bf) / 3; }
-        H[r * nCols + c] = swellAt(wx, wz, t) + m * 0.45;
+        // (the sea's own hills, fixed on it, so the rings flow by as it travels, the music raising
+        // them; and a little of the music straight, as the other seas have it)
+        const mx = mirror(wx);
+        const mz = mirror(wz);
+        const hills = 0.075 * Math.sin(mx * 2.1 + mz * 0.7) + 0.06 * Math.sin(mz * 2.6 - mx * 1.3) + 0.045 * Math.sin((mx - mz) * 3.4);
+        H[r * nCols + c] = swellAt(wx, wz, t) + hills * (0.7 + m * 1.6) + m * 0.22;
         SX[r * nCols + c] = sx;
       }
     }
