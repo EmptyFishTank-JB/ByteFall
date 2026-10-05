@@ -42,8 +42,8 @@ const vizSettings = (bars) => {
   return {
     bars: [
       { id: 'bars', name: 'BARS', unit: '', min: 4, max: 128, step: 1, def: bars },
-      { id: 'fall', name: 'PEAK FALL', unit: 'HEIGHTS/S', min: 0.2, max: 20, step: 0.2, def: 3 },
-      { id: 'lift', name: 'TREBLE LIFT', unit: '%', min: 0, max: 300, step: 10, def: 70 },
+      { id: 'fall', name: 'PEAK FALL', unit: 'HEIGHTS/S', min: 0.2, max: 20, step: 0.2, def: 0.2 },
+      { id: 'lift', name: 'TREBLE LIFT', unit: '%', min: 0, max: 300, step: 10, def: 0 },
     ],
     wave: [
       { id: 'height', name: 'HEIGHT', unit: '% OF HALF', min: 5, max: 100, step: 1, def: 42 },
@@ -73,9 +73,9 @@ const vizSettings = (bars) => {
       { ...pct('size', 'BLOB SIZE'), min: 30, max: 200 },
       trail(23),
     ],
-    vector: [{ id: 'dot', name: 'DOTS', unit: 'PX', min: 0.5, max: 6, step: 0.5, def: 1.5 }, { ...pct('zoom', 'ZOOM'), min: 20 }, trail(13)],
-    vectorwide: [{ id: 'dot', name: 'DOTS', unit: 'PX', min: 0.5, max: 6, step: 0.5, def: 1.5 }, { ...pct('zoom', 'ZOOM'), min: 20 }, trail(13)],
-    lissajous: [{ id: 'dot', name: 'DOTS', unit: 'PX', min: 0.5, max: 6, step: 0.5, def: 1.5 }, { ...pct('zoom', 'ZOOM'), min: 20 }, trail(13)],
+    vector: [{ id: 'dot', name: 'DOTS', unit: 'PX', min: 0.5, max: 6, step: 0.5, def: 1.5 }, { ...pct('zoom', 'ZOOM'), min: 20, def: 200 }, trail(13)],
+    vectorwide: [{ id: 'dot', name: 'DOTS', unit: 'PX', min: 0.5, max: 6, step: 0.5, def: 1.5 }, { ...pct('zoom', 'ZOOM'), min: 20, def: 200 }, trail(13)],
+    lissajous: [{ id: 'dot', name: 'DOTS', unit: 'PX', min: 0.5, max: 6, step: 0.5, def: 1.5 }, { ...pct('zoom', 'ZOOM'), min: 20, def: 200 }, trail(13)],
     matrix: [
       { id: 'size', name: 'CHARACTERS', unit: 'PX', min: 6, max: 48, step: 1, def: 12 },
       { ...pct('speed', 'SPEED') },
@@ -109,7 +109,7 @@ const vizSettings = (bars) => {
     oceanhex: sea(520),
     oceandepth: [{ ...sea(1100)[0], max: 3000 }, ...sea(1100).slice(1), { ...pct('depth', 'LINE DEPTH') }], // (its hanging lines: at most 3,000, more bogs down)
     oceantopo: [
-      { id: 'lines', name: 'CONTOURS', unit: '', min: 3, max: 30, step: 1, def: 10 },
+      { id: 'lines', name: 'CONTOURS', unit: '', min: 3, max: 30, step: 1, def: 16 },
       { ...pct('speed', 'SPEED') },
       { id: 'turn', name: 'TURNING', unit: '°/S AT MOST', min: 0, max: 90, step: 1, def: 14 },
     ],
