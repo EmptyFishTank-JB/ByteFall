@@ -1,8 +1,10 @@
 package com.emptyfishtank.bytefall;
 
+import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.webkit.JavascriptInterface;
+import android.view.WindowManager;
 import android.webkit.WebView;
 import androidx.activity.OnBackPressedCallback;
 import androidx.core.view.WindowCompat;
@@ -27,6 +29,17 @@ public class MainActivity extends BridgeActivity {
     public class AppBridge {
         @JavascriptInterface
         public void setPlayerOpen(boolean open) { playerOpen = open; }
+        // (the music player's FULL SCREEN visualizer: it turns with the phone, as the phone's own
+        // auto-rotate allows, and the screen stays on while it's up; everywhere else the game stays
+        // portrait and the screen sleeps as usual)
+        @JavascriptInterface
+        public void setVizFullscreen(boolean on) {
+            runOnUiThread(() -> {
+                setRequestedOrientation(on ? ActivityInfo.SCREEN_ORIENTATION_FULL_USER : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                if (on) getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                else getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            });
+        }
     }
 
     @Override

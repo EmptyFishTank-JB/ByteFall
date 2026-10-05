@@ -177,12 +177,25 @@
       if (!on && wake) { await wake.release(); wake = null; }
     } catch (e) { wake = null; }
   }
+  // (it turns with the phone: the app's portrait lock let go while it's up, tools/android/
+  // MainActivity.java; a browser in its own full screen turns anyway, an installed web app's
+  // portrait lock let go too)
+  function freeRotation(on) {
+    try { if (window.BytefallAndroid && window.BytefallAndroid.setVizFullscreen) window.BytefallAndroid.setVizFullscreen(on); } catch (e) {} // (and the screen kept on)
+    try {
+      if (!window.BYTEFALL_APP && screen.orientation) {
+        if (on && screen.orientation.unlock) screen.orientation.unlock();
+        else if (!on && screen.orientation.lock) screen.orientation.lock('portrait').catch(() => {});
+      }
+    } catch (e) {}
+  }
   function setFull(on) {
     if (on === isFull()) return;
     if (on) setDrawer(false);
     el.classList.toggle('viz-full', on);
     exitBtn.hidden = !on;
     keepAwake(on);
+    freeRotation(on);
     if (on) {
       stir();
       if (!window.BYTEFALL_APP && document.documentElement.requestFullscreen && !document.fullscreenElement) document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
