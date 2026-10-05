@@ -3,7 +3,8 @@
 // - MainActivity: full screen on black, the music on at launch, everything resting in the
 //   background, and the back button working the game (tools/android/MainActivity.java)
 // - VIBRATE permission (the game's haptics); RECORD_AUDIO and MODIFY_AUDIO_SETTINGS for the music
-//   player's OTHER APPS source (Android's Visualizer on what the phone is playing)
+//   player's OTHER APPS source, and FOREGROUND_SERVICE(_MEDIA_PROJECTION) with CaptureService (what
+//   the other apps play, by Android's audio playback capture; tools/android/CaptureService.java)
 // - portrait only, as the web app's manifest asks
 // - the version: the game's build number (index.html's ?v=), so each build installs over the last
 // - TEST builds signed with the repo's own test key (tools/android/test.keystore, password
@@ -22,11 +23,12 @@ const edit = (file, fn) => {
   fs.writeFileSync(p, after);
 };
 
-fs.copyFileSync(path.join(__dirname, 'android', 'MainActivity.java'), path.join(APP, 'src/main/java/com/emptyfishtank/bytefall/MainActivity.java'));
+for (const f of ['MainActivity.java', 'CaptureService.java']) fs.copyFileSync(path.join(__dirname, 'android', f), path.join(APP, 'src/main/java/com/emptyfishtank/bytefall', f));
 
 edit('src/main/AndroidManifest.xml', (s) => s
   .replace('android:name=".MainActivity"', 'android:name=".MainActivity"\n            android:screenOrientation="portrait"')
-  .replace('<uses-permission android:name="android.permission.INTERNET" />', '<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.VIBRATE" />\n    <uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />')); // (VIBRATION: navigator.vibrate needs it)
+  .replace('<uses-permission android:name="android.permission.INTERNET" />', '<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.VIBRATE" />\n    <uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />')
+  .replace('</activity>', '</activity>\n\n        <service android:name=".CaptureService" android:exported="false" android:foregroundServiceType="mediaProjection" />')); // (VIBRATION: navigator.vibrate needs it)
 // (black behind everything: the strip a system bar leaves, the notch, the splash's edges)
 edit('src/main/res/values/styles.xml', (s) => s.replace('<item name="android:background">@null</item>', '<item name="android:background">@null</item>\n        <item name="android:windowBackground">@android:color/black</item>\n        <item name="android:statusBarColor">@android:color/black</item>\n        <item name="android:navigationBarColor">@android:color/black</item>'));
 

@@ -14,7 +14,7 @@
   if (window.BYTEFALL_APP) document.querySelector('#music-player .mp-note').textContent = 'Every track plays with all its layers in. With the player open, the music keeps going with the screen off or in another app.';
   // (the visualizer's SOURCE: ByteFall's own music, or another source's, js/extsource.js)
   const vizAnalyser = () => (ExtSource.isOn() ? ExtSource.analyser() : Music.getAnalyser());
-  const vizStereo = () => (ExtSource.isOn() ? null : Music.getStereo());
+  const vizStereo = () => (ExtSource.isOn() ? ExtSource.stereo() : Music.getStereo());
   const viz = createVisualizer(document.getElementById('mp-viz'), vizAnalyser, {
     bars: 40, modes: ['bars', 'wave', 'scope', 'spectro', 'vu', 'radial', 'fluid', 'vector', 'vectorwide', 'lissajous', 'matrix', 'bitgrid', 'terrain', 'plasma', 'tunnel', 'orb', 'ocean', 'oceantri', 'oceanhex', 'oceantopo', 'topo', 'cloud'], key: 'bytefall-player-viz', getStereo: vizStereo,
   });
@@ -114,7 +114,7 @@
   // (X, Esc or the phone's back: back to SETTINGS, where it was opened from)
   function close() {
     setFull(false);
-    if (window.playerSource) window.playerSource.rest(); // (not listening with the player shut; back on when it opens)
+    if (window.playerSource) window.playerSource.rest(); // (the microphone off with the player shut, back on when it opens; OTHER APPS listens on, so Android needn't ask again; its notification stops it)
     el.hidden = true;
     document.body.classList.remove('player-open');
     toApp(false);
@@ -260,11 +260,12 @@
   }
   sourceBtn.addEventListener('click', () => {
     const list = [null, ...ExtSource.kinds()];
+    if (ExtSource.ended()) { useSource('apps'); return; } // (stopped from the notification: listening again)
     const at = ExtSource.isOn() ? list.indexOf(ExtSource.kind()) : 0;
     useSource(list[(at + 1) % list.length]);
   });
   setInterval(() => { if (!el.hidden && ExtSource.isOn()) hintEl.textContent = ExtSource.info(); }, 300);
-  window.playerSource = { toBytefall: () => useSource(null), resume: () => { if (want && !ExtSource.isOn()) useSource(want); }, rest: () => { if (ExtSource.isOn()) { const keep = want; ExtSource.stop(); showSource(); want = keep; } } };
+  window.playerSource = { toBytefall: () => useSource(null), resume: () => { if (want && !ExtSource.isOn()) useSource(want); }, rest: () => { if (ExtSource.isOn() && ExtSource.kind() !== 'apps') { const keep = want; ExtSource.stop(); showSource(); want = keep; } } };
 
   // The STYLES drawer: every style by name, the one showing lit; a tap goes straight to it
   const drawerBtn = document.getElementById('mp-viz-drawer-btn');

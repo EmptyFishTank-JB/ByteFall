@@ -1,7 +1,11 @@
 package com.emptyfishtank.bytefall;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.media.projection.MediaProjectionConfig;
+import android.media.projection.MediaProjectionManager;
+import android.os.Build;
 import android.content.pm.PackageManager;
 import android.media.audiofx.Visualizer;
 import android.util.Base64;
@@ -29,9 +33,43 @@ import com.getcapacitor.BridgeActivity;
 public class MainActivity extends BridgeActivity {
     private volatile boolean playerOpen = false;
     // OTHER APPS (the music player's SOURCE): what the phone is playing, from any app (Pandora,
-    // Spotify, ...), through Android's Visualizer on the output mix (session 0); it needs the
+    // Spotify, ...). From Android 10 on, by audio playback capture (CaptureService: Android asks
+    // each time, as for a screen recording, and shows a notification while it listens); before
+    // that, through Android's Visualizer on the output mix (session 0). Either needs the
     // RECORD_AUDIO permission (asked for once; nothing is recorded or kept)
     private static final int ASK_AUDIO = 7301;
+    private static final int ASK_CAPTURE = 7302;
+    private static boolean capture() { return Build.VERSION.SDK_INT >= 29; }
+
+    // (Android's "start recording or casting?" question; the answer goes to CaptureService. The
+    // whole screen's sound, not one app's: from Android 14 the question can offer just one app)
+    private void askCapture() {
+        extState = "asking";
+        CaptureService.state = "off";
+        MediaProjectionManager mpm = getSystemService(MediaProjectionManager.class);
+        Intent ask = Build.VERSION.SDK_INT >= 34
+            ? mpm.createScreenCaptureIntent(MediaProjectionConfig.createConfigForDefaultDisplay())
+            : mpm.createScreenCaptureIntent();
+        startActivityForResult(ask, ASK_CAPTURE);
+    }
+    private void stopCapture() {
+        if (!capture()) return;
+        try { startService(new Intent(this, CaptureService.class).setAction(CaptureService.STOP)); } catch (Throwable e) {}
+        CaptureService.state = "off";
+    }
+
+    @Override
+    protected void onActivityResult(int code, int result, Intent data) {
+        super.onActivityResult(code, result, data);
+        if (code != ASK_CAPTURE) return;
+        if (result != RESULT_OK || data == null) { extState = "denied"; return; }
+        try {
+            startForegroundService(new Intent(this, CaptureService.class).putExtra("code", result).putExtra("data", data));
+            extState = "capture";
+        } catch (Throwable e) {
+            extState = "error";
+        }
+    }
     private Visualizer outputViz = null;
     private volatile String extState = "off"; // (off, asking, on, denied, error)
     private byte[] fftBuf = null;
@@ -62,6 +100,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onDestroy() {
         stopOutputViz();
+        stopCapture();
         super.onDestroy();
     }
 
@@ -69,7 +108,9 @@ public class MainActivity extends BridgeActivity {
     public void onRequestPermissionsResult(int code, String[] perms, int[] results) {
         super.onRequestPermissionsResult(code, perms, results);
         if (code != ASK_AUDIO) return;
-        if (results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED) startOutputViz();
+        if (results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED) {
+            if (capture()) askCapture(); else startOutputViz();
+        }
         else extState = "denied";
     }
 
@@ -78,20 +119,35 @@ public class MainActivity extends BridgeActivity {
         @JavascriptInterface
         public void setPlayerOpen(boolean open) { playerOpen = open; }
         // (OTHER APPS: start listening (asking for the permission first if it's not given yet),
-        // stop, how it's going, and a frame: "rate,fftBase64,waveBase64", the FFT as Android gives
-        // it (real and imaginary bytes) and the wave as unsigned bytes)
+        // stop, how it's going (off, asking, on, ended, denied, error), and a frame: by capture,
+        // "pcm,rate,base64" (the last 2048 stereo frames, 16-bit), or by the Visualizer,
+        // "rate,fftBase64,waveBase64" (the FFT as Android gives it, real and imaginary bytes, and
+        // the wave as unsigned bytes))
         @JavascriptInterface
         public String extStart() {
-            if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) startOutputViz();
-            else { extState = "asking"; runOnUiThread(() -> requestPermissions(new String[] { Manifest.permission.RECORD_AUDIO }, ASK_AUDIO)); }
+            extState = "asking";
+            runOnUiThread(() -> {
+                if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED)
+                    requestPermissions(new String[] { Manifest.permission.RECORD_AUDIO }, ASK_AUDIO);
+                else if (capture()) askCapture();
+                else startOutputViz();
+            });
             return extState;
         }
         @JavascriptInterface
-        public void extStop() { runOnUiThread(() -> stopOutputViz()); }
+        public void extStop() { runOnUiThread(() -> { stopOutputViz(); stopCapture(); }); }
         @JavascriptInterface
-        public String extState() { return extState; }
+        public String extState() {
+            if (!"capture".equals(extState)) return extState;
+            String st = CaptureService.state; // (the service's: off until it's going, then on, ended or error)
+            return "off".equals(st) ? "asking" : st;
+        }
         @JavascriptInterface
         public String extFrame() {
+            if ("capture".equals(extState)) {
+                if (!"on".equals(CaptureService.state) || CaptureService.chunks == 0) return "";
+                return "pcm," + CaptureService.RATE + "," + Base64.encodeToString(CaptureService.frame(), Base64.NO_WRAP);
+            }
             Visualizer v = outputViz;
             if (v == null) return "";
             try {
