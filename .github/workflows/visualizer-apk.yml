@@ -1,0 +1,69 @@
+# BYTEFALL VIZ TEST APK: the standalone visualizer (visualizer/) as an Android app. Runs only by
+# hand: Actions → ByteFall Viz APK → Run workflow. The APK is on the run's page under Artifacts.
+# Test-signed with ByteFall's test key: each one installs over the last. SOURCE: live (the default)
+# loads the page from GitHub Pages each time it opens, so pushes show up without a new APK;
+# bundled has its own copy.
+name: ByteFall Viz APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      source:
+        description: 'live: loads the page from GitHub Pages (pushes show up without a new APK); bundled: its own copy'
+        type: choice
+        options: [live, bundled]
+        default: live
+
+concurrency:
+  group: visualizer-apk
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install Capacitor
+        run: npm ci
+
+      - name: Build the app's copy of the page (www/) and its Capacitor config
+        run: node visualizer/build.js ${{ inputs.source == 'bundled' && 'bundled' || 'live' }}
+
+      - name: Create the Android project
+        run: |
+          npx cap add android
+          node visualizer/setup-android.js ${{ inputs.source == 'bundled' && 'bundled' || 'live' }}
+          npx @capacitor/assets generate --android --assetPath tools/android/res \
+            --iconBackgroundColor '#000000' --iconBackgroundColorDark '#000000' \
+            --splashBackgroundColor '#000000' --splashBackgroundColorDark '#000000'
+          npx cap sync android
+
+      - name: Build the APK
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Name it
+        id: name
+        run: |
+          BUILD=$(grep -o '?v=[0-9]*' visualizer/index.html | head -1 | cut -d= -f2)
+          KIND=$([ "${{ inputs.source }}" = "bundled" ] && echo test || echo live)
+          echo "file=ByteFallViz-${KIND}-v${BUILD}-${GITHUB_SHA::7}.apk" >> "$GITHUB_OUTPUT"
+          cp android/app/build/outputs/apk/debug/app-debug.apk "ByteFallViz-${KIND}-v${BUILD}-${GITHUB_SHA::7}.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.name.outputs.file }}
+          path: ${{ steps.name.outputs.file }}
+          retention-days: 14

@@ -1,0 +1,11 @@
+{
+  "appId": "com.emptyfishtank.bytefallviz",
+  "appName": "ByteFall Viz",
+  "webDir": "www",
+  "backgroundColor": "#000000",
+  "android": {
+    "backgroundColor": "#000000",
+    "webContentsDebuggingEnabled": false
+  },
+  "appendUserAgent": "ByteFallVizApp"
+}

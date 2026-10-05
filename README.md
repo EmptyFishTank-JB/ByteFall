@@ -25,6 +25,10 @@ Mechanically it's a Drop7-style puzzle:
   still resolve there (a lone `[1]` decrypts itself), but anything left above
   the line afterwards completes the trace and ends the run.
 
+## ByteFall Viz
+
+The music player's visualizers as their own app, for whatever the phone plays (Pandora, Spotify, YouTube, ...), with the song from any app shown and played / paused / skipped: `visualizer/` (see `visualizer/README.md`), built by Actions → ByteFall Viz APK.
+
 ## Repo layout
 
 ```

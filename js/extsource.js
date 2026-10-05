@@ -173,6 +173,8 @@ const ExtSource = (() => {
   return {
     label,
     isOn: () => on,
+    // (by capture: how many frames have come, and the loudest sample of the last, 0 to 1)
+    level: () => ({ frames, peak: lastPeak }),
     // (OTHER APPS stopped from outside: the notification's STOP, or Android)
     ended() { if (!on || kind !== 'apps') return false; try { return window.BytefallAndroid.extState() === 'ended'; } catch (e) { return false; } },
     state: () => state,

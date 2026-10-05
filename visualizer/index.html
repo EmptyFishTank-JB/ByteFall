@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <title>ByteFall Viz</title>
+  <link rel="icon" href="../assets/icons/icon-192.png">
+  <link rel="stylesheet" href="viz.css?v=1">
+</head>
+<body>
+  <!-- BYTEFALL VIZ: ByteFall's music visualizers on their own, for whatever the phone plays
+       (visualizer/README.md). The page: the visualizer edge to edge, the controls over it -->
+  <canvas id="viz"></canvas>
+  <div id="flash" aria-hidden="true"></div>
+
+  <div id="ui">
+    <header id="top">
+      <span id="style-name">// SPECTRUM</span>
+      <span id="src-chip"><span id="src-name">AUTO</span> <span id="src-in"></span></span>
+    </header>
+
+    <section id="np" hidden>
+      <img id="np-art" alt="">
+      <div id="np-text">
+        <div id="np-title"></div>
+        <div id="np-sub"></div>
+        <div id="np-bar"><span id="np-fill"></span></div>
+      </div>
+      <div id="np-ctl">
+        <button id="np-prev" aria-label="Previous">&#x23EE;</button>
+        <button id="np-toggle" aria-label="Play or pause">&#x23EF;</button>
+        <button id="np-next" aria-label="Next">&#x23ED;</button>
+      </div>
+    </section>
+
+    <section id="np-ask" hidden>
+      <div class="ask-title">SHOW THE SONG</div>
+      <p>To show what Pandora, Spotify or any app is playing (and play, pause and skip it), Android needs
+        to give ByteFall Viz <b>notification access</b>. It reads no notifications, only what's playing.</p>
+      <div class="row">
+        <button id="np-allow">ALLOW</button>
+        <button id="np-later">NOT NOW</button>
+      </div>
+      <p class="small">Switch greyed out? Android holds it back for apps installed outside a store:
+        <a href="#" id="np-appinfo">open App info</a>, tap <b>&#8942;</b> top right, then <b>Allow restricted settings</b>, and try ALLOW again.</p>
+    </section>
+
+    <nav id="bar">
+      <button id="btn-styles">STYLES</button>
+      <button id="btn-source">SOURCE</button>
+      <button id="btn-color">COLOR</button>
+      <button id="btn-song">SONG</button>
+      <button id="btn-more">MORE</button>
+    </nav>
+  </div>
+
+  <div id="drawer" hidden>
+    <div class="drawer-head">STYLES</div>
+    <div id="drawer-list"></div>
+  </div>
+
+  <div id="more" hidden>
+    <div class="drawer-head">MORE</div>
+    <button id="more-pip" data-app>PICTURE IN PICTURE: ON</button>
+    <button id="more-calm">CALM WHEN PAUSED: ON</button>
+    <button id="more-access" data-app>NOTIFICATION ACCESS</button>
+    <button id="more-full" data-web>FULL SCREEN</button>
+    <p class="small">SOURCE &mdash; AUTO hears the other apps directly where they allow it, and through the microphone
+      where they don't (Pandora is one that doesn't). OTHER APPS: only directly. MICROPHONE: only the microphone.
+      Tap the left or right edge to change style; the middle shows or hides the controls.</p>
+    <button id="more-close">CLOSE</button>
+  </div>
+
+  <div id="start">
+    <div class="logo">BYTEFALL<span>VIZ</span></div>
+    <p id="start-text"></p>
+    <button id="start-btn">START</button>
+  </div>
+
+  <script src="../js/viz.js?v=1"></script>
+  <script src="../js/extsource.js?v=1"></script>
+  <script src="app.js?v=1"></script>
+</body>
+</html>
