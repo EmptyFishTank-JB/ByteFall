@@ -160,9 +160,9 @@
     if (source === 'screen') {
       if (scr && scr.stream.getAudioTracks()[0].readyState === 'ended') { stopScreen(); scrNote = 'ENDED'; }
       if (scr) { const m = micLevel(scr.an); return m > 0 ? `${Math.round(20 * Math.log10(m))} DB` : 'SILENT'; }
-      return scrNote === 'NO AUDIO' ? 'NO SOUND SHARED: TAP SOURCE' : scrNote ? `${scrNote}: TAP SOURCE` : '';
+      return scrNote === 'NO AUDIO' ? 'NO SOUND SHARED: SOURCE TO RETRY' : scrNote ? `${scrNote}: SOURCE TO RETRY` : '';
     }
-    if (capEnded && source !== 'mic' && using !== 'mic') return 'STOPPED: TAP SOURCE';
+    if (capEnded && source !== 'mic' && using !== 'mic') return 'STOPPED: SOURCE TO RESTART';
     if (using === 'cap') {
       const { frames, peak } = ExtSource.level();
       return !frames ? 'NO DATA' : peak > 0 ? `${Math.round(20 * Math.log10(peak))} DB` : 'SILENT';
@@ -199,10 +199,10 @@
   function showUi(on = true) {
     ui.classList.toggle('gone', !on);
     clearTimeout(uiT);
-    if (on) uiT = setTimeout(() => { if ($('drawer').hidden && $('more').hidden && $('np-ask').hidden) ui.classList.add('gone'); }, 5000);
+    if (on) uiT = setTimeout(() => { if ($('drawer').hidden && $('more').hidden && $('sources').hidden && $('np-ask').hidden) ui.classList.add('gone'); }, 5000);
   }
   $('viz').addEventListener('click', (e) => {
-    if (!$('drawer').hidden || !$('more').hidden) { closePanels(); return; }
+    if (!$('drawer').hidden || !$('more').hidden || !$('sources').hidden) { closePanels(); return; }
     const x = e.clientX / window.innerWidth;
     if (x < 0.25) step(-1);
     else if (x > 0.75) step(1);
@@ -210,7 +210,7 @@
   });
   ui.addEventListener('pointerdown', () => showUi(true));
 
-  function closePanels() { $('drawer').hidden = true; $('more').hidden = true; showUi(true); }
+  function closePanels() { $('drawer').hidden = true; $('more').hidden = true; $('sources').hidden = true; showUi(true); }
   function fillDrawer() {
     const list = $('drawer-list');
     list.textContent = '';
@@ -225,14 +225,40 @@
   $('btn-styles').addEventListener('click', () => { const open = $('drawer').hidden; closePanels(); $('drawer').hidden = !open; fillDrawer(); });
   $('btn-more').addEventListener('click', () => { const open = $('more').hidden; closePanels(); $('more').hidden = !open; });
   $('more-close').addEventListener('click', closePanels);
-  $('btn-source').addEventListener('click', () => {
-    if (!capEnded && !(source === 'screen' && !scr && scrNote)) source = SOURCES[(SOURCES.indexOf(source) + 1) % SOURCES.length];
+  // SOURCE: a list to pick from, the one listening lit; picking the one already on starts it again
+  // (after a share was cancelled or stopped, or capture stopped from its notification)
+  const SOURCE_HELP = {
+    auto: 'Other apps directly where they allow it, the microphone where they don\'t (Pandora)',
+    apps: 'Other apps directly only (silent for apps that refuse, like Pandora)',
+    screen: 'A shared browser tab\'s sound (Pandora, YouTube, ...), or on Windows the whole computer\'s',
+    mic: 'The microphone: whatever plays in the room',
+  };
+  function fillSources() {
+    const list = $('sources-list');
+    list.textContent = '';
+    for (const k of SOURCES) {
+      const b = document.createElement('button');
+      b.className = 'source-item';
+      b.classList.toggle('lit', k === source);
+      const name = document.createElement('span');
+      name.textContent = SOURCE_NAMES[k] + (k === source && started ? ' (TAP TO RESTART)' : '');
+      const help = document.createElement('small');
+      help.textContent = SOURCE_HELP[k];
+      b.append(name, help);
+      b.addEventListener('click', () => useSourceKind(k));
+      list.append(b);
+    }
+  }
+  function useSourceKind(k) {
+    source = k;
     store.set('source', source);
+    closePanels();
     showSource();
-    if (started) applySource();
-  });
+    if (started) { stopScreen(); scrNote = ''; applySource(); }
+  }
+  $('btn-source').addEventListener('click', () => { const open = $('sources').hidden; closePanels(); $('sources').hidden = !open; fillSources(); });
   window.vizBack = () => {
-    if (!$('drawer').hidden || !$('more').hidden) { closePanels(); return true; }
+    if (!$('drawer').hidden || !$('more').hidden || !$('sources').hidden) { closePanels(); return true; }
     return false;
   };
   window.vizPip = (on) => { document.documentElement.classList.toggle('pip', !!on); };

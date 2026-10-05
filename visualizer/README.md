@@ -8,7 +8,7 @@ game's MUSIC PLAYER (`js/viz.js`, shared with the game), edge to edge, turning w
   computer, SOURCE: SCREEN AUDIO (the default) hears what the browser's screen share carries: pick the
   tab playing the music (Pandora, YouTube, ...) or, on Windows and ChromeOS, the entire screen for the
   whole computer's sound, with SHARE AUDIO on (the picture is asked for too, as browsers require, but
-  never used); stopping the share shows ENDED: TAP SOURCE, and a tap asks again. MICROPHONE: the
+  never used); stopping or cancelling the share says so in the corner, and picking SCREEN AUDIO again in SOURCE asks again. SOURCE opens a list to pick from. MICROPHONE: the
   room. Phones' browsers: the microphone only. Keys: ← → styles, F full screen, H hides the controls;
   the mouse brings them back.
 - **Android app:** `com.emptyfishtank.bytefallviz`, built by Actions → **ByteFall Viz APK**
@@ -20,7 +20,7 @@ game's MUSIC PLAYER (`js/viz.js`, shared with the game), edge to edge, turning w
 - **START**: listening needs a tap first. Android asks for the audio permission (once), then to
   start recording or sharing the screen (each time): that is how an app hears the other apps
   (audio playback capture). Only the sound is used, nothing is recorded or kept; a notification
-  shows while it listens, with STOP (the corner then says STOPPED: TAP SOURCE).
+  shows while it listens, with STOP (the corner then says so; picking it again in SOURCE listens again).
 - **SOURCE**: AUTO (the default) hears the other apps directly where they allow it and switches to
   the microphone where they don't (after 2 seconds of silence directly while a song plays), back
   again on its own when the direct sound returns; the corner shows which (DIRECT or MIC) and the

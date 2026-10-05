@@ -52,8 +52,8 @@ a { color: var(--accent); }
 #np[hidden] + #np-ask[hidden] + #bar { margin-top: auto; }
 .on-other { color: var(--accent) !important; border-color: rgba(var(--accent-rgb), 0.6) !important; }
 
-#drawer, #more { position: fixed; left: 50%; bottom: max(124px, calc(env(safe-area-inset-bottom) + 124px)); transform: translateX(-50%); width: min(420px, calc(100vw - 32px)); max-height: 70vh; overflow-y: auto; background: rgba(0, 0, 0, 0.85); border: 1px solid rgba(var(--fg-rgb), 0.4); border-radius: 10px; padding: 12px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 5; }
-#drawer[hidden], #more[hidden] { display: none; }
+#drawer, #more, #sources { position: fixed; left: 50%; bottom: max(124px, calc(env(safe-area-inset-bottom) + 124px)); transform: translateX(-50%); width: min(420px, calc(100vw - 32px)); max-height: 70vh; overflow-y: auto; background: rgba(0, 0, 0, 0.85); border: 1px solid rgba(var(--fg-rgb), 0.4); border-radius: 10px; padding: 12px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 5; }
+#drawer[hidden], #more[hidden], #sources[hidden] { display: none; }
 #drawer-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px; }
 #drawer-list button { font-size: 11.5px; padding: 9px 6px; text-align: left; }
 #drawer-list button.lit { color: #000; background: var(--fg); }
@@ -73,4 +73,10 @@ a { color: var(--accent); }
 #start-btn { font-size: 16px; padding: 12px 34px; border-color: var(--fg); }
 
 /* (PICTURE IN PICTURE: the visualizer alone) */
-.pip #ui, .pip #drawer, .pip #more, .pip #flash, .pip #start { display: none !important; }
+.pip #ui, .pip #drawer, .pip #more, .pip #sources, .pip #flash, .pip #start { display: none !important; }
+
+#sources-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.source-item { text-align: left; display: flex; flex-direction: column; gap: 4px; }
+.source-item small { font-size: 11px; letter-spacing: 0.04em; color: rgba(var(--fg-rgb), 0.6); }
+.source-item.lit { border-color: var(--accent); }
+.source-item.lit span { color: var(--accent); }
