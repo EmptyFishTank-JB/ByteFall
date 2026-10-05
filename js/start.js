@@ -74,6 +74,11 @@
     // tutorial stays (it has its own EXIT); the main menu goes back to this screen
     const player = document.getElementById('music-player');
     const panel = !recordsEl.hidden || !settingsEl.hidden || !player.hidden;
+    if (!player.hidden && window.playerFullscreen && window.playerFullscreen.on()) { // (its full screen visualizer: out of it)
+      window.playerFullscreen.exit();
+      history.pushState({ bytefall: 'game' }, '');
+      return;
+    }
     if (!player.hidden) { // (the music player: back to SETTINGS)
       document.getElementById('mp-close').click();
       history.pushState({ bytefall: 'game' }, '');

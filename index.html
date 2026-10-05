@@ -31,8 +31,8 @@
   } catch (e) {}
 </script>
 <title>BYTEFALL // decryption terminal</title>
-<script src="js/fonts.js?v=331"></script>
-<link rel="stylesheet" href="css/style.css?v=331">
+<script src="js/fonts.js?v=332"></script>
+<link rel="stylesheet" href="css/style.css?v=332">
 </head>
 <body>
   <!-- Dev: TWINKLE BACKGROUND (grid-bg.js): the starlight behind the whole game, off by default -->
@@ -594,10 +594,17 @@
         <span class="mp-viz-name" id="mp-viz-name">// SPECTRUM</span>
         <span class="mp-viz-hint">TAP TO SWITCH</span>
       </button>
+      <!-- (full screen: its way back out, showing for a moment after each touch) -->
+      <button type="button" id="mp-viz-exit" class="mp-viz-exit" aria-label="Leave full screen" hidden>
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/></svg>
+      </button>
       <!-- The styles drawer (player.js): the arrow under the visualizer's lower left pulls it out -->
       <div class="mp-viz-drawer-wrap">
         <button type="button" id="mp-viz-drawer-btn" class="mp-drawer-btn" aria-expanded="false" aria-controls="mp-viz-drawer" title="Every visualizer style">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>STYLES
+        </button>
+        <button type="button" id="mp-viz-full-btn" class="mp-drawer-btn mp-full-btn" title="The visualizer full screen (tap it to switch styles; the corner button, Esc or back to come out)">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>FULL SCREEN
         </button>
         <div id="mp-viz-drawer" class="mp-viz-drawer" role="group" aria-label="Visualizer styles" hidden></div>
       </div>
@@ -654,44 +661,44 @@
     </div>
   </div>
 
-  <script src="js/bot-svg.js?v=331"></script>
-  <script src="js/unlocks.js?v=331"></script>
-  <script src="js/progress.js?v=331"></script>
-  <script src="js/music/output.js?v=331"></script>
-  <script src="js/music/mixes.js?v=331"></script>
-  <script src="js/sfx.js?v=331"></script>
-  <script src="js/music/music-bytefall-theme.js?v=331"></script>
-  <script src="js/music/music-sleep-mode.js?v=331"></script>
-  <script src="js/music/music-brute-force.js?v=331"></script>
-  <script src="js/music/music-deep-web.js?v=331"></script>
-  <script src="js/music/music-zero-day.js?v=331"></script>
-  <script src="js/music/music-system-restore.js?v=331"></script>
-  <script src="js/music/music-night-drive.js?v=331"></script>
-  <script src="js/music/music-standby-mode.js?v=331"></script>
-  <script src="js/music/music-core-dump.js?v=331"></script>
-  <script src="js/music/music-handshake.js?v=331"></script>
-  <script src="js/music/music-stack-overflow.js?v=331"></script>
-  <script src="js/music/music.js?v=331"></script>
-  <script src="js/data/puzzles.js?v=331"></script>
-  <script src="js/data/daily-puzzles.js?v=331"></script>
-  <script src="js/cpu.js?v=331"></script>
-  <script src="js/fx.js?v=331"></script>
-  <script src="js/viz.js?v=331"></script>
-  <script src="js/pixel.js?v=331"></script>
-  <script src="js/minibot.js?v=331"></script>
-  <script src="js/seasons.js?v=331"></script>
-  <script src="js/bigart.js?v=331"></script>
-  <script src="js/visitors.js?v=331"></script>
-  <script src="js/data/bot-anims.js?v=331"></script>
-<script src="js/wanderers.js?v=331"></script>
-  <script src="js/tutorial.js?v=331"></script>
-  <script src="js/puzzle-sim.js?v=331"></script>
-  <script src="js/script.js?v=331"></script>
-  <script src="js/grid-bg.js?v=331"></script>
-  <script src="js/player.js?v=331"></script>
-  <script src="js/store.js?v=331"></script>
-  <script src="js/start.js?v=331"></script>
-  <script src="js/place.js?v=331"></script>
-  <script src="js/saver.js?v=331"></script>
+  <script src="js/bot-svg.js?v=332"></script>
+  <script src="js/unlocks.js?v=332"></script>
+  <script src="js/progress.js?v=332"></script>
+  <script src="js/music/output.js?v=332"></script>
+  <script src="js/music/mixes.js?v=332"></script>
+  <script src="js/sfx.js?v=332"></script>
+  <script src="js/music/music-bytefall-theme.js?v=332"></script>
+  <script src="js/music/music-sleep-mode.js?v=332"></script>
+  <script src="js/music/music-brute-force.js?v=332"></script>
+  <script src="js/music/music-deep-web.js?v=332"></script>
+  <script src="js/music/music-zero-day.js?v=332"></script>
+  <script src="js/music/music-system-restore.js?v=332"></script>
+  <script src="js/music/music-night-drive.js?v=332"></script>
+  <script src="js/music/music-standby-mode.js?v=332"></script>
+  <script src="js/music/music-core-dump.js?v=332"></script>
+  <script src="js/music/music-handshake.js?v=332"></script>
+  <script src="js/music/music-stack-overflow.js?v=332"></script>
+  <script src="js/music/music.js?v=332"></script>
+  <script src="js/data/puzzles.js?v=332"></script>
+  <script src="js/data/daily-puzzles.js?v=332"></script>
+  <script src="js/cpu.js?v=332"></script>
+  <script src="js/fx.js?v=332"></script>
+  <script src="js/viz.js?v=332"></script>
+  <script src="js/pixel.js?v=332"></script>
+  <script src="js/minibot.js?v=332"></script>
+  <script src="js/seasons.js?v=332"></script>
+  <script src="js/bigart.js?v=332"></script>
+  <script src="js/visitors.js?v=332"></script>
+  <script src="js/data/bot-anims.js?v=332"></script>
+<script src="js/wanderers.js?v=332"></script>
+  <script src="js/tutorial.js?v=332"></script>
+  <script src="js/puzzle-sim.js?v=332"></script>
+  <script src="js/script.js?v=332"></script>
+  <script src="js/grid-bg.js?v=332"></script>
+  <script src="js/player.js?v=332"></script>
+  <script src="js/store.js?v=332"></script>
+  <script src="js/start.js?v=332"></script>
+  <script src="js/place.js?v=332"></script>
+  <script src="js/saver.js?v=332"></script>
 </body>
 </html>

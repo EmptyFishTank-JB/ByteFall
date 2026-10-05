@@ -1,7 +1,8 @@
 // SCREEN SAVER: after 90 seconds without a touch (or a key), the screen goes black but for the
 // wanderers doing their thing (wanderers.js, visitors and seasons and all), to save battery. Not
-// while a timed game runs (a BLITZ clock, a VS match). Everything behind it rests: the background
-// animations stop (grid-bg.js), the other wanderers go, the menus and the player close; the music
+// while a timed game runs (a BLITZ clock, a VS match), nor while the MUSIC PLAYER is open (its
+// visualizer is for watching). Everything behind it rests: the background animations stop
+// (grid-bg.js), the other wanderers go, the menus close; the music
 // plays on. A bot can be poked as ever; a tap anywhere else (or a key) wakes the screen, and that
 // tap goes no further. It comes on with a quick pixelated fade: black blocks filling the screen
 // in a random order (and breaks up the same way, quicker, on waking). Every minute the wanderers
@@ -102,6 +103,7 @@
   }
   setInterval(() => {
     if (!saver.hidden || !enabled || document.hidden) return; // (up, fading, or off)
+    if (!document.getElementById('music-player').hidden) return; // (never over the MUSIC PLAYER)
     if (performance.now() - lastActive > IDLE_MS && !timedRunning()) show();
   }, 2000);
   // Waking it: a tap on the black (a bot's poke stays a poke), or any key; neither goes further

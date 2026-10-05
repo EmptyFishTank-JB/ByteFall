@@ -2237,16 +2237,32 @@ body.player-open { overflow: hidden; }
 .mp-viz-name { left: 8px; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
 .mp-viz-hint { right: 8px; color: var(--fg-dim); }
 /* The styles drawer: an arrow just under the visualizer's lower left, pulling out every style */
-.mp-viz-drawer-wrap { margin-top: -10px; }
+.mp-viz-drawer-wrap { position: relative; z-index: 5; margin-top: -15px; display: flex; justify-content: space-between; padding: 0 10px; }
+/* FULL SCREEN: the visualizer over everything, edge to edge; its name and the way out show a moment
+   after each touch */
+.music-player.viz-full .mp-viz { position: fixed; inset: 0; z-index: 210; width: 100vw; height: 100vh; height: 100dvh; border: 0; border-radius: 0; background: var(--bg-solid); }
+.music-player.viz-full .mp-viz-hint { display: none; }
+.music-player.viz-full .mp-viz-name { top: max(10px, env(safe-area-inset-top)); left: 12px; transition: opacity 0.6s ease; }
+.music-player.viz-full.viz-calm .mp-viz-name { opacity: 0; }
+.mp-viz-exit {
+  position: fixed; z-index: 211; top: max(8px, env(safe-area-inset-top)); right: 10px; width: 40px; height: 40px;
+  display: grid; place-items: center; padding: 0; cursor: pointer; color: var(--fg); background: rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--fg-dim); border-radius: 6px; transition: opacity 0.6s ease;
+}
+.mp-viz-exit[hidden] { display: none; }
+.music-player.viz-calm .mp-viz-exit { opacity: 0; pointer-events: none; }
 .mp-drawer-btn {
   display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px 4px 6px; cursor: pointer;
-  font-family: inherit; font-size: 10px; letter-spacing: 1px; color: var(--fg); background: transparent;
+  font-family: inherit; font-size: 10px; letter-spacing: 1px; color: var(--fg); background: var(--inset-bg);
   border: 1px solid var(--grid-line); border-top: 0; border-radius: 0 0 5px 5px;
+  margin-top: 0; padding-top: 5px; /* (a tab: its sides run up into the visualizer's border) */
 }
 .mp-drawer-btn svg { transition: transform 0.2s ease; }
 .mp-drawer-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
 .mp-viz-drawer {
-  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin-top: 6px;
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 6; /* (over the controls below, not pushing them down) */
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 8px;
+  background: var(--bg-solid); border: 1px solid var(--grid-line); border-radius: 6px; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.6);
   animation: mp-drawer-in 0.18s ease-out;
 }
 .mp-viz-drawer[hidden] { display: none; }

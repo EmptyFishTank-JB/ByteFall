@@ -109,6 +109,7 @@
   }
   // (X, Esc or the phone's back: back to SETTINGS, where it was opened from)
   function close() {
+    setFull(false);
     el.hidden = true;
     document.body.classList.remove('player-open');
     toApp(false);
@@ -123,7 +124,8 @@
   document.getElementById('mp-close').addEventListener('click', close);
   document.addEventListener('keydown', (e) => {
     if (el.hidden) return;
-    if (e.key === 'Escape') close();
+    if (e.key === 'Escape' && isFull()) setFull(false);
+    else if (e.key === 'Escape') close();
     else if (e.key === ' ') { e.preventDefault(); playBtn.click(); }
     else if (e.key === 'ArrowRight') { Music.skip(1); after(); }
     else if (e.key === 'ArrowLeft') { Music.skip(-1); after(); }
@@ -156,16 +158,56 @@
     showVizName();
     markStyle();
   });
+  // FULL SCREEN: the visualizer edge to edge (and the browser's own full screen where there is
+  // one; the app always is), the screen kept awake; a tap still switches styles; the corner button,
+  // Esc or back comes out. Its name and the way out fade after a few seconds untouched
+  const fullBtn = document.getElementById('mp-viz-full-btn');
+  const exitBtn = document.getElementById('mp-viz-exit');
+  let wake = null;
+  let calmTimer = 0;
+  const isFull = () => el.classList.contains('viz-full');
+  function stir() {
+    el.classList.remove('viz-calm');
+    clearTimeout(calmTimer);
+    calmTimer = setTimeout(() => { if (isFull()) el.classList.add('viz-calm'); }, 2500);
+  }
+  async function keepAwake(on) {
+    try {
+      if (on && !wake && navigator.wakeLock) wake = await navigator.wakeLock.request('screen');
+      if (!on && wake) { await wake.release(); wake = null; }
+    } catch (e) { wake = null; }
+  }
+  function setFull(on) {
+    if (on === isFull()) return;
+    if (on) setDrawer(false);
+    el.classList.toggle('viz-full', on);
+    exitBtn.hidden = !on;
+    keepAwake(on);
+    if (on) {
+      stir();
+      if (!window.BYTEFALL_APP && document.documentElement.requestFullscreen && !document.fullscreenElement) document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+    } else {
+      el.classList.remove('viz-calm');
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    }
+  }
+  window.playerFullscreen = { on: isFull, exit: () => setFull(false) };
+  fullBtn.addEventListener('click', () => setFull(true));
+  exitBtn.addEventListener('click', () => setFull(false));
+  el.addEventListener('pointerdown', () => { if (isFull()) stir(); }, true);
+  document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && isFull()) setFull(false); }); // (the browser's own way out)
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && isFull()) { wake = null; keepAwake(true); } });
+
   // The STYLES drawer: every style by name, the one showing lit; a tap goes straight to it
   const drawerBtn = document.getElementById('mp-viz-drawer-btn');
   const drawer = document.getElementById('mp-viz-drawer');
   drawer.innerHTML = viz.styles().map((st) => `<button type="button" data-style="${st.id}">${st.name}</button>`).join('');
   function markStyle() { drawer.querySelectorAll('button').forEach((b) => b.classList.toggle('active', b.dataset.style === viz.mode)); }
   markStyle();
-  drawerBtn.addEventListener('click', () => {
-    drawer.hidden = !drawer.hidden;
-    drawerBtn.setAttribute('aria-expanded', String(!drawer.hidden));
-  });
+  const setDrawer = (open) => { drawer.hidden = !open; drawerBtn.setAttribute('aria-expanded', String(open)); };
+  drawerBtn.addEventListener('click', () => setDrawer(drawer.hidden));
+  // (it lies over the controls: a tap anywhere else puts it away)
+  document.addEventListener('pointerdown', (e) => { if (!drawer.hidden && !e.target.closest('#mp-viz-drawer, #mp-viz-drawer-btn')) setDrawer(false); }, true);
   drawer.addEventListener('click', (e) => {
     const b = e.target.closest('[data-style]');
     if (!b) return;

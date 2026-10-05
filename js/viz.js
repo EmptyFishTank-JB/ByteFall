@@ -782,11 +782,12 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     }
   }
 
-  // OCEAN (GRID or MESH): a sea of particles stretching away to the horizon, each joined to its
-  // neighbors by a thin line (a square grid, or a triangle mesh), fading out with the distance.
-  // Across it the spectrum (the bass in the middle, the treble out at the sides), the nearest row
-  // the music now and each row further out a moment older, so the swells roll away from you
-  const SEA_COLS = 34;
+  // OCEAN (GRID or MESH): a sea of particles stretching away to the horizon and out past every
+  // edge of the screen, each joined to its neighbors by a thin line (a square grid, or a triangle
+  // mesh), fading out with the distance. Across the screen the spectrum (the bass in the middle,
+  // the treble out at the sides), the nearest row the music now and each row further out a moment
+  // older, so the swells roll away from you
+  const SEA_COLS = 96; // (a wide sea: the far rows still reach past the sides)
   const SEA_ROWS = 22;
   const SEA_BANDS = 12;
   let seaHist = [];
@@ -806,45 +807,55 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
     const horizon = h * 0.3;
     const f = h * 0.95;
     const camH = 1.1;
+    const zNear = 0.95; // (the nearest row just below the bottom edge)
+    const zStep = 0.6;
+    const zFar = zNear + (SEA_ROWS - 1) * zStep;
+    const fx = f * 0.42;
+    // (the sea's width: enough that its farthest row still runs past both sides)
+    const halfW = ((w * 0.62) * zFar) / fx;
     const half = (SEA_COLS - 1) / 2;
     const pts = [];
     for (let r = 0; r < SEA_ROWS; r++) {
       const row = seaHist[Math.min(r, seaHist.length - 1)];
-      const z = 1.6 + r * 0.55;
-      const span = 2.2 + z * 0.75; // (the rows widen as they go out, so the sea reaches the sides)
+      const z = zNear + r * zStep;
       const shift = tri && r % 2 ? 0.5 : 0;
       const line = [];
       for (let c = 0; c < SEA_COLS; c++) {
-        const off = Math.abs(c + shift - half) / half; // (0 in the middle, 1 at the sides)
+        const u = (c + shift - half) / half; // (-1 to 1 across the sea)
+        const x = u * halfW;
+        const sx = cx + (x / z) * fx;
+        const off = Math.min(1, Math.abs(sx - cx) / (w / 2)); // (its band: by where it is on the screen)
         const band = Math.min(SEA_BANDS - 1, Math.floor(off * SEA_BANDS));
         const lvl = row[band];
-        const swell = 0.09 * Math.sin(c * 0.45 + t * 1.2 + r * 0.6) + 0.06 * Math.sin(r * 0.8 - t * 1.6 + c * 0.2);
+        const swell = 0.09 * Math.sin(u * 16 + t * 1.2 + r * 0.6) + 0.06 * Math.sin(r * 0.8 - t * 1.6 + u * 7);
         const y = swell + lvl * 0.6;
-        const x = ((c + shift) / (SEA_COLS - 1) - 0.5) * span * 2;
-        line.push({ x: cx + (x / z) * f * 0.42, y: horizon + ((camH - y) / z) * f, lvl, f: c / SEA_COLS });
+        line.push({ x: sx, y: horizon + ((camH - y) / z) * f, lvl, f: (u + 1) / 2 });
       }
       pts.push(line);
     }
     const fadeAt = (r) => Math.pow(1 - r / SEA_ROWS, 1.4); // (nearer, brighter)
+    const off = (p) => p.x < -30 || p.x > w + 30 || p.y > h + 30; // (out of sight: not drawn)
     g.lineWidth = 0.7;
     for (let r = SEA_ROWS - 1; r >= 0; r--) { // (the far rows first)
       const a = fadeAt(r);
       g.strokeStyle = paint(0.5, (a * 0.45).toFixed(3));
       g.beginPath();
       const row = pts[r];
-      for (let c = 0; c < SEA_COLS; c++) { if (c) g.lineTo(row[c].x, row[c].y); else g.moveTo(row[c].x, row[c].y); }
-      if (r + 1 < SEA_ROWS) { // (to the row behind)
-        const back = pts[r + 1];
-        for (let c = 0; c < SEA_COLS; c++) {
-          if (!tri) { g.moveTo(row[c].x, row[c].y); g.lineTo(back[c].x, back[c].y); continue; }
-          const other = r % 2 ? c + 1 : c - 1; // (a triangle lattice: the two nearest in the row behind)
-          g.moveTo(row[c].x, row[c].y); g.lineTo(back[c].x, back[c].y);
-          if (other >= 0 && other < SEA_COLS) { g.moveTo(row[c].x, row[c].y); g.lineTo(back[other].x, back[other].y); }
+      const back = r + 1 < SEA_ROWS ? pts[r + 1] : null;
+      const link = (p, q) => { if (off(p) && off(q)) return; g.moveTo(p.x, p.y); g.lineTo(q.x, q.y); };
+      for (let c = 0; c < SEA_COLS; c++) {
+        if (c) link(row[c - 1], row[c]);
+        if (!back) continue;
+        link(row[c], back[c]); // (to the row behind)
+        if (tri) { // (a triangle lattice: the other nearest in the row behind too)
+          const other = r % 2 ? c + 1 : c - 1;
+          if (other >= 0 && other < SEA_COLS) link(row[c], back[other]);
         }
       }
       g.stroke();
       const dot = 1 + (1 - r / SEA_ROWS) * 1.6;
       for (const p of row) {
+        if (off(p)) continue;
         g.fillStyle = paint(p.f, Math.min(1, a * (0.5 + p.lvl * 0.7)).toFixed(3), p.lvl > 0.75 && r < SEA_ROWS * 0.5);
         g.fillRect(p.x - dot / 2, p.y - dot / 2, dot, dot);
       }
