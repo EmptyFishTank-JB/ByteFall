@@ -249,11 +249,12 @@ const marketPool = () => Progress.exploitOrder().filter((id) => Progress.sellabl
 // (a quarter of the time a BLACK BOX: I most often, III least)
 const MARKET_BOX_ODDS = 0.25;
 function marketPick(not = []) {
-  if (Math.random() < MARKET_BOX_ODDS) {
+  const all = marketPool();
+  // (and always a box while no exploit is unlocked yet: boxes need no unlocking)
+  if (Math.random() < MARKET_BOX_ODDS || !all.length) {
     const r = Math.random();
     return Progress.boxIds()[r < 0.6 ? 0 : r < 0.9 ? 1 : 2];
   }
-  const all = marketPool();
   const pool = all.filter((id) => !not.includes(id));
   const from = pool.length ? pool : all;
   return from[Math.floor(Math.random() * from.length)] || null;
@@ -4592,7 +4593,7 @@ function marketTick() {
   if (marketDrops % MARKET_EVERY) { renderReserves(); return; }
   sideSlots.forEach((sl, i) => {
     if (sl.state !== 'market') return;
-    sl.id = marketPick(sideSlots.map((x) => x.id));
+    sl.id = marketPick(sideSlots.map((x) => x.id)) || sl.id;
     const b = sideSlotEls()[i];
     b.classList.remove('turned');
     void b.offsetWidth;
