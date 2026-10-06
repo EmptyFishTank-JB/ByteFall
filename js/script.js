@@ -3248,6 +3248,7 @@ function updateHome() {
   homePlayBtn.textContent = inAGame() && mode !== 'tutorial' ? 'RESUME' : 'PLAY';
   refreshBoosterRow();
   refreshStarterRow();
+  fitHome(); // (the words fitted to their boxes)
 }
 function updateTopIcons() {
   const inGame = !homeOpen; // (the tutorial too: PAUSE, as in a game)
@@ -3256,6 +3257,26 @@ function updateTopIcons() {
   document.body.classList.toggle('at-home', homeOpen);
   document.getElementById('records-btn').setAttribute('aria-label', !inGame ? 'Menu: rules, exploits and records' : vsPaused ? 'Resume' : canPause() ? 'Pause' : 'Back to the main menu');
 }
+// Fixed boxes, fitted words: the main menu's buttons and panel keep one size in every mode, font
+// and TEXT SIZE (style.css); what's written in them shrinks, when it must, to fit. Each element's own
+// size is the start (its CSS), so a smaller font or TEXT SIZE never shrinks it past that
+function fitText(el, min = 7) {
+  if (!el || el.hidden || !el.offsetParent) return;
+  el.style.fontSize = '';
+  let size = parseFloat(getComputedStyle(el).fontSize);
+  while ((el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1) && size > min) {
+    size -= 0.5;
+    el.style.fontSize = `${size}px`;
+  }
+}
+function fitHome() {
+  if (homeEl.hidden) return;
+  const FIT = '#level-bar, .home .modes button, .home-row button, #home-play, #difficulty-row button, .home .booster-one, #mode-info, #home-best, #daily-kinds button, #home-mode-name';
+  for (const el of homeEl.querySelectorAll(FIT)) fitText(el, el.id === 'mode-info' ? 7.5 : 8);
+}
+function refitHome() { requestAnimationFrame(fitHome); }
+window.addEventListener('resize', refitHome);
+if (document.fonts) document.fonts.addEventListener('loadingdone', refitHome);
 function showHome() {
   if (xpHold || pendingEarned.length) flushEarned(); // (out of a game: what it held back shows now)
   if (mode === 'tutorial') return; // (the lesson leaves by its own EXIT, which comes here)
@@ -3267,6 +3288,7 @@ function showHome() {
   homeEl.hidden = false;
   updateHome();
   if (daily) { renderDailyCards(); applyModeUi(); } // (how today stands, after a game)
+  fitHome();
   updateTopIcons();
   lockButtons(); // (the menu's buttons, now they can be measured)
 }
@@ -3854,7 +3876,7 @@ function applyFont() {
   const before = document.documentElement.dataset.font;
   if (shown.id === 'courier') delete document.documentElement.dataset.font;
   else document.documentElement.dataset.font = shown.id;
-  if (before !== document.documentElement.dataset.font) requestAnimationFrame(fitBoard); // text sizes shift
+  if (before !== document.documentElement.dataset.font) { requestAnimationFrame(fitBoard); refitHome(); } // text sizes shift
   fontNoteEl.textContent = `${shown.label}: ${shown.desc}`;
   fontListEl.innerHTML = '';
   for (const f of FONTS) {
@@ -4067,6 +4089,7 @@ textSizeBtn.addEventListener('click', () => {
   textSize = order[(order.indexOf(textSize) + 1) % order.length];
   storage.set('bytefall-text-size', textSize);
   applyTextSize();
+  refitHome();
   requestAnimationFrame(fitBoard); // (the HUD's labels refit)
 });
 applyTextSize();
@@ -4355,13 +4378,13 @@ function refreshStarterRow() {
   if (!row) return;
   row.hidden = !starterFits() || mode === 'tutorial';
   if (row.hidden) return;
-  row.innerHTML = `<span class="booster-title">STARTER EXPLOITS</span>`;
+  row.innerHTML = `<span class="booster-title">STARTERS</span>`; // (a long name trails off in its slot)
   const taken = Progress.startersTaken();
   for (let i = 0; i < STARTER_MAX; i++) {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = `booster-chip starter-slot${taken[i] ? ' on' : ''}`;
-    b.textContent = `${i ? 'RIGHT' : 'LEFT'}: ${taken[i] ? itemName(taken[i]) : 'EMPTY'}`;
+    b.innerHTML = taken[i] ? `${itemIcon(taken[i])} ${itemName(taken[i])}` : 'EMPTY'; // (which side: where it sits)
     b.setAttribute('aria-label', `${i ? 'Right' : 'Left'} starter slot: ${taken[i] ? itemName(taken[i]) : 'empty'}. Tap to choose`);
     b.addEventListener('click', () => openStarterPick(i));
     row.appendChild(b);

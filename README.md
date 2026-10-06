@@ -130,7 +130,7 @@ sold; **BLACK BOXES** I, II and III are (5 KEYS and 3 CRYPTO; 12, 5 and a ROOTKI
 random pull each, their odds on them: an exploit of tier 1, 2 or 3 (any of the tier, unlocked or not)
 or an **ANTI-EXPLOIT** (I: 65 / 20 / 3 / 12%; II: 35 / 45 / 12 / 8%; III: 10 / 45 / 42 / 3%).
 Pick 2 on the main menu to take into a game, one in each slot (marked S): two of one kind
-(if you have two) or one each of two. The menu shows the two slots, LEFT and RIGHT, and what's in each.
+(if you have two) or one each of two. The menu shows the two slots (STARTERS), left and right, and what's in each (a long name trails off).
 A tap on a slot opens its card: every starter and box you own and how many, to put in that slot, EMPTY
 THIS SLOT, and BUY EXPLOITS (the STORE's starters); each is used once in the game. In
 the game, a tap arms an exploit as your next drop, as an earned one, and it's used up (the ones not
@@ -354,6 +354,12 @@ twinkling across the whole screen. Both dev switches take effect as soon as you
 go back to the game, no reload needed.
 
 ## App view on a phone
+
+The main menu holds still: it's pinned to the top, and every box on it (the mode buttons, the mode's
+panel, the rows under it) is one size in every mode, font and TEXT SIZE. The panel takes the room the
+screen has, up to its cap, whatever the mode puts in it; the mode's description takes what the
+panel's other parts leave. A larger TEXT SIZE or a wider font only changes the words, which shrink to
+fit their box when they must, and each button's words sit centered in it.
 
 - **Add to Home Screen** (Chrome's menu on Android, Share on iPhone) installs
   ByteFall with its own icon, and it opens full screen like an app, without

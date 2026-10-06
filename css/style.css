@@ -3179,7 +3179,8 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 :root { --ts: 1; }
 :root.text-l { --ts: 1.15; --label-min: 8; }
 :root.text-xl { --ts: 1.3; --label-min: 9; }
-:root:is(.text-l, .text-xl) :is(.mode-info, .settings-note, .message, .tut-text, .tut-points, .overlay-box p, .records .menu-pane > .panel, .home-best, .booster-row, .vs-setup-note) { zoom: var(--ts); }
+:root:is(.text-l, .text-xl) :is(.settings-note, .message, .tut-text, .tut-points, .overlay-box p, .records .menu-pane > .panel, .vs-setup-note) { zoom: var(--ts); }
+/* (the main menu's words scale inside their set boxes instead: see THE MAIN MENU stays put) */
 /* (positioned ones aren't zoomed, since zoom scales their place too and throws them off to the side: their text is
    scaled instead. The toasts are placed in pixels by placeToast(); the CPU's card is set inside its board) */
 :root:is(.text-l, .text-xl) .toast { font-size: calc(12px * var(--ts)); padding: calc(8px * var(--ts)) calc(14px * var(--ts)); }
@@ -3434,3 +3435,40 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
    nothing to pause, stays top left like the cards' BACK */
 body.in-game.can-pause .records-btn { left: auto; right: 12px; }
 body.in-game.can-pause .records-btn svg { left: auto; right: 4px; } /* (hugging the right corner, as it hugged the left) */
+
+/* THE MAIN MENU stays put. Pinned to the top. Every box a set size in every mode, font and TEXT SIZE:
+   the buttons a fixed height, the mode panel the room left down to its cap (whatever the mode puts
+   in it), the rows under it right after. Only the words change: TEXT SIZE scales them inside their
+   boxes, and script.js's fitHome shrinks any that won't fit. In the panel the mode's description
+   takes what its other parts leave */
+.home { justify-content: flex-start; gap: 10px; padding-top: 30px; padding-bottom: 54px; }
+.home > * { flex-shrink: 0; }
+.home .home-panel { flex: 1 1 0; min-height: 0; max-height: 340px; justify-content: flex-start; gap: 8px; padding: 10px 12px; }
+.home-panel > * { flex-shrink: 0; }
+.home-panel .home-play { margin-top: auto; }
+.home .modes button, .home-row button, .home .home-play, #difficulty-row button, .home .booster-chip {
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  white-space: nowrap; overflow: hidden; padding-top: 0; padding-bottom: 0;
+}
+.home .modes button { height: 34px; }
+.home-row button { height: 32px; }
+.home .home-play { height: 36px; flex-shrink: 0; }
+#difficulty-row button { height: 26px; }
+.home-mode-name { height: 18px; white-space: nowrap; overflow: hidden; line-height: 18px; }
+.home .mode-info { flex: 1 1 0; min-height: 0; overflow: hidden; width: 100%; font-size: calc(11px * var(--ts)); }
+.home-best { height: 15px; line-height: 15px; overflow: hidden; white-space: nowrap; font-size: calc(11px * var(--ts)); }
+/* BOOSTERS and STARTER EXPLOITS: each one line, its name then its switch */
+.home .booster-row { flex-wrap: nowrap; margin: 0; height: 24px; width: 100%; }
+.home .booster-row .booster-title { width: auto; flex: 0 0 auto; font-size: calc(9px * var(--ts)); letter-spacing: 1px; }
+.home .booster-chip { height: 24px; font-size: calc(10px * var(--ts)); min-width: 0; flex: 0 1 auto; }
+.home .booster-chip.booster-one { width: 120px; }
+.home .booster-chip.starter-slot { flex: 1 1 0; max-width: 118px; display: block; line-height: 22px; text-overflow: ellipsis; padding-left: 5px; padding-right: 5px; }
+.home .booster-chip .ico { flex-shrink: 0; }
+/* DAILY's cards: set sizes, their words in em so they shrink together */
+.home .daily-cards button { height: 64px; overflow: hidden; font-size: calc(10px * var(--ts)); }
+.home .daily-cards .dc-name { font-size: 1.3em; }
+.home .daily-cards .dc-rule { font-size: 1em; }
+.home .daily-cards .dc-status { font-size: 0.95em; }
+/* (the menu's top lines too: one line each, a set height) */
+.home .level-bar { height: 16px; padding-top: 0; padding-bottom: 0; max-width: 100%; white-space: nowrap; overflow: hidden; }
+.home .wallet { height: 14px; overflow: hidden; }
