@@ -3578,4 +3578,3 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
    card's foot right under PLAY and the rows under the card right after; a mode with more than the
    screen has room for scrolls inside it) */
 .home .home-panel { flex: 0 1 auto; }
-.home .daily-cards button { min-height: 0; padding: 6px 8px; gap: 2px; } .home .daily-cards .dc-name { font-size: 1.15em; } /* (DAILY's four cards a little tighter, to fit the S23 Ultra without scrolling) */
