@@ -14,7 +14,7 @@ together.
 | **CACHE** | stacked disks, light grey `#c8ccd0` | common | bits decrypted **across a row** | 1 per 5 |
 | **CRYPTO** | the game's coin: a hexagon with a C struck through twice, Bitcoin orange `#f7931a` | common | **chain links** from the 3rd on | 1 per link |
 | **ROOTKITS** | `#`, red `#ff3b4e` | uncommon | a bit decrypted **across and down at once**; **layers broken** down to their bit; **BYTES** (HARD) | 1 per 2 cross decrypts; 1 per 20 layers broken; 1 per BYTE |
-| **MASTER KEYS** | a heavier key whose head is the currency sign, deep gold `#e8b10e` with a glow | rare | **every 5th level**; the **day's first daily game**; the **day's first VS win** | 1 each |
+| **MASTER KEYS** | the heavier key, its head carrying the currency sign's two lines, deep gold `#e8b10e` with a glow | rare | **every 5th level**; the **day's first daily game**; the **day's first VS win** | 1 each |
 
 Each resource holds at most **999** (KEYS have no cap); what's earned past that is lost. A bit decrypted both ways counts as a cross decrypt only, not also as BUGS and CACHE. Bits cleared
 by exploits earn no resources. Resources come whole once enough
