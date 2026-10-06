@@ -3214,8 +3214,6 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 .store-ico svg { width: 20px; height: 20px; }
 .store-cost { display: flex; flex-wrap: wrap; gap: 4px 10px; margin: 6px 0 2px; font-size: 12px; letter-spacing: 1px; }
 .store-odds { margin: 4px 0; font-size: 11px; letter-spacing: 0.5px; color: var(--fg-dim); }
-.store-need { margin: 2px 0; font-size: 11px; letter-spacing: 0.5px; color: var(--danger); min-height: 0; }
-.store-need:empty { display: none; }
 .store-master { margin-right: 6px; }
 .store-master[hidden] { display: none; }
 /* A BLACK BOX's tier, on its icon */
@@ -3364,3 +3362,13 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 .store-btns .store-master .key-ico { width: 15px; height: 15px; filter: drop-shadow(0 0 2px var(--res-master-glow)); }
 /* (a fourth resource at three digits wraps under the others on the narrowest phones, rather than running under BUY) */
 .store-terms .store-costs { flex-wrap: wrap; }
+
+/* What's short of a price pulses red (the STORE and the BLACK MARKET's window), in place of a NEED line;
+   a BUY tapped without enough flashes it harder for a moment */
+.shop-cost.short, .buy-keys.short { animation: short-pulse 1.2s ease-in-out infinite; }
+.shop-cost.short span, .buy-keys.short { color: var(--danger); }
+@keyframes short-pulse { 0%, 100% { opacity: 1; filter: drop-shadow(0 0 3px rgba(var(--danger-rgb), 0.75)); } 50% { opacity: 0.45; filter: none; } }
+.shop-cost.short.nudge, .buy-keys.short.nudge { animation: short-nudge 0.5s steps(2) 2, short-pulse 1.2s ease-in-out 1s infinite; }
+@keyframes short-nudge { 0% { transform: translateX(-2px) scale(1.12); filter: drop-shadow(0 0 6px rgba(var(--danger-rgb), 1)); } 100% { transform: translateX(2px) scale(1.12); filter: drop-shadow(0 0 6px rgba(var(--danger-rgb), 1)); } }
+@media (prefers-reduced-motion: reduce) { .shop-cost.short, .buy-keys.short { animation: none; } }
+.shop-note:empty { display: none; } /* (only the "opens when..." line now; nothing to say, no gap) */

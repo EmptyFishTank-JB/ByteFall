@@ -33,7 +33,7 @@ const Store = (() => {
     item.querySelector('.store-buy').addEventListener('click', () => {
       if (!Progress.spendKeys(b.cost)) {
         SFX.play('denied');
-        say(`NOT ENOUGH KEYS // ${b.name} IS ${b.cost} KEYS`);
+        flashShort(item);
         return;
       }
       Progress.addBooster(id);
@@ -58,14 +58,13 @@ const Store = (() => {
       + `<span class="store-price">${box ? '' : `TIER ${Progress.tierOf(id) + 1}`}</span></h3>`
       + `<p class="store-desc">${itemDesc(id)}</p>`
       + (box ? `<p class="store-odds">TIER 1 EXPLOIT ${odds[0]}% // TIER 2 ${odds[1]}% // TIER 3 ${odds[2]}% // ANTI-EXPLOIT ${odds[3]}%</p>` : '')
-      // (the price and how many are owned as one block, BUY level with it; what's short under them)
-      + `<div class="store-deal"><div class="store-terms"><div class="store-costs"></div><span class="booster-owned"></span></div><div class="store-btns">${box ? '' : `<button type="button" class="store-buy store-master" hidden title="Use a MASTER KEY in place of the price" aria-label="Use a MASTER KEY">USE ${RES_INFO.master.svg}</button>`}<button type="button" class="store-buy store-pay">${BUY_HTML(Progress.price(id).keys)}</button></div></div>`
-      + '<p class="store-need"></p>';
+      // (the price and how many are owned as one block, BUY level with it; what's short pulses red)
+      + `<div class="store-deal"><div class="store-terms"><div class="store-costs"></div><span class="booster-owned"></span></div><div class="store-btns">${box ? '' : `<button type="button" class="store-buy store-master" hidden title="Use a MASTER KEY in place of the price" aria-label="Use a MASTER KEY">USE ${RES_INFO.master.svg}</button>`}<button type="button" class="store-buy store-pay">${BUY_HTML(Progress.price(id).keys)}</button></div></div>`;
     const buy = (master) => {
       if (!box && !Progress.exploitInfo(id).unlocked) { SFX.play('denied'); return; }
       if (!Progress.payFor(id, master)) {
         SFX.play('denied');
-        say(`NOT ENOUGH // ${itemName(id)} NEEDS ${Progress.missing(id).map(([res, n]) => `${n} MORE ${RES_INFO[res].name}`).join(', ')}`);
+        flashShort(item); // (what's short flashes; no words)
         return;
       }
       Progress.addStarter(id);
@@ -111,8 +110,6 @@ const Store = (() => {
       item.querySelector('.booster-owned').textContent = !info.unlocked ? `UNLOCKS AT LV ${info.level}` : n ? `OWNED \u00d7${n}` : '';
       item.querySelector('.store-costs').innerHTML = costHtml(Progress.price(id), false); // (have / cost: green, enough of it; red, short; KEYS on BUY)
       item.querySelector('.store-pay').innerHTML = BUY_HTML(Progress.price(id).keys);
-      item.querySelector('.store-need').textContent = info.unlocked && missing.length
-        ? `NEED ${missing.map(([res, k]) => `${k} MORE ${RES_INFO[res].name}`).join(', ')}` : '';
       const btn = item.querySelector('.store-pay');
       btn.disabled = !info.unlocked;
       btn.classList.toggle('short', missing.length > 0);

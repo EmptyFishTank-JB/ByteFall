@@ -123,7 +123,7 @@ boosted game says so on its result screen.
 (SWAP, WORM VIRUS, KEYLOGGER, PACKET SNIFFER, BACKDOOR) 20 KEYS, about 17 of those and a ROOTKIT;
 tier 3 (LOGIC BOMB, HONEYPOT, DICTIONARY ATTACK, RAINBOW TABLE) 30 KEYS, about 22 and 2 or 3
 ROOTKITS (ECONOMY.md has each). The STORE shows each with its icon, its price in chips, what's still
-short of it (NEED ...), and USE A MASTER KEY when it's short and there's one. BLACK BOX itself isn't
+short of it (its amount pulses red; a BUY tapped without enough flashes it), and USE A MASTER KEY when it's short and there's one. BLACK BOX itself isn't
 sold; **BLACK BOXES** I, II and III are (5 KEYS and 3 CRYPTO; 12, 5 and a ROOTKIT; 20, 8 and 2), a
 random pull each, their odds on them: an exploit of tier 1, 2 or 3 (any of the tier, unlocked or not)
 or an **ANTI-EXPLOIT** (I: 65 / 20 / 3 / 12%; II: 35 / 45 / 12 / 8%; III: 10 / 45 / 42 / 3%).
@@ -144,7 +144,7 @@ game's own currency sign in its corner (a 0 struck through twice, as a dollar si
 country's), changing every 4 drops. A tap opens the BLACK MARKET's window: a neon sign of a border in
 the accent, a tilted, flickering sign-sign-sign in its corner and scan lines over it; the item's icon
 in brackets and its name (a box's odds under it), then each part of its price as the resource's icon
-over what you have / what it costs (red where you're short, NEED ... under them), and BUY in the middle
+over what you have / what it costs (red and pulsing where you're short), and BUY in the middle
 (USE A MASTER KEY under it when short of an exploit's price with one). A tap off it, the X, Esc or back
 closes it; drops wait while it's open. A buy waits in the slot until you tap it to arm (or open) it,
 then the slot sells again: buy as often as you like. Buying opens once the game's first encryption layer

@@ -4100,6 +4100,15 @@ const costHtml = (price, keys = true) => [...(keys ? ['keys'] : []), ...Progress
   const have = res === 'keys' ? Progress.keys() : Progress.res(res);
   return `<div class="shop-cost res-${res}${have < price[res] ? ' short' : ' afford'}" title="${RES_INFO[res].name}">${RES_INFO[res].svg}<span>${fmt(have)}/${price[res]}</span></div>`;
 }).join('');
+// What's short of a price flashes harder for a moment (a BUY tapped without enough): the pulsing
+// amounts in el (a STORE item or the BLACK MARKET's window)
+function flashShort(el) {
+  el.querySelectorAll('.shop-cost.short, .buy-keys.short').forEach((x) => {
+    x.classList.remove('nudge');
+    void x.offsetWidth;
+    x.classList.add('nudge');
+  });
+}
 // BUY, with the currency sign; given a KEYS cost, that cost under it (red when you're short): the STORE's
 // buttons, leaving the price row for up to four resources
 const BUY_HTML = (keys = 0) => (keys
@@ -4545,7 +4554,7 @@ function openShop(i) {
   mk.hidden = !master || !marketOpen;
   document.getElementById('shop-note').textContent = !marketOpen
     ? `THE BLACK MARKET OPENS WHEN THE FIRST ENCRYPTION ${MODES[mode].noLayers ? 'LAYER WOULD RISE' : 'LAYER RISES'}`
-    : missing.length ? `NEED ${missing.map(([res, n]) => `${n} MORE ${RES_INFO[res].name}`).join(', ')}` : '';
+    : ''; // (short of something: its amount pulses red, no words needed)
   document.getElementById('shop-sign').innerHTML = CURRENCY_SVG.repeat(3);
   shopEl.classList.remove('hidden');
   SFX.play('click');
@@ -4562,7 +4571,7 @@ function shopBuy(master) {
   const sl = sideSlots[shopSlot];
   if (!sl || sl.state !== 'market' || gameOver || !marketOpen) { closeShop(); return; }
   const name = itemName(sl.id);
-  if (!Progress.payFor(sl.id, master)) { SFX.play('denied'); return; }
+  if (!Progress.payFor(sl.id, master)) { SFX.play('denied'); flashShort(shopEl); return; }
   closeShop();
   sl.state = 'bought';
   marketBought.push(sl.id);
