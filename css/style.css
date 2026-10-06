@@ -2351,12 +2351,15 @@ body.player-open { overflow: hidden; }
 @media (max-width: 360px) { .mp-tracks { grid-template-columns: 1fr; } }
 .mp-tracks button {
   display: flex; align-items: center; gap: 6px; width: 100%; padding: 6px 8px; box-sizing: border-box;
-  font-family: inherit; font-size: 11px; letter-spacing: 1px; text-align: left; white-space: pre; overflow: hidden;
+  font-family: inherit; font-size: 11px; letter-spacing: 1px; text-align: left; overflow: hidden;
   background: transparent; color: var(--fg); border: 1px solid var(--grid-line); border-radius: 4px; cursor: pointer;
 }
 .mp-tracks button.active { border-color: var(--fg); background: rgba(var(--fg-rgb), 0.12); }
 .mp-tracks button.playing { box-shadow: 0 0 8px rgba(var(--fg-rgb), 0.35); }
 .mp-tracks button:disabled { cursor: default; color: rgba(var(--fg-rgb), 0.3); }
+.mp-tracks .mp-n { flex: none; line-height: 1.3; }
+.mp-tracks .mp-t { flex: 1; min-width: 0; line-height: 1.3; }
+.mp-tracks .mp-v { display: block; }
 .mp-tracks .need { margin-left: auto; font-size: 9px; letter-spacing: 0; color: var(--accent); }
 .mp-note { margin: 0; font-size: 10px; line-height: 1.5; text-align: center; color: var(--panel-text); opacity: 0.8; }
 /* OPEN MUSIC PLAYER: the same gap above the visualizer as between the menu's other buttons */

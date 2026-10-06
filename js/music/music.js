@@ -28,8 +28,8 @@ const Music = (() => {
     { id: 'core-dump', title: 'CORE DUMP', create: createCoreDump },
     { id: 'handshake', title: 'HANDSHAKE', create: createHandshake },
     { id: 'stack-overflow', title: 'STACK OVERFLOW', create: createStackOverflow },
-    // (music-generated.js: a new song from a seed, in the season's style; free)
-    { id: 'generated', title: 'GENERATED // SEASONAL', create: (c, o) => createGenerated(c, o, generatedOptions()), free: true, no: 16 },
+    // (music-generated.js: a new song from a seed, in the season's style; free, all year)
+    { id: 'generated', title: 'GENERATED', create: (c, o) => createGenerated(c, o, generatedOptions()), free: true, no: 16 },
   ];
   TRACKS.forEach((t, i) => { t.no = t.no || i + 1; });
   // GENERATED's seed: the SONG OF THE DAY (the date's, the same for everyone that day) or RANDOM (a
@@ -45,17 +45,24 @@ const Music = (() => {
     return 'default';
   }
   let lastGen = null;
+  function daySeed(season) {
+    const d = new Date();
+    const key = `${d.getUTCFullYear()}-${d.getUTCMonth() + 1}-${d.getUTCDate()}-${season}`;
+    let seed = 2166136261;
+    for (let i = 0; i < key.length; i++) { seed ^= key.charCodeAt(i); seed = Math.imul(seed, 16777619) >>> 0; }
+    return seed;
+  }
   function generatedOptions() {
     const season = generatedSeason();
-    let seed;
-    if (genMode === 'day') {
-      const d = new Date();
-      const key = `${d.getUTCFullYear()}-${d.getUTCMonth() + 1}-${d.getUTCDate()}-${season}`;
-      seed = 2166136261;
-      for (let i = 0; i < key.length; i++) { seed ^= key.charCodeAt(i); seed = Math.imul(seed, 16777619) >>> 0; }
-    } else seed = Math.floor(Math.random() * 4294967295);
+    const seed = genMode === 'day' ? daySeed(season) : Math.floor(Math.random() * 4294967295);
     lastGen = { season, seed, mode: genMode };
     return lastGen;
+  }
+  // (the song it plays: the day's, or on RANDOM the last one written; null before the first)
+  function genSong() {
+    const season = generatedSeason();
+    if (genMode === 'day') return composeGenerated({ season, seed: daySeed(season) }).describe();
+    return lastGen && lastGen.mode === 'random' ? composeGenerated(lastGen).describe() : null;
   }
   let enabled = true;
   let backgroundPlay = false;
@@ -80,11 +87,12 @@ const Music = (() => {
   let targetIntensity = 0;
   let gameIntensity = 0; // what the game asks for; the MUSIC PLAYER's full mix overrides it
   let fullMix = false;
-  // The MUSIC PLAYER's SPEED, for the tracks whose tempo climbs with the stack (a `tempo` layer:
-  // STACK OVERFLOW): HELD at its calm tempo, or RAMPING up across each time through the track
+  // The MUSIC PLAYER's speed, for the tracks whose tempo climbs with the stack (a `tempo` layer:
+  // STACK OVERFLOW): RAMPING up across each time through the track (the track as it is), or FULL
+  // SPEED, held at its top tempo (tapping the track while it plays switches)
   const SPEED_KEY = 'bytefall-player-speed';
   let speedMode = 'ramp';
-  try { if (localStorage.getItem(SPEED_KEY) === 'held') speedMode = 'held'; } catch (e) {}
+  try { if (localStorage.getItem(SPEED_KEY) === 'full') speedMode = 'full'; } catch (e) {}
   const RAMPING_TRACKS = new Set(['stack-overflow']);
   // SETTINGS → GAME MUSIC: FULL plays every layer in during the game too (LAYERED: they build with the stack)
   let alwaysFull = (() => { try { return localStorage.getItem('bytefall-music-full') === 'on'; } catch (e) { return false; } })();
@@ -125,9 +133,11 @@ const Music = (() => {
   }
 
   // Sequence/shuffle: fade out over the end of the last loop, then start the next track.
+  // (GENERATED on RANDOM, repeating: a radio, a new song after each has played twice)
+  const genRadio = () => mode === 'repeat' && trackId === 'generated' && genMode === 'random';
   function advance() {
-    if (mode === 'repeat') return;
-    const end = loopsToPlay * engine.loopSteps;
+    if (mode === 'repeat' && !genRadio()) return;
+    const end = (genRadio() ? 2 : loopsToPlay) * engine.loopSteps;
     if (!fadeStarted && step >= end - Math.ceil(FADE_OUT / engine.step)) {
       fadeStarted = true;
       session.gain.setValueAtTime(1, nextTime);
@@ -136,7 +146,7 @@ const Music = (() => {
     if (step >= end) {
       const old = session;
       setTimeout(() => old.disconnect(), (nextTime - ctx.currentTime + 1) * 1000);
-      setTrack(nextTrackId());
+      setTrack(genRadio() ? 'generated' : nextTrackId());
       openSession(0.8);
       if (onTrackChange) onTrackChange(trackId);
     }
@@ -158,7 +168,7 @@ const Music = (() => {
       hit = step % 4 === 0 ? { time: nextTime, beat: true, bar: step % 16 === 0, half: step % 8 === 0, feel: engine.feel ? engine.feel(step) : null } : null;
       if (engine.record) engine.record(recordHit);
       // (the player: the tempo held or ramping, not the full mix's top speed)
-      const tempo = fullMix && RAMPING_TRACKS.has(trackId) ? (speedMode === 'held' ? 0 : (step % engine.loopSteps) / engine.loopSteps) : null;
+      const tempo = fullMix && RAMPING_TRACKS.has(trackId) ? (speedMode === 'full' ? 1 : (step % engine.loopSteps) / engine.loopSteps) : null;
       engine.schedule(step, nextTime, intensity, null, null, tempo);
       if (engine.record) engine.record(null);
       if (hit) { drumLog.push(hit); if (drumLog.length > 96) drumLog.shift(); }
@@ -248,7 +258,10 @@ const Music = (() => {
       id: t.id,
       no: t.no, // (its number in the playlist: 01-16)
       free: !!t.free,
-      title: t.title,
+      name: t.title,
+      // (its way of playing, when it isn't the track as it is, and the title with it)
+      variant: RAMPING_TRACKS.has(t.id) && speedMode === 'full' ? 'FULL SPEED' : t.id === 'generated' && genMode === 'random' ? 'RANDOM' : '',
+      get title() { return this.variant ? `${this.name} - ${this.variant}` : this.name; },
       locked: isLocked(t),
       need: t.free ? '' : Progress.unlock(unlockId(t)).need,
     })),
@@ -262,7 +275,8 @@ const Music = (() => {
       try { localStorage.setItem(GEN_KEY, genMode); } catch (e) {}
       if (timer && trackId === 'generated') this.play('generated');
     },
-    genInfo: () => lastGen,
+    // (GENERATED's song: its title, style, key, tempo and the rest)
+    genSong,
     // A track for now, without starting the music if it's off (the SEASONAL theme's audio)
     useTrack(id) {
       const track = TRACKS.find((t) => t.id === id);
@@ -342,8 +356,15 @@ const Music = (() => {
     hasSpeed: (id = trackId) => RAMPING_TRACKS.has(id),
     getSpeed: () => speedMode,
     setSpeed(m) {
-      speedMode = m === 'held' ? 'held' : 'ramp';
+      speedMode = m === 'full' ? 'full' : 'ramp';
       try { localStorage.setItem(SPEED_KEY, speedMode); } catch (e) {}
+    },
+    // The tracks with two ways to play, switched by tapping the track while it's the one on:
+    // STACK OVERFLOW (ramping / FULL SPEED) and GENERATED (the SONG OF THE DAY / RANDOM: a new song)
+    hasVariant: (id) => RAMPING_TRACKS.has(id) || id === 'generated',
+    toggleVariant(id) {
+      if (RAMPING_TRACKS.has(id)) this.setSpeed(speedMode === 'full' ? 'ramp' : 'full');
+      else if (id === 'generated') this.setGenMode(genMode === 'day' ? 'random' : 'day');
     },
     setFullMix(on) {
       fullMix = on;

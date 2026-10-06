@@ -239,10 +239,8 @@ const SFX = (() => {
   const THEMES = [
     { id: 'terminal', name: 'TERMINAL', desc: 'The keyboard: clicks, keys, static and an 8-bit crunch.' },
     { id: 'handshake', name: 'HANDSHAKE', desc: 'A handheld game console, as in the HANDSHAKE track: pulse-wave blips, a wave-channel thud and noise-channel crunch.', unlock: 'track-10', track: 'HANDSHAKE' },
-    { id: 'haunted', name: 'HAUNTED', desc: 'October\'s: creaks and knocks, a cold wind, a music box, glass chimes and a church bell, in A harmonic minor.' },
+    { id: 'haunted', name: 'HAUNTED', desc: 'Halloween\'s (the SEASONAL theme puts it on in October): creaks and knocks, a cold wind, a music box, glass chimes and a church bell, in A harmonic minor.' },
   ];
-  // (the SEASONAL theme's audio, while it's on: the season's set over the one picked)
-  let seasonalSet = null;
   const THEME_KEY = 'bytefall-sfx-theme';
   let themeId = 'terminal';
   try { if (THEMES.some((t) => t.id === localStorage.getItem(THEME_KEY))) themeId = localStorage.getItem(THEME_KEY); } catch (e) {}
@@ -418,7 +416,6 @@ const SFX = (() => {
   };
   const SETS = { terminal: sounds, handshake, haunted };
   const current = () => {
-    if (seasonalSet && SETS[seasonalSet]) return SETS[seasonalSet];
     const t = THEMES.find((x) => x.id === themeId);
     return t && themeOpen(t) ? SETS[themeId] : sounds;
   };
@@ -519,9 +516,6 @@ const SFX = (() => {
     // (the sound themes: every one, whether it's open, the one picked)
     themes: () => THEMES.map((t) => ({ ...t, open: themeOpen(t) })),
     theme: () => themeId,
-    // (the SEASONAL theme's audio: a set over the picked one, or null)
-    setSeasonal(id) { seasonalSet = id || null; },
-    seasonal: () => seasonalSet,
     setTheme(id) {
       if (!THEMES.some((t) => t.id === id)) return;
       themeId = id;

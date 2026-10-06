@@ -9,7 +9,6 @@
   const stateEl = document.getElementById('mp-state');
   const playBtn = document.getElementById('mp-play');
   const bgBtn = document.getElementById('mp-bg-btn');
-  const speedBtn = document.getElementById('mp-speed-btn');
   bgBtn.hidden = !!window.BYTEFALL_APP; // (the app: the player always plays on in the background)
   if (window.BYTEFALL_APP) document.querySelector('#music-player .mp-note').textContent = 'Every track plays with all its layers in. With the player open, the music keeps going with the screen off or in another app.';
   // (the visualizer's SOURCE: ByteFall's own music, or another source's, js/extsource.js)
@@ -29,32 +28,36 @@
     const current = tracks.findIndex((t) => t && t.id === Music.currentTrack());
     const playing = Music.isEnabled() && Music.isPlaying();
     trackEl.textContent = `${num(current)} ${tracks[current].title}`;
-    stateEl.textContent = playing ? 'NOW PLAYING // FULL MIX' : 'PAUSED';
+    // (GENERATED: the song it wrote)
+    const song = tracks[current].id === 'generated' && Music.genSong();
+    stateEl.textContent = !playing ? 'PAUSED' : song ? `NOW PLAYING // ${song.title}` : 'NOW PLAYING // FULL MIX';
     playBtn.classList.toggle('playing', playing);
     playBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
     document.querySelectorAll('#mp-modes button').forEach((b) => b.classList.toggle('active', b.dataset.mode === Music.getMode()));
     bgBtn.textContent = `BACKGROUND PLAY: ${Music.isBackgroundPlay() ? 'ON' : 'OFF'}`;
     bgBtn.classList.toggle('on', Music.isBackgroundPlay());
-    // SPEED: for a track that speeds up as the stack climbs, held at its calm tempo or ramping up
-    speedBtn.hidden = !Music.hasSpeed(Music.currentTrack());
-    speedBtn.textContent = `SPEED: ${Music.getSpeed() === 'held' ? 'HELD' : 'RAMPING'}`;
-    speedBtn.classList.toggle('on', Music.getSpeed() === 'ramp');
     tracksEl.innerHTML = '';
     for (let n = 0; n < tracks.length; n++) {
       const t = tracks[n];
       const btn = document.createElement('button');
       btn.type = 'button';
+      // (the number, then the title: a long one wraps under itself)
+      btn.innerHTML = '<span class="mp-n"></span><span class="mp-t"></span>';
+      btn.firstChild.textContent = num(n);
       if (t && !t.locked) {
-        btn.textContent = `${num(n)}  ${t.title}`;
+        btn.lastChild.textContent = t.name;
+        if (t.variant) { const v = document.createElement('span'); v.className = 'mp-v'; v.textContent = `- ${t.variant}`; btn.lastChild.appendChild(v); }
         btn.classList.toggle('active', n === current);
         btn.classList.toggle('playing', n === current && playing);
         btn.addEventListener('click', () => {
-          Music.play(t.id);
+          // (the one playing, tapped again: its other way, if it has one)
+          if (n === current && playing && Music.hasVariant(t.id)) Music.toggleVariant(t.id);
+          else Music.play(t.id);
           after();
         });
       } else {
         btn.disabled = true;
-        btn.textContent = `${num(n)}  ${t ? t.title : 'COMING SOON'}`;
+        btn.lastChild.textContent = t ? t.title : 'COMING SOON';
         if (t) {
           btn.classList.add('locked');
           const need = document.createElement('span');
@@ -149,10 +152,6 @@
     if (typeof updateModeBtn === 'function') updateModeBtn();
     render();
   }));
-  speedBtn.addEventListener('click', () => {
-    Music.setSpeed(Music.getSpeed() === 'held' ? 'ramp' : 'held');
-    render();
-  });
   bgBtn.addEventListener('click', () => {
     Music.setBackgroundPlay(!Music.isBackgroundPlay());
     if (typeof updateBgPlayBtn === 'function') updateBgPlayBtn();
