@@ -1494,6 +1494,7 @@ function awardHack(id) {
 // ends (the 5 links in one chain). ZEN and the tutorial play NORMAL's rules, BLITZ its
 // difficulty's, VS the CPU's level's.
 const chainMeters = [...document.querySelectorAll('.chain-meter')];
+const METER_SEG_MS = 110; // (how long one segment takes to fill or drain)
 let streak = 0; // the charge, in segments
 let chainLit = 0; // a chain under way: its links so far (shown on top of the charge)
 let dropLinks = 0; // this drop's links, all its chains together
@@ -1515,8 +1516,30 @@ function showChainMeter() {
     m.hidden = !hacksOn;
     if (m.children.length !== cap) m.innerHTML = '<i></i>'.repeat(cap);
     m.classList.toggle('ready', ready);
-    [...m.children].forEach((seg, i) => {
-      const fill = Math.max(0, Math.min(1, charge - i));
+    // (one bar, not five: a fill runs up the segments in turn, a drain down them from the top, each
+    // segment's change waiting for the ones before it, at one steady rate of METER_SEG_MS a segment)
+    const segs = [...m.children];
+    const from = segs.map((seg) => Number(seg.dataset.fill) || 0);
+    const to = segs.map((seg, i) => Math.max(0, Math.min(1, charge - i)));
+    let wait = 0;
+    for (let i = 0; i < segs.length; i++) { // (rising: bottom up)
+      if (to[i] <= from[i]) continue;
+      const ms = (to[i] - from[i]) * METER_SEG_MS;
+      segs[i].style.setProperty('--fill-delay', `${wait}ms`);
+      segs[i].style.setProperty('--fill-ms', `${ms}ms`);
+      wait += ms;
+    }
+    wait = 0;
+    for (let i = segs.length - 1; i >= 0; i--) { // (falling: top down)
+      if (to[i] >= from[i]) continue;
+      const ms = (from[i] - to[i]) * METER_SEG_MS;
+      segs[i].style.setProperty('--fill-delay', `${wait}ms`);
+      segs[i].style.setProperty('--fill-ms', `${ms}ms`);
+      wait += ms;
+    }
+    segs.forEach((seg, i) => {
+      const fill = to[i];
+      seg.dataset.fill = fill.toFixed(3);
       seg.style.setProperty('--fill', fill.toFixed(3));
       seg.classList.toggle('lit', fill > 0);
       seg.classList.toggle('waiting', ready && fill < 1);
