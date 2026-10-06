@@ -25,7 +25,12 @@
 // Stacked seasons (seasons.js) all send theirs; up to two pieces of scenery stand at once.
 // Sprites are drawn as text: one letter a pixel (its color in `pal`, '.' left empty), in the bots'
 // own pixel size, facing right; a second frame (b) steps the legs, flaps the wings or ripples a hem.
-let hauntedForest = false; // (OCTOBER's HAUNTED FOREST, once it's come: up on every card, visitors.js)
+// (OCTOBER's HAUNTED FOREST, once it's come: up on every card, and kept for the rest of the month,
+// the app closed and opened again or not: the month it came, saved)
+const FOREST_KEY = 'bytefall-forest-month';
+const forestMonth = () => { const d = new Date(); return `${d.getFullYear()}-${d.getMonth() + 1}`; };
+let hauntedForest = (() => { try { return localStorage.getItem(FOREST_KEY) === forestMonth(); } catch (e) { return false; } })();
+const keepForest = (on) => { try { if (on) localStorage.setItem(FOREST_KEY, forestMonth()); else localStorage.removeItem(FOREST_KEY); } catch (e) {} };
 function createVisitors(api) {
   // The air: on the start screen the lane is the whole card, so what flies, falls or hangs
   // uses its full height (sky(f): that far up it, 0-1); in the game's short lane, the heights
@@ -542,6 +547,7 @@ function createVisitors(api) {
   const fogOften = () => { try { return localStorage.getItem('bytefall-dev-fog') === 'on' || /[?&]fog=1/.test(location.search); } catch (e) { return false; } };
   const spooky = () => typeof Season !== 'undefined' && Season.is('halloween'); // (its scarier version)
   const FOG_ODDS = 0.15; // (each NOVEMBER visit: a fog instead)
+  const FOREST_FIRST_ODDS = 0.45; // (OCTOBER, till the HAUNTED FOREST has come this month: sooner)
   let fog = null;
   const NG = 64;
   const grid = Float32Array.from({ length: NG * NG }, () => Math.random());
@@ -611,6 +617,7 @@ function createVisitors(api) {
     fog = { phase: 'in', at: now, level: 0, front: 0, dir: Math.random() < 0.5 ? 1 : -1, dark, back: fogCanvas('fog-back'), fore: fogCanvas('fog-fore'), trees: [], drawn: 0, t: 0, haunted, forced: haunted && !spooky(), red: 0 };
     if (haunted) {
       hauntedForest = true;
+      if (!fog.forced) keepForest(true); // (the dev page's FOREST out of season isn't kept)
       fog.nextEyes = now + rand(6000, 14000);
     }
     if (!instant) api.botEvent(haunted ? 'visit-forest' : 'visit-fog');
@@ -2174,7 +2181,7 @@ function createVisitors(api) {
       // season's visitors, if any)
       if (virusOften() || Math.random() < VIRUS_ODDS) visit('virus');
       else if (fog && fog.haunted && fog.phase === 'light' && Math.random() < 0.4) forestVisit();
-      else if (!fog && (fogOften() || ((Season.is('november') || Season.is('halloween')) && Math.random() < FOG_ODDS))) startFog();
+      else if (!fog && (fogOften() || ((Season.is('november') || Season.is('halloween')) && Math.random() < (spooky() && !hauntedForest ? FOREST_FIRST_ODDS : FOG_ODDS)))) startFog();
       else if (visits().length) visit();
       nextVisit = now + (virusOften() ? rand(3000, 6000) : rand(20000, 45000));
     }
@@ -2386,7 +2393,7 @@ function createVisitors(api) {
   function foggy() { return !!fog && ['in', 'thick', 'swell', 'blood'].includes(fog.phase); }
   // (forget: the dev page's CLEAR ALL, the HAUNTED FOREST too)
   function clear(forget = false) {
-    if (forget) hauntedForest = false;
+    if (forget) { hauntedForest = false; keepForest(false); }
     if (fog) { fog.back.remove(); fog.fore.remove(); fog.dark.remove(); if (fog.moon) fog.moon.remove(); fog = null; }
     if (lights) { lights.dark.remove(); lights.eyes.forEach((e) => e.remove()); if (lights.red) lights.red.remove(); lights = null; }
     api.lane.querySelectorAll('.moon-sky, .night-dark').forEach((e) => e.remove());
