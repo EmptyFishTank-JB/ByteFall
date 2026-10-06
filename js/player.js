@@ -24,6 +24,7 @@
   // SONG CODES: the one playing (tap: copied, to play again later or share), or one typed in
   const codeCopy = document.getElementById('mp-code-copy');
   const codeEnter = document.getElementById('mp-code-enter');
+  const codeShare = document.getElementById('mp-code-share');
   const codeForm = document.getElementById('mp-code-form');
   const codeInput = document.getElementById('mp-code-input');
   const codeMsg = document.getElementById('mp-code-msg');
@@ -49,6 +50,15 @@
       codeCopy.dataset.copied = '1';
       codeCopy.textContent = ok ? 'COPIED' : code;
       setTimeout(() => { delete codeCopy.dataset.copied; render(); }, 1400);
+    });
+  });
+  // SHARE: the song's name, style and code, copied, to paste anywhere
+  codeShare.addEventListener('click', () => {
+    const song = Music.genSong();
+    if (!song) return;
+    copyText(`"${song.title}" (${song.style}) on ByteFall // song code ${song.code}`).then((ok) => {
+      codeShare.textContent = ok ? 'COPIED' : 'COPY FAILED';
+      setTimeout(() => { codeShare.textContent = 'SHARE'; }, 1400);
     });
   });
   function codeEntry(on) {
@@ -80,6 +90,7 @@
     stateEl.textContent = !playing ? 'PAUSED' : song ? `NOW PLAYING // ${song.title}` : 'NOW PLAYING // FULL MIX';
     // (its SONG CODE, to copy: on track 16, once it's written one)
     codeCopy.hidden = !song || !codeForm.hidden;
+    codeShare.hidden = codeCopy.hidden;
     if (song && !codeCopy.dataset.copied) codeCopy.textContent = `CODE ${song.code}`;
     codeCopy.classList.add('code');
     playBtn.classList.toggle('playing', playing);

@@ -976,7 +976,8 @@ strumming, the groove and its fills, the instruments (organ, choir, strings, Rho
 theremin, fiddle, flute, pulse waves, a reese bass...) and a title. The MUSIC PLAYER shows the
 song's title and style; SETTINGS, under the playlist, today's. Every song has a SONG CODE (H1-0KUP3YT:
 its season, H Halloween, N November, W winter, D the rest of the year; the generator's version;
-its seed). The MUSIC PLAYER shows the playing song's (tap it: copied) and ENTER SONG CODE plays
+its seed). The MUSIC PLAYER shows the playing song's (tap it: copied), SHARE copies its name, style and code
+("PUMPKIN LULLABY" (MUSIC BOX) on ByteFall // song code H1-0KUP3YT), and ENTER SONG CODE plays
 the song a code names on track 16 (any case, the dash optional), so a RANDOM song can be heard
 again or shared. A code from a newer ByteFall says to update. When a change to the generator would
 alter the songs already written, the old generator is frozen as its own file (how, at the top of
