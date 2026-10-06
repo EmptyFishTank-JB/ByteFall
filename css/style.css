@@ -3304,7 +3304,7 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
   box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.55), 0 0 26px rgba(var(--accent-rgb), 0.22), inset 0 0 12px rgba(var(--accent-rgb), 0.18); animation: neon-hum 3.2s ease-in-out infinite; }
 .panel.panel-store::before { content: ''; position: absolute; inset: 0; border-radius: 8px; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(var(--fg-rgb), 0.045) 0 1px, transparent 1px 3px); }
 .panel-store h2 { color: var(--accent); letter-spacing: 4px; text-shadow: 0 0 8px rgba(var(--accent-rgb), 0.8); }
-.store-sign { top: 8px; right: 10px; }
+.store-sign { top: -14px; right: -10px; } /* (where the BLACK MARKET's sits: off the corner, clear of the KEYS) */
 .panel-store .store-item { border-color: rgba(var(--accent-rgb), 0.35); background: rgba(var(--accent-rgb), 0.025); }
 .panel-store .store-sub { text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.6); }
 .panel-store .store-buy:not(:disabled):not(.short) { box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.45); }
@@ -3344,7 +3344,8 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
    neon border. The border's glow is kept within the card's padding (the card clips what spills past it) */
 .records .menu-pane > .panel.panel-store { display: flex; flex-direction: column; overflow: hidden; padding-bottom: 0;
   box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.6), 0 0 12px rgba(var(--accent-rgb), 0.25), inset 0 0 12px rgba(var(--accent-rgb), 0.18); animation: none; }
-.store-top { flex: none; position: relative; z-index: 1; padding-bottom: 6px; border-bottom: 1px dashed rgba(var(--accent-rgb), 0.35); }
+.store-top { flex: none; position: relative; z-index: 1; padding-bottom: 0; }
+.store-top::after { content: "================================================================================"; display: block; margin-top: 8px; overflow: hidden; white-space: nowrap; font-size: 11px; line-height: 11px; letter-spacing: 2px; color: var(--accent); opacity: 0.7; } /* (as .store-rule) */
 .store-top h2 { margin-top: 0; }
 .store-top .wallet { margin-bottom: 0; }
 .store-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; margin-right: -8px; padding: 0 8px 14px 0;
@@ -3484,3 +3485,22 @@ body.in-game.can-pause .records-btn svg { left: auto; right: 4px; } /* (hugging 
 .card-back, :is(.records, .settings) .card-back { width: 88px; justify-content: center; }
 #tutorial-btn { width: 100px; text-align: center; }
 .panel-store .store-rule + .store-sub { margin-top: 6px; } /* (each STORE section under its ===== line, as RECORDS' sections) */
+/* The DAILY DROP's LOGIN STREAK: days in a row, a pip for each day of this run of 7 */
+.store-streak { margin-top: 6px !important; font-size: 10px !important; letter-spacing: 1px; color: var(--fg-dim); }
+.store-streak b { color: var(--accent); }
+.streak-pips { display: inline-flex; gap: 2px; vertical-align: -1px; margin: 0 4px; }
+.streak-pips i { width: 7px; height: 9px; border: 1px solid rgba(var(--accent-rgb), 0.6); border-radius: 1px; }
+.streak-pips i.on { background: var(--accent); box-shadow: 0 0 4px rgba(var(--accent-rgb), 0.7); }
+/* PAUSE: its buttons one size, two to a row as the main menu's (one alone sits centered), MAIN MENU
+   as bright as the rest; the STORE's sign clear of its word */
+.vs-pause .pause-row { gap: 8px; flex-wrap: nowrap; }
+.vs-pause .pause-row button, .vs-pause .pause-menu {
+  width: 136px; min-width: 0; height: 32px; padding: 0 22px; display: flex; align-items: center; justify-content: center;
+  white-space: nowrap; overflow: hidden; font-size: 11px; letter-spacing: 1px; flex: none;
+}
+.vs-pause .pause-menu { border-color: var(--fg); color: var(--fg); }
+/* (the STORE's card lets its sign hang off the corner, as the BLACK MARKET's window does; its
+   .store-scroll does the scrolling) */
+.records .menu-pane > .panel.panel-store { overflow: visible; }
+.vs-pause .pause-row button, .vs-pause .pause-menu { width: 140px; padding: 0 6px; }
+.vs-pause #pause-store { padding: 0 24px; } /* (room for its sign) */

@@ -3158,7 +3158,7 @@ function openPause() {
   vsPaused = true;
   vsPausedAt = performance.now();
   document.getElementById('pause-note').textContent = mode === 'vs' ? 'The CPU is waiting for you.' : 'The game is waiting for you.';
-  requestAnimationFrame(() => fitText(document.getElementById('pause-note')));
+  requestAnimationFrame(() => { for (const el of document.querySelectorAll('#pause-note, .vs-pause .pause-row button, #pause-menu')) fitText(el); });
   document.getElementById('pause-exit').hidden = mode !== 'vs';
   // (the tutorial: no RESTART or MAIN MENU; its banner's EXIT leaves)
   for (const id of ['pause-restart', 'pause-menu']) document.getElementById(id).hidden = mode === 'tutorial';
@@ -4148,8 +4148,26 @@ if (freeExploit.day !== localDay()) {
 }
 const DAILY_DROP_KEYS = 25; // (about a game's worth)
 const DAILY_DROP_RES = { bugs: 3, cache: 3, crypto: 3 };
+// LOGIN STREAK: days in a row the game's been opened (the player's own date). Every 7th day in a
+// row, the DAILY DROP also holds 3 MASTER KEYS. A day missed starts it over at 1
+const LOGIN_KEY = 'bytefall-login-streak';
+const STREAK_EVERY = 7;
+const STREAK_MASTERS = 3;
+let loginStreak = { last: '', days: 0, paid: '' };
+try { loginStreak = { ...loginStreak, ...JSON.parse(storage.get(LOGIN_KEY)) }; } catch (e) {}
+const saveStreak = () => storage.set(LOGIN_KEY, JSON.stringify(loginStreak));
+if (loginStreak.last !== localDay()) {
+  const y = new Date();
+  y.setDate(y.getDate() - 1);
+  loginStreak.days = loginStreak.last === y.toLocaleDateString('en-CA') ? loginStreak.days + 1 : 1;
+  loginStreak.last = localDay();
+  saveStreak();
+}
+const streakPays = () => loginStreak.days % STREAK_EVERY === 0 && loginStreak.paid !== localDay();
 window.dailyDrop = {
   claimable: () => !!freeExploit.claimable,
+  // (the STORE's streak line: days in a row, and how far into this run of 7)
+  streak: () => ({ days: loginStreak.days, into: ((loginStreak.days - 1) % STREAK_EVERY) + 1, every: STREAK_EVERY, masters: STREAK_MASTERS, paysToday: streakPays() }),
   claim() {
     if (!freeExploit.claimable) return false;
     freeExploit.claimable = false;
@@ -4157,8 +4175,14 @@ window.dailyDrop = {
     saveFree();
     Progress.claimKeys(DAILY_DROP_KEYS);
     for (const [id, n] of Object.entries(DAILY_DROP_RES)) Progress.addRes(id, n);
+    const streak = streakPays();
+    if (streak) {
+      Progress.addRes('master', STREAK_MASTERS);
+      loginStreak.paid = localDay();
+      saveStreak();
+    }
     SFX.play('egg');
-    showToast(`DAILY DROP // FREE EXPLOIT READY +${DAILY_DROP_KEYS} KEYS +3 BUGS, CACHE, CRYPTO`);
+    showToast(streak ? `${loginStreak.days}-DAY STREAK // +${STREAK_MASTERS} MASTER KEYS +${DAILY_DROP_KEYS} KEYS, FREE EXPLOIT READY` : `DAILY DROP // FREE EXPLOIT READY +${DAILY_DROP_KEYS} KEYS +3 BUGS, CACHE, CRYPTO`);
     updateFreeBtn();
     showKeys();
     return true;
@@ -4172,7 +4196,7 @@ const KEY_SVG = '<svg class="key-ico" viewBox="0 0 16 16" aria-hidden="true"><pa
 const resSvg = (d) => `<svg class="key-ico res-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="${d}" fill="currentColor" fill-rule="evenodd"/></svg>`;
 const RES_INFO = {
   keys: { name: 'KEYS', svg: KEY_SVG },
-  bugs: { name: 'BUGS', svg: resSvg('M6 2h4v2H6zM4 4h8v10H4zM7 6v7h2V6zM1 6h3v1.5H1zM12 6h3v1.5h-3zM1 9h3v1.5H1zM12 9h3v1.5h-3zM2 12h2v1.5H2zM12 12h2v1.5h-2z') },
+  bugs: { name: 'BUGS', svg: resSvg('M6 0h1.2v2H6zM8.8 0H10v2H8.8zM6 2h4v2H6zM4 4h8v10H4zM7 6v7h2V6zM1 6h3v1.5H1zM12 6h3v1.5h-3zM1 9h3v1.5H1zM12 9h3v1.5h-3zM2 12h2v1.5H2zM12 12h2v1.5h-2z') },
   cache: { name: 'CACHE', svg: resSvg('M2 2h12v3.5H2zM2 6.25h12v3.5H2zM2 10.5h12V14H2zM11 3h2v1.5h-2zM11 7.25h2v1.5h-2zM11 11.5h2V13h-2z') },
   // (the game's own coin: a hexagon, a C struck through twice)
   crypto: { name: 'CRYPTO', svg: '<svg class="key-ico res-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0.5l6.8 3.9v7.2L8 15.5l-6.8-3.9V4.4zM8 2.3 2.8 5.3v5.4L8 13.7l5.2-3V5.3z" fill="currentColor" fill-rule="evenodd"/><path d="M5.5 5.5h5V7h-3.5v2h3.5v1.5h-5zM7.2 4h1v1.5h-1zM7.2 10.5h1V12h-1zM8.8 4h1v1.5h-1zM8.8 10.5h1V12h-1z" fill="currentColor"/></svg>' },

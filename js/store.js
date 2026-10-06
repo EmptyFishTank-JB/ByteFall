@@ -120,6 +120,11 @@ const Store = (() => {
     claimBtn.disabled = !claimable;
     claimBtn.textContent = claimable ? 'CLAIM' : 'CLAIMED \u2713';
     document.getElementById('daily-drop-state').textContent = claimable ? 'READY' : 'BACK TOMORROW';
+    if (window.dailyDrop) { // LOGIN STREAK: days in a row, a pip for each day of this run of 7
+      const s = window.dailyDrop.streak();
+      const pips = Array.from({ length: s.every }, (_, i) => `<i class="${i < s.into ? 'on' : ''}"></i>`).join('');
+      document.getElementById('login-streak').innerHTML = `LOGIN STREAK <b>${s.days}</b> ${s.days === 1 ? 'DAY' : 'DAYS'} <span class="streak-pips">${pips}</span> ${s.paysToday ? `+${s.masters} MASTER KEYS TODAY` : s.into === s.every ? `+${s.masters} MASTER KEYS CLAIMED` : `${s.every - s.into} TO +${s.masters} MASTER KEYS`}`;
+    }
     document.getElementById('store-key-count').innerHTML = `${KEY_SVG} ${keys.toLocaleString()}`;
     for (const [id, item] of Object.entries(ITEMS)) {
       const owned = item.owned();

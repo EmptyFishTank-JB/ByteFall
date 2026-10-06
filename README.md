@@ -90,7 +90,7 @@ earned, every price, the BLACK BOX odds and the anti-exploits.
 KEYS are the game's currency, earned by playing and kept on the device
 (progress.js): 1 for every 10 bits decrypted, +2 when a chain reaches 5 links and +5 at 7,
 a first puzzle solve (EASY 2, NORMAL 4, HARD 6), 10 for each achievement and each level,
-5 for the day's first daily game, and 25 with the DAILY DROP (plus 3 each of BUGS, CACHE and CRYPTO) (claimed once a day in the
+5 for the day's first daily game, and 25 with the DAILY DROP (plus 3 each of BUGS, CACHE and CRYPTO, and every 7th day in a row you open the game, 3 MASTER KEYS: the LOGIN STREAK, its days and a pip for each day of the run of 7 shown under the DAILY DROP; a day missed starts it over) (claimed once a day in the
 STORE, with a free exploit for the next game) (the STORE buttons, on the main menu and the pause screen, carry the game's currency sign in their corner: unlit, a dark tube, and lit like a HOT NOW sign, glowing with a slow hum and a flicker now and then, while the DAILY DROP waits). Beside them, the RESOURCES, earned by how bits are
 decrypted: **BUGS** (down a column, 1 per 5), **CACHE** (across a row, 1 per 5), **CRYPTO** (each chain
 link from the 3rd on), **ROOTKITS** (a bit decrypted across and down at once, layers broken, BYTES)
@@ -694,7 +694,7 @@ nothing to pause: VS's setup screen), and SETTINGS waits on the pause screen.
 **PAUSE** (every mode but the tutorial; the top-right icon, or Esc / P): the board is covered
 as on VS's setup screen and the clocks stop (BLITZ's, the CPU's): RESUME, RESTART (VS: a new
 match with the same options) and, in VS, EXIT (back to its setup screen), the last two taking
-a second tap; RULES & RECORDS, SETTINGS, EXPLOITS and STORE open over it; MAIN MENU goes to the menu with the
+a second tap; RULES & RECORDS, SETTINGS, EXPLOITS and STORE open over it (every button under RESUME one size, two to a row, as on the main menu); MAIN MENU goes to the menu with the
 game still paused. A pause pressed mid-drop opens once the drop finishes. The game over box
 has MAIN MENU under NEW SESSION.
 
