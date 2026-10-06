@@ -3423,3 +3423,7 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 .daily-cards button.active { border-color: var(--fg); background: rgba(var(--fg-rgb), 0.14); box-shadow: 0 0 10px rgba(var(--fg-rgb), 0.3); }
 .daily-cards button.active .dc-name { color: var(--fg); text-shadow: 0 0 6px rgba(var(--fg-rgb), 0.6); }
 .daily-cards button.danger { border-color: var(--danger); color: var(--danger); justify-content: center; align-items: center; letter-spacing: 2px; }
+/* In a game, PAUSE sits in the top-right corner (SETTINGS' spot, empty in a game); ← BACK, when there's
+   nothing to pause, stays top left like the cards' BACK */
+body.in-game.can-pause .records-btn { left: auto; right: 12px; }
+body.in-game.can-pause .records-btn svg { left: auto; right: 4px; } /* (hugging the right corner, as it hugged the left) */
