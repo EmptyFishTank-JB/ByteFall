@@ -79,7 +79,9 @@ let pulseInterval = BASE_INTERVAL;
 let gameOver = false;
 let busy = false; // true while animating/resolving, blocks input
 let runId = 0; // bumped on every new game so a pending game-over sequence can tell it's stale
-let vsPaused = false; // PAUSE (any mode): the board covered, the CPU's clock stopped, the drop buttons off
+let vsPaused = false;
+let adware = null; // ANTI-EXPLOITS (runAnti): ADWARE's covered column { col, left }
+let spywareLeft = 0; // ...and SPYWARE's hidden bits // PAUSE (any mode): the board covered, the CPU's clock stopped, the drop buttons off
 let keyloggerDrops = 0; // drops left with the keylogger's preview showing
 let snifferBits = 0; // bits left whose number the player can pick
 let chainLog = []; // this drop's decrypts: { vals, chain, points } per link, { packet, count, points }
@@ -223,28 +225,48 @@ const BOOSTERS = {
 };
 window.BOOSTERS = BOOSTERS;
 // THE SIDE SLOTS, one each side of the exploit button (CLASSIC, BLITZ and ZEN; not DAILY, PUZZLE,
-// VS or the tutorial). RESERVE EXPLOITS (bought in the STORE with KEYS, Progress keeps them): 2
-// taken into a game (picked on the main menu: two of one kind, or one each of two), one in each
-// slot, each used once; a tap arms it as the next drop,
-// as an earned one, and it's used up (the ones not used stay owned). A slot whose reserve is used
-// is the BLACK MARKET (one taken in empty stays closed): a random exploit (of the ones unlocked by level)
-// and its price in KEYS (the STORE's), changing every MARKET_EVERY drops. A tap shows the price, a
-// second buys it, and it waits in the slot until it's armed; one buy a slot, a game. Only
-// exploits unlocked by level. A game that used them says so.
+// VS or the tutorial). RESERVE EXPLOITS and BLACK BOXES (bought in the STORE with KEYS and the
+// RESOURCES, Progress keeps them; ECONOMY.md): 2 taken into a game (picked on the main menu: two
+// of one kind, or one each of two), one in each slot, each used once; a tap arms an exploit as the
+// next drop, as an earned one, and it's used up (the ones not used stay owned). A BLACK BOX waits
+// sealed: a tap opens it (used up), its slot rolling like a slot machine's reel and landing on an
+// exploit, which then waits there to be armed, or an ANTI-EXPLOIT, which goes off at once. A slot
+// whose reserve is used is the BLACK MARKET (one taken in empty stays closed): a random exploit (of
+// the ones unlocked by level) or BLACK BOX at the STORE's price, changing every MARKET_EVERY drops.
+// A tap shows the price, a second buys it (short of it, an exploit takes a MASTER KEY instead, if
+// there's one), and it waits in the slot until it's armed (or opened); one buy a slot, a game. A
+// game that used them says so.
 const RESERVE_MAX = 2;
 const MARKET_EVERY = 4;
 const reserveFits = (m = mode) => !daily && ['classic', 'blitz', 'zen'].includes(m);
-let sideSlots = []; // this game's: [{ state: 'reserve' | 'bought' | 'market' | 'closed', id, buys, confirm }]
+let sideSlots = []; // this game's: [{ state: 'reserve' | 'bought' | 'opened' | 'rolling' | 'market' | 'closed', id, buys, confirm }]
 let marketDrops = 0;
 let usedReserves = []; // (for the result screen)
 let marketBought = [];
-const marketPool = () => Progress.exploitOrder().filter((id) => Progress.exploitInfo(id).unlocked);
+const marketPool = () => Progress.exploitOrder().filter((id) => Progress.sellable(id) && Progress.exploitInfo(id).unlocked);
+// (a quarter of the time a BLACK BOX: I most often, III least)
+const MARKET_BOX_ODDS = 0.25;
 function marketPick(not = []) {
+  if (Math.random() < MARKET_BOX_ODDS) {
+    const r = Math.random();
+    return Progress.boxIds()[r < 0.6 ? 0 : r < 0.9 ? 1 : 2];
+  }
   const all = marketPool();
   const pool = all.filter((id) => !not.includes(id));
   const from = pool.length ? pool : all;
   return from[Math.floor(Math.random() * from.length)] || null;
 }
+// BLACK BOXES and ANTI-EXPLOITS beside the exploits: their names and icons
+const BOX_TIERS = { 'box-1': 'I', 'box-2': 'II', 'box-3': 'III' };
+const ANTI = {
+  adware: { name: 'ADWARE', does: 'A POP-UP COVERS A DROP BUTTON FOR 3 DROPS' },
+  spyware: { name: 'SPYWARE', does: 'YOUR NEXT 3 BITS ARE HIDDEN' },
+  ransomware: { name: 'RANSOMWARE', does: '3 BITS LOCKED UNDER A LAYER' },
+};
+// (a little virus: the ANTI-EXPLOITS')
+const VIRUS_SVG = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 7V3M12 21v-4M7 12H3M21 12h-4M8.5 8.5 5.5 5.5M18.5 18.5l-3-3M8.5 15.5l-3 3M18.5 5.5l-3 3"/></svg>';
+const itemName = (id) => (BOX_TIERS[id] ? `BLACK BOX ${BOX_TIERS[id]}` : ANTI[id] ? ANTI[id].name : HACKS[id] ? HACKS[id].name : id);
+const itemIcon = (id) => (BOX_TIERS[id] ? `${ICON_SVG['black-box']}<span class="box-tier">${BOX_TIERS[id]}</span>` : ANTI[id] ? VIRUS_SVG : iconHtml(id));
 const boosterFits = (id, m = mode) => !daily && BOOSTERS[id].modes.includes(m);
 // (switched on per mode: CLASSIC's choice isn't BLITZ's)
 const armedKey = () => `bytefall-boosters-on-${mode}`;
@@ -486,6 +508,8 @@ function initGame() {
   usedReserves = [];
   marketBought = [];
   marketDrops = 0;
+  adware = null;
+  spywareLeft = 0;
   const taken = Progress.reservesTaken();
   sideSlots = reserveFits() && mode !== 'tutorial'
     ? [0, 1].map((i) => (taken[i] ? { state: 'reserve', id: taken[i], buys: 0 } : { state: 'closed', id: null, buys: 0 })) : [];
@@ -563,12 +587,14 @@ function checkPuzzle() {
   }
 }
 
-// The KEYS this game earned, under the score
+// The KEYS and RESOURCES this game earned, under the score
 function showRunKeys() {
   const el = document.getElementById('overlay-keys');
   const n = Progress.runKeys();
-  el.hidden = !n || mode === 'tutorial';
-  el.textContent = `+${fmt(n)} KEYS // ${fmt(Progress.keys())} IN ALL`;
+  const got = Progress.runRes();
+  const parts = Progress.resIds().filter((id) => got[id]).map((id) => resChip(id, `+${fmt(got[id])}`));
+  el.hidden = (!n && !parts.length) || mode === 'tutorial';
+  el.innerHTML = `${n ? `+${fmt(n)} KEYS // ${fmt(Progress.keys())} IN ALL` : ''}${parts.length ? `<span class="haul">${parts.join(' ')}</span>` : ''}`;
 }
 
 function showPuzzleResult(solved, firstTime = false) {
@@ -934,6 +960,10 @@ function updateColumnButtons() {
     btn.classList.toggle('pivot-target', target);
     btn.classList.toggle('tut-off', mode === 'tutorial' && !Tutorial.allows(c)); // (dimmed: not this lesson's column)
     btn.textContent = target ? (c < pivotFrom ? '\u2190' : '\u2192') : String(c + 1);
+    // (ADWARE: a pop-up over one button; the grid still takes the drop)
+    const ad = !!adware && adware.col === c && pivotFrom === null;
+    btn.classList.toggle('adware', ad);
+    if (ad) { btn.disabled = true; btn.textContent = 'AD'; }
   });
 }
 
@@ -1150,8 +1180,10 @@ function updateHud() {
     currentEl.classList.remove('hack', 'has-glyph');
     currentEl.removeAttribute('aria-label');
     currentEl.title = '';
-  } else if (queue[0]) showPiece(currentEl, queue[0]);
-  else {
+  } else if (queue[0]) {
+    showPiece(currentEl, queue[0]);
+    if (spyHides(0) && queue[0].type === 'number') { currentEl.textContent = '[?]'; currentEl.classList.remove('has-glyph'); } // (SPYWARE)
+  } else {
     currentEl.textContent = '';
     currentEl.classList.remove('hack');
   }
@@ -1167,12 +1199,13 @@ function updateHud() {
     requestAnimationFrame(fitBoard); // the HUD may wrap differently now
   }
   nextEl.innerHTML = '';
-  for (const piece of queue.slice(1, 1 + preview)) {
+  queue.slice(1, 1 + preview).forEach((piece, n) => {
     const sq = document.createElement('div');
     sq.className = 'bit-sq';
     showPiece(sq, piece);
+    if (spyHides(n + 1) && piece.type === 'number') { sq.textContent = '?'; sq.classList.remove('has-glyph'); } // (SPYWARE)
     nextEl.appendChild(sq);
-  }
+  });
   pulseCounterEl.textContent = mode === 'puzzle' ? queue.length : mode === 'breach' ? layersLeft() : mode === 'vs' && !vsLayers ? '-' : pulseInterval - dropsSinceLastPulse;
   if (dealLimit() < Infinity) showClock();
   const layerNext = !gameOver && !MODES[mode].noLayers && pulseInterval - dropsSinceLastPulse === 1;
@@ -1266,6 +1299,7 @@ async function attemptDrop(col) {
   setMessage('');
   const piecesBefore = columns.reduce((n, c) => n + c.length, 0);
   const scoreBefore = score;
+  const resBefore = Progress.runRes();
   chainLog = []; // (what this drop decrypts, link by link, for the tutorial's explanations)
   dropLinks = 0;
   const piece = queue.shift();
@@ -1274,6 +1308,8 @@ async function attemptDrop(col) {
   if (keyloggerDrops > 0) keyloggerDrops--;
   const sniffedOut = snifferBits === 1 && piece.type === 'number'; // the Packet Sniffer's last bit
   if (snifferBits > 0 && piece.type === 'number') snifferBits--;
+  if (spywareLeft > 0 && piece.type === 'number') spywareLeft--;
+  if (adware && --adware.left <= 0) adware = null;
   updateHud();
   const landing = columns[col].length;
   for (let r = MAX_ROWS - 1; r > landing; r--) {
@@ -1330,6 +1366,7 @@ async function attemptDrop(col) {
   }
   if (mode === 'vs' && !overflowed()) await vsAfterDrop(score - scoreBefore);
   endStreakDrop(piece.type === 'hack');
+  showPickup(resBefore);
   Progress.endDrop({
     hack: piece.type === 'hack', heights: columns.map((c) => c.length), rows: ROWS, over: overflowed(),
     lastSecond: mode === 'blitz' && timeLeft <= 1,
@@ -1527,7 +1564,7 @@ async function resolveChains() {
         const vertical = computeRunLength(grid, r, c, 1, 0);
         const horizontal = computeRunLength(grid, r, c, 0, 1);
         if (cell.val === vertical || cell.val === horizontal) {
-          pops.push({ row: r, col: c });
+          pops.push({ row: r, col: c, down: cell.val === vertical, across: cell.val === horizontal });
         }
       }
     }
@@ -1559,6 +1596,13 @@ async function resolveChains() {
     chain++;
     cleared += pops.length;
     Progress.decrypted(pops.map((p) => grid[p.row][p.col].val), chain);
+    // (the RESOURCES: BUGS down a column, CACHE across a row, ROOTKITS both at once, CRYPTO a link from the 3rd on)
+    Progress.decryptKinds({
+      col: pops.filter((p) => p.down && !p.across).length,
+      row: pops.filter((p) => p.across && !p.down).length,
+      cross: pops.filter((p) => p.down && p.across).length,
+      links: chain >= 3 ? 1 : 0,
+    });
     const linkPoints = pops.reduce((n, pos) => n + blockPoints(grid[pos.row][pos.col]), 0) * chain;
     chainLog.push({ vals: pops.map((pos) => grid[pos.row][pos.col].val), chain, points: linkPoints });
     score += linkPoints;
@@ -1911,9 +1955,9 @@ function endGame(reason = 'trace') {
     note.hidden = false;
     note.textContent += ` // BOOSTED: ${[...runBoosts, ...(secondChanceUsed ? ['second-chance'] : [])].map((id) => BOOSTERS[id].name).join(', ')}`;
   }
-  if (usedReserves.length) note.textContent += ` // RESERVES: ${usedReserves.map((id) => HACKS[id].name).join(', ')}`; // (and one that used side slots)
+  if (usedReserves.length) note.textContent += ` // RESERVES: ${usedReserves.map(itemName).join(', ')}`; // (and one that used side slots)
   if (marketBought.length) {
-    note.textContent += ` // BLACK MARKET: ${marketBought.map((id) => HACKS[id].name).join(', ')}`;
+    note.textContent += ` // BLACK MARKET: ${marketBought.map(itemName).join(', ')}`;
   }
   showRunKeys();
   shareBtn.hidden = !daily || mode === 'puzzle';
@@ -3450,6 +3494,7 @@ function placeGhost() {
   const piece = queue[0];
   aimGhost.className = `cell drag-ghost ${piece.type === 'hack' ? 'hack' : 'disc'}`;
   if (piece.type === 'hack') aimGhost.innerHTML = `[${iconHtml(piece.id)}]`;
+  else if (spyHides(0)) aimGhost.textContent = '?'; // (SPYWARE)
   else fillBit(aimGhost, piece.val);
   Object.assign(aimGhost.style, { left: `${cell.offsetLeft}px`, top: `${cell.offsetTop}px`, width: `${cell.offsetWidth}px`, height: `${cell.offsetHeight}px` });
 }
@@ -3934,7 +3979,41 @@ window.dailyDrop = {
 // KEYS: on the main menu under the title, and in the STORE; the STORE buttons get a mark
 // while the DAILY DROP waits
 const KEY_SVG = '<svg class="key-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 4h6v8H1zM3 6v4h2V6zM7 7h8v2H7zM11 9h1.5v2H11zM13.5 9H15v3h-1.5z" fill="currentColor" fill-rule="evenodd"/></svg>';
+// The RESOURCES (Progress, ECONOMY.md): a name and a small pixel icon each
+const resSvg = (d) => `<svg class="key-ico res-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="${d}" fill="currentColor" fill-rule="evenodd"/></svg>`;
+const RES_INFO = {
+  keys: { name: 'KEYS', svg: KEY_SVG },
+  bugs: { name: 'BUGS', svg: resSvg('M6 2h4v2H6zM4 4h8v10H4zM7 6v7h2V6zM1 6h3v1.5H1zM12 6h3v1.5h-3zM1 9h3v1.5H1zM12 9h3v1.5h-3zM2 12h2v1.5H2zM12 12h2v1.5h-2z') },
+  cache: { name: 'CACHE', svg: resSvg('M2 2h12v3.5H2zM2 6.25h12v3.5H2zM2 10.5h12V14H2zM11 3h2v1.5h-2zM11 7.25h2v1.5h-2zM11 11.5h2V13h-2z') },
+  crypto: { name: 'CRYPTO', svg: resSvg('M5 1h6v2h2v2h2v6h-2v2h-2v2H5v-2H3v-2H1V5h2V3h2zM6 4v8h4.5v-1.5H7.5v-2h3V7h-3V5.5h3V4z') },
+  rootkits: { name: 'ROOTKITS', svg: resSvg('M4.5 1.5h2v13h-2zM9.5 1.5h2v13h-2zM1.5 4.5h13v2h-13zM1.5 9.5h13v2h-13z') },
+  master: { name: 'MASTER KEYS', svg: resSvg('M1 3h7v10H1zM3 5v6h3V5zM8 7h7v2H8zM10 9h1.5v3H10zM12.5 9H14v4h-1.5zM3 1h3v2H3z') },
+};
+const resChip = (id, n) => `<span class="res-chip res-${id}" title="${RES_INFO[id].name}">${RES_INFO[id].svg}${n}</span>`;
+// A price as chips: KEYS first, then the resources in their order
+const priceHtml = (price) => ['keys', ...Progress.resIds()].filter((id) => price[id]).map((id) => resChip(id, price[id])).join(' ');
+const priceText = (price) => ['keys', ...Progress.resIds()].filter((id) => price[id]).map((id) => `${price[id]} ${RES_INFO[id].name}`).join(' + ');
+// The wallet: the main menu's line under the level bar, and the STORE's
+function showWallet() {
+  const html = Progress.resIds().map((id) => resChip(id, fmt(Progress.res(id)))).join('');
+  for (const id of ['wallet', 'store-wallet']) {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  }
+}
+// What a drop earned, floating up off the board for a moment
+function showPickup(before) {
+  const now = Progress.runRes();
+  const parts = Progress.resIds().filter((id) => (now[id] || 0) > (before[id] || 0)).map((id) => resChip(id, `+${now[id] - (before[id] || 0)}`));
+  if (!parts.length) return;
+  const el = document.createElement('div');
+  el.className = 'res-pop';
+  el.innerHTML = parts.join(' ');
+  boardWrapEl.appendChild(el);
+  setTimeout(() => el.remove(), 1700);
+}
 function showKeys() {
+  showWallet();
   const n = fmt(Progress.keys());
   document.getElementById('key-label').innerHTML = `${KEY_SVG} ${n}`;
   const inStore = document.getElementById('store-key-count');
@@ -4014,9 +4093,10 @@ function openReservePick(slot) {
   const here = taken[slot] || null;
   const other = taken[1 - slot] || null;
   document.getElementById('reserve-pick-title').textContent = `// ${slot ? 'RIGHT' : 'LEFT'} SLOT`;
-  const owned = Progress.exploitOrder().filter((id) => Progress.reserves(id) > 0 && Progress.exploitInfo(id).unlocked);
+  const owned = [...Progress.exploitOrder().filter((id) => Progress.reserves(id) > 0 && Progress.exploitInfo(id).unlocked),
+    ...Progress.boxIds().filter((id) => Progress.reserves(id) > 0)];
   document.getElementById('reserve-pick-note').textContent = owned.length
-    ? 'Pick a reserve exploit for this side of the exploit button. It\'s used once in the game; the ones you don\'t use stay yours.'
+    ? 'Pick a reserve exploit or BLACK BOX for this side of the exploit button. It\'s used once in the game; the ones you don\'t use stay yours.'
     : 'You don\'t have any reserve exploits yet.';
   const list = document.getElementById('reserve-pick-list');
   list.textContent = '';
@@ -4027,8 +4107,8 @@ function openReservePick(slot) {
     const free = Progress.reserves(id) - (other === id ? 1 : 0);
     b.className = `reserve-pick-item${here === id ? ' on' : ''}`;
     b.disabled = free <= 0;
-    b.innerHTML = `<span class="exploit-glyph">${iconHtml(id)}</span><span class="reserve-pick-name"></span><span class="reserve-pick-count">\u00d7${Progress.reserves(id)}</span>`;
-    b.querySelector('.reserve-pick-name').textContent = HACKS[id].name;
+    b.innerHTML = `<span class="exploit-glyph">${itemIcon(id)}</span><span class="reserve-pick-name"></span><span class="reserve-pick-count">\u00d7${Progress.reserves(id)}</span>`;
+    b.querySelector('.reserve-pick-name').textContent = itemName(id);
     b.addEventListener('click', () => {
       const ids = taken.slice();
       ids[slot] = id;
@@ -4063,8 +4143,8 @@ function refreshReserveRow() {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = `booster-chip reserve-slot${taken[i] ? ' on' : ''}`;
-    b.textContent = `${i ? 'RIGHT' : 'LEFT'}: ${taken[i] ? HACKS[taken[i]].name : 'EMPTY'}`;
-    b.setAttribute('aria-label', `${i ? 'Right' : 'Left'} reserve slot: ${taken[i] ? HACKS[taken[i]].name : 'empty'}. Tap to choose`);
+    b.textContent = `${i ? 'RIGHT' : 'LEFT'}: ${taken[i] ? itemName(taken[i]) : 'EMPTY'}`;
+    b.setAttribute('aria-label', `${i ? 'Right' : 'Left'} reserve slot: ${taken[i] ? itemName(taken[i]) : 'empty'}. Tap to choose`);
     b.addEventListener('click', () => openReservePick(i));
     row.appendChild(b);
   }
@@ -4261,58 +4341,120 @@ const sideSlotEls = () => slotEls || (slotEls = [0, 1].map((i) => {
   return b;
 }));
 function renderReserves() {
-  const keys = Progress.keys();
   sideSlotEls().forEach((b, i) => {
     const sl = sideSlots[i];
     const show = !!sl && !gameOver && mode !== 'tutorial';
     b.hidden = !sideSlots.length || gameOver || mode === 'tutorial';
     b.classList.toggle('closed', !show || sl.state === 'closed');
     if (!show || sl.state === 'closed') { b.innerHTML = ''; b.disabled = true; return; }
+    if (sl.state === 'rolling') return; // (the reel draws itself)
     const market = sl.state === 'market';
-    const price = Progress.reservePrice(sl.id);
+    const price = Progress.price(sl.id);
+    const sealed = Progress.isBox(sl.id);
+    const short = market && Progress.missing(sl.id).length > 0 && !(sealed ? false : Progress.res('master') > 0);
     b.disabled = false;
     b.classList.toggle('market', market);
     b.classList.toggle('owned', !market);
+    b.classList.toggle('sealed', sealed && !market);
     b.classList.toggle('confirm', market && !!sl.confirm);
-    b.classList.toggle('short', market && keys < price);
-    b.innerHTML = `<span class="exploit-glyph">${iconHtml(sl.id)}</span>`
-      + (market ? `<span class="slot-price">${price}</span>` : `<span class="reserve-tag">${sl.state === 'reserve' ? 'R' : '\u2713'}</span>`);
-    const name = HACKS[sl.id].name;
-    b.title = market ? `BLACK MARKET // ${name}: ${price} KEYS (tap, then tap again to buy)` : `${sl.state === 'reserve' ? 'RESERVE' : 'BOUGHT'} // ${name}: tap to arm it`;
+    b.classList.toggle('short', short);
+    b.innerHTML = `<span class="exploit-glyph">${itemIcon(sl.id)}</span>`
+      + (market ? `<span class="slot-price">${price.keys || ''}</span>` : `<span class="reserve-tag">${sl.state === 'reserve' ? 'R' : '✓'}</span>`);
+    const name = itemName(sl.id);
+    b.title = market ? `BLACK MARKET // ${name}: ${priceText(price)} (tap, then tap again to buy)`
+      : sealed ? `${sl.state === 'reserve' ? 'RESERVE' : 'BOUGHT'} // ${name}: tap to open it`
+        : `${sl.state === 'reserve' ? 'RESERVE' : sl.state === 'opened' ? 'BLACK BOX' : 'BOUGHT'} // ${name}: tap to arm it`;
     b.setAttribute('aria-label', b.title);
-    if (!market && armedHack) b.disabled = true;
+    if (!market && !sealed && armedHack) b.disabled = true;
   });
+}
+// The slot's next life once what was in it is used: the BLACK MARKET, until it's been bought from
+// once this game
+function slotSpent(sl, used) {
+  sl.state = sl.buys < 1 ? 'market' : 'closed';
+  sl.confirm = false;
+  if (sl.state === 'market') sl.id = marketPick(sideSlots.map((x) => x.id).concat(used));
+  if (!sl.id) sl.state = 'closed';
 }
 function slotTap(i) {
   const sl = sideSlots[i];
-  if (!sl || gameOver || sl.state === 'closed') return;
-  if (sl.state === 'reserve' || sl.state === 'bought') {
-    if (!armExploit(i)) SFX.play('denied');
+  if (!sl || gameOver || sl.state === 'closed' || sl.state === 'rolling') return;
+  if (sl.state !== 'market') {
+    if (Progress.isBox(sl.id)) openBox(i);
+    else if (!armExploit(i)) SFX.play('denied');
     return;
   }
-  const name = HACKS[sl.id].name;
-  const price = Progress.reservePrice(sl.id);
+  const name = itemName(sl.id);
+  const price = Progress.price(sl.id);
+  const missing = Progress.missing(sl.id);
+  const master = missing.length > 0 && !Progress.isBox(sl.id) && Progress.res('master') > 0; // (short: a MASTER KEY pays instead)
   if (!sl.confirm) { // (the first tap: its price)
     sideSlots.forEach((x) => { x.confirm = false; });
     sl.confirm = true;
-    setMessage(`BLACK MARKET // ${name}: ${price} KEYS, TAP AGAIN TO BUY`);
+    setMessage(`BLACK MARKET // ${name}: ${priceText(price)}${master ? ', OR 1 MASTER KEY' : ''}, TAP AGAIN TO BUY`);
     SFX.play('click');
     renderReserves();
     return;
   }
   sl.confirm = false;
-  if (!Progress.spendKeys(price)) {
+  if (!Progress.payFor(sl.id, master)) {
     SFX.play('denied');
-    setMessage(`BLACK MARKET // NOT ENOUGH KEYS FOR ${name}`);
+    setMessage(`BLACK MARKET // NEED ${missing.map(([res, n]) => `${n} MORE ${RES_INFO[res].name}`).join(', ')}`);
     renderReserves();
     return;
   }
   sl.state = 'bought';
   sl.buys++;
+  marketBought.push(sl.id);
   SFX.play('egg');
-  setMessage(`BLACK MARKET // BOUGHT ${name}: TAP IT TO ARM`);
-  if (typeof showKeys === 'function') showKeys();
+  setMessage(`BLACK MARKET // BOUGHT ${name}${master ? ' WITH A MASTER KEY' : ''}: TAP IT TO ${Progress.isBox(sl.id) ? 'OPEN' : 'ARM'}`);
+  showKeys();
   renderReserves();
+}
+// A BLACK BOX opened in its slot: the reel spins through the icons, slowing, and lands on what
+// Progress rolled. An exploit waits there to be armed; an ANTI-EXPLOIT goes off
+const REEL_STEPS = [50, 50, 55, 60, 65, 75, 85, 100, 115, 135, 160, 190, 230, 280];
+function openBox(i) {
+  const sl = sideSlots[i];
+  const box = sl.id;
+  if (sl.state === 'reserve') {
+    if (!Progress.useReserve(box)) { SFX.play('denied'); return; }
+    usedReserves.push(box);
+  }
+  Progress.openedBlackBox();
+  const result = Progress.rollBox(box);
+  sl.state = 'rolling';
+  sl.confirm = false;
+  const b = sideSlotEls()[i];
+  b.classList.remove('market', 'short', 'confirm', 'sealed');
+  b.classList.add('owned', 'rolling');
+  const faces = [...Progress.exploitOrder().filter((id) => id !== 'black-box'), ...Progress.antiIds()];
+  setMessage(`${itemName(box)} // OPENING...`);
+  let step = 0;
+  const spin = () => {
+    if (gameOver) return;
+    if (step < REEL_STEPS.length) {
+      b.innerHTML = `<span class="exploit-glyph">${itemIcon(faces[Math.floor(Math.random() * faces.length)])}</span>`;
+      SFX.play('click');
+      setTimeout(spin, REEL_STEPS[step++]);
+      return;
+    }
+    b.classList.remove('rolling');
+    if (Progress.isAnti(result)) {
+      b.innerHTML = `<span class="exploit-glyph">${VIRUS_SVG}</span>`;
+      b.classList.add('glitched');
+      setTimeout(() => { b.classList.remove('glitched'); slotSpent(sl, box); renderReserves(); }, 700);
+      runAnti(result);
+      return;
+    }
+    sl.id = result;
+    sl.state = 'opened';
+    setMessage(`BLACK BOX // ${itemName(result)}: TAP IT TO ARM`);
+    burstMessage('warning');
+    SFX.play('egg');
+    renderReserves();
+  };
+  spin();
 }
 // Every MARKET_EVERY drops, the market's slots turn over (a price shown and not taken up goes too)
 function marketTick() {
@@ -4330,6 +4472,32 @@ function marketTick() {
   renderReserves();
 }
 
+// ANTI-EXPLOITS (a BLACK BOX's bad luck): mild and short. ADWARE covers one drop button for 3 drops
+// (the grid itself still takes the drop); SPYWARE hides the next 3 bits until they land;
+// RANSOMWARE locks 3 bits on the board under a one-peel layer
+const ANTI_DROPS = 3;
+const spyHides = (n) => spywareLeft > n; // (the bit n places down the queue: 0 is CURRENT)
+function runAnti(id) {
+  if (id === 'adware') {
+    const open = columns.map((c, n) => n).filter((n) => columns[n].length < MAX_ROWS);
+    if (open.length) adware = { col: open[Math.floor(Math.random() * open.length)], left: ANTI_DROPS };
+  } else if (id === 'spyware') {
+    spywareLeft = ANTI_DROPS;
+  } else if (id === 'ransomware') {
+    const cells = numberCells();
+    for (let n = 0; n < ANTI_DROPS && cells.length; n++) {
+      const { r, c } = cells.splice(Math.floor(Math.random() * cells.length), 1)[0];
+      columns[c][r] = { type: 'firewall', level: 1, hidden: columns[c][r].val };
+    }
+    render();
+  }
+  setMessage(`BLACK BOX // ${ANTI[id].name}: ${ANTI[id].does}`, 'alarm');
+  burstMessage('warning');
+  SFX.play('denied');
+  updateHud();
+  updateColumnButtons();
+}
+
 // Arm the ready exploit as the next drop. Committed: it can't be taken back.
 function armExploit(slot = null) {
   if (armedHack || gameOver || busy || pivotFrom !== null) return false;
@@ -4338,21 +4506,14 @@ function armExploit(slot = null) {
   let label = 'ARMED';
   if (slot !== null) { // (a side slot's: a RESERVE, used up as it's armed, or one bought on the BLACK MARKET)
     const sl = sideSlots[slot];
-    if (!sl || (sl.state !== 'reserve' && sl.state !== 'bought')) return false;
+    if (!sl || !['reserve', 'bought', 'opened'].includes(sl.state) || Progress.isBox(sl.id)) return false;
     if (sl.state === 'reserve') {
       if (!Progress.useReserve(sl.id)) return false;
       usedReserves.push(sl.id);
       label = 'RESERVE';
-    } else {
-      marketBought.push(sl.id);
-      label = 'BLACK MARKET';
-    }
+    } else label = sl.state === 'opened' ? 'BLACK BOX' : 'BLACK MARKET';
     id = sl.id;
-    // (the slot opens to the market: until it's been bought from once this game)
-    sl.state = sl.buys < 1 ? 'market' : 'closed';
-    sl.confirm = false;
-    if (sl.state === 'market') sl.id = marketPick(sideSlots.map((x) => x.id).concat(id));
-    if (!sl.id) sl.state = 'closed';
+    slotSpent(sl, id); // (the slot opens to the market)
   } else if (!id) {
     if (!freeAllowed()) return false;
     id = freeExploitId();

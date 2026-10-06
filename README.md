@@ -82,13 +82,23 @@ for testing, kept through launches; take it out before the Play Store build.
 To build it locally instead: `npm ci && node tools/build-app.js && npx cap add
 android && node tools/setup-android.js`, then open `android/` in Android Studio.
 
-## Keys and boosters
+## Keys, resources and boosters
+
+**[ECONOMY.md](ECONOMY.md) has the whole economy in tables**: every resource, how and where it's
+earned, every price, the BLACK BOX odds and the anti-exploits.
 
 KEYS are the game's currency, earned by playing and kept on the device
 (progress.js): 1 for every 10 bits decrypted, +2 when a chain reaches 5 links and +5 at 7,
 a first puzzle solve (EASY 2, NORMAL 4, HARD 6), 10 for each achievement and each level,
 5 for the day's first daily game, and 5 with the DAILY DROP (claimed once a day in the
-STORE, with a free exploit for the next game). They're spent on BOOSTERS and RESERVE EXPLOITS in the STORE, and on the BLACK MARKET in a game:
+STORE, with a free exploit for the next game). Beside them, the RESOURCES, earned by how bits are
+decrypted: **BUGS** (down a column, 1 per 5), **CACHE** (across a row, 1 per 5), **CRYPTO** (each chain
+link from the 3rd on), **ROOTKITS** (a bit decrypted across and down at once, layers broken, BYTES)
+and **MASTER KEYS** (every 5th level, the day's first daily game, the day's first VS win). CLASSIC and
+DAILY earn them all, BLITZ and ZEN at half the rate, VS only CRYPTO, ROOTKITS and MASTER KEYS, PUZZLE
+none. The main menu shows them in a line under the level bar, the STORE too; a drop that earns some
+floats them up off the board, and the result screen lists the game's haul. BOOSTERS cost KEYS;
+RESERVE EXPLOITS and BLACK BOXES cost KEYS and resources (a MASTER KEY buys any exploit outright):
 
 | Booster | Keys | Does |
 |---|---|---|
@@ -106,23 +116,35 @@ puzzle's drop buttons, and with none owned a second tap buys one. Never in DAILY
 boosted game says so on its result screen.
 
 **THE SIDE SLOTS**: one each side of the exploit button (CLASSIC, BLITZ and ZEN only).
-**RESERVE EXPLOITS** (STORE, with KEYS) are exploits of your own, any you've unlocked by level, at 25
-KEYS (the first five to unlock: RNG, BITFLIP, BUFFER OVERFLOW, TROJAN, PIVOT), 35 (SWAP, WORM VIRUS,
-KEYLOGGER, PACKET SNIFFER, BACKDOOR) or 45 (LOGIC BOMB, HONEYPOT, DICTIONARY ATTACK, RAINBOW TABLE,
-BLACK BOX). Pick 2 on the main menu to take into a game, one in each slot (marked R): two of one kind
+**RESERVE EXPLOITS** (STORE) are exploits of your own, any you've unlocked by level, by tier: tier 1
+(RNG, BITFLIP, BUFFER OVERFLOW, TROJAN, PIVOT) 10 KEYS and about 12 BUGS, CACHE or CRYPTO; tier 2
+(SWAP, WORM VIRUS, KEYLOGGER, PACKET SNIFFER, BACKDOOR) 20 KEYS, about 17 of those and a ROOTKIT;
+tier 3 (LOGIC BOMB, HONEYPOT, DICTIONARY ATTACK, RAINBOW TABLE) 30 KEYS, about 22 and 2 or 3
+ROOTKITS (ECONOMY.md has each). The STORE shows each with its icon, its price in chips, what's still
+short of it (NEED ...), and USE A MASTER KEY when it's short and there's one. BLACK BOX itself isn't
+sold; **BLACK BOXES** I, II and III are (5 KEYS and 3 CRYPTO; 12, 5 and a ROOTKIT; 20, 8 and 2), a
+random pull each, their odds on them: an exploit of tier 1, 2 or 3 (any of the tier, unlocked or not)
+or an **ANTI-EXPLOIT** (I: 65 / 20 / 3 / 12%; II: 35 / 45 / 12 / 8%; III: 10 / 45 / 42 / 3%).
+Pick 2 on the main menu to take into a game, one in each slot (marked R): two of one kind
 (if you have two) or one each of two. The menu shows the two slots, LEFT and RIGHT, and what's in each,
-and BUY EXPLOITS under them (the STORE's reserves). A tap on a slot opens its card: every reserve you
-own and how many, to put in that slot, and EMPTY THIS SLOT; each is used once in the game. In the game, a tap arms
-it as your next drop, as an earned one, and it's used up (the ones not used stay yours). Once a
-slot's reserve is used, it's the **BLACK MARKET** (a slot taken in empty stays closed): a random exploit you've unlocked
-and its price (the same as a reserve's) under it, changing every 4 drops. Tap it for its price, tap
-again to buy; it waits in the slot (a tick in its corner) until you tap it to arm it. One buy each
-slot, a game. A game that used them says so on its result screen (RESERVES: ... // BLACK MARKET: ...).
+and BUY EXPLOITS under them (the STORE's reserves). A tap on a slot opens its card: every reserve and
+box you own and how many, to put in that slot, and EMPTY THIS SLOT; each is used once in the game. In
+the game, a tap arms an exploit as your next drop, as an earned one, and it's used up (the ones not
+used stay yours). A box waits sealed (pulsing); a tap opens it: the slot spins like a slot machine's
+reel for about 1.5 seconds and lands on an exploit, which waits there (a tick in its corner) to be
+armed when you like, or an anti-exploit, which glitches red and goes off at once: **ADWARE** (a pop-up,
+AD, covers one drop button for 3 drops; the grid and number keys still drop there), **SPYWARE** (the
+next 3 bits show as ? until they land) or **RANSOMWARE** (3 bits on the board go under a one-peel
+layer). Once a slot's reserve is used, it's the **BLACK MARKET** (a slot taken in empty stays closed):
+a random exploit you've unlocked or, a quarter of the time, a BLACK BOX, with its KEYS under it,
+changing every 4 drops. Tap it for its whole price, tap again to buy (short of an exploit's price with
+a MASTER KEY, the MASTER KEY pays); it waits in the slot until you tap it to arm (or open) it. One buy
+each slot, a game. A game that used them says so on its result screen (RESERVES: ... // BLACK MARKET: ...).
 
 How far KEYS go (a simulation of CLASSIC games on the CPU's own board code: node tools/keysim.js): a game
 decrypts about 90 to 110 bits, so it earns about 14 to 18 KEYS, or 20 to 23 all in with the levels,
-achievements, first puzzle solves and the daily 10. That's about one booster, reserve or black-market buy a game,
-or a few saved up for a game with everything on.
+achievements, first puzzle solves and the daily 10. That's about one booster, or with the resources a game also earns (ECONOMY.md), two tier 1
+exploits or one tier 2, or a few saved up for a game with everything on.
 
 ## Exploits
 

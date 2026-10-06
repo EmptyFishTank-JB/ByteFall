@@ -97,12 +97,16 @@ const Progress = (() => {
     reserves: {}, // RESERVE EXPLOITS: exploit id -> how many owned
     puzzlePaid: {}, // puzzle key -> the day a solve of it last paid XP and KEYS (a replay pays once a day)
     reservesTaken: [], // the 2 the player takes into each game (one a side slot; two of one kind, or one each of two)
+    res: { bugs: 0, cache: 0, crypto: 0, rootkits: 0, master: 0 }, // the RESOURCES (ECONOMY.md), beside KEYS
+    resPart: {}, // resource -> the part of the next one earned so far
+    resEarned: {}, // resource -> every one ever earned
+    vsMasterDay: '', // the day a VS win last paid a MASTER KEY (one a day)
   });
 
   let d = fresh();
   try {
     const saved = JSON.parse(localStorage.getItem(KEY));
-    if (saved) d = { ...d, ...saved };
+    if (saved) d = { ...d, ...saved, res: { ...d.res, ...(saved.res || {}) } };
     if (saved && saved.hashes != null && saved.keys == null) { // (KEYS were HASHES for a day)
       d.keys = saved.hashes;
       d.keysEarned = saved.hashesEarned || 0;
@@ -252,7 +256,7 @@ const Progress = (() => {
     { id: 'close-call', name: 'CLOSE CALL', desc: 'Decrypt your way back under the line', value: () => d.closeCalls, goal: 1 },
     { id: 'daily-driver', name: 'DAILY DRIVER', desc: 'Play a Daily game 7 days in a row', value: currentStreak, goal: 7, note: 'Progress shows your current streak; a missed day (at midnight) starts it over' },
     { id: 'locksmith', name: 'LOCKSMITH', desc: 'Solve 10 puzzles', value: () => Object.keys(d.puzzles).length, goal: 10 },
-    { id: 'master-key', name: 'MASTER KEY', desc: 'Solve every puzzle', value: () => Object.keys(d.puzzles).length, goal: () => puzzleCount },
+    { id: 'master-key', name: 'SKELETON KEY', desc: 'Solve every puzzle', value: () => Object.keys(d.puzzles).length, goal: () => puzzleCount },
     { id: 'maxed-out', name: 'MAXED OUT', desc: 'Reach Lv 80 as DECRYPTOR 9', value: () => (d.decryptor >= 10 || (d.decryptor >= 9 && levelInfo().maxed) ? 1 : 0), goal: 1 },
     { id: 'rollover', name: 'ROLLOVER', desc: 'Rank up to DECRYPTOR 1', value: () => d.decryptor, goal: 1 },
     { id: 'full-spectrum', name: 'FULL SPECTRUM', desc: 'Unlock every theme', value: () => themeIds.filter(isUnlocked).length, goal: themeIds.length },
@@ -488,6 +492,7 @@ const Progress = (() => {
     const today = localDay();
     if (d.lastDaily === today) return;
     earn(KEY_PAY.daily); // (the day's first daily game)
+    gain('master', 1);
     d.dailyStreak = d.lastDaily === localDay(-1) ? d.dailyStreak + 1 : 1;
     d.bestDailyStreak = Math.max(d.bestDailyStreak, d.dailyStreak);
     d.lastDaily = today;
@@ -506,6 +511,98 @@ const Progress = (() => {
     if (run) run.keys = (run.keys || 0) + n;
   }
 
+  // RESOURCES (ECONOMY.md has the whole table): earned by how bits are decrypted, spent with KEYS on
+  // RESERVE EXPLOITS and BLACK BOXES (the STORE, and the BLACK MARKET in a game).
+  //   BUGS: bits decrypted down a column; CACHE: across a row; CRYPTO: chain links from the 3rd on;
+  //   ROOTKITS: a bit decrypted across and down at once, layers broken, BYTES;
+  //   MASTER KEYS: every 5th level, the day's first daily game, the day's first VS win. One pays
+  //   for any exploit in place of its price.
+  // A resource comes whole once enough of its events add up (RES_PER); CLASSIC and DAILY earn
+  // all of them, BLITZ and ZEN at half the rate, VS only CRYPTO and ROOTKITS (not from layers),
+  // PUZZLE and the tutorial nothing
+  const RES_IDS = ['bugs', 'cache', 'crypto', 'rootkits', 'master'];
+  const RES_PER = { bugs: { col: 5 }, cache: { row: 5 }, crypto: { link: 1 }, rootkits: { cross: 2, layer: 20, byte: 1 } };
+  function resRate(kind) {
+    if (!run || run.noPay || ['puzzle', 'tutorial'].includes(run.mode)) return 0;
+    if (run.daily) return 1;
+    if (run.mode === 'vs') return kind === 'link' || kind === 'cross' || kind === 'byte' ? 1 : 0;
+    return run.mode === 'blitz' || run.mode === 'zen' ? 0.5 : 1;
+  }
+  function gain(res, n) {
+    if (!(n > 0)) return;
+    d.res[res] = (d.res[res] || 0) + n;
+    d.resEarned[res] = (d.resEarned[res] || 0) + n;
+    if (run) run.res = { ...(run.res || {}), [res]: ((run.res || {})[res] || 0) + n };
+  }
+  // n events of a kind ('col', 'row', 'link', 'cross', 'layer', 'byte')
+  function events(kind, n) {
+    const rate = resRate(kind);
+    if (!(n > 0) || !rate) return;
+    for (const res of RES_IDS) {
+      const per = RES_PER[res] && RES_PER[res][kind];
+      if (!per) continue;
+      const part = (d.resPart[res] || 0) + (n * rate) / per;
+      gain(res, Math.floor(part + 1e-9));
+      d.resPart[res] = part - Math.floor(part + 1e-9);
+    }
+  }
+  // Prices: KEYS plus resources, by tier (EXPLOIT_ORDER in fives). BLACK BOX itself isn't sold:
+  // the BLACK BOXES (I, II, III) are, a random pull each
+  const PRICES = {
+    rng: { keys: 10, bugs: 6, cache: 6 },
+    bitflip: { keys: 10, cache: 8, crypto: 4 },
+    'buffer-overflow': { keys: 10, bugs: 8, crypto: 4 },
+    trojan: { keys: 10, bugs: 7, crypto: 5 },
+    pivot: { keys: 10, cache: 7, bugs: 5 },
+    swap: { keys: 20, cache: 10, crypto: 6, rootkits: 1 },
+    'worm-virus': { keys: 20, bugs: 12, crypto: 5, rootkits: 1 },
+    keylogger: { keys: 20, cache: 9, crypto: 8, rootkits: 1 },
+    'packet-sniffer': { keys: 20, bugs: 8, cache: 8, rootkits: 1 },
+    backdoor: { keys: 20, bugs: 10, crypto: 6, rootkits: 1 },
+    'logic-bomb': { keys: 30, bugs: 14, crypto: 8, rootkits: 2 },
+    honeypot: { keys: 30, cache: 12, crypto: 10, rootkits: 2 },
+    'dictionary-attack': { keys: 30, cache: 12, bugs: 6, rootkits: 3 },
+    'rainbow-table': { keys: 30, crypto: 12, cache: 8, rootkits: 2 },
+    'box-1': { keys: 5, crypto: 3 },
+    'box-2': { keys: 12, crypto: 5, rootkits: 1 },
+    'box-3': { keys: 20, crypto: 8, rootkits: 2 },
+  };
+  const BOX_IDS = ['box-1', 'box-2', 'box-3'];
+  const ANTI_IDS = ['adware', 'spyware', 'ransomware'];
+  // Each BLACK BOX's odds, in percent: a tier 1, 2 or 3 exploit, or an ANTI-EXPLOIT
+  const BOX_ODDS = { 'box-1': [65, 20, 3, 12], 'box-2': [35, 45, 12, 8], 'box-3': [10, 45, 42, 3] };
+  const tierOf = (id) => Math.min(2, Math.floor(EXPLOIT_ORDER.indexOf(id) / 5)); // 0, 1, 2
+  const sellable = (id) => !!PRICES[id];
+  const have = (res) => (res === 'keys' ? d.keys : d.res[res] || 0);
+  // What's short of a price: [[resource, how many more]]
+  const missing = (id) => Object.entries(PRICES[id] || {}).filter(([res, n]) => have(res) < n).map(([res, n]) => [res, n - have(res)]);
+  function payFor(id, master = false) {
+    if (!PRICES[id]) return false;
+    if (master) {
+      if (BOX_IDS.includes(id) || !d.res.master) return false; // (a MASTER KEY buys an exploit, not a box)
+      d.res.master--;
+    } else {
+      if (missing(id).length) return false;
+      for (const [res, n] of Object.entries(PRICES[id])) {
+        if (res === 'keys') d.keys -= n;
+        else d.res[res] -= n;
+      }
+    }
+    save();
+    return true;
+  }
+  // A BLACK BOX opened: an exploit of the tier its odds land on (any of the tier, unlocked or not;
+  // not BLACK BOX itself), or an ANTI-EXPLOIT
+  function rollBox(box, rnd = Math.random) {
+    const odds = BOX_ODDS[box];
+    let roll = rnd() * 100;
+    let tier = 0;
+    while (tier < 3 && roll >= odds[tier]) roll -= odds[tier++];
+    if (tier === 3) return ANTI_IDS[Math.floor(rnd() * ANTI_IDS.length)];
+    const pool = EXPLOIT_ORDER.filter((id) => id !== 'black-box' && tierOf(id) === tier);
+    return pool[Math.floor(rnd() * pool.length)];
+  }
+
   // Marks newly met unlocks and achievements; returns them as [{ type, name }] (quiet: just record).
   function check(quiet = false) {
     const earned = [];
@@ -519,7 +616,14 @@ const Progress = (() => {
     const { level } = levelInfo();
     if (level > d.lastLevel) {
       earned.push({ type: 'LEVEL UP', name: `LV ${level}`, keys: (level - d.lastLevel) * KEY_PAY.level });
-      if (!quiet) earn((level - d.lastLevel) * KEY_PAY.level);
+      if (!quiet) {
+        earn((level - d.lastLevel) * KEY_PAY.level);
+        const fives = Math.floor(level / 5) - Math.floor(d.lastLevel / 5); // (a MASTER KEY every 5th level)
+        if (fives > 0) {
+          gain('master', fives);
+          earned.push({ type: 'MASTER KEY', name: `LV ${Math.floor(level / 5) * 5}` });
+        }
+      }
     }
     d.lastLevel = Math.max(d.lastLevel, level);
     let opened = false;
@@ -723,6 +827,10 @@ const Progress = (() => {
       d.vsLossStreak = m.won ? 0 : d.vsLossStreak + 1;
       if (d.vsLossStreak >= 5) d.secrets.tilted = true;
       if (!m.won) return;
+      if (d.vsMasterDay !== localDay()) { // (the day's first win: a MASTER KEY)
+        d.vsMasterDay = localDay();
+        gain('master', 1);
+      }
       d.vsBotWins[m.bot] = (d.vsBotWins[m.bot] || 0) + 1;
       d.vsBotLevelWins[`${m.bot}:${m.level}`] = true;
       d.vsModeWins[m.mode] = (d.vsModeWins[m.mode] || 0) + 1;
@@ -780,6 +888,7 @@ const Progress = (() => {
       if (run.mode === 'tutorial') return; // (the tutorial counts toward nothing)
       d.bytes += count;
       run.bytes += count;
+      events('byte', count);
       d.bestDropBytes = Math.max(d.bestDropBytes, count);
     },
     nibbles(count) {
@@ -793,6 +902,7 @@ const Progress = (() => {
       if (broken) {
         d.broken++;
         run.dropBroken++;
+        events('layer', 1);
       }
     },
     // BLACK BOX opened (as whatever it turns into, it counts as that one when it runs): marked as
@@ -852,10 +962,34 @@ const Progress = (() => {
       save();
       return true;
     },
-    // RESERVE EXPLOITS: bought with KEYS (the price by how late the exploit unlocks), taken into a
+    // RESERVE EXPLOITS (and BLACK BOXES): bought with KEYS and resources (PRICES), taken into a
     // game (2, one in each side slot: reservesTaken, two of one kind or one each of two), each used
     // once there, then gone
-    reservePrice: (id) => [25, 35, 45][Math.min(2, Math.floor(EXPLOIT_ORDER.indexOf(id) / 5))],
+    // RESOURCES and prices (above)
+    resIds: () => [...RES_IDS],
+    res: (id) => have(id),
+    runRes: () => ({ ...((run && run.res) || {}) }),
+    // A drop's decrypts by how they matched: down a column, across a row, both at once; and its
+    // chain links from the 3rd on
+    decryptKinds({ col = 0, row = 0, cross = 0, links = 0 }) {
+      events('col', col);
+      events('row', row);
+      events('cross', cross);
+      events('link', links);
+    },
+    price: (id) => ({ ...(PRICES[id] || {}) }),
+    sellable,
+    missing,
+    payFor,
+    tierOf,
+    boxIds: () => [...BOX_IDS],
+    isBox: (id) => BOX_IDS.includes(id),
+    antiIds: () => [...ANTI_IDS],
+    isAnti: (id) => ANTI_IDS.includes(id),
+    boxOdds: (box) => [...BOX_ODDS[box]],
+    rollBox,
+    // (testing and the dev page)
+    addRes(id, n) { gain(id, n); save(); },
     reserves: (id) => d.reserves[id] || 0,
     addReserve(id, n = 1) { d.reserves[id] = (d.reserves[id] || 0) + n; save(); },
     useReserve(id) {
@@ -869,7 +1003,7 @@ const Progress = (() => {
       const left = {};
       return [0, 1].map((i) => {
         const id = (d.reservesTaken || [])[i];
-        if (!id || !EXPLOIT_ORDER.includes(id) || !exploitInfo(id).unlocked) return null;
+        if (!id || !(BOX_IDS.includes(id) || (EXPLOIT_ORDER.includes(id) && exploitInfo(id).unlocked))) return null;
         if (left[id] == null) left[id] = d.reserves[id] || 0;
         return left[id]-- > 0 ? id : null;
       });

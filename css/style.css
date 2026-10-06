@@ -3158,3 +3158,38 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 /* PUSHED BITs (visitors.js): the grid's own bit (.cell.disc), half again a bot's size, on the floor */
 .visitor-bit .pushed-bit { position: absolute; left: 0; bottom: 0; width: 51px; height: 51px; font-size: 19px; box-sizing: border-box; }
 .visitor-bit .pushed-bit .glyph-num { font-size: 12px; right: 4px; bottom: 2px; }
+
+/* The RESOURCES (ECONOMY.md): the wallet lines, the game-over haul, a drop's pickups */
+.wallet { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 12px; margin: 2px 0 6px; font-size: 12px; letter-spacing: 1px; color: var(--fg); }
+.res-chip { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
+.res-chip .key-ico { width: 13px; height: 13px; }
+.res-keys, .res-master { color: var(--accent); }
+.res-rootkits { color: var(--danger); }
+.overlay-keys .haul { display: block; margin-top: 4px; }
+.overlay-keys .haul .res-chip { margin: 0 4px; }
+.res-pop { position: absolute; left: 50%; top: 18%; transform: translateX(-50%); z-index: 6; pointer-events: none; display: flex; gap: 10px; font-size: 13px; letter-spacing: 1px; color: var(--fg); text-shadow: 0 0 6px var(--bg-solid), 0 0 2px var(--bg-solid); animation: res-pop 1.6s ease-out forwards; white-space: nowrap; }
+@keyframes res-pop { 0% { opacity: 0; translate: 0 8px; } 15% { opacity: 1; translate: 0 0; } 75% { opacity: 1; } 100% { opacity: 0; translate: 0 -18px; } }
+@media (prefers-reduced-motion: reduce) { .res-pop { animation-name: res-pop-still; } @keyframes res-pop-still { 0%, 80% { opacity: 1; } 100% { opacity: 0; } } }
+
+/* The STORE's exploits and boxes: the icon left of the name, the price in chips, what's short */
+.reserve-item h3 { display: flex; align-items: center; gap: 8px; }
+.reserve-item .store-name { flex: 1; }
+.store-ico { display: inline-flex; align-items: center; justify-content: center; width: 24px; margin-right: 6px; height: 24px; position: relative; color: var(--accent); font-size: 18px; }
+.store-ico svg { width: 20px; height: 20px; }
+.store-cost { display: flex; flex-wrap: wrap; gap: 4px 10px; margin: 6px 0 2px; font-size: 12px; letter-spacing: 1px; }
+.store-odds { margin: 4px 0; font-size: 11px; letter-spacing: 0.5px; color: var(--fg-dim); }
+.store-need { margin: 2px 0; font-size: 11px; letter-spacing: 0.5px; color: var(--danger); min-height: 0; }
+.store-need:empty { display: none; }
+.store-master { margin-right: 6px; }
+.store-master[hidden] { display: none; }
+/* A BLACK BOX's tier, on its icon */
+.box-tier { position: absolute; right: -4px; bottom: -3px; font-size: 9px; font-weight: bold; line-height: 1; color: var(--accent); text-shadow: 0 0 3px var(--bg-solid), 0 0 2px var(--bg-solid); letter-spacing: 0; }
+.exploit-glyph { position: relative; }
+.reserve-pick-item .exploit-glyph svg { width: 18px; height: 18px; }
+/* A side slot: a sealed BLACK BOX, its reel spinning, an ANTI-EXPLOIT's glitch */
+.exploit-icon.side-slot.sealed { animation: amber-pulse 1.6s ease-in-out infinite; }
+.exploit-icon.side-slot.rolling { color: var(--accent); border-color: var(--accent); }
+.exploit-icon.side-slot.glitched { color: var(--danger); border-color: var(--danger); animation: slot-glitch 0.12s steps(2) 5; }
+@keyframes slot-glitch { 0% { transform: translate(-2px, 1px); } 50% { transform: translate(2px, -1px); } 100% { transform: none; } }
+/* ADWARE's pop-up over a drop button */
+.column-buttons button.adware { color: var(--danger); border-color: var(--danger); background: repeating-linear-gradient(45deg, rgba(255, 77, 94, 0.18) 0 4px, transparent 4px 8px); opacity: 1; }

@@ -1,5 +1,6 @@
 // STORE: the MENU's fourth tab. The DAILY DROP to claim (script.js's dailyDrop), the BOOSTERS
-// bought with KEYS (script.js's BOOSTERS, Progress's wallet), and two purchases: REMOVE ADS (no ads, nothing unlocked) and FULL
+// bought with KEYS (script.js's BOOSTERS, Progress's wallet), RESERVE EXPLOITS and BLACK BOXES
+// bought with KEYS and RESOURCES (ECONOMY.md), and two purchases: REMOVE ADS (no ads, nothing unlocked) and FULL
 // ACCESS (everything that unlocks by level, and no ads), plus RESTORE PURCHASES. A preview for
 // now: BUY and RESTORE say the store isn't open and charge nothing. The app will swap buy() and
 // restore() for Google Play's billing, then tell Unlocks what's owned (Unlocks.set / setNoAds).
@@ -43,31 +44,45 @@ const Store = (() => {
     });
     shop.appendChild(item);
   }
-  // RESERVE EXPLOITS: every exploit, in the order they unlock; the locked ones show their level
-  const reserveShop = document.getElementById('reserve-shop');
-  for (const id of Progress.exploitOrder()) {
-    const name = (typeof HACKS !== 'undefined' && HACKS[id] && HACKS[id].name) || id.toUpperCase();
-    const price = Progress.reservePrice(id);
+  // RESERVE EXPLOITS and BLACK BOXES: each with its icon, its price in KEYS and RESOURCES
+  // (Progress; ECONOMY.md), what's still short of it, how many are owned and BUY; an exploit short of
+  // its price can take a MASTER KEY instead. The exploits in the order they unlock (the locked ones
+  // show their level; BLACK BOX itself isn't sold); each BLACK BOX shows its odds
+  function shopItem(id, parent) {
     const item = document.createElement('div');
     item.className = 'store-item booster-item reserve-item';
     item.dataset.reserve = id;
-    item.innerHTML = `<h3>${name} <span class="store-price">${price} KEYS</span></h3>`
-      + '<div class="booster-buy-row"><span class="booster-owned"></span><button type="button" class="store-buy">BUY</button></div>';
-    item.querySelector('.store-buy').addEventListener('click', () => {
-      if (!Progress.exploitInfo(id).unlocked) { SFX.play('denied'); return; }
-      if (!Progress.spendKeys(price)) {
+    const box = Progress.isBox(id);
+    const odds = box ? Progress.boxOdds(id) : null;
+    item.innerHTML = `<h3><span class="store-ico">${itemIcon(id)}</span><span class="store-name">${itemName(id)}</span>`
+      + `<span class="store-price">${box ? '' : `TIER ${Progress.tierOf(id) + 1}`}</span></h3>`
+      + `<p class="store-cost">${priceHtml(Progress.price(id))}</p>`
+      + (box ? `<p class="store-odds">TIER 1 EXPLOIT ${odds[0]}% // TIER 2 ${odds[1]}% // TIER 3 ${odds[2]}% // ANTI-EXPLOIT ${odds[3]}%</p>` : '')
+      + '<p class="store-need"></p>'
+      + `<div class="booster-buy-row"><span class="booster-owned"></span>${box ? '' : '<button type="button" class="store-buy store-master" hidden>USE A MASTER KEY</button>'}<button type="button" class="store-buy store-pay">BUY</button></div>`;
+    const buy = (master) => {
+      if (!box && !Progress.exploitInfo(id).unlocked) { SFX.play('denied'); return; }
+      if (!Progress.payFor(id, master)) {
         SFX.play('denied');
-        say(`NOT ENOUGH KEYS // ${name} IS ${price} KEYS`);
+        say(`NOT ENOUGH // ${itemName(id)} NEEDS ${Progress.missing(id).map(([res, n]) => `${n} MORE ${RES_INFO[res].name}`).join(', ')}`);
         return;
       }
       Progress.addReserve(id);
       SFX.play('egg');
-      say(`BOUGHT // RESERVE ${name}: TAKE IT INTO A GAME FROM THE MAIN MENU`);
+      say(`BOUGHT // ${itemName(id)}${master ? ' WITH A MASTER KEY' : ''}: TAKE IT INTO A GAME FROM A RESERVE SLOT ON THE MAIN MENU`);
       if (typeof showKeys === 'function') showKeys();
+      if (typeof refreshReserveRow === 'function') refreshReserveRow();
       render();
-    });
-    reserveShop.appendChild(item);
+    };
+    item.querySelector('.store-pay').addEventListener('click', () => buy(false));
+    const m = item.querySelector('.store-master');
+    if (m) m.addEventListener('click', () => buy(true));
+    parent.appendChild(item);
   }
+  const reserveShop = document.getElementById('reserve-shop');
+  for (const id of Progress.exploitOrder()) if (Progress.sellable(id)) shopItem(id, reserveShop);
+  const boxShop = document.getElementById('box-shop');
+  for (const id of Progress.boxIds()) shopItem(id, boxShop);
   const claimBtn = document.getElementById('daily-claim');
   claimBtn.addEventListener('click', () => {
     if (window.dailyDrop && window.dailyDrop.claim()) say('CLAIMED // YOUR FREE EXPLOIT IS ON THE EXPLOIT BUTTON');
@@ -84,13 +99,19 @@ const Store = (() => {
     });
     menu.querySelectorAll('.reserve-item').forEach((item) => {
       const id = item.dataset.reserve;
-      const info = Progress.exploitInfo(id);
+      const box = Progress.isBox(id);
+      const info = box ? { unlocked: true } : Progress.exploitInfo(id);
       const n = Progress.reserves(id);
+      const missing = Progress.missing(id);
       item.classList.toggle('locked', !info.unlocked);
       item.querySelector('.booster-owned').textContent = !info.unlocked ? `UNLOCKS AT LV ${info.level}` : n ? `OWNED \u00d7${n}` : '';
-      const btn = item.querySelector('.store-buy');
+      item.querySelector('.store-need').textContent = info.unlocked && missing.length
+        ? `NEED ${missing.map(([res, k]) => `${k} MORE ${RES_INFO[res].name}`).join(', ')}` : '';
+      const btn = item.querySelector('.store-pay');
       btn.disabled = !info.unlocked;
-      btn.classList.toggle('short', keys < Progress.reservePrice(id));
+      btn.classList.toggle('short', missing.length > 0);
+      const m = item.querySelector('.store-master');
+      if (m) m.hidden = !info.unlocked || !missing.length || Progress.res('master') < 1;
     });
     const claimable = !!(window.dailyDrop && window.dailyDrop.claimable());
     claimBtn.disabled = !claimable;
