@@ -3405,3 +3405,7 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
    defragmenting grid behind the options, in place of the flat green tint */
 .home-panel { position: relative; isolation: isolate; overflow: hidden; background: var(--board-bg); }
 .home-panel-bg { z-index: -1; }
+/* LIGHTS OUT's top edge fades into the rest of the card, rather than a hard line (on the game card it starts a
+   little above the lane, behind the grid's card, so the fade wraps around its sides) */
+:is(.start-walkers, .game-walkers) .lights-out { -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 70px); mask-image: linear-gradient(to bottom, transparent 0, #000 70px); }
+.game-walkers .lights-out { top: -36px; }
