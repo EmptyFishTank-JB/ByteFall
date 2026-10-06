@@ -359,8 +359,8 @@ The game has one text size, set large enough to read on a phone (there's no TEXT
 every piece of text has its own size written in, nothing scaled on top. The main menu holds still:
 its title is one line at the top (BYTEFALL // DECRYPTION TERMINAL, 8px under the card's border; just
 BYTEFALL where the whole line won't fit), with **←** in the top left corner back to the title screen,
-then the level, the resources and the six modes; the mode's panel takes the room the screen has
-whatever the mode puts in it, with PLAY at its foot, and what the mode shows in it (its description,
+then the level, the resources and the six modes; the mode's panel is only as tall as what the mode
+puts in it, PLAY 8px under its last piece and the rows under the panel right after, and what the mode shows in it (its description,
 DAILY's cards, the options) scrolls inside it on a short screen, fading out at its foot while
 there's more. The buttons are one size in every mode and font, their words centered; a word that
 won't fit on a button shrinks, never under 10px. Through the game the font never changes a

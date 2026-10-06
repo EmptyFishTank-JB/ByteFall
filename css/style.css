@@ -3574,3 +3574,8 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
 .home-head { padding: 0 40px; }
 .home-head.no-tag .tagline { display: none; }
 .home-head h1 { letter-spacing: 0.1em; } .home-head .tagline { letter-spacing: 0.04em; } .home-head { gap: 0.6em; } /* (tighter, so the whole line fits beside the arrow on more phones) */
+/* (the mode's card only as tall as what it holds: PLAY the one 8px gap under its last piece, the
+   card's foot right under PLAY and the rows under the card right after; a mode with more than the
+   screen has room for scrolls inside it) */
+.home .home-panel { flex: 0 1 auto; }
+.home .daily-cards button { min-height: 0; padding: 6px 8px; gap: 2px; } .home .daily-cards .dc-name { font-size: 1.15em; } /* (DAILY's four cards a little tighter, to fit the S23 Ultra without scrolling) */
