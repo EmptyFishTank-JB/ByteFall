@@ -3579,3 +3579,9 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
    screen has room for scrolls inside it) */
 .home .home-panel { flex: 0 1 auto; }
 .home { padding-bottom: 37px; } /* (room under the menu for the walking bots: just their height, so DAILY fits the S23 Ultra) */
+/* THE WANDERERS' LANE: one fixed height, the same on the main menu and in every game, nothing else
+   on the card changing it */
+.game-walkers { height: 192px !important; }
+/* The defrag backgrounds (the grid's card, the main menu's mode card, VS's setup) a little see-through,
+   so the trees in the lane show faintly behind them */
+.board-frame, .home-panel, .vs-setup:not(.vs-pause) { background: color-mix(in srgb, var(--board-bg) 92%, transparent) !important; }

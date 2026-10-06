@@ -187,8 +187,8 @@ function createVisitors(api) {
     oak: {
       pal: { t: '#07090b', T: '#12171c' },
       a: ['..t.......t.....t.....', '...t...t..t....t..t...', 't..t..t...tt..t..t....', '.t.tt.t....t.tt.t...t.', '..t.tt.t...ttt..t..t..', '...t.ttt...tt..tt.t...', 't...t.ttt..tt.tt.t....', '.tt..t..tt.ttttt.t..tt', '...tt.t..tttttt.tttt..', '.....tttt.tTtt.tt.....',
-        '........ttTtttt.......', '.........tTttt........', '.........tTtt.........', '.........tTtt.........', '........ttTtt.........', '........tTttt.........', '........tTtttt........', '........tTtttt........', '.......ttTtttt........', '.......tTttttt........',
-        '.......tTtttttt.......', '.......tTtttttt.......', '......ttTttttttt......', '......tTtttttttt......', '.....ttTttttttttt.....', '....tttTtttttttttt....', '...tt.tTttttt.tttttt..', '..t..tt.ttt..tt...ttt.'],
+        '........ttTttt........', '.........tTtt.........', '.........tTt..........', '.........tTt..........', '.........tTtt.........', '.........tTtt.........', '.........tTtt.........', '.........tTtt.........', '........ttTtt.........', '........tTttt.........',
+        '........tTttt.........', '........tTttt.........', '........tTtttt........', '.......ttTtttt........', '.......tTttttt........', '......ttTtttttt.......', '.....tt.tTtt.tt.......', '....t..tt.tt...tt.....'],
     },
     eyes: { pal: { e: '#ffd23f' }, a: ['ee...ee', 'ee...ee'] },
     // The WEREWOLF (under OCTOBER's full moon): the old movie kind, a man gone to fur: pointed ears,
@@ -594,6 +594,9 @@ function createVisitors(api) {
         t.depth = 1;
         t.lag = side ? (fog.dir > 0 ? 0.3 : 0) : (fog.dir > 0 ? 0 : 0.3);
         t.fore = true;
+        // (sunk past the lane's foot, roots and all: the bots pass behind a solid trunk, not
+        // through the gaps at its base)
+        t.y = -Math.round(parseFloat(t.el.querySelector('svg').getAttribute('height')) * 0.24);
         place(t);
         fog.trees.push(t);
       }

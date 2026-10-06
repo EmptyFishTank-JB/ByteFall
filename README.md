@@ -362,7 +362,12 @@ BYTEFALL where the whole line won't fit), with **←** in the top left corner ba
 then the level, the resources and the six modes; the mode's panel is only as tall as what the mode
 puts in it, PLAY 8px under its last piece and the rows under the panel right after, and what the mode shows in it (its description,
 DAILY's cards, the options) scrolls inside it on a short screen, fading out at its foot while
-there's more. The buttons are one size in every mode and font, their words centered; a word that
+there's more. The wanderers' lane at the card's foot is one fixed height (192px), the same on the
+main menu and in every game, whatever else is on the card; the defrag backgrounds (the grid's card,
+the mode card, VS's setup) are a little see-through (92%), so the lane's trees show faintly behind
+them, and the HAUNTED FOREST's two big oaks stand sunk past the lane's foot on slimmer trunks, the
+bots passing behind them. A button's tick (and buzz) comes on a successful tap, released on it, not
+on a touch that slides off. The buttons are one size in every mode and font, their words centered; a word that
 won't fit on a button shrinks, never under 10px. Through the game the font never changes a
 button's size or moves the HUD, the board or its buttons.
 

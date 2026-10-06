@@ -3768,14 +3768,8 @@ const startScreenUp = () => { const el = document.getElementById('start-screen')
 // The game card's lane runs from the card's bottom up to meet the grid's card's bottom edge: the drop
 // buttons, the exploit row and the message sit over it in their own layer, and what flies in the
 // lane passes behind them (fitted as the board's size and place change)
-function fitGameLane() {
-  const lane = document.getElementById('game-walkers');
-  if (!lane) return;
-  const grid = (boardEl.closest('.board-frame') || boardEl).getBoundingClientRect(); // (the grid's card, its border and all)
-  if (!grid.height) return;
-  const h = Math.round(lane.getBoundingClientRect().bottom - grid.bottom); // (its bottom stays put; its top meets the card's)
-  lane.style.height = `${Math.max(44, h)}px`;
-}
+// The wanderers' lane: one fixed height (style.css), whatever else is on the card
+function fitGameLane() {}
 if (window.ResizeObserver) new ResizeObserver(() => fitGameLane()).observe(boardEl);
 window.addEventListener('resize', () => requestAnimationFrame(fitGameLane));
 requestAnimationFrame(fitGameLane);
@@ -4117,15 +4111,17 @@ vibrateBtn.addEventListener('click', () => {
   if (vibrate) navigator.vibrate(20);
 });
 updateVibrateBtn();
-// Every button ticks as it's pressed (the drop buttons have the drop's own sound)
-document.addEventListener('pointerdown', (e) => {
+// Every button ticks once it's pressed: on a successful tap (released on it), not on a touch that
+// slides off (the drop buttons have the drop's own sound)
+document.addEventListener('click', (e) => {
   if (e.button !== 0) return;
   const b = e.target.closest('button:not(:disabled)');
   if (!b || b.closest('.column-buttons')) return;
   SFX.play('button');
 }, { capture: true, passive: true });
-// Every button buzzes as it's pressed (with VIBRATION on), as the game's own sounds do
-document.addEventListener('pointerdown', (e) => {
+// Every button buzzes as it's pressed (with VIBRATION on), as the game's own sounds do: on the same
+// successful tap
+document.addEventListener('click', (e) => {
   if (!vibrate || e.button !== 0 || !e.target.closest('button:not(:disabled), a[href], .walker, .visitor')) return;
   try { navigator.vibrate(12); } catch (err) {}
 }, { capture: true, passive: true });
