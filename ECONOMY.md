@@ -63,8 +63,8 @@ So a game pays for about two tier 1 exploits, or one tier 2, and a tier 3 takes 
 | BLACK MARKET (in a game) | an exploit or BLACK BOX, the STORE's price | the same |
 
 Reserve exploits and boxes go into the two RESERVE slots on the main menu (two of one kind, or one
-each of two) and are used once in a game. A slot left empty stays closed; once a slot's reserve is
-used, it becomes the BLACK MARKET.
+each of two) and are used once in a game. A slot left empty is the BLACK MARKET from the start, and
+a slot whose reserve is used becomes one.
 
 ## Exploit prices
 
@@ -137,7 +137,7 @@ Mild and short. None can end a game by itself.
 
 | Rule | |
 |---|---|
-| Where | a side slot whose reserve has been used (a slot taken in empty stays closed) |
+| Where | a side slot taken in empty (from the start), or one whose reserve has been used |
 | Modes | CLASSIC, BLITZ and ZEN (not DAILY, PUZZLE, VS or the tutorial) |
 | What's offered | a random unlocked exploit, or (a quarter of the time) a BLACK BOX: I 60%, II 30%, III 10% |
 | Turnover | a new offer every 4 drops (a price shown and not taken goes too) |

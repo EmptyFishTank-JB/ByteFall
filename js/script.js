@@ -231,7 +231,7 @@ window.BOOSTERS = BOOSTERS;
 // next drop, as an earned one, and it's used up (the ones not used stay owned). A BLACK BOX waits
 // sealed: a tap opens it (used up), its slot rolling like a slot machine's reel and landing on an
 // exploit, which then waits there to be armed, or an ANTI-EXPLOIT, which goes off at once. A slot
-// whose reserve is used is the BLACK MARKET (one taken in empty stays closed): a random exploit (of
+// taken in empty, or whose reserve is used, is the BLACK MARKET: a random exploit (of
 // the ones unlocked by level) or BLACK BOX at the STORE's price, changing every MARKET_EVERY drops.
 // A tap shows the price, a second buys it (short of it, an exploit takes a MASTER KEY instead, if
 // there's one), and it waits in the slot until it's armed (or opened); one buy a slot, a game. A
@@ -514,7 +514,12 @@ function initGame() {
   spywareLeft = 0;
   const taken = Progress.reservesTaken();
   sideSlots = reserveFits() && mode !== 'tutorial'
-    ? [0, 1].map((i) => (taken[i] ? { state: 'reserve', id: taken[i], buys: 0 } : { state: 'closed', id: null, buys: 0 })) : [];
+    ? [0, 1].map((i) => (taken[i] ? { state: 'reserve', id: taken[i], buys: 0 } : { state: 'market', id: null, buys: 0 })) : [];
+  for (const sl of sideSlots) { // (a slot taken in empty is the BLACK MARKET from the start)
+    if (sl.state !== 'market') continue;
+    sl.id = marketPick(sideSlots.map((x) => x.id));
+    if (!sl.id) sl.state = 'closed'; // (nothing unlocked yet)
+  }
   puzzleHistory = [];
   hintCol = null;
   if (runBoosts.has('head-start')) streak = Math.floor(streakCap() / 2);
@@ -4697,9 +4702,13 @@ function placeToast() {
   toastEl.classList.toggle('on-board', !!onBoard);
   toastEl.style.top = onBoard ? `${(a.top + a.bottom) / 2}px` : '';
   toastEl.style.left = onBoard ? `${(a.left + z.right) / 2}px` : '';
+  // (no wider than the board; with the larger TEXT SIZEs it wraps onto a second line rather than shrinking back)
+  const bigText = document.documentElement.matches('.text-l, .text-xl');
+  toastEl.style.maxWidth = onBoard ? `${z.right - a.left + 12}px` : '';
+  toastEl.classList.toggle('wrap', !!onBoard && bigText);
   // (on one line over the board: a wide font closes up, then shrinks, to stay on the screen)
   toastEl.style.letterSpacing = toastEl.style.fontSize = '';
-  if (!onBoard) return;
+  if (!onBoard || bigText) return;
   let ls = parseFloat(getComputedStyle(toastEl).letterSpacing) || 0;
   let size = parseFloat(getComputedStyle(toastEl).fontSize);
   const wide = () => toastEl.scrollWidth > toastEl.clientWidth + 0.5;

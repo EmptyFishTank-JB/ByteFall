@@ -137,7 +137,8 @@ reel for about 1.5 seconds and lands on an exploit, which waits there (a tick in
 armed when you like, or an anti-exploit, which glitches red and goes off at once: **ADWARE** (a pop-up,
 AD, covers one drop button for 3 drops; the grid and number keys still drop there), **SPYWARE** (the
 next 3 bits show as ? until they land) or **RANSOMWARE** (3 bits on the board go under a one-peel
-layer). Once a slot's reserve is used, it's the **BLACK MARKET** (a slot taken in empty stays closed):
+layer). A slot taken in empty, or once its reserve is used, is the **BLACK MARKET** (so it's there
+whether you take reserves in or not):
 a random exploit you've unlocked or, a quarter of the time, a BLACK BOX, marked for sale with the
 game's own currency sign in its corner (a 0 struck through twice, as a dollar sign is: no one
 country's), changing every 4 drops. A tap opens the BLACK MARKET's window: a neon sign of a border in

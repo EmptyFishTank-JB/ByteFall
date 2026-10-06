@@ -1603,6 +1603,7 @@ body.vs-mode header #mode-info { display: none; }
 .toast[hidden] { display: none; }
 /* Centered over the overflow row (placed by placeToast() in script.js) */
 .toast.on-board { translate: -50% -50%; white-space: nowrap; }
+.toast.on-board.wrap { white-space: normal; width: max-content; }
 .toast.show { animation: byte-in 0.35s ease-out; }
 
 .settings-btn {
@@ -3164,7 +3165,12 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 :root { --ts: 1; }
 :root.text-l { --ts: 1.15; --label-min: 8; }
 :root.text-xl { --ts: 1.3; --label-min: 9; }
-:root:is(.text-l, .text-xl) :is(.mode-info, .settings-note, .cpu-desc, .message, .toast, .tut-text, .tut-points, .overlay-box p, .records .menu-pane > .panel, .home-best, .booster-row, .vs-setup-note) { zoom: var(--ts); }
+:root:is(.text-l, .text-xl) :is(.mode-info, .settings-note, .message, .tut-text, .tut-points, .overlay-box p, .records .menu-pane > .panel, .home-best, .booster-row, .vs-setup-note) { zoom: var(--ts); }
+/* (positioned ones aren't zoomed, since zoom scales their place too and throws them off to the side: their text is
+   scaled instead. The toasts are placed in pixels by placeToast(); the CPU's card is set inside its board) */
+:root:is(.text-l, .text-xl) .toast { font-size: calc(12px * var(--ts)); padding: calc(8px * var(--ts)) calc(14px * var(--ts)); }
+:root:is(.text-l, .text-xl) .cpu-desc { font-size: calc(10px * var(--ts)); }
+:root:is(.text-l, .text-xl) .res-pop { font-size: calc(13px * var(--ts)); }
 :root:is(.text-l, .text-xl) .hud .stat .label { font-size: calc(8px * var(--ts)); }
 /* The snowman's powder as it comes apart (visitors.js) */
 .visitor .snow-powder { position: absolute; bottom: 0; pointer-events: none; }
