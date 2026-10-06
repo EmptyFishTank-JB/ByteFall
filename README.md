@@ -368,7 +368,7 @@ the mode card, VS's setup) are a little see-through (92%), so the lane's trees s
 them, and the HAUNTED FOREST's two big trees in front (the oaks, or now and then slim, gnarled ones) stand
 on trunks that run down to the card's foot, inside its border (the card frames the scene), the bots passing
 behind them; about one forest in three, the HOLLOW stands between them, as big, a dead tree with two
-red eyes and a gaping mouth in its trunk. The forest has a floor: a silhouetted ground along the lane's foot down to the
+red eyes and a gaping mouth in its trunk. The two edge trees never match: each has its own crown (which edge gets which, at random). The forest has a floor: a silhouetted ground along the lane's foot down to the
 card's edge, earth with grass tufts in front of the bots' feet, stones, fallen twigs and dead leaves,
 laid out afresh each time the forest comes. The big trees' canopies arch in over the lane toward the middle (the
 HOLLOW's both ways). October also brings the HEADLESS HORSEMAN (a black horse at a gallop, its

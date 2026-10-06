@@ -209,6 +209,29 @@ function createVisitors(api) {
         '...tTttttt..........................', '...tTttttt..........................', '...tTttttt..........................', '...tTttttt..........................', '...tTttttt..........................', '...tTttttt..........................',
         '..ttTtttttt.........................', '.tt.tTtt.tt.........................', 't..tt.tt...tt.......................'],
     },
+    // (the second crown, so the trees at the two edges are never one tree and its mirror)
+    oak2: {
+      pal: { t: '#07090b', T: '#12171c' },
+      a: [
+        '.......t....t..t.........t..........', '......t.t..t..t.t...t...t.t...t.....', '.....t...tt..tt...t.t.tt...t.t.t....', '....tt..t.tttt..tt.ttt..tt..t...t...', '...t..tt.t.tt.tt..tttttt..tt.t...t..', '..t..t..tt.ttt..ttt...tttt..t.tt..t.',
+        '.t..t.ttt..tt.tt.......ttttt...t.t..', '...t.t.tt.tTt............tttt...t..t', '..t..ttt.tTtt..............ttt..t.t.', '.t...t..ttTt.................tt.t..t', '..t.t...tTtt..................t..t..', '...t..ttTtt....................t..t.',
+        '....tttTtt.......................t..', '.....tTttt.........................t', '....ttTtttt.........................', '.....tTttt..........................', '.....tTtt...........................', '.....tTtt...........................',
+        '....ttTtt...........................', '....tTttt...........................', '....tTtttt..........................', '....tTtttt..........................', '...ttTtttt..........................', '...tTttttt..........................',
+        '...tTtttttt.........................', '...tTtttttt.........................', '..ttTttttttt........................', '..tTtttttttt........................', '.ttTttttttttt.......................', '.tTtttttttttt.......................',
+        '.tTtttttttttt.......................', '.tTtttttttttt.......................', '.tTtttttttttt.......................', '.tTtttttttttt.......................', '.tTtttttttttt.......................', '.tTtttttttttt.......................',
+        'tttTtttttttttt......................', 'tt.tTttttt.tttttt...................', 't..tt.ttt..tt...ttt.................'],
+    },
+    gnarl2: {
+      pal: { t: '#07090b', T: '#12171c' },
+      a: [
+        '.......t....t..t.........t..........', '......t.t..t..t.t...t...t.t...t.....', '.....t...tt..tt...t.t.tt...t.t.t....', '....tt..t.tttt..tt.ttt..tt..t...t...', '...t..tt.t.tt.tt..tttttt..tt.t...t..', '..t..t..tt.ttt..ttt...tttt..t.tt..t.',
+        '.t..t.ttt..tt.tt.......ttttt...t.t..', '...t.t.tt.tTt............tttt...t..t', '..t..ttt.tTtt..............ttt..t.t.', '.t...t..ttTt.................tt.t..t', '..t.t...tTtt..................t..t..', '...t..ttTtt....................t..t.',
+        '....tttTtt.......................t..', '.....tTttt.........................t', '....ttTttt..........................', '.....tTtt...........................', '.....tTt............................', '.....tTt............................',
+        '.....tTtt...........................', '.....tTtt...........................', '.....tTtt...........................', '.....tTtt...........................', '....ttTtt...........................', '....tTttt...........................',
+        '....tTttt...........................', '....tTttt...........................', '....tTtttt..........................', '...ttTtttt..........................', '...tTttttt..........................', '...tTttttt..........................',
+        '...tTttttt..........................', '...tTttttt..........................', '...tTttttt..........................', '...tTttttt..........................', '...tTttttt..........................', '...tTttttt..........................',
+        '..ttTtttttt.........................', '.tt.tTtt.tt.........................', 't..tt.tt...tt.......................'],
+    },
     // (now and then, between them: the HOLLOW, a dead tree with a face in its trunk, two red eyes
     // and a gaping mouth you can see through)
     hollow: {
@@ -450,6 +473,8 @@ function createVisitors(api) {
     baretree: { speed: 0, frameMs: 0 },
     oak: { speed: 0, frameMs: 0 },
     gnarl: { speed: 0, frameMs: 0 },
+    oak2: { speed: 0, frameMs: 0 },
+    gnarl2: { speed: 0, frameMs: 0 },
     hollow: { speed: 0, frameMs: 0 },
     horseman: { speed: 78, frameMs: 120, monster: true, poke: 'laugh' },
     zombie: { speed: 9, frameMs: 520, sway: 1, monster: true, poke: 'braains' },
@@ -703,7 +728,9 @@ function createVisitors(api) {
       api.lane.after(f);
       const sync = () => {
         const l = api.lane;
-        Object.assign(f.style, { left: `${l.offsetLeft}px`, top: `${l.offsetTop}px`, width: `${l.offsetWidth}px`, height: `${l.offsetHeight}px` });
+        // (from the card's top down to the lane's foot: the canopies have room above, and the layer
+        // clips what's sunk below the card, so it never makes the page scroll)
+        Object.assign(f.style, { left: `${l.offsetLeft}px`, top: '0px', width: `${l.offsetWidth}px`, height: `${l.offsetTop + l.offsetHeight}px` });
       };
       sync();
       window.addEventListener('resize', sync);
@@ -758,8 +785,9 @@ function createVisitors(api) {
     }
     if (haunted) { // (the big ones in front, by either edge: the path between them; the oaks, or now and then the slim, gnarled ones)
       const foreKind = Math.random() < 0.5 ? 'oak' : 'gnarl';
+      const swap = Math.random() < 0.5; // (which edge gets which crown: never the same tree mirrored)
       for (const side of [0, 1]) {
-        const t = add(foreKind, 0, side ? -1 : 1, { state: 'fogtree' });
+        const t = add((side === 1) !== swap ? `${foreKind}2` : foreKind, 0, side ? -1 : 1, { state: 'fogtree' });
         scaleTree(t, big ? 3.6 : 1.1);
         const w = parseFloat(t.el.style.width);
         const trunk = 8 / 36; // (where its trunk stands across it: its canopy arches in over the lane, toward the middle)
