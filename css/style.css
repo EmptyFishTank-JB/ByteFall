@@ -3727,3 +3727,6 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
 :is(.start-walkers, .game-walkers) .visitor.v-alt-2 { z-index: 4; }
 [data-theme="paper"] .game-walkers :is(.cloud-layer, .cloud-dark, .cloud-flash) { display: none; } /* (the light theme keeps its card) */
 @media (prefers-reduced-motion: reduce) { .game-walkers.lightning .cloud-layer { filter: none; } .game-walkers.lightning .cloud-flash { opacity: 0.3; } }
+/* (the big trees stay inside the card: it frames the scene; cut off at its inside edges and rounded
+   foot, the lane's 6px over the card's padding below it included) */
+.lane-fore { clip-path: inset(-400px 0 -6px 0 round 0 0 8px 8px); }
