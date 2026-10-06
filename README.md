@@ -77,8 +77,10 @@ with **✎ EDIT LAYOUT** at the foot of SETTINGS (or `?edit` in the address); it
   that cuts off a glow). **ITS CONTENTS**: the gap between what's inside it, and how they're
   justified and aligned.
 - **↺** puts one setting back to the game's own; **UNDO** steps back; **—** shrinks the panel to its
-  top line (picking still works); **⇅** moves it between the top and the foot (it moves itself out
-  of the way of what's picked).
+  top line (picking still works). **▁ FOOT / ▔ TOP / ❐ FLOAT** places the panel: docked at the
+  foot or the top (drag the grip on its inner edge to make it taller or shorter; docked, it moves
+  itself out of the way of what's picked), or floating (drag its grip to move it anywhere, its
+  corner to size it). Where it sits and its size are kept on the device.
 - Edits are kept on the device and applied even with the editor off. **YOUR EDITS** lists them (PICK
   one, or ✕ it), **SHOWING EDITS** flips to the original to compare, **EXPORT CSS** copies them as
   CSS to send over and bake into `css/style.css`, and **RESET ALL** clears them.
