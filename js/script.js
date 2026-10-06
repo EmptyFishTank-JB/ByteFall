@@ -3285,7 +3285,14 @@ function fitHome() {
   if (homeEl.hidden) return;
   const FIT = '#level-bar, .home .modes button, .home-row button, #home-play, #difficulty-row button, .home .booster-one, #home-best, #home-mode-name, .home .booster-title';
   for (const el of homeEl.querySelectorAll(FIT)) fitText(el, 10); // (single lines; never under 10px)
-  fitText(homeEl.querySelector('.home-head'), 8); // (the title line, as one)
+  // (the title line, as one; where even 10px won't fit it, without its // DECRYPTION TERMINAL)
+  const head = homeEl.querySelector('.home-head');
+  head.classList.remove('no-tag');
+  fitText(head, 10);
+  if (head.scrollWidth > head.clientWidth + 1 || head.querySelector('h1').getBoundingClientRect().left < homeEl.querySelector('.home-back').getBoundingClientRect().right) {
+    head.classList.add('no-tag');
+    fitText(head, 10);
+  }
   homePanelMore();
 }
 // (and the game's other set boxes with words that change: the message line, VS's setup note)
@@ -5577,6 +5584,8 @@ if (window.BYTEFALL_APP && !window.BYTEFALL_APP.live) {
 // card, the music player or the settings; pauses a game, or resumes it; wakes the screen saver);
 // at the main menu with nothing open, back to the start screen. false on the start screen: the
 // app goes to the background
+// The main menu's ← (top left): back to the title screen
+document.getElementById('home-back').addEventListener('click', () => { if (window.showStartScreen) window.showStartScreen(); });
 window.bytefallBack = () => {
   if (!starterPickEl.classList.contains('hidden')) { closeStarterPick(); return true; } // (a starter slot's card)
   if (!boosterPickEl.classList.contains('hidden')) { closeBoosterPick(); return true; } // (the BOOSTERS card)

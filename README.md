@@ -383,7 +383,8 @@ go back to the game, no reload needed.
 
 The game has one text size, set large enough to read on a phone (there's no TEXT SIZE setting):
 every piece of text has its own size written in, nothing scaled on top. The main menu holds still:
-its title is one line at the top (BYTEFALL // DECRYPTION TERMINAL, 8px under the card's border),
+its title is one line at the top (BYTEFALL // DECRYPTION TERMINAL, 8px under the card's border; just
+BYTEFALL where the whole line won't fit), with **←** in the top left corner back to the title screen,
 then the level, the resources and the six modes; the mode's panel takes the room the screen has
 whatever the mode puts in it, with PLAY at its foot, and what the mode shows in it (its description,
 DAILY's cards, the options) scrolls inside it on a short screen, fading out at its foot while
