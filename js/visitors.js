@@ -801,7 +801,7 @@ function createVisitors(api) {
     for (let i = 0; i < n; i++) {
       const v = add('eyes', rand(0.06, 0.88) * W, 1, { state: 'eyes', y: tall() ? rand(0.05, 0.3) * api.laneH() : rand(10, 34), until: now + rand(3500, 7000) + i * 600, blinkAt: now + rand(500, 2000), pal: { e: col } });
       v.el.classList.add('fog-eyes');
-      if (tall()) scaleTree(v, 2);
+      if (tall() && !cloudLane()) scaleTree(v, 2); // (doubled on the start screen's whole-card lane only: on the game card, the bots' own size)
       v.el.style.color = col;
       v.el.style.opacity = '0';
       setTimeout(() => { v.el.style.opacity = '1'; }, i * 600);
