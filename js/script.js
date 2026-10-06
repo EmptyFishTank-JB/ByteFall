@@ -3283,10 +3283,19 @@ function fitText(el, min = 7) {
 }
 function fitHome() {
   if (homeEl.hidden) return;
-  const FIT = '#level-bar, .home .modes button, .home-row button, #home-play, #difficulty-row button, .home .booster-one, #mode-info, #home-best, #daily-kinds button, #home-mode-name, .home .booster-title';
-  for (const el of homeEl.querySelectorAll(FIT)) fitText(el, el.id === 'mode-info' ? 7.5 : el.closest('#daily-kinds') ? 5.5 : 8); // (a DAILY card's words in em: its status line is the smallest)
+  const FIT = '#level-bar, .home .modes button, .home-row button, #home-play, #difficulty-row button, .home .booster-one, #home-best, #home-mode-name, .home .booster-title';
+  for (const el of homeEl.querySelectorAll(FIT)) fitText(el, 10); // (single lines; never under 10px)
+  fitText(homeEl.querySelector('.home-head'), 8); // (the title line, as one)
+  homePanelMore();
 }
 // (and the game's other set boxes with words that change: the message line, VS's setup note)
+// The panel's body: faded at its foot while there's more to scroll to
+const homePanelBody = document.getElementById('home-panel-body');
+function homePanelMore() {
+  const b = homePanelBody;
+  b.classList.toggle('more', b.scrollHeight - b.scrollTop - b.clientHeight > 2);
+}
+homePanelBody.addEventListener('scroll', homePanelMore, { passive: true });
 function refitHome() { requestAnimationFrame(() => { fitHome(); for (const id of ['message', 'vs-setup-note', 'pause-note']) fitText(document.getElementById(id)); }); }
 window.addEventListener('resize', refitHome);
 if (document.fonts) document.fonts.addEventListener('loadingdone', refitHome);
@@ -4087,25 +4096,6 @@ SFX.play = (name) => {
     try { navigator.vibrate(HAPTICS[name]); } catch (e) {}
   }
 };
-// TEXT SIZE: NORMAL, LARGE or LARGER (style.css scales the smaller text; index.html's inline
-// script applies the saved one before the first paint)
-const TEXT_SIZES = { normal: '', large: 'text-l', larger: 'text-xl' };
-let textSize = TEXT_SIZES[storage.get('bytefall-text-size')] !== undefined ? storage.get('bytefall-text-size') : 'normal';
-const textSizeBtn = document.getElementById('text-size-btn');
-function applyTextSize() {
-  document.documentElement.classList.remove('text-l', 'text-xl');
-  if (TEXT_SIZES[textSize]) document.documentElement.classList.add(TEXT_SIZES[textSize]);
-  textSizeBtn.textContent = `TEXT SIZE: ${textSize.toUpperCase()}`;
-}
-textSizeBtn.addEventListener('click', () => {
-  const order = Object.keys(TEXT_SIZES);
-  textSize = order[(order.indexOf(textSize) + 1) % order.length];
-  storage.set('bytefall-text-size', textSize);
-  applyTextSize();
-  refitHome();
-  requestAnimationFrame(fitBoard); // (the HUD's labels refit)
-});
-applyTextSize();
 
 const vibrateBtn = document.getElementById('vibrate-btn');
 vibrateBtn.hidden = !canVibrate;
@@ -4928,8 +4918,8 @@ function placeToast() {
   toastEl.classList.toggle('on-board', !!onBoard);
   toastEl.style.top = onBoard ? `${(a.top + a.bottom) / 2}px` : '';
   toastEl.style.left = onBoard ? `${(a.left + z.right) / 2}px` : '';
-  // (no wider than the board; with the larger TEXT SIZEs it wraps onto a second line rather than shrinking back)
-  const bigText = document.documentElement.matches('.text-l, .text-xl');
+  // (no wider than the board; the game's text is large, so it wraps onto a second line rather than shrinking back)
+  const bigText = true;
   toastEl.style.maxWidth = onBoard ? `${z.right - a.left + 12}px` : '';
   toastEl.classList.toggle('wrap', !!onBoard && bigText);
   // (on one line over the board: a wide font closes up, then shrinks, to stay on the screen)

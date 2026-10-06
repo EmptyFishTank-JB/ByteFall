@@ -355,15 +355,15 @@ go back to the game, no reload needed.
 
 ## App view on a phone
 
-The main menu holds still: it's pinned to the top, and every box on it (the mode buttons, the mode's
-panel, the rows under it) is one size in every mode, font and TEXT SIZE. The panel takes the room the
-screen has, up to its cap, whatever the mode puts in it; the mode's description takes what the
-panel's other parts leave. A larger TEXT SIZE or a wider font only changes the words, which shrink to
-fit their box when they must, and each button's words sit centered in it.
-The same holds through the game: TEXT SIZE and the font never change a button's size or move the
-HUD, the board or its buttons (the message line under the board and VS's setup notes are set boxes
-too, and the cards' pages scale their words for TEXT SIZE while their buttons keep their size). Only
-on the pages you scroll (RULES, the STORE, SETTINGS) does larger text push what's under it down.
+The game has one text size, set large enough to read on a phone (there's no TEXT SIZE setting):
+every piece of text has its own size written in, nothing scaled on top. The main menu holds still:
+its title is one line at the top (BYTEFALL // DECRYPTION TERMINAL, 8px under the card's border),
+then the level, the resources and the six modes; the mode's panel takes the room the screen has
+whatever the mode puts in it, with PLAY at its foot, and what the mode shows in it (its description,
+DAILY's cards, the options) scrolls inside it on a short screen, fading out at its foot while
+there's more. The buttons are one size in every mode and font, their words centered; a word that
+won't fit on a button shrinks, never under 10px. Through the game the font never changes a
+button's size or moves the HUD, the board or its buttons.
 
 - **Add to Home Screen** (Chrome's menu on Android, Share on iPhone) installs
   ByteFall with its own icon, and it opens full screen like an app, without

@@ -3,7 +3,7 @@
    fonts moves and resizes nothing. [data-font] on <html> picks one; everything reads var(--font). */
 /* The smallest a HUD label may shrink to and stay readable (script.js's fitStatValues; past it,
    labels wrap) */
-:root { --label-min: 7; }
+:root { --label-min: 9; }
 /* Courier's line height in every font (js/fonts.js sets --line); buttons and fields too (the
    browser's own style gives them "normal", which is the font's) */
 html { line-height: var(--line, normal); }
@@ -964,7 +964,7 @@ body.vs-mode .hud #pulse-stat > .layer-mark { top: auto; bottom: 7px; } /* (VS: 
 .free-exploit-btn[hidden] { display: none; }
 .free-exploit-btn:disabled { animation: none; opacity: 0.4; cursor: default; }
 #vibrate-btn { margin-top: 6px; }
-.rec-reset { margin-top: 14px; width: 100%; padding: 6px; background: none; border: 1px solid var(--grid-line); border-radius: 4px; color: var(--fg-dim); font-family: inherit; font-size: 11px; letter-spacing: 1px; cursor: pointer; }
+.rec-reset { margin-top: 14px; width: 100%; padding: 6px; background: none; border: 1px solid var(--grid-line); border-radius: 4px; color: var(--fg-dim); font-family: inherit; font-size: 14.5px; letter-spacing: 1px; cursor: pointer; }
 
 @media (hover: hover) { #restart-btn:hover, #overlay-restart-btn:hover {
   background: rgba(var(--fg-rgb), 0.15);
@@ -1022,11 +1022,11 @@ body.vs-mode .stat-best { display: none; }
 .level-bar.maxed .xp i { background: var(--accent); }
 
 .rec-level { margin: 0 0 10px; padding: 8px; border: 1px dashed var(--grid-line); border-radius: 4px; }
-.rec-level .rec-head { font-size: 12px; }
+.rec-level .rec-head { font-size: 15.5px; }
 .rec-level { border-color: var(--accent); }
 .rec-level .rec-name, .rec-level .rec-state { color: var(--fg); text-shadow: 0 0 6px rgba(var(--fg-rgb), 0.4); }
 .rec-level .rec-name em, .rec-level .rec-state em { font-style: normal; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
-.rec-rankup { margin-top: 8px; width: 100%; padding: 6px; background: rgba(var(--accent-rgb), 0.1); border: 1px solid var(--accent); border-radius: 4px; color: var(--accent); font-family: inherit; font-size: 11px; letter-spacing: 1px; cursor: pointer; }
+.rec-rankup { margin-top: 8px; width: 100%; padding: 6px; background: rgba(var(--accent-rgb), 0.1); border: 1px solid var(--accent); border-radius: 4px; color: var(--accent); font-family: inherit; font-size: 14.5px; letter-spacing: 1px; cursor: pointer; }
 
 .modes {
   display: flex;
@@ -1071,7 +1071,7 @@ body.vs-mode .stat-best { display: none; }
 .overlay-box.win h2,
 .overlay-box.win .overlay-sub { color: var(--fg); text-shadow: 0 0 8px var(--fg); }
 
-.overlay-note { font-size: 11px; letter-spacing: 1px; color: var(--fg-dim); }
+.overlay-note { font-size: 14.5px; letter-spacing: 1px; color: var(--fg-dim); }
 .overlay-share-btn {
   margin-left: 18px; /* (8px and what Courier's space between them used to be) */
   background: transparent;
@@ -1318,14 +1318,14 @@ body.vs-mode header #mode-info { display: none; }
   border: 1px dashed var(--fg-dim);
   border-radius: 6px;
   padding: 14px;
-  font-size: 12px;
+  font-size: 15.5px;
   line-height: 1.5;
   color: var(--panel-text);
 }
 
 .panel h2 {
   margin: 0 0 8px;
-  font-size: 18px;
+  font-size: 23.5px;
   letter-spacing: 3px;
   color: var(--fg);
   text-shadow: 0 0 8px var(--fg);
@@ -1345,7 +1345,7 @@ body.vs-mode header #mode-info { display: none; }
 
 .hack-item h3 {
   margin: 0 0 4px;
-  font-size: 13px;
+  font-size: 17px;
   letter-spacing: 1px;
   color: var(--fg);
 }
@@ -1355,11 +1355,11 @@ body.vs-mode header #mode-info { display: none; }
 .hack-item h3 { display: flex; align-items: baseline; }
 .hack-item .combo {
   margin-left: auto;
-  font-size: 11px;
+  font-size: 14.5px;
   color: var(--fg-dim);
 }
 .hack-item.held .combo { color: var(--accent); }
-.hack-item p { margin: 0; font-size: 11px; }
+.hack-item p { margin: 0; font-size: 14.5px; }
 
 .hack-item.held {
   border: 1px solid var(--accent);
@@ -1369,7 +1369,7 @@ body.vs-mode header #mode-info { display: none; }
 .hack-item.held h3 { color: var(--accent); }
 
 /* Exploit loadout: tap an unlocked card to equip or remove it */
-.slot-info { margin: 0 0 8px; font-size: 11px; letter-spacing: 1px; color: var(--accent); }
+.slot-info { margin: 0 0 8px; font-size: 14.5px; letter-spacing: 1px; color: var(--accent); }
 .hack-item.unlocked { cursor: pointer; }
 .hack-item.unlocked:not(.equipped) { opacity: 0.7; }
 @media (hover: hover) { .hack-item.unlocked:hover { border-color: var(--fg-dim); } }
@@ -1389,8 +1389,8 @@ body.vs-mode header #mode-info { display: none; }
 }
 @keyframes dev-hold { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 .dev-unlock .hack-item { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
-.hack-item.equipped h3::after { content: 'EQUIPPED'; margin-left: 8px; font-size: 9px; letter-spacing: 1px; color: var(--fg); order: 3; }
-.hack-item .lock-tag { display: block; margin-top: 4px; font-size: 9px; letter-spacing: 2px; color: var(--fg-dim); }
+.hack-item.equipped h3::after { content: 'EQUIPPED'; margin-left: 8px; font-size: 11.5px; letter-spacing: 1px; color: var(--fg); order: 3; }
+.hack-item .lock-tag { display: block; margin-top: 4px; font-size: 11.5px; letter-spacing: 2px; color: var(--fg-dim); }
 .hack-item.locked .lock-tag { color: var(--accent); }
 
 /* LOGIC BOMB and HONEYPOT sit on the board as armed blocks */
@@ -1530,14 +1530,14 @@ body.vs-mode header #mode-info { display: none; }
 @media (hover: hover) { .menu-tabs button:hover { background: rgba(var(--fg-rgb), 0.08); } }
 .menu-tabs button[aria-selected="true"] { color: var(--fg); border-color: var(--fg); text-shadow: 0 0 6px rgba(var(--fg-rgb), 0.6); filter: drop-shadow(0 0 3px rgba(var(--fg-rgb), 0.35)); }
 .menu-pane[hidden] { display: none; }
-.records .panel { padding: 10px; font-size: 11px; }
-.records .panel h2 { font-size: 13px; }
-.records .panel-records { font-size: 12px; }
+.records .panel { padding: 10px; font-size: 14.5px; }
+.records .panel h2 { font-size: 17px; }
+.records .panel-records { font-size: 15.5px; }
 /* RECORDS text: 12px at most, the rest a step down */
-.records-body { font-size: 12px; }
-.rec-group { margin: 10px 0 4px; font-size: 11px; letter-spacing: 2px; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+.records-body { font-size: 15.5px; }
+.rec-group { margin: 10px 0 4px; font-size: 14.5px; letter-spacing: 2px; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
 /* ======= between achievement sections */
-.rec-sep { margin: 12px 0 0; overflow: hidden; white-space: nowrap; font-size: 11px; line-height: 11px; letter-spacing: 2px; color: var(--accent); opacity: 0.7; }
+.rec-sep { margin: 12px 0 0; overflow: hidden; white-space: nowrap; font-size: 14.5px; line-height: 15px; letter-spacing: 2px; color: var(--accent); opacity: 0.7; }
 .rec-sep + .rec-group { margin-top: 6px; }
 .rec-group:first-child { margin-top: 0; }
 .rec-summary { margin: 0 0 8px; color: var(--accent); letter-spacing: 1px; }
@@ -1545,11 +1545,11 @@ body.vs-mode header #mode-info { display: none; }
 .rec-row { padding: 6px 0; border-bottom: 1px dashed var(--grid-line); }
 .rec-head { display: flex; gap: 8px; align-items: baseline; }
 .rec-name { color: var(--fg-dim); letter-spacing: 1px; }
-.rec-state { margin-left: auto; font-size: 11px; color: var(--fg-dim); white-space: nowrap; }
+.rec-state { margin-left: auto; font-size: 14.5px; color: var(--fg-dim); white-space: nowrap; }
 .rec-row.done .rec-name { color: var(--fg); }
 .rec-row.done .rec-state { color: var(--accent); }
 .rec-check { color: var(--accent); }
-.rec-desc { margin: 2px 0 0; font-size: 11px; color: var(--panel-text); opacity: 0.8; }
+.rec-desc { margin: 2px 0 0; font-size: 14.5px; color: var(--panel-text); opacity: 0.8; }
 .rec-bar { height: 3px; margin-top: 5px; background: rgba(var(--fg-rgb), 0.12); border-radius: 2px; overflow: hidden; }
 .rec-bar i { display: block; height: 100%; background: var(--fg); }
 .rec-stats { margin: 0; }
@@ -1773,7 +1773,7 @@ body.vs-mode header #mode-info { display: none; }
 
 .settings-note {
   margin: 6px 2px 0;
-  font-size: 10px;
+  font-size: 13px;
   line-height: 1.4;
   color: rgba(var(--fg-rgb), 0.78); /* (brighter than --fg-dim: easy to read) */
 }
@@ -1867,7 +1867,7 @@ footer span { color: var(--fg); }
 
 .overlay-sub {
   margin-top: 0;
-  font-size: 12px;
+  font-size: 15.5px;
   letter-spacing: 2px;
   color: var(--danger);
   opacity: 0.75;
@@ -1981,7 +1981,7 @@ header { margin-bottom: 6px; }
    by script.js) */
 body.cards-in-settings .settings footer { margin-top: 12px; display: block; font-size: 10px; }
 /* An amber ===== line between the footer and the settings above it */
-body.cards-in-settings .settings footer::before { content: "================================================================================"; display: block; margin-bottom: 10px; overflow: hidden; white-space: nowrap; font-size: 11px; line-height: 11px; letter-spacing: 2px; color: var(--accent); opacity: 0.7; }
+body.cards-in-settings .settings footer::before { content: "================================================================================"; display: block; margin-bottom: 10px; overflow: hidden; white-space: nowrap; font-size: 14.5px; line-height: 15px; letter-spacing: 2px; color: var(--accent); opacity: 0.7; }
 body.cards-in-settings .settings .dev-link { display: inline-flex; margin-top: 6px; }
 
 /* Shorter HUD: SCORE, CHAIN, ENCRYPT IN, CURRENT and NEXT take less height */
@@ -2424,7 +2424,7 @@ body:not(.vs-mode) .hud .stat:not(.cpu-stat):not(.cpu-face) > .label {
 .tut-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; font-size: 10px; letter-spacing: 2px; color: var(--accent); }
 .tut-exit { font-family: inherit; font-size: 10px; letter-spacing: 1px; padding: 2px 8px; cursor: pointer; background: transparent; color: var(--fg-dim); border: 1px solid var(--grid-line); border-radius: 3px; }
 .tut-text { margin: 0; }
-.tut-points { margin: 6px 0 0; font-family: inherit; font-size: 11px; line-height: 1.5; color: var(--accent); white-space: pre-wrap; }
+.tut-points { margin: 6px 0 0; font-family: inherit; font-size: 14.5px; line-height: 1.5; color: var(--accent); white-space: pre-wrap; }
 .tut-actions { flex: none; display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
 .tut-actions button {
   font-family: inherit; font-size: 12px; letter-spacing: 1px; padding: 5px 14px; cursor: pointer;
@@ -2644,14 +2644,14 @@ html.page-twinkle .page-bg { display: block; }
 #theme-note { min-height: 4lh; }
 
 /* STORE (store.js): the MENU's fourth tab, cards like the exploits', and RESTORE PURCHASES */
-.panel-store .store-preview { font-size: 10px; letter-spacing: 1px; color: var(--accent); }
+.panel-store .store-preview { font-size: 13px; letter-spacing: 1px; color: var(--accent); }
 .store-item {
   border: 1px dashed var(--grid-line); border-radius: 4px; padding: 8px 10px; margin-top: 10px;
   display: flex; flex-direction: column; gap: 6px;
 }
-.store-item h3 { margin: 0; display: flex; align-items: baseline; font-size: 13px; letter-spacing: 1px; color: var(--fg); }
-.store-item p { margin: 0; font-size: 11px; }
-.store-price { margin-left: auto; font-size: 12px; color: var(--accent); }
+.store-item h3 { margin: 0; display: flex; align-items: baseline; font-size: 17px; letter-spacing: 1px; color: var(--fg); }
+.store-item p { margin: 0; font-size: 14.5px; }
+.store-price { margin-left: auto; font-size: 15.5px; color: var(--accent); }
 .store-buy, .store-restore {
   font-family: inherit; font-size: 12px; letter-spacing: 2px; padding: 6px 16px; cursor: pointer;
   background: rgba(var(--accent-rgb), 0.08); color: var(--accent); border: 1px solid var(--accent); border-radius: 4px;
@@ -2664,9 +2664,9 @@ html.page-twinkle .page-bg { display: block; }
 .store-item.flash { animation: store-flash 1.2s ease-out; }
 @keyframes store-flash { 0%, 30% { border-color: var(--accent); box-shadow: 0 0 14px rgba(var(--accent-rgb), 0.5); } 100% { box-shadow: none; } }
 /* (room for a message, so RESTORE PURCHASES never moves) */
-.store-msg { min-height: 2lh; margin: 10px 0 6px !important; font-size: 11px; letter-spacing: 1px; color: var(--accent); text-align: center; }
+.store-msg { min-height: 2lh; margin: 10px 0 6px !important; font-size: 14.5px; letter-spacing: 1px; color: var(--accent); text-align: center; }
 .store-restore { display: block; width: 100%; color: var(--fg); border-color: var(--fg-dim); background: none; }
-.panel-store .store-note { margin: 8px 0 0; font-size: 10px; color: var(--fg-dim); }
+.panel-store .store-note { margin: 8px 0 0; font-size: 13px; color: var(--fg-dim); }
 /* REMOVE ADS: a quiet link at the foot of the menu's other tabs */
 .store-shortcut {
   display: flex; align-items: center; justify-content: center; gap: 6px; margin: 10px auto 0; padding: 5px 12px;
@@ -3092,7 +3092,7 @@ html.pixel-mode .walker.skater.walking[data-look="left"] .bot { transform: none;
 .pz-tile.next { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.45); }
 .pz-tile.current { outline: 2px solid var(--accent); outline-offset: 1px; }
 .pz-tile:disabled { opacity: 0.3; cursor: default; color: var(--fg-dim); border-style: dashed; }
-.pz-note { margin: 10px 0 0; font-size: 10px; color: var(--fg-dim); text-align: center; }
+.pz-note { margin: 10px 0 0; font-size: 13px; color: var(--fg-dim); text-align: center; }
 
 /* KEYS: beside the level bar, in the accent color, after a key */
 .key-label { margin-left: 4px; color: var(--accent); letter-spacing: 1px; white-space: nowrap; }
@@ -3111,12 +3111,12 @@ html.pixel-mode .walker.skater.walking[data-look="left"] .bot { transform: none;
 @media (prefers-reduced-motion: reduce) { .has-drop .store-lamp { animation: none; } }
 /* STORE: the balance, the sections, the boosters */
 .panel-store .store-keys { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 10px; letter-spacing: 2px; color: var(--fg-dim); }
-.panel-store .store-keys b { font-size: 16px; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
-.panel-store .store-sub { margin: 14px 0 4px; font-size: 12px; letter-spacing: 2px; color: var(--accent); }
-.panel-store .store-sub-note { margin: 0 0 8px; font-size: 10px; color: var(--fg-dim); }
+.panel-store .store-keys b { font-size: 21px; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+.panel-store .store-sub { margin: 14px 0 4px; font-size: 15.5px; letter-spacing: 2px; color: var(--accent); }
+.panel-store .store-sub-note { margin: 0 0 8px; font-size: 13px; color: var(--fg-dim); }
 .booster-shop { display: flex; flex-direction: column; gap: 8px; }
 .booster-buy-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.booster-owned { font-size: 11px; letter-spacing: 1px; color: var(--accent); }
+.booster-owned { font-size: 14.5px; letter-spacing: 1px; color: var(--accent); }
 .store-buy.short { opacity: 0.45; }
 /* The main menu's BOOSTERS: switches for the next game */
 .booster-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; margin: 8px 0 2px; }
@@ -3155,7 +3155,7 @@ html.pixel-mode .walker.skater.walking[data-look="left"] .bot { transform: none;
 .puzzle-tools button:disabled { opacity: 0.35; cursor: default; }
 .column-buttons button.hinted { border-color: var(--accent); color: var(--accent); animation: amber-pulse 0.9s ease-in-out infinite; }
 /* The KEYS a game earned, under its score */
-.overlay-keys { margin: 4px 0 0; font-size: 12px; letter-spacing: 1px; color: var(--accent); }
+.overlay-keys { margin: 4px 0 0; font-size: 15.5px; letter-spacing: 1px; color: var(--accent); }
 .overlay-keys[hidden] { display: none; }
 /* THE LEVEL METER after a game: this game's bits filling it; a flash at each LEVEL UP */
 .overlay-xp { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 10px 0 14px; font-size: 12px; letter-spacing: 1px; color: var(--fg-dim); cursor: pointer; }
@@ -3169,22 +3169,18 @@ html.pixel-mode .walker.skater.walking[data-look="left"] .bot { transform: none;
 @keyframes oxp-flash { 50% { opacity: 0.3; } }
 .key-ico { width: 1em; height: 1em; vertical-align: -0.15em; }
 /* STORE: the ===== line between what KEYS buy and what money buys, as the other menus have them */
-.store-rule { margin: 16px 0 4px; overflow: hidden; white-space: nowrap; font-size: 11px; line-height: 11px; letter-spacing: 2px; color: var(--accent); opacity: 0.7; } /* (as RECORDS' .rec-sep) */
+.store-rule { margin: 16px 0 4px; overflow: hidden; white-space: nowrap; font-size: 14.5px; line-height: 15px; letter-spacing: 2px; color: var(--accent); opacity: 0.7; } /* (as RECORDS' .rec-sep) */
 body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; line-height: 1; }
-/* TEXT SIZE (SETTINGS): LARGE and LARGER scale the game's smaller text: the notes and descriptions,
-   the menu card's pages, the tutorial, messages and toasts (zoomed, so they reflow where they are),
-   and the HUD's labels (whose floor rises with them) */
-:root { --ts: 1; }
-:root.text-l { --ts: 1.15; --label-min: 8; }
-:root.text-xl { --ts: 1.3; --label-min: 9; }
-:root:is(.text-l, .text-xl) :is(.settings-note, .tut-text, .tut-points, .overlay-box p, .records .menu-pane > .panel) { zoom: var(--ts); }
-/* (the main menu's words scale inside their set boxes instead: see THE MAIN MENU stays put) */
-/* (positioned ones aren't zoomed, since zoom scales their place too and throws them off to the side: their text is
-   scaled instead. The toasts are placed in pixels by placeToast(); the CPU's card is set inside its board) */
-:root:is(.text-l, .text-xl) .toast { font-size: calc(12px * var(--ts)); padding: calc(8px * var(--ts)) calc(14px * var(--ts)); }
-:root:is(.text-l, .text-xl) .cpu-desc { font-size: calc(10px * var(--ts)); }
-:root:is(.text-l, .text-xl) .res-pop { font-size: calc(13px * var(--ts)); }
-:root:is(.text-l, .text-xl) .hud .stat .label { font-size: calc(8px * var(--ts)); }
+/* The game's one text size (what the old TEXT SIZE setting called LARGER), written in as each
+   element's own font size. Text that has no size of its own in the menu card's pages, the notes, the
+   tutorial and the game over box's lines takes 1.3x what it would inherit (:where, so any element's
+   own size wins) */
+:root { --label-min: 9; }
+:where(.settings-note, .tut-text, .tut-points, .overlay-box p, .records .menu-pane > .panel) { font-size: 1.3em; }
+.toast { font-size: 15.5px; padding: 10.5px 18px; }
+.cpu-desc { font-size: 13px; }
+.res-pop { font-size: 17px; }
+.hud .stat .label { font-size: 10.5px; }
 /* The snowman's powder as it comes apart (visitors.js) */
 .visitor .snow-powder { position: absolute; bottom: 0; pointer-events: none; }
 /* The other viruses: ADWARE's message on its window, the LOGIC BOMB's last seconds (its fuse
@@ -3216,10 +3212,10 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 /* The STORE's exploits and boxes: the icon left of the name, the price in chips, what's short */
 .starter-item h3 { display: flex; align-items: center; gap: 8px; }
 .starter-item .store-name { flex: 1; }
-.store-ico { display: inline-flex; align-items: center; justify-content: center; width: 24px; margin-right: 6px; height: 24px; position: relative; color: var(--accent); font-size: 18px; }
+.store-ico { display: inline-flex; align-items: center; justify-content: center; width: 24px; margin-right: 6px; height: 24px; position: relative; color: var(--accent); font-size: 23.5px; }
 .store-ico svg { width: 20px; height: 20px; }
-.store-cost { display: flex; flex-wrap: wrap; gap: 4px 10px; margin: 6px 0 2px; font-size: 12px; letter-spacing: 1px; }
-.store-odds { margin: 4px 0; font-size: 11px; letter-spacing: 0.5px; color: var(--fg-dim); }
+.store-cost { display: flex; flex-wrap: wrap; gap: 4px 10px; margin: 6px 0 2px; font-size: 15.5px; letter-spacing: 1px; }
+.store-odds { margin: 4px 0; font-size: 14.5px; letter-spacing: 0.5px; color: var(--fg-dim); }
 .store-master { margin-right: 6px; }
 .store-master[hidden] { display: none; }
 /* A BLACK BOX's tier, on its icon */
@@ -3275,10 +3271,10 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 .shop-name { font-size: 16px; letter-spacing: 2px; color: var(--fg); }
 .shop-tier { font-size: 10px; letter-spacing: 1px; color: var(--fg-dim); }
 .shop-costs { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 16px; margin: 6px 0 8px; padding: 10px 6px; border-top: 1px dashed rgba(var(--accent-rgb), 0.4); border-bottom: 1px dashed rgba(var(--accent-rgb), 0.4); }
-.shop-cost { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 13px; letter-spacing: 1px; color: var(--fg); min-width: 44px; }
+.shop-cost { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 17px; letter-spacing: 1px; color: var(--fg); min-width: 44px; }
 .shop-cost .key-ico { width: 20px; height: 20px; }
 .shop-cost.short span { color: var(--danger); }
-.shop-note { margin: 4px 0 12px; font-size: 10.5px; letter-spacing: 1px; color: var(--fg-dim); min-height: 1em; }
+.shop-note { margin: 4px 0 12px; font-size: 13.5px; letter-spacing: 1px; color: var(--fg-dim); min-height: 1em; }
 .shop-foot { display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .shop-buy, .shop-alt { font-family: inherit; letter-spacing: 3px; cursor: pointer; border-radius: 6px; }
 .shop-buy { font-size: 15px; padding: 10px 34px; color: var(--bg-solid); background: var(--accent); border: 1px solid var(--accent); box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.6); }
@@ -3316,7 +3312,7 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 
 /* The STORE's prices as the BLACK MARKET's: each resource's icon over have / cost */
 .store-costs { display: flex; flex-wrap: wrap; gap: 8px 14px; padding: 6px 0 2px; }
-.store-costs .shop-cost { font-size: 12px; min-width: 38px; }
+.store-costs .shop-cost { font-size: 15.5px; min-width: 38px; }
 .store-costs .shop-cost .key-ico { width: 17px; height: 17px; }
 /* BUY with the currency sign */
 .store-buy .cur-ico, .shop-buy .cur-ico { width: 0.95em; height: 0.95em; margin-right: 4px; vertical-align: -0.12em; }
@@ -3328,14 +3324,14 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 .store-deal { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .store-terms { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .store-terms .store-costs { padding: 2px 0 0; gap: 4px 12px; }
-.store-terms .booster-owned { font-size: 10.5px; letter-spacing: 1px; line-height: 1.2; }
+.store-terms .booster-owned { font-size: 13.5px; letter-spacing: 1px; line-height: 1.2; }
 .store-terms .booster-owned:empty { display: none; }
 .store-btns { flex: none; display: flex; flex-direction: column; align-items: stretch; gap: 6px; }
 .store-btns .store-buy { align-self: auto; }
 .store-btns .store-master { margin: 0; font-size: 10px; letter-spacing: 1px; padding: 5px 8px; }
 /* (tight enough for a four-part price on one line beside BUY on a phone) */
 .store-terms .store-costs { gap: 2px 8px; flex-wrap: nowrap; }
-.store-terms .shop-cost { min-width: 0; font-size: 11px; letter-spacing: 0.5px; gap: 2px; }
+.store-terms .shop-cost { min-width: 0; font-size: 14.5px; letter-spacing: 0.5px; gap: 2px; }
 .store-terms .shop-cost .key-ico { width: 15px; height: 15px; }
 .store-btns .store-buy { padding: 6px 10px; letter-spacing: 1px; }
 /* THE STORE: its top (title, KEYS, resources) stays put, its body scrolls under it, the scrollbar inside the
@@ -3343,7 +3339,7 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 .records .menu-pane > .panel.panel-store { display: flex; flex-direction: column; overflow: hidden; padding-bottom: 0;
   box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.6), 0 0 12px rgba(var(--accent-rgb), 0.25), inset 0 0 12px rgba(var(--accent-rgb), 0.18); animation: none; }
 .store-top { flex: none; position: relative; z-index: 1; padding-bottom: 0; }
-.store-top::after { content: "================================================================================"; display: block; margin-top: 8px; overflow: hidden; white-space: nowrap; font-size: 11px; line-height: 11px; letter-spacing: 2px; color: var(--accent); opacity: 0.7; } /* (as .store-rule) */
+.store-top::after { content: "================================================================================"; display: block; margin-top: 8px; overflow: hidden; white-space: nowrap; font-size: 14.5px; line-height: 15px; letter-spacing: 2px; color: var(--accent); opacity: 0.7; } /* (as .store-rule) */
 .store-top h2 { margin-top: 0; }
 .store-top .wallet { margin-bottom: 0; }
 .store-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; margin-right: -8px; padding: 0 8px 14px 0;
@@ -3388,7 +3384,7 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 .store-deal { gap: 8px; }
 .store-terms { flex: 1 1 auto; }
 .store-terms .store-costs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px 4px; max-width: 216px; flex-wrap: nowrap; }
-.store-terms .shop-cost { min-width: 0; font-size: 10.5px; letter-spacing: 0; }
+.store-terms .shop-cost { min-width: 0; font-size: 13.5px; letter-spacing: 0; }
 .store-btns .store-buy { min-width: 0; padding: 4px 7px; font-size: 11px; letter-spacing: 0.5px; }
 .store-btns .store-buy .cur-ico { margin-right: 2px; }
 .store-btns .store-master { padding: 4px 7px; gap: 3px; }
@@ -3454,17 +3450,17 @@ body.in-game.can-pause .records-btn svg { left: auto; right: 4px; } /* (hugging 
 .home .home-play { height: 36px; flex-shrink: 0; }
 #difficulty-row button { height: 26px; }
 .home-mode-name { height: 18px; white-space: nowrap; overflow: hidden; line-height: 18px; }
-.home .mode-info { flex: 1 1 0; min-height: 0; overflow: hidden; width: 100%; font-size: calc(11px * var(--ts)); }
-.home-best { height: 15px; line-height: 15px; overflow: hidden; white-space: nowrap; font-size: calc(11px * var(--ts)); }
+.home .mode-info { flex: 1 1 0; min-height: 0; overflow: hidden; width: 100%; font-size: 14.5px; }
+.home-best { height: 15px; line-height: 15px; overflow: hidden; white-space: nowrap; font-size: 14.5px; }
 /* BOOSTERS and STARTER EXPLOITS: each one line, its name then its switch */
 .home .booster-row { flex-wrap: nowrap; margin: 0; height: 24px; width: 100%; }
-.home .booster-row .booster-title { width: 74px; flex: 0 0 74px; height: 24px; line-height: 24px; overflow: hidden; white-space: nowrap; text-align: right; font-size: calc(9px * var(--ts)); letter-spacing: 1px; }
-.home .booster-chip { height: 24px; font-size: calc(10px * var(--ts)); min-width: 0; flex: 0 1 auto; }
+.home .booster-row .booster-title { width: 74px; flex: 0 0 74px; height: 24px; line-height: 24px; overflow: hidden; white-space: nowrap; text-align: right; font-size: 11.5px; letter-spacing: 1px; }
+.home .booster-chip { height: 24px; font-size: 13px; min-width: 0; flex: 0 1 auto; }
 .home .booster-chip.booster-one { width: 120px; }
 .home .booster-chip.starter-slot { flex: 1 1 0; min-width: 0; max-width: 110px; display: block; line-height: 22px; text-overflow: ellipsis; padding-left: 5px; padding-right: 5px; }
 .home .booster-chip .ico { flex-shrink: 0; }
 /* DAILY's cards: set sizes, their words in em so they shrink together */
-.home .daily-cards button { height: 64px; overflow: hidden; font-size: calc(10px * var(--ts)); }
+.home .daily-cards button { height: 64px; overflow: hidden; font-size: 13px; }
 .home .daily-cards .dc-name { font-size: 1.3em; }
 .home .daily-cards .dc-rule { font-size: 1em; }
 .home .daily-cards .dc-status { font-size: 0.95em; }
@@ -3476,15 +3472,14 @@ body.in-game.can-pause .records-btn svg { left: auto; right: 4px; } /* (hugging 
    are zoomed back to their own size; the message line and VS's notes are one size and their words
    scale (and shrink to fit: script.js's fitText); BACK and TUTORIAL are wide enough for the widest
    font */
-:root:is(.text-l, .text-xl) .records .menu-pane > .panel button:not(button button) { zoom: calc(1 / var(--ts)); }
-.message-slot .message { height: 18px; min-height: 0; line-height: 18px; white-space: nowrap; font-size: calc(14px * var(--ts)); }
-#vs-setup-note { height: 50px; overflow: hidden; font-size: calc(11px * var(--ts)); }
-#pause-note { height: 17px; line-height: 17px; overflow: hidden; white-space: nowrap; font-size: calc(11px * var(--ts)); }
+.message-slot .message { height: 18px; min-height: 0; line-height: 18px; white-space: nowrap; font-size: 18px; }
+#vs-setup-note { height: 50px; overflow: hidden; font-size: 14.5px; }
+#pause-note { height: 17px; line-height: 17px; overflow: hidden; white-space: nowrap; font-size: 14.5px; }
 .card-back, :is(.records, .settings) .card-back { width: 88px; justify-content: center; }
 #tutorial-btn { width: 100px; text-align: center; }
 .panel-store .store-rule + .store-sub { margin-top: 6px; } /* (each STORE section under its ===== line, as RECORDS' sections) */
 /* The DAILY DROP's LOGIN STREAK: days in a row, a pip for each day of this run of 7 */
-.store-streak { margin-top: 6px !important; font-size: 10px !important; letter-spacing: 1px; color: var(--fg-dim); }
+.store-streak { margin-top: 6px !important; font-size: 13px !important; letter-spacing: 1px; color: var(--fg-dim); }
 .store-streak b { color: var(--accent); }
 .streak-pips { display: inline-flex; gap: 2px; vertical-align: -1px; margin: 0 4px; }
 .streak-pips i { width: 7px; height: 9px; border: 1px solid rgba(var(--accent-rgb), 0.6); border-radius: 1px; }
@@ -3534,3 +3529,40 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
    panel is short), its options right under it; the room left over goes above PLAY, which stays put */
 .home .mode-info { flex: 0 1 auto; }
 .home .home-panel { max-height: 292px; } /* (what the tallest mode, DAILY, needs) */
+/* THE MAIN MENU, at the game's one text size: the title one small line at the top, 8px under the
+   card's border, the level and resources right under it; the mode's panel takes the room left (to a
+   cap), what the mode puts in it scrolling inside it on a short screen, PLAY always under that */
+.home { padding-top: 8px; }
+.home-head { display: flex; align-items: baseline; justify-content: center; gap: 10px; white-space: nowrap; }
+.home-head h1 { font-size: 20px; letter-spacing: 3px; margin: 0; }
+.home-head .tagline { margin: 0; font-size: 12px; }
+.home .home-panel { max-height: 420px; }
+.home-panel-body { flex: 1 1 auto; min-height: 0; width: 100%; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; align-items: center; gap: var(--gap); }
+.home-panel-body > * { flex-shrink: 0; }
+.home .mode-info { flex: none; overflow: visible; }
+.home .daily-cards button { height: auto; min-height: 64px; }
+.home .home-best { height: auto; overflow: visible; }
+.home-panel .home-play { margin-top: 0; }
+/* (the title line in em, so the whole line shrinks together to fit the card's width) */
+.home-head { width: 100%; overflow: hidden; font-size: 12px; gap: 0.8em; }
+.home-head h1 { font-size: 1.6em; letter-spacing: 0.15em; }
+.home-head .tagline { font-size: 1em; letter-spacing: 0.1em; }
+.home .home-panel { max-height: 360px; }
+/* (more below: the panel's body fades out at its foot until scrolled to the end) */
+.home-panel-body.more { -webkit-mask-image: linear-gradient(#000 calc(100% - 22px), transparent); mask-image: linear-gradient(#000 calc(100% - 22px), transparent); }
+.home .home-panel { max-height: none; } /* (all the room there is: the more a mode shows before scrolling, the better) */
+/* (the menu's level bar and resources big enough to read) */
+.home .level-bar { font-size: 12px; height: 18px; }
+.home .wallet { font-size: 12px; height: 16px; }
+/* (the STORE's resources, box tiers and sign at the game's text size; the BLACK MARKET window's
+   costs and note, and the main menu's, as they were) */
+.panel-store .wallet { font-size: 15.5px; }
+.panel-store .box-tier { font-size: 11.5px; }
+.panel-store .shop-sign { font-size: 23.5px; }
+#market-shop .shop-cost { font-size: 13px; }
+#market-shop .shop-note { font-size: 10.5px; }
+/* (set boxes a little taller for their words) */
+.message-slot .message { height: 22px; line-height: 22px; }
+#pause-note { height: 20px; line-height: 20px; }
+.home-best { height: 18px; line-height: 18px; }
+.home-head { height: 26px; align-items: center; } /* (one height in every font) */
