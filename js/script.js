@@ -197,7 +197,7 @@ const puzzleOpen = (i, t = puzzleTier) => i === 0 || puzzleDone(i - 1, t);
 const tierSolved = (t = puzzleTier) => tierPuzzles(t).filter((_, n) => puzzleDone(n, t)).length;
 const tierLabel = (t = puzzleTier) => DIFFICULTIES[t].label;
 Progress.setPuzzleCount(PUZZLE_TIERS.reduce((n, t) => n + PUZZLES[t].length, 0));
-Progress.setTrackCount(Music.tracks().length);
+Progress.setTracks(Music.tracks());
 // The one you were on in a set (or its first unsolved one)
 const firstUnsolved = (t = puzzleTier) => {
   const i = tierPuzzles(t).findIndex((_, n) => !puzzleDone(n, t));
@@ -3984,8 +3984,8 @@ function lvTag(btn, unlockId) {
 }
 function renderPlaylist() {
   playlistTracksEl.innerHTML = '';
-  const tracks = Music.tracks();
-  for (let n = 0; n < Math.max(PLAYLIST_SLOTS, tracks.length); n++) {
+  const tracks = Music.slots(PLAYLIST_SLOTS); // (by number: an unmade one is a gap)
+  for (let n = 0; n < tracks.length; n++) {
     const track = tracks[n];
     const btn = document.createElement('button');
     const num = String(n + 1).padStart(2, '0');
@@ -5005,7 +5005,7 @@ window.addEventListener('scroll', () => toastEl.hidden || placeToast(), { passiv
 // Track unlocks are named TRACK 03 etc.; add the title once the track exists.
 function unlockLabel(name) {
   const m = name.match(/^TRACK (\d+)$/);
-  const track = m && Music.tracks()[Number(m[1]) - 1];
+  const track = m && Music.slots()[Number(m[1]) - 1];
   return track ? `${name} // ${track.title}` : name;
 }
 
@@ -5273,7 +5273,7 @@ function renderRecords() {
         recordsBodyEl.appendChild(list);
       }
       const m = u.name.match(/^TRACK (\d+)$/);
-      const track = m && Music.tracks()[Number(m[1]) - 1];
+      const track = m && Music.slots()[Number(m[1]) - 1];
       const name = m ? `${u.name} · ${track ? track.title : 'COMING SOON'}` : u.name;
       list.appendChild(recordRow({ name, desc: u.need, current: u.current, goal: u.goal, done: u.done }));
     }

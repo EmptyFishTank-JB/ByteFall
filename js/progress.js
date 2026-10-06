@@ -206,10 +206,9 @@ const Progress = (() => {
   const unlockById = Object.fromEntries(UNLOCKS.map((u) => [u.id, u]));
 
   const themeIds = UNLOCKS.filter((u) => u.group === 'THEMES').map((u) => u.id);
-  const trackIds = UNLOCKS.filter((u) => u.group === 'TRACKS').map((u) => u.id);
   let exploitCount = 7; // set by script.js from HACKS
   let puzzleCount = 30; // set by script.js from PUZZLES
-  let trackCount = 7; // the tracks made so far: set by script.js from Music.tracks()
+  let madeTracks = []; // the tracks made so far ({ no, free }): set by script.js from Music.tracks()
   const ALL_TRACKS = 16; // the playlist's full length (the music achievements need all of them)
   let themeCount = 10; // set by script.js from THEMES
   let sittingRestarts = 0; // live sessions restarted since the page loaded
@@ -264,7 +263,7 @@ const Progress = (() => {
     { id: 'rollover', name: 'ROLLOVER', desc: 'Rank up to DECRYPTOR 1', value: () => d.decryptor, goal: 1 },
     { id: 'full-spectrum', name: 'FULL SPECTRUM', desc: 'Unlock every theme', value: () => themeIds.filter(isUnlocked).length, goal: themeIds.length },
     // All 16 tracks: only tracks that exist count, so these wait until track 16 is made
-    { id: 'collector', name: 'COLLECTOR', desc: 'Unlock all 16 music tracks', value: () => 1 + trackIds.slice(0, trackCount - 1).filter(isUnlocked).length, goal: ALL_TRACKS },
+    { id: 'collector', name: 'COLLECTOR', desc: 'Unlock all 16 music tracks', value: () => madeTracks.filter((t) => t.free || isUnlocked(`track-${t.no}`)).length, goal: ALL_TRACKS },
     // Skill
     { id: 'zero-day', name: 'ZERO-DAY', desc: 'Decrypt a bit with the first drop of a session', value: () => d.firstDropClears, goal: 1 },
     { id: 'surgical', name: 'SURGICAL', desc: '20 drops in a row that each decrypt a bit (exploit drops skip)', value: () => d.bestClearStreak, goal: 20, note: 'Progress shows your best run so far' },
@@ -712,7 +711,7 @@ const Progress = (() => {
       return true;
     },
     setPuzzleCount(n) { puzzleCount = n; },
-    setTrackCount(n) { trackCount = n; },
+    setTracks(list) { madeTracks = list.map((t) => ({ no: t.no, free: t.free })); },
     setThemeCount(n) { themeCount = n; },
     puzzleSolved: (i) => !!d.puzzles[i],
     runPays: () => !run.noPay,

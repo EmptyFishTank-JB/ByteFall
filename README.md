@@ -293,7 +293,7 @@ for its space in a wider font (PRESS START, ORBITRON) closes up its letter
 spacing, then shrinks, until it fits. The FONT and THEME notes keep room for
 their longest text, so picking one never moves what's below.
 
-Tracks 11-16 are still to come. COLLECTOR, DJ and AUDIOPHILE need all 16
+Tracks 12-15 are still to come (16 is GENERATED). COLLECTOR, DJ and AUDIOPHILE need all 16
 tracks, so they open up once the last one is made.
 
 **VS matches aren't sessions.** The SESSIONS achievements, the "in one
@@ -939,7 +939,7 @@ SURPRISED, LOVE (red heart eyes), DIZZY and LAUGH. The small faces come from
 
 ## Music player
 
-**GENERATED // SEASONAL** (track 12, free; `js/music/music-generated.js`) writes itself: a new song
+**GENERATED // SEASONAL** (track 16, free, ahead of tracks 12-15; `js/music/music-generated.js`) writes itself: a new song
 from a seed, in the season's style. The seed picks the key, the tempo, a chord progression, a
 melody motif and its variations, the bass's walk, the arpeggio and the drums; the season picks the
 instruments and the harmony: OCTOBER, harmonic minor with a church organ, a music box, a theremin

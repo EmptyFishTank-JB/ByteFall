@@ -25,8 +25,8 @@
 
   const num = (n) => String(n + 1).padStart(2, '0');
   function render() {
-    const tracks = Music.tracks();
-    const current = tracks.findIndex((t) => t.id === Music.currentTrack());
+    const tracks = Music.slots(SLOTS); // (by number: an unmade one is a gap)
+    const current = tracks.findIndex((t) => t && t.id === Music.currentTrack());
     const playing = Music.isEnabled() && Music.isPlaying();
     trackEl.textContent = `${num(current)} ${tracks[current].title}`;
     stateEl.textContent = playing ? 'NOW PLAYING // FULL MIX' : 'PAUSED';
@@ -40,7 +40,7 @@
     speedBtn.textContent = `SPEED: ${Music.getSpeed() === 'held' ? 'HELD' : 'RAMPING'}`;
     speedBtn.classList.toggle('on', Music.getSpeed() === 'ramp');
     tracksEl.innerHTML = '';
-    for (let n = 0; n < Math.max(SLOTS, tracks.length); n++) {
+    for (let n = 0; n < tracks.length; n++) {
       const t = tracks[n];
       const btn = document.createElement('button');
       btn.type = 'button';

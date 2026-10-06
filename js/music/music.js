@@ -14,7 +14,8 @@ const Music = (() => {
   const HIDDEN_LOOKAHEAD = 1.5;
   const INTENSITY_EASE = 0.06; // per 16th step, ~2.5s to settle
   // Add future tracks here: each entry's create(ctx, out) returns an engine like createBytefallTheme's.
-  // free: always playable; track N (from 02) is unlocked by progress.js's track-N.
+  // free: always playable; track N (from 02) is unlocked by progress.js's track-N. no: its number
+  // in the playlist when that isn't its place in this list (GENERATED is track 16; 12-15 are to come)
   const TRACKS = [
     { id: 'bytefall-theme', title: 'BYTEFALL THEME', create: createBytefallTheme, free: true },
     { id: 'sleep-mode', title: 'SLEEP MODE', create: createSleepMode },
@@ -28,8 +29,9 @@ const Music = (() => {
     { id: 'handshake', title: 'HANDSHAKE', create: createHandshake },
     { id: 'stack-overflow', title: 'STACK OVERFLOW', create: createStackOverflow },
     // (music-generated.js: a new song from a seed, in the season's style; free)
-    { id: 'generated', title: 'GENERATED // SEASONAL', create: (c, o) => createGenerated(c, o, generatedOptions()), free: true },
+    { id: 'generated', title: 'GENERATED // SEASONAL', create: (c, o) => createGenerated(c, o, generatedOptions()), free: true, no: 16 },
   ];
+  TRACKS.forEach((t, i) => { t.no = t.no || i + 1; });
   // GENERATED's seed: the SONG OF THE DAY (the date's, the same for everyone that day) or RANDOM (a
   // new song each time it starts); its season, the time of year's
   const GEN_KEY = 'bytefall-gen-seed';
@@ -64,7 +66,7 @@ const Music = (() => {
     enabled = localStorage.getItem(STORAGE_KEY) !== 'off';
     backgroundPlay = localStorage.getItem(BG_KEY) === 'on';
   } catch (e) {}
-  const unlockId = (track) => `track-${TRACKS.indexOf(track) + 1}`;
+  const unlockId = (track) => `track-${track.no}`;
   const isLocked = (track) => !track.free && !Progress.isUnlocked(unlockId(track));
   function setTrack(id) {
     trackId = id;
@@ -244,10 +246,14 @@ const Music = (() => {
     },
     tracks: () => TRACKS.map((t) => ({
       id: t.id,
+      no: t.no, // (its number in the playlist: 01-16)
+      free: !!t.free,
       title: t.title,
       locked: isLocked(t),
       need: t.free ? '' : Progress.unlock(unlockId(t)).need,
     })),
+    // The playlist's 16 slots in order, each its track or null (not made yet)
+    slots(n = 16) { const list = this.tracks(); return Array.from({ length: Math.max(n, ...list.map((t) => t.no)) }, (_, i) => list.find((t) => t.no === i + 1) || null); },
     currentTrack: () => trackId,
     // GENERATED: its seed (SONG OF THE DAY or RANDOM; a new one starts the song again if it's on)
     genMode: () => genMode,
