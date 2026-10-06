@@ -1125,10 +1125,13 @@ function createVisitors(api) {
         const env = Math.max(0, 1 - v * v) * Math.min(1, y / top);
         if (!env) continue;
         const px = c.dir > 0 ? x / cw : 1 - x / cw;
-        const edge = Math.max(0, Math.min(1, (c.front * 1.3 - px) * 4)); // (rolling in)
+        // (rolling in: the front ragged, not a line, and the masses thinning and breaking up toward
+        // it, so the cloud drifts in rather than sliding in under a hard edge)
+        const ragged = 0.18 * (noise(seed * 3, y * sy * 0.6 + c.t * 0.05) - 0.5);
+        const edge = Math.max(0, Math.min(1, (c.front * 1.35 - px + ragged) * 2.2));
         if (!edge) continue;
         const n = 0.62 * noise(x * sx - drift + seed, y * sy + seed) + 0.38 * noise(x * sx * 2.2 - drift * 1.6 + seed, y * sy * 2.2 + seed);
-        dens[y * cw + x] = (n * env * 1.25 - thr) * c.level * edge;
+        dens[y * cw + x] = (n * env * 1.25 * (0.55 + 0.45 * edge) - thr) * c.level * edge;
       }
     }
     const ctx = cv.getContext('2d');
