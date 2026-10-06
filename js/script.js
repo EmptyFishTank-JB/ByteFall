@@ -79,6 +79,7 @@ let pulseInterval = BASE_INTERVAL;
 let gameOver = false;
 let busy = false; // true while animating/resolving, blocks input
 let runId = 0; // bumped on every new game so a pending game-over sequence can tell it's stale
+let vsPaused = false; // PAUSE (any mode): the board covered, the CPU's clock stopped, the drop buttons off
 let keyloggerDrops = 0; // drops left with the keylogger's preview showing
 let snifferBits = 0; // bits left whose number the player can pick
 let chainLog = []; // this drop's decrypts: { vals, chain, points } per link, { packet, count, points }
@@ -932,7 +933,7 @@ function updateColumnButtons() {
   buttons.forEach((btn, c) => {
     const target = pivotFrom !== null && Math.abs(c - pivotFrom) === 1;
     // While PIVOT waits for a side, only the two neighbors can be pressed: the choice is committed
-    btn.disabled = gameOver || busy || (pivotFrom !== null ? !target : columns[c].length >= MAX_ROWS);
+    btn.disabled = gameOver || busy || vsPaused || (pivotFrom !== null ? !target : columns[c].length >= MAX_ROWS); // (paused: off, dimmed, till RESUME)
     btn.classList.toggle('pivot-from', c === pivotFrom);
     btn.classList.toggle('pivot-target', target);
     btn.classList.toggle('tut-off', mode === 'tutorial' && !Tutorial.allows(c)); // (dimmed: not this lesson's column)
@@ -2365,7 +2366,6 @@ let vsThem = 0;
 let vsCounted = 0;
 let stealPts = 0;
 let vsStarted = false; // START pressed on the setup overlay
-let vsPaused = false; // PAUSE: the board covered, the CPU's clock stopped
 let vsPausedAt = 0; // (for AFK)
 let vsLanded = 0; // this match: blocks that landed on your board
 let vsSent = 0; // this match: blocks you sent at the CPU
@@ -2991,6 +2991,7 @@ function openPause() {
   SFX.play('static');
   if (mode === 'vs') botMood();
   updatePauseBtn();
+  updateColumnButtons(); // (the drop buttons off while it's paused)
 }
 function resumeMatch() {
   if (!vsPaused) return;
@@ -3010,6 +3011,7 @@ function resumeMatch() {
   SFX.play('static');
   if (mode === 'vs') botMood();
   updatePauseBtn();
+  updateColumnButtons(); // (the drop buttons back on)
 }
 // RESTART / EXIT: the first tap arms (CONFIRM?), the second melts the board and starts over
 function pauseConfirm(btn, apply) {
@@ -4787,8 +4789,10 @@ function renderRecords() {
       disarmReset();
       try {
         Object.keys(localStorage)
-          .filter((k) => k === 'bytefall-progress' || k === 'bytefall-puzzle' || k.startsWith('bytefall-best-')
-            || k.startsWith('bytefall-best-') || k.startsWith('bytefall-daily-'))
+          // (the puzzle each tier was on: NORMAL's bytefall-puzzle, EASY's and HARD's bytefall-puzzle-easy
+          // and -hard; the tier picked, bytefall-puzzle-tier, is a setting and stays)
+          .filter((k) => k === 'bytefall-progress' || k === 'bytefall-puzzle' || (k.startsWith('bytefall-puzzle-') && k !== 'bytefall-puzzle-tier')
+            || k.startsWith('bytefall-best-') || (k.startsWith('bytefall-daily-') && k !== 'bytefall-daily-kind')) // (the daily game picked: a setting too)
           .forEach((k) => localStorage.removeItem(k));
       } catch (e) {}
       location.reload();

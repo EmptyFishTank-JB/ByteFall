@@ -2,7 +2,7 @@
 // without the dev page or anything that only the dev page uses.
 //   node tools/build-app.js
 // - only what the game loads: index.html, the manifest, css/, js/, the fonts and icons (not the
-//   dev tools, the docs, the soundtrack's .wav archive or the screenshots)
+//   dev tools, the docs or the screenshots)
 // - the settings' DEV link taken out
 // - the build, commit and date baked in (the web version asks GitHub for them on each load)
 // - any dev switches left in storage cleared on launch (VIRUSES: OFTEN, ...), but for UNLOCK

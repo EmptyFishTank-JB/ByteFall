@@ -528,7 +528,7 @@ with a cached older script (GitHub Pages lets browsers cache for 10 minutes).
   intensity (the engine's `step` follows it, and the player and mixer read it every 16th);
   then 16th hats, a rolling bass, the tune an octave up and an overflow alarm. Unlocked at
   Lv 44 (TRACK 11).
-- `js/music/music-firewall.js` — FIREWALL (off the playlist for now; on the dev pages to hear and mix): an original 16-bit console track in
+- `js/music/music-firewall.js` — FIREWALL (not in the game, and not loaded by any page: kept as code only): an original 16-bit console track in
   the style of early-90s Genesis platformers, in two-operator FM synthesis like the console's
   sound chip (a slap FM bass, an FM electric piano with a tine, FM brass and bell leads) over
   crunchy sample-style drums (rounded to 64 levels). A bright ZONE theme in F major at 144 BPM
@@ -556,12 +556,6 @@ with a cached older script (GitHub Pages lets browsers cache for 10 minutes).
   track and output in the browser (`bytefall-mix-<track>`) until pasted in. The
   intensity layers (when each comes in, MUTE / PLAY and SOLO; ARCHIVED and TRIAL
   layers start muted), the sections and how the music intensifies are below
-- `assets/audio/` — offline WAV renders of the music for reference (not loaded by
-  the game). `01-bytefall-theme.wav` through `10-handshake.wav` are one full
-  loop of each track at full intensity (stack 6+, every layer the game plays,
-  archived layers left out). Older versions: `bytefall-theme-v1.wav` is the
-  original 16-bar theme loop, `bytefall-theme-v2.wav` the first 32-bar
-  version, `sleep-mode-v1.wav` the first SLEEP MODE
 
 ## Stereo
 
@@ -598,8 +592,7 @@ is placed the way each style would be mixed:
   and the fake-chord arps right, the low-HP alarm's two tones trading sides.
 
 Panned sounds get +3 dB ahead of the panner (it halves a mono sound's power), so
-each track kept its loudness (within about 0.3 dB of its mono mix). The WAV
-renders in `assets/audio/` are still the older mono mixdowns.
+each track kept its loudness (within about 0.3 dB of its mono mix).
 
 ## Tutorial
 
