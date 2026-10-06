@@ -230,7 +230,7 @@
 
   <section id="dev">
     <h2><span class="sec-num">00</span> Dev Switches</h2>
-    <p class="sec-desc">For testing in this browser only. UNLOCK EVERYTHING works like owning Full Access (Hard, every track, theme and exploit) without touching your saved progress, and the game shows a DEV badge while it's on (it owns Full Access in the STORE too). OWN REMOVE ADS previews owning just REMOVE ADS in the STORE (reload the game to see it). While it's on, press and hold any exploit card in the game for 2 seconds to make it your next drop, slotted or not. JUMP TO LV 80 and +10 LEVELS edit your saved progress so you can try levels, exploit slots and DECRYPTOR ranks quickly. AD BANNER PREVIEW (off by default) steps through 50, 60 and 90px: a grey strip where a phone's banner ad would sit, with everything fitted around it, to get a feel for the space. AD BANNER SPOT puts it at the TOP (the default) or BOTTOM of the screen. BACKGROUND switches what's behind the game card between the PLAIN gradient and the TWINKLE starlight. SEASON forces the seasonal touches (AUTO follows the date: HALLOWEEN is the whole of October, NOVEMBER the whole month) on or OFF: the wanderers' costumes, snacks and visitors. VIRUSES: OFTEN brings a virus every few seconds (the PHAGE, the BUG and the TROJAN in turn) instead of one every ten minutes or so. FOG: OFTEN rolls the November fog in at the next visit (any season), and the light mist after it lifts in 20 seconds instead of 2 minutes. These change as soon as you go back to the game.</p>
+    <p class="sec-desc">For testing in this browser only. UNLOCK EVERYTHING works like owning Full Access (Hard, every track, theme and exploit) without touching your saved progress, and the game shows a DEV badge while it's on (it owns Full Access in the STORE too). OWN REMOVE ADS previews owning just REMOVE ADS in the STORE (reload the game to see it). While it's on, press and hold any exploit card in the game for 2 seconds to make it your next drop, slotted or not. JUMP TO LV 80 and +10 LEVELS edit your saved progress so you can try levels, exploit slots and DECRYPTOR ranks quickly. AD BANNER PREVIEW (off by default) steps through 50, 60 and 90px: a grey strip where a phone's banner ad would sit, with everything fitted around it, to get a feel for the space. AD BANNER SPOT puts it at the TOP (the default) or BOTTOM of the screen. BACKGROUND switches what's behind the game card between the PLAIN gradient and the TWINKLE starlight. SEASON forces the seasonal touches (AUTO follows the date: HALLOWEEN is the whole of October, NOVEMBER the whole month) on or OFF: the wanderers' costumes, snacks and visitors. VIRUSES: OFTEN brings a virus every few seconds (the PHAGE, the BUG and the TROJAN in turn) instead of one every ten minutes or so. WEATHER: AUTO follows the date and the time of day (a spell every few minutes, some of the time); OFTEN brings a new spell every few seconds; SPRING, SUMMER, AUTUMN or WINTER does the same with that season's weather, at any hour; or pick one kind (RAIN, THUNDERSTORM, SNOW, AURORA...) to keep it on. FOG: OFTEN rolls the November fog in at the next visit (any season), and the light mist after it lifts in 20 seconds instead of 2 minutes. These change as soon as you go back to the game.</p>
     <div class="dev-switches">
       <button type="button" id="dev-unlock">UNLOCK EVERYTHING: OFF</button>
       <button type="button" id="dev-noads">OWN REMOVE ADS: OFF</button>
@@ -240,6 +240,7 @@
       <button type="button" id="dev-adpos">AD BANNER SPOT: TOP</button>
       <button type="button" id="dev-twinkle">BACKGROUND: PLAIN</button>
       <button type="button" id="dev-season">SEASON: AUTO</button>
+      <button type="button" id="dev-weather">WEATHER: AUTO</button>
       <button type="button" id="dev-virus">VIRUSES: RARE</button>
       <button type="button" id="dev-fog">FOG: RARE</button>
     </div>
@@ -467,9 +468,37 @@
     seaBtn.addEventListener('click', () => {
       set(SEA, SEA_STEPS[(SEA_STEPS.indexOf(seaNow()) + 1) % SEA_STEPS.length]);
       showSea();
+    const WX = 'bytefall-dev-weather';
+    const WX_STEPS = ['auto', 'often', 'spring', 'summer', 'autumn', 'winter', 'drizzle', 'rain', 'storm', 'sunshower', 'hail', 'sleet', 'snow', 'blizzard', 'wind', 'sunny', 'rainbow', 'aurora', 'fireflies', 'meteors', 'fog'];
+    const wxBtn = document.getElementById('dev-weather');
+    const wxNow = () => (WX_STEPS.includes(get(WX)) ? get(WX) : 'auto');
+    const showWx = () => {
+      wxBtn.textContent = `WEATHER: ${wxNow().toUpperCase()}`;
+      wxBtn.classList.toggle('on', wxNow() !== 'auto');
+    };
+    wxBtn.addEventListener('click', () => {
+      set(WX, WX_STEPS[(WX_STEPS.indexOf(wxNow()) + 1) % WX_STEPS.length]);
+      showWx();
+      status.textContent = 'Saved. Reload the game to see it.';
+    });
+    showWx();
       status.textContent = 'Saved. New wanderers dress for it (reload the game to see it at once).';
     });
     showSea();
+    const WX = 'bytefall-dev-weather';
+    const WX_STEPS = ['auto', 'often', 'spring', 'summer', 'autumn', 'winter', 'drizzle', 'rain', 'storm', 'sunshower', 'hail', 'sleet', 'snow', 'blizzard', 'wind', 'sunny', 'rainbow', 'aurora', 'fireflies', 'meteors', 'fog'];
+    const wxBtn = document.getElementById('dev-weather');
+    const wxNow = () => (WX_STEPS.includes(get(WX)) ? get(WX) : 'auto');
+    const showWx = () => {
+      wxBtn.textContent = `WEATHER: ${wxNow().toUpperCase()}`;
+      wxBtn.classList.toggle('on', wxNow() !== 'auto');
+    };
+    wxBtn.addEventListener('click', () => {
+      set(WX, WX_STEPS[(WX_STEPS.indexOf(wxNow()) + 1) % WX_STEPS.length]);
+      showWx();
+      status.textContent = 'Saved. Reload the game to see it.';
+    });
+    showWx();
     const VI = 'bytefall-dev-virus';
     const viBtn = document.getElementById('dev-virus');
     const showVi = () => {

@@ -432,6 +432,8 @@ const Progress = (() => {
         { id: 'eight-nights', name: 'EIGHT NIGHTS', desc: 'Watch a bot push a menorah onto the card during Hanukkah', value: n('push-menorah'), goal: 1, hidden: true },
         { id: 'gimel', name: 'GIMEL', desc: 'See the Hanukkah dreidel land on GIMEL', value: n('gimel'), goal: 1, hidden: true },
         { id: 'seven-candles', name: 'SEVEN CANDLES', desc: 'Watch a bot push a kinara onto the card during Kwanzaa', value: n('push-kinara'), goal: 1, hidden: true },
+        { id: 'storm-chaser', name: 'STORM CHASER', desc: 'See a thunderstorm, a blizzard and hail roll over the bots', value: () => ['storm', 'blizzard', 'hail'].filter((k) => d.bots[`weather-${k}`]).length, goal: 3, hidden: true },
+        { id: 'stargazer', name: 'STARGAZER', desc: 'See the northern lights, a meteor shower and fireflies over the bots', value: () => ['aurora', 'meteors', 'fireflies'].filter((k) => d.bots[`weather-${k}`]).length, goal: 3, hidden: true },
         { id: 'midnight', name: 'MIDNIGHT', desc: 'Be there when the bots count down to the new year', value: n('countdown'), goal: 1, hidden: true },
         { id: 'costume-party', name: 'COSTUME PARTY', desc: 'All four bots on screen at once in their Halloween costumes', value: n('costume-party'), goal: 1, hidden: true },
         { id: 'rabid', name: 'RABID', desc: 'Poke a HARD or INSANE bot and get snapped at', value: n('bitten'), goal: 1, hidden: true },

@@ -3751,3 +3751,23 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
 .lane-fore .forest-ground { position: absolute; left: 0; width: 100%; image-rendering: pixelated; pointer-events: none; opacity: 0; transition: opacity 3s ease-in; }
 .lane-fore { overflow: clip; overflow-clip-margin: 6px; } /* (nothing sunk below the card counts toward the page: no scrolling) */
 .lane-fore { clip-path: inset(-400px 0 calc(-1 * var(--below, 6px)) 0 round 0 0 8px 8px); overflow-clip-margin: var(--below, 6px); } /* (down to the card's inside edge, wherever the lane stops) */
+
+/* WEATHER (weather.js): the rain, snow, hail, leaves and the rest on two canvases (behind the bots,
+   in front of them), the sun's warmth, the night sky, a blizzard's whiteout and the lightning's flash */
+:is(.start-walkers, .game-walkers) .wx-layer { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; image-rendering: pixelated; }
+:is(.start-walkers, .game-walkers) .wx-back { z-index: 0; }
+:is(.start-walkers, .game-walkers) .wx-front { z-index: 5; }
+:is(.start-walkers, .game-walkers) :is(.wx-glow, .wx-night, .wx-white, .wx-flash) { position: absolute; left: 0; right: 0; top: 0; bottom: 0; pointer-events: none; opacity: 0; transition: opacity 0.8s linear; }
+:is(.start-walkers, .game-walkers) .wx-glow { z-index: -3; background: radial-gradient(circle at var(--sx, 80%) 18%, rgba(255, 210, 90, 0.28), rgba(255, 170, 60, 0.08) 45%, transparent 75%); }
+:is(.start-walkers, .game-walkers) .wx-night { z-index: -4; background: linear-gradient(to bottom, rgba(4, 6, 20, 0.85), rgba(4, 6, 20, 0.35) 70%, transparent); }
+:is(.start-walkers, .game-walkers) .wx-white { z-index: 4; background: linear-gradient(to bottom, rgba(225, 232, 242, 0.7), rgba(225, 232, 242, 0.35)); }
+:is(.start-walkers, .game-walkers) .wx-flash { z-index: 6; background: rgba(235, 240, 255, 0.35); transition: none; }
+:is(.start-walkers, .game-walkers) .wx-flash.on { opacity: 1; }
+.game-walkers :is(.wx-layer, .wx-glow, .wx-night, .wx-white, .wx-flash) {
+  top: calc(-1 * var(--feather)); height: calc(100% + var(--feather)); bottom: auto;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 var(--feather));
+  mask-image: linear-gradient(to bottom, transparent, #000 var(--feather));
+}
+.game-walkers .wx-flash { clip-path: inset(0 round 0 0 8px 8px); }
+:is([data-theme="paper"], [data-theme="daylight"]) :is(.wx-night, .wx-glow) { display: none; }
+@media (prefers-reduced-motion: reduce) { :is(.start-walkers, .game-walkers) .wx-flash { display: none; } }

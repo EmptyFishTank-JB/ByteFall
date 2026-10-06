@@ -546,6 +546,7 @@ function createVisitors(api) {
   // One visit: a monster, the ghost, a flock of bats or a crow or two, in from either side
   function visit(what = pick(visits().length ? visits() : VISITS.halloween)) {
     if (what === 'countdown') return countdown();
+    if (typeof what === 'string' && what.startsWith('wx-')) return weather && (what === 'wx-clear' ? weather.clear() : weather.start(what.slice(3)));
     if (what === 'fog') return startFog();
     if (what === 'overcast') return startClouds();
     // (OCTOBER: the HAUNTED FOREST and what happens in it; the dev page brings each any time)
@@ -1039,11 +1040,14 @@ function createVisitors(api) {
   const CLOUD_TONES = {
     spooky: [[30, 24, 40], [50, 40, 64], [76, 63, 94]],
     grey: [[42, 45, 51], [62, 66, 73], [88, 92, 100]],
+    storm: [[26, 29, 38], [42, 47, 58], [62, 68, 82]], // (weather.js's: a thunderstorm's, the hail's)
+    snow: [[74, 78, 88], [100, 104, 114], [128, 132, 142]], // (and the snow's: pale, heavy)
   };
   let clouds = null;
   const cloudLane = () => api.lane.classList.contains('game-walkers');
   const cloudSeason = () => typeof Season !== 'undefined' && (Season.is('halloween') || Season.is('november'));
-  function startClouds(stays = false) {
+  // (tone: the weather's, weather.js, which holds the sky while it rains or snows)
+  function startClouds(stays = false, tone = null) {
     if (clouds || !cloudLane()) return clouds;
     const now = performance.now();
     const el = (cls) => {
@@ -1056,7 +1060,7 @@ function createVisitors(api) {
     clouds = {
       phase: 'in', at: now, front: 0, level: 0, dir: Math.random() < 0.5 ? 1 : -1, t: rand(0, 200), drawn: 0, stays, spooky: spooky(),
       dark: el('cloud-dark'), flash: el('cloud-flash'), layers: [0, 1, 2].map((i) => el(`cloud-layer cloud-${i}`)),
-      until: now + rand(150000, 260000), nextFlash: now + rand(5000, 12000),
+      until: now + rand(150000, 260000), nextFlash: now + rand(5000, 12000), tone,
     };
     for (const v of list) if (v.alt !== undefined) setAlt(v, v.alt); // (the flyers already up: among them)
     api.botEvent('visit-overcast');
@@ -1078,7 +1082,7 @@ function createVisitors(api) {
       if (c.front >= 1) { c.phase = 'stand'; c.at = now; }
     } else if (c.phase === 'stand') {
       if (c.stays && !(fog && fog.haunted)) { c.stays = false; c.until = now + rand(60000, 120000); } // (the forest gone: it lifts in a while)
-      if (!c.stays && now > c.until) { c.phase = 'lift'; c.at = now; }
+      if (!c.stays && !c.held && now > c.until) { c.phase = 'lift'; c.at = now; }
     } else if (c.phase === 'lift') {
       c.level = 1 - Math.min(1, age / 12000);
       if (age > 12000) { endClouds(); return; }
@@ -1106,7 +1110,7 @@ function createVisitors(api) {
     const cw = Math.ceil(W / cell);
     const ch = Math.ceil(H / cell);
     if (cv.width !== cw || cv.height !== ch) { cv.width = cw; cv.height = ch; }
-    const tone = CLOUD_TONES[c.spooky ? 'spooky' : 'grey'][i];
+    const tone = CLOUD_TONES[c.spooky ? 'spooky' : c.tone || 'grey'][i];
     const drift = [0.05, 0.1, 0.17][i] * c.t * c.dir;
     const seed = [3, 47, 91][i];
     const sx = cell / [70, 56, 44][i];
@@ -2540,8 +2544,23 @@ function createVisitors(api) {
     v.el.querySelector('svg').style.transform = `scaleX(${v.dir})${v.svgT || ''}`;
   }
 
+  // WEATHER (weather.js): its own spells over this lane (not the screen saver's), with the clouds
+  // and the fog from here
+  const weather = typeof createWeather === 'function' && !api.lane.classList.contains('saver-lane') ? createWeather({
+    lane: api.lane, tall, foggy: () => !!fog, walkers: api.walkers, botEvent: api.botEvent,
+    say: (w, m, text) => api.say(w, m, text),
+    clouds: (tone) => {
+      const c = clouds && clouds.phase === 'lift' ? null : clouds || startClouds(false, tone);
+      if (!c) return;
+      c.held = true;
+      if (!c.spooky) c.tone = tone;
+    },
+    releaseClouds: (soon) => { if (clouds && (clouds.held || soon) && !clouds.stays) { clouds.held = false; clouds.until = performance.now() + (soon ? 0 : rand(6000, 16000)); } },
+    fog: () => { if (!fog) startFog(false, false); },
+  }) : null;
   function frame(now, dt) {
     const W = api.laneW();
+    if (weather) weather.frame(now, dt);
     if (!fog && hauntedForest && spooky()) startFog(true); // (the HAUNTED FOREST stands, all month)
     if (fog) fogFrame(now);
     if (clouds) cloudsFrame(now);
@@ -2772,6 +2791,7 @@ function createVisitors(api) {
   // (forget: the dev page's CLEAR ALL, the HAUNTED FOREST too)
   function clear(forget = false) {
     if (forget) hauntedForest = false;
+    if (weather) weather.clear();
     horde = null;
     if (clouds) endClouds();
     if (fog) { if (fog.ground) fog.ground.remove(); fog.back.remove(); fog.fore.remove(); fog.dark.remove(); if (fog.moon) fog.moon.remove(); fog = null; }
@@ -2807,5 +2827,5 @@ function createVisitors(api) {
     }
     return { sprites, anims, kinds: { ...KINDS, 'tree-walking': { frameMs: 190 }, 'baretree-walking': { frameMs: 190 }, 'pine-walking': { frameMs: 190 } } };
   }
-  return { frame, clear, visit, list: () => list, makeScenery, moveTree, foggy, spirit, art };
+  return { frame, clear, visit, list: () => list, makeScenery, moveTree, foggy, spirit, art, weather: () => (weather ? weather.current() : null) };
 }

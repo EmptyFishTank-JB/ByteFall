@@ -384,7 +384,25 @@ then climb or dip a layer, flying in and out of the cloud. October's is purple-g
 flickering inside it, lighting it from within; November's is plain grey. It lifts after a few
 minutes (over the forest, it stays). The game card's sky (the clouds, the overcast's and the fog's dark, the
 night, the moon's sky) is feathered at the top: it reaches 56px past the lane's top edge and fades
-out there, into the UI above. A button's tick (and buzz) comes on a successful tap, released on it, not
+out there, into the UI above.
+
+**WEATHER** (`js/weather.js`): over the wanderers on the game card and the start screen, all year.
+Every few minutes a spell may come, from the time of year's and the time of day's, and the date
+gives each day a lean (a wet day, a dry one, a stormy one, a calm one: the same for everyone).
+WINTER (Dec-Feb): SNOW that settles on the floor, a BLIZZARD (sideways, a whiteout), SLEET, a
+crisp SUNNY day, the AURORA on clear nights. SPRING (Mar-May): DRIZZLE, RAIN (puddles that drops
+ring, the bots' umbrellas up), a THUNDERSTORM (bolts, flashes, the bots flinching at the thunder),
+a SUNSHOWER, WIND full of blossom petals, HAIL that bounces (an "ow"), SUNNY, a misty morning
+(the fog). SUMMER (Jun-Aug): SUNNY (a heat haze, the bots puffing), THUNDERSTORMS, a SUNSHOWER, a
+dry WIND (dust and a tumbleweed), FIREFLIES in the evening, a METEOR SHOWER at night (the most in
+August). AUTUMN (Sep-Nov): WIND full of falling leaves, DRIZZLE, RAIN, a THUNDERSTORM, HAIL, a
+foggy morning, SUNNY. After the rain, now and then, a RAINBOW. The game card's lane gets its clouds
+for the rain, the snow and the storms (dark for a storm, pale for snow). Achievements: STORM
+CHASER (a thunderstorm, a blizzard and hail) and STARGAZER (the aurora, a meteor shower and
+fireflies). The dev page's WEATHER brings it OFTEN, in a chosen season, or one kind to stay; the
+BOT SANDBOX has a button for each.
+
+A button's tick (and buzz) comes on a successful tap, released on it, not
 on a touch that slides off. The buttons are one size in every mode and font, their words centered; a word that
 won't fit on a button shrinks, never under 10px. Through the game the font never changes a
 button's size or moves the HUD, the board or its buttons.
