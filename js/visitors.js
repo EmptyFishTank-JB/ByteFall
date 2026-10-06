@@ -504,6 +504,8 @@ function createVisitors(api) {
       poke(v);
     });
     api.lane.insertBefore(el, api.lane.firstChild); // (behind the bots; bats and crows go on top, style.css)
+    const kk = KINDS[kind];
+    if (kk && (kk.bird || kk.fly || kind === 'crow')) setAlt(v, Math.floor(Math.random() * 3)); // (its depth among the clouds)
     list.push(v);
     place(v);
     return v;
@@ -518,6 +520,7 @@ function createVisitors(api) {
   function visit(what = pick(visits().length ? visits() : VISITS.halloween)) {
     if (what === 'countdown') return countdown();
     if (what === 'fog') return startFog();
+    if (what === 'overcast') return startClouds();
     // (OCTOBER: the HAUNTED FOREST and what happens in it; the dev page brings each any time)
     if (what === 'forest') return forest();
     if (what === 'eyes') return forest() && eyesIn();
@@ -658,6 +661,7 @@ function createVisitors(api) {
     if (haunted) {
       hauntedForest = true;
       fog.nextEyes = now + rand(6000, 14000);
+      if (Math.random() < 0.75) startClouds(true); // (and a sky to match, most of the time)
     }
     if (!instant) api.botEvent(haunted ? 'visit-forest' : 'visit-fog');
     const W = api.laneW();
@@ -911,6 +915,136 @@ function createVisitors(api) {
     if (fog.moon) fog.moon.remove();
     fog.trees.forEach((t) => { t.gone = true; });
     fog = null;
+  }
+  // THE OVERCAST (OCTOBER and NOVEMBER, now and then; over the HAUNTED FOREST most of the time it
+  // stands; the game card's lane): three layers of pixel cloud across the sky, rolling in from one
+  // side. The far one darkest and slowest, the near one lightest, quickest and patchiest; each
+  // drawn in masses with lit tops and dark undersides, so their stacking and thickness show where
+  // they overlap. The birds and bats fly at one of three depths among them (behind the middle
+  // layer, between, or in front of them all) and now and then climb or dip a layer, so they fly in
+  // and out of the cloud. In OCTOBER it's purple-grey, and lightning flickers inside it now and
+  // then, lighting it from within. After a few minutes it lifts (over the forest it stays).
+  const CLOUD_ODDS = 0.25; // (each OCTOBER or NOVEMBER visit that comes due: the overcast instead)
+  const CLOUD_TONES = {
+    spooky: [[30, 24, 40], [50, 40, 64], [76, 63, 94]],
+    grey: [[42, 45, 51], [62, 66, 73], [88, 92, 100]],
+  };
+  let clouds = null;
+  const cloudLane = () => api.lane.classList.contains('game-walkers');
+  const cloudSeason = () => typeof Season !== 'undefined' && (Season.is('halloween') || Season.is('november'));
+  function startClouds(stays = false) {
+    if (clouds || !cloudLane()) return clouds;
+    const now = performance.now();
+    const el = (cls) => {
+      const e = document.createElement(cls.startsWith('cloud-layer') ? 'canvas' : 'div');
+      e.className = cls;
+      e.setAttribute('aria-hidden', 'true');
+      api.lane.appendChild(e);
+      return e;
+    };
+    clouds = {
+      phase: 'in', at: now, front: 0, level: 0, dir: Math.random() < 0.5 ? 1 : -1, t: rand(0, 200), drawn: 0, stays, spooky: spooky(),
+      dark: el('cloud-dark'), flash: el('cloud-flash'), layers: [0, 1, 2].map((i) => el(`cloud-layer cloud-${i}`)),
+      until: now + rand(150000, 260000), nextFlash: now + rand(5000, 12000),
+    };
+    for (const v of list) if (v.alt !== undefined) setAlt(v, v.alt); // (the flyers already up: among them)
+    api.botEvent('visit-overcast');
+    return clouds;
+  }
+  function endClouds() {
+    clouds.layers.forEach((c) => c.remove());
+    clouds.dark.remove();
+    clouds.flash.remove();
+    api.lane.classList.remove('lightning');
+    clouds = null;
+  }
+  function cloudsFrame(now) {
+    const c = clouds;
+    const age = now - c.at;
+    if (c.phase === 'in') {
+      c.front = Math.min(1, age / 20000);
+      c.level = Math.min(1, age / 5000);
+      if (c.front >= 1) { c.phase = 'stand'; c.at = now; }
+    } else if (c.phase === 'stand') {
+      if (c.stays && !(fog && fog.haunted)) { c.stays = false; c.until = now + rand(60000, 120000); } // (the forest gone: it lifts in a while)
+      if (!c.stays && now > c.until) { c.phase = 'lift'; c.at = now; }
+    } else if (c.phase === 'lift') {
+      c.level = 1 - Math.min(1, age / 12000);
+      if (age > 12000) { endClouds(); return; }
+    }
+    c.dark.style.opacity = (c.level * Math.min(1, c.front * 1.5)).toFixed(2);
+    if (c.spooky && c.phase === 'stand' && now > c.nextFlash) { // (lightning, deep in the cloud: a flicker and a second)
+      c.nextFlash = now + rand(7000, 20000);
+      c.flash.style.left = `${rand(5, 65).toFixed(0)}%`;
+      const on = (ms, off) => setTimeout(() => { api.lane.classList.add('lightning'); setTimeout(() => api.lane.classList.remove('lightning'), off); }, ms);
+      on(0, 90);
+      on(170, 60);
+      if (Math.random() < 0.5) on(420, 110);
+    }
+    const low = document.documentElement.classList.contains('low-fx');
+    if (now - c.drawn < (low ? 240 : 120)) return;
+    c.t += (now - (c.drawn || now)) / 1000;
+    c.drawn = now;
+    c.layers.forEach((cv, i) => drawClouds(cv, c, i, low));
+  }
+  function drawClouds(cv, c, i, low) {
+    const cell = low ? 6 : 4;
+    const W = cv.clientWidth;
+    const H = cv.clientHeight;
+    if (!W || !H) return;
+    const cw = Math.ceil(W / cell);
+    const ch = Math.ceil(H / cell);
+    if (cv.width !== cw || cv.height !== ch) { cv.width = cw; cv.height = ch; }
+    const tone = CLOUD_TONES[c.spooky ? 'spooky' : 'grey'][i];
+    const drift = [0.05, 0.1, 0.17][i] * c.t * c.dir;
+    const seed = [3, 47, 91][i];
+    const sx = cell / [70, 56, 44][i];
+    const sy = cell / [20, 17, 14][i];
+    const yc = [0.32, 0.48, 0.62][i]; // (the far layer higher up, the near one lower)
+    const hb = [0.36, 0.3, 0.26][i];
+    const thr = [0.44, 0.5, 0.56][i]; // (the near one patchier: broken masses with sky between)
+    const dens = new Float32Array(cw * ch);
+    const top = Math.max(1, ch * 0.18);
+    for (let y = 0; y < ch; y++) {
+      for (let x = 0; x < cw; x++) {
+        // (each mass its own height: the band rising and falling along the sky; fading out at the
+        // very top, so no hard edge under the grid)
+        const lift = 0.16 * (noise(x * sx * 0.35 - drift * 0.5 + seed * 2, seed) - 0.5);
+        const v = (y / ch - yc - lift) / hb;
+        const env = Math.max(0, 1 - v * v) * Math.min(1, y / top);
+        if (!env) continue;
+        const px = c.dir > 0 ? x / cw : 1 - x / cw;
+        const edge = Math.max(0, Math.min(1, (c.front * 1.3 - px) * 4)); // (rolling in)
+        if (!edge) continue;
+        const n = 0.62 * noise(x * sx - drift + seed, y * sy + seed) + 0.38 * noise(x * sx * 2.2 - drift * 1.6 + seed, y * sy * 2.2 + seed);
+        dens[y * cw + x] = (n * env * 1.25 - thr) * c.level * edge;
+      }
+    }
+    const ctx = cv.getContext('2d');
+    const img = ctx.createImageData(cw, ch);
+    const opa = [0.96, 0.9, 0.78][i];
+    for (let y = 0; y < ch; y++) {
+      for (let x = 0; x < cw; x++) {
+        const d = dens[y * cw + x];
+        if (d <= 0) continue;
+        const a = Math.ceil(Math.min(1, d * 5) * 4) / 4; // (in steps: a pixel cloud, not a blur)
+        const up = y > 1 ? dens[(y - 2) * cw + x] : 0;
+        const dn = y < ch - 2 ? dens[(y + 2) * cw + x] : 0;
+        const shade = up < d * 0.45 ? 1.4 : dn < d * 0.45 ? 0.72 : 1; // (lit on top, dark underneath: its thickness)
+        const k = (y * cw + x) * 4;
+        img.data[k] = Math.min(255, Math.round(tone[0] * shade));
+        img.data[k + 1] = Math.min(255, Math.round(tone[1] * shade));
+        img.data[k + 2] = Math.min(255, Math.round(tone[2] * shade));
+        img.data[k + 3] = Math.round(255 * a * opa);
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+  // (a flyer's depth among the clouds: 0 behind the middle layer, 1 between, 2 in front of them all)
+  function setAlt(v, alt) {
+    v.el.classList.remove('v-alt-0', 'v-alt-1', 'v-alt-2');
+    v.alt = alt;
+    v.el.classList.add(`v-alt-${alt}`);
   }
   function forestVisit() {
     const r = Math.random();
@@ -2296,6 +2430,7 @@ function createVisitors(api) {
     const W = api.laneW();
     if (!fog && hauntedForest && spooky()) startFog(true); // (the HAUNTED FOREST stands, all month)
     if (fog) fogFrame(now);
+    if (clouds) cloudsFrame(now);
     if (lights) lightsFrame(now);
     hordeTick(now);
     if (!foggy() && !lights && !list.some((v) => v.state !== 'scenery' && v.state !== 'fogtree') && now > nextVisit) {
@@ -2304,6 +2439,7 @@ function createVisitors(api) {
       if (virusOften() || Math.random() < VIRUS_ODDS) visit('virus');
       else if (fog && fog.haunted && fog.phase === 'light' && Math.random() < 0.4) forestVisit();
       else if (!fog && (fogOften() || ((Season.is('november') || Season.is('halloween')) && Math.random() < (spooky() && !hauntedForest ? FOREST_FIRST_ODDS : FOG_ODDS)))) startFog();
+      else if (!clouds && cloudLane() && cloudSeason() && Math.random() < CLOUD_ODDS) startClouds();
       else if (visits().length) visit();
       nextVisit = now + (virusOften() ? rand(3000, 6000) : rand(20000, 45000));
     }
@@ -2319,6 +2455,10 @@ function createVisitors(api) {
     for (const v of list) {
       const k = KINDS[v.kind];
       v.age += dt * 1000;
+      if (clouds && v.alt !== undefined && v.y > 20 && now > (v.altAt || 0)) { // (in the air: now and then up or down a layer, through the cloud)
+        v.altAt = now + rand(1800, 4500);
+        if (Math.random() < 0.45) setAlt(v, Math.max(0, Math.min(2, v.alt + (Math.random() < 0.5 ? -1 : 1))));
+      }
       if (k.frameMs && !v.still && v.state !== 'slide' && now - v.frameAt > (v.state === 'peck' ? 160 : k.frameMs)) {
         v.frameAt = now;
         v.frame = 1 - v.frame;
@@ -2519,6 +2659,7 @@ function createVisitors(api) {
   function clear(forget = false) {
     if (forget) hauntedForest = false;
     horde = null;
+    if (clouds) endClouds();
     if (fog) { fog.back.remove(); fog.fore.remove(); fog.dark.remove(); if (fog.moon) fog.moon.remove(); fog = null; }
     if (lights) { lights.dark.remove(); lights.eyes.forEach((e) => e.remove()); if (lights.red) lights.red.remove(); lights = null; }
     api.lane.querySelectorAll('.moon-sky, .night-dark').forEach((e) => e.remove());

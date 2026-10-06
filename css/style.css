@@ -3709,3 +3709,21 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
 :root.low-fx [data-theme="season-halloween"] .crt, :root.low-fx[data-theme="season-halloween"] .crt { animation: none; }
 /* SEASONAL's button: the full width, under the two columns of themes */
 .theme-list .theme-seasonal { grid-column: 1 / -1; }
+/* THE OVERCAST (visitors.js): three cloud layers over the game card's lane, the sky dimmed under
+   them; the flyers at their depths among them (v-alt-0 behind the middle layer, 1 between, 2 in
+   front); lightning lighting the cloud from within (OCTOBER) */
+.game-walkers .cloud-layer { position: absolute; left: 0; right: 0; top: 0; width: 100%; height: 64%; image-rendering: pixelated; pointer-events: none; transition: filter 0.06s linear; }
+.game-walkers .cloud-0 { z-index: -1; }
+.game-walkers .cloud-1 { z-index: 1; }
+.game-walkers .cloud-2 { z-index: 3; }
+.game-walkers .cloud-dark { position: absolute; left: 0; right: 0; top: 0; height: 75%; z-index: -4; pointer-events: none; opacity: 0;
+  background: linear-gradient(to bottom, rgba(4, 2, 8, 0.7), rgba(4, 2, 8, 0.35) 55%, transparent); }
+.game-walkers .cloud-flash { position: absolute; top: 0; width: 45%; height: 60%; z-index: -1; pointer-events: none; opacity: 0;
+  background: radial-gradient(ellipse at center, rgba(225, 205, 255, 0.85), rgba(170, 130, 255, 0.25) 45%, transparent 70%); }
+.game-walkers.lightning .cloud-flash { opacity: 1; }
+.game-walkers.lightning .cloud-layer { filter: brightness(1.9) saturate(0.8); }
+:is(.start-walkers, .game-walkers) .visitor.v-alt-0 { z-index: 0; }
+:is(.start-walkers, .game-walkers) .visitor.v-alt-1 { z-index: 2; }
+:is(.start-walkers, .game-walkers) .visitor.v-alt-2 { z-index: 4; }
+[data-theme="paper"] .game-walkers :is(.cloud-layer, .cloud-dark, .cloud-flash) { display: none; } /* (the light theme keeps its card) */
+@media (prefers-reduced-motion: reduce) { .game-walkers.lightning .cloud-layer { filter: none; } .game-walkers.lightning .cloud-flash { opacity: 0.3; } }

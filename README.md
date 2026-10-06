@@ -373,7 +373,14 @@ HOLLOW's both ways). October also brings the HEADLESS HORSEMAN (a black horse at
 cloaked rider holding up a flaming jack o' lantern; HAHAHA, and poked, every bot near it jumps) and
 ZOMBIE HORDES (three to seven, shuffling in, out of the trees in the forest, some clawing up out of
 the ground; now and then they all break into the THRILLER for four bars, on the music's beat, then
-shuffle on). A button's tick (and buzz) comes on a successful tap, released on it, not
+shuffle on). THE OVERCAST (OCTOBER and NOVEMBER, now and then, and over the
+HAUNTED FOREST most of the time it stands): three layers of pixel cloud roll in across the game
+card's sky, the far one darkest and slowest, the near one lightest and patchiest, each in masses
+with lit tops and dark undersides, so you see them stack and how thick they are; the birds and bats
+fly at one of three depths among them (behind the middle layer, between, or in front) and now and
+then climb or dip a layer, flying in and out of the cloud. October's is purple-grey with lightning
+flickering inside it, lighting it from within; November's is plain grey. It lifts after a few
+minutes (over the forest, it stays). A button's tick (and buzz) comes on a successful tap, released on it, not
 on a touch that slides off. The buttons are one size in every mode and font, their words centered; a word that
 won't fit on a button shrinks, never under 10px. Through the game the font never changes a
 button's size or moves the HUD, the board or its buttons.
