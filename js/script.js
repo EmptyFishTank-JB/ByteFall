@@ -2136,7 +2136,7 @@ let armed = null; // { btn, label, timer }
 function disarmReset() {
   if (!armed) return;
   clearTimeout(armed.timer);
-  if (!armed.icon) armed.btn.textContent = armed.label;
+  if (!armed.icon) armed.btn.innerHTML = armed.label; // (its markup and all: a DAILY card's lines)
   armed.btn.classList.remove('danger');
   armed = null;
 }
@@ -2145,7 +2145,7 @@ function armReset(btn, confirmText) {
   disarmReset();
   // Icon buttons (RESTART, QUIT) keep their icon and turn red to ask instead
   const icon = btn.classList.contains('corner-btn');
-  armed = { btn, icon, label: btn.textContent, timer: setTimeout(disarmReset, RESET_CONFIRM_MS) };
+  armed = { btn, icon, label: btn.innerHTML, timer: setTimeout(disarmReset, RESET_CONFIRM_MS) };
   if (!icon) btn.textContent = confirmText;
   btn.classList.add('danger');
   SFX.play('alert');
@@ -2349,6 +2349,46 @@ function showVsGoal() {
   document.getElementById('vs-goal-up').disabled = vsMode === 'classic' || now >= range.max;
 }
 
+// DAILY's setup: today's date, the streak and the time to the next set over a card for each game,
+// DECRYPT, PUZZLE, BLITZ, BREACH: its rules in a line and how today stands (the official run still
+// to play, its score, or the puzzle's tries); a tap picks it, PLAY plays it
+const DAILY_CARD = {
+  decrypt: { name: 'DECRYPT', rule: () => `The same ${DAILY_BITS} bits for everyone.` },
+  puzzle: { name: 'PUZZLE', rule: () => `The ${WEEKDAYS[utcWeekday()]} puzzle: difficulty ${utcWeekday() + 1}/7, ${DAILY_PUZZLE_TRIES} tries.` },
+  blitz: { name: 'BLITZ', rule: () => `${DAILY_BLITZ_SECONDS} seconds, the same bits for everyone.` },
+  breach: { name: 'BREACH', rule: () => `Break a ${BREACH_ROWS}-row firewall with ${BREACH_BITS} bits.` },
+};
+function dailyStatus(kind) {
+  if (kind === 'puzzle') {
+    const at = dailyPuzzleSolvedAt();
+    const used = dailyPuzzleTries();
+    if (at) return { done: true, text: `SOLVED ON TRY ${at}/${DAILY_PUZZLE_TRIES}` };
+    if (used >= DAILY_PUZZLE_TRIES) return { done: true, text: `NOT SOLVED // ${DAILY_PUZZLE_TRIES}/${DAILY_PUZZLE_TRIES} TRIES USED` };
+    return { done: false, text: used ? `${DAILY_PUZZLE_TRIES - used} OF ${DAILY_PUZZLE_TRIES} TRIES LEFT` : `${DAILY_PUZZLE_TRIES} TRIES TODAY` };
+  }
+  if (storage.get(dailyPlayedKey(kind))) return { done: true, text: `OFFICIAL ${fmt(Number(storage.get(dailyKey(kind))) || 0)} // PRACTICE` };
+  return { done: false, text: 'OFFICIAL RUN READY' };
+}
+// (to the next UTC midnight, when the dailies turn over)
+function dailyTurnover() {
+  const now = new Date();
+  const next = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1);
+  const mins = Math.max(1, Math.ceil((next - now) / 60000));
+  return mins >= 60 ? `${Math.floor(mins / 60)}H ${mins % 60}M` : `${mins}M`;
+}
+const dailyHeader = () => `${todayKey()} (UTC) // STREAK ${fmt(Progress.dailyStreak())} // NEW IN ${dailyTurnover()}. The first run of each is official; the rest are practice.`;
+function renderDailyCards() {
+  document.querySelectorAll('#daily-kinds button').forEach((btn) => {
+    if (armed && armed.btn === btn) return; // (asking to confirm: left as it is)
+    const kind = btn.dataset.daily;
+    const st = dailyStatus(kind);
+    btn.classList.toggle('active', kind === dailyKind);
+    btn.classList.toggle('done', st.done);
+    btn.innerHTML = `<span class="dc-name">${DAILY_CARD[kind].name}</span><span class="dc-rule">${DAILY_CARD[kind].rule()}</span><span class="dc-status">${st.done ? '\u2713 ' : ''}${st.text}</span>`;
+    btn.setAttribute('aria-pressed', String(kind === dailyKind));
+  });
+}
+setInterval(() => { if (homeOpen && daily) { renderDailyCards(); applyModeUi(); } }, 30000); // (the countdown)
 // DAILY's games: DECRYPT, PUZZLE, BLITZ, BREACH
 document.querySelectorAll('#daily-kinds button').forEach((btn) => {
   btn.addEventListener('click', () => {
@@ -2390,11 +2430,10 @@ function applyModeUi() {
   document.querySelectorAll('.modes button').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.mode === topMode && mode !== 'tutorial');
   });
-  document.querySelectorAll('#daily-kinds button').forEach((btn) => {
-    btn.classList.toggle('active', btn.dataset.daily === dailyKind);
-  });
-  // (on the menu's panel, under the mode's name: without the name it starts with)
-  document.getElementById('mode-info').textContent = MODES[mode].info(todayKey()).replace(/^[A-Z ]+ \/\/ (.)/, (_, c) => c.toUpperCase());
+  renderDailyCards();
+  // (on the menu's panel, under the mode's name: without the name it starts with; DAILY's: the day,
+  // the streak and the turnover, over its cards)
+  document.getElementById('mode-info').textContent = daily ? dailyHeader() : MODES[mode].info(todayKey()).replace(/^[A-Z ]+ \/\/ (.)/, (_, c) => c.toUpperCase());
   document.getElementById('game-mode-label').textContent = `// ${modeLine()}`;
   document.getElementById('difficulty-row').hidden = mode !== 'classic';
   document.getElementById('daily-kinds').hidden = !daily;
@@ -3201,8 +3240,8 @@ function modeLine() {
 }
 function updateHome() {
   document.getElementById('home-mode-name').textContent = `// ${daily ? 'DAILY' : MODES[mode].label}`;
-  // BEST: the mode's best (DAILY: today's official score, once it's played)
-  const key = mode === 'vs' || mode === 'tutorial' || mode === 'puzzle' ? null : daily ? dailyKey() : bestKey();
+  // BEST: the mode's best (not for DAILY: its cards show today's official scores)
+  const key = mode === 'vs' || mode === 'tutorial' || mode === 'puzzle' || daily ? null : bestKey(); // (DAILY: each card says how today stands)
   const kept = key ? storage.get(key) : null;
   document.getElementById('home-best').innerHTML = !key || (daily && kept == null) ? ''
     : `${daily ? 'TODAY' : 'BEST'} <b>${fmt(Number(kept) || 0)}</b>`;
@@ -3227,6 +3266,7 @@ function showHome() {
   homeOpen = true;
   homeEl.hidden = false;
   updateHome();
+  if (daily) { renderDailyCards(); applyModeUi(); } // (how today stands, after a game)
   updateTopIcons();
   lockButtons(); // (the menu's buttons, now they can be measured)
 }

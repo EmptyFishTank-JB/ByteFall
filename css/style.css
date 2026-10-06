@@ -3409,3 +3409,17 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
    little above the lane, behind the grid's card, so the fade wraps around its sides) */
 :is(.start-walkers, .game-walkers) .lights-out { -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 70px); mask-image: linear-gradient(to bottom, transparent 0, #000 70px); }
 .game-walkers .lights-out { top: -36px; }
+
+/* DAILY's setup on the menu's panel: a card for each of today's games (its name, rules and how today stands);
+   the one picked lit, the ones whose official run is done ticked and dimmer */
+.daily-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; }
+.daily-cards[hidden] { display: none; }
+.daily-cards button { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; padding: 8px 9px; text-align: left;
+  font-family: inherit; color: var(--fg); background: rgba(var(--fg-rgb), 0.04); border: 1px solid var(--grid-line); border-radius: 5px; cursor: pointer; }
+.daily-cards .dc-name { font-size: 13px; letter-spacing: 2px; }
+.daily-cards .dc-rule { font-size: 10px; line-height: 1.35; color: var(--panel-text); letter-spacing: 0.3px; }
+.daily-cards .dc-status { margin-top: auto; padding-top: 2px; font-size: 9.5px; letter-spacing: 0.5px; color: var(--accent); }
+.daily-cards button.done .dc-status { color: var(--fg-dim); }
+.daily-cards button.active { border-color: var(--fg); background: rgba(var(--fg-rgb), 0.14); box-shadow: 0 0 10px rgba(var(--fg-rgb), 0.3); }
+.daily-cards button.active .dc-name { color: var(--fg); text-shadow: 0 0 6px rgba(var(--fg-rgb), 0.6); }
+.daily-cards button.danger { border-color: var(--danger); color: var(--danger); justify-content: center; align-items: center; letter-spacing: 2px; }
