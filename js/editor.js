@@ -37,8 +37,9 @@
   // SETTINGS' footer: EDIT LAYOUT turns it on (and closes SETTINGS, to the game under it)
   const openBtn = document.getElementById('edit-layout-btn');
   if (openBtn) openBtn.addEventListener('click', () => { if (typeof setSettingsOpen === 'function') setSettingsOpen(false); window.LayoutEditor.open(); });
-  window.LayoutEditor = { open: () => { store.set(ON_KEY, 'on'); build(); ui.hidden = false; } };
+  window.LayoutEditor = { open: () => { store.set(ON_KEY, 'on'); build(); ui.hidden = false; }, pick: (el) => pick(el) };
 
+  const grips = [];
   let ui; let overlay; let picked = null; let scope = 'this'; let selecting = true; let undo = [];
 
   // Classes that come and go with a piece's state, left out of the selectors an edit is saved under
@@ -87,6 +88,7 @@
     snapshot();
     delete edits[sel][prop];
     if (prop === 'z-index') delete edits[sel].position;
+    if (prop === 'width' || prop === 'height') for (const k of UNCAP[prop]) delete edits[sel][k];
     if (!Object.keys(edits[sel]).length) delete edits[sel];
     save();
     refresh();
@@ -266,6 +268,10 @@
 .ed-box.locked { border-color: #9aa; border-style: dashed; }
 .ed-tag.locked { background: #9aa; }
 .ed-drag { touch-action: none !important; cursor: grab; }
+.ed-grab { position: fixed; z-index: 100001; width: 28px; height: 28px; margin: -14px 0 0 -14px; touch-action: none; display: flex; align-items: center; justify-content: center; }
+.ed-grab::before { content: ''; width: 12px; height: 12px; background: var(--accent, #fd6); border: 2px solid #000; border-radius: 2px; }
+.ed-grab[data-g="r"] { cursor: ew-resize; } .ed-grab[data-g="b"] { cursor: ns-resize; } .ed-grab[data-g="rb"] { cursor: nwse-resize; }
+.ed-grab[hidden] { display: none; }
 .ed-overlay { position: fixed; inset: 0; z-index: 99999; pointer-events: none; }
 .ed-box { position: fixed; border: 2px solid var(--accent, #fd6); box-shadow: 0 0 0 1px #000; }
 .ed-parent { position: fixed; border: 1px dashed rgba(var(--fg-rgb, 57,255,143), 0.7); }
@@ -278,6 +284,37 @@
     overlay = document.createElement('div');
     overlay.className = 'ed-ui ed-overlay';
     document.body.appendChild(overlay);
+    // GRIPS on the picked piece's right edge, foot and corner: drag one to size it (uncapped)
+    for (const g of ['r', 'b', 'rb']) {
+      const h = document.createElement('div');
+      h.className = 'ed-ui ed-grab';
+      h.dataset.g = g;
+      h.hidden = true;
+      document.body.appendChild(h);
+      grips.push(h);
+      h.addEventListener('pointerdown', (e) => {
+        if (!picked || isLocked(picked)) return;
+        e.preventDefault();
+        e.stopPropagation();
+        h.setPointerCapture(e.pointerId);
+        const cs = getComputedStyle(picked);
+        const w0 = parseFloat(cs.width);
+        const h0 = parseFloat(cs.height);
+        const x0 = e.clientX;
+        const y0 = e.clientY;
+        snapshot();
+        const move = (ev) => {
+          if (g.includes('r')) sizeInto('width', `${Math.max(0, Math.round(w0 + ev.clientX - x0))}px`);
+          if (g.includes('b')) sizeInto('height', `${Math.max(0, Math.round(h0 + ev.clientY - y0))}px`);
+          writeSheet();
+          drawOverlay();
+        };
+        const end = () => { h.removeEventListener('pointermove', move); h.removeEventListener('pointerup', end); h.removeEventListener('pointercancel', end); save(); refresh(); };
+        h.addEventListener('pointermove', move);
+        h.addEventListener('pointerup', end);
+        h.addEventListener('pointercancel', end);
+      });
+    }
 
 
     ui = document.createElement('div');
@@ -398,9 +435,34 @@
     if (a === 'exit') { store.set(ON_KEY, 'off'); ui.hidden = true; picked = null; overlay.innerHTML = ''; }
   }
 
+  // A width or height, uncapped: whatever caps it in the game's own CSS (a max or min, or a row's
+  // stretching or squeezing) is lifted with it, so it can go past its default either way
+  const UNCAP = { width: ['max-width', 'min-width', 'flex-grow', 'flex-shrink', 'flex-basis'], height: ['max-height', 'min-height', 'flex-grow', 'flex-shrink', 'flex-basis'] };
+  function setSize(prop, value) {
+    if (isLocked(picked)) return;
+    snapshot();
+    sizeInto(prop, value);
+    save();
+    refresh();
+  }
+  function sizeInto(prop, value) {
+    const sel = selOf(picked);
+    const e = (edits[sel] = edits[sel] || {});
+    e[prop] = value;
+    if (value === 'auto') { for (const k of UNCAP[prop]) delete e[k]; } else {
+      e[`max-${prop}`] = 'none';
+      e[`min-${prop}`] = '0';
+      const p = picked.parentElement && getComputedStyle(picked.parentElement);
+      const across = p && /flex/.test(p.display) && (prop === 'width') === !/column/.test(p.flexDirection);
+      if (across) { e['flex-grow'] = '0'; e['flex-shrink'] = '0'; e['flex-basis'] = 'auto'; }
+      // (a column's height: lifted the same way)
+      if (p && /flex/.test(p.display) && prop === 'height' && /column/.test(p.flexDirection)) { e['flex-grow'] = '0'; e['flex-shrink'] = '0'; e['flex-basis'] = 'auto'; }
+    }
+  }
   // A number: px, but LAYER a plain number, and a piece laid out in place gets position: relative
   // (a layer only takes in a positioned piece, or one in a row or column)
   function setNum(prop, v) {
+    if (prop === 'width' || prop === 'height') { setSize(prop, `${v}px`); return; }
     if (prop !== 'z-index') { setProp(prop, `${v}px`); return; }
     const sel = selOf(picked);
     snapshot();
@@ -489,7 +551,7 @@
     if (!b) return;
     const d = parseFloat(b.dataset.d);
     if (b.dataset.step) { const v = current(b.dataset.step); setNum(b.dataset.step, round((Number.isFinite(v) ? v : 0) + d)); }
-    if (b.dataset.auto) setProp(b.dataset.auto, 'auto');
+    if (b.dataset.auto) setSize(b.dataset.auto, 'auto');
     if (b.dataset.set) { if (b.dataset.v === '' && b.dataset.set === 'display') clearProp('display'); else setProp(b.dataset.set, b.dataset.v); }
     if (b.dataset.clear) clearProp(b.dataset.clear);
     if (b.dataset.gap) setGap(b.dataset.gap, round(gap(picked, b.dataset.gap).d + d));
@@ -528,8 +590,14 @@
   // The picked piece outlined with its size, its parent dashed, and the space to what's beside it
   function drawOverlay() {
     if (!overlay) return;
-    if (!picked || !picked.isConnected || ui.hidden) { overlay.innerHTML = ''; return; }
+    const off = !picked || !picked.isConnected || ui.hidden;
+    for (const g of grips) g.hidden = off || isLocked(picked);
+    if (off) { overlay.innerHTML = ''; return; }
     const r = picked.getBoundingClientRect();
+    for (const g of grips) {
+      g.style.left = `${g.dataset.g === 'b' ? r.left + r.width / 2 : r.right}px`;
+      g.style.top = `${g.dataset.g === 'r' ? r.top + r.height / 2 : r.bottom}px`;
+    }
     let h = '';
     const box = (q, cls) => `<div class="${cls}" style="left:${q.left}px;top:${q.top}px;width:${q.width}px;height:${q.height}px"></div>`;
     if (picked.parentElement) h += box(picked.parentElement.getBoundingClientRect(), 'ed-parent');

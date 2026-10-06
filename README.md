@@ -68,7 +68,10 @@ with **✎ EDIT LAYOUT** at the foot of SETTINGS (or `?edit` in the address); it
   **▲ PARENT** and **▼ INSIDE** pick the piece around it or inside it.
 - **Drag** a picked piece to move it (a nudge, the space to what's beside it shown as it goes; a
   tap still picks). **LOCK** freezes a piece: no dragging or editing it (grey dashed outline) until
-  UNLOCK; locks are kept on the device. **CLEAR** unpicks.
+  UNLOCK; locks are kept on the device. **CLEAR** unpicks. **Grips** (small squares on the picked piece's right
+  edge, foot and corner) drag its width, height or both. Sizes are uncapped: a width or height set
+  by a grip, a typed number or +/− lifts whatever held the piece to its default (its max or min
+  size, a row stretching or squeezing it), so it can go past it either way; AUTO or ↺ gives it back.
 - **THIS ONE** or **ALL LIKE IT**: an edit goes to just this piece, or to every piece of its kind in
   that part of the game (all six mode buttons, every STORE description); the top line shows the
   selector and how many it covers.
