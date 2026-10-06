@@ -653,7 +653,7 @@ function createVisitors(api) {
   }
   function drawGround(c) {
     const P = U; // (the bots' own pixel)
-    const below = 6; // (the lane's foot to the card's)
+    const below = laneBelow(); // (the lane's foot to the card's)
     const hPx = below + FLOOR + 6 * P;
     const W = api.laneW();
     const cw = Math.ceil(W / P);
@@ -719,6 +719,13 @@ function createVisitors(api) {
   }
   // The big trees' layer: over the lane, its box the lane's, cut off at the sides as the lane is
   // but open below (the lane cuts off at its floor, for what comes up through it)
+  // (from the lane's foot to the card's inside edge: 6px on the game card, more on the start screen)
+  function laneBelow() {
+    const card = api.lane.offsetParent;
+    if (!card) return 6;
+    const cs = getComputedStyle(card);
+    return Math.max(0, Math.round(card.getBoundingClientRect().bottom - (parseFloat(cs.borderBottomWidth) || 0) - api.lane.getBoundingClientRect().bottom));
+  }
   function foreLayer() {
     let f = api.lane.nextElementSibling;
     if (!f || !f.classList.contains('lane-fore')) {
@@ -731,6 +738,7 @@ function createVisitors(api) {
         // (from the card's top down to the lane's foot: the canopies have room above, and the layer
         // clips what's sunk below the card, so it never makes the page scroll)
         Object.assign(f.style, { left: `${l.offsetLeft}px`, top: '0px', width: `${l.offsetWidth}px`, height: `${l.offsetTop + l.offsetHeight}px` });
+        f.style.setProperty('--below', `${laneBelow()}px`); // (down to the card's edge, wherever the lane stops)
       };
       sync();
       window.addEventListener('resize', sync);

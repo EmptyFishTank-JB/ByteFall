@@ -239,7 +239,10 @@ const SFX = (() => {
   const THEMES = [
     { id: 'terminal', name: 'TERMINAL', desc: 'The keyboard: clicks, keys, static and an 8-bit crunch.' },
     { id: 'handshake', name: 'HANDSHAKE', desc: 'A handheld game console, as in the HANDSHAKE track: pulse-wave blips, a wave-channel thud and noise-channel crunch.', unlock: 'track-10', track: 'HANDSHAKE' },
+    { id: 'haunted', name: 'HAUNTED', desc: 'October\'s: creaks and knocks, a cold wind, a music box, glass chimes and a church bell, in A harmonic minor.' },
   ];
+  // (the SEASONAL theme's audio, while it's on: the season's set over the one picked)
+  let seasonalSet = null;
   const THEME_KEY = 'bytefall-sfx-theme';
   let themeId = 'terminal';
   try { if (THEMES.some((t) => t.id === localStorage.getItem(THEME_KEY))) themeId = localStorage.getItem(THEME_KEY); } catch (e) {}
@@ -357,8 +360,65 @@ const SFX = (() => {
       sq(c, t, m, 0.09, 0.1, 50, m - 24);
     },
   };
-  const SETS = { terminal: sounds, handshake };
+  // HAUNTED (OCTOBER; the SEASONAL theme's): wood and wind, a music box and bells, in A harmonic minor
+  const tone = (c, t, f, type, vol, a, d, to = null) => {
+    const o = c.createOscillator();
+    o.type = type;
+    o.frequency.setValueAtTime(f, t);
+    if (to) o.frequency.exponentialRampToValueAtTime(to, t + a + d);
+    const g = c.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(VOL * vol, t + a);
+    g.gain.exponentialRampToValueAtTime(0.0005, t + a + d);
+    g.connect(dest(c));
+    o.connect(g);
+    o.start(t); o.stop(t + a + d + 0.05);
+  };
+  const air = (c, t, dur, vol, type, f0, f1, q = 1) => { // (filtered noise, its pitch swept)
+    const src = noiseBuffer(c, dur, (i, n) => Math.sin((Math.PI * i) / n));
+    const flt = filter(c, type, f0, q);
+    flt.frequency.exponentialRampToValueAtTime(f1, t + dur);
+    src.connect(flt); flt.connect(envelope(c, VOL * vol, t, dur));
+    src.start(t); src.stop(t + dur);
+  };
+  const bellTone = (c, t, m, vol) => { // (struck: the tone and its inharmonic ring)
+    tone(c, t, midi(m), 'sine', vol, 0.002, 1.6);
+    tone(c, t, midi(m) * 2.4, 'sine', vol * 0.4, 0.002, 1.0);
+    tone(c, t, midi(m) * 3.9, 'sine', vol * 0.2, 0.002, 0.6);
+  };
+  const HARMONIC = [81, 83, 84, 86, 88, 89, 92, 93]; // (A harmonic minor, high)
+  const haunted = {
+    // (the cursor: a dry wooden tick)
+    click(c) { const t = c.currentTime; air(c, t, 0.03, 0.8, 'bandpass', 1100, 700, 4); tone(c, t, 240, 'sine', 0.3, 0.001, 0.04); },
+    // (a button: a hollow knock)
+    button(c) { const t = c.currentTime; tone(c, t, 190, 'sine', 0.9, 0.002, 0.09, 120); air(c, t, 0.02, 0.5, 'bandpass', 1800, 1200, 3); },
+    // (a layer showing, a hint: a cold glass ping, a tritone over it)
+    punct(c) { const t = c.currentTime; tone(c, t, 1320, 'sine', 0.35, 0.002, 0.5); tone(c, t + 0.02, 1320 * 1.414, 'sine', 0.12, 0.002, 0.4); },
+    // (a bit landing: a low thud and a creak)
+    enter(c) { const t = c.currentTime; tone(c, t, 95, 'sine', 1.2, 0.003, 0.2, 52); tone(c, t + 0.02, 150, 'sawtooth', 0.12, 0.01, 0.12, 118); },
+    // (a layer cracked, an undo: a scrape)
+    backspace(c) { air(c, c.currentTime, 0.14, 1, 'bandpass', 2600, 500, 2); },
+    // (a screen changing: a gust of cold wind)
+    static(c) { const t = c.currentTime; air(c, t, 0.45, 1.6, 'bandpass', 320, 1400, 3); air(c, t + 0.12, 0.35, 0.8, 'bandpass', 1400, 400, 4); },
+    // (a warning: the church bell tolls twice)
+    alert(c) { const t = c.currentTime; bellTone(c, t, 55, 0.9); bellTone(c, t + 0.5, 55, 0.7); },
+    // (no: a dissonant organ chord, cut short)
+    denied(c) { const t = c.currentTime; [110, 116.5, 155.6].forEach((f) => tone(c, t, f, 'triangle', 0.45, 0.01, 0.28)); },
+    // (a chain, a reward: the music box, up the harmonic minor)
+    egg(c) { const t = c.currentTime; [69, 72, 76, 80, 81].forEach((m, i) => { tone(c, t + i * 0.07, midi(m + 12), 'sine', 0.5, 0.002, 0.5); tone(c, t + i * 0.07, midi(m + 12) * 4.02, 'sine', 0.08, 0.002, 0.12); }); },
+    // (a bit decrypting: a ghostly whoosh and a glass chime, a different note each time: a chain
+    // plays an eerie little tune)
+    burst(c) {
+      const t = c.currentTime;
+      air(c, t, 0.22, 0.9, 'bandpass', 1800, 500, 3);
+      const m = HARMONIC[Math.floor(Math.random() * HARMONIC.length)];
+      tone(c, t, midi(m), 'sine', 0.3, 0.002, 0.45);
+      tone(c, t, midi(m) * 2.76, 'sine', 0.08, 0.002, 0.25);
+    },
+  };
+  const SETS = { terminal: sounds, handshake, haunted };
   const current = () => {
+    if (seasonalSet && SETS[seasonalSet]) return SETS[seasonalSet];
     const t = THEMES.find((x) => x.id === themeId);
     return t && themeOpen(t) ? SETS[themeId] : sounds;
   };
@@ -459,6 +519,9 @@ const SFX = (() => {
     // (the sound themes: every one, whether it's open, the one picked)
     themes: () => THEMES.map((t) => ({ ...t, open: themeOpen(t) })),
     theme: () => themeId,
+    // (the SEASONAL theme's audio: a set over the picked one, or null)
+    setSeasonal(id) { seasonalSet = id || null; },
+    seasonal: () => seasonalSet,
     setTheme(id) {
       if (!THEMES.some((t) => t.id === id)) return;
       themeId = id;

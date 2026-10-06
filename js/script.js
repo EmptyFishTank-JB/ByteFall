@@ -3841,6 +3841,7 @@ function applyTheme() {
     render();
     updateHud();
   }
+  if (window.seasonalAudioReady) applySeasonalAudio(); // (the SEASONAL theme's music and sounds)
   themeNoteEl.textContent = `${shown.label}: ${shown.id === 'seasonal' ? `changes with the time of year. Now ${season.desc}` : shown.desc}`;
 
   themeListEl.innerHTML = '';
@@ -4070,7 +4071,8 @@ const sfxThemeNote = document.getElementById('sfx-theme-note');
 function updateSfxThemeBtn() {
   const all = SFX.themes();
   const cur = all.find((t) => t.id === SFX.theme() && t.open) || all[0];
-  sfxThemeBtn.textContent = `SOUND EFFECTS: ${cur.name}`;
+  const over = SFX.seasonal() && all.find((t) => t.id === SFX.seasonal());
+  sfxThemeBtn.textContent = over ? `SOUND EFFECTS: ${over.name} (SEASONAL)` : `SOUND EFFECTS: ${cur.name}`;
   const locked = all.filter((t) => !t.open).map((t) => `${t.name} opens with the ${t.track} track (LV ${Progress.unlock(t.unlock).goal})`);
   sfxThemeNote.textContent = `${cur.desc}${locked.length ? ` ${locked.join('; ')}.` : ''}`;
 }
@@ -4083,6 +4085,49 @@ sfxThemeBtn.addEventListener('click', () => {
   SFX.play('egg');
 });
 updateSfxThemeBtn();
+
+// GENERATED MUSIC's seed: the SONG OF THE DAY (the same for everyone that day) or RANDOM (a new song
+// each time it starts)
+const genSeedBtn = document.getElementById('gen-seed-btn');
+const genSeedNote = document.getElementById('gen-seed-note');
+function updateGenSeedBtn() {
+  const day = Music.genMode() === 'day';
+  genSeedBtn.textContent = `GENERATED MUSIC: ${day ? 'SONG OF THE DAY' : 'RANDOM'}`;
+  genSeedNote.textContent = `The GENERATED // SEASONAL track writes itself in the season's style. ${day ? 'SONG OF THE DAY: a new song each day, the same for everyone that day.' : 'RANDOM: a new song every time it starts.'}`;
+}
+genSeedBtn.addEventListener('click', () => {
+  Music.setGenMode(Music.genMode() === 'day' ? 'random' : 'day');
+  updateGenSeedBtn();
+});
+updateGenSeedBtn();
+// SEASONAL AUDIO: with the SEASONAL theme on, its music (GENERATED, in the season's style) and its
+// sound effects (October: HAUNTED); off, or another theme, the player's own come back
+const seasonalAudioBtn = document.getElementById('seasonal-audio-btn');
+let seasonalAudio = storage.get('bytefall-seasonal-audio') !== 'off';
+const SEASON_SFX = { halloween: 'haunted' };
+function applySeasonalAudio() {
+  const on = seasonalAudio && themeId === 'seasonal';
+  const sfx = on ? Object.keys(SEASON_SFX).find((id) => Season.is(id)) : null;
+  SFX.setSeasonal(sfx ? SEASON_SFX[sfx] : null);
+  if (on && Music.currentTrack() !== 'generated') {
+    storage.set('bytefall-pre-seasonal-track', Music.currentTrack());
+    Music.useTrack('generated');
+  } else if (!on && Music.currentTrack() === 'generated' && storage.get('bytefall-pre-seasonal-track')) {
+    Music.useTrack(storage.get('bytefall-pre-seasonal-track'));
+    storage.set('bytefall-pre-seasonal-track', '');
+  }
+  seasonalAudioBtn.textContent = `SEASONAL AUDIO: ${seasonalAudio ? 'ON' : 'OFF'}`;
+  seasonalAudioBtn.classList.toggle('on', seasonalAudio);
+  updateSfxThemeBtn();
+  renderPlaylist();
+}
+seasonalAudioBtn.addEventListener('click', () => {
+  seasonalAudio = !seasonalAudio;
+  storage.set('bytefall-seasonal-audio', seasonalAudio ? 'on' : 'off');
+  applySeasonalAudio();
+});
+window.seasonalAudioReady = true;
+applySeasonalAudio();
 
 function setSettingsOpen(open) {
   settingsEl.hidden = !open;

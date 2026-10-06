@@ -27,7 +27,34 @@ const Music = (() => {
     { id: 'core-dump', title: 'CORE DUMP', create: createCoreDump },
     { id: 'handshake', title: 'HANDSHAKE', create: createHandshake },
     { id: 'stack-overflow', title: 'STACK OVERFLOW', create: createStackOverflow },
+    // (music-generated.js: a new song from a seed, in the season's style; free)
+    { id: 'generated', title: 'GENERATED // SEASONAL', create: (c, o) => createGenerated(c, o, generatedOptions()), free: true },
   ];
+  // GENERATED's seed: the SONG OF THE DAY (the date's, the same for everyone that day) or RANDOM (a
+  // new song each time it starts); its season, the time of year's
+  const GEN_KEY = 'bytefall-gen-seed';
+  let genMode = (() => { try { return localStorage.getItem(GEN_KEY) === 'random' ? 'random' : 'day'; } catch (e) { return 'day'; } })();
+  function generatedSeason() {
+    const S = typeof Season !== 'undefined' ? Season : null;
+    if (!S) return 'default';
+    if (S.is('halloween')) return 'halloween';
+    if (S.is('november')) return 'harvest';
+    if (['winter', 'christmas', 'hanukkah', 'kwanzaa', 'nye', 'newyear'].some((id) => S.is(id))) return 'winter';
+    return 'default';
+  }
+  let lastGen = null;
+  function generatedOptions() {
+    const season = generatedSeason();
+    let seed;
+    if (genMode === 'day') {
+      const d = new Date();
+      const key = `${d.getUTCFullYear()}-${d.getUTCMonth() + 1}-${d.getUTCDate()}-${season}`;
+      seed = 2166136261;
+      for (let i = 0; i < key.length; i++) { seed ^= key.charCodeAt(i); seed = Math.imul(seed, 16777619) >>> 0; }
+    } else seed = Math.floor(Math.random() * 4294967295);
+    lastGen = { season, seed, mode: genMode };
+    return lastGen;
+  }
   let enabled = true;
   let backgroundPlay = false;
   let trackId = TRACKS[0].id; // the last track picked or played (saved), else track 01
@@ -222,6 +249,21 @@ const Music = (() => {
       need: t.free ? '' : Progress.unlock(unlockId(t)).need,
     })),
     currentTrack: () => trackId,
+    // GENERATED: its seed (SONG OF THE DAY or RANDOM; a new one starts the song again if it's on)
+    genMode: () => genMode,
+    setGenMode(m) {
+      genMode = m === 'random' ? 'random' : 'day';
+      try { localStorage.setItem(GEN_KEY, genMode); } catch (e) {}
+      if (timer && trackId === 'generated') this.play('generated');
+    },
+    genInfo: () => lastGen,
+    // A track for now, without starting the music if it's off (the SEASONAL theme's audio)
+    useTrack(id) {
+      const track = TRACKS.find((t) => t.id === id);
+      if (!track || isLocked(track) || id === trackId) return;
+      if (timer) this.play(id);
+      else setTrack(id);
+    },
     // The beat, for whatever moves to the music (the wandering bots' headphones): a quarter note's
     // length in seconds and how far into the current one the music is (0-1); null when silent
     // The drum hits as they're heard: { now (the audio clock, less the output's delay), hits: [{

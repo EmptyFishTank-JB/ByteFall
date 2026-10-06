@@ -939,6 +939,19 @@ SURPRISED, LOVE (red heart eyes), DIZZY and LAUGH. The small faces come from
 
 ## Music player
 
+**GENERATED // SEASONAL** (track 12, free; `js/music/music-generated.js`) writes itself: a new song
+from a seed, in the season's style. The seed picks the key, the tempo, a chord progression, a
+melody motif and its variations, the bass's walk, the arpeggio and the drums; the season picks the
+instruments and the harmony: OCTOBER, harmonic minor with a church organ, a music box, a theremin
+on the melody, a plucked bass, a timpani and a tolling bell; NOVEMBER, dorian, a reed organ,
+plucked strings and a soft flute; December, major, a choir pad, celesta, sleigh bells and struck
+bells; the rest of the year, a minor synth song. It's layered like the others, building with the
+stack. SETTINGS → GENERATED MUSIC: SONG OF THE DAY (the date's seed, the same song for everyone
+that day) or RANDOM (a new song each time it starts). SETTINGS → SEASONAL AUDIO (on by default):
+with the SEASONAL theme on, the music is GENERATED and the sound effects are the season's (October:
+HAUNTED, also a SOUND EFFECTS choice of its own: creaks and knocks, a cold wind, a music box, glass
+chimes and a church bell, in A harmonic minor); off, or another theme, your own come back.
+
 SETTINGS → **GAME MUSIC**: LAYERED (the default: the music builds with your stack, more layers
 coming in as the danger climbs) or FULL (every layer in the whole game long, as in the music
 player; STACK OVERFLOW then runs at its top speed). SETTINGS → PLAYLIST → **OPEN MUSIC PLAYER** opens the soundtrack on its own,

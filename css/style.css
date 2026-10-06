@@ -3747,3 +3747,4 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
    feet, down to the card's edge (the big trees' layer clips it to the card) */
 .lane-fore .forest-ground { position: absolute; left: 0; width: 100%; image-rendering: pixelated; pointer-events: none; opacity: 0; transition: opacity 3s ease-in; }
 .lane-fore { overflow: clip; overflow-clip-margin: 6px; } /* (nothing sunk below the card counts toward the page: no scrolling) */
+.lane-fore { clip-path: inset(-400px 0 calc(-1 * var(--below, 6px)) 0 round 0 0 8px 8px); overflow-clip-margin: var(--below, 6px); } /* (down to the card's inside edge, wherever the lane stops) */
