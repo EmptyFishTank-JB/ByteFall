@@ -346,29 +346,6 @@ function createVisitors(api) {
     el.innerHTML = `<svg viewBox="0 0 ${d.w} ${d.h}" width="${d.w * px}" height="${d.h * px}" shape-rendering="crispEdges" aria-hidden="true">${groups}</svg><span class="walker-emote"></span>`;
     return el;
   }
-  function artShow(v, name, i) {
-    const key = `${name}${i}`;
-    if (v.artShown === key) return;
-    const svg = v.el.querySelector('svg');
-    svg.querySelector(`.art-${v.artShown || `${ART[v.kind].anims[0]}0`}`).style.display = 'none';
-    svg.querySelector(`.art-${key}`).style.display = 'inline';
-    v.artShown = key;
-  }
-  // (an animation played from when it started: the frame showing at that time, the last one held)
-  function artPlay(v, name, t0, now, speed = 1) {
-    const frames = ART[v.kind][name];
-    let t = (now - t0) * speed;
-    let i = 0;
-    while (i < frames.length - 1 && t >= frames[i].ms) { t -= frames[i].ms; i++; }
-    artShow(v, name, i);
-  }
-  // (a looping walk stepped on by time: every ms, the next frame)
-  function artStep(v, now, ms) {
-    if (now - (v.frameAt || 0) < ms) return;
-    v.frameAt = now;
-    v.frame = ((v.frame || 0) + 1) % ART[v.kind].walk.length;
-    artShow(v, 'walk', v.frame);
-  }
   function spriteEl(kind, pal) {
     if (ART[kind]) return artEl(kind);
     const def = { ...SPRITES[kind], ...(pal ? { pal: { ...SPRITES[kind].pal, ...pal } } : {}) };

@@ -3096,6 +3096,9 @@ html.pixel-mode .walker.skater.walking[data-look="left"] .bot { transform: none;
 }
 .booster-chip.on { border-style: solid; border-color: var(--accent); color: var(--accent); box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.4); }
 .booster-chip.get { border-style: solid; border-color: var(--fg-dim); color: var(--fg); }
+.booster-chip.reserve-slot { border-style: solid; } /* (a side slot: what goes in it, or EMPTY) */
+.booster-chip.reserve-slot:disabled { opacity: 0.55; cursor: default; }
+.booster-break { flex-basis: 100%; height: 0; } /* (the slots on one line, the exploits owned below) */
 /* PUZZLE: HINT and UNDO under the drop buttons, and the column HINT lights */
 .puzzle-tools { display: flex; justify-content: center; gap: 8px; margin-top: 6px; }
 .puzzle-tools[hidden] { display: none; }

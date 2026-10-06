@@ -223,8 +223,9 @@ const BOOSTERS = {
 };
 window.BOOSTERS = BOOSTERS;
 // THE SIDE SLOTS, one each side of the exploit button (CLASSIC, BLITZ and ZEN; not DAILY, PUZZLE,
-// VS or the tutorial). RESERVE EXPLOITS (bought in the STORE with KEYS, Progress keeps them): up to
-// 2 taken into a game (picked on the main menu), one in each slot; a tap arms it as the next drop,
+// VS or the tutorial). RESERVE EXPLOITS (bought in the STORE with KEYS, Progress keeps them): 2
+// taken into a game (picked on the main menu: two of one kind, or one each of two), one in each
+// slot, each used once; a tap arms it as the next drop,
 // as an earned one, and it's used up (the ones not used stay owned). A slot with no reserve in it,
 // or whose reserve is used, is the BLACK MARKET: a random exploit (of the ones unlocked by level)
 // and its price in KEYS (the STORE's), changing every MARKET_EVERY drops. A tap shows the price, a
@@ -993,10 +994,6 @@ const ICON_SVG = {
 };
 const iconHtml = (id) => ICON_SVG[id] || HACKS[id].icon;
 const UPDOWN_SVG = ICON_SVG.bitflip;
-
-function pieceLabel(piece) {
-  return piece.type === 'hack' ? `[${HACKS[piece.id].icon}]` : `[${piece.val}]`;
-}
 
 // A bit in a HUD square: its number (or glyph); an exploit shows its icon
 function showPiece(el, piece) {
@@ -3997,14 +3994,15 @@ function refreshBoosterRow() {
   }
 }
 
-// The main menu's RESERVES: every reserve exploit owned (and unlocked), each a switch to take it
-// into the next game, up to 3; none owned, a way to the STORE
+// The main menu's RESERVES: the two side slots, what goes in each (a tap on a filled one empties
+// it), and every reserve exploit owned (and unlocked), how many, and how many are going in: a tap
+// puts one in the next empty slot (two of one kind, if there are two). None owned: a way to the STORE
 function refreshReserveRow() {
   const row = document.getElementById('reserve-row');
   if (!row) return;
   row.hidden = !reserveFits() || mode === 'tutorial';
   if (row.hidden) return;
-  row.innerHTML = `<span class="booster-title">RESERVE EXPLOITS (UP TO ${RESERVE_MAX} A GAME, ONE EACH SIDE OF THE EXPLOIT BUTTON)</span>`;
+  row.innerHTML = `<span class="booster-title">RESERVE EXPLOITS (${RESERVE_MAX} SLOTS, ONE EACH SIDE OF THE EXPLOIT BUTTON, EACH USED ONCE A GAME)</span>`;
   const owned = Progress.exploitOrder().filter((id) => Progress.reserves(id) > 0 && Progress.exploitInfo(id).unlocked);
   if (!owned.length) {
     const b = document.createElement('button');
@@ -4016,21 +4014,37 @@ function refreshReserveRow() {
     return;
   }
   const taken = Progress.reservesTaken();
+  const changed = (ids) => {
+    Progress.setReservesTaken(ids);
+    // (a game not yet under way takes them now; one under way, from the next game)
+    if (!started && !gameOver && !busy && !inAGame()) initGame();
+    refreshReserveRow();
+  };
+  for (let i = 0; i < RESERVE_MAX; i++) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = `booster-chip reserve-slot${taken[i] ? ' on' : ''}`;
+    b.textContent = `${i ? 'RIGHT' : 'LEFT'}: ${taken[i] ? HACKS[taken[i]].name : 'EMPTY'}`;
+    b.setAttribute('aria-label', taken[i] ? `${i ? 'Right' : 'Left'} slot: ${HACKS[taken[i]].name}. Tap to take it out` : `${i ? 'Right' : 'Left'} slot: empty`);
+    if (taken[i]) b.addEventListener('click', () => changed(taken.filter((_, n) => n !== i)));
+    else b.disabled = true;
+    row.appendChild(b);
+  }
+  const brk = document.createElement('span');
+  brk.className = 'booster-break';
+  row.appendChild(brk);
   for (const id of owned) {
     const b = document.createElement('button');
     b.type = 'button';
-    const on = taken.includes(id);
-    b.className = `booster-chip${on ? ' on' : ''}`;
-    b.textContent = `${HACKS[id].name} \u00d7${Progress.reserves(id)}`;
-    b.setAttribute('aria-pressed', String(on));
+    const inGame = taken.filter((x) => x === id).length;
+    b.className = `booster-chip${inGame ? ' on' : ''}`;
+    b.textContent = `${HACKS[id].name} \u00d7${Progress.reserves(id)}${inGame ? ` (${inGame} IN)` : ''}`;
+    b.setAttribute('aria-pressed', String(inGame > 0));
     b.addEventListener('click', () => {
       const now = Progress.reservesTaken();
-      if (now.includes(id)) Progress.setReservesTaken(now.filter((x) => x !== id));
-      else if (now.length >= RESERVE_MAX) { SFX.play('denied'); return; }
-      else Progress.setReservesTaken([...now, id]);
-      // (a game not yet under way takes them now; one under way, from the next game)
-      if (!started && !gameOver && !busy && !inAGame()) initGame();
-      refreshReserveRow();
+      // (both slots full, or every one of these already in: no room for another)
+      if (now.length >= RESERVE_MAX || now.filter((x) => x === id).length >= Progress.reserves(id)) { SFX.play('denied'); return; }
+      changed([...now, id]);
     });
     row.appendChild(b);
   }

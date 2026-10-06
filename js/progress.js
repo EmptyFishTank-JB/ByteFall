@@ -96,7 +96,7 @@ const Progress = (() => {
     boosters: {}, // booster id -> how many owned
     reserves: {}, // RESERVE EXPLOITS: exploit id -> how many owned
     puzzlePaid: {}, // puzzle key -> the day a solve of it last paid XP and KEYS (a replay pays once a day)
-    reservesTaken: [], // the (up to 3) the player takes into each game
+    reservesTaken: [], // the 2 the player takes into each game (one a side slot; two of one kind, or one each of two)
   });
 
   let d = fresh();
@@ -853,7 +853,8 @@ const Progress = (() => {
       return true;
     },
     // RESERVE EXPLOITS: bought with KEYS (the price by how late the exploit unlocks), taken into a
-    // game (up to 3: reservesTaken), each used once there, then gone
+    // game (2, one in each side slot: reservesTaken, two of one kind or one each of two), each used
+    // once there, then gone
     reservePrice: (id) => [25, 35, 45][Math.min(2, Math.floor(EXPLOIT_ORDER.indexOf(id) / 5))],
     reserves: (id) => d.reserves[id] || 0,
     addReserve(id, n = 1) { d.reserves[id] = (d.reserves[id] || 0) + n; save(); },
@@ -863,7 +864,17 @@ const Progress = (() => {
       save();
       return true;
     },
-    reservesTaken: () => (d.reservesTaken || []).filter((id) => d.reserves[id] > 0 && exploitInfo(id).unlocked).slice(0, 3),
-    setReservesTaken(ids) { d.reservesTaken = ids.slice(0, 3); save(); },
+    // (the picks still owned: an exploit taken twice needs two of it; at most 2)
+    reservesTaken: () => {
+      const left = {};
+      const out = [];
+      for (const id of d.reservesTaken || []) {
+        if (out.length >= 2 || !exploitInfo(id).unlocked) continue;
+        if (left[id] == null) left[id] = d.reserves[id] || 0;
+        if (left[id] > 0) { left[id]--; out.push(id); }
+      }
+      return out;
+    },
+    setReservesTaken(ids) { d.reservesTaken = ids.slice(0, 2); save(); },
   };
 })();

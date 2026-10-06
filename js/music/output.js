@@ -157,7 +157,6 @@ function createSoundOutput(ctx, id = 'headphones') {
 
 // The level (as a gain) a mix table gives a channel at an intensity: its four points in dB,
 // straight lines between
-const MIX_POINTS = [0, 1 / 3, 2 / 3, 1];
 function mixGain(points, intensity) {
   if (!points) return 1;
   const x = Math.max(0, Math.min(1, intensity)) * 3;
