@@ -3803,8 +3803,23 @@ const THEMES = [
   { id: 'paper', label: 'PAPER', desc: 'near-black ink and grey on pale paper with gold accents, for bright rooms and outdoors.' },
   { id: 'glyph', label: 'GLYPH', desc: 'bits become shapes with one corner per point: a teardrop is 1, a triangle 3, an octagon 8.' },
   { id: 'spectrum', label: 'SPECTRUM', desc: 'every bit cycles through the rainbow on its own while the page drifts slowly behind them.' },
+  { id: 'seasonal', label: 'SEASONAL', desc: '' }, // (free; its colors follow the time of year: seasonTheme)
 ];
-const themeAvailable = (t) => t.id === 'terminal' || Progress.isUnlocked(`theme-${t.id}`);
+// SEASONAL: the theme for the time of year (seasons.js): OCTOBER's orange, black and purple (with a
+// spooky flicker), NOVEMBER's harvest, December's holidays; the rest of the year, TERMINAL's colors
+const SEASON_THEMES = [
+  ['halloween', 'season-halloween', 'HALLOWEEN: pumpkin orange and witching purple on black, the card glowing between them and the title flickering now and then.'],
+  ['november', 'season-harvest', 'HARVEST: gold and rust on deep brown, for November.'],
+  ['christmas', 'season-winter', 'THE HOLIDAYS: evergreen and red on a winter night.'],
+  ['hanukkah', 'season-winter', 'THE HOLIDAYS: evergreen and red on a winter night.'],
+  ['winter', 'season-winter', 'THE HOLIDAYS: evergreen and red on a winter night.'],
+  ['newyear', 'season-winter', 'THE HOLIDAYS: evergreen and red on a winter night.'],
+];
+function seasonTheme() {
+  for (const [id, theme, desc] of SEASON_THEMES) if (typeof Season !== 'undefined' && Season.is(id)) return { theme, desc };
+  return { theme: null, desc: 'TERMINAL\'s colors for now: a holiday brings its own.' };
+}
+const themeAvailable = (t) => t.id === 'terminal' || t.id === 'seasonal' || Progress.isUnlocked(`theme-${t.id}`);
 const themeListEl = document.getElementById('theme-list');
 const themeNoteEl = document.getElementById('theme-note');
 const themeMeta = document.querySelector('meta[name="theme-color"]');
@@ -3816,15 +3831,17 @@ let themeFade = 0; // the timer that ends the page's fade to a newly picked them
 function applyTheme() {
   const theme = THEMES.find((t) => t.id === themeId);
   const shown = themeAvailable(theme) ? theme : THEMES[0];
-  if (shown.id === 'terminal') delete document.documentElement.dataset.theme;
-  else document.documentElement.dataset.theme = shown.id;
+  const season = seasonTheme();
+  const applied = shown.id === 'seasonal' ? season.theme : shown.id === 'terminal' ? null : shown.id;
+  if (!applied) delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = applied;
   themeMeta.content = getComputedStyle(document.documentElement).getPropertyValue('--bg-solid').trim();
   // GLYPH swaps the bits' markup, so redraw the board and HUD (once the game exists)
   if (columns.length) {
     render();
     updateHud();
   }
-  themeNoteEl.textContent = `${shown.label}: ${shown.desc}`;
+  themeNoteEl.textContent = `${shown.label}: ${shown.id === 'seasonal' ? `changes with the time of year. Now ${season.desc}` : shown.desc}`;
 
   themeListEl.innerHTML = '';
   for (const t of THEMES) {
@@ -3838,7 +3855,8 @@ function applyTheme() {
     btn.appendChild(name);
     const swatches = document.createElement('span');
     swatches.className = 'swatches';
-    swatches.dataset.theme = t.id;
+    swatches.dataset.theme = t.id === 'seasonal' ? (season.theme || 'terminal') : t.id;
+    if (t.id === 'seasonal') btn.classList.add('theme-seasonal'); // (the full width, under the others)
     swatches.innerHTML = '<i></i><i></i><i></i>';
     btn.appendChild(swatches);
     if (!themeAvailable(t)) {

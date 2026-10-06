@@ -3593,3 +3593,119 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
 /* The zombies' THRILLER (visitors.js): claws up to one side (z-c), then the other (z-d), on the beat */
 .visitor.z-c :is(.f-a, .f-b, .f-d), .visitor.z-d :is(.f-a, .f-b, .f-c) { display: none; }
 .visitor.z-c .f-c, .visitor.z-d .f-d { display: inline; }
+
+/* SEASONAL (script.js's seasonTheme): the theme for the time of year */
+[data-theme="season-halloween"] {
+  --bg: #0a0610;
+  --bg-solid: #050308;
+  --bg-center: #1a0f22;
+  --panel: #120a18;
+  --panel-text: #f3d9b8;
+  --popup-bg: #100818;
+  --overlay-bg: #0c0612;
+  --grid-line: #3a2346;
+  --board-bg: #0e0714;
+  --cell-bg: #160b1e;
+  --fg: #ff8c1a;
+  --fg-rgb: 255, 140, 26;
+  --fg-dim: #8c4f1a;
+  --accent: #b36bff;
+  --accent-rgb: 179, 107, 255;
+  --danger: #ff3b5c;
+  --danger-rgb: 255, 59, 92;
+  --layer-a: #2a1838;
+  --layer-b: #1a0f24;
+  --layer-border: #7d5a96;
+  --layer-text: #a88cbf;
+  --layer-rgb: 168, 140, 191;
+  --exploit-bg: #1c0f26;
+  --alarm-text: #ffffff;
+  --byte-text: #fff3e0;
+  --hot-rgb: 255, 140, 26;
+  --burst-hot-rgb: 255, 140, 26;
+  --heat-text: #ffb36b;
+  --heat-bg: #2e1405;
+  --heat-peak-border: #fff3e0;
+  --heat-peak-text: #fffaf2;
+  --heat-peak-bg: #5a2a08;
+}
+[data-theme="season-harvest"] {
+  --bg: #0d0804;
+  --bg-solid: #060402;
+  --bg-center: #20140a;
+  --panel: #160d06;
+  --panel-text: #f1dcbc;
+  --popup-bg: #140c05;
+  --overlay-bg: #0e0905;
+  --grid-line: #3c2814;
+  --board-bg: #120b04;
+  --cell-bg: #1a1007;
+  --fg: #e8a33d;
+  --fg-rgb: 232, 163, 61;
+  --fg-dim: #8a5f22;
+  --accent: #d0603a;
+  --accent-rgb: 208, 96, 58;
+  --danger: #ff3b5c;
+  --danger-rgb: 255, 59, 92;
+  --layer-a: #2b2016;
+  --layer-b: #1c140c;
+  --layer-border: #86684a;
+  --layer-text: #a88a6a;
+  --layer-rgb: 168, 138, 106;
+  --exploit-bg: #22140b;
+  --alarm-text: #ffffff;
+  --byte-text: #fff3e0;
+  --hot-rgb: 232, 163, 61;
+  --burst-hot-rgb: 232, 163, 61;
+  --heat-text: #f0c070;
+  --heat-bg: #2e1d08;
+  --heat-peak-border: #fff3e0;
+  --heat-peak-text: #fffaf2;
+  --heat-peak-bg: #5a3a0c;
+}
+[data-theme="season-winter"] {
+  --bg: #050a12;
+  --bg-solid: #03060b;
+  --bg-center: #0f1a2a;
+  --panel: #0a121e;
+  --panel-text: #e6eef8;
+  --popup-bg: #08101c;
+  --overlay-bg: #060c16;
+  --grid-line: #1f3046;
+  --board-bg: #08101a;
+  --cell-bg: #0c1624;
+  --fg: #4fd66f;
+  --fg-rgb: 79, 214, 111;
+  --fg-dim: #2f7a45;
+  --accent: #ff5a5a;
+  --accent-rgb: 255, 90, 90;
+  --danger: #ff3b5c;
+  --danger-rgb: 255, 59, 92;
+  --layer-a: #1e2a3a;
+  --layer-b: #141e2b;
+  --layer-border: #7a8ca3;
+  --layer-text: #9fb0c6;
+  --layer-rgb: 159, 176, 198;
+  --exploit-bg: #0f1d16;
+  --alarm-text: #ffffff;
+  --byte-text: #fff3e0;
+  --hot-rgb: 79, 214, 111;
+  --burst-hot-rgb: 79, 214, 111;
+  --heat-text: #9be8ae;
+  --heat-bg: #0f2a18;
+  --heat-peak-border: #fff3e0;
+  --heat-peak-text: #fffaf2;
+  --heat-peak-bg: #1c4a2a;
+}
+/* OCTOBER's spooky touches: the card's glow breathing between purple and orange, the title flickering now and then */
+[data-theme="season-halloween"] .crt { animation: spooky-glow 7s ease-in-out infinite; }
+@keyframes spooky-glow {
+  0%, 100% { box-shadow: 0 0 18px rgba(179, 107, 255, 0.28), inset 0 0 28px rgba(179, 107, 255, 0.08); }
+  50% { box-shadow: 0 0 26px rgba(255, 140, 26, 0.32), inset 0 0 36px rgba(255, 140, 26, 0.08); }
+}
+[data-theme="season-halloween"] :is(header h1, .home-head h1) { animation: spooky-flicker 9s steps(1) infinite; }
+@keyframes spooky-flicker { 0%, 90% { opacity: 1; } 91% { opacity: 0.35; } 92% { opacity: 1; } 95% { opacity: 0.6; } 96%, 100% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { [data-theme="season-halloween"] :is(.crt, header h1, .home-head h1) { animation: none; } }
+:root.low-fx [data-theme="season-halloween"] .crt, :root.low-fx[data-theme="season-halloween"] .crt { animation: none; }
+/* SEASONAL's button: the full width, under the two columns of themes */
+.theme-list .theme-seasonal { grid-column: 1 / -1; }

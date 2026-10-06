@@ -471,12 +471,15 @@ Themes (picked from the swatch grid in settings; a locked theme or font shows it
 | PAPER | near-black ink on paper | grey | dark amber (gold) | red |
 | GLYPH | shapes on blueprint blue | slate | amber | red |
 | SPECTRUM | each bit cycles the rainbow on its own | grey (still) | near-white (still) | cycles |
+| SEASONAL | the time of year's: OCTOBER pumpkin orange, NOVEMBER gold, December evergreen (TERMINAL's green the rest of the year) | OCTOBER witching purple, NOVEMBER brown, December slate | OCTOBER purple, NOVEMBER rust, December red | its season's |
 
 GLYPH draws each bit as a shape with one corner per point of its number (1 is
 a teardrop pointing up, 2 a lens, 3 a triangle... 8 an octagon), with a small
 number in the corner. SPECTRUM gives every bit its own random hue speed,
 direction and phase, slowly hue-rotates the rest of the page, and turns the
-background grid into dimmed rainbow blocks; it holds still under reduced motion.
+background grid into dimmed rainbow blocks; it holds still under reduced motion. SEASONAL (free, the
+full-width button under the other themes) follows the calendar: in OCTOBER the card's glow breathes
+between purple and orange and the title flickers now and then like a failing light.
 
 Every color in `css/style.css` is a named role in `:root`; a theme is a
 `[data-theme="…"]` block that overrides those values, plus an entry in
