@@ -3179,7 +3179,7 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 :root { --ts: 1; }
 :root.text-l { --ts: 1.15; --label-min: 8; }
 :root.text-xl { --ts: 1.3; --label-min: 9; }
-:root:is(.text-l, .text-xl) :is(.settings-note, .message, .tut-text, .tut-points, .overlay-box p, .records .menu-pane > .panel, .vs-setup-note) { zoom: var(--ts); }
+:root:is(.text-l, .text-xl) :is(.settings-note, .tut-text, .tut-points, .overlay-box p, .records .menu-pane > .panel) { zoom: var(--ts); }
 /* (the main menu's words scale inside their set boxes instead: see THE MAIN MENU stays put) */
 /* (positioned ones aren't zoomed, since zoom scales their place too and throws them off to the side: their text is
    scaled instead. The toasts are placed in pixels by placeToast(); the CPU's card is set inside its board) */
@@ -3459,10 +3459,10 @@ body.in-game.can-pause .records-btn svg { left: auto; right: 4px; } /* (hugging 
 .home-best { height: 15px; line-height: 15px; overflow: hidden; white-space: nowrap; font-size: calc(11px * var(--ts)); }
 /* BOOSTERS and STARTER EXPLOITS: each one line, its name then its switch */
 .home .booster-row { flex-wrap: nowrap; margin: 0; height: 24px; width: 100%; }
-.home .booster-row .booster-title { width: auto; flex: 0 0 auto; font-size: calc(9px * var(--ts)); letter-spacing: 1px; }
+.home .booster-row .booster-title { width: 74px; flex: 0 0 74px; height: 24px; line-height: 24px; overflow: hidden; white-space: nowrap; text-align: right; font-size: calc(9px * var(--ts)); letter-spacing: 1px; }
 .home .booster-chip { height: 24px; font-size: calc(10px * var(--ts)); min-width: 0; flex: 0 1 auto; }
 .home .booster-chip.booster-one { width: 120px; }
-.home .booster-chip.starter-slot { flex: 1 1 0; max-width: 118px; display: block; line-height: 22px; text-overflow: ellipsis; padding-left: 5px; padding-right: 5px; }
+.home .booster-chip.starter-slot { flex: 1 1 0; min-width: 0; max-width: 110px; display: block; line-height: 22px; text-overflow: ellipsis; padding-left: 5px; padding-right: 5px; }
 .home .booster-chip .ico { flex-shrink: 0; }
 /* DAILY's cards: set sizes, their words in em so they shrink together */
 .home .daily-cards button { height: 64px; overflow: hidden; font-size: calc(10px * var(--ts)); }
@@ -3472,3 +3472,14 @@ body.in-game.can-pause .records-btn svg { left: auto; right: 4px; } /* (hugging 
 /* (the menu's top lines too: one line each, a set height) */
 .home .level-bar { height: 16px; padding-top: 0; padding-bottom: 0; max-width: 100%; white-space: nowrap; overflow: hidden; }
 .home .wallet { height: 14px; overflow: hidden; }
+/* Set boxes across the game, not just the main menu: TEXT SIZE and the font change words, never a
+   button's size or where things sit. The cards' pages are zoomed for TEXT SIZE, but their buttons
+   are zoomed back to their own size; the message line and VS's notes are one size and their words
+   scale (and shrink to fit: script.js's fitText); BACK and TUTORIAL are wide enough for the widest
+   font */
+:root:is(.text-l, .text-xl) .records .menu-pane > .panel button:not(button button) { zoom: calc(1 / var(--ts)); }
+.message-slot .message { height: 18px; min-height: 0; line-height: 18px; white-space: nowrap; font-size: calc(14px * var(--ts)); }
+#vs-setup-note { height: 50px; overflow: hidden; font-size: calc(11px * var(--ts)); }
+#pause-note { height: 17px; line-height: 17px; overflow: hidden; white-space: nowrap; font-size: calc(11px * var(--ts)); }
+.card-back, :is(.records, .settings) .card-back { width: 88px; justify-content: center; }
+#tutorial-btn { width: 100px; text-align: center; }

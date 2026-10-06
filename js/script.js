@@ -1282,6 +1282,7 @@ function updateHud() {
 
 function setMessage(text, tone = '') {
   messageEl.textContent = text;
+  fitText(messageEl); // (its box is one size; a long one's words shrink)
   messageEl.classList.toggle('hidden', !text);
   messageEl.classList.remove('warn', 'alarm', 'byte');
   if (tone) messageEl.classList.add(tone);
@@ -2420,6 +2421,7 @@ function refreshVsPicks() {
     btn.classList.toggle('active', btn.dataset.vsmode === vsMode);
   });
   document.getElementById('vs-setup-note').textContent = VS_MODES[vsMode].note;
+  fitText(document.getElementById('vs-setup-note'));
   showVsGoal();
   lockButtons();
 }
@@ -3156,6 +3158,7 @@ function openPause() {
   vsPaused = true;
   vsPausedAt = performance.now();
   document.getElementById('pause-note').textContent = mode === 'vs' ? 'The CPU is waiting for you.' : 'The game is waiting for you.';
+  requestAnimationFrame(() => fitText(document.getElementById('pause-note')));
   document.getElementById('pause-exit').hidden = mode !== 'vs';
   // (the tutorial: no RESTART or MAIN MENU; its banner's EXIT leaves)
   for (const id of ['pause-restart', 'pause-menu']) document.getElementById(id).hidden = mode === 'tutorial';
@@ -3263,18 +3266,26 @@ function updateTopIcons() {
 function fitText(el, min = 7) {
   if (!el || el.hidden || !el.offsetParent) return;
   el.style.fontSize = '';
-  let size = parseFloat(getComputedStyle(el).fontSize);
-  while ((el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1) && size > min) {
+  const cs = getComputedStyle(el);
+  const room = el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  const words = document.createRange();
+  words.selectNodeContents(el);
+  // (the words' own width too: centered or right-aligned words spill out on the left, where the
+  // box's scroll width doesn't count them)
+  const over = () => el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1 || words.getBoundingClientRect().width > room + 1;
+  let size = parseFloat(cs.fontSize);
+  while (over() && size > min) {
     size -= 0.5;
     el.style.fontSize = `${size}px`;
   }
 }
 function fitHome() {
   if (homeEl.hidden) return;
-  const FIT = '#level-bar, .home .modes button, .home-row button, #home-play, #difficulty-row button, .home .booster-one, #mode-info, #home-best, #daily-kinds button, #home-mode-name';
+  const FIT = '#level-bar, .home .modes button, .home-row button, #home-play, #difficulty-row button, .home .booster-one, #mode-info, #home-best, #daily-kinds button, #home-mode-name, .home .booster-title';
   for (const el of homeEl.querySelectorAll(FIT)) fitText(el, el.id === 'mode-info' ? 7.5 : 8);
 }
-function refitHome() { requestAnimationFrame(fitHome); }
+// (and the game's other set boxes with words that change: the message line, VS's setup note)
+function refitHome() { requestAnimationFrame(() => { fitHome(); for (const id of ['message', 'vs-setup-note', 'pause-note']) fitText(document.getElementById(id)); }); }
 window.addEventListener('resize', refitHome);
 if (document.fonts) document.fonts.addEventListener('loadingdone', refitHome);
 function showHome() {
@@ -4307,6 +4318,7 @@ function refreshBoosterRow() {
   b.setAttribute('aria-label', `Boosters: ${on.length ? on.map((id) => BOOSTERS[id].name).join(', ') : 'none on'}. Tap to choose`);
   b.addEventListener('click', openBoosterPick);
   row.appendChild(b);
+  refitHome(); // (new words in set boxes)
 }
 
 // The main menu's STARTERS: the two side slots, LEFT and RIGHT, what's in each (or EMPTY). A tap on a
@@ -4389,6 +4401,7 @@ function refreshStarterRow() {
     b.addEventListener('click', () => openStarterPick(i));
     row.appendChild(b);
   }
+  refitHome(); // (new words in set boxes)
 }
 
 // SECOND CHANCE: the trace completes, but everything above the bottom 3 rows is wiped and the game

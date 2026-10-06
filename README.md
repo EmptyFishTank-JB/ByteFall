@@ -360,6 +360,10 @@ panel, the rows under it) is one size in every mode, font and TEXT SIZE. The pan
 screen has, up to its cap, whatever the mode puts in it; the mode's description takes what the
 panel's other parts leave. A larger TEXT SIZE or a wider font only changes the words, which shrink to
 fit their box when they must, and each button's words sit centered in it.
+The same holds through the game: TEXT SIZE and the font never change a button's size or move the
+HUD, the board or its buttons (the message line under the board and VS's setup notes are set boxes
+too, and the cards' pages scale their words for TEXT SIZE while their buttons keep their size). Only
+on the pages you scroll (RULES, the STORE, SETTINGS) does larger text push what's under it down.
 
 - **Add to Home Screen** (Chrome's menu on Android, Share on iPhone) installs
   ByteFall with its own icon, and it opens full screen like an app, without
