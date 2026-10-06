@@ -1,5 +1,5 @@
 // STORE: the MENU's fourth tab. The DAILY DROP to claim (script.js's dailyDrop), the BOOSTERS
-// bought with KEYS (script.js's BOOSTERS, Progress's wallet), RESERVE EXPLOITS and BLACK BOXES
+// bought with KEYS (script.js's BOOSTERS, Progress's wallet), STARTER EXPLOITS and BLACK BOXES
 // bought with KEYS and RESOURCES (ECONOMY.md), and two purchases: REMOVE ADS (no ads, nothing unlocked) and FULL
 // ACCESS (everything that unlocks by level, and no ads), plus RESTORE PURCHASES. A preview for
 // now: BUY and RESTORE say the store isn't open and charge nothing. The app will swap buy() and
@@ -28,8 +28,9 @@ const Store = (() => {
     const item = document.createElement('div');
     item.className = 'store-item booster-item';
     item.dataset.booster = id;
-    item.innerHTML = `<h3>${b.name} <span class="store-price">${b.cost} KEYS</span></h3><p>${b.desc}</p>`
-      + '<div class="booster-buy-row"><span class="booster-owned"></span><button type="button" class="store-buy">BUY</button></div>';
+    item.innerHTML = `<h3><span class="store-ico bracketed"><span class="ico-br">[</span>${BOOSTER_SVG[id] || ''}<span class="ico-br">]</span></span><span class="store-name">${b.name}</span></h3><p class="store-desc">${b.desc}</p>`
+      + '<div class="store-costs"></div>'
+      + `<div class="booster-buy-row"><span class="booster-owned"></span><button type="button" class="store-buy">${BUY_HTML()}</button></div>`;
     item.querySelector('.store-buy').addEventListener('click', () => {
       if (!Progress.spendKeys(b.cost)) {
         SFX.play('denied');
@@ -44,7 +45,7 @@ const Store = (() => {
     });
     shop.appendChild(item);
   }
-  // RESERVE EXPLOITS and BLACK BOXES: each with its icon, its price in KEYS and RESOURCES
+  // STARTER EXPLOITS and BLACK BOXES: each with its icon, its price in KEYS and RESOURCES
   // (Progress; ECONOMY.md), what's still short of it, how many are owned and BUY; an exploit short of
   // its price can take a MASTER KEY instead. The exploits in the order they unlock (the locked ones
   // show their level; BLACK BOX itself isn't sold); each BLACK BOX shows its odds
@@ -57,10 +58,10 @@ const Store = (() => {
     item.innerHTML = `<h3><span class="store-ico bracketed">${bracketIcon(id)}</span><span class="store-name">${itemName(id)}</span>`
       + `<span class="store-price">${box ? '' : `TIER ${Progress.tierOf(id) + 1}`}</span></h3>`
       + `<p class="store-desc">${itemDesc(id)}</p>`
-      + `<p class="store-cost">${priceHtml(Progress.price(id))}</p>`
+      + '<div class="store-costs"></div>'
       + (box ? `<p class="store-odds">TIER 1 EXPLOIT ${odds[0]}% // TIER 2 ${odds[1]}% // TIER 3 ${odds[2]}% // ANTI-EXPLOIT ${odds[3]}%</p>` : '')
       + '<p class="store-need"></p>'
-      + `<div class="booster-buy-row"><span class="booster-owned"></span>${box ? '' : '<button type="button" class="store-buy store-master" hidden>USE A MASTER KEY</button>'}<button type="button" class="store-buy store-pay">BUY</button></div>`;
+      + `<div class="booster-buy-row"><span class="booster-owned"></span>${box ? '' : '<button type="button" class="store-buy store-master" hidden>USE A MASTER KEY</button>'}<button type="button" class="store-buy store-pay">${BUY_HTML()}</button></div>`;
     const buy = (master) => {
       if (!box && !Progress.exploitInfo(id).unlocked) { SFX.play('denied'); return; }
       if (!Progress.payFor(id, master)) {
@@ -70,7 +71,7 @@ const Store = (() => {
       }
       Progress.addReserve(id);
       SFX.play('egg');
-      say(`BOUGHT // ${itemName(id)}${master ? ' WITH A MASTER KEY' : ''}: TAKE IT INTO A GAME FROM A RESERVE SLOT ON THE MAIN MENU`);
+      say(`BOUGHT // ${itemName(id)}${master ? ' WITH A MASTER KEY' : ''}: TAKE IT INTO A GAME FROM A STARTER SLOT ON THE MAIN MENU`);
       if (typeof showKeys === 'function') showKeys();
       if (typeof refreshReserveRow === 'function') refreshReserveRow();
       render();
@@ -98,6 +99,7 @@ const Store = (() => {
       const b = boosters[item.dataset.booster];
       const n = Progress.boosters(item.dataset.booster);
       item.querySelector('.booster-owned').textContent = n ? `OWNED \u00d7${n}` : '';
+      item.querySelector('.store-costs').innerHTML = costHtml({ keys: b.cost });
       item.querySelector('.store-buy').classList.toggle('short', keys < b.cost);
     });
     menu.querySelectorAll('.reserve-item').forEach((item) => {
@@ -108,7 +110,7 @@ const Store = (() => {
       const missing = Progress.missing(id);
       item.classList.toggle('locked', !info.unlocked);
       item.querySelector('.booster-owned').textContent = !info.unlocked ? `UNLOCKS AT LV ${info.level}` : n ? `OWNED \u00d7${n}` : '';
-      item.querySelector('.store-cost').innerHTML = priceHtml(Progress.price(id), info.unlocked); // (green: enough of it; red: short)
+      item.querySelector('.store-costs').innerHTML = costHtml(Progress.price(id)); // (have / cost: green, enough of it; red, short)
       item.querySelector('.store-need').textContent = info.unlocked && missing.length
         ? `NEED ${missing.map(([res, k]) => `${k} MORE ${RES_INFO[res].name}`).join(', ')}` : '';
       const btn = item.querySelector('.store-pay');

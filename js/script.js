@@ -224,9 +224,20 @@ const BOOSTERS = {
   hint: { name: 'HINT', cost: 10, desc: 'PUZZLE: lights the column the next bit goes in.', modes: ['puzzle'], inGame: true },
   undo: { name: 'UNDO', cost: 8, desc: 'PUZZLE: takes back your last drop, even after running out of bits.', modes: ['puzzle'], inGame: true },
 };
+// Each booster's own icon (in the STORE, in brackets, and on the main menu's booster buttons)
+const BOOSTER_SVG = {
+  'head-start': '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6l6 6-6 6M12 6l6 6-6 6"/></svg>', // (fast-forward: a running start)
+  'firewall-delay': '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3zM3 9.7h18M3 14.3h18M9 5v4.7M15 5v4.7M6 9.7v4.6M12 9.7v4.6M18 9.7v4.6M9 14.3V19M15 14.3V19"/></svg>', // (the wall, held back)
+  lookahead: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>', // (an eye)
+  overtime: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="13.5" r="7.5"/><path d="M9 3h4M11 3v3M11 10v3.5l2.2 2.2M19.5 3.5v5M17 6h5"/></svg>', // (a stopwatch, plus)
+  'second-chance': '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S3.5 15 3.5 9.2A4.4 4.4 0 0 1 12 7a4.4 4.4 0 0 1 8.5 2.2c0 1.6-.6 3.1-1.6 4.5"/><path d="M14 13.5a3.5 3.5 0 1 0 1-2.5M14.6 9.6V12H17"/></svg>', // (a heart, going round again)
+  hint: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/></svg>', // (a light bulb)
+  undo: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>', // (back a step)
+};
+
 window.BOOSTERS = BOOSTERS;
 // THE SIDE SLOTS, one each side of the exploit button (CLASSIC, BLITZ and ZEN; not DAILY, PUZZLE,
-// VS or the tutorial). RESERVE EXPLOITS and BLACK BOXES (bought in the STORE with KEYS and the
+// VS or the tutorial). STARTER EXPLOITS (the code's reserves) and BLACK BOXES (bought in the STORE with KEYS and the
 // RESOURCES, Progress keeps them; ECONOMY.md): 2 taken into a game (picked on the main menu: two
 // of one kind, or one each of two), one in each slot, each used once; a tap arms an exploit as the
 // next drop, as an earned one, and it's used up (the ones not used stay owned). A BLACK BOX waits
@@ -983,6 +994,12 @@ function buildColumnButtons() {
 
 function updateColumnButtons() {
   updateFreeBtn();
+  // (PIVOT's choice: the picked column and the two it can swap with light up the grid too, not only their buttons)
+  boardEl.querySelectorAll('.cell[data-pos]').forEach((cell) => {
+    const c = Number(cell.dataset.pos.split(',')[1]);
+    cell.classList.toggle('pivot-col-from', pivotFrom !== null && c === pivotFrom);
+    cell.classList.toggle('pivot-col-target', pivotFrom !== null && Math.abs(c - pivotFrom) === 1);
+  });
   if (dropCtlReady) applyDropControls(); // (the tutorial takes both)
   const buttons = columnButtonsEl.querySelectorAll('button');
   buttons.forEach((btn, c) => {
@@ -1051,6 +1068,11 @@ const ICON_SVG = {
   'black-box': '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14M12 17.5v.5"/></svg>',
 };
 const iconHtml = (id) => ICON_SVG[id] || HACKS[id].icon;
+// (the EXPLOITS menu's cards: each icon in brackets, [!], as in the STORE)
+document.querySelectorAll('.hack-item[data-hack]').forEach((el) => {
+  const icon = el.querySelector('h3 .icon');
+  if (icon && HACKS[el.dataset.hack]) icon.innerHTML = `<span class="ico-br">[</span>${iconHtml(el.dataset.hack)}<span class="ico-br">]</span>`;
+});
 const UPDOWN_SVG = ICON_SVG.bitflip;
 
 // A bit in a HUD square: its number (or glyph); an exploit shows its icon
@@ -2032,7 +2054,7 @@ function endGame(reason = 'trace') {
     note.hidden = false;
     note.textContent += ` // BOOSTED: ${[...runBoosts, ...(secondChanceUsed ? ['second-chance'] : [])].map((id) => BOOSTERS[id].name).join(', ')}`;
   }
-  if (usedReserves.length) note.textContent += ` // RESERVES: ${usedReserves.map(itemName).join(', ')}`; // (and one that used side slots)
+  if (usedReserves.length) note.textContent += ` // STARTERS: ${usedReserves.map(itemName).join(', ')}`; // (and one that used side slots)
   if (marketBought.length) {
     note.textContent += ` // BLACK MARKET: ${marketBought.map(itemName).join(', ')}`;
   }
@@ -4070,6 +4092,14 @@ const RES_INFO = {
 // country's, it marks what's for sale (the BLACK MARKET)
 const CURRENCY_SVG = '<svg class="cur-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5h9v9h-9zM5.5 5.5v5h5v-5z" fill="currentColor" fill-rule="evenodd"/><path d="M6 0.5h1.5v15H6zM8.5 0.5H10v15H8.5z" fill="currentColor"/></svg>';
 const resChip = (id, n) => `<span class="res-chip res-${id}" title="${RES_INFO[id].name}">${RES_INFO[id].svg}${n}</span>`;
+// A price as the BLACK MARKET (and the STORE) shows it: each resource's icon over what you have / what
+// it costs, green where you have enough and red where you're short
+const costHtml = (price) => ['keys', ...Progress.resIds()].filter((res) => price[res]).map((res) => {
+  const have = res === 'keys' ? Progress.keys() : Progress.res(res);
+  return `<div class="shop-cost res-${res}${have < price[res] ? ' short' : ' afford'}" title="${RES_INFO[res].name}">${RES_INFO[res].svg}<span>${fmt(have)}/${price[res]}</span></div>`;
+}).join('');
+// BUY, with the currency sign
+const BUY_HTML = () => `${CURRENCY_SVG} BUY`;
 // A price as chips: KEYS first, then the resources in their order
 // (checked: each amount green if you have enough of it, red if not)
 const priceHtml = (price, checked = false) => ['keys', ...Progress.resIds()].filter((id) => price[id]).map((id) => {
@@ -4138,7 +4168,7 @@ function refreshBoosterRow() {
     b.type = 'button';
     const on = armedBoosts.has(id);
     b.className = `booster-chip${on ? ' on' : ''}`;
-    b.textContent = `${BOOSTERS[id].name} \u00d7${Progress.boosters(id)}`;
+    b.innerHTML = `${BOOSTER_SVG[id] || ''} ${BOOSTERS[id].name} \u00d7${Progress.boosters(id)}`;
     b.title = BOOSTERS[id].desc;
     b.setAttribute('aria-pressed', String(on));
     b.addEventListener('click', () => {
@@ -4182,8 +4212,8 @@ function openReservePick(slot) {
   const owned = [...Progress.exploitOrder().filter((id) => Progress.reserves(id) > 0 && Progress.exploitInfo(id).unlocked),
     ...Progress.boxIds().filter((id) => Progress.reserves(id) > 0)];
   document.getElementById('reserve-pick-note').textContent = owned.length
-    ? 'Pick a reserve exploit or BLACK BOX for this side of the exploit button. It\'s used once in the game; the ones you don\'t use stay yours.'
-    : 'You don\'t have any reserve exploits yet.';
+    ? 'Pick a starter exploit or BLACK BOX for this side of the exploit button. It\'s used once in the game; the ones you don\'t use stay yours.'
+    : 'You don\'t have any starter exploits yet.';
   const list = document.getElementById('reserve-pick-list');
   list.textContent = '';
   for (const id of owned) {
@@ -4223,14 +4253,14 @@ function refreshReserveRow() {
   if (!row) return;
   row.hidden = !reserveFits() || mode === 'tutorial';
   if (row.hidden) return;
-  row.innerHTML = `<span class="booster-title">RESERVE EXPLOITS</span>`;
+  row.innerHTML = `<span class="booster-title">STARTER EXPLOITS</span>`;
   const taken = Progress.reservesTaken();
   for (let i = 0; i < RESERVE_MAX; i++) {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = `booster-chip reserve-slot${taken[i] ? ' on' : ''}`;
     b.textContent = `${i ? 'RIGHT' : 'LEFT'}: ${taken[i] ? itemName(taken[i]) : 'EMPTY'}`;
-    b.setAttribute('aria-label', `${i ? 'Right' : 'Left'} reserve slot: ${taken[i] ? itemName(taken[i]) : 'empty'}. Tap to choose`);
+    b.setAttribute('aria-label', `${i ? 'Right' : 'Left'} starter slot: ${taken[i] ? itemName(taken[i]) : 'empty'}. Tap to choose`);
     b.addEventListener('click', () => openReservePick(i));
     row.appendChild(b);
   }
@@ -4446,11 +4476,11 @@ function renderReserves() {
     b.classList.toggle('locked', market && !marketOpen); // (not open yet: the first layer hasn't risen)
     b.classList.toggle('short', short);
     b.innerHTML = `<span class="exploit-glyph">${itemIcon(sl.id)}</span>`
-      + (market ? `<span class="slot-sale" aria-hidden="true">${CURRENCY_SVG}</span>` : `<span class="reserve-tag">${sl.state === 'reserve' ? 'R' : '✓'}</span>`);
+      + (market ? `<span class="slot-sale" aria-hidden="true">${CURRENCY_SVG}</span>` : `<span class="reserve-tag">${sl.state === 'reserve' ? 'S' : '✓'}</span>`);
     const name = itemName(sl.id);
     b.title = market ? `BLACK MARKET // ${name}: ${priceText(price)} (${marketOpen ? 'tap to see it' : `opens in ${marketOpensIn()} drops`})`
-      : sealed ? `${sl.state === 'reserve' ? 'RESERVE' : 'BOUGHT'} // ${name}: tap to open it`
-        : `${sl.state === 'reserve' ? 'RESERVE' : sl.state === 'opened' ? 'BLACK BOX' : 'BOUGHT'} // ${name}: tap to arm it`;
+      : sealed ? `${sl.state === 'reserve' ? 'STARTER' : 'BOUGHT'} // ${name}: tap to open it`
+        : `${sl.state === 'reserve' ? 'STARTER' : sl.state === 'opened' ? 'BLACK BOX' : 'BOUGHT'} // ${name}: tap to arm it`;
     b.setAttribute('aria-label', b.title);
     if (!market && !sealed && armedHack) b.disabled = true;
   });
@@ -4499,19 +4529,18 @@ function openShop(i) {
   document.getElementById('shop-item').innerHTML = `<span class="shop-ico">${bracketIcon(id)}</span><span class="shop-name">${itemName(id)}</span>`
     + `<span class="shop-tier">${box ? `T1 ${odds[0]}% // T2 ${odds[1]}% // T3 ${odds[2]}% // ANTI ${odds[3]}%` : `TIER ${Progress.tierOf(id) + 1} EXPLOIT`}</span>`
     + `<span class="shop-desc">${itemDesc(id)}</span>`;
-  document.getElementById('shop-costs').innerHTML = ['keys', ...Progress.resIds()].filter((res) => price[res]).map((res) => {
-    const have = res === 'keys' ? Progress.keys() : Progress.res(res);
-    return `<div class="shop-cost res-${res}${have < price[res] ? ' short' : ' afford'}" title="${RES_INFO[res].name}">${RES_INFO[res].svg}<span>${fmt(have)}/${price[res]}</span></div>`;
-  }).join('');
+  document.getElementById('shop-costs').innerHTML = costHtml(price);
   const buy = document.getElementById('shop-buy');
   const opensIn = marketOpen ? 0 : marketOpensIn();
   buy.disabled = missing.length > 0 || !marketOpen;
-  buy.textContent = !marketOpen ? `OPENS IN ${opensIn} DROP${opensIn === 1 ? '' : 'S'}` : missing.length ? 'NOT ENOUGH' : 'BUY';
+  if (!marketOpen) buy.textContent = `OPENS IN ${opensIn} DROP${opensIn === 1 ? '' : 'S'}`;
+  else if (missing.length) buy.textContent = 'NOT ENOUGH';
+  else buy.innerHTML = BUY_HTML();
   const mk = document.getElementById('shop-master');
   mk.hidden = !master || !marketOpen;
   document.getElementById('shop-note').textContent = !marketOpen
     ? `THE BLACK MARKET OPENS WHEN THE FIRST ENCRYPTION ${MODES[mode].noLayers ? 'LAYER WOULD RISE' : 'LAYER RISES'}`
-    : missing.length ? `NEED ${missing.map(([res, n]) => `${n} MORE ${RES_INFO[res].name}`).join(', ')}` : 'BUY AS OFTEN AS YOU LIKE';
+    : missing.length ? `NEED ${missing.map(([res, n]) => `${n} MORE ${RES_INFO[res].name}`).join(', ')}` : '';
   document.getElementById('shop-sign').innerHTML = CURRENCY_SVG.repeat(3);
   shopEl.classList.remove('hidden');
   SFX.play('click');
@@ -4640,7 +4669,7 @@ function armExploit(slot = null) {
     if (sl.state === 'reserve') {
       if (!Progress.useReserve(sl.id)) return false;
       usedReserves.push(sl.id);
-      label = 'RESERVE';
+      label = 'STARTER';
     } else label = sl.state === 'opened' ? 'BLACK BOX' : 'BLACK MARKET';
     id = sl.id;
     slotSpent(sl, id); // (the slot opens to the market)

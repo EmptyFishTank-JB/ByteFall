@@ -631,6 +631,9 @@ body.vs-mode .vs-title span { color: var(--accent); text-shadow: 0 0 8px var(--a
   background: rgba(var(--accent-rgb), 0.15);
   animation: warn-pulse 1s ease-in-out infinite;
 }
+/* ...and their columns on the grid: the picked one outlined, the two it can swap with glowing and pulsing */
+.cell.pivot-col-from { box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.75); }
+.cell.pivot-col-target { box-shadow: inset 0 0 0 1px var(--accent), inset 0 0 10px rgba(var(--accent-rgb), 0.45), 0 0 6px rgba(var(--accent-rgb), 0.35); background-color: rgba(var(--accent-rgb), 0.08); animation: warn-pulse 1s ease-in-out infinite; }
 
 .column-buttons button:disabled {
   opacity: 0.25;
@@ -1347,7 +1350,8 @@ body.vs-mode header #mode-info { display: none; }
   color: var(--fg);
 }
 
-.hack-item .icon { display: inline-block; width: 1.2em; }
+.hack-item .icon { display: inline-flex; align-items: center; gap: 1px; min-width: 2.6em; margin-right: 4px; color: var(--accent); }
+.hack-item .icon .ico-br { color: var(--fg-dim); }
 .hack-item h3 { display: flex; align-items: baseline; }
 .hack-item .combo {
   margin-left: auto;
@@ -3303,3 +3307,14 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 /* A price's amounts: green where you have enough, red where you're short (the STORE and the BLACK MARKET's window) */
 .shop-cost.afford span, .res-chip.afford { color: var(--afford); }
 .shop-cost.short span, .res-chip.short { color: var(--danger); }
+/* (room above the STORE's neon border, so the card's top bar, solid and pinned, doesn't cut its glow off) */
+.records .menu-pane[data-pane="store"]:not([hidden]) { padding: 14px 2px 4px; }
+
+/* The STORE's prices as the BLACK MARKET's: each resource's icon over have / cost */
+.store-costs { display: flex; flex-wrap: wrap; gap: 8px 14px; padding: 6px 0 2px; }
+.store-costs .shop-cost { font-size: 12px; min-width: 38px; }
+.store-costs .shop-cost .key-ico { width: 17px; height: 17px; }
+/* BUY with the currency sign */
+.store-buy .cur-ico, .shop-buy .cur-ico { width: 0.95em; height: 0.95em; margin-right: 4px; vertical-align: -0.12em; }
+/* A booster's icon on the main menu's booster buttons */
+.booster-chip .ico { width: 1.15em; height: 1.15em; vertical-align: -0.22em; margin-right: 2px; }

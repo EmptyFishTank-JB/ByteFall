@@ -100,7 +100,7 @@ none. Each has its own color in every theme (BUGS roach brown, CACHE light grey,
 ROOTKITS red, MASTER KEYS gold with a glow; KEYS the theme's accent; PAPER darker, MONOCHROME in greys).
 The main menu shows them in a line under the level bar, the STORE too; a drop that earns some
 floats them up off the board, and the result screen lists the game's haul. BOOSTERS cost KEYS;
-RESERVE EXPLOITS and BLACK BOXES cost KEYS and resources (a MASTER KEY buys any exploit outright):
+STARTER EXPLOITS and BLACK BOXES cost KEYS and resources (a MASTER KEY buys any exploit outright):
 
 | Booster | Keys | Does |
 |---|---|---|
@@ -118,7 +118,7 @@ puzzle's drop buttons, and with none owned a second tap buys one. Never in DAILY
 boosted game says so on its result screen.
 
 **THE SIDE SLOTS**: one each side of the exploit button (CLASSIC, BLITZ and ZEN only).
-**RESERVE EXPLOITS** (STORE) are exploits of your own, any you've unlocked by level, by tier: tier 1
+**STARTER EXPLOITS** (STORE) are exploits of your own, any you've unlocked by level, by tier: tier 1
 (RNG, BITFLIP, BUFFER OVERFLOW, TROJAN, PIVOT) 10 KEYS and about 12 BUGS, CACHE or CRYPTO; tier 2
 (SWAP, WORM VIRUS, KEYLOGGER, PACKET SNIFFER, BACKDOOR) 20 KEYS, about 17 of those and a ROOTKIT;
 tier 3 (LOGIC BOMB, HONEYPOT, DICTIONARY ATTACK, RAINBOW TABLE) 30 KEYS, about 22 and 2 or 3
@@ -127,9 +127,9 @@ short of it (NEED ...), and USE A MASTER KEY when it's short and there's one. BL
 sold; **BLACK BOXES** I, II and III are (5 KEYS and 3 CRYPTO; 12, 5 and a ROOTKIT; 20, 8 and 2), a
 random pull each, their odds on them: an exploit of tier 1, 2 or 3 (any of the tier, unlocked or not)
 or an **ANTI-EXPLOIT** (I: 65 / 20 / 3 / 12%; II: 35 / 45 / 12 / 8%; III: 10 / 45 / 42 / 3%).
-Pick 2 on the main menu to take into a game, one in each slot (marked R): two of one kind
+Pick 2 on the main menu to take into a game, one in each slot (marked S): two of one kind
 (if you have two) or one each of two. The menu shows the two slots, LEFT and RIGHT, and what's in each,
-and BUY EXPLOITS under them (the STORE's reserves). A tap on a slot opens its card: every reserve and
+and BUY EXPLOITS under them (the STORE's starters). A tap on a slot opens its card: every starter and
 box you own and how many, to put in that slot, and EMPTY THIS SLOT; each is used once in the game. In
 the game, a tap arms an exploit as your next drop, as an earned one, and it's used up (the ones not
 used stay yours). A box waits sealed (pulsing); a tap opens it: the slot spins like a slot machine's
@@ -137,8 +137,8 @@ reel for about 1.5 seconds and lands on an exploit, which waits there (a tick in
 armed when you like, or an anti-exploit, which glitches red and goes off at once: **ADWARE** (a pop-up,
 AD, covers one drop button for 3 drops; the grid and number keys still drop there), **SPYWARE** (the
 next 3 bits show as ? until they land) or **RANSOMWARE** (3 bits on the board go under a one-peel
-layer). A slot taken in empty, or once its reserve is used, is the **BLACK MARKET** (so it's there
-whether you take reserves in or not):
+layer). A slot taken in empty, or once its starter is used, is the **BLACK MARKET** (so it's there
+whether you take starters in or not):
 a random exploit you've unlocked or, a quarter of the time, a BLACK BOX, marked for sale with the
 game's own currency sign in its corner (a 0 struck through twice, as a dollar sign is: no one
 country's), changing every 4 drops. A tap opens the BLACK MARKET's window: a neon sign of a border in
@@ -149,7 +149,7 @@ over what you have / what it costs (red where you're short, NEED ... under them)
 closes it; drops wait while it's open. A buy waits in the slot until you tap it to arm (or open) it,
 then the slot sells again: buy as often as you like. Buying opens once the game's first encryption layer
 rises (ZEN, with no layers: after 8 drops, when the first would); till then the slots show their offers
-dimmed, and the window shows OPENS IN n DROPS in place of BUY. A game that used them says so on its result screen (RESERVES: ... // BLACK MARKET: ...).
+dimmed, and the window shows OPENS IN n DROPS in place of BUY. A game that used them says so on its result screen (STARTERS: ... // BLACK MARKET: ...).
 
 How far KEYS go (a simulation of CLASSIC games on the CPU's own board code: node tools/keysim.js): a game
 decrypts about 90 to 110 bits, so it earns about 14 to 18 KEYS, or 20 to 23 all in with the levels,
