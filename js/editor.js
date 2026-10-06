@@ -23,6 +23,11 @@
     .filter(([, p]) => Object.keys(p).length)
     .map(([sel, p]) => `${sel} { ${Object.entries(p).map(([k, v]) => `${k}: ${v}${important ? ' !important' : ''};`).join(' ')} }`)
     .join('\n');
+  // LOCKED pieces: no dragging or editing them until they're unlocked (kept on the device)
+  const LOCK_KEY = 'bytefall-layout-locks';
+  let locks = [];
+  try { locks = JSON.parse(store.get(LOCK_KEY)) || []; } catch (e) {}
+  const saveLocks = () => store.set(LOCK_KEY, JSON.stringify(locks));
   let showEdits = true;
   const writeSheet = () => { sheet.textContent = showEdits ? cssOf(true) : ''; };
   const save = () => { store.set(KEY, JSON.stringify(edits)); writeSheet(); };
@@ -37,7 +42,7 @@
   let ui; let overlay; let picked = null; let scope = 'this'; let selecting = true; let undo = [];
 
   // Classes that come and go with a piece's state, left out of the selectors an edit is saved under
-  const STATE = /^(active|on|off|hidden|locked|unlocked|short|afford|done|danger|armed|ready|held|equipped|owned|flash|pulse|more|closing|current|next|selected|open|paused|shown|lit|has-drop|wrap|on-board|leveled|maxed|warn|alarm|byte|ref-font|scrambling|dev-holding|is-.*)$/;
+  const STATE = /^(active|on|off|hidden|locked|unlocked|short|afford|done|danger|armed|ready|held|equipped|owned|flash|pulse|more|closing|current|next|selected|open|paused|shown|lit|has-drop|wrap|on-board|leveled|maxed|warn|alarm|byte|ref-font|scrambling|dev-holding|ed-drag|is-.*)$/;
   const stable = (el) => [...el.classList].filter((c) => !STATE.test(c));
   const esc = (s) => (window.CSS && CSS.escape ? CSS.escape(s) : s);
   // THIS: a path that finds just this piece (from the nearest piece with an id)
@@ -65,18 +70,20 @@
     if (pc.length) return `${ctx}.${pc.map(esc).join('.')} > ${tag}`;
     return pathOf(el);
   }
+  const isLocked = (el) => !!el && locks.includes(pathOf(el));
   const selOf = (el) => (scope === 'all' ? kindOf(el) : pathOf(el));
   const count = (sel) => { try { return document.querySelectorAll(sel).length; } catch (e) { return 0; } };
 
   const snapshot = () => { undo.push(JSON.stringify(edits)); if (undo.length > 60) undo.shift(); };
   function setProp(prop, value, el = picked, sel = selOf(el)) {
+    if (isLocked(el)) return;
     snapshot();
     (edits[sel] = edits[sel] || {})[prop] = value;
     save();
     refresh();
   }
   function clearProp(prop, sel = selOf(picked)) {
-    if (!edits[sel] || !(prop in edits[sel])) return;
+    if (isLocked(picked) || !edits[sel] || !(prop in edits[sel])) return;
     snapshot();
     delete edits[sel][prop];
     if (prop === 'z-index') delete edits[sel].position;
@@ -256,6 +263,9 @@
 .ed-list div { display: flex; align-items: center; gap: 6px; padding: 3px 0; border-bottom: 1px dashed var(--grid-line, #333); overflow-wrap: anywhere; }
 .ed-list span { flex: 1; }
 .ed-export { width: 100%; height: 120px; margin-top: 6px; background: transparent; border: 1px solid var(--grid-line, #333); color: var(--fg, #3f8); font-size: 10px; }
+.ed-box.locked { border-color: #9aa; border-style: dashed; }
+.ed-tag.locked { background: #9aa; }
+.ed-drag { touch-action: none !important; cursor: grab; }
 .ed-overlay { position: fixed; inset: 0; z-index: 99999; pointer-events: none; }
 .ed-box { position: fixed; border: 2px solid var(--accent, #fd6); box-shadow: 0 0 0 1px #000; }
 .ed-parent { position: fixed; border: 1px dashed rgba(var(--fg-rgb, 57,255,143), 0.7); }
@@ -281,6 +291,8 @@
         <button type="button" data-ed="child">▼ INSIDE</button>
         <button type="button" data-ed="this" class="on">THIS ONE</button>
         <button type="button" data-ed="all">ALL LIKE IT</button>
+        <button type="button" data-ed="lock">LOCK</button>
+        <button type="button" data-ed="clear">CLEAR</button>
         <button type="button" data-ed="undo">UNDO</button>
         <button type="button" data-ed="min">—</button>
         <button type="button" data-ed="dock">▁ FOOT</button>
@@ -306,13 +318,39 @@
 
     // PICKING: a tap picks what's under it instead of pressing it (the game never sees it). The
     // editor's own buttons work as usual, and so do the game's while USING
+    // DRAGGING: the picked piece (unless LOCKED) follows a finger or the mouse, as a nudge, the space
+    // to what's beside it shown as it goes; a tap still picks
+    let dragging = null;
+    let noClick = false;
+    let down = null;
     const swallow = (e) => {
       if (!selecting || ui.hidden || e.target.closest('.ed-ui')) return;
       e.stopImmediatePropagation();
       if (!e.type.startsWith('touch')) e.preventDefault(); // (touches still scroll, and still make the tap's click)
-      if (e.type === 'click') pick(e.target);
+      if (e.type === 'pointerdown') down = [e.clientX, e.clientY];
+      if (e.type === 'pointerdown' && picked && picked.contains(e.target) && !isLocked(picked)) {
+        dragging = { id: e.pointerId, x0: e.clientX, y0: e.clientY, n: nudgeOf(), moved: false, sel: selOf(picked) };
+      }
+      if (e.type === 'pointermove' && dragging && e.pointerId === dragging.id) {
+        const dx = Math.round(e.clientX - dragging.x0);
+        const dy = Math.round(e.clientY - dragging.y0);
+        if (!dragging.moved && Math.abs(dx) + Math.abs(dy) < 5) return;
+        if (!dragging.moved) { dragging.moved = true; snapshot(); }
+        (edits[dragging.sel] = edits[dragging.sel] || {}).translate = `${dragging.n[0] + dx}px ${dragging.n[1] + dy}px`;
+        writeSheet();
+        drawOverlay();
+      }
+      if ((e.type === 'pointerup' || e.type === 'pointercancel') && dragging && e.pointerId === dragging.id) {
+        if (dragging.moved) { save(); noClick = true; refresh(); }
+        dragging = null;
+      }
+      if (e.type === 'click') {
+        if (noClick) { noClick = false; return; } // (the end of a drag, not a tap)
+        if (down && Math.abs(e.clientX - down[0]) + Math.abs(e.clientY - down[1]) > 8) return; // (nor any other drag)
+        pick(e.target);
+      }
     };
-    for (const t of ['pointerdown', 'pointerup', 'mousedown', 'mouseup', 'touchstart', 'touchend', 'click', 'dblclick', 'contextmenu']) window.addEventListener(t, swallow, { capture: true, passive: false });
+    for (const t of ['pointerdown', 'pointermove', 'pointerup', 'pointercancel', 'mousedown', 'mouseup', 'touchstart', 'touchend', 'click', 'dblclick', 'contextmenu']) window.addEventListener(t, swallow, { capture: true, passive: false });
     // (typing in the editor doesn't drop bits or pause the game)
     window.addEventListener('keydown', (e) => { if (e.target.closest && e.target.closest('.ed-ui')) e.stopImmediatePropagation(); }, true);
     setInterval(() => { if (!ui.hidden) drawOverlay(); }, 120); // (the outlines follow a scroll or an animation)
@@ -323,7 +361,9 @@
     let el = t;
     while (el && (el instanceof SVGElement)) el = el.parentElement; // (an icon's drawing: its holder)
     if (!el || el === document.body || el === document.documentElement) return;
+    if (picked) picked.classList.remove('ed-drag');
     picked = el;
+    picked.classList.add('ed-drag'); // (a finger drags it instead of scrolling the page)
     // (the panel out of its way: at the top for a piece low on the screen, at the foot for one high up)
     const r = el.getBoundingClientRect();
     if (geo.place !== 'float') { geo.place = r.top + r.height / 2 > innerHeight / 2 ? 'top' : 'bottom'; applyGeo(); }
@@ -343,6 +383,13 @@
       scope = a;
       ui.querySelector('[data-ed="this"]').classList.toggle('on', scope === 'this');
       ui.querySelector('[data-ed="all"]').classList.toggle('on', scope === 'all');
+      renderBody();
+    }
+    if (a === 'clear' && picked) { picked.classList.remove('ed-drag'); picked = null; renderBody(); drawOverlay(); } // (nothing picked)
+    if (a === 'lock' && picked) {
+      const p = pathOf(picked);
+      locks = locks.includes(p) ? locks.filter((x) => x !== p) : [...locks, p];
+      saveLocks();
       renderBody();
     }
     if (a === 'undo' && undo.length) { edits = JSON.parse(undo.pop()); save(); refresh(); }
@@ -390,6 +437,14 @@
     }
     const sel = selOf(picked);
     const r = picked.getBoundingClientRect();
+    const lockBtn = ui.querySelector('[data-ed="lock"]');
+    lockBtn.textContent = isLocked(picked) ? 'UNLOCK' : 'LOCK';
+    lockBtn.classList.toggle('on', isLocked(picked));
+    if (isLocked(picked)) {
+      head.innerHTML = `${pathOf(picked).replace(/</g, '&lt;')} <small>// LOCKED // ${Math.round(r.width)} \u00d7 ${Math.round(r.height)}</small>`;
+      body.innerHTML = `<div class="ed-h">LOCKED</div><div class="ed-row"><span class="ed-u">This piece stays as it is: no dragging or editing it. UNLOCK (above) to change it again; ▲ PARENT and ▼ INSIDE still pick around it.</span></div>${editedList()}`;
+      return;
+    }
     head.innerHTML = `${sel.replace(/</g, '&lt;')} <small>// ${count(sel)} ${scope === 'all' ? 'LIKE IT' : 'PIECE'} // ${Math.round(r.width)} × ${Math.round(r.height)}</small>`;
     let h = '';
     const flexParent = picked.parentElement && /flex|grid/.test(getComputedStyle(picked.parentElement).display);
@@ -478,8 +533,9 @@
     let h = '';
     const box = (q, cls) => `<div class="${cls}" style="left:${q.left}px;top:${q.top}px;width:${q.width}px;height:${q.height}px"></div>`;
     if (picked.parentElement) h += box(picked.parentElement.getBoundingClientRect(), 'ed-parent');
-    h += box(r, 'ed-box');
-    h += `<div class="ed-tag" style="left:${r.left}px;top:${Math.max(0, r.top - 15)}px">${Math.round(r.width)} × ${Math.round(r.height)}</div>`;
+    const lk = isLocked(picked);
+    h += box(r, lk ? 'ed-box locked' : 'ed-box');
+    h += `<div class="ed-tag${lk ? ' locked' : ''}" style="left:${r.left}px;top:${Math.max(0, r.top - 15)}px">${lk ? 'LOCKED // ' : ''}${Math.round(r.width)} × ${Math.round(r.height)}</div>`;
     for (const side of ['top', 'bottom', 'left', 'right']) {
       const g = gap(picked, side);
       if (!(g.d > 0.5)) continue;
