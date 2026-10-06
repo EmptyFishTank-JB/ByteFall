@@ -146,8 +146,10 @@ the accent, a tilted, flickering sign-sign-sign in its corner and scan lines ove
 in brackets and its name (a box's odds under it), then each part of its price as the resource's icon
 over what you have / what it costs (red where you're short, NEED ... under them), and BUY in the middle
 (USE A MASTER KEY under it when short of an exploit's price with one). A tap off it, the X, Esc or back
-closes it; drops wait while it's open. A buy waits in the slot until you tap it to arm (or open) it. One buy
-each slot, a game. A game that used them says so on its result screen (RESERVES: ... // BLACK MARKET: ...).
+closes it; drops wait while it's open. A buy waits in the slot until you tap it to arm (or open) it,
+then the slot sells again: buy as often as you like. Buying opens once the game's first encryption layer
+rises (ZEN, with no layers: after 8 drops, when the first would); till then the slots show their offers
+dimmed, and the window shows OPENS IN n DROPS in place of BUY. A game that used them says so on its result screen (RESERVES: ... // BLACK MARKET: ...).
 
 How far KEYS go (a simulation of CLASSIC games on the CPU's own board code: node tools/keysim.js): a game
 decrypts about 90 to 110 bits, so it earns about 14 to 18 KEYS, or 20 to 23 all in with the levels,

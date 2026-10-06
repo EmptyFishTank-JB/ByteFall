@@ -81,7 +81,8 @@ let busy = false; // true while animating/resolving, blocks input
 let runId = 0; // bumped on every new game so a pending game-over sequence can tell it's stale
 let vsPaused = false;
 let adware = null; // ANTI-EXPLOITS (runAnti): ADWARE's covered column { col, left }
-let spywareLeft = 0; // ...and SPYWARE's hidden bits // PAUSE (any mode): the board covered, the CPU's clock stopped, the drop buttons off
+let spywareLeft = 0; // ...and SPYWARE's hidden bits
+let marketOpen = false; // THE BLACK MARKET sells once the game's first encryption layer rises (ZEN: after as many drops) // PAUSE (any mode): the board covered, the CPU's clock stopped, the drop buttons off
 let keyloggerDrops = 0; // drops left with the keylogger's preview showing
 let snifferBits = 0; // bits left whose number the player can pick
 let chainLog = []; // this drop's decrypts: { vals, chain, points } per link, { packet, count, points }
@@ -233,13 +234,14 @@ window.BOOSTERS = BOOSTERS;
 // exploit, which then waits there to be armed, or an ANTI-EXPLOIT, which goes off at once. A slot
 // taken in empty, or whose reserve is used, is the BLACK MARKET: a random exploit (of
 // the ones unlocked by level) or BLACK BOX at the STORE's price, changing every MARKET_EVERY drops.
-// A tap shows the price, a second buys it (short of it, an exploit takes a MASTER KEY instead, if
-// there's one), and it waits in the slot until it's armed (or opened); one buy a slot, a game. A
-// game that used them says so.
+// A tap opens its window: the price, and BUY (short of it, an exploit takes a MASTER KEY instead, if
+// there's one); a buy waits in the slot until it's armed (or opened), then the slot sells again, as
+// often as you like. Buying opens once the first encryption layer rises (ZEN, with none: after as
+// many drops, BASE_INTERVAL); till then the offers can be looked at. A game that used them says so.
 const RESERVE_MAX = 2;
 const MARKET_EVERY = 4;
 const reserveFits = (m = mode) => !daily && ['classic', 'blitz', 'zen'].includes(m);
-let sideSlots = []; // this game's: [{ state: 'reserve' | 'bought' | 'opened' | 'rolling' | 'market' | 'closed', id, buys, confirm }]
+let sideSlots = []; // this game's: [{ state: 'reserve' | 'bought' | 'opened' | 'rolling' | 'market' | 'closed', id }]
 let marketDrops = 0;
 let usedReserves = []; // (for the result screen)
 let marketBought = [];
@@ -512,9 +514,10 @@ function initGame() {
   marketDrops = 0;
   adware = null;
   spywareLeft = 0;
+  marketOpen = false;
   const taken = Progress.reservesTaken();
   sideSlots = reserveFits() && mode !== 'tutorial'
-    ? [0, 1].map((i) => (taken[i] ? { state: 'reserve', id: taken[i], buys: 0 } : { state: 'market', id: null, buys: 0 })) : [];
+    ? [0, 1].map((i) => (taken[i] ? { state: 'reserve', id: taken[i] } : { state: 'market', id: null })) : [];
   for (const sl of sideSlots) { // (a slot taken in empty is the BLACK MARKET from the start)
     if (sl.state !== 'market') continue;
     sl.id = marketPick(sideSlots.map((x) => x.id));
@@ -1355,6 +1358,7 @@ async function attemptDrop(col) {
     if (dropsSinceLastPulse >= pulseInterval) {
       dropsSinceLastPulse = 0;
       await injectPulse();
+      openMarket(); // (the first layer: the BLACK MARKET opens)
       wentOver = wentOver || overflowed();
       await resolveChains();
       pulseInterval = mode === 'vs' ? BASE_INTERVAL : DIFFICULTIES[difficulty].interval(score);
@@ -4410,24 +4414,32 @@ function renderReserves() {
     b.classList.toggle('owned', !market);
     b.classList.toggle('sealed', sealed && !market);
     b.classList.toggle('confirm', market && shopSlot === i);
+    b.classList.toggle('locked', market && !marketOpen); // (not open yet: the first layer hasn't risen)
     b.classList.toggle('short', short);
     b.innerHTML = `<span class="exploit-glyph">${itemIcon(sl.id)}</span>`
       + (market ? `<span class="slot-sale" aria-hidden="true">${CURRENCY_SVG}</span>` : `<span class="reserve-tag">${sl.state === 'reserve' ? 'R' : '✓'}</span>`);
     const name = itemName(sl.id);
-    b.title = market ? `BLACK MARKET // ${name}: ${priceText(price)} (tap to see it)`
+    b.title = market ? `BLACK MARKET // ${name}: ${priceText(price)} (${marketOpen ? 'tap to see it' : `opens in ${marketOpensIn()} drops`})`
       : sealed ? `${sl.state === 'reserve' ? 'RESERVE' : 'BOUGHT'} // ${name}: tap to open it`
         : `${sl.state === 'reserve' ? 'RESERVE' : sl.state === 'opened' ? 'BLACK BOX' : 'BOUGHT'} // ${name}: tap to arm it`;
     b.setAttribute('aria-label', b.title);
     if (!market && !sealed && armedHack) b.disabled = true;
   });
 }
-// The slot's next life once what was in it is used: the BLACK MARKET, until it's been bought from
-// once this game
+// The slot's next life once what was in it is used: the BLACK MARKET, again
 function slotSpent(sl, used) {
-  sl.state = sl.buys < 1 ? 'market' : 'closed';
-  sl.confirm = false;
-  if (sl.state === 'market') sl.id = marketPick(sideSlots.map((x) => x.id).concat(used));
+  sl.state = 'market';
+  sl.id = marketPick(sideSlots.map((x) => x.id).concat(used));
   if (!sl.id) sl.state = 'closed';
+}
+// Drops till the BLACK MARKET opens: till the first layer rises (ZEN: BASE_INTERVAL drops)
+const marketOpensIn = () => (MODES[mode].noLayers ? Math.max(1, BASE_INTERVAL - marketDrops) : Math.max(1, pulseInterval - dropsSinceLastPulse));
+function openMarket() {
+  if (marketOpen || !sideSlots.some((sl) => sl.state === 'market')) { marketOpen = true; return; }
+  marketOpen = true;
+  setMessage('BLACK MARKET // OPEN FOR BUSINESS');
+  SFX.play('egg');
+  renderReserves();
 }
 function slotTap(i) {
   const sl = sideSlots[i];
@@ -4462,12 +4474,14 @@ function openShop(i) {
     return `<div class="shop-cost res-${res}${have < price[res] ? ' short' : ''}" title="${RES_INFO[res].name}">${RES_INFO[res].svg}<span>${fmt(have)}/${price[res]}</span></div>`;
   }).join('');
   const buy = document.getElementById('shop-buy');
-  buy.disabled = missing.length > 0;
-  buy.textContent = missing.length ? 'NOT ENOUGH' : 'BUY';
+  const opensIn = marketOpen ? 0 : marketOpensIn();
+  buy.disabled = missing.length > 0 || !marketOpen;
+  buy.textContent = !marketOpen ? `OPENS IN ${opensIn} DROP${opensIn === 1 ? '' : 'S'}` : missing.length ? 'NOT ENOUGH' : 'BUY';
   const mk = document.getElementById('shop-master');
-  mk.hidden = !master;
-  document.getElementById('shop-note').textContent = missing.length
-    ? `NEED ${missing.map(([res, n]) => `${n} MORE ${RES_INFO[res].name}`).join(', ')}` : 'ONE BUY FROM THIS SLOT A GAME';
+  mk.hidden = !master || !marketOpen;
+  document.getElementById('shop-note').textContent = !marketOpen
+    ? `THE BLACK MARKET OPENS WHEN THE FIRST ENCRYPTION ${MODES[mode].noLayers ? 'LAYER WOULD RISE' : 'LAYER RISES'}`
+    : missing.length ? `NEED ${missing.map(([res, n]) => `${n} MORE ${RES_INFO[res].name}`).join(', ')}` : 'BUY AS OFTEN AS YOU LIKE';
   document.getElementById('shop-sign').innerHTML = CURRENCY_SVG.repeat(3);
   shopEl.classList.remove('hidden');
   SFX.play('click');
@@ -4482,12 +4496,11 @@ function closeShop() {
 }
 function shopBuy(master) {
   const sl = sideSlots[shopSlot];
-  if (!sl || sl.state !== 'market' || gameOver) { closeShop(); return; }
+  if (!sl || sl.state !== 'market' || gameOver || !marketOpen) { closeShop(); return; }
   const name = itemName(sl.id);
   if (!Progress.payFor(sl.id, master)) { SFX.play('denied'); return; }
   closeShop();
   sl.state = 'bought';
-  sl.buys++;
   marketBought.push(sl.id);
   SFX.play('egg');
   setMessage(`BLACK MARKET // BOUGHT ${name}${master ? ' WITH A MASTER KEY' : ''}: TAP IT TO ${Progress.isBox(sl.id) ? 'OPEN' : 'ARM'}`);
@@ -4512,7 +4525,6 @@ function openBox(i) {
   Progress.openedBlackBox();
   const result = Progress.rollBox(box);
   sl.state = 'rolling';
-  sl.confirm = false;
   const b = sideSlotEls()[i];
   b.classList.remove('market', 'short', 'confirm', 'sealed');
   b.classList.add('owned', 'rolling');
@@ -4547,8 +4559,8 @@ function openBox(i) {
 // Every MARKET_EVERY drops, the market's slots turn over (a price shown and not taken up goes too)
 function marketTick() {
   if (!sideSlots.length) return;
-  sideSlots.forEach((x) => { x.confirm = false; });
-  if (++marketDrops % MARKET_EVERY) { renderReserves(); return; }
+  if (++marketDrops >= BASE_INTERVAL && MODES[mode].noLayers) openMarket(); // (ZEN: no layers rise)
+  if (marketDrops % MARKET_EVERY) { renderReserves(); return; }
   sideSlots.forEach((sl, i) => {
     if (sl.state !== 'market') return;
     sl.id = marketPick(sideSlots.map((x) => x.id));

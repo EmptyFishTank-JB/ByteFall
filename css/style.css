@@ -3274,3 +3274,7 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 .shop-alt[hidden] { display: none; }
 .shop-x { position: absolute; top: 6px; left: 8px; width: 28px; height: 28px; font-size: 20px; line-height: 1; color: var(--fg-dim); background: none; border: 0; cursor: pointer; }
 @media (prefers-reduced-motion: reduce) { .shop-box, .shop-sign, .cell.scrambling { animation: none; } }
+
+/* A BLACK MARKET slot before it opens (the first layer hasn't risen): its offer to look at, dimmed */
+.exploit-icon.side-slot.market.locked { opacity: 0.35; }
+.exploit-icon.side-slot.market.locked .slot-sale { border-color: var(--fg-dim); color: var(--fg-dim); box-shadow: none; }

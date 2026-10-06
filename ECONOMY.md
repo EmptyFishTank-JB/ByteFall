@@ -143,7 +143,8 @@ Mild and short. None can end a game by itself.
 | Turnover | a new offer every 4 drops (a price shown and not taken goes too) |
 | Buying | a tap opens the BLACK MARKET's window: each part of the price as have / cost under its icon, BUY (and USE A MASTER KEY when short of an exploit's price with one) |
 | Marked | the game's own currency sign (a 0 struck through twice) in the slot's corner |
-| Limit | one buy per slot, per game |
+| Opens | once the game's first encryption layer rises (ZEN, with no layers: after 8 drops); till then the offers can be looked at |
+| Limit | none: once a buy is used, the slot sells again |
 | After | a bought exploit waits in the slot to be armed; a bought box waits sealed to be opened |
 
 ## Not sold for money
