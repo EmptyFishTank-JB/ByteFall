@@ -43,6 +43,13 @@ button, input, select, textarea { line-height: inherit; }
   --accent: #ffd166; /* exploits, warnings, cracked layers */
   --accent-rgb: 255, 209, 102;
   --cracked: var(--accent); /* cracked layers; SPECTRUM keeps them still */
+  /* The RESOURCES' own colors, the same in every theme (PAPER darker, MONOCHROME in greys); KEYS take the accent */
+  --res-bugs: #b5824a; /* roach brown */
+  --res-cache: #c8ccd0; /* light grey */
+  --res-crypto: #f7931a; /* Bitcoin orange */
+  --res-rootkits: #ff3b4e; /* red */
+  --res-master: #e8b10e; /* deep gold, with a glow */
+  --res-master-glow: rgba(232, 177, 14, 0.7);
   /* Icons drawn in CSS (as masks, so they take the text color): no emoji anywhere */
   --icon-lock: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'><rect x='5' y='11' width='14' height='10' rx='2'/><path d='M8 11V7a4 4 0 0 1 8 0v4'/></svg>");
   --icon-play: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M7 4 L19 12 L7 20 Z' fill='black'/></svg>");
@@ -102,7 +109,7 @@ button, input, select, textarea { line-height: inherit; }
   --heat-peak-bg: #124656;
 }
 
-/* AMBER CRT: an old amber monitor, grey layers, white for cracks and exploits */
+/* AMBER CRT: an old amber monitor, grey layers, cyan for cracks and exploits (the amber's opposite) */
 [data-theme="amber-crt"] {
   --bg: #0a0703;
   --bg-solid: #040301;
@@ -114,11 +121,11 @@ button, input, select, textarea { line-height: inherit; }
   --grid-line: #3d2c10;
   --board-bg: #120b02;
   --cell-bg: #1a1003;
-  --fg: #ffb000;
-  --fg-rgb: 255, 176, 0;
-  --fg-dim: #8a5f10;
-  --accent: #ff7a1f; /* (a hotter orange: stands apart from the amber, and from the danger red) */
-  --accent-rgb: 255, 122, 31;
+  --fg: #ffc33d; /* (a yellower amber than the old #ffb000) */
+  --fg-rgb: 255, 195, 61;
+  --fg-dim: #8f6a1c;
+  --accent: #4fe3e0; /* (cyan: the amber's opposite, standing apart from it and from the danger red) */
+  --accent-rgb: 79, 227, 224;
   --danger: #ff4d3d;
   --danger-rgb: 255, 77, 61;
   --layer-a: #2a2a2a;
@@ -126,7 +133,7 @@ button, input, select, textarea { line-height: inherit; }
   --layer-border: #777;
   --layer-text: #999;
   --layer-rgb: 175, 175, 175;
-  --exploit-bg: #1e1a12;
+  --exploit-bg: #0e1c1c;
   --alarm-text: #ffffff;
   --byte-text: #fff1cc;
   --hot-rgb: 255, 200, 90;
@@ -140,6 +147,12 @@ button, input, select, textarea { line-height: inherit; }
 
 /* MONOCHROME: black and white; layers told apart by their stripes and dashed borders */
 [data-theme="monochrome"] {
+  --res-bugs: #8c8c8c;
+  --res-cache: #d6d6d6;
+  --res-crypto: #b0b0b0;
+  --res-rootkits: #ffffff;
+  --res-master: #ffffff;
+  --res-master-glow: rgba(255, 255, 255, 0.6);
   --bg: #070707;
   --bg-solid: #030303;
   --bg-center: #151515;
@@ -303,6 +316,12 @@ button, input, select, textarea { line-height: inherit; }
 
 /* PAPER: dark ink on pale paper, for bright rooms and outdoors */
 [data-theme="paper"] {
+  --res-bugs: #7a4f22;
+  --res-cache: #111111;
+  --res-crypto: #c26a00;
+  --res-rootkits: #c4142a;
+  --res-master: #a67c00;
+  --res-master-glow: rgba(166, 124, 0, 0.35);
   --inset-bg: rgba(90, 70, 30, 0.06);
   --bg: #efeadf;
   --bg-solid: #e9e3d6;
@@ -3163,8 +3182,12 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 .wallet { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 12px; margin: 2px 0 6px; font-size: 12px; letter-spacing: 1px; color: var(--fg); }
 .res-chip { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
 .res-chip .key-ico { width: 13px; height: 13px; }
-.res-keys, .res-master { color: var(--accent); }
-.res-rootkits { color: var(--danger); }
+.res-chip .key-ico { color: var(--accent); } /* (KEYS: the theme's accent) */
+.res-bugs .key-ico { color: var(--res-bugs); }
+.res-cache .key-ico { color: var(--res-cache); }
+.res-crypto .key-ico { color: var(--res-crypto); }
+.res-rootkits .key-ico { color: var(--res-rootkits); }
+.res-master .key-ico { color: var(--res-master); filter: drop-shadow(0 0 2px var(--res-master-glow)); }
 .overlay-keys .haul { display: block; margin-top: 4px; }
 .overlay-keys .haul .res-chip { margin: 0 4px; }
 .res-pop { position: absolute; left: 50%; top: 18%; transform: translateX(-50%); z-index: 6; pointer-events: none; display: flex; gap: 10px; font-size: 13px; letter-spacing: 1px; color: var(--fg); text-shadow: 0 0 6px var(--bg-solid), 0 0 2px var(--bg-solid); animation: res-pop 1.6s ease-out forwards; white-space: nowrap; }

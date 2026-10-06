@@ -96,7 +96,9 @@ decrypted: **BUGS** (down a column, 1 per 5), **CACHE** (across a row, 1 per 5),
 link from the 3rd on), **ROOTKITS** (a bit decrypted across and down at once, layers broken, BYTES)
 and **MASTER KEYS** (every 5th level, the day's first daily game, the day's first VS win). CLASSIC and
 DAILY earn them all, BLITZ and ZEN at half the rate, VS only CRYPTO, ROOTKITS and MASTER KEYS, PUZZLE
-none. The main menu shows them in a line under the level bar, the STORE too; a drop that earns some
+none. Each has its own color in every theme (BUGS roach brown, CACHE light grey, CRYPTO Bitcoin orange,
+ROOTKITS red, MASTER KEYS gold with a glow; KEYS the theme's accent; PAPER darker, MONOCHROME in greys).
+The main menu shows them in a line under the level bar, the STORE too; a drop that earns some
 floats them up off the board, and the result screen lists the game's haul. BOOSTERS cost KEYS;
 RESERVE EXPLOITS and BLACK BOXES cost KEYS and resources (a MASTER KEY buys any exploit outright):
 
@@ -428,7 +430,7 @@ Themes (picked from the swatch grid in settings; a locked theme or font shows it
 |---|---|---|---|---|
 | TERMINAL (default) | green | grey | amber | red |
 | CIPHER | cyan | magenta | yellow | orange-red |
-| AMBER CRT | amber | grey | white | red |
+| AMBER CRT | amber (a yellow amber) | grey | cyan | red |
 | MONOCHROME | light grey | striped grey | white | white |
 | ANAGLYPH | off-white with red/cyan 3D fringes | red | cyan | red |
 | SYNTHWAVE | pink | purple | orange | cyan |
