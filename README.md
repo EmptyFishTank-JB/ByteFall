@@ -368,7 +368,12 @@ the mode card, VS's setup) are a little see-through (92%), so the lane's trees s
 them, and the HAUNTED FOREST's two big trees in front (the oaks, or now and then slim, gnarled ones) stand
 on trunks that run down past the card's edge to the screen's, framing the lane, the bots passing
 behind them; about one forest in three, the HOLLOW stands between them, as big, a dead tree with two
-red eyes and a gaping mouth in its trunk. A button's tick (and buzz) comes on a successful tap, released on it, not
+red eyes and a gaping mouth in its trunk. The big trees' canopies arch in over the lane toward the middle (the
+HOLLOW's both ways). October also brings the HEADLESS HORSEMAN (a black horse at a gallop, its
+cloaked rider holding up a flaming jack o' lantern; HAHAHA, and poked, every bot near it jumps) and
+ZOMBIE HORDES (three to seven, shuffling in, out of the trees in the forest, some clawing up out of
+the ground; now and then they all break into the THRILLER for four bars, on the music's beat, then
+shuffle on). A button's tick (and buzz) comes on a successful tap, released on it, not
 on a touch that slides off. The buttons are one size in every mode and font, their words centered; a word that
 won't fit on a button shrinks, never under 10px. Through the game the font never changes a
 button's size or moves the HUD, the board or its buttons.

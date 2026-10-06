@@ -187,30 +187,67 @@ function createVisitors(api) {
     // framing the path), and the glowing eyes between the trees at the back
     oak: {
       pal: { t: '#07090b', T: '#12171c' },
-      a: ['..t.......t.....t.....', '...t...t..t....t..t...', 't..t..t...tt..t..t....', '.t.tt.t....t.tt.t...t.', '..t.tt.t...ttt..t..t..', '...t.ttt...tt..tt.t...', 't...t.ttt..tt.tt.t....', '.tt..t..tt.ttttt.t..tt', '...tt.t..tttttt.tttt..', '.....tttt.tTtt.tt.....',
-        '........ttTtttt.......', '.........tTttt........', '.........tTtt.........', '.........tTtt.........', '........ttTtt.........', '........tTttt.........', '........tTtttt........', '........tTtttt........',
-        '.......ttTtttt........', '.......tTttttt........', '.......tTtttttt.......', '.......tTtttttt.......', '......ttTttttttt......', '......tTtttttttt......', '.....ttTttttttttt.....', '.....tTtttttttttt.....',
-        '.....tTtttttttttt.....', '.....tTtttttttttt.....', '.....tTtttttttttt.....', '.....tTtttttttttt.....', '.....tTtttttttttt.....', '.....tTtttttttttt.....', '....tttTtttttttttt....', '...tt.tTttttt.tttttt..',
-        '..t..tt.ttt..tt...ttt.'],
+      a: [
+        '..........tt.t....t.....t...........', '....t...tt..tt.tt..t...t..t.t.......', '...t.t.t..ttt.t..tt.t.t.tt...t.t....', '..t...ttt...tttt...ttt.t..tt..t..t..', '.t..t..tt.tt..tttt..t.tt.t..tt..t..t', 't..tt.t.ttt....tttttt..tt..t..t..t..',
+        '..t.ttt..tt.tt...ttttttt.t.t.tt..t..', '.t..t.ttt.ttt..t....tttttt...t..t..t', '..tt.t..tTtt...t.......tttt..t..t...', '....tt.tTtt..tt.........ttt...t..t..', '.t...tttTtt.t............tt.t.t.....', '..t..tTttt.t..............t...t..t..',
+        '...tttTttt.................t..t.....', '.....tTttt..................t.......', '....ttTtttt.........................', '.....tTttt..........................', '.....tTtt...........................', '.....tTtt...........................',
+        '....ttTtt...........................', '....tTttt...........................', '....tTtttt..........................', '....tTtttt..........................', '...ttTtttt..........................', '...tTttttt..........................',
+        '...tTtttttt.........................', '...tTtttttt.........................', '..ttTttttttt........................', '..tTtttttttt........................', '.ttTttttttttt.......................', '.tTtttttttttt.......................',
+        '.tTtttttttttt.......................', '.tTtttttttttt.......................', '.tTtttttttttt.......................', '.tTtttttttttt.......................', '.tTtttttttttt.......................', '.tTtttttttttt.......................',
+        'tttTtttttttttt......................', 'tt.tTttttt.tttttt...................', 't..tt.ttt..tt...ttt.................'],
     },
     // (the other kind of big tree in front, now and then instead of the oaks: the same crown on a
     // slim, gnarled trunk)
     gnarl: {
       pal: { t: '#07090b', T: '#12171c' },
-      a: ['..t.......t.....t.....', '...t...t..t....t..t...', 't..t..t...tt..t..t....', '.t.tt.t....t.tt.t...t.', '..t.tt.t...ttt..t..t..', '...t.ttt...tt..tt.t...', 't...t.ttt..tt.tt.t....', '.tt..t..tt.ttttt.t..tt', '...tt.t..tttttt.tttt..', '.....tttt.tTtt.tt.....',
-        '........ttTttt........', '.........tTtt.........', '.........tTt..........', '.........tTt..........', '.........tTtt.........', '.........tTtt.........', '.........tTtt.........', '.........tTtt.........',
-        '........ttTtt.........', '........tTttt.........', '........tTttt.........', '........tTttt.........', '........tTtttt........', '.......ttTtttt........', '.......tTttttt........', '.......tTttttt........',
-        '.......tTttttt........', '.......tTttttt........', '.......tTttttt........', '.......tTttttt........', '.......tTttttt........', '.......tTttttt........', '......ttTtttttt.......', '.....tt.tTtt.tt.......',
-        '....t..tt.tt...tt.....'],
+      a: [
+        '..........tt.t....t.....t...........', '....t...tt..tt.tt..t...t..t.t.......', '...t.t.t..ttt.t..tt.t.t.tt...t.t....', '..t...ttt...tttt...ttt.t..tt..t..t..', '.t..t..tt.tt..tttt..t.tt.t..tt..t..t', 't..tt.t.ttt....tttttt..tt..t..t..t..',
+        '..t.ttt..tt.tt...ttttttt.t.t.tt..t..', '.t..t.ttt.ttt..t....tttttt...t..t..t', '..tt.t..tTtt...t.......tttt..t..t...', '....tt.tTtt..tt.........ttt...t..t..', '.t...tttTtt.t............tt.t.t.....', '..t..tTttt.t..............t...t..t..',
+        '...tttTttt.................t..t.....', '.....tTttt..................t.......', '....ttTttt..........................', '.....tTtt...........................', '.....tTt............................', '.....tTt............................',
+        '.....tTtt...........................', '.....tTtt...........................', '.....tTtt...........................', '.....tTtt...........................', '....ttTtt...........................', '....tTttt...........................',
+        '....tTttt...........................', '....tTttt...........................', '....tTtttt..........................', '...ttTtttt..........................', '...tTttttt..........................', '...tTttttt..........................',
+        '...tTttttt..........................', '...tTttttt..........................', '...tTttttt..........................', '...tTttttt..........................', '...tTttttt..........................', '...tTttttt..........................',
+        '..ttTtttttt.........................', '.tt.tTtt.tt.........................', 't..tt.tt...tt.......................'],
     },
     // (now and then, between them: the HOLLOW, a dead tree with a face in its trunk, two red eyes
     // and a gaping mouth you can see through)
     hollow: {
       pal: { t: '#07090b', T: '#12171c', e: '#a3221a' },
-      a: ['.t.......t.......t....t.', '..t...t..t..t...t....t..', 't..t...t.t.t...t..t.t...', '.t..t...ttt...t..t.t..t.', '..tt.t...tt..t..t.tt.t..', '....t.tt.tt.t.tt.tt..t..', '.tt..t..tttt.t..t...t...', '...tt.t..ttt.ttt..tt....',
-        '.....ttt.tTtt...tt......', '.......tttTtt.tt........', '........ttTtttt.........', '........tTttttt.........', '.......ttTttttt.........', '.......tTteetet.........', '.......tTtttttt.........', '.......tTtt..tt.........',
-        '.......tTt....t.........', '.......tTtt..tt.........', '.......tTttttttt........', '......ttTttttttt........', '......tTtttttttt........', '......tTtttttttt........', '......tTtttttttt........', '......tTtttttttt........',
-        '.....ttTttttttttt.......', '....t.tTtttt.tttt.......', '...t..tt.ttt..t..tt.....'],
+      a: [
+        '..............t...tt....t...............', '.........t..t..t.tt..tt..t...t..........', '......t..tt..tt.tt.t..t.tt..tt..t.......', '....t..tt..ttt..ttttttt..ttt..tt..t.....', '...t.tt..ttt..tttt..t.tttt..ttt..tt.t...', '..t..t.ttt..ttt..tttttt..ttt..ttt.t..t..',
+        '.t..tt..t.tt...ttt.tt.ttt...tt.t..tt..t.', 't..t...tt.t...t..tttTtt..t...t.tt...t..t', '..t..tt..t...t.....tTtt.....t...t.tt..t.', '.t..t...t..........tTtt..........t...t..', '..t...tt...........tTtt...........tt..t.', '.t..t..............tTt..............t..t',
+        '..t.................................t...', '....................ttTtttt.............', '....................tTttttt.............', '...................ttTttttt.............', '...................tTteetet.............', '...................tTtttttt.............',
+        '...................tTtt..tt.............', '...................tTt....t.............', '...................tTtt..tt.............', '...................tTttttttt............', '..................ttTttttttt............', '..................tTtttttttt............',
+        '..................tTtttttttt............', '..................tTtttttttt............', '..................tTtttttttt............', '.................ttTttttttttt...........', '................t.tTtttt.tttt...........', '...............t..tt.ttt..t..tt.........'],
+    },
+    // The HEADLESS HORSEMAN (OCTOBER): a black horse at a gallop, red-eyed, its rider cloaked and
+    // headless, holding up a flaming jack o' lantern
+    horseman: {
+      pal: { H: '#141417', h: '#2a2a30', e: '#ff3b2f', m: '#07070a', c: '#120e16', C: '#2a2032', n: '#7a1010', s: '#4a1c1c', j: '#ff8c1a', J: '#3a1a00', f: '#ffd23f' },
+      a: [
+        '..................ff......', '.................ffff.....', '.................jjjj.....', '................jJjJj.....', '.......n........jjjjj.....', '......ccc........JJj......',
+        '.....cCccc.......c........', '.....cCcccc.....c.........', '....ccCccccc..cc......mm..', '....cCccccccccc......mHHH.', '...ccCcccccc........mHHeH.', '...cccccccss.......mHHHHHH',
+        '..cccHHHsssssHHHHHHHHH.HH.', '.c.HHHHHHHHHHHHHHHHHH.....', 'mm.HhHHHHHHHHHHHHHHH......', 'm..HHHHHHHHHHHHHHHHH......', '...HHH.HHH....HHH.HHH.....', '...HH...HH....HH...HH.....',
+        '..HH.....HH...HH....HH....', '..H.......H..HH......H....', '.HH.......HH.H.......HH...', '.ss........s.ss.......s...'],
+      b: { 16: '...HHH.HHH....HHHHHH......', 17: '....HHHH......HHHH........', 18: '....HH.HH....HH..HH.......', 19: '...HH...HH..HH....HH......', 20: '...H.....H..H......H......', 21: '..ss.....ss.ss.....ss.....' },
+    },
+    // A ZOMBIE (OCTOBER, in a horde): grey-green, its arms out, shuffling; c and d, the THRILLER
+    // (claws up to one side, then the other)
+    zombie: {
+      pal: { h: '#2b2420', k: '#8aa279', e: '#f4f1b0', m: '#2a1a1a', c: '#5a4a6e', C: '#3e3350', K: '#6d8560', p: '#3b3a33', s: '#1b1b1b' },
+      a: [
+        '...hhhhh....', '..hkkkkkh...', '..kkekkek...', '..kkkkkkk...', '..kkmmmkk...', '...kkkkk....',
+        '..CcccccC...', '.CcccccccKKK', '.ccccccc....', '.Ccccc.cKKK.', '..ccccc.....', '..pppppp....',
+        '..pp..pp....', '..pp..pp....', '..pp..pp....', '.sss..sss...'],
+      b: { 12: '..pp...pp...', 13: '.pp....pp...', 14: '.pp....pp...', 15: 'sss...sss...' },
+      c: [
+        '...hhhhh..KK', '..hkkkkkh.K.', '..kkekkekc..', '..kkkkkkkc..', '..kkmmmkkc..', '...kkkkkcKK.',
+        '..CcccccC.K.', '.CccccccC...', '.ccccccc....', '..ccccc.....', '..ccccc.....', '..pppppp....',
+        '.pp...pp....', 'pp.....pp...', 'pp......pp..', 'ss......sss.'],
+      d: [
+        'KK..hhhhh...', '.K.hkkkkkh..', '..ckekkekk..', '..ckkkkkkk..', '..ckkmmmkk..', '.KKckkkkk...',
+        '.K.CcccccC..', '...CccccccC.', '....ccccccc.', '.....ccccc..', '.....ccccc..', '....pppppp..',
+        '....pp...pp.', '...pp.....pp', '..pp......pp', '.sss......ss'],
     },
     eyes: { pal: { e: '#ffd23f' }, a: ['ee...ee', 'ee...ee'] },
     // The WEREWOLF (under OCTOBER's full moon): the old movie kind, a man gone to fur: pointed ears,
@@ -412,6 +449,8 @@ function createVisitors(api) {
     oak: { speed: 0, frameMs: 0 },
     gnarl: { speed: 0, frameMs: 0 },
     hollow: { speed: 0, frameMs: 0 },
+    horseman: { speed: 78, frameMs: 120, monster: true, poke: 'laugh' },
+    zombie: { speed: 9, frameMs: 520, sway: 1, monster: true, poke: 'braains' },
     eyes: { speed: 0, frameMs: 0, fixed: true, poke: 'blink' },
     werewolf: { speed: 30, frameMs: 200, sway: 1, monster: true, poke: 'growl' },
     hand: { speed: 0, frameMs: 0, poke: 'sink' },
@@ -437,7 +476,7 @@ function createVisitors(api) {
   // (fixed: never mirrored, its order matters: the candles, the year's digits)
   // What each season sends (one visit at a time)
   const VISITS = {
-    halloween: ['frank', 'mummy', 'creature', 'nosferatu', 'ghost', 'bats', 'crows', 'spider', 'gremlin', 'bigspider', 'werewolf', 'lightsout', 'hand', 'possessed'],
+    halloween: ['frank', 'mummy', 'creature', 'nosferatu', 'ghost', 'bats', 'crows', 'spider', 'gremlin', 'bigspider', 'werewolf', 'lightsout', 'hand', 'possessed', 'horseman', 'zombies'],
     november: ['turkey', 'turkey', 'crows', 'geese', 'ducks', 'songbirds', 'swallows'],
     winter: ['penguin'],
     christmas: ['reindeer', 'reindeer'],
@@ -487,6 +526,7 @@ function createVisitors(api) {
     if (what === 'lightsout') return lightsOut();
     if (lights) return; // (nothing else while the lights are out)
     if (what === 'hand') return handVisit();
+    if (what === 'zombies') return hordeVisit();
     if (what === 'possessed') return possessVisit();
     if (what === 'gremlin') { // (in, a few pranks, off at a run)
       add('gremlin', (Math.random() < 0.5 ? -1 : 1) > 0 ? -30 : api.laneW() + 4, 1, { state: 'go', target: rand(0.2, 0.8) * api.laneW(), pranks: 2 + Math.floor(Math.random() * 2) });
@@ -521,6 +561,10 @@ function createVisitors(api) {
       if (v.x > W / 2) v.dir = -1;
     }
     else if (what === 'werewolf') werewolfVisit(dir, edge, W);
+    else if (what === 'horseman') { // (at a gallop, a laugh as it comes)
+      const v = add('horseman', edge(26 * U), dir, { prance: true });
+      say(v, 'HAHAHA!', 1400);
+    }
     else if (what === 'turkey') add('turkey', edge(12 * U), dir, { stopAt: rand(0.25, 0.65) * W, life: rand(2500, 4500) });
     else if (what === 'reindeer' || what === 'rudolph') { // (now and then, the one with the red nose)
       const red = what === 'rudolph' || Math.random() < 0.25;
@@ -640,7 +684,8 @@ function createVisitors(api) {
         const t = add(foreKind, 0, side ? -1 : 1, { state: 'fogtree' });
         scaleTree(t, big ? 3.6 : 1.1);
         const w = parseFloat(t.el.style.width);
-        t.x = side ? W - w * rand(0.45, 0.62) : -w * rand(0.38, 0.55);
+        const trunk = 8 / 36; // (where its trunk stands across it: its canopy arches in over the lane, toward the middle)
+        t.x = side ? W - W * rand(0, 0.06) - w * (1 - trunk) : W * rand(0, 0.06) - w * trunk;
         t.el.style.opacity = '0';
         t.el.classList.add('fog-tree', 'fore');
         t.depth = 1;
@@ -869,7 +914,8 @@ function createVisitors(api) {
   }
   function forestVisit() {
     const r = Math.random();
-    if (r < 0.12) bloodFog();
+    if (r < 0.2) { hordeVisit(); return; } // (a horde out of the trees and the mist)
+    if (r < 0.3) bloodFog();
     else if (r < 0.42) swell();
     else eyesIn();
   }
@@ -1097,6 +1143,79 @@ function createVisitors(api) {
 
   // THE HAND (OCTOBER): the floor rumbles under a bot and a hand comes up through it and grabs it;
   // the bot struggles, breaks free and runs for it, and the hand sinks back. Poked: it lets go
+  // A ZOMBIE HORDE (OCTOBER): three to seven, shuffling in from one side (out of the trees and the
+  // mist in the forest), some clawing up out of the ground along the way; now and then, all at once,
+  // they break into the THRILLER, in time with the music (or their own count, with none on), four
+  // bars, then shuffle on and off the card
+  let horde = null;
+  function hordeVisit() {
+    const W = api.laneW();
+    const dir = Math.random() < 0.5 ? 1 : -1;
+    const n = 3 + Math.floor(Math.random() * 5);
+    const zw = 12 * U;
+    const now = performance.now();
+    horde = { dir, zs: [], danced: false, danceAt: now + rand(5000, 10000), dances: Math.random() < 0.65 };
+    for (let i = 0; i < n; i++) {
+      const up = Math.random() < 0.4; // (out of the ground, somewhere along the way)
+      const x = up ? rand(0.12, 0.8) * W : (dir > 0 ? -zw - 4 - i * rand(16, 30) : W + 4 + i * rand(16, 30));
+      const z = add('zombie', x, dir, { speed: KINDS.zombie.speed * rand(0.75, 1.25), horde });
+      if (up) {
+        z.state = 'rise';
+        z.depth = 16 * U + 2;
+        z.t0 = now + rand(0, 4000);
+        z.el.style.clipPath = 'inset(-80px -80px 0 -80px)'; // (below the floor, out of sight)
+        z.svgT = ` translateY(${z.depth}px)`;
+      }
+      horde.zs.push(z);
+    }
+    say(horde.zs[0], pick(['braaains...', 'uuurgh', 'BRAAAINS']), 1600);
+    api.botEvent('visit-zombies');
+  }
+  // (the zombies: rising, and the dance, all of them together)
+  function zombieFrame(v, now) {
+    if (v.state === 'rise') {
+      if (now < v.t0) return;
+      const p = Math.min(1, (now - v.t0) / 1500);
+      v.svgT = ` translateY(${(v.depth * (1 - p) + (p < 1 && Math.random() < 0.5 ? 1 : 0)).toFixed(1)}px)`;
+      if (p >= 1) { v.state = 'go'; v.svgT = ''; v.el.style.clipPath = ''; }
+    } else if (v.state === 'dance') {
+      const h = v.horde;
+      const i = Math.floor((now - h.t0) / h.ms);
+      const left = i % 2 === 1;
+      v.el.classList.toggle('z-c', !left);
+      v.el.classList.toggle('z-d', left);
+      v.x = v.danceX + (left ? -2 : 2) * U; // (the shuffle, side to side on the beat)
+      if (now > h.until) {
+        v.el.classList.remove('z-c', 'z-d');
+        v.state = 'go';
+        v.dir = h.dir;
+        v.still = false;
+      }
+    }
+  }
+  function hordeTick(now) {
+    if (!horde) return;
+    const W = api.laneW();
+    horde.zs = horde.zs.filter((z) => !z.gone);
+    if (!horde.zs.length) { horde = null; return; }
+    if (horde.danced || !horde.dances || now < horde.danceAt) return;
+    const on = horde.zs.filter((z) => z.state === 'go' && z.x > 0 && z.x < W - 12 * U);
+    if (on.length < 2) { horde.danceAt = now + 1500; return; }
+    horde.danced = true;
+    const b = typeof Music !== 'undefined' && Music.beat ? Music.beat() : null;
+    horde.ms = b ? b.period * 1000 : 520;
+    horde.t0 = b ? now - b.phase * horde.ms : now; // (on the music's own beat)
+    horde.until = horde.t0 + horde.ms * 16;
+    for (const z of horde.zs) {
+      if (z.state !== 'go') continue;
+      z.state = 'dance';
+      z.danceX = z.x;
+      z.dir = 1; // (all facing the same way, for the moves)
+      z.still = true;
+    }
+    say(on[0], b ? '♪ THRILLER ♪' : '♪', 1800);
+    api.botEvent('zombie-thriller');
+  }
   function handVisit() {
     const bots = api.walkers().filter((b) => !['startled', 'vanish', 'poked'].includes(b.state));
     if (!bots.length) return;
@@ -1999,6 +2118,13 @@ function createVisitors(api) {
       v.el.classList.add('v-stomp');
       setTimeout(() => v.el.classList.remove('v-stomp'), 700);
       api.startle(v, 80);
+    } else if (k.poke === 'laugh') { // (a laugh, the jack o' lantern held high: every bot near it jumps)
+      say(v, 'HAHAHAHA!', 1200);
+      api.startle(v, 120);
+    } else if (k.poke === 'braains') {
+      say(v, pick(['BRAAAINS', 'uuurgh', 'mmmrrgh']), 1000);
+      v.el.classList.add('v-wobble');
+      setTimeout(() => v.el.classList.remove('v-wobble'), 900);
     } else if (k.poke === 'groan') {
       say(v, 'mmmMMPH');
       v.el.classList.add('v-wobble');
@@ -2171,6 +2297,7 @@ function createVisitors(api) {
     if (!fog && hauntedForest && spooky()) startFog(true); // (the HAUNTED FOREST stands, all month)
     if (fog) fogFrame(now);
     if (lights) lightsFrame(now);
+    hordeTick(now);
     if (!foggy() && !lights && !list.some((v) => v.state !== 'scenery' && v.state !== 'fogtree') && now > nextVisit) {
       // (the VIRUS: any time of year, now and then; a FOG now and then in NOVEMBER; otherwise the
       // season's visitors, if any)
@@ -2203,6 +2330,8 @@ function createVisitors(api) {
         eyesFrame(v, now);
       } else if (v.kind === 'hand') {
         handFrame(v, now);
+      } else if (v.kind === 'zombie' && v.state !== 'go') {
+        zombieFrame(v, now);
       } else if (v.kind === 'werewolf') {
         werewolfFrame(v, now, dt, W);
       } else if (v.kind === 'spirit') { // (up and away, swaying, fading)
@@ -2389,6 +2518,7 @@ function createVisitors(api) {
   // (forget: the dev page's CLEAR ALL, the HAUNTED FOREST too)
   function clear(forget = false) {
     if (forget) hauntedForest = false;
+    horde = null;
     if (fog) { fog.back.remove(); fog.fore.remove(); fog.dark.remove(); if (fog.moon) fog.moon.remove(); fog = null; }
     if (lights) { lights.dark.remove(); lights.eyes.forEach((e) => e.remove()); if (lights.red) lights.red.remove(); lights = null; }
     api.lane.querySelectorAll('.moon-sky, .night-dark').forEach((e) => e.remove());

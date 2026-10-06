@@ -3590,3 +3590,6 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
 .lane-fore { position: absolute; z-index: 0; pointer-events: none; clip-path: inset(-400px 0 -400px 0); }
 .lane-fore .visitor { position: absolute; left: 0; bottom: 0; }
 .lane-fore .visitor.fog-tree { pointer-events: none; transition: opacity 3s ease-in; will-change: transform; }
+/* The zombies' THRILLER (visitors.js): claws up to one side (z-c), then the other (z-d), on the beat */
+.visitor.z-c :is(.f-a, .f-b, .f-d), .visitor.z-d :is(.f-a, .f-b, .f-c) { display: none; }
+.visitor.z-c .f-c, .visitor.z-d .f-d { display: inline; }
