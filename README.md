@@ -57,43 +57,6 @@ tools/android/          its MainActivity, icon and splash images, and the test s
 .github/workflows/      android-apk.yml: builds the test APK on GitHub (Actions → Android test APK)
 ```
 
-## Layout editor
-
-A dev tool for moving and sizing the game's pieces on the phone itself (`js/editor.js`). Turn it on
-with **✎ EDIT LAYOUT** at the foot of SETTINGS (or `?edit` in the address); it stays on until its ✕.
-
-- **PICKING**: a tap picks the piece under it instead of pressing it (outlined, its size above it,
-  its parent dashed, and pink lines with the space in px to what's beside it). Tap **PICKING** to
-  switch to **USING THE GAME** and get around (open the STORE, start a game, pause), then back.
-  **▲ PARENT** and **▼ INSIDE** pick the piece around it or inside it.
-- **Drag** a picked piece to move it (a nudge, the space to what's beside it shown as it goes; a
-  tap still picks). **LOCK** freezes a piece: no dragging or editing it (grey dashed outline) until
-  UNLOCK; locks are kept on the device. **CLEAR** unpicks. **Grips** (small squares on the picked piece's right
-  edge, foot and corner) drag its width, height or both. Sizes are uncapped: a width or height set
-  by a grip, a typed number or +/− lifts whatever held the piece to its default (its max or min
-  size, a row stretching or squeezing it), so it can go past it either way; AUTO or ↺ gives it back.
-- **SHIFT** (or **⇧ AXIS / RATIO** in the panel, for a phone): a drag moves on one axis only (the
-  one moved along most), and the corner grip keeps the piece's proportions. **CTRL** (or **⌗ SNAP
-  8**): moves and sizes snap to 8px, the game's one gap.
-- **THIS ONE** or **ALL LIKE IT**: an edit goes to just this piece, or to every piece of its kind in
-  that part of the game (all six mode buttons, every STORE description); the top line shows the
-  selector and how many it covers.
-- **TEXT**: size, letter spacing, line height, weight, alignment. **BOX**: width and height (or
-  AUTO), padding on each side, shown or hidden. **SPACE TO WHAT'S BESIDE IT**: the px above, below,
-  left and right to the next piece or the parent's edge; type the space you want and its margin is
-  set to make it. **MOVE**: a nudge in px, and EARLIER / LATER in its row or column. **LAYER**: what's
-  in front (higher is in front: raise a button a LIGHTS OUT covers) and OVERFLOW (SHOW ALL for a box
-  that cuts off a glow). **ITS CONTENTS**: the gap between what's inside it, and how they're
-  justified and aligned.
-- **↺** puts one setting back to the game's own; **UNDO** steps back; **—** shrinks the panel to its
-  top line (picking still works). **▁ FOOT / ▔ TOP / ❐ FLOAT** places the panel: docked at the
-  foot or the top (drag the grip on its inner edge to make it taller or shorter; docked, it moves
-  itself out of the way of what's picked), or floating (drag its grip to move it anywhere, its
-  corner to size it). Where it sits and its size are kept on the device.
-- Edits are kept on the device and applied even with the editor off. **YOUR EDITS** lists them (PICK
-  one, or ✕ it), **SHOWING EDITS** flips to the original to compare, **EXPORT CSS** copies them as
-  CSS to send over and bake into `css/style.css`, and **RESET ALL** clears them.
-
 ## Android test APK
 
 GitHub builds the game as an Android app (Capacitor) when you ask it to: **Actions →

@@ -3566,8 +3566,6 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
 #pause-note { height: 20px; line-height: 20px; }
 .home-best { height: 18px; line-height: 18px; }
 .home-head { height: 26px; align-items: center; } /* (one height in every font) */
-/* (SETTINGS' footer: EDIT LAYOUT, the layout editor's switch (js/editor.js), as a link under DEV) */
-#edit-layout-btn { grid-column: 2; background: none; border: 0; font-family: inherit; color: var(--fg); cursor: pointer; }
 /* THE MAIN MENU's ← in its top left corner, back to the title screen; the title line keeps clear of it */
 .home-back { position: absolute; top: 8px; left: 8px; z-index: 2; width: 34px; height: 26px; padding: 0; display: flex; align-items: center; justify-content: center;
   background: transparent; border: 1px solid var(--fg-dim); border-radius: 4px; color: var(--fg); cursor: pointer; }

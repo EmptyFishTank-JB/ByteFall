@@ -5538,6 +5538,10 @@ if (window.BYTEFALL_APP) {
 }
 document.body.classList.toggle('dev-unlock', Unlocks.isDevUnlock());
 
+// (the old layout editor's saved edits, locks and panel: gone with it, so the layout is the game's own)
+for (const k of ['bytefall-layout-edits', 'bytefall-layout-locks', 'bytefall-layout-editor', 'bytefall-layout-editor-panel']) {
+  try { localStorage.removeItem(k); } catch (e) {}
+}
 initGame();
 updateFreeBtn();
 if (freeGrantedNow) showToast('DAILY DROP // CLAIM IT IN THE STORE');
