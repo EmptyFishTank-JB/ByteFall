@@ -309,7 +309,8 @@ const boosterFits = (id, m = mode) => !daily && BOOSTERS[id].modes.includes(m);
 // (switched on per mode: CLASSIC's choice isn't BLITZ's)
 const armedKey = () => `bytefall-boosters-on-${mode}`;
 let armedBoosts = new Set();
-const loadArmed = () => { armedBoosts = new Set((storage.get(armedKey()) || '').split(',').filter((id) => BOOSTERS[id] && boosterFits(id))); };
+// (one booster per game: an older save with several keeps the first)
+const loadArmed = () => { armedBoosts = new Set((storage.get(armedKey()) || '').split(',').filter((id) => BOOSTERS[id] && boosterFits(id)).slice(0, 1)); };
 const saveArmed = () => storage.set(armedKey(), [...armedBoosts].join(','));
 const LOOKAHEAD_MS = 60000;
 let lookaheadLeft = 0; // LOOKAHEAD: the play time it has left (counted while the game is being played)
@@ -4333,9 +4334,9 @@ function showKeys() {
   refreshPuzzleTools();
 }
 
-// The main menu's BOOSTERS: one button, saying what's on (none, its name, or the icons of several);
-// a tap opens its card: the ones owned for this mode, each switched on or off (on: used up in the
-// next game, at its first drop), and GET BOOSTERS (the STORE's)
+// The main menu's BOOSTERS: one button, saying what's on (none or its name); a tap opens its card:
+// the ones owned for this mode, one of them switched on at a time (on: used up in the next game, at
+// its first drop), and GET BOOSTERS (the STORE's)
 const boosterPickEl = document.getElementById('booster-pick');
 const boosterIds = () => Object.keys(BOOSTERS).filter((id) => !BOOSTERS[id].inGame && boosterFits(id));
 function boostersChanged() {
@@ -4356,7 +4357,7 @@ function openBoosterPick() {
   loadArmed();
   const owned = boosterIds().filter((id) => Progress.boosters(id) > 0);
   document.getElementById('booster-pick-note').textContent = owned.length
-    ? `Switch on the ones to use in your next ${MODES[mode].label} game. Each is used up at its first drop (SECOND CHANCE only if it saves you).`
+    ? `Switch on one to use in your next ${MODES[mode].label} game (one per game). It's used up at its first drop (SECOND CHANCE only if it saves you).`
     : 'You don\'t have any boosters for this mode yet.';
   const list = document.getElementById('booster-pick-list');
   list.textContent = '';
@@ -4370,8 +4371,9 @@ function openBoosterPick() {
     b.querySelector('.starter-pick-name').textContent = BOOSTERS[id].name;
     b.title = BOOSTERS[id].desc;
     b.addEventListener('click', () => {
-      if (armedBoosts.has(id)) armedBoosts.delete(id);
-      else armedBoosts.add(id);
+      const was = armedBoosts.has(id);
+      armedBoosts.clear(); // (one per game: switching one on switches the other off)
+      if (!was) armedBoosts.add(id);
       boostersChanged();
       openBoosterPick(); // (redrawn in place)
     });

@@ -112,9 +112,9 @@ STARTER EXPLOITS and BLACK BOXES cost KEYS and resources (a MASTER KEY buys any 
 | HINT | 10 | PUZZLE: lights the column the next bit goes in (worked out by js/puzzle-sim.js) |
 | UNDO | 8 | PUZZLE: takes back the last drop, even after running out of bits |
 
-The first five are switched on from the main menu's one BOOSTERS button (it says what's on: NONE ON,
-the booster's name, or the icons of several and how many), which opens a card of the ones owned for the
-mode, each with its icon, how many and ON / OFF, and GET BOOSTERS (the STORE's); per mode, for the modes they fit and paid for at
+The first five are switched on from the main menu's one BOOSTERS button (it says what's on: NONE ON or
+the booster's name; one booster per game), which opens a card of the ones owned for the
+mode, each with its icon, how many and ON / OFF (switching one on switches the other off), and GET BOOSTERS (the STORE's); per mode, for the modes they fit and paid for at
 a game's first drop (SECOND CHANCE only when it saves you); HINT and UNDO sit under a
 puzzle's drop buttons, and with none owned a second tap buys one. Never in DAILY or VS. A
 boosted game says so on its result screen.
