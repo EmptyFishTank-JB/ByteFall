@@ -110,9 +110,9 @@ boosted game says so on its result screen.
 KEYS (the first five to unlock: RNG, BITFLIP, BUFFER OVERFLOW, TROJAN, PIVOT), 35 (SWAP, WORM VIRUS,
 KEYLOGGER, PACKET SNIFFER, BACKDOOR) or 45 (LOGIC BOMB, HONEYPOT, DICTIONARY ATTACK, RAINBOW TABLE,
 BLACK BOX). Pick 2 on the main menu to take into a game, one in each slot (marked R): two of one kind
-(if you have two) or one each of two. The menu shows the two slots, LEFT and RIGHT, and what's in each
-(a tap on one takes it out), and under them every reserve you own and how many are going in (a tap
-puts one in the next empty slot); each is used once in the game. In the game, a tap arms
+(if you have two) or one each of two. The menu shows the two slots, LEFT and RIGHT, and what's in each,
+and BUY EXPLOITS under them (the STORE's reserves). A tap on a slot opens its card: every reserve you
+own and how many, to put in that slot, and EMPTY THIS SLOT; each is used once in the game. In the game, a tap arms
 it as your next drop, as an earned one, and it's used up (the ones not used stay yours). A slot with
 no reserve, or once its reserve is used, is the **BLACK MARKET**: a random exploit you've unlocked
 and its price (the same as a reserve's) under it, changing every 4 drops. Tap it for its price, tap

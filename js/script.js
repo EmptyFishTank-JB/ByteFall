@@ -3994,60 +3994,94 @@ function refreshBoosterRow() {
   }
 }
 
-// The main menu's RESERVES: the two side slots, what goes in each (a tap on a filled one empties
-// it), and every reserve exploit owned (and unlocked), how many, and how many are going in: a tap
-// puts one in the next empty slot (two of one kind, if there are two). None owned: a way to the STORE
+// The main menu's RESERVES: the two side slots, LEFT and RIGHT, what's in each (or EMPTY), and BUY
+// EXPLOITS under them (the STORE's reserves). A tap on a slot opens its card: every reserve exploit
+// owned (and unlocked), how many, to put in that slot (two of one kind, if there are two; one each
+// of two), and EMPTY to take it out
+const reservePickEl = document.getElementById('reserve-pick');
+let reservePickSlot = 0;
+function setReserves(ids) {
+  Progress.setReservesTaken(ids);
+  // (a game not yet under way takes them now; one under way, from the next game)
+  if (!started && !gameOver && !busy && !inAGame()) initGame();
+  refreshReserveRow();
+}
+function openReserveStore() {
+  closeReservePick();
+  setRecordsOpen(true, 'store');
+  const shop = document.getElementById('reserve-shop');
+  if (shop) requestAnimationFrame(() => shop.previousElementSibling.previousElementSibling.scrollIntoView({ block: 'start' }));
+}
+function closeReservePick() { reservePickEl.classList.add('hidden'); }
+function openReservePick(slot) {
+  reservePickSlot = slot;
+  const taken = Progress.reservesTaken();
+  const here = taken[slot] || null;
+  const other = taken[1 - slot] || null;
+  document.getElementById('reserve-pick-title').textContent = `// ${slot ? 'RIGHT' : 'LEFT'} SLOT`;
+  const owned = Progress.exploitOrder().filter((id) => Progress.reserves(id) > 0 && Progress.exploitInfo(id).unlocked);
+  document.getElementById('reserve-pick-note').textContent = owned.length
+    ? 'Pick a reserve exploit for this side of the exploit button. It\'s used once in the game; the ones you don\'t use stay yours.'
+    : 'You don\'t have any reserve exploits yet.';
+  const list = document.getElementById('reserve-pick-list');
+  list.textContent = '';
+  for (const id of owned) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    // (all of them already in the other slot: none left for this one)
+    const free = Progress.reserves(id) - (other === id ? 1 : 0);
+    b.className = `reserve-pick-item${here === id ? ' on' : ''}`;
+    b.disabled = free <= 0;
+    b.innerHTML = `<span class="exploit-glyph">${iconHtml(id)}</span><span class="reserve-pick-name"></span><span class="reserve-pick-count">\u00d7${Progress.reserves(id)}</span>`;
+    b.querySelector('.reserve-pick-name').textContent = HACKS[id].name;
+    b.addEventListener('click', () => {
+      const ids = taken.slice();
+      ids[slot] = id;
+      setReserves(ids);
+      closeReservePick();
+    });
+    list.appendChild(b);
+  }
+  if (here) {
+    const e = document.createElement('button');
+    e.type = 'button';
+    e.className = 'reserve-pick-item reserve-pick-empty';
+    e.textContent = 'EMPTY THIS SLOT';
+    e.addEventListener('click', () => { const ids = taken.slice(); ids[slot] = null; setReserves(ids); closeReservePick(); });
+    list.appendChild(e);
+  }
+  reservePickEl.classList.remove('hidden');
+  (list.querySelector('button:not(:disabled)') || document.getElementById('reserve-pick-buy')).focus();
+}
+document.getElementById('reserve-pick-close').addEventListener('click', closeReservePick);
+document.getElementById('reserve-pick-buy').addEventListener('click', openReserveStore);
+reservePickEl.addEventListener('click', (e) => { if (e.target === reservePickEl) closeReservePick(); }); // (a tap off the card)
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !reservePickEl.classList.contains('hidden')) { e.stopImmediatePropagation(); closeReservePick(); } }, true);
 function refreshReserveRow() {
   const row = document.getElementById('reserve-row');
   if (!row) return;
   row.hidden = !reserveFits() || mode === 'tutorial';
   if (row.hidden) return;
-  row.innerHTML = `<span class="booster-title">RESERVE EXPLOITS (${RESERVE_MAX} SLOTS, ONE EACH SIDE OF THE EXPLOIT BUTTON, EACH USED ONCE A GAME)</span>`;
-  const owned = Progress.exploitOrder().filter((id) => Progress.reserves(id) > 0 && Progress.exploitInfo(id).unlocked);
-  if (!owned.length) {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'booster-chip get';
-    b.textContent = 'GET SOME IN THE STORE';
-    b.addEventListener('click', () => setRecordsOpen(true, 'store'));
-    row.appendChild(b);
-    return;
-  }
+  row.innerHTML = `<span class="booster-title">RESERVE EXPLOITS</span>`;
   const taken = Progress.reservesTaken();
-  const changed = (ids) => {
-    Progress.setReservesTaken(ids);
-    // (a game not yet under way takes them now; one under way, from the next game)
-    if (!started && !gameOver && !busy && !inAGame()) initGame();
-    refreshReserveRow();
-  };
   for (let i = 0; i < RESERVE_MAX; i++) {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = `booster-chip reserve-slot${taken[i] ? ' on' : ''}`;
     b.textContent = `${i ? 'RIGHT' : 'LEFT'}: ${taken[i] ? HACKS[taken[i]].name : 'EMPTY'}`;
-    b.setAttribute('aria-label', taken[i] ? `${i ? 'Right' : 'Left'} slot: ${HACKS[taken[i]].name}. Tap to take it out` : `${i ? 'Right' : 'Left'} slot: empty`);
-    if (taken[i]) b.addEventListener('click', () => changed(taken.filter((_, n) => n !== i)));
-    else b.disabled = true;
+    b.setAttribute('aria-label', `${i ? 'Right' : 'Left'} reserve slot: ${taken[i] ? HACKS[taken[i]].name : 'empty'}. Tap to choose`);
+    b.addEventListener('click', () => openReservePick(i));
     row.appendChild(b);
   }
   const brk = document.createElement('span');
   brk.className = 'booster-break';
   row.appendChild(brk);
-  for (const id of owned) {
-    const b = document.createElement('button');
-    b.type = 'button';
-    const inGame = taken.filter((x) => x === id).length;
-    b.className = `booster-chip${inGame ? ' on' : ''}`;
-    b.textContent = `${HACKS[id].name} \u00d7${Progress.reserves(id)}${inGame ? ` (${inGame} IN)` : ''}`;
-    b.setAttribute('aria-pressed', String(inGame > 0));
-    b.addEventListener('click', () => {
-      const now = Progress.reservesTaken();
-      // (both slots full, or every one of these already in: no room for another)
-      if (now.length >= RESERVE_MAX || now.filter((x) => x === id).length >= Progress.reserves(id)) { SFX.play('denied'); return; }
-      changed([...now, id]);
-    });
-    row.appendChild(b);
-  }
+  const buy = document.createElement('button');
+  buy.type = 'button';
+  buy.className = 'booster-chip get';
+  buy.textContent = 'BUY EXPLOITS';
+  buy.addEventListener('click', openReserveStore);
+  row.appendChild(buy);
 }
 
 // SECOND CHANCE: the trace completes, but everything above the bottom 3 rows is wiped and the game
@@ -5079,6 +5113,7 @@ if (window.BYTEFALL_APP && !window.BYTEFALL_APP.live) {
 // at the main menu with nothing open, back to the start screen. false on the start screen: the
 // app goes to the background
 window.bytefallBack = () => {
+  if (!reservePickEl.classList.contains('hidden')) { closeReservePick(); return true; } // (a reserve slot's card)
   const start = document.getElementById('start-screen');
   if (start && !start.hidden) return false;
   if (homeOpen && !panelOpen() && window.showStartScreen) {

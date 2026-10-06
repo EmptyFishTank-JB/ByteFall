@@ -3097,7 +3097,21 @@ html.pixel-mode .walker.skater.walking[data-look="left"] .bot { transform: none;
 .booster-chip.on { border-style: solid; border-color: var(--accent); color: var(--accent); box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.4); }
 .booster-chip.get { border-style: solid; border-color: var(--fg-dim); color: var(--fg); }
 .booster-chip.reserve-slot { border-style: solid; } /* (a side slot: what goes in it, or EMPTY) */
-.booster-chip.reserve-slot:disabled { opacity: 0.55; cursor: default; }
+.booster-chip.reserve-slot { min-width: 9.5em; }
+/* (a reserve slot's card: the theme's color, not the game over's red) */
+#reserve-pick { z-index: 207; } /* (over the main menu and its toasts) */
+.reserve-pick-box { border-color: var(--fg-dim); box-shadow: 0 0 30px rgba(var(--fg-rgb), 0.25); width: min(360px, calc(100vw - 32px)); padding: 18px 18px; }
+.reserve-pick-box h2 { color: var(--accent); text-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5); font-size: 16px; margin: 0 0 6px; }
+.reserve-pick-list { display: flex; flex-direction: column; gap: 6px; margin: 12px 0; max-height: 50vh; overflow-y: auto; }
+.reserve-pick-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; font-family: inherit; font-size: 12px; letter-spacing: 1px; color: var(--fg); background: transparent; border: 1px solid var(--grid-line); border-radius: 4px; cursor: pointer; text-align: left; }
+.reserve-pick-item .exploit-glyph { width: 1.6em; text-align: center; color: var(--accent); }
+.reserve-pick-item .reserve-pick-name { flex: 1; }
+.reserve-pick-item .reserve-pick-count { color: var(--fg-dim); }
+.reserve-pick-item.on { border-color: var(--accent); color: var(--accent); }
+.reserve-pick-item:disabled { opacity: 0.4; cursor: default; }
+.reserve-pick-empty { justify-content: center; color: var(--fg-dim); border-style: dashed; }
+.reserve-pick-foot { display: flex; gap: 8px; justify-content: center; }
+.reserve-pick-foot button { font-family: inherit; font-size: 11px; letter-spacing: 1px; padding: 8px 12px; color: var(--fg); background: transparent; border: 1px solid var(--fg-dim); border-radius: 4px; cursor: pointer; }
 .booster-break { flex-basis: 100%; height: 0; } /* (the slots on one line, the exploits owned below) */
 /* PUZZLE: HINT and UNDO under the drop buttons, and the column HINT lights */
 .puzzle-tools { display: flex; justify-content: center; gap: 8px; margin-top: 6px; }

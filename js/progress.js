@@ -864,17 +864,16 @@ const Progress = (() => {
       save();
       return true;
     },
-    // (the picks still owned: an exploit taken twice needs two of it; at most 2)
+    // (the picks still owned, [LEFT, RIGHT], null for an empty slot: an exploit taken twice needs two of it)
     reservesTaken: () => {
       const left = {};
-      const out = [];
-      for (const id of d.reservesTaken || []) {
-        if (out.length >= 2 || !exploitInfo(id).unlocked) continue;
+      return [0, 1].map((i) => {
+        const id = (d.reservesTaken || [])[i];
+        if (!id || !EXPLOIT_ORDER.includes(id) || !exploitInfo(id).unlocked) return null;
         if (left[id] == null) left[id] = d.reserves[id] || 0;
-        if (left[id] > 0) { left[id]--; out.push(id); }
-      }
-      return out;
+        return left[id]-- > 0 ? id : null;
+      });
     },
-    setReservesTaken(ids) { d.reservesTaken = ids.slice(0, 2); save(); },
+    setReservesTaken(ids) { d.reservesTaken = [ids[0] || null, ids[1] || null]; save(); },
   };
 })();
