@@ -877,7 +877,8 @@ function fitBlockText(t) {
   while (tall() && size > 6) t.style.fontSize = `${(size -= 0.5)}px`;
 }
 function lockButtons() {
-  const shown = (el) => el.getClientRects().length;
+  // (not the main menu's: its boxes are set sizes of their own, their words fitted by fitHome)
+  const shown = (el) => el.getClientRects().length && !el.closest('#home');
   const btns = [...document.querySelectorAll(LOCKED_BUTTONS)].filter(shown);
   const texts = [...document.querySelectorAll(LOCKED_TEXT)].filter(shown);
   for (const b of [...btns, ...texts]) {
@@ -3251,7 +3252,8 @@ function updateHome() {
   homePlayBtn.textContent = inAGame() && mode !== 'tutorial' ? 'RESUME' : 'PLAY';
   refreshBoosterRow();
   refreshStarterRow();
-  fitHome(); // (the words fitted to their boxes)
+  fitHome(); // (the words fitted to their boxes; again once the mode's rows have all settled)
+  refitHome();
 }
 function updateTopIcons() {
   const inGame = !homeOpen; // (the tutorial too: PAUSE, as in a game)
@@ -3282,7 +3284,7 @@ function fitText(el, min = 7) {
 function fitHome() {
   if (homeEl.hidden) return;
   const FIT = '#level-bar, .home .modes button, .home-row button, #home-play, #difficulty-row button, .home .booster-one, #mode-info, #home-best, #daily-kinds button, #home-mode-name, .home .booster-title';
-  for (const el of homeEl.querySelectorAll(FIT)) fitText(el, el.id === 'mode-info' ? 7.5 : 8);
+  for (const el of homeEl.querySelectorAll(FIT)) fitText(el, el.id === 'mode-info' ? 7.5 : el.closest('#daily-kinds') ? 5.5 : 8); // (a DAILY card's words in em: its status line is the smallest)
 }
 // (and the game's other set boxes with words that change: the message line, VS's setup note)
 function refitHome() { requestAnimationFrame(() => { fitHome(); for (const id of ['message', 'vs-setup-note', 'pause-note']) fitText(document.getElementById(id)); }); }

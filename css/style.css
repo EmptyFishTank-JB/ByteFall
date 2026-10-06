@@ -3522,3 +3522,15 @@ body.in-game.can-pause .records-btn svg { left: auto; right: 4px; } /* (hugging 
 /* (the STORE's card starts where EXPLOITS' does, right under the card's top bar) */
 .records .menu-pane[data-pane="store"]:not([hidden]) { padding-top: 0; }
 .settings-row { margin-bottom: var(--gap); }
+/* (the ===== lines: the one gap above and below them, too, and the one gap from a section's note to its cards) */
+.store-rule, .rec-sep { margin: var(--gap) 0; }
+.panel-store .store-rule + .store-sub, .rec-sep + .rec-group { margin-top: 0; }
+.store-top::after { margin-top: var(--gap); }
+.store-scroll > .store-item:first-child { margin-top: var(--gap); }
+.panel-store .store-sub { margin-bottom: 4px; }
+.panel-store .store-sub-note { margin-bottom: var(--gap); }
+body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
+/* THE MAIN MENU's panel: the mode's description only as tall as its words (shrunk to fit when the
+   panel is short), its options right under it; the room left over goes above PLAY, which stays put */
+.home .mode-info { flex: 0 1 auto; }
+.home .home-panel { max-height: 292px; } /* (what the tallest mode, DAILY, needs) */
