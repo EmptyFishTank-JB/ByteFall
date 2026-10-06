@@ -3730,3 +3730,16 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
 /* (the big trees stay inside the card: it frames the scene; cut off at its inside edges and rounded
    foot, the lane's 6px over the card's padding below it included) */
 .lane-fore { clip-path: inset(-400px 0 -6px 0 round 0 0 8px 8px); }
+/* The game card's sky FEATHERED into the UI above: the clouds, the overcast's and the fog's dark,
+   the night and the moon's sky reach on past the lane's top edge (which stays where it is) and fade
+   out there, so the scene melts into the card instead of stopping at a line */
+.game-walkers { --feather: 56px; }
+.game-walkers :is(.cloud-layer, .cloud-dark, .fog-dark, .night-dark, .moon-sky, .fog-layer) {
+  top: calc(-1 * var(--feather));
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 var(--feather));
+  mask-image: linear-gradient(to bottom, transparent, #000 var(--feather));
+}
+.game-walkers .cloud-layer { height: calc(64% + var(--feather)); }
+.game-walkers .cloud-dark { height: calc(75% + var(--feather)); }
+.game-walkers .fog-layer { height: calc(100% + 6px + var(--feather)); }
+.game-walkers .moon-sky { clip-path: none; }

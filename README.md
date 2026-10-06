@@ -380,7 +380,9 @@ with lit tops and dark undersides, so you see them stack and how thick they are;
 fly at one of three depths among them (behind the middle layer, between, or in front) and now and
 then climb or dip a layer, flying in and out of the cloud. October's is purple-grey with lightning
 flickering inside it, lighting it from within; November's is plain grey. It lifts after a few
-minutes (over the forest, it stays). A button's tick (and buzz) comes on a successful tap, released on it, not
+minutes (over the forest, it stays). The game card's sky (the clouds, the overcast's and the fog's dark, the
+night, the moon's sky) is feathered at the top: it reaches 56px past the lane's top edge and fades
+out there, into the UI above. A button's tick (and buzz) comes on a successful tap, released on it, not
 on a touch that slides off. The buttons are one size in every mode and font, their words centered; a word that
 won't fit on a button shrinks, never under 10px. Through the game the font never changes a
 button's size or moves the HUD, the board or its buttons.
