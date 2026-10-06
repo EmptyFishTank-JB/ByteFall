@@ -3098,12 +3098,19 @@ html.pixel-mode .walker.skater.walking[data-look="left"] .bot { transform: none;
 
 /* KEYS: beside the level bar, in the accent color, after a key */
 .key-label { margin-left: 4px; color: var(--accent); letter-spacing: 1px; white-space: nowrap; }
-/* The STORE buttons, while the DAILY DROP waits: a dot */
-#home-store.has-drop, #pause-store.has-drop { position: relative; }
-#home-store.has-drop::after, #pause-store.has-drop::after {
-  content: ''; position: absolute; top: 4px; right: 6px; width: 7px; height: 7px; border-radius: 50%;
-  background: var(--accent); box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.8);
+/* The STORE buttons' sign: the currency sign in its corner, always there. Unlit, a dark tube; while the
+   DAILY DROP waits it lights up like a HOT NOW sign: the accent, a glow, a slow hum and a flicker now and then */
+#home-store, #pause-store { position: relative; }
+.store-lamp { position: absolute; top: 50%; right: 9px; translate: 0 -50%; display: flex; color: var(--fg-dim); opacity: 0.45; transition: color 0.3s, opacity 0.3s; pointer-events: none; }
+.store-lamp .cur-ico { width: 13px; height: 13px; }
+.has-drop .store-lamp { color: var(--accent); opacity: 1; filter: drop-shadow(0 0 3px rgba(var(--accent-rgb), 0.95)) drop-shadow(0 0 7px rgba(var(--accent-rgb), 0.6)); animation: lamp-hum 4.2s ease-in-out infinite; }
+@keyframes lamp-hum {
+  0%, 100% { opacity: 1; }
+  40% { opacity: 0.82; }
+  /* (the flicker: off, on, off, on, the way a neon sign catches) */
+  76% { opacity: 1; } 77% { opacity: 0.2; } 78% { opacity: 1; } 80% { opacity: 0.35; } 81% { opacity: 1; }
 }
+@media (prefers-reduced-motion: reduce) { .has-drop .store-lamp { animation: none; } }
 /* STORE: the balance, the sections, the boosters */
 .panel-store .store-keys { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 10px; letter-spacing: 2px; color: var(--fg-dim); }
 .panel-store .store-keys b { font-size: 16px; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }

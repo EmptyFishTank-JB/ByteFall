@@ -4202,9 +4202,13 @@ function showKeys() {
   document.getElementById('key-label').innerHTML = `${KEY_SVG} ${n}`;
   const inStore = document.getElementById('store-key-count');
   if (inStore) inStore.innerHTML = `${KEY_SVG} ${n}`;
+  // (the STORE buttons' sign: the currency sign, always there, lit like a HOT NOW sign while the DAILY DROP waits)
   for (const id of ['home-store', 'pause-store']) {
     const b = document.getElementById(id);
-    if (b) b.classList.toggle('has-drop', !!freeExploit.claimable);
+    if (!b) continue;
+    if (!b.querySelector('.store-lamp')) b.insertAdjacentHTML('beforeend', `<span class="store-lamp" aria-hidden="true">${CURRENCY_SVG}</span>`);
+    b.classList.toggle('has-drop', !!freeExploit.claimable);
+    b.setAttribute('aria-label', freeExploit.claimable ? 'Store: the daily drop is ready' : 'Store');
   }
   refreshBoosterRow();
   refreshStarterRow();
