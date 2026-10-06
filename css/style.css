@@ -1957,7 +1957,7 @@ header { margin-bottom: 6px; }
 .exploit-icon.ready { color: var(--fg); opacity: 1; border-color: var(--fg); box-shadow: 0 0 12px rgba(var(--fg-rgb), 0.7); text-shadow: 0 0 8px rgba(var(--fg-rgb), 0.9); }
 /* Armed as the next drop: glowing, pulsing amber */
 .exploit-icon.armed { color: var(--accent); opacity: 1; border-color: var(--accent); animation: amber-pulse 0.9s ease-in-out infinite; }
-/* THE SIDE SLOTS, either side of the exploit button: a RESERVE (an R in its corner) or one bought (a
+/* THE SIDE SLOTS, either side of the exploit button: a STARTER (an R in its corner) or one bought (a
    tick), ready to arm; or the BLACK MARKET's offer (dashed, its price in KEYS under it; a first
    tap lights it, pulsing, for the second to buy) */
 .exploit-row { gap: 10px; }
@@ -1971,8 +1971,8 @@ header { margin-bottom: 6px; }
 .exploit-icon.side-slot.turned .exploit-glyph { animation: slot-turn 0.35s steps(3); }
 @keyframes slot-turn { 0% { opacity: 0; transform: translateY(6px); } 100% { opacity: 1; transform: none; } }
 .slot-price { position: absolute; bottom: -15px; left: 0; right: 0; text-align: center; font-size: 10px; line-height: 1; color: var(--accent); }
-.reserve-tag { position: absolute; top: 1px; right: 3px; font-size: 8px; line-height: 1; color: var(--accent); }
-.store-item.reserve-item.locked { opacity: 0.45; }
+.starter-tag { position: absolute; top: 1px; right: 3px; font-size: 8px; line-height: 1; color: var(--accent); }
+.store-item.starter-item.locked { opacity: 0.45; }
 @keyframes amber-pulse {
   0%, 100% { box-shadow: 0 0 4px rgba(var(--accent-rgb), 0.4); }
   50% { box-shadow: 0 0 18px rgba(var(--accent-rgb), 0.95); }
@@ -3123,22 +3123,22 @@ html.pixel-mode .walker.skater.walking[data-look="left"] .bot { transform: none;
 }
 .booster-chip.on { border-style: solid; border-color: var(--accent); color: var(--accent); box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.4); }
 .booster-chip.get { border-style: solid; border-color: var(--fg-dim); color: var(--fg); }
-.booster-chip.reserve-slot { border-style: solid; } /* (a side slot: what goes in it, or EMPTY) */
-.booster-chip.reserve-slot { min-width: 9.5em; }
-/* (a reserve slot's card: the theme's color, not the game over's red) */
-#reserve-pick { z-index: 207; } /* (over the main menu and its toasts) */
-.reserve-pick-box { border-color: var(--fg-dim); box-shadow: 0 0 30px rgba(var(--fg-rgb), 0.25); width: min(360px, calc(100vw - 32px)); padding: 18px 18px; }
-.reserve-pick-box h2 { color: var(--accent); text-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5); font-size: 16px; margin: 0 0 6px; }
-.reserve-pick-list { display: flex; flex-direction: column; gap: 6px; margin: 12px 0; max-height: 50vh; overflow-y: auto; }
-.reserve-pick-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; font-family: inherit; font-size: 12px; letter-spacing: 1px; color: var(--fg); background: transparent; border: 1px solid var(--grid-line); border-radius: 4px; cursor: pointer; text-align: left; }
-.reserve-pick-item .exploit-glyph { width: 1.6em; text-align: center; color: var(--accent); }
-.reserve-pick-item .reserve-pick-name { flex: 1; }
-.reserve-pick-item .reserve-pick-count { color: var(--fg-dim); }
-.reserve-pick-item.on { border-color: var(--accent); color: var(--accent); }
-.reserve-pick-item:disabled { opacity: 0.4; cursor: default; }
-.reserve-pick-empty { justify-content: center; color: var(--fg-dim); border-style: dashed; }
-.reserve-pick-foot { display: flex; gap: 8px; justify-content: center; }
-.reserve-pick-foot button { font-family: inherit; font-size: 11px; letter-spacing: 1px; padding: 8px 12px; color: var(--fg); background: transparent; border: 1px solid var(--fg-dim); border-radius: 4px; cursor: pointer; }
+.booster-chip.starter-slot { border-style: solid; } /* (a side slot: what goes in it, or EMPTY) */
+.booster-chip.starter-slot { min-width: 9.5em; }
+/* (a starter slot's card: the theme's color, not the game over's red) */
+#starter-pick { z-index: 207; } /* (over the main menu and its toasts) */
+.starter-pick-box { border-color: var(--fg-dim); box-shadow: 0 0 30px rgba(var(--fg-rgb), 0.25); width: min(360px, calc(100vw - 32px)); padding: 18px 18px; }
+.starter-pick-box h2 { color: var(--accent); text-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5); font-size: 16px; margin: 0 0 6px; }
+.starter-pick-list { display: flex; flex-direction: column; gap: 6px; margin: 12px 0; max-height: 50vh; overflow-y: auto; }
+.starter-pick-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; font-family: inherit; font-size: 12px; letter-spacing: 1px; color: var(--fg); background: transparent; border: 1px solid var(--grid-line); border-radius: 4px; cursor: pointer; text-align: left; }
+.starter-pick-item .exploit-glyph { width: 1.6em; text-align: center; color: var(--accent); }
+.starter-pick-item .starter-pick-name { flex: 1; }
+.starter-pick-item .starter-pick-count { color: var(--fg-dim); }
+.starter-pick-item.on { border-color: var(--accent); color: var(--accent); }
+.starter-pick-item:disabled { opacity: 0.4; cursor: default; }
+.starter-pick-empty { justify-content: center; color: var(--fg-dim); border-style: dashed; }
+.starter-pick-foot { display: flex; gap: 8px; justify-content: center; }
+.starter-pick-foot button { font-family: inherit; font-size: 11px; letter-spacing: 1px; padding: 8px 12px; color: var(--fg); background: transparent; border: 1px solid var(--fg-dim); border-radius: 4px; cursor: pointer; }
 .booster-break { flex-basis: 100%; height: 0; } /* (the slots on one line, the exploits owned below) */
 /* PUZZLE: HINT and UNDO under the drop buttons, and the column HINT lights */
 .puzzle-tools { display: flex; justify-content: center; gap: 8px; margin-top: 6px; }
@@ -3208,8 +3208,8 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 @media (prefers-reduced-motion: reduce) { .res-pop { animation-name: res-pop-still; } @keyframes res-pop-still { 0%, 80% { opacity: 1; } 100% { opacity: 0; } } }
 
 /* The STORE's exploits and boxes: the icon left of the name, the price in chips, what's short */
-.reserve-item h3 { display: flex; align-items: center; gap: 8px; }
-.reserve-item .store-name { flex: 1; }
+.starter-item h3 { display: flex; align-items: center; gap: 8px; }
+.starter-item .store-name { flex: 1; }
 .store-ico { display: inline-flex; align-items: center; justify-content: center; width: 24px; margin-right: 6px; height: 24px; position: relative; color: var(--accent); font-size: 18px; }
 .store-ico svg { width: 20px; height: 20px; }
 .store-cost { display: flex; flex-wrap: wrap; gap: 4px 10px; margin: 6px 0 2px; font-size: 12px; letter-spacing: 1px; }
@@ -3221,7 +3221,7 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 /* A BLACK BOX's tier, on its icon */
 .box-tier { position: absolute; right: -4px; bottom: -3px; font-size: 9px; font-weight: bold; line-height: 1; color: var(--accent); text-shadow: 0 0 3px var(--bg-solid), 0 0 2px var(--bg-solid); letter-spacing: 0; }
 .exploit-glyph { position: relative; }
-.reserve-pick-item .exploit-glyph svg { width: 18px; height: 18px; }
+.starter-pick-item .exploit-glyph svg { width: 18px; height: 18px; }
 /* A side slot: a sealed BLACK BOX, its reel spinning, an ANTI-EXPLOIT's glitch */
 .exploit-icon.side-slot.sealed { animation: amber-pulse 1.6s ease-in-out infinite; }
 .exploit-icon.side-slot.rolling { color: var(--accent); border-color: var(--accent); }
@@ -3230,14 +3230,14 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 /* ADWARE's pop-up over a drop button */
 .column-buttons button.adware { color: var(--danger); border-color: var(--danger); background: repeating-linear-gradient(45deg, rgba(255, 77, 94, 0.18) 0 4px, transparent 4px 8px); opacity: 1; }
 
-/* An exploit's icon in brackets beside its name ([!]), in the STORE and a reserve slot's card */
+/* An exploit's icon in brackets beside its name ([!]), in the STORE and a starter slot's card */
 .bracketed { width: auto !important; gap: 1px; display: inline-flex; align-items: center; }
 .bracketed > svg, .bracketed > .ico { position: relative; }
 .ico-br { font-weight: normal; opacity: 0.8; font-size: 0.85em; }
 .store-ico.bracketed { position: relative; min-width: 44px; justify-content: flex-start; }
 .store-ico.bracketed svg { width: 16px; height: 16px; }
-.reserve-pick-item .exploit-glyph.bracketed { min-width: 3.2em; font-size: 14px; }
-.reserve-pick-item .exploit-glyph.bracketed svg { width: 15px; height: 15px; }
+.starter-pick-item .exploit-glyph.bracketed { min-width: 3.2em; font-size: 14px; }
+.starter-pick-item .exploit-glyph.bracketed svg { width: 15px; height: 15px; }
 .bracketed .box-tier { display: none; } /* (the name says I, II or III) */
 
 /* RNG's scramble: the bits churn in place, flickering */
@@ -3318,3 +3318,19 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 .store-buy .cur-ico, .shop-buy .cur-ico { width: 0.95em; height: 0.95em; margin-right: 4px; vertical-align: -0.12em; }
 /* A booster's icon on the main menu's booster buttons */
 .booster-chip .ico { width: 1.15em; height: 1.15em; vertical-align: -0.22em; margin-right: 2px; }
+
+/* A STORE item's deal: the price (have / cost under each icon) and OWNED as one tight block, BUY level with
+   its middle on the right (USE A MASTER KEY over BUY when it shows) */
+.store-deal { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.store-terms { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.store-terms .store-costs { padding: 2px 0 0; gap: 4px 12px; }
+.store-terms .booster-owned { font-size: 10.5px; letter-spacing: 1px; line-height: 1.2; }
+.store-terms .booster-owned:empty { display: none; }
+.store-btns { flex: none; display: flex; flex-direction: column; align-items: stretch; gap: 6px; }
+.store-btns .store-buy { align-self: auto; }
+.store-btns .store-master { margin: 0; font-size: 10px; letter-spacing: 1px; padding: 5px 8px; }
+/* (tight enough for a four-part price on one line beside BUY on a phone) */
+.store-terms .store-costs { gap: 2px 8px; flex-wrap: nowrap; }
+.store-terms .shop-cost { min-width: 0; font-size: 11px; letter-spacing: 0.5px; gap: 2px; }
+.store-terms .shop-cost .key-ico { width: 15px; height: 15px; }
+.store-btns .store-buy { padding: 6px 10px; letter-spacing: 1px; }

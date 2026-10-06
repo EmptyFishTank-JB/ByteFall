@@ -94,9 +94,9 @@ const Progress = (() => {
     keysEarned: 0, // every one ever earned
     keyBits: 0, // bits decrypted toward the next key (one every KEY_BITS)
     boosters: {}, // booster id -> how many owned
-    reserves: {}, // RESERVE EXPLOITS: exploit id -> how many owned
+    starters: {}, // STARTER EXPLOITS: exploit id -> how many owned
     puzzlePaid: {}, // puzzle key -> the day a solve of it last paid XP and KEYS (a replay pays once a day)
-    reservesTaken: [], // the 2 the player takes into each game (one a side slot; two of one kind, or one each of two)
+    startersTaken: [], // the 2 the player takes into each game (one a side slot; two of one kind, or one each of two)
     res: { bugs: 0, cache: 0, crypto: 0, rootkits: 0, master: 0 }, // the RESOURCES (ECONOMY.md), beside KEYS
     resPart: {}, // resource -> the part of the next one earned so far
     resEarned: {}, // resource -> every one ever earned
@@ -112,6 +112,8 @@ const Progress = (() => {
       d.keysEarned = saved.hashesEarned || 0;
       d.keyBits = saved.hashBits || 0;
     }
+    delete d.reserves; // (STARTERS were RESERVES before release: those aren't carried over)
+    delete d.reservesTaken;
   } catch (e) {}
   const save = () => {
     try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
@@ -512,7 +514,7 @@ const Progress = (() => {
   }
 
   // RESOURCES (ECONOMY.md has the whole table): earned by how bits are decrypted, spent with KEYS on
-  // RESERVE EXPLOITS and BLACK BOXES (the STORE, and the BLACK MARKET in a game).
+  // STARTER EXPLOITS and BLACK BOXES (the STORE, and the BLACK MARKET in a game).
   //   BUGS: bits decrypted down a column; CACHE: across a row; CRYPTO: chain links from the 3rd on;
   //   ROOTKITS: a bit decrypted across and down at once, layers broken, BYTES;
   //   MASTER KEYS: every 5th level, the day's first daily game, the day's first VS win. One pays
@@ -962,8 +964,8 @@ const Progress = (() => {
       save();
       return true;
     },
-    // RESERVE EXPLOITS (and BLACK BOXES): bought with KEYS and resources (PRICES), taken into a
-    // game (2, one in each side slot: reservesTaken, two of one kind or one each of two), each used
+    // STARTER EXPLOITS (and BLACK BOXES): bought with KEYS and resources (PRICES), taken into a
+    // game (2, one in each side slot: startersTaken, two of one kind or one each of two), each used
     // once there, then gone
     // RESOURCES and prices (above)
     resIds: () => [...RES_IDS],
@@ -990,24 +992,24 @@ const Progress = (() => {
     rollBox,
     // (testing and the dev page)
     addRes(id, n) { gain(id, n); save(); },
-    reserves: (id) => d.reserves[id] || 0,
-    addReserve(id, n = 1) { d.reserves[id] = (d.reserves[id] || 0) + n; save(); },
-    useReserve(id) {
-      if (!d.reserves[id]) return false;
-      d.reserves[id]--;
+    starters: (id) => d.starters[id] || 0,
+    addStarter(id, n = 1) { d.starters[id] = (d.starters[id] || 0) + n; save(); },
+    useStarter(id) {
+      if (!d.starters[id]) return false;
+      d.starters[id]--;
       save();
       return true;
     },
     // (the picks still owned, [LEFT, RIGHT], null for an empty slot: an exploit taken twice needs two of it)
-    reservesTaken: () => {
+    startersTaken: () => {
       const left = {};
       return [0, 1].map((i) => {
-        const id = (d.reservesTaken || [])[i];
+        const id = (d.startersTaken || [])[i];
         if (!id || !(BOX_IDS.includes(id) || (EXPLOIT_ORDER.includes(id) && exploitInfo(id).unlocked))) return null;
-        if (left[id] == null) left[id] = d.reserves[id] || 0;
+        if (left[id] == null) left[id] = d.starters[id] || 0;
         return left[id]-- > 0 ? id : null;
       });
     },
-    setReservesTaken(ids) { d.reservesTaken = [ids[0] || null, ids[1] || null]; save(); },
+    setStartersTaken(ids) { d.startersTaken = [ids[0] || null, ids[1] || null]; save(); },
   };
 })();

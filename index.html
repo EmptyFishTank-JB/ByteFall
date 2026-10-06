@@ -31,8 +31,8 @@
   } catch (e) {}
 </script>
 <title>BYTEFALL // decryption terminal</title>
-<script src="js/fonts.js?v=371"></script>
-<link rel="stylesheet" href="css/style.css?v=371">
+<script src="js/fonts.js?v=372"></script>
+<link rel="stylesheet" href="css/style.css?v=372">
 </head>
 <body>
   <!-- Dev: TWINKLE BACKGROUND (grid-bg.js): the starlight behind the whole game, off by default -->
@@ -235,7 +235,7 @@
             <div class="booster-shop" id="booster-shop"></div>
             <h3 class="store-sub">STARTER EXPLOITS</h3>
             <p class="store-sub-note">An exploit of your own to take into a game: up to 2 (tap a STARTER slot on the main menu to pick one), one each side of the exploit button. Tap one there to arm it as your next drop, as one the CHAIN METER earned; each is used once, and the ones you don't use stay yours. Each costs KEYS and RESOURCES, earned by how you decrypt: BUGS down a column, CACHE across a row, CRYPTO for chain links from the 3rd on, ROOTKITS for a bit decrypted across and down at once, layers broken and BYTES. Short of the price? A MASTER KEY (every 5th level, the day's first daily game, the day's first VS win) buys any exploit. A side taken in empty, or once its starter is used, is the BLACK MARKET: an exploit or BLACK BOX at these prices, a different one every 4 drops. It opens once the first encryption layer rises (in ZEN, after 8 drops). In CLASSIC, BLITZ and ZEN.</p>
-            <div class="booster-shop" id="reserve-shop"></div>
+            <div class="booster-shop" id="starter-shop"></div>
             <h3 class="store-sub">BLACK BOXES</h3>
             <p class="store-sub-note">A random pull, cheaper than what it's likely to hold. It waits sealed in its slot; tap it in the game and it rolls, landing on an exploit (any of its tier, locked or not) to arm when you like, or now and then an ANTI-EXPLOIT that goes off at once: ADWARE (a pop-up covers a drop button for 3 drops), SPYWARE (your next 3 bits are hidden) or RANSOMWARE (3 bits locked under a layer). The higher the box, the better the odds.</p>
             <div class="booster-shop" id="box-shop"></div>
@@ -376,7 +376,7 @@
         </div>
         <!-- BOOSTERS (script.js): the ones owned for this mode, switched on for the next game -->
         <div class="booster-row" id="booster-row" hidden></div>
-        <div class="booster-row" id="reserve-row" hidden></div>
+        <div class="booster-row" id="starter-row" hidden></div>
         <p class="home-best" id="home-best"></p>
         <button type="button" class="vs-start home-play" id="home-play">PLAY</button>
         </div>
@@ -670,14 +670,14 @@
     </div>
   </div>
   <!-- A STARTER SLOT's card (script.js): the starter exploits owned, to pick one for that slot -->
-  <div id="reserve-pick" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="reserve-pick-title">
-    <div class="overlay-box reserve-pick-box">
-      <h2 id="reserve-pick-title">// LEFT SLOT</h2>
-      <p class="overlay-note" id="reserve-pick-note"></p>
-      <div class="reserve-pick-list" id="reserve-pick-list"></div>
-      <div class="reserve-pick-foot">
-        <button type="button" id="reserve-pick-buy">BUY EXPLOITS</button>
-        <button type="button" id="reserve-pick-close">CLOSE</button>
+  <div id="starter-pick" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="starter-pick-title">
+    <div class="overlay-box starter-pick-box">
+      <h2 id="starter-pick-title">// LEFT SLOT</h2>
+      <p class="overlay-note" id="starter-pick-note"></p>
+      <div class="starter-pick-list" id="starter-pick-list"></div>
+      <div class="starter-pick-foot">
+        <button type="button" id="starter-pick-buy">BUY EXPLOITS</button>
+        <button type="button" id="starter-pick-close">CLOSE</button>
       </div>
     </div>
   </div>
@@ -701,45 +701,45 @@
     </div>
   </div>
 
-  <script src="js/bot-svg.js?v=371"></script>
-  <script src="js/unlocks.js?v=371"></script>
-  <script src="js/progress.js?v=371"></script>
-  <script src="js/music/output.js?v=371"></script>
-  <script src="js/music/mixes.js?v=371"></script>
-  <script src="js/sfx.js?v=371"></script>
-  <script src="js/music/music-bytefall-theme.js?v=371"></script>
-  <script src="js/music/music-sleep-mode.js?v=371"></script>
-  <script src="js/music/music-brute-force.js?v=371"></script>
-  <script src="js/music/music-deep-web.js?v=371"></script>
-  <script src="js/music/music-zero-day.js?v=371"></script>
-  <script src="js/music/music-system-restore.js?v=371"></script>
-  <script src="js/music/music-night-drive.js?v=371"></script>
-  <script src="js/music/music-standby-mode.js?v=371"></script>
-  <script src="js/music/music-core-dump.js?v=371"></script>
-  <script src="js/music/music-handshake.js?v=371"></script>
-  <script src="js/music/music-stack-overflow.js?v=371"></script>
-  <script src="js/music/music.js?v=371"></script>
-  <script src="js/data/puzzles.js?v=371"></script>
-  <script src="js/data/daily-puzzles.js?v=371"></script>
-  <script src="js/cpu.js?v=371"></script>
-  <script src="js/fx.js?v=371"></script>
-  <script src="js/viz.js?v=371"></script>
-  <script src="js/pixel.js?v=371"></script>
-  <script src="js/minibot.js?v=371"></script>
-  <script src="js/seasons.js?v=371"></script>
-  <script src="js/bigart.js?v=371"></script>
-  <script src="js/visitors.js?v=371"></script>
-  <script src="js/data/bot-anims.js?v=371"></script>
-<script src="js/wanderers.js?v=371"></script>
-  <script src="js/tutorial.js?v=371"></script>
-  <script src="js/puzzle-sim.js?v=371"></script>
-  <script src="js/script.js?v=371"></script>
-  <script src="js/grid-bg.js?v=371"></script>
-  <script src="js/extsource.js?v=371"></script>
-  <script src="js/player.js?v=371"></script>
-  <script src="js/store.js?v=371"></script>
-  <script src="js/start.js?v=371"></script>
-  <script src="js/place.js?v=371"></script>
-  <script src="js/saver.js?v=371"></script>
+  <script src="js/bot-svg.js?v=372"></script>
+  <script src="js/unlocks.js?v=372"></script>
+  <script src="js/progress.js?v=372"></script>
+  <script src="js/music/output.js?v=372"></script>
+  <script src="js/music/mixes.js?v=372"></script>
+  <script src="js/sfx.js?v=372"></script>
+  <script src="js/music/music-bytefall-theme.js?v=372"></script>
+  <script src="js/music/music-sleep-mode.js?v=372"></script>
+  <script src="js/music/music-brute-force.js?v=372"></script>
+  <script src="js/music/music-deep-web.js?v=372"></script>
+  <script src="js/music/music-zero-day.js?v=372"></script>
+  <script src="js/music/music-system-restore.js?v=372"></script>
+  <script src="js/music/music-night-drive.js?v=372"></script>
+  <script src="js/music/music-standby-mode.js?v=372"></script>
+  <script src="js/music/music-core-dump.js?v=372"></script>
+  <script src="js/music/music-handshake.js?v=372"></script>
+  <script src="js/music/music-stack-overflow.js?v=372"></script>
+  <script src="js/music/music.js?v=372"></script>
+  <script src="js/data/puzzles.js?v=372"></script>
+  <script src="js/data/daily-puzzles.js?v=372"></script>
+  <script src="js/cpu.js?v=372"></script>
+  <script src="js/fx.js?v=372"></script>
+  <script src="js/viz.js?v=372"></script>
+  <script src="js/pixel.js?v=372"></script>
+  <script src="js/minibot.js?v=372"></script>
+  <script src="js/seasons.js?v=372"></script>
+  <script src="js/bigart.js?v=372"></script>
+  <script src="js/visitors.js?v=372"></script>
+  <script src="js/data/bot-anims.js?v=372"></script>
+<script src="js/wanderers.js?v=372"></script>
+  <script src="js/tutorial.js?v=372"></script>
+  <script src="js/puzzle-sim.js?v=372"></script>
+  <script src="js/script.js?v=372"></script>
+  <script src="js/grid-bg.js?v=372"></script>
+  <script src="js/extsource.js?v=372"></script>
+  <script src="js/player.js?v=372"></script>
+  <script src="js/store.js?v=372"></script>
+  <script src="js/start.js?v=372"></script>
+  <script src="js/place.js?v=372"></script>
+  <script src="js/saver.js?v=372"></script>
 </body>
 </html>

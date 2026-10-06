@@ -29,8 +29,7 @@ const Store = (() => {
     item.className = 'store-item booster-item';
     item.dataset.booster = id;
     item.innerHTML = `<h3><span class="store-ico bracketed"><span class="ico-br">[</span>${BOOSTER_SVG[id] || ''}<span class="ico-br">]</span></span><span class="store-name">${b.name}</span></h3><p class="store-desc">${b.desc}</p>`
-      + '<div class="store-costs"></div>'
-      + `<div class="booster-buy-row"><span class="booster-owned"></span><button type="button" class="store-buy">${BUY_HTML()}</button></div>`;
+      + `<div class="store-deal"><div class="store-terms"><div class="store-costs"></div><span class="booster-owned"></span></div><div class="store-btns"><button type="button" class="store-buy">${BUY_HTML()}</button></div></div>`;
     item.querySelector('.store-buy').addEventListener('click', () => {
       if (!Progress.spendKeys(b.cost)) {
         SFX.play('denied');
@@ -51,17 +50,17 @@ const Store = (() => {
   // show their level; BLACK BOX itself isn't sold); each BLACK BOX shows its odds
   function shopItem(id, parent) {
     const item = document.createElement('div');
-    item.className = 'store-item booster-item reserve-item';
-    item.dataset.reserve = id;
+    item.className = 'store-item booster-item starter-item';
+    item.dataset.starter = id;
     const box = Progress.isBox(id);
     const odds = box ? Progress.boxOdds(id) : null;
     item.innerHTML = `<h3><span class="store-ico bracketed">${bracketIcon(id)}</span><span class="store-name">${itemName(id)}</span>`
       + `<span class="store-price">${box ? '' : `TIER ${Progress.tierOf(id) + 1}`}</span></h3>`
       + `<p class="store-desc">${itemDesc(id)}</p>`
-      + '<div class="store-costs"></div>'
       + (box ? `<p class="store-odds">TIER 1 EXPLOIT ${odds[0]}% // TIER 2 ${odds[1]}% // TIER 3 ${odds[2]}% // ANTI-EXPLOIT ${odds[3]}%</p>` : '')
-      + '<p class="store-need"></p>'
-      + `<div class="booster-buy-row"><span class="booster-owned"></span>${box ? '' : '<button type="button" class="store-buy store-master" hidden>USE A MASTER KEY</button>'}<button type="button" class="store-buy store-pay">${BUY_HTML()}</button></div>`;
+      // (the price and how many are owned as one block, BUY level with it; what's short under them)
+      + `<div class="store-deal"><div class="store-terms"><div class="store-costs"></div><span class="booster-owned"></span></div><div class="store-btns">${box ? '' : '<button type="button" class="store-buy store-master" hidden>USE A MASTER KEY</button>'}<button type="button" class="store-buy store-pay">${BUY_HTML()}</button></div></div>`
+      + '<p class="store-need"></p>';
     const buy = (master) => {
       if (!box && !Progress.exploitInfo(id).unlocked) { SFX.play('denied'); return; }
       if (!Progress.payFor(id, master)) {
@@ -69,11 +68,11 @@ const Store = (() => {
         say(`NOT ENOUGH // ${itemName(id)} NEEDS ${Progress.missing(id).map(([res, n]) => `${n} MORE ${RES_INFO[res].name}`).join(', ')}`);
         return;
       }
-      Progress.addReserve(id);
+      Progress.addStarter(id);
       SFX.play('egg');
       say(`BOUGHT // ${itemName(id)}${master ? ' WITH A MASTER KEY' : ''}: TAKE IT INTO A GAME FROM A STARTER SLOT ON THE MAIN MENU`);
       if (typeof showKeys === 'function') showKeys();
-      if (typeof refreshReserveRow === 'function') refreshReserveRow();
+      if (typeof refreshStarterRow === 'function') refreshStarterRow();
       render();
     };
     item.querySelector('.store-pay').addEventListener('click', () => buy(false));
@@ -81,8 +80,8 @@ const Store = (() => {
     if (m) m.addEventListener('click', () => buy(true));
     parent.appendChild(item);
   }
-  const reserveShop = document.getElementById('reserve-shop');
-  for (const id of Progress.exploitOrder()) if (Progress.sellable(id)) shopItem(id, reserveShop);
+  const starterShop = document.getElementById('starter-shop');
+  for (const id of Progress.exploitOrder()) if (Progress.sellable(id)) shopItem(id, starterShop);
   const boxShop = document.getElementById('box-shop');
   for (const id of Progress.boxIds()) shopItem(id, boxShop);
   // (the BLACK MARKET's look: the currency sign's tilted, glowing sign in the corner)
@@ -95,18 +94,18 @@ const Store = (() => {
 
   function render() {
     const keys = Progress.keys();
-    menu.querySelectorAll('.booster-item:not(.reserve-item)').forEach((item) => {
+    menu.querySelectorAll('.booster-item:not(.starter-item)').forEach((item) => {
       const b = boosters[item.dataset.booster];
       const n = Progress.boosters(item.dataset.booster);
       item.querySelector('.booster-owned').textContent = n ? `OWNED \u00d7${n}` : '';
       item.querySelector('.store-costs').innerHTML = costHtml({ keys: b.cost });
       item.querySelector('.store-buy').classList.toggle('short', keys < b.cost);
     });
-    menu.querySelectorAll('.reserve-item').forEach((item) => {
-      const id = item.dataset.reserve;
+    menu.querySelectorAll('.starter-item').forEach((item) => {
+      const id = item.dataset.starter;
       const box = Progress.isBox(id);
       const info = box ? { unlocked: true } : Progress.exploitInfo(id);
-      const n = Progress.reserves(id);
+      const n = Progress.starters(id);
       const missing = Progress.missing(id);
       item.classList.toggle('locked', !info.unlocked);
       item.querySelector('.booster-owned').textContent = !info.unlocked ? `UNLOCKS AT LV ${info.level}` : n ? `OWNED \u00d7${n}` : '';
