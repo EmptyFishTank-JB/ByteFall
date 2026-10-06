@@ -4077,8 +4077,7 @@ window.dailyDrop = {
 
 // KEYS: on the main menu under the title, and in the STORE; the STORE buttons get a mark
 // while the DAILY DROP waits
-// (KEYS: a key whose head is the game's currency sign, a 0 struck through twice)
-const KEY_SVG = '<svg class="key-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M0.5 4h7v8h-7zM2 5.5v5h4v-5z" fill="currentColor" fill-rule="evenodd"/><path d="M2.6 2.5h1.1v11H2.6zM4.3 2.5h1.1v11H4.3zM7.5 7h8v2h-8zM11.5 9H13v2.5h-1.5zM14 9h1.5v3H14z" fill="currentColor"/></svg>';
+const KEY_SVG = '<svg class="key-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 4h6v8H1zM3 6v4h2V6zM7 7h8v2H7zM11 9h1.5v2H11zM13.5 9H15v3h-1.5z" fill="currentColor" fill-rule="evenodd"/></svg>';
 // The RESOURCES (Progress, ECONOMY.md): a name and a small pixel icon each
 const resSvg = (d) => `<svg class="key-ico res-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="${d}" fill="currentColor" fill-rule="evenodd"/></svg>`;
 const RES_INFO = {
@@ -4088,7 +4087,8 @@ const RES_INFO = {
   // (the game's own coin: a hexagon, a C struck through twice)
   crypto: { name: 'CRYPTO', svg: '<svg class="key-ico res-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0.5l6.8 3.9v7.2L8 15.5l-6.8-3.9V4.4zM8 2.3 2.8 5.3v5.4L8 13.7l5.2-3V5.3z" fill="currentColor" fill-rule="evenodd"/><path d="M5.5 5.5h5V7h-3.5v2h3.5v1.5h-5zM7.2 4h1v1.5h-1zM7.2 10.5h1V12h-1zM8.8 4h1v1.5h-1zM8.8 10.5h1V12h-1z" fill="currentColor"/></svg>' },
   rootkits: { name: 'ROOTKITS', svg: resSvg('M4.5 1.5h2v13h-2zM9.5 1.5h2v13h-2zM1.5 4.5h13v2h-13zM1.5 9.5h13v2h-13z') },
-  master: { name: 'MASTER KEYS', svg: resSvg('M1 3h7v10H1zM3 5v6h3V5zM8 7h7v2H8zM10 9h1.5v3H10zM12.5 9H14v4h-1.5zM3 1h3v2H3z') },
+  // (a heavier key whose head is the game's currency sign, a 0 struck through twice)
+  master: { name: 'MASTER KEYS', svg: '<svg class="key-ico res-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M0.3 3.2h7.6v9.6H0.3zM2.1 5v6h4V5z" fill="currentColor" fill-rule="evenodd"/><path d="M2.4 1h1.5v14H2.4zM4.3 1h1.5v14H4.3zM7.9 6.7h7.8v2.6H7.9zM10.6 9.3h1.9v3.4h-1.9zM13.8 9.3h1.9v4.4h-1.9z" fill="currentColor"/></svg>' },
 };
 // THE BYTEFALL CURRENCY SIGN: a bit's 0 struck through twice, as a dollar sign is: no one
 // country's, it marks what's for sale (the BLACK MARKET)
@@ -4096,12 +4096,15 @@ const CURRENCY_SVG = '<svg class="cur-ico" viewBox="0 0 16 16" aria-hidden="true
 const resChip = (id, n) => `<span class="res-chip res-${id}" title="${RES_INFO[id].name}">${RES_INFO[id].svg}${n}</span>`;
 // A price as the BLACK MARKET (and the STORE) shows it: each resource's icon over what you have / what
 // it costs, green where you have enough and red where you're short
-const costHtml = (price) => ['keys', ...Progress.resIds()].filter((res) => price[res]).map((res) => {
+const costHtml = (price, keys = true) => [...(keys ? ['keys'] : []), ...Progress.resIds()].filter((res) => price[res]).map((res) => {
   const have = res === 'keys' ? Progress.keys() : Progress.res(res);
   return `<div class="shop-cost res-${res}${have < price[res] ? ' short' : ' afford'}" title="${RES_INFO[res].name}">${RES_INFO[res].svg}<span>${fmt(have)}/${price[res]}</span></div>`;
 }).join('');
-// BUY, with the currency sign
-const BUY_HTML = () => `${CURRENCY_SVG} BUY`;
+// BUY, with the currency sign; given a KEYS cost, that cost under it (red when you're short): the STORE's
+// buttons, leaving the price row for up to four resources
+const BUY_HTML = (keys = 0) => (keys
+  ? `<span class="buy-word">${CURRENCY_SVG} BUY</span><span class="buy-keys res-keys${Progress.keys() < keys ? ' short' : ''}">${KEY_SVG}${fmt(keys)}</span>`
+  : `${CURRENCY_SVG} BUY`);
 // A price as chips: KEYS first, then the resources in their order
 // (checked: each amount green if you have enough of it, red if not)
 const priceHtml = (price, checked = false) => ['keys', ...Progress.resIds()].filter((id) => price[id]).map((id) => {
@@ -5191,7 +5194,7 @@ function showMenuPane(pane) {
   if (box) box.scrollTop = 0;
 }
 // The page that scrolls in RULES & RECORDS: the open tab's dashed box (the card itself stays put)
-const menuScroller = () => recordsEl.querySelector('.menu-pane:not([hidden]) > .panel');
+const menuScroller = () => recordsEl.querySelector('.menu-pane:not([hidden]) > .panel .store-scroll') || recordsEl.querySelector('.menu-pane:not([hidden]) > .panel'); // (the STORE's: under its fixed top)
 // pane: which tab to show (the last one shown if left out)
 // RULES → TUTORIAL: the guided lesson (tutorial.js). A live session asks first, as a restart does.
 const tutorialBtn = document.getElementById('tutorial-btn');

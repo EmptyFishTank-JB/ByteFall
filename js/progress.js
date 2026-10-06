@@ -107,6 +107,7 @@ const Progress = (() => {
   try {
     const saved = JSON.parse(localStorage.getItem(KEY));
     if (saved) d = { ...d, ...saved, res: { ...d.res, ...(saved.res || {}) } };
+    for (const k of Object.keys(d.res)) d.res[k] = Math.min(999, d.res[k] || 0); // (RES_CAP)
     if (saved && saved.hashes != null && saved.keys == null) { // (KEYS were HASHES for a day)
       d.keys = saved.hashes;
       d.keysEarned = saved.hashesEarned || 0;
@@ -530,7 +531,11 @@ const Progress = (() => {
     if (run.mode === 'vs') return kind === 'link' || kind === 'cross' || kind === 'byte' ? 1 : 0;
     return run.mode === 'blitz' || run.mode === 'zen' ? 0.5 : 1;
   }
+  // (each resource holds at most RES_CAP; what's earned past it is lost. KEYS have no cap)
+  const RES_CAP = 999;
   function gain(res, n) {
+    if (!(n > 0)) return;
+    n = Math.min(n, RES_CAP - (d.res[res] || 0));
     if (!(n > 0)) return;
     d.res[res] = (d.res[res] || 0) + n;
     d.resEarned[res] = (d.resEarned[res] || 0) + n;

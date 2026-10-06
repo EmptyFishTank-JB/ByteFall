@@ -9,14 +9,14 @@ together.
 
 | Resource | Icon | Rarity | Earned by | Rate |
 |---|---|---|---|---|
-| **KEYS** | a key whose head is the currency sign, the theme's accent | money | bits decrypted (any way), chains of 5 and 7, levels, achievements, first puzzle solves, the day's first daily game, the DAILY DROP | 1 per 10 bits; +2 at a 5-link chain, +5 at 7; 10 a level; 10 an achievement; 5 the first daily game; 5 the DAILY DROP; first puzzle solves 2 / 4 / 6 (EASY / NORMAL / HARD) |
+| **KEYS** | key, the theme's accent | money | bits decrypted (any way), chains of 5 and 7, levels, achievements, first puzzle solves, the day's first daily game, the DAILY DROP | 1 per 10 bits; +2 at a 5-link chain, +5 at 7; 10 a level; 10 an achievement; 5 the first daily game; 5 the DAILY DROP; first puzzle solves 2 / 4 / 6 (EASY / NORMAL / HARD) |
 | **BUGS** | bug, roach brown `#b5824a` | common | bits decrypted **down a column** | 1 per 5 |
 | **CACHE** | stacked disks, light grey `#c8ccd0` | common | bits decrypted **across a row** | 1 per 5 |
 | **CRYPTO** | the game's coin: a hexagon with a C struck through twice, Bitcoin orange `#f7931a` | common | **chain links** from the 3rd on | 1 per link |
 | **ROOTKITS** | `#`, red `#ff3b4e` | uncommon | a bit decrypted **across and down at once**; **layers broken** down to their bit; **BYTES** (HARD) | 1 per 2 cross decrypts; 1 per 20 layers broken; 1 per BYTE |
-| **MASTER KEYS** | big key, deep gold `#e8b10e` with a glow | rare | **every 5th level**; the **day's first daily game**; the **day's first VS win** | 1 each |
+| **MASTER KEYS** | a heavier key whose head is the currency sign, deep gold `#e8b10e` with a glow | rare | **every 5th level**; the **day's first daily game**; the **day's first VS win** | 1 each |
 
-A bit decrypted both ways counts as a cross decrypt only, not also as BUGS and CACHE. Bits cleared
+Each resource holds at most **999** (KEYS have no cap); what's earned past that is lost. A bit decrypted both ways counts as a cross decrypt only, not also as BUGS and CACHE. Bits cleared
 by exploits earn no resources. Resources come whole once enough
 events add up; the part toward the next one is kept between games. The colors are the same in
 every theme (`--res-*` in `css/style.css`), but PAPER uses darker ones and MONOCHROME greys.

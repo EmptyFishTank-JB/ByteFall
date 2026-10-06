@@ -31,8 +31,8 @@
   } catch (e) {}
 </script>
 <title>BYTEFALL // decryption terminal</title>
-<script src="js/fonts.js?v=372"></script>
-<link rel="stylesheet" href="css/style.css?v=372">
+<script src="js/fonts.js?v=373"></script>
+<link rel="stylesheet" href="css/style.css?v=373">
 </head>
 <body>
   <!-- Dev: TWINKLE BACKGROUND (grid-bg.js): the starlight behind the whole game, off by default -->
@@ -220,9 +220,13 @@
         <div class="menu-pane" data-pane="store" hidden>
           <section class="panel panel-store">
             <div class="shop-sign store-sign" id="store-sign" aria-hidden="true"></div>
-            <h2>STORE</h2>
-            <p class="store-keys">YOUR KEYS <b id="store-key-count">0</b></p>
-            <div class="wallet" id="store-wallet" aria-label="Resources"></div>
+            <!-- (stays put: the title, your KEYS and resources; the rest scrolls under it) -->
+            <div class="store-top">
+              <h2>STORE</h2>
+              <p class="store-keys">YOUR KEYS <b id="store-key-count">0</b></p>
+              <div class="wallet" id="store-wallet" aria-label="Resources"></div>
+            </div>
+            <div class="store-scroll">
             <!-- DAILY DROP (script.js): once a day, a free exploit and some KEYS, claimed here -->
             <div class="store-item store-daily" data-item="daily-drop">
               <h3>DAILY DROP <span class="store-price" id="daily-drop-state">FREE</span></h3>
@@ -256,6 +260,7 @@
             <p class="store-msg" id="store-msg" aria-live="polite"></p>
             <button type="button" class="store-restore" id="store-restore">RESTORE PURCHASES</button>
             <p class="store-note">Bought something on another device, or reinstalled the game? RESTORE PURCHASES brings back what your account owns.</p>
+            </div>
           </section>
         </div>
         <!-- PUZZLES (script.js, renderPuzzleSelect): every puzzle of a set, in pages, to pick one -->
@@ -701,45 +706,45 @@
     </div>
   </div>
 
-  <script src="js/bot-svg.js?v=372"></script>
-  <script src="js/unlocks.js?v=372"></script>
-  <script src="js/progress.js?v=372"></script>
-  <script src="js/music/output.js?v=372"></script>
-  <script src="js/music/mixes.js?v=372"></script>
-  <script src="js/sfx.js?v=372"></script>
-  <script src="js/music/music-bytefall-theme.js?v=372"></script>
-  <script src="js/music/music-sleep-mode.js?v=372"></script>
-  <script src="js/music/music-brute-force.js?v=372"></script>
-  <script src="js/music/music-deep-web.js?v=372"></script>
-  <script src="js/music/music-zero-day.js?v=372"></script>
-  <script src="js/music/music-system-restore.js?v=372"></script>
-  <script src="js/music/music-night-drive.js?v=372"></script>
-  <script src="js/music/music-standby-mode.js?v=372"></script>
-  <script src="js/music/music-core-dump.js?v=372"></script>
-  <script src="js/music/music-handshake.js?v=372"></script>
-  <script src="js/music/music-stack-overflow.js?v=372"></script>
-  <script src="js/music/music.js?v=372"></script>
-  <script src="js/data/puzzles.js?v=372"></script>
-  <script src="js/data/daily-puzzles.js?v=372"></script>
-  <script src="js/cpu.js?v=372"></script>
-  <script src="js/fx.js?v=372"></script>
-  <script src="js/viz.js?v=372"></script>
-  <script src="js/pixel.js?v=372"></script>
-  <script src="js/minibot.js?v=372"></script>
-  <script src="js/seasons.js?v=372"></script>
-  <script src="js/bigart.js?v=372"></script>
-  <script src="js/visitors.js?v=372"></script>
-  <script src="js/data/bot-anims.js?v=372"></script>
-<script src="js/wanderers.js?v=372"></script>
-  <script src="js/tutorial.js?v=372"></script>
-  <script src="js/puzzle-sim.js?v=372"></script>
-  <script src="js/script.js?v=372"></script>
-  <script src="js/grid-bg.js?v=372"></script>
-  <script src="js/extsource.js?v=372"></script>
-  <script src="js/player.js?v=372"></script>
-  <script src="js/store.js?v=372"></script>
-  <script src="js/start.js?v=372"></script>
-  <script src="js/place.js?v=372"></script>
-  <script src="js/saver.js?v=372"></script>
+  <script src="js/bot-svg.js?v=373"></script>
+  <script src="js/unlocks.js?v=373"></script>
+  <script src="js/progress.js?v=373"></script>
+  <script src="js/music/output.js?v=373"></script>
+  <script src="js/music/mixes.js?v=373"></script>
+  <script src="js/sfx.js?v=373"></script>
+  <script src="js/music/music-bytefall-theme.js?v=373"></script>
+  <script src="js/music/music-sleep-mode.js?v=373"></script>
+  <script src="js/music/music-brute-force.js?v=373"></script>
+  <script src="js/music/music-deep-web.js?v=373"></script>
+  <script src="js/music/music-zero-day.js?v=373"></script>
+  <script src="js/music/music-system-restore.js?v=373"></script>
+  <script src="js/music/music-night-drive.js?v=373"></script>
+  <script src="js/music/music-standby-mode.js?v=373"></script>
+  <script src="js/music/music-core-dump.js?v=373"></script>
+  <script src="js/music/music-handshake.js?v=373"></script>
+  <script src="js/music/music-stack-overflow.js?v=373"></script>
+  <script src="js/music/music.js?v=373"></script>
+  <script src="js/data/puzzles.js?v=373"></script>
+  <script src="js/data/daily-puzzles.js?v=373"></script>
+  <script src="js/cpu.js?v=373"></script>
+  <script src="js/fx.js?v=373"></script>
+  <script src="js/viz.js?v=373"></script>
+  <script src="js/pixel.js?v=373"></script>
+  <script src="js/minibot.js?v=373"></script>
+  <script src="js/seasons.js?v=373"></script>
+  <script src="js/bigart.js?v=373"></script>
+  <script src="js/visitors.js?v=373"></script>
+  <script src="js/data/bot-anims.js?v=373"></script>
+<script src="js/wanderers.js?v=373"></script>
+  <script src="js/tutorial.js?v=373"></script>
+  <script src="js/puzzle-sim.js?v=373"></script>
+  <script src="js/script.js?v=373"></script>
+  <script src="js/grid-bg.js?v=373"></script>
+  <script src="js/extsource.js?v=373"></script>
+  <script src="js/player.js?v=373"></script>
+  <script src="js/store.js?v=373"></script>
+  <script src="js/start.js?v=373"></script>
+  <script src="js/place.js?v=373"></script>
+  <script src="js/saver.js?v=373"></script>
 </body>
 </html>

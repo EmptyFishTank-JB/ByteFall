@@ -29,7 +29,7 @@ const Store = (() => {
     item.className = 'store-item booster-item';
     item.dataset.booster = id;
     item.innerHTML = `<h3><span class="store-ico bracketed"><span class="ico-br">[</span>${BOOSTER_SVG[id] || ''}<span class="ico-br">]</span></span><span class="store-name">${b.name}</span></h3><p class="store-desc">${b.desc}</p>`
-      + `<div class="store-deal"><div class="store-terms"><div class="store-costs"></div><span class="booster-owned"></span></div><div class="store-btns"><button type="button" class="store-buy">${BUY_HTML()}</button></div></div>`;
+      + `<div class="store-deal"><div class="store-terms"><div class="store-costs"></div><span class="booster-owned"></span></div><div class="store-btns"><button type="button" class="store-buy">${BUY_HTML(b.cost)}</button></div></div>`;
     item.querySelector('.store-buy').addEventListener('click', () => {
       if (!Progress.spendKeys(b.cost)) {
         SFX.play('denied');
@@ -59,7 +59,7 @@ const Store = (() => {
       + `<p class="store-desc">${itemDesc(id)}</p>`
       + (box ? `<p class="store-odds">TIER 1 EXPLOIT ${odds[0]}% // TIER 2 ${odds[1]}% // TIER 3 ${odds[2]}% // ANTI-EXPLOIT ${odds[3]}%</p>` : '')
       // (the price and how many are owned as one block, BUY level with it; what's short under them)
-      + `<div class="store-deal"><div class="store-terms"><div class="store-costs"></div><span class="booster-owned"></span></div><div class="store-btns">${box ? '' : '<button type="button" class="store-buy store-master" hidden>USE A MASTER KEY</button>'}<button type="button" class="store-buy store-pay">${BUY_HTML()}</button></div></div>`
+      + `<div class="store-deal"><div class="store-terms"><div class="store-costs"></div><span class="booster-owned"></span></div><div class="store-btns">${box ? '' : `<button type="button" class="store-buy store-master" hidden title="Use a MASTER KEY in place of the price" aria-label="Use a MASTER KEY">USE ${RES_INFO.master.svg}</button>`}<button type="button" class="store-buy store-pay">${BUY_HTML(Progress.price(id).keys)}</button></div></div>`
       + '<p class="store-need"></p>';
     const buy = (master) => {
       if (!box && !Progress.exploitInfo(id).unlocked) { SFX.play('denied'); return; }
@@ -98,7 +98,7 @@ const Store = (() => {
       const b = boosters[item.dataset.booster];
       const n = Progress.boosters(item.dataset.booster);
       item.querySelector('.booster-owned').textContent = n ? `OWNED \u00d7${n}` : '';
-      item.querySelector('.store-costs').innerHTML = costHtml({ keys: b.cost });
+      item.querySelector('.store-buy').innerHTML = BUY_HTML(b.cost); // (KEYS on BUY)
       item.querySelector('.store-buy').classList.toggle('short', keys < b.cost);
     });
     menu.querySelectorAll('.starter-item').forEach((item) => {
@@ -109,7 +109,8 @@ const Store = (() => {
       const missing = Progress.missing(id);
       item.classList.toggle('locked', !info.unlocked);
       item.querySelector('.booster-owned').textContent = !info.unlocked ? `UNLOCKS AT LV ${info.level}` : n ? `OWNED \u00d7${n}` : '';
-      item.querySelector('.store-costs').innerHTML = costHtml(Progress.price(id)); // (have / cost: green, enough of it; red, short)
+      item.querySelector('.store-costs').innerHTML = costHtml(Progress.price(id), false); // (have / cost: green, enough of it; red, short; KEYS on BUY)
+      item.querySelector('.store-pay').innerHTML = BUY_HTML(Progress.price(id).keys);
       item.querySelector('.store-need').textContent = info.unlocked && missing.length
         ? `NEED ${missing.map(([res, k]) => `${k} MORE ${RES_INFO[res].name}`).join(', ')}` : '';
       const btn = item.querySelector('.store-pay');
