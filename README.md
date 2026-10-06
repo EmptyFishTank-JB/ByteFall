@@ -72,6 +72,9 @@ with **✎ EDIT LAYOUT** at the foot of SETTINGS (or `?edit` in the address); it
   edge, foot and corner) drag its width, height or both. Sizes are uncapped: a width or height set
   by a grip, a typed number or +/− lifts whatever held the piece to its default (its max or min
   size, a row stretching or squeezing it), so it can go past it either way; AUTO or ↺ gives it back.
+- **SHIFT** (or **⇧ AXIS / RATIO** in the panel, for a phone): a drag moves on one axis only (the
+  one moved along most), and the corner grip keeps the piece's proportions. **CTRL** (or **⌗ SNAP
+  8**): moves and sizes snap to 8px, the game's one gap.
 - **THIS ONE** or **ALL LIKE IT**: an edit goes to just this piece, or to every piece of its kind in
   that part of the game (all six mode buttons, every STORE description); the top line shows the
   selector and how many it covers.

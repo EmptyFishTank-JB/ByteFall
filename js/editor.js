@@ -40,6 +40,13 @@
   window.LayoutEditor = { open: () => { store.set(ON_KEY, 'on'); build(); ui.hidden = false; }, pick: (el) => pick(el) };
 
   const grips = [];
+  // MODIFIERS: SHIFT (or ⇧ in the panel) keeps a drag to one axis and a corner grip to the piece's
+  // proportions; CTRL (or ⌗ SNAP 8) snaps moves and sizes to 8px, the game's one gap
+  let shiftOn = false;
+  let snapOn = false;
+  const shiftOf = (e) => e.shiftKey || shiftOn;
+  const snapOf = (e) => e.ctrlKey || e.metaKey || snapOn;
+  const snap = (v, e) => (snapOf(e) ? Math.round(v / 8) * 8 : Math.round(v));
   let ui; let overlay; let picked = null; let scope = 'this'; let selecting = true; let undo = [];
 
   // Classes that come and go with a piece's state, left out of the selectors an edit is saved under
@@ -304,8 +311,15 @@
         const y0 = e.clientY;
         snapshot();
         const move = (ev) => {
-          if (g.includes('r')) sizeInto('width', `${Math.max(0, Math.round(w0 + ev.clientX - x0))}px`);
-          if (g.includes('b')) sizeInto('height', `${Math.max(0, Math.round(h0 + ev.clientY - y0))}px`);
+          let w = w0 + ev.clientX - x0;
+          let ht = h0 + ev.clientY - y0;
+          if (g === 'rb' && shiftOf(ev) && w0 > 0 && h0 > 0) { // (its proportions kept: the bigger change leads)
+            const k = Math.abs(w / w0 - 1) > Math.abs(ht / h0 - 1) ? w / w0 : ht / h0;
+            w = w0 * k;
+            ht = h0 * k;
+          }
+          if (g.includes('r')) sizeInto('width', `${Math.max(0, snap(w, ev))}px`);
+          if (g.includes('b')) sizeInto('height', `${Math.max(0, snap(ht, ev))}px`);
           writeSheet();
           drawOverlay();
         };
@@ -330,6 +344,8 @@
         <button type="button" data-ed="all">ALL LIKE IT</button>
         <button type="button" data-ed="lock">LOCK</button>
         <button type="button" data-ed="clear">CLEAR</button>
+        <button type="button" data-ed="shift" title="Hold SHIFT: a move on one axis, a corner keeps proportions">⇧ AXIS / RATIO</button>
+        <button type="button" data-ed="snap" title="Hold CTRL: snap to 8px">⌗ SNAP 8</button>
         <button type="button" data-ed="undo">UNDO</button>
         <button type="button" data-ed="min">—</button>
         <button type="button" data-ed="dock">▁ FOOT</button>
@@ -369,9 +385,12 @@
         dragging = { id: e.pointerId, x0: e.clientX, y0: e.clientY, n: nudgeOf(), moved: false, sel: selOf(picked) };
       }
       if (e.type === 'pointermove' && dragging && e.pointerId === dragging.id) {
-        const dx = Math.round(e.clientX - dragging.x0);
-        const dy = Math.round(e.clientY - dragging.y0);
+        let dx = e.clientX - dragging.x0;
+        let dy = e.clientY - dragging.y0;
         if (!dragging.moved && Math.abs(dx) + Math.abs(dy) < 5) return;
+        if (shiftOf(e)) { if (Math.abs(dx) > Math.abs(dy)) dy = 0; else dx = 0; } // (one axis)
+        dx = snap(dragging.n[0] + dx, e) - dragging.n[0];
+        dy = snap(dragging.n[1] + dy, e) - dragging.n[1];
         if (!dragging.moved) { dragging.moved = true; snapshot(); }
         (edits[dragging.sel] = edits[dragging.sel] || {}).translate = `${dragging.n[0] + dx}px ${dragging.n[1] + dy}px`;
         writeSheet();
@@ -422,6 +441,8 @@
       ui.querySelector('[data-ed="all"]').classList.toggle('on', scope === 'all');
       renderBody();
     }
+    if (a === 'shift') { shiftOn = !shiftOn; b.classList.toggle('on', shiftOn); }
+    if (a === 'snap') { snapOn = !snapOn; b.classList.toggle('on', snapOn); }
     if (a === 'clear' && picked) { picked.classList.remove('ed-drag'); picked = null; renderBody(); drawOverlay(); } // (nothing picked)
     if (a === 'lock' && picked) {
       const p = pathOf(picked);
