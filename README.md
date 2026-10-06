@@ -834,8 +834,8 @@ mist lifting after 20 seconds (or ?fog=1).
 
 **OCTOBER's scares.** On HALLOWEEN (the whole of October) the fog is the HAUNTED FOREST, and once it's
 come it STAYS, on every card (the start screen, the game card, the screen saver) for the rest of the
-month, the app closed and opened again or not (the month it came is saved); till it's come, a visit
-that comes due in October is the forest's fog 45% of the time (15% in November): pines and bare, twisted trees, bigger than November's and a shade lighter so they show
+month while the game's open (not kept once it's closed); till it's come, a visit that comes due in
+October is the forest's fog 45% of the time (15% in November): pines and bare, twisted trees, bigger than November's and a shade lighter so they show
 against the dark, and two big gnarled trees in front of everything at either edge, the path the
 bots walk between them. The mist never lifts; it breathes, thinning and thickening a little, and
 now and then swells heavy again for its wanderer (or a monster) to come out of. In the forest:
