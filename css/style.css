@@ -1951,8 +1951,6 @@ header { margin-bottom: 6px; }
 .exploit-glyph svg { width: 22px; height: 22px; }
 .exploit-count { position: absolute; top: -7px; right: -7px; padding: 0 4px; border-radius: 6px; background: var(--fg); color: var(--panel); font-size: 10px; font-weight: bold; }
 .exploit-count[hidden] { display: none; }
-.exploit-free { position: absolute; left: calc(100% + 10px); top: 50%; transform: translateY(-50%); font-size: 12px; font-weight: bold; letter-spacing: 1px; white-space: nowrap; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.7); animation: warn-pulse 1.6s ease-in-out infinite; }
-.exploit-free[hidden] { display: none; }
 /* An exploit to arm: bright green glow, showing that exploit's icon */
 .exploit-icon.ready { color: var(--fg); opacity: 1; border-color: var(--fg); box-shadow: 0 0 12px rgba(var(--fg-rgb), 0.7); text-shadow: 0 0 8px rgba(var(--fg-rgb), 0.9); }
 /* Armed as the next drop: glowing, pulsing amber */
@@ -3508,3 +3506,19 @@ body.in-game.can-pause .records-btn svg { left: auto; right: 4px; } /* (hugging 
    it or its glow, and sits in from the card's right edge; the STORE card itself doesn't scroll, its
    .store-scroll does, so the sign never rides up over BACK) */
 .store-sign { right: -6px; z-index: 6; }
+/* ONE GAP: the space between the main menu's RULES & RECORDS and SETTINGS, between every set of
+   buttons and every set of cards across the game (the main menu, PAUSE, the STORE's and EXPLOITS'
+   cards, SETTINGS' buttons) */
+:root { --gap: 8px; }
+.home { gap: var(--gap); }
+.home .modes, .home-row { gap: var(--gap); }
+.vs-setup.vs-pause, .vs-pause .pause-row { gap: var(--gap); }
+.booster-shop { gap: var(--gap); }
+.booster-shop > .store-item { margin-top: 0; }
+.store-item { margin-top: var(--gap); }
+.hack-item { margin-top: var(--gap); }
+.theme-list, .settings-row { gap: var(--gap); }
+.settings > .toggle-btn + .toggle-btn { margin-top: var(--gap); }
+/* (the STORE's card starts where EXPLOITS' does, right under the card's top bar) */
+.records .menu-pane[data-pane="store"]:not([hidden]) { padding-top: 0; }
+.settings-row { margin-bottom: var(--gap); }

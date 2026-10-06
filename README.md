@@ -373,7 +373,7 @@ on the pages you scroll (RULES, the STORE, SETTINGS) does larger text push what'
 ## Daily bonus, vibration and resetting
 
 - **Daily bonus:** the first time the game opens each day (local date), one
-  free exploit waits in the exploit button, marked FREE!.
+  free exploit (claimed in the STORE's DAILY DROP) waits loaded in the exploit button.
   Arming it makes one of the first five exploits (RNG, BITFLIP, BUFFER OVERFLOW, TROJAN, WORM VIRUS) your next drop, even if you haven't unlocked it yet, so new players get to try them. It doesn't stack
   if unused, and it's hidden in DAILY and PUZZLE so those stay equal for
   everyone. Its notice (like every notification but achievements) waits until
@@ -437,7 +437,7 @@ the EXPLOITS step pulses SLOTS and the cards; the menu steps' banners sit mid-sc
 
 THE EXPLOIT BUTTON: under the grid in its own row, below the drop buttons with a gap
 between (it's not one of them), a square the size of a grid square with the exploit's
-symbol in the middle; FREE! beside it. With nothing held, tapping it just buzzes: the EXPLOITS
+symbol in the middle (the daily free exploit just loaded in it, unmarked). With nothing held, tapping it just buzzes: the EXPLOITS
 card (the loadout) opens only from its EXPLOITS button. The HUD's labels (SCORE ... CURRENT) are brighter.
 
 The gear/speaker icon in the corner opens the settings: sound and music on or

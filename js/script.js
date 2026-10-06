@@ -4590,8 +4590,6 @@ function updateFreeBtn() {
   exploitBtn.classList.toggle('ready', !armedHack && !!ready);
   exploitBtn.title = armedHack ? `${HACKS[armedHack].name} // ARMED: drop it`
     : ready ? `${HACKS[ready].name} // tap to arm it as your next drop` : 'Exploits';
-  // FREE! beside the button when the ready one is the daily free exploit
-  document.getElementById('exploit-free').hidden = !!armedHack || heldHacks.length > 0 || !ready;
   const count = heldHacks.length + (freeAllowed() ? 1 : 0);
   const countEl = document.getElementById('exploit-count');
   countEl.hidden = count < 2 || !!armedHack;
