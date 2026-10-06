@@ -187,8 +187,29 @@ function createVisitors(api) {
     oak: {
       pal: { t: '#07090b', T: '#12171c' },
       a: ['..t.......t.....t.....', '...t...t..t....t..t...', 't..t..t...tt..t..t....', '.t.tt.t....t.tt.t...t.', '..t.tt.t...ttt..t..t..', '...t.ttt...tt..tt.t...', 't...t.ttt..tt.tt.t....', '.tt..t..tt.ttttt.t..tt', '...tt.t..tttttt.tttt..', '.....tttt.tTtt.tt.....',
-        '........ttTttt........', '.........tTtt.........', '.........tTt..........', '.........tTt..........', '.........tTtt.........', '.........tTtt.........', '.........tTtt.........', '.........tTtt.........', '........ttTtt.........', '........tTttt.........',
-        '........tTttt.........', '........tTttt.........', '........tTtttt........', '.......ttTtttt........', '.......tTttttt........', '......ttTtttttt.......', '.....tt.tTtt.tt.......', '....t..tt.tt...tt.....'],
+        '........ttTtttt.......', '.........tTttt........', '.........tTtt.........', '.........tTtt.........', '........ttTtt.........', '........tTttt.........', '........tTtttt........', '........tTtttt........',
+        '.......ttTtttt........', '.......tTttttt........', '.......tTtttttt.......', '.......tTtttttt.......', '......ttTttttttt......', '......tTtttttttt......', '.....ttTttttttttt.....', '.....tTtttttttttt.....',
+        '.....tTtttttttttt.....', '.....tTtttttttttt.....', '.....tTtttttttttt.....', '.....tTtttttttttt.....', '.....tTtttttttttt.....', '.....tTtttttttttt.....', '....tttTtttttttttt....', '...tt.tTttttt.tttttt..',
+        '..t..tt.ttt..tt...ttt.'],
+    },
+    // (the other kind of big tree in front, now and then instead of the oaks: the same crown on a
+    // slim, gnarled trunk)
+    gnarl: {
+      pal: { t: '#07090b', T: '#12171c' },
+      a: ['..t.......t.....t.....', '...t...t..t....t..t...', 't..t..t...tt..t..t....', '.t.tt.t....t.tt.t...t.', '..t.tt.t...ttt..t..t..', '...t.ttt...tt..tt.t...', 't...t.ttt..tt.tt.t....', '.tt..t..tt.ttttt.t..tt', '...tt.t..tttttt.tttt..', '.....tttt.tTtt.tt.....',
+        '........ttTttt........', '.........tTtt.........', '.........tTt..........', '.........tTt..........', '.........tTtt.........', '.........tTtt.........', '.........tTtt.........', '.........tTtt.........',
+        '........ttTtt.........', '........tTttt.........', '........tTttt.........', '........tTttt.........', '........tTtttt........', '.......ttTtttt........', '.......tTttttt........', '.......tTttttt........',
+        '.......tTttttt........', '.......tTttttt........', '.......tTttttt........', '.......tTttttt........', '.......tTttttt........', '.......tTttttt........', '......ttTtttttt.......', '.....tt.tTtt.tt.......',
+        '....t..tt.tt...tt.....'],
+    },
+    // (now and then, between them: the HOLLOW, a dead tree with a face in its trunk, two red eyes
+    // and a gaping mouth you can see through)
+    hollow: {
+      pal: { t: '#07090b', T: '#12171c', e: '#a3221a' },
+      a: ['.t.......t.......t....t.', '..t...t..t..t...t....t..', 't..t...t.t.t...t..t.t...', '.t..t...ttt...t..t.t..t.', '..tt.t...tt..t..t.tt.t..', '....t.tt.tt.t.tt.tt..t..', '.tt..t..tttt.t..t...t...', '...tt.t..ttt.ttt..tt....',
+        '.....ttt.tTtt...tt......', '.......tttTtt.tt........', '........ttTtttt.........', '........tTttttt.........', '.......ttTttttt.........', '.......tTteetet.........', '.......tTtttttt.........', '.......tTtt..tt.........',
+        '.......tTt....t.........', '.......tTtt..tt.........', '.......tTttttttt........', '......ttTttttttt........', '......tTtttttttt........', '......tTtttttttt........', '......tTtttttttt........', '......tTtttttttt........',
+        '.....ttTttttttttt.......', '....t.tTtttt.tttt.......', '...t..tt.ttt..t..tt.....'],
     },
     eyes: { pal: { e: '#ffd23f' }, a: ['ee...ee', 'ee...ee'] },
     // The WEREWOLF (under OCTOBER's full moon): the old movie kind, a man gone to fur: pointed ears,
@@ -388,6 +409,8 @@ function createVisitors(api) {
     pine: { speed: 0, frameMs: 0 },
     baretree: { speed: 0, frameMs: 0 },
     oak: { speed: 0, frameMs: 0 },
+    gnarl: { speed: 0, frameMs: 0 },
+    hollow: { speed: 0, frameMs: 0 },
     eyes: { speed: 0, frameMs: 0, fixed: true, poke: 'blink' },
     werewolf: { speed: 30, frameMs: 200, sway: 1, monster: true, poke: 'growl' },
     hand: { speed: 0, frameMs: 0, poke: 'sink' },
@@ -540,6 +563,32 @@ function createVisitors(api) {
     api.lane.appendChild(c);
     return c;
   }
+  // (a big tree in front, sunk: its foot past the screen's, roots (its last 3 rows) out of sight)
+  function sinkTree(t) {
+    const svgH = parseFloat(t.el.querySelector('svg').getAttribute('height'));
+    const rows = SPRITES[t.kind].a.length;
+    const below = Math.max(0, innerHeight - api.lane.getBoundingClientRect().bottom);
+    t.y = -Math.round(below + (svgH / rows) * 3);
+  }
+  // The big trees' layer: over the lane, its box the lane's, cut off at the sides as the lane is
+  // but open below (the lane cuts off at its floor, for what comes up through it)
+  function foreLayer() {
+    let f = api.lane.nextElementSibling;
+    if (!f || !f.classList.contains('lane-fore')) {
+      f = document.createElement('div');
+      f.className = 'lane-fore';
+      f.setAttribute('aria-hidden', 'true');
+      api.lane.after(f);
+      const sync = () => {
+        const l = api.lane;
+        Object.assign(f.style, { left: `${l.offsetLeft}px`, top: `${l.offsetTop}px`, width: `${l.offsetWidth}px`, height: `${l.offsetHeight}px` });
+      };
+      sync();
+      window.addEventListener('resize', sync);
+      if (window.ResizeObserver) new ResizeObserver(sync).observe(api.lane);
+    }
+    return f;
+  }
   // (a tree, drawn k times its size)
   function scaleTree(t, k) {
     if (k === 1) return;
@@ -583,9 +632,10 @@ function createVisitors(api) {
       t.lag = rand(0.08, 0.2); // (it shows once the fog's well past it: fading in with it, not ahead of it)
       fog.trees.push(t);
     }
-    if (haunted) { // (the big ones in front, by either edge: the path between them)
+    if (haunted) { // (the big ones in front, by either edge: the path between them; the oaks, or now and then the slim, gnarled ones)
+      const foreKind = Math.random() < 0.5 ? 'oak' : 'gnarl';
       for (const side of [0, 1]) {
-        const t = add('oak', 0, side ? -1 : 1, { state: 'fogtree' });
+        const t = add(foreKind, 0, side ? -1 : 1, { state: 'fogtree' });
         scaleTree(t, big ? 3.6 : 1.1);
         const w = parseFloat(t.el.style.width);
         t.x = side ? W - w * rand(0.45, 0.62) : -w * rand(0.38, 0.55);
@@ -594,11 +644,29 @@ function createVisitors(api) {
         t.depth = 1;
         t.lag = side ? (fog.dir > 0 ? 0.3 : 0) : (fog.dir > 0 ? 0 : 0.3);
         t.fore = true;
-        // (sunk past the lane's foot, roots and all: the bots pass behind a solid trunk, not
-        // through the gaps at its base)
-        t.y = -Math.round(parseFloat(t.el.querySelector('svg').getAttribute('height')) * 0.24);
+        // (on a layer of its own over the lane, open below: its trunk runs on down past the lane's
+        // foot and the card's edge to the screen's, roots out of sight, framing the scene; the
+        // bots pass behind a solid trunk)
+        foreLayer().appendChild(t.el);
+        sinkTree(t);
         place(t);
         fog.trees.push(t);
+      }
+      // (less often, about one forest in three: the HOLLOW, big as they are, somewhere between them)
+      if (Math.random() < 0.35) {
+        const h = add('hollow', 0, Math.random() < 0.5 ? 1 : -1, { state: 'fogtree' });
+        scaleTree(h, big ? 3.6 : 1.1);
+        const hw = parseFloat(h.el.style.width);
+        h.x = W * rand(0.28, 0.72) - hw / 2;
+        h.el.style.opacity = '0';
+        h.el.classList.add('fog-tree', 'fore');
+        h.depth = 1;
+        h.lag = rand(0.1, 0.25);
+        h.fore = true;
+        foreLayer().appendChild(h.el);
+        sinkTree(h);
+        place(h);
+        fog.trees.push(h);
       }
     }
     if (instant) { // (as it stands: thinned to its mist, every tree up)
