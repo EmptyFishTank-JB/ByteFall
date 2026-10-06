@@ -3578,3 +3578,4 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
    card's foot right under PLAY and the rows under the card right after; a mode with more than the
    screen has room for scrolls inside it) */
 .home .home-panel { flex: 0 1 auto; }
+.home { padding-bottom: 37px; } /* (room under the menu for the walking bots: just their height, so DAILY fits the S23 Ultra) */
