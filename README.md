@@ -57,6 +57,32 @@ tools/android/          its MainActivity, icon and splash images, and the test s
 .github/workflows/      android-apk.yml: builds the test APK on GitHub (Actions → Android test APK)
 ```
 
+## Layout editor
+
+A dev tool for moving and sizing the game's pieces on the phone itself (`js/editor.js`). Turn it on
+with **✎ EDIT LAYOUT** at the foot of SETTINGS (or `?edit` in the address); it stays on until its ✕.
+
+- **PICKING**: a tap picks the piece under it instead of pressing it (outlined, its size above it,
+  its parent dashed, and pink lines with the space in px to what's beside it). Tap **PICKING** to
+  switch to **USING THE GAME** and get around (open the STORE, start a game, pause), then back.
+  **▲ PARENT** and **▼ INSIDE** pick the piece around it or inside it.
+- **THIS ONE** or **ALL LIKE IT**: an edit goes to just this piece, or to every piece of its kind in
+  that part of the game (all six mode buttons, every STORE description); the top line shows the
+  selector and how many it covers.
+- **TEXT**: size, letter spacing, line height, weight, alignment. **BOX**: width and height (or
+  AUTO), padding on each side, shown or hidden. **SPACE TO WHAT'S BESIDE IT**: the px above, below,
+  left and right to the next piece or the parent's edge; type the space you want and its margin is
+  set to make it. **MOVE**: a nudge in px, and EARLIER / LATER in its row or column. **LAYER**: what's
+  in front (higher is in front: raise a button a LIGHTS OUT covers) and OVERFLOW (SHOW ALL for a box
+  that cuts off a glow). **ITS CONTENTS**: the gap between what's inside it, and how they're
+  justified and aligned.
+- **↺** puts one setting back to the game's own; **UNDO** steps back; **—** shrinks the panel to its
+  top line (picking still works); **⇅** moves it between the top and the foot (it moves itself out
+  of the way of what's picked).
+- Edits are kept on the device and applied even with the editor off. **YOUR EDITS** lists them (PICK
+  one, or ✕ it), **SHOWING EDITS** flips to the original to compare, **EXPORT CSS** copies them as
+  CSS to send over and bake into `css/style.css`, and **RESET ALL** clears them.
+
 ## Android test APK
 
 GitHub builds the game as an Android app (Capacitor) when you ask it to: **Actions →

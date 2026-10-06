@@ -3566,3 +3566,5 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
 #pause-note { height: 20px; line-height: 20px; }
 .home-best { height: 18px; line-height: 18px; }
 .home-head { height: 26px; align-items: center; } /* (one height in every font) */
+/* (SETTINGS' footer: EDIT LAYOUT, the layout editor's switch (js/editor.js), as a link under DEV) */
+#edit-layout-btn { grid-column: 2; background: none; border: 0; font-family: inherit; color: var(--fg); cursor: pointer; }
