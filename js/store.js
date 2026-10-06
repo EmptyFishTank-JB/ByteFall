@@ -108,6 +108,7 @@ const Store = (() => {
       const missing = Progress.missing(id);
       item.classList.toggle('locked', !info.unlocked);
       item.querySelector('.booster-owned').textContent = !info.unlocked ? `UNLOCKS AT LV ${info.level}` : n ? `OWNED \u00d7${n}` : '';
+      item.querySelector('.store-cost').innerHTML = priceHtml(Progress.price(id), info.unlocked); // (green: enough of it; red: short)
       item.querySelector('.store-need').textContent = info.unlocked && missing.length
         ? `NEED ${missing.map(([res, k]) => `${k} MORE ${RES_INFO[res].name}`).join(', ')}` : '';
       const btn = item.querySelector('.store-pay');

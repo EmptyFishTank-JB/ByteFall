@@ -4070,7 +4070,13 @@ const RES_INFO = {
 const CURRENCY_SVG = '<svg class="cur-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5h9v9h-9zM5.5 5.5v5h5v-5z" fill="currentColor" fill-rule="evenodd"/><path d="M6 0.5h1.5v15H6zM8.5 0.5H10v15H8.5z" fill="currentColor"/></svg>';
 const resChip = (id, n) => `<span class="res-chip res-${id}" title="${RES_INFO[id].name}">${RES_INFO[id].svg}${n}</span>`;
 // A price as chips: KEYS first, then the resources in their order
-const priceHtml = (price) => ['keys', ...Progress.resIds()].filter((id) => price[id]).map((id) => resChip(id, price[id])).join(' ');
+// (checked: each amount green if you have enough of it, red if not)
+const priceHtml = (price, checked = false) => ['keys', ...Progress.resIds()].filter((id) => price[id]).map((id) => {
+  const chip = resChip(id, price[id]);
+  if (!checked) return chip;
+  const have = id === 'keys' ? Progress.keys() : Progress.res(id);
+  return chip.replace('class="res-chip ', `class="res-chip ${have >= price[id] ? 'afford' : 'short'} `);
+}).join(' ');
 const priceText = (price) => ['keys', ...Progress.resIds()].filter((id) => price[id]).map((id) => `${price[id]} ${RES_INFO[id].name}`).join(' + ');
 // The wallet: the main menu's line under the level bar, and the STORE's
 function showWallet() {
@@ -4494,7 +4500,7 @@ function openShop(i) {
     + `<span class="shop-desc">${itemDesc(id)}</span>`;
   document.getElementById('shop-costs').innerHTML = ['keys', ...Progress.resIds()].filter((res) => price[res]).map((res) => {
     const have = res === 'keys' ? Progress.keys() : Progress.res(res);
-    return `<div class="shop-cost res-${res}${have < price[res] ? ' short' : ''}" title="${RES_INFO[res].name}">${RES_INFO[res].svg}<span>${fmt(have)}/${price[res]}</span></div>`;
+    return `<div class="shop-cost res-${res}${have < price[res] ? ' short' : ' afford'}" title="${RES_INFO[res].name}">${RES_INFO[res].svg}<span>${fmt(have)}/${price[res]}</span></div>`;
   }).join('');
   const buy = document.getElementById('shop-buy');
   const opensIn = marketOpen ? 0 : marketOpensIn();

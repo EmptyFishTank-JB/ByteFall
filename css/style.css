@@ -50,6 +50,7 @@ button, input, select, textarea { line-height: inherit; }
   --res-rootkits: #ff3b4e; /* red */
   --res-master: #e8b10e; /* deep gold, with a glow */
   --res-master-glow: rgba(232, 177, 14, 0.7);
+  --afford: #3ddc84; /* a price's amount you have enough of (red, --danger, where you're short) */
   /* Icons drawn in CSS (as masks, so they take the text color): no emoji anywhere */
   --icon-lock: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'><rect x='5' y='11' width='14' height='10' rx='2'/><path d='M8 11V7a4 4 0 0 1 8 0v4'/></svg>");
   --icon-play: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M7 4 L19 12 L7 20 Z' fill='black'/></svg>");
@@ -147,6 +148,7 @@ button, input, select, textarea { line-height: inherit; }
 
 /* MONOCHROME: black and white; layers told apart by their stripes and dashed borders */
 [data-theme="monochrome"] {
+  --afford: #ffffff;
   --res-bugs: #8c8c8c;
   --res-cache: #d6d6d6;
   --res-crypto: #b0b0b0;
@@ -316,6 +318,7 @@ button, input, select, textarea { line-height: inherit; }
 
 /* PAPER: dark ink on pale paper, for bright rooms and outdoors */
 [data-theme="paper"] {
+  --afford: #1a7f3c;
   --res-bugs: #7a4f22;
   --res-cache: #111111;
   --res-crypto: #c26a00;
@@ -3296,3 +3299,7 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 .panel-store .store-sub { text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.6); }
 .panel-store .store-buy:not(:disabled):not(.short) { box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.45); }
 .store-desc { color: var(--panel-text); line-height: 1.45; }
+
+/* A price's amounts: green where you have enough, red where you're short (the STORE and the BLACK MARKET's window) */
+.shop-cost.afford span, .res-chip.afford { color: var(--afford); }
+.shop-cost.short span, .res-chip.short { color: var(--danger); }
