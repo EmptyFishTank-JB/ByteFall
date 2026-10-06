@@ -4087,8 +4087,8 @@ const RES_INFO = {
   // (the game's own coin: a hexagon, a C struck through twice)
   crypto: { name: 'CRYPTO', svg: '<svg class="key-ico res-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0.5l6.8 3.9v7.2L8 15.5l-6.8-3.9V4.4zM8 2.3 2.8 5.3v5.4L8 13.7l5.2-3V5.3z" fill="currentColor" fill-rule="evenodd"/><path d="M5.5 5.5h5V7h-3.5v2h3.5v1.5h-5zM7.2 4h1v1.5h-1zM7.2 10.5h1V12h-1zM8.8 4h1v1.5h-1zM8.8 10.5h1V12h-1z" fill="currentColor"/></svg>' },
   rootkits: { name: 'ROOTKITS', svg: resSvg('M4.5 1.5h2v13h-2zM9.5 1.5h2v13h-2zM1.5 4.5h13v2h-13zM1.5 9.5h13v2h-13z') },
-  // (the heavier key, its head lengthened so the currency sign's two lines fit in it, and over it)
-  master: { name: 'MASTER KEYS', svg: '<svg class="key-ico res-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M0 3h8.5v10H0zM2 5v6h4.5V5z" fill="currentColor" fill-rule="evenodd"/><path d="M2.6 1h1.2v2H2.6zM4.7 1h1.2v2H4.7zM2.6 5h1.2v6H2.6zM4.7 5h1.2v6H4.7zM8.5 7h7v2h-7zM10.5 9H12v3h-1.5zM13 9h1.5v4H13z" fill="currentColor"/></svg>' },
+  // (the heavier key, its head lengthened so the currency sign's two lines run through it, top to bottom)
+  master: { name: 'MASTER KEYS', svg: '<svg class="key-ico res-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M0 3h8.5v10H0zM2 5v6h4.5V5z" fill="currentColor" fill-rule="evenodd"/><path d="M2.6 0.8h1.2v14.4H2.6zM4.7 0.8h1.2v14.4H4.7zM8.5 7h7v2h-7zM10.5 9H12v3h-1.5zM13 9h1.5v4H13z" fill="currentColor"/></svg>' },
 };
 // THE BYTEFALL CURRENCY SIGN: a bit's 0 struck through twice, as a dollar sign is: no one
 // country's, it marks what's for sale (the BLACK MARKET)
