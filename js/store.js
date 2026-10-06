@@ -56,6 +56,7 @@ const Store = (() => {
     const odds = box ? Progress.boxOdds(id) : null;
     item.innerHTML = `<h3><span class="store-ico bracketed">${bracketIcon(id)}</span><span class="store-name">${itemName(id)}</span>`
       + `<span class="store-price">${box ? '' : `TIER ${Progress.tierOf(id) + 1}`}</span></h3>`
+      + `<p class="store-desc">${itemDesc(id)}</p>`
       + `<p class="store-cost">${priceHtml(Progress.price(id))}</p>`
       + (box ? `<p class="store-odds">TIER 1 EXPLOIT ${odds[0]}% // TIER 2 ${odds[1]}% // TIER 3 ${odds[2]}% // ANTI-EXPLOIT ${odds[3]}%</p>` : '')
       + '<p class="store-need"></p>'
@@ -83,6 +84,8 @@ const Store = (() => {
   for (const id of Progress.exploitOrder()) if (Progress.sellable(id)) shopItem(id, reserveShop);
   const boxShop = document.getElementById('box-shop');
   for (const id of Progress.boxIds()) shopItem(id, boxShop);
+  // (the BLACK MARKET's look: the currency sign's tilted, glowing sign in the corner)
+  document.getElementById('store-sign').innerHTML = CURRENCY_SVG.repeat(3);
   const claimBtn = document.getElementById('daily-claim');
   claimBtn.addEventListener('click', () => {
     if (window.dailyDrop && window.dailyDrop.claim()) say('CLAIMED // YOUR FREE EXPLOIT IS ON THE EXPLOIT BUTTON');

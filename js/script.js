@@ -267,6 +267,28 @@ const ANTI = {
 };
 // (a little virus: the ANTI-EXPLOITS')
 const VIRUS_SVG = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 7V3M12 21v-4M7 12H3M21 12h-4M8.5 8.5 5.5 5.5M18.5 18.5l-3-3M8.5 15.5l-3 3M18.5 5.5l-3 3"/></svg>';
+// What each one does, for the STORE and the BLACK MARKET's window (the README's exploit table, short)
+const ITEM_DESC = {
+  rng: 'Scrambles every bit on the board to a random number.',
+  bitflip: 'Turns every column upside down.',
+  'buffer-overflow': 'Adds 1 to every bit; the top number is re-encrypted under two layers.',
+  trojan: 'Wipes out every block touching the spot where it lands.',
+  pivot: 'Swaps the column it lands in with a neighbor you pick.',
+  swap: 'Any two bits on the board trade places.',
+  'worm-virus': 'Wipes out every block in the column it lands in.',
+  keylogger: 'Shows your next 3 bits for the next 10 drops.',
+  'packet-sniffer': 'For your next 3 bits, you pick each one\'s number.',
+  backdoor: 'Deletes the bottom row, layers included; everything drops by one.',
+  'logic-bomb': 'Lands as a 3-drop countdown, then wipes out the 5x5 around it.',
+  honeypot: 'A trap: when a bit beside it decrypts, every bit of that number within 2 cells does too.',
+  'dictionary-attack': 'Every encryption layer on the board loses one level.',
+  'rainbow-table': 'Decrypts every bit showing the most common number on the board.',
+  'black-box': 'Opens into a random exploit, any of them.',
+  'box-1': 'A sealed pull, opened in the game: most likely a tier 1 exploit.',
+  'box-2': 'A sealed pull, opened in the game: most likely a tier 2 exploit.',
+  'box-3': 'A sealed pull, opened in the game: good odds of a tier 3 exploit.',
+};
+const itemDesc = (id) => ITEM_DESC[id] || '';
 const itemName = (id) => (BOX_TIERS[id] ? `BLACK BOX ${BOX_TIERS[id]}` : ANTI[id] ? ANTI[id].name : HACKS[id] ? HACKS[id].name : id);
 // (in a list beside its name: in brackets, as a bit is, [!])
 const bracketIcon = (id) => `<span class="ico-br">[</span>${itemIcon(id)}<span class="ico-br">]</span>`;
@@ -4468,7 +4490,8 @@ function openShop(i) {
   const master = missing.length > 0 && !box && Progress.res('master') > 0;
   const odds = box ? Progress.boxOdds(id) : null;
   document.getElementById('shop-item').innerHTML = `<span class="shop-ico">${bracketIcon(id)}</span><span class="shop-name">${itemName(id)}</span>`
-    + `<span class="shop-tier">${box ? `T1 ${odds[0]}% // T2 ${odds[1]}% // T3 ${odds[2]}% // ANTI ${odds[3]}%` : `TIER ${Progress.tierOf(id) + 1} EXPLOIT`}</span>`;
+    + `<span class="shop-tier">${box ? `T1 ${odds[0]}% // T2 ${odds[1]}% // T3 ${odds[2]}% // ANTI ${odds[3]}%` : `TIER ${Progress.tierOf(id) + 1} EXPLOIT`}</span>`
+    + `<span class="shop-desc">${itemDesc(id)}</span>`;
   document.getElementById('shop-costs').innerHTML = ['keys', ...Progress.resIds()].filter((res) => price[res]).map((res) => {
     const have = res === 'keys' ? Progress.keys() : Progress.res(res);
     return `<div class="shop-cost res-${res}${have < price[res] ? ' short' : ''}" title="${RES_INFO[res].name}">${RES_INFO[res].svg}<span>${fmt(have)}/${price[res]}</span></div>`;
