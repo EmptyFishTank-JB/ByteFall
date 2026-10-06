@@ -4044,7 +4044,7 @@ function visualizerLoop() {
   requestAnimationFrame(visualizerLoop);
 }
 
-const MODE_LABELS = { repeat: 'MODE: REPEAT', sequence: 'MODE: SEQUENCE', shuffle: 'MODE: SHUFFLE' };
+const MODE_LABELS = { repeat: 'MODE: REPEAT', sequence: 'MODE: SEQUENCE', shuffle: 'MODE: SHUFFLE', radio: 'MODE: RADIO' };
 const modeBtn = document.getElementById('play-mode-btn');
 function updateModeBtn() {
   modeBtn.textContent = MODE_LABELS[Music.getMode()];

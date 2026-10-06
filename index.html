@@ -29,8 +29,8 @@
   } catch (e) {}
 </script>
 <title>BYTEFALL // decryption terminal</title>
-<script src="js/fonts.js?v=422"></script>
-<link rel="stylesheet" href="css/style.css?v=422">
+<script src="js/fonts.js?v=423"></script>
+<link rel="stylesheet" href="css/style.css?v=423">
 </head>
 <body>
   <!-- Dev: TWINKLE BACKGROUND (grid-bg.js): the starlight behind the whole game, off by default -->
@@ -320,7 +320,7 @@
         <p class="settings-note" id="gen-seed-note"></p>
         <div class="settings-options">
           <button type="button" id="play-mode-btn" class="toggle-btn">MODE: REPEAT</button>
-          <p class="settings-note">REPEAT loops the track. SEQUENCE and SHUFFLE play each track 4 times, then fade into the next (in order, or at random).</p>
+          <p class="settings-note">REPEAT loops the track. SEQUENCE and SHUFFLE play each track 4 times, then fade into the next (in order, or at random). RADIO is mostly brand-new GENERATED songs, with the SONG OF THE DAY and your tracks mixed in.</p>
           <button type="button" id="bg-play-btn" class="toggle-btn">BACKGROUND PLAY: OFF</button>
           <p class="settings-note">ON keeps the music going when you switch tabs or apps.</p>
         </div>
@@ -657,6 +657,7 @@
         <button type="button" data-mode="repeat">REPEAT</button>
         <button type="button" data-mode="sequence">SEQUENCE</button>
         <button type="button" data-mode="shuffle">SHUFFLE</button>
+        <button type="button" data-mode="radio">RADIO</button>
       </div>
       <ol class="mp-tracks" id="mp-tracks"></ol>
       <!-- (only for a track whose tempo climbs: STACK OVERFLOW) -->
@@ -728,46 +729,46 @@
     </div>
   </div>
 
-  <script src="js/bot-svg.js?v=422"></script>
-  <script src="js/unlocks.js?v=422"></script>
-  <script src="js/progress.js?v=422"></script>
-  <script src="js/music/output.js?v=422"></script>
-  <script src="js/music/mixes.js?v=422"></script>
-  <script src="js/sfx.js?v=422"></script>
-  <script src="js/music/music-bytefall-theme.js?v=422"></script>
-  <script src="js/music/music-sleep-mode.js?v=422"></script>
-  <script src="js/music/music-brute-force.js?v=422"></script>
-  <script src="js/music/music-deep-web.js?v=422"></script>
-  <script src="js/music/music-zero-day.js?v=422"></script>
-  <script src="js/music/music-system-restore.js?v=422"></script>
-  <script src="js/music/music-night-drive.js?v=422"></script>
-  <script src="js/music/music-standby-mode.js?v=422"></script>
-  <script src="js/music/music-core-dump.js?v=422"></script>
-  <script src="js/music/music-handshake.js?v=422"></script>
-  <script src="js/music/music-stack-overflow.js?v=422"></script>
-  <script src="js/music/music-generated.js?v=422"></script>
-  <script src="js/music/music.js?v=422"></script>
-  <script src="js/data/puzzles.js?v=422"></script>
-  <script src="js/data/daily-puzzles.js?v=422"></script>
-  <script src="js/cpu.js?v=422"></script>
-  <script src="js/fx.js?v=422"></script>
-  <script src="js/viz.js?v=422"></script>
-  <script src="js/pixel.js?v=422"></script>
-  <script src="js/minibot.js?v=422"></script>
-  <script src="js/seasons.js?v=422"></script>
-  <script src="js/bigart.js?v=422"></script>
-  <script src="js/visitors.js?v=422"></script>
-  <script src="js/data/bot-anims.js?v=422"></script>
-<script src="js/wanderers.js?v=422"></script>
-  <script src="js/tutorial.js?v=422"></script>
-  <script src="js/puzzle-sim.js?v=422"></script>
-  <script src="js/script.js?v=422"></script>
-  <script src="js/grid-bg.js?v=422"></script>
-  <script src="js/extsource.js?v=422"></script>
-  <script src="js/player.js?v=422"></script>
-  <script src="js/store.js?v=422"></script>
-  <script src="js/start.js?v=422"></script>
-  <script src="js/place.js?v=422"></script>
-  <script src="js/saver.js?v=422"></script>
+  <script src="js/bot-svg.js?v=423"></script>
+  <script src="js/unlocks.js?v=423"></script>
+  <script src="js/progress.js?v=423"></script>
+  <script src="js/music/output.js?v=423"></script>
+  <script src="js/music/mixes.js?v=423"></script>
+  <script src="js/sfx.js?v=423"></script>
+  <script src="js/music/music-bytefall-theme.js?v=423"></script>
+  <script src="js/music/music-sleep-mode.js?v=423"></script>
+  <script src="js/music/music-brute-force.js?v=423"></script>
+  <script src="js/music/music-deep-web.js?v=423"></script>
+  <script src="js/music/music-zero-day.js?v=423"></script>
+  <script src="js/music/music-system-restore.js?v=423"></script>
+  <script src="js/music/music-night-drive.js?v=423"></script>
+  <script src="js/music/music-standby-mode.js?v=423"></script>
+  <script src="js/music/music-core-dump.js?v=423"></script>
+  <script src="js/music/music-handshake.js?v=423"></script>
+  <script src="js/music/music-stack-overflow.js?v=423"></script>
+  <script src="js/music/music-generated.js?v=423"></script>
+  <script src="js/music/music.js?v=423"></script>
+  <script src="js/data/puzzles.js?v=423"></script>
+  <script src="js/data/daily-puzzles.js?v=423"></script>
+  <script src="js/cpu.js?v=423"></script>
+  <script src="js/fx.js?v=423"></script>
+  <script src="js/viz.js?v=423"></script>
+  <script src="js/pixel.js?v=423"></script>
+  <script src="js/minibot.js?v=423"></script>
+  <script src="js/seasons.js?v=423"></script>
+  <script src="js/bigart.js?v=423"></script>
+  <script src="js/visitors.js?v=423"></script>
+  <script src="js/data/bot-anims.js?v=423"></script>
+<script src="js/wanderers.js?v=423"></script>
+  <script src="js/tutorial.js?v=423"></script>
+  <script src="js/puzzle-sim.js?v=423"></script>
+  <script src="js/script.js?v=423"></script>
+  <script src="js/grid-bg.js?v=423"></script>
+  <script src="js/extsource.js?v=423"></script>
+  <script src="js/player.js?v=423"></script>
+  <script src="js/store.js?v=423"></script>
+  <script src="js/start.js?v=423"></script>
+  <script src="js/place.js?v=423"></script>
+  <script src="js/saver.js?v=423"></script>
 </body>
 </html>

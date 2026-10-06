@@ -6,7 +6,7 @@ const Music = (() => {
   const BG_KEY = 'bytefall-music-bg';
   const MODE_KEY = 'bytefall-music-mode';
   const TRACK_KEY = 'bytefall-music-track';
-  const MODES = ['repeat', 'sequence', 'shuffle'];
+  const MODES = ['repeat', 'sequence', 'shuffle', 'radio'];
   const FADE_OUT = 3; // seconds of fade at the end of a track's last loop
   const LOOPS_PER_TRACK = 4; // sequence/shuffle: plays before moving to the next track
   const LOOKAHEAD = 0.12;
@@ -52,14 +52,18 @@ const Music = (() => {
     for (let i = 0; i < key.length; i++) { seed ^= key.charCodeAt(i); seed = Math.imul(seed, 16777619) >>> 0; }
     return seed;
   }
+  let genPick = null; // (RADIO's pick for the next GENERATED song: 'day' or 'random', over genMode)
   function generatedOptions() {
     const season = generatedSeason();
-    const seed = genMode === 'day' ? daySeed(season) : Math.floor(Math.random() * 4294967295);
-    lastGen = { season, seed, mode: genMode };
+    const m = genPick || genMode;
+    const seed = m === 'day' ? daySeed(season) : Math.floor(Math.random() * 4294967295);
+    lastGen = { season, seed, mode: m };
     return lastGen;
   }
-  // (the song it plays: the day's, or on RANDOM the last one written; null before the first)
+  // (the song it plays: the one playing, else the day's, or on RANDOM the last one written; null
+  // before the first)
   function genSong() {
+    if (trackId === 'generated' && lastGen && timer) return composeGenerated(lastGen).describe();
     const season = generatedSeason();
     if (genMode === 'day') return composeGenerated({ season, seed: daySeed(season) }).describe();
     return lastGen && lastGen.mode === 'random' ? composeGenerated(lastGen).describe() : null;
@@ -132,12 +136,28 @@ const Music = (() => {
     return others.length ? others[Math.floor(Math.random() * others.length)].id : trackId;
   }
 
-  // Sequence/shuffle: fade out over the end of the last loop, then start the next track.
-  // (GENERATED on RANDOM, repeating: a radio, a new song after each has played twice)
-  const genRadio = () => mode === 'repeat' && trackId === 'generated' && genMode === 'random';
+  // RADIO: mostly new RANDOM GENERATED songs, now and then the SONG OF THE DAY or one of the
+  // tracks (unlocked, not the one just played); each plays twice through
+  const RADIO_LOOPS = 2;
+  function radioPick() {
+    const r = Math.random();
+    const official = TRACKS.filter((t) => !isLocked(t) && t.id !== 'generated' && t.id !== trackId);
+    if (r < 0.15 && official.length) return { id: official[Math.floor(Math.random() * official.length)].id };
+    const justDay = trackId === 'generated' && lastGen && lastGen.mode === 'day';
+    return { id: 'generated', gen: r < 0.27 && !justDay ? 'day' : 'random' };
+  }
+  // (a session with RADIO's pick: its GENERATED seed for this song only)
+  function openPick(pick, fadeIn) {
+    setTrack(pick.id);
+    genPick = pick.gen || null;
+    openSession(fadeIn);
+    genPick = null;
+  }
+
+  // Sequence/shuffle/radio: fade out over the end of the last loop, then start the next track.
   function advance() {
-    if (mode === 'repeat' && !genRadio()) return;
-    const end = (genRadio() ? 2 : loopsToPlay) * engine.loopSteps;
+    if (mode === 'repeat') return;
+    const end = (mode === 'radio' ? RADIO_LOOPS : loopsToPlay) * engine.loopSteps;
     if (!fadeStarted && step >= end - Math.ceil(FADE_OUT / engine.step)) {
       fadeStarted = true;
       session.gain.setValueAtTime(1, nextTime);
@@ -146,8 +166,8 @@ const Music = (() => {
     if (step >= end) {
       const old = session;
       setTimeout(() => old.disconnect(), (nextTime - ctx.currentTime + 1) * 1000);
-      setTrack(genRadio() ? 'generated' : nextTrackId());
-      openSession(0.8);
+      if (mode === 'radio') openPick(radioPick(), 0.8);
+      else { setTrack(nextTrackId()); openSession(0.8); }
       if (onTrackChange) onTrackChange(trackId);
     }
   }
@@ -260,7 +280,7 @@ const Music = (() => {
       free: !!t.free,
       name: t.title,
       // (its way of playing, when it isn't the track as it is, and the title with it)
-      variant: RAMPING_TRACKS.has(t.id) && speedMode === 'full' ? 'FULL SPEED' : t.id === 'generated' && genMode === 'random' ? 'RANDOM' : '',
+      variant: RAMPING_TRACKS.has(t.id) && speedMode === 'full' ? 'FULL SPEED' : t.id === 'generated' && (trackId === 'generated' && lastGen && timer ? lastGen.mode : genMode) === 'random' ? 'RANDOM' : '',
       get title() { return this.variant ? `${this.name} - ${this.variant}` : this.name; },
       locked: isLocked(t),
       need: t.free ? '' : Progress.unlock(unlockId(t)).need,
@@ -382,6 +402,15 @@ const Music = (() => {
       const open = TRACKS.filter((t) => !isLocked(t));
       if (!open.length) return;
       const i = open.findIndex((t) => t.id === trackId);
+      if (dir > 0 && mode === 'radio') { // (RADIO: NEXT is the radio's next pick)
+        const pick = radioPick();
+        stop();
+        genPick = pick.gen || null;
+        this.play(pick.id);
+        genPick = null;
+        if (onTrackChange) onTrackChange(trackId);
+        return;
+      }
       const id = dir > 0 && mode === 'shuffle' ? nextTrackId() : open[(i + dir + open.length) % open.length].id;
       this.play(id);
       if (onTrackChange) onTrackChange(trackId);

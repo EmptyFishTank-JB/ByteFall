@@ -941,8 +941,10 @@ SURPRISED, LOVE (red heart eyes), DIZZY and LAUGH. The small faces come from
 
 **GENERATED** (track 16, free all year, ahead of tracks 12-15; `js/music/music-generated.js`) writes
 itself. It's seeded: the SONG OF THE DAY is the date's, a new song each day that everyone hears the
-same; tapping track 16 while it plays switches to RANDOM (a new song each time it starts; on REPEAT
-a radio, a new song after each has played twice) and back. The seed picks a style from the
+same; tapping track 16 while it plays switches to RANDOM (a new song each time it starts) and back.
+The play mode RADIO (after REPEAT, SEQUENCE and SHUFFLE) is mostly new RANDOM songs, with the SONG
+OF THE DAY and the unlocked tracks now and then (about 3 in 4 new songs), each played twice through;
+NEXT is its next pick. The seed picks a style from the
 season's: all year SYNTHWAVE, CHIPTUNE, DRUM & BASS, LO-FI, TECHNO and DREAMWAVE; Halloween HAUNTED
 WALTZ (3/4), MONSTER SURF, HORROR SYNTH, GRAVEYARD MARCH and MUSIC BOX (a warped 3/4 lullaby);
 November HARVEST JIG (6/8), CAMPFIRE, HOEDOWN and AUTUMN LO-FI; December SLEIGH RIDE, SNOW WALTZ
