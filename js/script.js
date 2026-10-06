@@ -4099,8 +4099,8 @@ function updateGenSeedNote() {
   const song = Music.genSong();
   const name = song ? ` ${song.title} (${song.style})` : '';
   genSeedNote.textContent = Music.genMode() === 'day'
-    ? `16 GENERATED is seeded: a new song each day in the season's style, and everyone hears the same one. Today's:${name}. Tap it while it plays for RANDOM songs.`
-    : `16 GENERATED is on RANDOM: a new song every time${name ? `, now${name}` : ''}. Tap it while it plays for the SONG OF THE DAY, the one everyone hears today.`;
+    ? `Track 16 is seeded: a new song each day in the season's style, and everyone hears the same one. Today's:${name}. Tap it while it plays for RANDOM songs.`
+    : `Track 16 is on RANDOM: a new song every time${name ? `, now${name}` : ''}. Tap it while it plays for the SONG OF THE DAY, the one everyone hears today.`;
 }
 // The SEASONAL theme comes with its audio: picking it puts on GENERATED (in the season's style) and
 // the season's sound effects (October: HAUNTED), as a starting point (either can be changed after);

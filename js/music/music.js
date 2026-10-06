@@ -132,7 +132,8 @@ const Music = (() => {
     const open = TRACKS.filter((t) => !isLocked(t));
     const i = open.findIndex((t) => t.id === trackId);
     if (mode === 'sequence') return open[(i + 1) % open.length].id;
-    const others = open.filter((t) => t.id !== trackId); // shuffle never repeats back to back
+    // (shuffle: the official tracks only, GENERATED being RADIO's; never back to back)
+    const others = open.filter((t) => t.id !== trackId && t.id !== 'generated');
     return others.length ? others[Math.floor(Math.random() * others.length)].id : trackId;
   }
 
