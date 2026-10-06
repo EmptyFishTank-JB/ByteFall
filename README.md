@@ -90,7 +90,7 @@ earned, every price, the BLACK BOX odds and the anti-exploits.
 KEYS are the game's currency, earned by playing and kept on the device
 (progress.js): 1 for every 10 bits decrypted, +2 when a chain reaches 5 links and +5 at 7,
 a first puzzle solve (EASY 2, NORMAL 4, HARD 6), 10 for each achievement and each level,
-5 for the day's first daily game, and 5 with the DAILY DROP (claimed once a day in the
+5 for the day's first daily game, and 25 with the DAILY DROP (plus 3 each of BUGS, CACHE and CRYPTO) (claimed once a day in the
 STORE, with a free exploit for the next game) (the STORE buttons, on the main menu and the pause screen, carry the game's currency sign in their corner: unlit, a dark tube, and lit like a HOT NOW sign, glowing with a slow hum and a flicker now and then, while the DAILY DROP waits). Beside them, the RESOURCES, earned by how bits are
 decrypted: **BUGS** (down a column, 1 per 5), **CACHE** (across a row, 1 per 5), **CRYPTO** (each chain
 link from the 3rd on), **ROOTKITS** (a bit decrypted across and down at once, layers broken, BYTES)

@@ -4131,7 +4131,7 @@ document.addEventListener('pointerdown', (e) => {
   try { navigator.vibrate(12); } catch (err) {}
 }, { capture: true, passive: true });
 
-// DAILY DROP: each day (the player's own date) one free exploit, and 5 KEYS, to claim in the
+// DAILY DROP: each day (the player's own date) one free exploit, 25 KEYS and 3 each of BUGS, CACHE and CRYPTO, to claim in the
 // STORE; claimed, the exploit waits behind the exploit button until used. It's one of the first
 // five in the unlock order, locked or not, so new players get a feel for them. Unused, it doesn't
 // stack. Not in DAILY, PUZZLE or VS, which stay the same for everyone.
@@ -4146,7 +4146,8 @@ if (freeExploit.day !== localDay()) {
   saveFree();
   freeGrantedNow = true;
 }
-const DAILY_DROP_KEYS = 5;
+const DAILY_DROP_KEYS = 25; // (about a game's worth)
+const DAILY_DROP_RES = { bugs: 3, cache: 3, crypto: 3 };
 window.dailyDrop = {
   claimable: () => !!freeExploit.claimable,
   claim() {
@@ -4155,8 +4156,9 @@ window.dailyDrop = {
     freeExploit.ready = true;
     saveFree();
     Progress.claimKeys(DAILY_DROP_KEYS);
+    for (const [id, n] of Object.entries(DAILY_DROP_RES)) Progress.addRes(id, n);
     SFX.play('egg');
-    showToast(`DAILY DROP // FREE EXPLOIT READY +${DAILY_DROP_KEYS} KEYS`);
+    showToast(`DAILY DROP // FREE EXPLOIT READY +${DAILY_DROP_KEYS} KEYS +3 BUGS, CACHE, CRYPTO`);
     updateFreeBtn();
     showKeys();
     return true;

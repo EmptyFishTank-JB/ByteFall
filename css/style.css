@@ -3483,3 +3483,4 @@ body.in-game.can-pause .records-btn svg { left: auto; right: 4px; } /* (hugging 
 #pause-note { height: 17px; line-height: 17px; overflow: hidden; white-space: nowrap; font-size: calc(11px * var(--ts)); }
 .card-back, :is(.records, .settings) .card-back { width: 88px; justify-content: center; }
 #tutorial-btn { width: 100px; text-align: center; }
+.panel-store .store-rule + .store-sub { margin-top: 6px; } /* (each STORE section under its ===== line, as RECORDS' sections) */
