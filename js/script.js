@@ -4157,49 +4157,79 @@ function showKeys() {
   refreshPuzzleTools();
 }
 
-// The main menu's BOOSTERS: the ones owned for this mode, each a switch (on: used up in the next
-// game, at its first drop); none owned, a way to the STORE
-function refreshBoosterRow() {
-  const row = document.getElementById('booster-row');
-  if (!row) return;
-  loadArmed(); // (this mode's)
-  const ids = Object.keys(BOOSTERS).filter((id) => !BOOSTERS[id].inGame && boosterFits(id));
-  row.hidden = !ids.length || mode === 'tutorial';
-  if (row.hidden) return;
-  row.innerHTML = '<span class="booster-title">BOOSTERS</span>';
-  const owned = ids.filter((id) => Progress.boosters(id) > 0);
-  if (!owned.length) {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'booster-chip get';
-    b.textContent = 'GET SOME IN THE STORE';
-    b.addEventListener('click', () => setRecordsOpen(true, 'store'));
-    row.appendChild(b);
-    return;
-  }
+// The main menu's BOOSTERS: one button, saying what's on (none, its name, or the icons of several);
+// a tap opens its card: the ones owned for this mode, each switched on or off (on: used up in the
+// next game, at its first drop), and GET BOOSTERS (the STORE's)
+const boosterPickEl = document.getElementById('booster-pick');
+const boosterIds = () => Object.keys(BOOSTERS).filter((id) => !BOOSTERS[id].inGame && boosterFits(id));
+function boostersChanged() {
+  saveArmed();
+  // (a game not yet under way takes it now; one under way, from the next game)
+  if (!started && !gameOver && !busy && !inAGame()) initGame();
+  refreshBoosterRow();
+}
+function openBoosterStore() {
+  closeBoosterPick();
+  closeStarterPick();
+  setRecordsOpen(true, 'store');
+  const shop = document.getElementById('booster-shop');
+  if (shop) requestAnimationFrame(() => shop.previousElementSibling.previousElementSibling.scrollIntoView({ block: 'start' }));
+}
+function closeBoosterPick() { boosterPickEl.classList.add('hidden'); }
+function openBoosterPick() {
+  loadArmed();
+  const owned = boosterIds().filter((id) => Progress.boosters(id) > 0);
+  document.getElementById('booster-pick-note').textContent = owned.length
+    ? `Switch on the ones to use in your next ${MODES[mode].label} game. Each is used up at its first drop (SECOND CHANCE only if it saves you).`
+    : 'You don\'t have any boosters for this mode yet.';
+  const list = document.getElementById('booster-pick-list');
+  list.textContent = '';
   for (const id of owned) {
     const b = document.createElement('button');
     b.type = 'button';
     const on = armedBoosts.has(id);
-    b.className = `booster-chip${on ? ' on' : ''}`;
-    b.innerHTML = `${BOOSTER_SVG[id] || ''} ${BOOSTERS[id].name} \u00d7${Progress.boosters(id)}`;
-    b.title = BOOSTERS[id].desc;
+    b.className = `starter-pick-item${on ? ' on' : ''}`;
     b.setAttribute('aria-pressed', String(on));
+    b.innerHTML = `<span class="exploit-glyph bracketed"><span class="ico-br">[</span>${BOOSTER_SVG[id] || ''}<span class="ico-br">]</span></span><span class="starter-pick-name"></span><span class="starter-pick-count">×${Progress.boosters(id)}</span><span class="booster-pick-state">${on ? 'ON' : 'OFF'}</span>`;
+    b.querySelector('.starter-pick-name').textContent = BOOSTERS[id].name;
+    b.title = BOOSTERS[id].desc;
     b.addEventListener('click', () => {
       if (armedBoosts.has(id)) armedBoosts.delete(id);
       else armedBoosts.add(id);
-      saveArmed();
-      // (a game not yet under way takes it now; one under way, from the next game)
-      if (!started && !gameOver && !busy && !inAGame()) initGame();
-      refreshBoosterRow();
-  refreshStarterRow();
+      boostersChanged();
+      openBoosterPick(); // (redrawn in place)
     });
-    row.appendChild(b);
+    list.appendChild(b);
+  }
+  if (boosterPickEl.classList.contains('hidden')) {
+    boosterPickEl.classList.remove('hidden');
+    (list.querySelector('button') || document.getElementById('booster-pick-buy')).focus();
   }
 }
+document.getElementById('booster-pick-close').addEventListener('click', closeBoosterPick);
+document.getElementById('booster-pick-buy').addEventListener('click', openBoosterStore);
+boosterPickEl.addEventListener('click', (e) => { if (e.target === boosterPickEl) closeBoosterPick(); }); // (a tap off the card)
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !boosterPickEl.classList.contains('hidden')) { e.stopImmediatePropagation(); closeBoosterPick(); } }, true);
+function refreshBoosterRow() {
+  const row = document.getElementById('booster-row');
+  if (!row) return;
+  loadArmed(); // (this mode's)
+  const ids = boosterIds();
+  row.hidden = !ids.length || mode === 'tutorial';
+  if (row.hidden) return;
+  row.innerHTML = '<span class="booster-title">BOOSTERS</span>';
+  const on = ids.filter((id) => armedBoosts.has(id) && Progress.boosters(id) > 0);
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = `booster-chip booster-one${on.length ? ' on' : ''}`;
+  b.innerHTML = !on.length ? 'NONE ON' : on.length === 1 ? `${BOOSTER_SVG[on[0]] || ''} ${BOOSTERS[on[0]].name}` : `${on.map((id) => BOOSTER_SVG[id] || '').join('')} ${on.length} ON`;
+  b.setAttribute('aria-label', `Boosters: ${on.length ? on.map((id) => BOOSTERS[id].name).join(', ') : 'none on'}. Tap to choose`);
+  b.addEventListener('click', openBoosterPick);
+  row.appendChild(b);
+}
 
-// The main menu's STARTERS: the two side slots, LEFT and RIGHT, what's in each (or EMPTY), and BUY
-// EXPLOITS under them (the STORE's starters). A tap on a slot opens its card: every starter exploit
+// The main menu's STARTERS: the two side slots, LEFT and RIGHT, what's in each (or EMPTY). A tap on a
+// slot opens its card (BUY EXPLOITS in it: the STORE's starters): every starter exploit
 // owned (and unlocked), how many, to put in that slot (two of one kind, if there are two; one each
 // of two), and EMPTY to take it out
 const starterPickEl = document.getElementById('starter-pick');
@@ -4278,15 +4308,6 @@ function refreshStarterRow() {
     b.addEventListener('click', () => openStarterPick(i));
     row.appendChild(b);
   }
-  const brk = document.createElement('span');
-  brk.className = 'booster-break';
-  row.appendChild(brk);
-  const buy = document.createElement('button');
-  buy.type = 'button';
-  buy.className = 'booster-chip get';
-  buy.textContent = 'BUY EXPLOITS';
-  buy.addEventListener('click', openStarterStore);
-  row.appendChild(buy);
 }
 
 // SECOND CHANCE: the trace completes, but everything above the bottom 3 rows is wiped and the game
@@ -5448,6 +5469,7 @@ if (window.BYTEFALL_APP && !window.BYTEFALL_APP.live) {
 // app goes to the background
 window.bytefallBack = () => {
   if (!starterPickEl.classList.contains('hidden')) { closeStarterPick(); return true; } // (a starter slot's card)
+  if (!boosterPickEl.classList.contains('hidden')) { closeBoosterPick(); return true; } // (the BOOSTERS card)
   if (shopSlot !== null) { closeShop(); return true; } // (the BLACK MARKET's window)
   const start = document.getElementById('start-screen');
   if (start && !start.hidden) return false;

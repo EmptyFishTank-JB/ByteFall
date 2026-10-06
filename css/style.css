@@ -3385,3 +3385,11 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 .store-btns .store-buy { min-width: 0; padding: 4px 7px; font-size: 11px; letter-spacing: 0.5px; }
 .store-btns .store-buy .cur-ico { margin-right: 2px; }
 .store-btns .store-master { padding: 4px 7px; gap: 3px; }
+
+/* The main menu's one BOOSTERS button, and its card's ON / OFF */
+.booster-chip.booster-one { min-width: 12em; }
+.booster-chip.booster-one .ico { margin-right: 1px; }
+.booster-pick-state { min-width: 2.6em; text-align: right; font-size: 10.5px; letter-spacing: 1px; color: var(--fg-dim); }
+.starter-pick-item.on .booster-pick-state { color: var(--accent); }
+#booster-pick { z-index: 207; }
+.starter-pick-item .exploit-glyph.bracketed .ico { width: 15px; height: 15px; }
