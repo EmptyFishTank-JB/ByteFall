@@ -138,9 +138,14 @@ armed when you like, or an anti-exploit, which glitches red and goes off at once
 AD, covers one drop button for 3 drops; the grid and number keys still drop there), **SPYWARE** (the
 next 3 bits show as ? until they land) or **RANSOMWARE** (3 bits on the board go under a one-peel
 layer). Once a slot's reserve is used, it's the **BLACK MARKET** (a slot taken in empty stays closed):
-a random exploit you've unlocked or, a quarter of the time, a BLACK BOX, with its KEYS under it,
-changing every 4 drops. Tap it for its whole price, tap again to buy (short of an exploit's price with
-a MASTER KEY, the MASTER KEY pays); it waits in the slot until you tap it to arm (or open) it. One buy
+a random exploit you've unlocked or, a quarter of the time, a BLACK BOX, marked for sale with the
+game's own currency sign in its corner (a 0 struck through twice, as a dollar sign is: no one
+country's), changing every 4 drops. A tap opens the BLACK MARKET's window: a neon sign of a border in
+the accent, a tilted, flickering sign-sign-sign in its corner and scan lines over it; the item's icon
+in brackets and its name (a box's odds under it), then each part of its price as the resource's icon
+over what you have / what it costs (red where you're short, NEED ... under them), and BUY in the middle
+(USE A MASTER KEY under it when short of an exploit's price with one). A tap off it, the X, Esc or back
+closes it; drops wait while it's open. A buy waits in the slot until you tap it to arm (or open) it. One buy
 each slot, a game. A game that used them says so on its result screen (RESERVES: ... // BLACK MARKET: ...).
 
 How far KEYS go (a simulation of CLASSIC games on the CPU's own board code: node tools/keysim.js): a game
@@ -163,7 +168,7 @@ runs where it lands. With nothing to arm, the button opens the menu's EXPLOITS t
 | Worm Virus `[§]` | 5x | Wipes out every block in the column it lands in |
 | Buffer Overflow `[+]` | 4x | Adds 1 to every bit; the top number (7, or 8 on Hard) is re-encrypted under two layers |
 | Trojan `[◈]` | 4x | Wipes out every block touching the spot where it lands |
-| RNG `[?]` | 3x | Scrambles every bit to a random number |
+| RNG `[?]` | 3x | Scrambles every bit to a random number: the bits flicker through random values in place (the squares don't move) for about half a second before the new numbers land |
 | Bitflip `[↕]` (drawn as an arrow icon) | 3x | Turns every column upside down |
 | Dictionary Attack `[#]` * | 4x | Every encryption layer on the board loses one level at once |
 | Keylogger `[@]` * | 3x | Shows your next 3 bits for the next 10 drops |

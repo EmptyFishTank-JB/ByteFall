@@ -3182,7 +3182,7 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 .wallet { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 12px; margin: 2px 0 6px; font-size: 12px; letter-spacing: 1px; color: var(--fg); }
 .res-chip { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
 .res-chip .key-ico { width: 13px; height: 13px; }
-.res-chip .key-ico { color: var(--accent); } /* (KEYS: the theme's accent) */
+.res-chip .key-ico, .shop-cost .key-ico { color: var(--accent); } /* (KEYS: the theme's accent) */
 .res-bugs .key-ico { color: var(--res-bugs); }
 .res-cache .key-ico { color: var(--res-cache); }
 .res-crypto .key-ico { color: var(--res-crypto); }
@@ -3226,3 +3226,45 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 .reserve-pick-item .exploit-glyph.bracketed { min-width: 3.2em; font-size: 14px; }
 .reserve-pick-item .exploit-glyph.bracketed svg { width: 15px; height: 15px; }
 .bracketed .box-tier { display: none; } /* (the name says I, II or III) */
+
+/* RNG's scramble: the bits churn in place, flickering */
+.cell.scrambling { color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.8); animation: scramble-flash 0.09s steps(2) infinite; }
+@keyframes scramble-flash { 50% { opacity: 0.55; } }
+
+/* THE CURRENCY SIGN (a 0 struck twice) */
+.cur-ico { width: 1em; height: 1em; display: inline-block; vertical-align: -0.12em; }
+/* A BLACK MARKET slot: the sign in its corner, for sale */
+.slot-sale { position: absolute; top: -6px; right: -6px; width: 15px; height: 15px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--bg-solid); border: 1px solid var(--accent); color: var(--accent); box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.6); }
+.slot-sale .cur-ico { width: 10px; height: 10px; }
+
+/* THE BLACK MARKET's window: a neon sign of a border, the price in icons, BUY */
+#market-shop { z-index: 207; background: rgba(0, 0, 0, 0.6); }
+.shop-box { position: relative; width: min(330px, calc(100vw - 32px)); padding: 20px 18px 16px; text-align: center; border: 2px solid var(--accent); border-radius: 10px; background: linear-gradient(rgba(var(--accent-rgb), 0.06), rgba(var(--accent-rgb), 0.02)), var(--popup-bg);
+  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.7), 0 0 28px rgba(var(--accent-rgb), 0.35), inset 0 0 12px rgba(var(--accent-rgb), 0.25); animation: neon-hum 3.2s ease-in-out infinite; }
+/* (scan lines over it: the data-terminal side of the shop) */
+.shop-box::before { content: ''; position: absolute; inset: 0; border-radius: 8px; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(var(--fg-rgb), 0.05) 0 1px, transparent 1px 3px); }
+@keyframes neon-hum { 0%, 100% { box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.7), 0 0 28px rgba(var(--accent-rgb), 0.35), inset 0 0 12px rgba(var(--accent-rgb), 0.25); } 47% { box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.7), 0 0 28px rgba(var(--accent-rgb), 0.35), inset 0 0 12px rgba(var(--accent-rgb), 0.25); } 48% { box-shadow: 0 0 4px rgba(var(--accent-rgb), 0.4), 0 0 10px rgba(var(--accent-rgb), 0.15), inset 0 0 4px rgba(var(--accent-rgb), 0.1); } 50% { box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.85), 0 0 34px rgba(var(--accent-rgb), 0.45), inset 0 0 14px rgba(var(--accent-rgb), 0.3); } }
+.shop-box h2 { margin: 0 0 12px; font-size: 15px; letter-spacing: 3px; color: var(--accent); text-shadow: 0 0 8px rgba(var(--accent-rgb), 0.8); }
+.shop-sign { position: absolute; top: -14px; right: -10px; transform: rotate(14deg); display: flex; gap: 1px; padding: 3px 6px; color: var(--accent); background: var(--bg-solid); border: 1px solid var(--accent); border-radius: 4px; font-size: 18px;
+  filter: drop-shadow(0 0 4px rgba(var(--accent-rgb), 0.9)); animation: sign-pulse 1.4s ease-in-out infinite; }
+@keyframes sign-pulse { 0%, 100% { opacity: 1; filter: drop-shadow(0 0 4px rgba(var(--accent-rgb), 0.9)); } 50% { opacity: 0.65; filter: drop-shadow(0 0 1px rgba(var(--accent-rgb), 0.4)); } 52% { opacity: 1; } }
+.shop-item { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-bottom: 12px; }
+.shop-ico { display: inline-flex; align-items: center; gap: 2px; font-size: 26px; color: var(--accent); }
+.shop-ico svg { width: 26px; height: 26px; }
+.shop-ico .ico-br { font-size: 22px; }
+.shop-ico .box-tier { display: none; }
+.shop-name { font-size: 16px; letter-spacing: 2px; color: var(--fg); }
+.shop-tier { font-size: 10px; letter-spacing: 1px; color: var(--fg-dim); }
+.shop-costs { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 16px; margin: 6px 0 8px; padding: 10px 6px; border-top: 1px dashed rgba(var(--accent-rgb), 0.4); border-bottom: 1px dashed rgba(var(--accent-rgb), 0.4); }
+.shop-cost { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 13px; letter-spacing: 1px; color: var(--fg); min-width: 44px; }
+.shop-cost .key-ico { width: 20px; height: 20px; }
+.shop-cost.short span { color: var(--danger); }
+.shop-note { margin: 4px 0 12px; font-size: 10.5px; letter-spacing: 1px; color: var(--fg-dim); min-height: 1em; }
+.shop-foot { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.shop-buy, .shop-alt { font-family: inherit; letter-spacing: 3px; cursor: pointer; border-radius: 6px; }
+.shop-buy { font-size: 15px; padding: 10px 34px; color: var(--bg-solid); background: var(--accent); border: 1px solid var(--accent); box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.6); }
+.shop-buy:disabled { color: var(--fg-dim); background: transparent; border-color: var(--grid-line); box-shadow: none; cursor: default; }
+.shop-alt { font-size: 11px; padding: 7px 14px; color: var(--res-master); background: transparent; border: 1px solid var(--res-master); }
+.shop-alt[hidden] { display: none; }
+.shop-x { position: absolute; top: 6px; left: 8px; width: 28px; height: 28px; font-size: 20px; line-height: 1; color: var(--fg-dim); background: none; border: 0; cursor: pointer; }
+@media (prefers-reduced-motion: reduce) { .shop-box, .shop-sign, .cell.scrambling { animation: none; } }

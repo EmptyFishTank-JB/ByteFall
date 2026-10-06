@@ -1258,7 +1258,7 @@ function clearPivotChoice() {
 }
 
 async function attemptDrop(col) {
-  if (gameOver || busy || !queue.length || vsPaused || homeOpen) return;
+  if (gameOver || busy || !queue.length || vsPaused || homeOpen || shopSlot !== null) return;
   if (mode === 'tutorial' && !Tutorial.canDrop(col)) return; // (only where the lesson says)
   // SWAP: it drops once two bits are picked on the grid (with fewer than two on the board, it
   // drops and does nothing)
@@ -1873,6 +1873,7 @@ async function runHack(id, row, col) {
     await sleep(300);
   } else {
     columns[col].pop();
+    if (id === 'rng') await scrambleBits();
     for (const stack of columns) {
       if (id === 'bitflip') stack.reverse();
       stack.forEach((cell, r) => {
@@ -1891,6 +1892,25 @@ async function runHack(id, row, col) {
 
   updateHud();
   setMessage('');
+}
+
+// RNG: before the new numbers land, every bit on the board flickers through random values in
+// place (the squares stay put; only what's in them churns), slowing to a stop
+const SCRAMBLE_STEPS = [45, 45, 50, 55, 60, 70, 80, 95, 110];
+async function scrambleBits() {
+  const els = [];
+  columns.forEach((stack, c) => stack.forEach((cell, r) => {
+    const el = cell && cell.type === 'number' && boardEl.querySelector(`.cell[data-pos="${r},${c}"]`);
+    if (el) els.push(el);
+  }));
+  if (!els.length) return;
+  for (const el of els) el.classList.add('scrambling');
+  for (const ms of SCRAMBLE_STEPS) {
+    for (const el of els) fillBit(el, 1 + Math.floor(Math.random() * COLS));
+    SFX.play('click');
+    await sleep(ms);
+  }
+  for (const el of els) el.classList.remove('scrambling');
 }
 
 // Game over: every piece shakes and heats up, bursts at its own random moment,
@@ -3991,6 +4011,9 @@ const RES_INFO = {
   rootkits: { name: 'ROOTKITS', svg: resSvg('M4.5 1.5h2v13h-2zM9.5 1.5h2v13h-2zM1.5 4.5h13v2h-13zM1.5 9.5h13v2h-13z') },
   master: { name: 'MASTER KEYS', svg: resSvg('M1 3h7v10H1zM3 5v6h3V5zM8 7h7v2H8zM10 9h1.5v3H10zM12.5 9H14v4h-1.5zM3 1h3v2H3z') },
 };
+// THE BYTEFALL CURRENCY SIGN: a bit's 0 struck through twice, as a dollar sign is: no one
+// country's, it marks what's for sale (the BLACK MARKET)
+const CURRENCY_SVG = '<svg class="cur-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5h9v9h-9zM5.5 5.5v5h5v-5z" fill="currentColor" fill-rule="evenodd"/><path d="M6 0.5h1.5v15H6zM8.5 0.5H10v15H8.5z" fill="currentColor"/></svg>';
 const resChip = (id, n) => `<span class="res-chip res-${id}" title="${RES_INFO[id].name}">${RES_INFO[id].svg}${n}</span>`;
 // A price as chips: KEYS first, then the resources in their order
 const priceHtml = (price) => ['keys', ...Progress.resIds()].filter((id) => price[id]).map((id) => resChip(id, price[id])).join(' ');
@@ -4358,12 +4381,12 @@ function renderReserves() {
     b.classList.toggle('market', market);
     b.classList.toggle('owned', !market);
     b.classList.toggle('sealed', sealed && !market);
-    b.classList.toggle('confirm', market && !!sl.confirm);
+    b.classList.toggle('confirm', market && shopSlot === i);
     b.classList.toggle('short', short);
     b.innerHTML = `<span class="exploit-glyph">${itemIcon(sl.id)}</span>`
-      + (market ? `<span class="slot-price">${price.keys || ''}</span>` : `<span class="reserve-tag">${sl.state === 'reserve' ? 'R' : '✓'}</span>`);
+      + (market ? `<span class="slot-sale" aria-hidden="true">${CURRENCY_SVG}</span>` : `<span class="reserve-tag">${sl.state === 'reserve' ? 'R' : '✓'}</span>`);
     const name = itemName(sl.id);
-    b.title = market ? `BLACK MARKET // ${name}: ${priceText(price)} (tap, then tap again to buy)`
+    b.title = market ? `BLACK MARKET // ${name}: ${priceText(price)} (tap to see it)`
       : sealed ? `${sl.state === 'reserve' ? 'RESERVE' : 'BOUGHT'} // ${name}: tap to open it`
         : `${sl.state === 'reserve' ? 'RESERVE' : sl.state === 'opened' ? 'BLACK BOX' : 'BOUGHT'} // ${name}: tap to arm it`;
     b.setAttribute('aria-label', b.title);
@@ -4386,25 +4409,55 @@ function slotTap(i) {
     else if (!armExploit(i)) SFX.play('denied');
     return;
   }
+  openShop(i);
+}
+// THE BLACK MARKET's window: what's for sale (its icon, name, and a box's odds), its price as each
+// resource's icon over what you have / what it costs (red where you're short), BUY in the middle
+// (and USE A MASTER KEY when short of an exploit's price with one), a neon sign of a border and
+// a tilted, flickering $$$ in the corner. Drops wait while it's open
+const shopEl = document.getElementById('market-shop');
+let shopSlot = null;
+function openShop(i) {
+  const sl = sideSlots[i];
+  if (!sl || sl.state !== 'market') return;
+  shopSlot = i;
+  const id = sl.id;
+  const box = Progress.isBox(id);
+  const price = Progress.price(id);
+  const missing = Progress.missing(id);
+  const master = missing.length > 0 && !box && Progress.res('master') > 0;
+  const odds = box ? Progress.boxOdds(id) : null;
+  document.getElementById('shop-item').innerHTML = `<span class="shop-ico">${bracketIcon(id)}</span><span class="shop-name">${itemName(id)}</span>`
+    + `<span class="shop-tier">${box ? `T1 ${odds[0]}% // T2 ${odds[1]}% // T3 ${odds[2]}% // ANTI ${odds[3]}%` : `TIER ${Progress.tierOf(id) + 1} EXPLOIT`}</span>`;
+  document.getElementById('shop-costs').innerHTML = ['keys', ...Progress.resIds()].filter((res) => price[res]).map((res) => {
+    const have = res === 'keys' ? Progress.keys() : Progress.res(res);
+    return `<div class="shop-cost res-${res}${have < price[res] ? ' short' : ''}" title="${RES_INFO[res].name}">${RES_INFO[res].svg}<span>${fmt(have)}/${price[res]}</span></div>`;
+  }).join('');
+  const buy = document.getElementById('shop-buy');
+  buy.disabled = missing.length > 0;
+  buy.textContent = missing.length ? 'NOT ENOUGH' : 'BUY';
+  const mk = document.getElementById('shop-master');
+  mk.hidden = !master;
+  document.getElementById('shop-note').textContent = missing.length
+    ? `NEED ${missing.map(([res, n]) => `${n} MORE ${RES_INFO[res].name}`).join(', ')}` : 'ONE BUY FROM THIS SLOT A GAME';
+  document.getElementById('shop-sign').innerHTML = CURRENCY_SVG.repeat(3);
+  shopEl.classList.remove('hidden');
+  SFX.play('click');
+  renderReserves();
+  (buy.disabled ? (master ? mk : document.getElementById('shop-close')) : buy).focus();
+}
+function closeShop() {
+  if (shopSlot === null) return;
+  shopSlot = null;
+  shopEl.classList.add('hidden');
+  renderReserves();
+}
+function shopBuy(master) {
+  const sl = sideSlots[shopSlot];
+  if (!sl || sl.state !== 'market' || gameOver) { closeShop(); return; }
   const name = itemName(sl.id);
-  const price = Progress.price(sl.id);
-  const missing = Progress.missing(sl.id);
-  const master = missing.length > 0 && !Progress.isBox(sl.id) && Progress.res('master') > 0; // (short: a MASTER KEY pays instead)
-  if (!sl.confirm) { // (the first tap: its price)
-    sideSlots.forEach((x) => { x.confirm = false; });
-    sl.confirm = true;
-    setMessage(`BLACK MARKET // ${name}: ${priceText(price)}${master ? ', OR 1 MASTER KEY' : ''}, TAP AGAIN TO BUY`);
-    SFX.play('click');
-    renderReserves();
-    return;
-  }
-  sl.confirm = false;
-  if (!Progress.payFor(sl.id, master)) {
-    SFX.play('denied');
-    setMessage(`BLACK MARKET // NEED ${missing.map(([res, n]) => `${n} MORE ${RES_INFO[res].name}`).join(', ')}`);
-    renderReserves();
-    return;
-  }
+  if (!Progress.payFor(sl.id, master)) { SFX.play('denied'); return; }
+  closeShop();
   sl.state = 'bought';
   sl.buys++;
   marketBought.push(sl.id);
@@ -4413,6 +4466,11 @@ function slotTap(i) {
   showKeys();
   renderReserves();
 }
+document.getElementById('shop-buy').addEventListener('click', () => shopBuy(false));
+document.getElementById('shop-master').addEventListener('click', () => shopBuy(true));
+document.getElementById('shop-close').addEventListener('click', closeShop);
+shopEl.addEventListener('click', (e) => { if (e.target === shopEl) closeShop(); }); // (a tap off the window)
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && shopSlot !== null) { e.stopImmediatePropagation(); closeShop(); } }, true);
 // A BLACK BOX opened in its slot: the reel spins through the icons, slowing, and lands on what
 // Progress rolled. An exploit waits there to be armed; an ANTI-EXPLOIT goes off
 const REEL_STEPS = [50, 50, 55, 60, 65, 75, 85, 100, 115, 135, 160, 190, 230, 280];
@@ -5273,6 +5331,7 @@ if (window.BYTEFALL_APP && !window.BYTEFALL_APP.live) {
 // app goes to the background
 window.bytefallBack = () => {
   if (!reservePickEl.classList.contains('hidden')) { closeReservePick(); return true; } // (a reserve slot's card)
+  if (shopSlot !== null) { closeShop(); return true; } // (the BLACK MARKET's window)
   const start = document.getElementById('start-screen');
   if (start && !start.hidden) return false;
   if (homeOpen && !panelOpen() && window.showStartScreen) {

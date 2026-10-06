@@ -141,7 +141,8 @@ Mild and short. None can end a game by itself.
 | Modes | CLASSIC, BLITZ and ZEN (not DAILY, PUZZLE, VS or the tutorial) |
 | What's offered | a random unlocked exploit, or (a quarter of the time) a BLACK BOX: I 60%, II 30%, III 10% |
 | Turnover | a new offer every 4 drops (a price shown and not taken goes too) |
-| Buying | tap for the price, tap again to buy; short of an exploit's price with a MASTER KEY, the second tap uses the MASTER KEY |
+| Buying | a tap opens the BLACK MARKET's window: each part of the price as have / cost under its icon, BUY (and USE A MASTER KEY when short of an exploit's price with one) |
+| Marked | the game's own currency sign (a 0 struck through twice) in the slot's corner |
 | Limit | one buy per slot, per game |
 | After | a bought exploit waits in the slot to be armed; a bought box waits sealed to be opened |
 
