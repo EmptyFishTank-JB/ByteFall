@@ -113,8 +113,8 @@ BLACK BOX). Pick 2 on the main menu to take into a game, one in each slot (marke
 (if you have two) or one each of two. The menu shows the two slots, LEFT and RIGHT, and what's in each,
 and BUY EXPLOITS under them (the STORE's reserves). A tap on a slot opens its card: every reserve you
 own and how many, to put in that slot, and EMPTY THIS SLOT; each is used once in the game. In the game, a tap arms
-it as your next drop, as an earned one, and it's used up (the ones not used stay yours). A slot with
-no reserve, or once its reserve is used, is the **BLACK MARKET**: a random exploit you've unlocked
+it as your next drop, as an earned one, and it's used up (the ones not used stay yours). Once a
+slot's reserve is used, it's the **BLACK MARKET** (a slot taken in empty stays closed): a random exploit you've unlocked
 and its price (the same as a reserve's) under it, changing every 4 drops. Tap it for its price, tap
 again to buy; it waits in the slot (a tick in its corner) until you tap it to arm it. One buy each
 slot, a game. A game that used them says so on its result screen (RESERVES: ... // BLACK MARKET: ...).

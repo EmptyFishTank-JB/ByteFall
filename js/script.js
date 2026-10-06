@@ -226,8 +226,8 @@ window.BOOSTERS = BOOSTERS;
 // VS or the tutorial). RESERVE EXPLOITS (bought in the STORE with KEYS, Progress keeps them): 2
 // taken into a game (picked on the main menu: two of one kind, or one each of two), one in each
 // slot, each used once; a tap arms it as the next drop,
-// as an earned one, and it's used up (the ones not used stay owned). A slot with no reserve in it,
-// or whose reserve is used, is the BLACK MARKET: a random exploit (of the ones unlocked by level)
+// as an earned one, and it's used up (the ones not used stay owned). A slot whose reserve is used
+// is the BLACK MARKET (one taken in empty stays closed): a random exploit (of the ones unlocked by level)
 // and its price in KEYS (the STORE's), changing every MARKET_EVERY drops. A tap shows the price, a
 // second buys it, and it waits in the slot until it's armed; one buy a slot, a game. Only
 // exploits unlocked by level. A game that used them says so.
@@ -488,12 +488,7 @@ function initGame() {
   marketDrops = 0;
   const taken = Progress.reservesTaken();
   sideSlots = reserveFits() && mode !== 'tutorial'
-    ? [0, 1].map((i) => (taken[i] ? { state: 'reserve', id: taken[i], buys: 0 } : { state: 'market', id: null, buys: 0 })) : [];
-  for (const sl of sideSlots) {
-    if (sl.state !== 'market') continue;
-    sl.id = marketPick(sideSlots.map((x) => x.id));
-    if (!sl.id) sl.state = 'closed'; // (nothing unlocked yet)
-  }
+    ? [0, 1].map((i) => (taken[i] ? { state: 'reserve', id: taken[i], buys: 0 } : { state: 'closed', id: null, buys: 0 })) : [];
   puzzleHistory = [];
   hintCol = null;
   if (runBoosts.has('head-start')) streak = Math.floor(streakCap() / 2);
@@ -4357,6 +4352,7 @@ function armExploit(slot = null) {
     sl.state = sl.buys < 1 ? 'market' : 'closed';
     sl.confirm = false;
     if (sl.state === 'market') sl.id = marketPick(sideSlots.map((x) => x.id).concat(id));
+    if (!sl.id) sl.state = 'closed';
   } else if (!id) {
     if (!freeAllowed()) return false;
     id = freeExploitId();
