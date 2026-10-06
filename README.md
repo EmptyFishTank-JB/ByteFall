@@ -884,7 +884,7 @@ through anything). Menorah, kinara and sign are never mirrored.
 
 The same wanderers stroll along the bottom of the game card too, between the
 corner buttons (walking out from behind them), with everything above: meetings,
-frights, pop-ins, decrypts and pokes. SETTINGS → WANDERING BOTS turns them off
+frights, pop-ins, decrypts and pokes. On the game card their lane reaches up to the grid's bottom edge, and the drop buttons, the exploit button (and its side slots) and the message stay on top of it: what flies there passes behind them, and LIGHTS OUT, the night and the fog fill the lane under them. SETTINGS → WANDERING BOTS turns them off
 (on by default). The engine is `js/wanderers.js`, shared by both cards. On the start card the lane is the whole card: the bots walk along its bottom, and what flies, falls or hangs uses all of it (bats anywhere up the card, the spider dropping from the top edge behind the title, crows climbing off across it, snow falling from the top, fireworks bursting high). In the game the lane is the card's full width along the bottom, with the heights as before. They
 pass under the drop buttons and the message line below the grid (bats, crows
 and the spider's thread included), and a poke leaves no tap box around them.

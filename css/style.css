@@ -3393,3 +3393,15 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 .starter-pick-item.on .booster-pick-state { color: var(--accent); }
 #booster-pick { z-index: 207; }
 .starter-pick-item .exploit-glyph.bracketed .ico { width: 15px; height: 15px; }
+
+/* THE GAME CARD'S LANE reaches up to the grid's bottom edge (fitGameLane, script.js): the drop
+   buttons, the exploit row and the message stay over it, so LIGHTS OUT, the night and the fog fill the
+   lane under them and nothing in the air covers them. Its covers start at its own top now */
+.exploit-row { position: relative; z-index: 2; }
+.game-walkers .lights-out, .game-walkers .night-dark, .game-walkers .fog-dark { top: 0; }
+.game-walkers .fog-layer { top: 0; height: calc(100% + 6px); }
+
+/* The main menu's mode panel (// CLASSIC ...): the VS setup's look, the board's color with its
+   defragmenting grid behind the options, in place of the flat green tint */
+.home-panel { position: relative; isolation: isolate; overflow: hidden; background: var(--board-bg); }
+.home-panel-bg { z-index: -1; }

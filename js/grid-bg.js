@@ -260,6 +260,8 @@ const gameShown = () => !document.body.classList.contains('at-home') && !lowFx()
 if (document.getElementById('board-bg')) startGridBackground(document.getElementById('board-bg'), { active: gameShown });
 // VS setup: the defrag behind its options (the board's cells are covered)
 if (document.getElementById('vs-setup-bg')) startGridBackground(document.getElementById('vs-setup-bg'), { active: () => !lowFx() });
+// MAIN MENU: the mode's panel (// CLASSIC ...), the VS setup's defrag behind it, while the menu's up
+if (document.getElementById('home-panel-bg')) startGridBackground(document.getElementById('home-panel-bg'), { active: () => !lowFx() && document.body.classList.contains('at-home') });
 // START SCREEN: the starlight only, twinkling across the whole card
 if (document.getElementById('start-bg')) startGridBackground(document.getElementById('start-bg'), { defrag: false, active: () => !lowFx() });
 // The HUD boxes (SCORE, CHAIN, NEW LAYER IN, CURRENT...): the starlight only

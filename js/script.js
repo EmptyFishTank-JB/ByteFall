@@ -3674,6 +3674,20 @@ const wanderersBtn = document.getElementById('wanderers-btn');
 let wanderersOn = storage.get('bytefall-wanderers') !== 'off';
 // (not while the start screen covers the card: start.js starts them when it goes)
 const startScreenUp = () => { const el = document.getElementById('start-screen'); return !!el && !el.hidden && !document.documentElement.classList.contains('no-start'); };
+// The game card's lane runs from the card's bottom up to meet the grid's bottom edge: the drop
+// buttons, the exploit row and the message sit over it in their own layer, and what flies in the
+// lane passes behind them (fitted as the board's size and place change)
+function fitGameLane() {
+  const lane = document.getElementById('game-walkers');
+  if (!lane) return;
+  const grid = boardEl.getBoundingClientRect();
+  if (!grid.height) return;
+  const h = Math.round(lane.getBoundingClientRect().bottom - grid.bottom); // (its bottom stays put; its top meets the grid's)
+  lane.style.height = `${Math.max(44, h)}px`;
+}
+if (window.ResizeObserver) new ResizeObserver(() => fitGameLane()).observe(boardEl);
+window.addEventListener('resize', () => requestAnimationFrame(fitGameLane));
+requestAnimationFrame(fitGameLane);
 const gameWalkers = createWanderers(document.getElementById('game-walkers'), () => wanderersOn && !startScreenUp() && !document.documentElement.classList.contains('saver-on'));
 // A game under way (for BACK, start.js, and the screen saver, saver.js): a session with drops in
 // it, the tutorial, or a VS match; a timed one: a BLITZ clock or a VS match running (not paused)
