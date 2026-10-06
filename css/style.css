@@ -3372,3 +3372,16 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 @keyframes short-nudge { 0% { transform: translateX(-2px) scale(1.12); filter: drop-shadow(0 0 6px rgba(var(--danger-rgb), 1)); } 100% { transform: translateX(2px) scale(1.12); filter: drop-shadow(0 0 6px rgba(var(--danger-rgb), 1)); } }
 @media (prefers-reduced-motion: reduce) { .shop-cost.short, .buy-keys.short { animation: none; } }
 .shop-note:empty { display: none; } /* (only the "opens when..." line now; nothing to say, no gap) */
+/* A STORE item's name starts right after its icon in brackets (TIER stays at the right) */
+.store-item h3 { align-items: center; gap: 0; }
+.store-ico.bracketed { width: auto; min-width: 0; margin-right: 6px; }
+.store-item h3 .store-name { flex: 1; }
+/* The price row: four equal columns, so each tag sits in the same place on every item and four
+   three-digit prices (999/99) fit beside BUY on a phone; BUY slimmer to give them the room */
+.store-deal { gap: 8px; }
+.store-terms { flex: 1 1 auto; }
+.store-terms .store-costs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px 4px; max-width: 216px; flex-wrap: nowrap; }
+.store-terms .shop-cost { min-width: 0; font-size: 10.5px; letter-spacing: 0; }
+.store-btns .store-buy { min-width: 0; padding: 4px 7px; font-size: 11px; letter-spacing: 0.5px; }
+.store-btns .store-buy .cur-ico { margin-right: 2px; }
+.store-btns .store-master { padding: 4px 7px; gap: 3px; }
