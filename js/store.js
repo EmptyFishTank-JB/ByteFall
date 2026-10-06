@@ -54,7 +54,7 @@ const Store = (() => {
     item.dataset.reserve = id;
     const box = Progress.isBox(id);
     const odds = box ? Progress.boxOdds(id) : null;
-    item.innerHTML = `<h3><span class="store-ico">${itemIcon(id)}</span><span class="store-name">${itemName(id)}</span>`
+    item.innerHTML = `<h3><span class="store-ico bracketed">${bracketIcon(id)}</span><span class="store-name">${itemName(id)}</span>`
       + `<span class="store-price">${box ? '' : `TIER ${Progress.tierOf(id) + 1}`}</span></h3>`
       + `<p class="store-cost">${priceHtml(Progress.price(id))}</p>`
       + (box ? `<p class="store-odds">TIER 1 EXPLOIT ${odds[0]}% // TIER 2 ${odds[1]}% // TIER 3 ${odds[2]}% // ANTI-EXPLOIT ${odds[3]}%</p>` : '')

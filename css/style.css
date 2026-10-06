@@ -3216,3 +3216,13 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 @keyframes slot-glitch { 0% { transform: translate(-2px, 1px); } 50% { transform: translate(2px, -1px); } 100% { transform: none; } }
 /* ADWARE's pop-up over a drop button */
 .column-buttons button.adware { color: var(--danger); border-color: var(--danger); background: repeating-linear-gradient(45deg, rgba(255, 77, 94, 0.18) 0 4px, transparent 4px 8px); opacity: 1; }
+
+/* An exploit's icon in brackets beside its name ([!]), in the STORE and a reserve slot's card */
+.bracketed { width: auto !important; gap: 1px; display: inline-flex; align-items: center; }
+.bracketed > svg, .bracketed > .ico { position: relative; }
+.ico-br { font-weight: normal; opacity: 0.8; font-size: 0.85em; }
+.store-ico.bracketed { position: relative; min-width: 44px; justify-content: flex-start; }
+.store-ico.bracketed svg { width: 16px; height: 16px; }
+.reserve-pick-item .exploit-glyph.bracketed { min-width: 3.2em; font-size: 14px; }
+.reserve-pick-item .exploit-glyph.bracketed svg { width: 15px; height: 15px; }
+.bracketed .box-tier { display: none; } /* (the name says I, II or III) */

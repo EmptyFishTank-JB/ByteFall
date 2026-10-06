@@ -266,6 +266,8 @@ const ANTI = {
 // (a little virus: the ANTI-EXPLOITS')
 const VIRUS_SVG = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 7V3M12 21v-4M7 12H3M21 12h-4M8.5 8.5 5.5 5.5M18.5 18.5l-3-3M8.5 15.5l-3 3M18.5 5.5l-3 3"/></svg>';
 const itemName = (id) => (BOX_TIERS[id] ? `BLACK BOX ${BOX_TIERS[id]}` : ANTI[id] ? ANTI[id].name : HACKS[id] ? HACKS[id].name : id);
+// (in a list beside its name: in brackets, as a bit is, [!])
+const bracketIcon = (id) => `<span class="ico-br">[</span>${itemIcon(id)}<span class="ico-br">]</span>`;
 const itemIcon = (id) => (BOX_TIERS[id] ? `${ICON_SVG['black-box']}<span class="box-tier">${BOX_TIERS[id]}</span>` : ANTI[id] ? VIRUS_SVG : iconHtml(id));
 const boosterFits = (id, m = mode) => !daily && BOOSTERS[id].modes.includes(m);
 // (switched on per mode: CLASSIC's choice isn't BLITZ's)
@@ -4107,7 +4109,7 @@ function openReservePick(slot) {
     const free = Progress.reserves(id) - (other === id ? 1 : 0);
     b.className = `reserve-pick-item${here === id ? ' on' : ''}`;
     b.disabled = free <= 0;
-    b.innerHTML = `<span class="exploit-glyph">${itemIcon(id)}</span><span class="reserve-pick-name"></span><span class="reserve-pick-count">\u00d7${Progress.reserves(id)}</span>`;
+    b.innerHTML = `<span class="exploit-glyph bracketed">${bracketIcon(id)}</span><span class="reserve-pick-name"></span><span class="reserve-pick-count">\u00d7${Progress.reserves(id)}</span>`;
     b.querySelector('.reserve-pick-name').textContent = itemName(id);
     b.addEventListener('click', () => {
       const ids = taken.slice();
