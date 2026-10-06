@@ -102,6 +102,31 @@ const GEN_WORDS = {
 };
 const GEN_NOTE_NAMES = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
 
+// SONG CODES: a song's season, the generator's version and its seed, short enough to share
+// (H1-7QK2ZM: H Halloween, N November's harvest, W winter, D the rest of the year; 1 the version).
+// The same code, the same song, on this version. FREEZING A VERSION, when a change would alter
+// the songs already written (almost any change: even one more style changes which style a seed
+// picks): copy this file to music-generated-v<N>.js, rename its composeGenerated and
+// createGenerated to composeGeneratedV<N> and createGeneratedV<N> (and its GEN_ constants, so they
+// don't clash), add N to GEN_FROZEN below, and raise GEN_VERSION here. music.js loads a frozen
+// version only when a code asks for it.
+const GEN_VERSION = 1;
+const GEN_FROZEN = {}; // (version: the frozen file, under js/music/)
+const GEN_SEASON_CODE = { default: 'D', halloween: 'H', harvest: 'N', winter: 'W' };
+function generatedCode(season, seed, version = GEN_VERSION) {
+  return `${GEN_SEASON_CODE[season] || 'D'}${version}-${(seed >>> 0).toString(36).toUpperCase().padStart(7, '0')}`;
+}
+// (a code typed or pasted: any case, the dash and spaces optional, the seed always 7 characters;
+// null if it isn't one)
+function parseGeneratedCode(text) {
+  const m = String(text || '').toUpperCase().replace(/[\s-]+/g, '').match(/^([DHNW])(\d{1,3})([0-9A-Z]{7})$/);
+  if (!m) return null;
+  const seed = parseInt(m[3], 36);
+  if (!Number.isFinite(seed) || seed > 0xFFFFFFFF) return null;
+  const season = Object.keys(GEN_SEASON_CODE).find((k) => GEN_SEASON_CODE[k] === m[1]);
+  return { season, seed, version: Number(m[2]) };
+}
+
 // The song as data: the same seed, the same song
 function composeGenerated(opts = {}) {
   const season = GEN_POOLS[opts.season] ? opts.season : 'default';
@@ -283,6 +308,7 @@ function composeGenerated(opts = {}) {
   P.describe = () => ({
     title, style: S.name, season, bpm, meter: meter === 4 ? '4/4' : meter === 3 ? '3/4' : '6/8',
     key: `${GEN_NOTE_NAMES[KEY % 12]} ${GEN_SCALES[scaleId].name}`, form: form.join(' '), seconds: Math.round(N * BS * P.step),
+    code: generatedCode(season, opts.seed), version: GEN_VERSION,
   });
   return P;
 }

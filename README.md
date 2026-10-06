@@ -974,7 +974,14 @@ landing on the chord's notes on the beat and moving by step between, said, answe
 and brought home), the bass line (root, octaves, walking, oom-pah, acid...), the arpeggio or
 strumming, the groove and its fills, the instruments (organ, choir, strings, Rhodes, music box,
 theremin, fiddle, flute, pulse waves, a reese bass...) and a title. The MUSIC PLAYER shows the
-song's title and style; SETTINGS, under the playlist, today's. Layered like the others, building
+song's title and style; SETTINGS, under the playlist, today's. Every song has a SONG CODE (H1-0KUP3YT:
+its season, H Halloween, N November, W winter, D the rest of the year; the generator's version;
+its seed). The MUSIC PLAYER shows the playing song's (tap it: copied) and ENTER SONG CODE plays
+the song a code names on track 16 (any case, the dash optional), so a RANDOM song can be heard
+again or shared. A code from a newer ByteFall says to update. When a change to the generator would
+alter the songs already written, the old generator is frozen as its own file (how, at the top of
+`music-generated.js`) and loaded only when one of its codes is entered, so old codes keep playing
+their songs. Layered like the others, building
 with the stack.
 
 **The SEASONAL theme's audio**: picking the SEASONAL theme puts on GENERATED and the season's sound

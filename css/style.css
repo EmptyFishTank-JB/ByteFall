@@ -2328,6 +2328,15 @@ body.player-open { overflow: hidden; }
 @media (hover: hover) { .mp-viz-drawer button:hover { color: var(--fg); border-color: var(--fg-dim); } }
 .mp-now { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
 .mp-label { font-size: 10px; letter-spacing: 2px; color: var(--fg-dim); }
+/* (GENERATED's SONG CODE: copy the one playing, or enter one) */
+.mp-code { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; min-height: 26px; }
+.mp-code-btn { font-family: inherit; font-size: 10px; letter-spacing: 1px; padding: 4px 8px; cursor: pointer; background: transparent; color: var(--fg-dim); border: 1px solid var(--grid-line); border-radius: 4px; }
+.mp-code-btn.code { color: var(--accent); border-color: rgba(var(--fg-rgb), 0.35); }
+.mp-code-form { display: flex; gap: 6px; }
+.mp-code-form[hidden] { display: none; }
+.mp-code-form input { width: 120px; font-family: inherit; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; padding: 4px 6px; background: transparent; color: var(--fg); border: 1px solid var(--fg-dim); border-radius: 4px; }
+.mp-code-msg { flex-basis: 100%; font-size: 10px; letter-spacing: 1px; color: var(--accent); min-height: 0; }
+.mp-code-msg:empty { display: none; }
 .mp-track { font-size: 20px; letter-spacing: 2px; color: var(--fg); text-shadow: 0 0 8px rgba(var(--fg-rgb), 0.5); }
 .mp-transport { display: flex; justify-content: center; align-items: center; gap: 18px; }
 .mp-transport button {

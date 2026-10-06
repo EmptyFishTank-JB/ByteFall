@@ -4097,10 +4097,10 @@ updateSfxThemeBtn();
 const genSeedNote = document.getElementById('gen-seed-note');
 function updateGenSeedNote() {
   const song = Music.genSong();
-  const name = song ? ` ${song.title} (${song.style})` : '';
+  const name = song ? ` ${song.title} (${song.style}, CODE ${song.code})` : '';
   genSeedNote.textContent = Music.genMode() === 'day'
-    ? `Track 16 is seeded: a new song each day in the season's style, and everyone hears the same one. Today's:${name}. Tap it while it plays for RANDOM songs.`
-    : `Track 16 is on RANDOM: a new song every time${name ? `, now${name}` : ''}. Tap it while it plays for the SONG OF THE DAY, the one everyone hears today.`;
+    ? `Track 16 is seeded: a new song each day in the season's style, and everyone hears the same one. Today's:${name}. Tap it while it plays for RANDOM songs. Each song has a CODE: enter it in the MUSIC PLAYER to hear it again.`
+    : `Track 16 is on RANDOM: a new song every time${name ? `, now${name}` : ''}. Tap it while it plays for the SONG OF THE DAY. Each song has a CODE: enter it in the MUSIC PLAYER to hear it again.`;
 }
 // The SEASONAL theme comes with its audio: picking it puts on GENERATED (in the season's style) and
 // the season's sound effects (October: HAUNTED), as a starting point (either can be changed after);

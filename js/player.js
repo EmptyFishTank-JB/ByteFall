@@ -21,6 +21,53 @@
   const showVizName = () => { vizNameEl.textContent = `// ${viz.name}`; };
   showVizName();
   const SLOTS = 16; // unmade tracks show as COMING SOON, as in the playlist
+  // SONG CODES: the one playing (tap: copied, to play again later or share), or one typed in
+  const codeCopy = document.getElementById('mp-code-copy');
+  const codeEnter = document.getElementById('mp-code-enter');
+  const codeForm = document.getElementById('mp-code-form');
+  const codeInput = document.getElementById('mp-code-input');
+  const codeMsg = document.getElementById('mp-code-msg');
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text).then(() => true, () => copyOld(text));
+    return Promise.resolve(copyOld(text));
+  }
+  function copyOld(text) { // (where the clipboard API isn't offered: a hidden box, selected and copied)
+    const t = document.createElement('textarea');
+    t.value = text;
+    t.style.cssText = 'position:fixed;opacity:0;';
+    document.body.appendChild(t);
+    t.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) {}
+    t.remove();
+    return ok;
+  }
+  codeCopy.addEventListener('click', () => {
+    const code = Music.genCode();
+    if (!code) return;
+    copyText(code).then((ok) => {
+      codeCopy.dataset.copied = '1';
+      codeCopy.textContent = ok ? 'COPIED' : code;
+      setTimeout(() => { delete codeCopy.dataset.copied; render(); }, 1400);
+    });
+  });
+  function codeEntry(on) {
+    codeForm.hidden = !on;
+    codeEnter.hidden = on;
+    codeMsg.textContent = '';
+    if (on) { codeInput.value = ''; codeInput.focus(); }
+    render();
+  }
+  codeEnter.addEventListener('click', () => codeEntry(true));
+  document.getElementById('mp-code-cancel').addEventListener('click', () => codeEntry(false));
+  codeInput.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); codeEntry(false); } });
+  codeForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const why = await Music.playCode(codeInput.value);
+    if (why) { codeMsg.textContent = why; codeInput.select(); return; }
+    codeEntry(false);
+    after();
+  });
 
   const num = (n) => String(n + 1).padStart(2, '0');
   function render() {
@@ -31,6 +78,10 @@
     // (GENERATED: the song it wrote)
     const song = tracks[current].id === 'generated' && Music.genSong();
     stateEl.textContent = !playing ? 'PAUSED' : song ? `NOW PLAYING // ${song.title}` : 'NOW PLAYING // FULL MIX';
+    // (its SONG CODE, to copy: on track 16, once it's written one)
+    codeCopy.hidden = !song || !codeForm.hidden;
+    if (song && !codeCopy.dataset.copied) codeCopy.textContent = `CODE ${song.code}`;
+    codeCopy.classList.add('code');
     playBtn.classList.toggle('playing', playing);
     playBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
     document.querySelectorAll('#mp-modes button').forEach((b) => b.classList.toggle('active', b.dataset.mode === Music.getMode()));

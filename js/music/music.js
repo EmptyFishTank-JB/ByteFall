@@ -29,7 +29,7 @@ const Music = (() => {
     { id: 'handshake', title: 'HANDSHAKE', create: createHandshake },
     { id: 'stack-overflow', title: 'STACK OVERFLOW', create: createStackOverflow },
     // (music-generated.js: a new song from a seed, in the season's style; free, all year)
-    { id: 'generated', title: 'GENERATED', create: (c, o) => createGenerated(c, o, generatedOptions()), free: true, no: 16 },
+    { id: 'generated', title: 'GENERATED', create: (c, o) => { const g = generatedOptions(); return genMaker(g.version, 'create')(c, o, g); }, free: true, no: 16 },
   ];
   TRACKS.forEach((t, i) => { t.no = t.no || i + 1; });
   // GENERATED's seed: the SONG OF THE DAY (the date's, the same for everyone that day) or RANDOM (a
@@ -53,7 +53,11 @@ const Music = (() => {
     return seed;
   }
   let genPick = null; // (RADIO's pick for the next GENERATED song: 'day' or 'random', over genMode)
+  let genFixed = null; // (a SONG CODE's song: { season, seed, version }, played until another's picked)
+  // (the generator a version's songs were written by: this one, or a frozen one loaded for its code)
+  const genMaker = (v, what) => (!v || v === GEN_VERSION ? (what === 'create' ? createGenerated : composeGenerated) : window[`${what}GeneratedV${v}`]);
   function generatedOptions() {
+    if (genFixed && !genPick) { lastGen = { ...genFixed, mode: 'code' }; return lastGen; }
     const season = generatedSeason();
     const m = genPick || genMode;
     const seed = m === 'day' ? daySeed(season) : Math.floor(Math.random() * 4294967295);
@@ -63,7 +67,7 @@ const Music = (() => {
   // (the song it plays: the one playing, else the day's, or on RANDOM the last one written; null
   // before the first)
   function genSong() {
-    if (trackId === 'generated' && lastGen && timer) return composeGenerated(lastGen).describe();
+    if (trackId === 'generated' && lastGen && timer) return genMaker(lastGen.version, 'compose')(lastGen).describe();
     const season = generatedSeason();
     if (genMode === 'day') return composeGenerated({ season, seed: daySeed(season) }).describe();
     return lastGen && lastGen.mode === 'random' ? composeGenerated(lastGen).describe() : null;
@@ -150,6 +154,7 @@ const Music = (() => {
   // (a session with RADIO's pick: its GENERATED seed for this song only)
   function openPick(pick, fadeIn) {
     setTrack(pick.id);
+    genFixed = null;
     genPick = pick.gen || null;
     openSession(fadeIn);
     genPick = null;
@@ -281,7 +286,7 @@ const Music = (() => {
       free: !!t.free,
       name: t.title,
       // (its way of playing, when it isn't the track as it is, and the title with it)
-      variant: RAMPING_TRACKS.has(t.id) && speedMode === 'full' ? 'FULL SPEED' : t.id === 'generated' && (trackId === 'generated' && lastGen && timer ? lastGen.mode : genMode) === 'random' ? 'RANDOM' : '',
+      variant: RAMPING_TRACKS.has(t.id) && speedMode === 'full' ? 'FULL SPEED' : t.id !== 'generated' ? '' : ({ random: 'RANDOM', code: 'SONG CODE' })[trackId === 'generated' && lastGen && timer ? lastGen.mode : genMode] || '',
       get title() { return this.variant ? `${this.name} - ${this.variant}` : this.name; },
       locked: isLocked(t),
       need: t.free ? '' : Progress.unlock(unlockId(t)).need,
@@ -322,9 +327,10 @@ const Music = (() => {
     getAnalyser: () => (timer ? analyser : null),
     getStereo: () => (timer ? stereo : null),
     // Selecting a track always starts it, restarting playback if another was playing.
-    play(id) {
+    play(id, keepCode = false) {
       const track = TRACKS.find((t) => t.id === id);
       if (!track || isLocked(track)) return;
+      if (!keepCode) genFixed = null; // (a pick from the playlist: the day's or a random song again)
       setTrack(id);
       stop();
       setEnabled(true);
@@ -385,8 +391,33 @@ const Music = (() => {
     hasVariant: (id) => RAMPING_TRACKS.has(id) || id === 'generated',
     toggleVariant(id) {
       if (RAMPING_TRACKS.has(id)) this.setSpeed(speedMode === 'full' ? 'ramp' : 'full');
+      else if (id === 'generated' && lastGen && lastGen.mode === 'code') this.play('generated'); // (from a code's song: back to the day's or a random one)
       else if (id === 'generated') this.setGenMode(genMode === 'day' ? 'random' : 'day');
     },
+    // SONG CODES (music-generated.js): play the song a code names, on track 16. Resolves to null,
+    // or why it can't: not a code, or from a version this one doesn't have
+    async playCode(text) {
+      const c = parseGeneratedCode(text);
+      if (!c) return 'NOT A SONG CODE';
+      if (c.version > GEN_VERSION) return 'FROM A NEWER BYTEFALL: UPDATE TO PLAY IT';
+      if (c.version !== GEN_VERSION && !window[`createGeneratedV${c.version}`]) {
+        if (!GEN_FROZEN[c.version]) return 'NO SONGS FROM THAT VERSION';
+        try {
+          await new Promise((res, rej) => {
+            const s = document.createElement('script');
+            s.src = `js/music/${GEN_FROZEN[c.version]}`;
+            s.onload = res; s.onerror = rej;
+            document.head.appendChild(s);
+          });
+        } catch (e) { return 'COULDN\'T LOAD THAT VERSION'; }
+      }
+      genFixed = c;
+      this.play('generated', true);
+      if (onTrackChange) onTrackChange(trackId);
+      return null;
+    },
+    // (the code of the song playing on track 16, or the one it would play; null if none yet)
+    genCode: () => { const s = genSong(); return s ? s.code : null; },
     setFullMix(on) {
       fullMix = on;
       targetIntensity = on || alwaysFull ? 1 : gameIntensity;
