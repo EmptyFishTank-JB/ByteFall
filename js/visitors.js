@@ -614,6 +614,77 @@ function createVisitors(api) {
     api.lane.appendChild(c);
     return c;
   }
+  // THE FOREST FLOOR (the HAUNTED FOREST's): a silhouetted ground along the lane's foot, in front of
+  // the bots' feet, down to the card's edge: earth, grass tufts, stones, fallen twigs and leaves,
+  // dark as the trees, laid out afresh each time the forest comes
+  function groundIn() {
+    const c = document.createElement('canvas');
+    c.className = 'forest-ground';
+    c.setAttribute('aria-hidden', 'true');
+    foreLayer().appendChild(c);
+    drawGround(c);
+    requestAnimationFrame(() => { c.style.opacity = '1'; });
+    return c;
+  }
+  function drawGround(c) {
+    const P = U; // (the bots' own pixel)
+    const below = 6; // (the lane's foot to the card's)
+    const hPx = below + FLOOR + 6 * P;
+    const W = api.laneW();
+    const cw = Math.ceil(W / P);
+    const ch = Math.ceil(hPx / P);
+    c.width = cw;
+    c.height = ch;
+    c.style.height = `${ch * P}px`;
+    c.style.bottom = `${-below}px`;
+    const ctx = c.getContext('2d');
+    const px = (x, y, col) => { if (x >= 0 && x < cw && y >= 0 && y < ch) { ctx.fillStyle = col; ctx.fillRect(x, y, 1, 1); } };
+    const ri = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+    const top = ch - Math.round((below + FLOOR) / P); // (the ground's surface: where the bots stand)
+    const surf = [];
+    let h = 0;
+    for (let x = 0; x < cw; x++) { // (earth, its surface a little uneven, specked)
+      if (Math.random() < 0.18) h = Math.max(-1, Math.min(1, h + (Math.random() < 0.5 ? -1 : 1)));
+      surf[x] = top + h;
+      for (let y = surf[x]; y < ch; y++) px(x, y, Math.random() < 0.08 ? '#0e1217' : '#06080a');
+    }
+    for (let k = 0, n = Math.round(cw / 26); k < n; k++) { // (stones, lit a little on top)
+      const x0 = ri(0, cw - 6);
+      const w = ri(3, 6);
+      const sh = ri(2, 3);
+      for (let x = x0; x < x0 + w; x++) {
+        const s0 = surf[x] - sh + (x === x0 || x === x0 + w - 1 ? 1 : 0);
+        for (let y = s0; y <= surf[x]; y++) px(x, y, y === s0 ? '#1a2128' : '#10151a');
+      }
+    }
+    for (let k = 0, n = Math.round(cw / 40); k < n; k++) { // (fallen twigs, a side shoot or two)
+      const x0 = ri(0, cw - 12);
+      const len = ri(6, 11);
+      const tilt = Math.random() < 0.5 ? 0 : (Math.random() < 0.5 ? -1 : 1);
+      for (let i = 0; i < len; i++) px(x0 + i, surf[x0 + i] - 1 + (tilt && i > len / 2 ? tilt : 0), '#0d1115');
+      const b = x0 + ri(2, len - 2);
+      px(b + 1, surf[b] - 2, '#0d1115');
+      px(b + 2, surf[b] - 3, '#0d1115');
+    }
+    for (let k = 0, n = Math.round(cw / 6); k < n; k++) { // (grass tufts: a few blades, leaning)
+      const x0 = ri(0, cw - 1);
+      for (let b = 0, nb = ri(2, 4); b < nb; b++) {
+        let x = x0 + b - 1;
+        const tall = ri(2, 5);
+        const lean = Math.random() < 0.5 ? -1 : 1;
+        for (let i = 1; i <= tall; i++) {
+          if (i > 2 && Math.random() < 0.4) x += lean;
+          px(x, surf[Math.max(0, Math.min(cw - 1, x0))] - i, '#0a0e11');
+        }
+      }
+    }
+    for (let k = 0, n = Math.round(cw / 5); k < n; k++) { // (leaves: dead red-brown and olive, here and there)
+      const x = ri(0, cw - 2);
+      const col = pick(['#2a1416', '#22200f', '#1f1012', '#18160c']);
+      px(x, surf[x] - (Math.random() < 0.3 ? 1 : 0), col);
+      if (Math.random() < 0.5) px(x + 1, surf[x], col);
+    }
+  }
   // (a big tree in front, sunk: its foot past the screen's, roots (its last 3 rows) out of sight)
   function sinkTree(t) {
     const svgH = parseFloat(t.el.querySelector('svg').getAttribute('height'));
@@ -664,6 +735,7 @@ function createVisitors(api) {
       hauntedForest = true;
       fog.nextEyes = now + rand(6000, 14000);
       if (Math.random() < 0.75) startClouds(true); // (and a sky to match, most of the time)
+      fog.ground = groundIn();
     }
     if (!instant) api.botEvent(haunted ? 'visit-forest' : 'visit-fog');
     const W = api.laneW();
@@ -911,6 +983,7 @@ function createVisitors(api) {
     ctx.putImageData(img, 0, 0);
   }
   function endFog() {
+    if (fog.ground) fog.ground.remove();
     fog.back.remove();
     fog.fore.remove();
     fog.dark.remove();
@@ -2662,7 +2735,7 @@ function createVisitors(api) {
     if (forget) hauntedForest = false;
     horde = null;
     if (clouds) endClouds();
-    if (fog) { fog.back.remove(); fog.fore.remove(); fog.dark.remove(); if (fog.moon) fog.moon.remove(); fog = null; }
+    if (fog) { if (fog.ground) fog.ground.remove(); fog.back.remove(); fog.fore.remove(); fog.dark.remove(); if (fog.moon) fog.moon.remove(); fog = null; }
     if (lights) { lights.dark.remove(); lights.eyes.forEach((e) => e.remove()); if (lights.red) lights.red.remove(); lights = null; }
     api.lane.querySelectorAll('.moon-sky, .night-dark').forEach((e) => e.remove());
     list.forEach((v) => v.el.remove());

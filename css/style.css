@@ -3743,3 +3743,6 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
 .game-walkers .cloud-dark { height: calc(75% + var(--feather)); }
 .game-walkers .fog-layer { height: calc(100% + 6px + var(--feather)); }
 .game-walkers .moon-sky { clip-path: none; }
+/* The HAUNTED FOREST's floor (visitors.js's drawGround): along the lane's foot, in front of the bots'
+   feet, down to the card's edge (the big trees' layer clips it to the card) */
+.lane-fore .forest-ground { position: absolute; left: 0; width: 100%; image-rendering: pixelated; pointer-events: none; opacity: 0; transition: opacity 3s ease-in; }
