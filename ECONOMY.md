@@ -133,7 +133,7 @@ Mild and short. None can end a game by itself.
 
 | Anti-exploit | What it does | For |
 |---|---|---|
-| **ADWARE** | a pop-up covers one drop button (`AD`); drops by touching the grid or the number keys still work | 3 drops |
+| **ADWARE** | a pop-up covers one drop button (`AD`) and blocks its column: nothing drops there by the button, the grid or the number keys (it gives way if every other column is full) | 3 drops |
 | **SPYWARE** | CURRENT, the NEXT preview and the bit over the grid show `?` until each lands | the next 3 bits |
 | **RANSOMWARE** | 3 random bits on the board go under a one-peel layer (one decrypt beside each frees it, the same bit) | until peeled |
 

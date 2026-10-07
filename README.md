@@ -154,7 +154,7 @@ the game, a tap arms an exploit as your next drop, as an earned one, and it's us
 used stay yours). A box waits sealed (pulsing); a tap opens it: the slot spins like a slot machine's
 reel for about 1.5 seconds and lands on an exploit, which waits there (a tick in its corner) to be
 armed when you like, or an anti-exploit, which glitches red and goes off at once: **ADWARE** (a pop-up,
-AD, covers one drop button for 3 drops; the grid and number keys still drop there), **SPYWARE** (the
+AD, covers one drop button and blocks its column for 3 drops: nothing drops there, by the button, the grid or the number keys, unless every other column is full), **SPYWARE** (the
 next 3 bits show as ? until they land) or **RANSOMWARE** (3 bits on the board go under a one-peel
 layer). A slot taken in empty, or once its starter is used, is the **BLACK MARKET** (so it's there
 whether you take starters in or not):

@@ -3240,6 +3240,8 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 .exploit-icon.side-slot.glitched { color: var(--danger); border-color: var(--danger); animation: slot-glitch 0.12s steps(2) 5; }
 @keyframes slot-glitch { 0% { transform: translate(-2px, 1px); } 50% { transform: translate(2px, -1px); } 100% { transform: none; } }
 /* ADWARE's pop-up over a drop button */
+.column-buttons button.adware.ad-shake { animation: ad-shake 0.3s steps(4); }
+@keyframes ad-shake { 25% { transform: translateX(-2px); } 75% { transform: translateX(2px); } }
 .column-buttons button.adware { color: var(--danger); border-color: var(--danger); background: repeating-linear-gradient(45deg, rgba(255, 77, 94, 0.18) 0 4px, transparent 4px 8px); opacity: 1; }
 
 /* An exploit's icon in brackets beside its name ([!]), in the STORE and a starter slot's card */

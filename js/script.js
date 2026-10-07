@@ -273,7 +273,7 @@ function marketPick(not = []) {
 // BLACK BOXES and ANTI-EXPLOITS beside the exploits: their names and icons
 const BOX_TIERS = { 'box-1': 'I', 'box-2': 'II', 'box-3': 'III' };
 const ANTI = {
-  adware: { name: 'ADWARE', does: 'A POP-UP COVERS A DROP BUTTON FOR 3 DROPS' },
+  adware: { name: 'ADWARE', does: 'A POP-UP BLOCKS A COLUMN FOR 3 DROPS' },
   spyware: { name: 'SPYWARE', does: 'YOUR NEXT 3 BITS ARE HIDDEN' },
   ransomware: { name: 'RANSOMWARE', does: '3 BITS LOCKED UNDER A LAYER' },
 };
@@ -1012,7 +1012,7 @@ function updateColumnButtons() {
     btn.classList.toggle('pivot-target', target);
     btn.classList.toggle('tut-off', mode === 'tutorial' && !Tutorial.allows(c)); // (dimmed: not this lesson's column)
     btn.textContent = target ? (c < pivotFrom ? '\u2190' : '\u2192') : String(c + 1);
-    // (ADWARE: a pop-up over one button; the grid still takes the drop)
+    // (ADWARE: a pop-up over one button; its column takes no drop at all, attemptDrop)
     const ad = !!adware && adware.col === c && pivotFrom === null;
     btn.classList.toggle('adware', ad);
     if (ad) { btn.disabled = true; btn.textContent = 'AD'; }
@@ -1316,6 +1316,18 @@ function clearPivotChoice() {
 async function attemptDrop(col) {
   if (gameOver || busy || !queue.length || vsPaused || homeOpen || shopSlot !== null) return;
   if (mode === 'tutorial' && !Tutorial.canDrop(col)) return; // (only where the lesson says)
+  // ADWARE: its column takes nothing till the pop-up goes, from the button, the grid or the keys
+  // (with every other column full, the pop-up gives way)
+  if (adware && adware.col === col && pivotFrom === null) {
+    if (columns.some((c, n) => n !== col && c.length < MAX_ROWS)) {
+      setMessage(`${ANTI.adware.name} // COLUMN ${col + 1} BLOCKED FOR ${adware.left} MORE DROP${adware.left === 1 ? '' : 'S'}`, 'alarm');
+      SFX.play('denied');
+      const btn = columnButtonsEl.querySelectorAll('button')[col];
+      if (btn) { btn.classList.remove('ad-shake'); void btn.offsetWidth; btn.classList.add('ad-shake'); }
+      return;
+    }
+    adware = null;
+  }
   // SWAP: it drops once two bits are picked on the grid (with fewer than two on the board, it
   // drops and does nothing)
   if (swapArmed() && swapPicks.length < 2 && numberCells().length >= 2) {
@@ -4863,8 +4875,8 @@ function marketTick() {
   renderStarters();
 }
 
-// ANTI-EXPLOITS (a BLACK BOX's bad luck): mild and short. ADWARE covers one drop button for 3 drops
-// (the grid itself still takes the drop); SPYWARE hides the next 3 bits until they land;
+// ANTI-EXPLOITS (a BLACK BOX's bad luck): mild and short. ADWARE blocks one column for 3 drops
+// (nothing drops into that column, by the button, the grid or the keys); SPYWARE hides the next 3 bits until they land;
 // RANSOMWARE locks 3 bits on the board under a one-peel layer
 const ANTI_DROPS = 3;
 const spyHides = (n) => spywareLeft > n; // (the bit n places down the queue: 0 is CURRENT)
