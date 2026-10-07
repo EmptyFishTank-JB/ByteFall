@@ -3421,6 +3421,7 @@ function zoomHome() {
   if (!r.width) return;
   const z = Math.min(1.6, r.width / HOME_BASE[0], r.height / HOME_BASE[1]);
   homeEl.style.zoom = z > 1.02 ? z.toFixed(3) : '';
+  homeEl.style.setProperty('--home-zoom', z > 1.02 ? z.toFixed(3) : '1'); // (← BACK undoes it: one size, as PAUSE and every BACK)
 }
 addEventListener('resize', () => { zoomHome(); refitHome(); });
 requestAnimationFrame(zoomHome);

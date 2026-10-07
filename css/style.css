@@ -3702,7 +3702,7 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
 .home-head { height: 26px; align-items: center; } /* (one height in every font) */
 /* THE MAIN MENU's ← BACK in its top left corner, back to the title screen: the cards' own BACK button
    (one BACK everywhere); the title line keeps clear of it */
-.home .home-back { position: absolute; top: 8px; left: 8px; z-index: 2; }
+.home .home-back { position: absolute; top: 8px; left: 8px; z-index: 2; zoom: calc(1 / var(--home-zoom, 1)); } /* (not scaled with the menu on a big screen: the same BACK as everywhere, in the same corner) */
 @media (hover: hover) { .home .home-back:hover { background: rgba(var(--fg-rgb), 0.12); } }
 .home-head { padding: 0 80px; } /* (BACK's width and a gap, both sides: the title stays centred) */
 .home-head h1 { letter-spacing: 0.1em; } /* (the title alone: its // DECRYPTION TERMINAL is the title card's) */
