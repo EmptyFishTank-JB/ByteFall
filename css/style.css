@@ -4264,3 +4264,12 @@ html, body { overflow-x: clip; }
 .tier-head .store-rule { margin: 16px 0 4px; }
 .tier-sub { margin: 4px 0 2px; font-size: 15.5px; letter-spacing: 2px; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
 .tier-note { margin: 0 0 4px; font-size: 13px; color: var(--fg-dim); }
+
+/* SETTINGS, as RULES & RECORDS, EXPLOITS and the STORE: the card stays put (BACK and its title), its
+   options in a dashed box that scrolls inside its border, the scrollbar inside it too */
+.settings:not([hidden]) { display: flex; flex-direction: column; overflow: hidden; padding-bottom: 14px; }
+.settings .card-head { flex: none; position: static; }
+.settings-panel { flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
+  font-size: inherit; line-height: inherit; color: inherit; padding: 4px 12px 14px; scrollbar-width: thin; scrollbar-color: var(--fg-dim) transparent; }
+.settings-panel::-webkit-scrollbar { width: 6px; }
+.settings-panel::-webkit-scrollbar-thumb { background: var(--fg-dim); border-radius: 3px; }

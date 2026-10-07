@@ -4771,7 +4771,7 @@ function freeExploitId() {
 // The footer lives inside SETTINGS and the game card fills the screen: the phone layout, on
 // every screen. (RULES and EXPLOITS are tabs in the MENU, top left.)
 const footerEl = document.querySelector('footer');
-settingsEl.append(footerEl);
+(document.getElementById('settings-panel') || settingsEl).append(footerEl); // (in the box that scrolls)
 document.body.classList.add('cards-in-settings');
 
 // The lower corners: RESTART (QUIT in VS; greyed out until the first drop), and the

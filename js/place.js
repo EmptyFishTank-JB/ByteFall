@@ -8,7 +8,7 @@
   window.addEventListener('pagehide', () => {
     const place = {};
     if (!player.hidden) Object.assign(place, { panel: 'player', scroll: player.scrollTop });
-    else if (!settingsEl.hidden) Object.assign(place, { panel: 'settings', scroll: settingsEl.scrollTop });
+    else if (!settingsEl.hidden) Object.assign(place, { panel: 'settings', scroll: (document.getElementById('settings-panel') || settingsEl).scrollTop });
     else if (!recordsEl.hidden) Object.assign(place, { panel: 'menu', pane: menuPane, tab: recordsTab, scroll: (menuScroller() || recordsEl).scrollTop });
     if (mode === 'tutorial') place.tutorial = Tutorial.state();
     else if (homeOpen) place.home = true;
@@ -33,7 +33,7 @@
     scrollTo(menuScroller() || recordsEl);
   } else if (place.panel === 'settings') {
     setSettingsOpen(true);
-    scrollTo(settingsEl);
+    scrollTo(document.getElementById('settings-panel') || settingsEl);
   } else if (place.panel === 'player') {
     document.getElementById('open-player-btn').click();
     scrollTo(player);
