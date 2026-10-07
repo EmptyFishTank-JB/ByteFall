@@ -7,6 +7,11 @@
 //   HALLOWEEN  HAUNTED WALTZ, MONSTER SURF, HORROR SYNTH, GRAVEYARD MARCH, MUSIC BOX
 //   HARVEST    (November) HARVEST JIG (6/8), CAMPFIRE, HOEDOWN, AUTUMN LO-FI
 //   WINTER     (December, the holidays) SLEIGH RIDE, SNOW WALTZ, CAROL, COZY LO-FI
+//   FROST      (Jan 7 - Feb) AURORA, ICE CAVE, SNOW DAY, FIRESIDE LO-FI
+//   VALENTINE  (Feb 7 - 14) LOVE BALLAD, SLOW JAM, SWEETHEART WALTZ, SYNTH CRUSH
+//   SPRING     (Mar - May) MEADOW FOLK, APRIL SHOWERS, GARDEN WALTZ, BLOOM
+//   SUMMER     (Jun - Aug) BEACH SURF, ISLAND BREEZE, SUNSET HOUSE, ARCADE SUMMER
+//   AUTUMN     (September) BACK TO SCHOOL, GOLDEN HOUR, EQUINOX LO-FI, PORCH SWING
 // It's variety inside rules that keep it music: chords from a hand-picked stock of progressions,
 // voiced close together; a two-bar hook that lands on the chord's own notes on the beat and moves
 // by step between, said, answered, said again and brought home to the key; a form (INTRO, A, B, a
@@ -83,12 +88,47 @@ const GEN_STYLES = {
   'snow-waltz': { name: 'SNOW WALTZ', meter: 3, bpm: [132, 152], scales: ['major', 'lydian'], sevenths: 0.3, hold: [2], drums: ['waltz'], kit: 'soft', bass: ['oompah'], bassInst: ['pluck'], arp: ['updown'], arpRate: [2], arpInst: ['celesta', 'harp'], arpOct: 1, pad: ['strings'], lead: ['flute', 'fiddle'], dens: [0.35, 0.5], lift: 0.3, bells: true, fill: ['none'] },
   carol: { name: 'CAROL', bpm: [70, 84], scales: ['major'], sevenths: 0.1, hold: [1, 2], drums: ['carol'], kit: 'orchestral', bass: ['root'], bassInst: ['tuba', 'sub'], arp: ['up'], arpRate: [2], arpInst: ['harp'], pad: ['choir', 'organ'], lead: ['bells', 'brass'], dens: [0.35, 0.45], harmony: 0.7, bells: true, fill: ['none'] },
   'cozy-lofi': { name: 'COZY LO-FI', bpm: [70, 84], swing: [0.16, 0.24], scales: ['major', 'dorian'], sevenths: 1, hold: [1, 2], drums: ['boombap'], kit: 'lofi', bass: ['walk', 'root'], bassInst: ['upright', 'sub'], arp: ['up'], arpRate: [4], arpInst: ['celesta'], arpOct: 1, pad: ['rhodes'], lead: ['bells', 'whistle'], dens: [0.25, 0.35], crackle: true, sleighHats: true, fill: ['none'] },
+
+  // FROST (January 7 to February): the deep of winter, crystal and quiet
+  aurora: { name: 'AURORA', bpm: [72, 86], scales: ['lydian', 'major'], sevenths: 0.8, hold: [2], drums: ['halftime'], kit: 'soft', bass: ['root'], bassInst: ['sub'], arp: ['updown'], arpRate: [2], arpInst: ['celesta', 'bell'], arpOct: 1, pad: ['choir', 'strings'], lead: ['whistle', 'fm'], dens: [0.2, 0.3], lift: 0.2, bells: true, fill: ['none'] },
+  'ice-cave': { name: 'ICE CAVE', bpm: [96, 110], scales: ['minor', 'dorian'], sevenths: 0.4, hold: [2], drums: ['halftime', 'backbeat'], kit: 'gated', bass: ['octave'], bassInst: ['saw'], arp: ['up', 'pedal'], arpRate: [1], arpInst: ['bell'], arpOct: 1, pad: ['strings'], lead: ['fm', 'square'], dens: [0.25, 0.35], fill: ['toms'] },
+  'snow-day': { name: 'SNOW DAY', bpm: [132, 148], scales: ['major'], hold: [1, 2], drums: ['chip'], kit: 'chip', bass: ['chip8', 'octave'], bassInst: ['chip'], arp: ['chip'], arpRate: [1], arpInst: ['chip'], arpOct: 1, pad: ['none'], lead: ['pulse', 'pulse12'], leadOct: 1, dens: [0.45, 0.6], lift: 0.5, harmony: 0.3, bells: true, fill: ['snare'] },
+  'fireside-lofi': { name: 'FIRESIDE LO-FI', bpm: [68, 80], swing: [0.16, 0.24], scales: ['dorian', 'minor'], sevenths: 1, hold: [1, 2], drums: ['boombap'], kit: 'lofi', bass: ['walk', 'root'], bassInst: ['upright'], arp: ['none'], pad: ['rhodes'], lead: ['flute', 'whistle'], dens: [0.25, 0.35], crackle: true, fill: ['none'] },
+
+  // VALENTINE'S (February 7 to 14): sweet and slow
+  'love-ballad': { name: 'LOVE BALLAD', bpm: [66, 78], scales: ['major'], sevenths: 0.8, hold: [2], drums: ['brushes'], kit: 'soft', bass: ['root'], bassInst: ['upright'], arp: ['broken'], arpRate: [2], arpInst: ['harp'], pad: ['rhodes', 'strings'], lead: ['flute', 'whistle'], dens: [0.28, 0.4], harmony: 0.5, fill: ['none'] },
+  'slow-jam': { name: 'SLOW JAM', bpm: [70, 82], swing: [0.12, 0.2], scales: ['dorian', 'major'], sevenths: 1, hold: [1, 2], drums: ['boombap'], kit: 'lofi', bass: ['walk'], bassInst: ['sub'], arp: ['none'], pad: ['rhodes'], lead: ['fm', 'whistle'], dens: [0.25, 0.35], fill: ['none'] },
+  'sweetheart-waltz': { name: 'SWEETHEART WALTZ', meter: 3, bpm: [120, 140], scales: ['major'], sevenths: 0.4, hold: [2], drums: ['waltz'], kit: 'soft', bass: ['oompah'], bassInst: ['pluck'], arp: ['updown'], arpRate: [2], arpInst: ['musicbox', 'celesta'], arpOct: 1, pad: ['strings'], lead: ['fiddle', 'flute'], dens: [0.35, 0.5], lift: 0.3, bells: true, fill: ['none'] },
+  'synth-crush': { name: 'SYNTH CRUSH', bpm: [110, 122], scales: ['major', 'mixolydian'], sevenths: 0.5, hold: [2, 1], drums: ['four', 'backbeat'], kit: 'gated', bass: ['octave'], bassInst: ['saw'], arp: ['up', 'broken'], arpRate: [1, 2], arpInst: ['pluck'], arpOct: 1, pad: ['saw', 'strings'], lead: ['square', 'saw'], dens: [0.4, 0.55], lift: 0.4, harmony: 0.4, fill: ['snare'] },
+
+  // SPRING (March to May): fresh, green and bright
+  'meadow-folk': { name: 'MEADOW FOLK', bpm: [92, 108], swing: [0.04, 0.1], scales: ['major', 'mixolydian'], sevenths: 0.2, hold: [2], drums: ['brushes'], kit: 'folk', bass: ['root'], bassInst: ['upright'], arp: ['strum', 'broken'], arpRate: [2], arpInst: ['guitar'], pad: ['reed', 'none'], lead: ['flute', 'whistle'], dens: [0.35, 0.5], fill: ['none'] },
+  'april-showers': { name: 'APRIL SHOWERS', bpm: [72, 86], swing: [0.16, 0.24], scales: ['major', 'dorian'], sevenths: 1, hold: [1, 2], drums: ['boombap'], kit: 'lofi', bass: ['walk', 'root'], bassInst: ['upright', 'sub'], arp: ['up'], arpRate: [4], arpInst: ['celesta'], arpOct: 1, pad: ['rhodes'], lead: ['flute', 'bells'], dens: [0.25, 0.35], crackle: true, fill: ['none'] },
+  'garden-waltz': { name: 'GARDEN WALTZ', meter: 3, bpm: [126, 146], scales: ['major', 'lydian'], sevenths: 0.3, hold: [2], drums: ['waltz'], kit: 'soft', bass: ['oompah'], bassInst: ['pluck'], arp: ['updown'], arpRate: [2], arpInst: ['harp'], arpOct: 1, pad: ['strings'], lead: ['flute', 'fiddle'], dens: [0.35, 0.5], lift: 0.3, fill: ['none'] },
+  bloom: { name: 'BLOOM', bpm: [112, 126], scales: ['major', 'lydian'], sevenths: 0.5, hold: [2, 1], drums: ['backbeat'], kit: 'soft', bass: ['octave', 'root'], bassInst: ['sub'], arp: ['up', 'updown'], arpRate: [2], arpInst: ['bell', 'pluck'], arpOct: 1, pad: ['strings'], lead: ['whistle', 'bells'], dens: [0.35, 0.5], lift: 0.4, harmony: 0.4, fill: ['toms'] },
+
+  // SUMMER (June to August): sun, surf and warm nights
+  'beach-surf': { name: 'BEACH SURF', bpm: [150, 168], scales: ['major', 'mixolydian'], hold: [2], drums: ['surf'], kit: 'garage', bass: ['walk'], bassInst: ['pluck'], arp: ['broken', 'up'], arpRate: [2], arpInst: ['twang'], pad: ['organ'], lead: ['twang', 'square'], dens: [0.4, 0.55], fill: ['toms'] },
+  'island-breeze': { name: 'ISLAND BREEZE', bpm: [92, 106], swing: [0.08, 0.14], scales: ['major', 'mixolydian'], sevenths: 0.4, hold: [1, 2], drums: ['boomchick'], kit: 'soft', bass: ['boomchick', 'walk'], bassInst: ['upright'], arp: ['roll', 'broken'], arpRate: [2], arpInst: ['bell', 'twang'], pad: ['none', 'reed'], lead: ['whistle', 'flute'], dens: [0.35, 0.5], fill: ['none'] },
+  'sunset-house': { name: 'SUNSET HOUSE', bpm: [118, 126], scales: ['dorian', 'major'], sevenths: 0.8, hold: [2], drums: ['four'], kit: '909', bass: ['octave'], bassInst: ['sub'], arp: ['offstab'], arpInst: ['stab'], pad: ['strings', 'rhodes'], lead: ['fm', 'whistle'], dens: [0.22, 0.32], lift: 0.3, fill: ['snare'] },
+  'arcade-summer': { name: 'ARCADE SUMMER', bpm: [136, 152], scales: ['major', 'mixolydian'], hold: [1, 2], drums: ['chip'], kit: 'chip', bass: ['chip8', 'octave'], bassInst: ['chip'], arp: ['chip'], arpRate: [1], arpInst: ['chip'], arpOct: 1, pad: ['none'], lead: ['pulse', 'pulse12'], leadOct: 1, dens: [0.5, 0.65], lift: 0.5, harmony: 0.3, fill: ['snare'] },
+
+  // AUTUMN (September): back to school, golden evenings
+  'back-to-school': { name: 'BACK TO SCHOOL', bpm: [124, 140], scales: ['major', 'mixolydian'], hold: [2, 1], drums: ['backbeat'], kit: 'garage', bass: ['pulse8', 'octave'], bassInst: ['pluck'], arp: ['strum'], arpInst: ['guitar'], pad: ['organ', 'none'], lead: ['square', 'twang'], dens: [0.4, 0.55], lift: 0.4, fill: ['toms', 'snare'] },
+  'golden-hour': { name: 'GOLDEN HOUR', bpm: [78, 92], scales: ['dorian', 'major'], sevenths: 0.8, hold: [2], drums: ['halftime'], kit: 'gated', bass: ['root'], bassInst: ['sub'], arp: ['updown'], arpRate: [2], arpInst: ['bell'], arpOct: 1, pad: ['rhodes', 'strings'], lead: ['flute', 'fm'], dens: [0.22, 0.32], lift: 0.2, fill: ['toms'] },
+  'equinox-lofi': { name: 'EQUINOX LO-FI', bpm: [72, 84], swing: [0.16, 0.24], scales: ['dorian', 'minor', 'major'], sevenths: 1, hold: [1, 2], drums: ['boombap'], kit: 'lofi', bass: ['walk', 'root'], bassInst: ['upright'], arp: ['none'], pad: ['rhodes'], lead: ['flute', 'whistle'], dens: [0.25, 0.35], crackle: true, fill: ['none'] },
+  'porch-swing': { name: 'PORCH SWING', bpm: [84, 98], swing: [0.06, 0.12], scales: ['major', 'mixolydian'], sevenths: 0.3, hold: [2], drums: ['brushes'], kit: 'folk', bass: ['root', 'walk'], bassInst: ['upright'], arp: ['roll'], arpRate: [2], arpInst: ['banjo', 'guitar'], pad: ['reed', 'none'], lead: ['fiddle', 'whistle'], dens: [0.3, 0.45], fill: ['none'] },
 };
 const GEN_POOLS = {
   default: ['synthwave', 'chiptune', 'dnb', 'lofi', 'techno', 'dreamwave'],
   halloween: ['haunted-waltz', 'monster-surf', 'horror-synth', 'graveyard-march', 'music-box'],
   harvest: ['harvest-jig', 'campfire', 'hoedown', 'autumn-lofi'],
   winter: ['sleigh-ride', 'snow-waltz', 'carol', 'cozy-lofi'],
+  frost: ['aurora', 'ice-cave', 'snow-day', 'fireside-lofi'],
+  valentine: ['love-ballad', 'slow-jam', 'sweetheart-waltz', 'synth-crush'],
+  spring: ['meadow-folk', 'april-showers', 'garden-waltz', 'bloom'],
+  summer: ['beach-surf', 'island-breeze', 'sunset-house', 'arcade-summer'],
+  autumn: ['back-to-school', 'golden-hour', 'equinox-lofi', 'porch-swing'],
 };
 const GEN_WORDS = {
   default: [['NULL', 'STATIC', 'NEON', 'CHROME', 'SILENT', 'BROKEN', 'MIDNIGHT', 'BINARY', 'ELECTRIC', 'LOST', 'QUANTUM', 'CRIMSON', 'ZERO', 'ANALOG', 'LUCID', 'RADIANT', 'FADING', 'HIDDEN', 'COLD', 'VELVET'],
@@ -99,11 +139,22 @@ const GEN_WORDS = {
     ['MOON', 'JIG', 'REEL', 'FIELDS', 'LANE', 'FIRE', 'ROAD', 'MILL', 'BARN', 'DANCE', 'RIDGE', 'GROVE', 'TABLE', 'HOMECOMING']],
   winter: [['SILVER', 'FROSTED', 'SNOWBOUND', 'MIDWINTER', 'STARLIT', 'GLASS', 'NORTHERN', 'CANDLE', 'EVERGREEN', 'HOLLY', 'WHITE', 'CRYSTAL', 'SLEIGHBELL', 'COCOA'],
     ['NIGHT', 'MORNING', 'WALTZ', 'LIGHTS', 'CAROL', 'EVE', 'PINES', 'RIDE', 'HEARTH', 'SKY', 'SNOWFALL', 'LANTERN', 'WREATH', 'STAR']],
+  frost: [['GLACIAL', 'POLAR', 'FROZEN', 'NORTHERN', 'ARCTIC', 'HUSHED', 'PALE', 'RIME', 'BLUE', 'DEEP', 'STILL', 'ICEBOUND', 'BOREAL', 'WINTER'],
+    ['LIGHTS', 'CAVE', 'DRIFT', 'HOLLOW', 'MORNING', 'PASS', 'LAKE', 'HEARTH', 'STAR', 'SILENCE', 'TRAIL', 'SKY', 'EMBER', 'CABIN']],
+  valentine: [['SWEET', 'TENDER', 'ROSE', 'CRIMSON', 'LOVESTRUCK', 'VELVET', 'CANDY', 'SECRET', 'SATIN', 'STARRY', 'GOLDEN', 'DARLING', 'CUPID\'S', 'MOONLIT'],
+    ['HEART', 'KISS', 'CRUSH', 'LETTER', 'DANCE', 'PROMISE', 'VALENTINE', 'ROSES', 'SERENADE', 'EMBRACE', 'DATE', 'WISH', 'ARROW', 'BALLAD']],
+  spring: [['GREEN', 'FRESH', 'BLOSSOM', 'APRIL', 'DEWY', 'CLOVER', 'MORNING', 'MEADOW', 'TULIP', 'BUDDING', 'SUNLIT', 'WILDFLOWER', 'LILAC', 'ROBIN\'S'],
+    ['RAIN', 'BLOOM', 'GARDEN', 'BREEZE', 'SONG', 'SHOWERS', 'FIELDS', 'PETALS', 'PATH', 'KITE', 'BROOK', 'DAWN', 'NEST', 'WALTZ']],
+  summer: [['SUNNY', 'ENDLESS', 'TROPIC', 'SALTY', 'GOLDEN', 'SUNSET', 'BAREFOOT', 'COASTAL', 'HAZY', 'NEON', 'SEASIDE', 'LEMONADE', 'MIDSUMMER', 'WARM'],
+    ['WAVES', 'BOARDWALK', 'TIDE', 'DAYS', 'BREEZE', 'NIGHTS', 'SURF', 'LAGOON', 'DRIVE', 'PIER', 'HEAT', 'ISLAND', 'FIREFLIES', 'POOL']],
+  autumn: [['GOLDEN', 'SEPTEMBER', 'AMBER', 'CRISP', 'FADING', 'EARLY', 'HONEYED', 'HAZY', 'QUIET', 'LAST', 'WILLOW', 'COPPER', 'HOMEWARD', 'AFTERGLOW'],
+    ['HOUR', 'BELL', 'LOCKER', 'STREET', 'EVENING', 'PORCH', 'BUS', 'HALLWAY', 'SWING', 'LEAVES', 'SUNDOWN', 'EQUINOX', 'NOTEBOOK', 'DRIVE']],
 };
 const GEN_NOTE_NAMES = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
 
 // SONG CODES: a song's season, the generator's version and its seed, short enough to share
-// (H1-7QK2ZM: H Halloween, N November's harvest, W winter, D the rest of the year; 1 the version).
+// (H1-7QK2ZM: H Halloween, N November's harvest, W winter, F frost, V Valentine's, S spring, U summer,
+// A September's autumn, D the all-year styles; 1 the version).
 // The same code, the same song, on this version. FREEZING A VERSION, when a change would alter
 // the songs already written (almost any change: even one more style changes which style a seed
 // picks): copy this file to music-generated-v<N>.js, rename its composeGenerated and
@@ -112,14 +163,14 @@ const GEN_NOTE_NAMES = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'B
 // version only when a code asks for it.
 const GEN_VERSION = 1;
 const GEN_FROZEN = {}; // (version: the frozen file, under js/music/)
-const GEN_SEASON_CODE = { default: 'D', halloween: 'H', harvest: 'N', winter: 'W' };
+const GEN_SEASON_CODE = { default: 'D', halloween: 'H', harvest: 'N', winter: 'W', frost: 'F', valentine: 'V', spring: 'S', summer: 'U', autumn: 'A' };
 function generatedCode(season, seed, version = GEN_VERSION) {
   return `${GEN_SEASON_CODE[season] || 'D'}${version}-${(seed >>> 0).toString(36).toUpperCase().padStart(7, '0')}`;
 }
 // (a code typed or pasted: any case, the dash and spaces optional, the seed always 7 characters;
 // null if it isn't one)
 function parseGeneratedCode(text) {
-  const m = String(text || '').toUpperCase().replace(/[\s-]+/g, '').match(/^([DHNW])(\d{1,3})([0-9A-Z]{7})$/);
+  const m = String(text || '').toUpperCase().replace(/[\s-]+/g, '').match(/^([DHNWFVSUA])(\d{1,3})([0-9A-Z]{7})$/);
   if (!m) return null;
   const seed = parseInt(m[3], 36);
   if (!Number.isFinite(seed) || seed > 0xFFFFFFFF) return null;

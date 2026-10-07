@@ -151,6 +151,10 @@ const Progress = (() => {
   // Loadout slots: DECRYPTOR N keeps N (up to MAX_SLOTS); the rest unlock at SLOT_LEVELS in turn
   const MAX_SLOTS = 6;
   const SLOT_LEVELS = [5, 15, 30, 45, 60, 75];
+  // The SIDE SLOTS either side of the exploit button (STARTER EXPLOITS and the BLACK MARKET): the
+  // left one early, the right one a little later, so the market's prices are met a step at a time
+  const SIDE_SLOT_LEVELS = [4, 12];
+  const sideSlots = () => (Unlocks.hasFullAccess() ? 2 : SIDE_SLOT_LEVELS.filter((l) => levelInfo().level >= l).length);
   let exploitNames = {}; // id -> name, from script.js
 
   function exploitInfo(id) {
@@ -200,6 +204,7 @@ const Progress = (() => {
     { id: 'vs-insane', group: 'VS CPU', name: 'INSANE CPU', ...atLevel(46) },
     ...BOT_ORDER.map(([id, name, level]) => ({ id: `bot-${id}`, group: 'VS CPU', name: `BOT: ${name}`, ...atLevel(level) })),
     ...TRACK_LEVELS.map((level, i) => ({ id: `track-${i + 2}`, group: 'TRACKS', name: `TRACK ${String(i + 2).padStart(2, '0')}`, ...atLevel(level) })),
+    ...SIDE_SLOT_LEVELS.map((level, i) => ({ id: `side-slot-${i + 1}`, group: 'SIDE SLOTS', name: `SIDE SLOT: ${i ? 'RIGHT' : 'LEFT'}`, ...atLevel(level) })),
     ...THEME_ORDER.map(([id, name, level]) => ({ id: `theme-${id}`, group: 'THEMES', name, ...atLevel(level) })),
     ...FONT_ORDER.map(([id, name, level]) => ({ id: `font-${id}`, group: 'FONTS', name, ...atLevel(level) })),
   ];
@@ -682,6 +687,8 @@ const Progress = (() => {
     exploitInfo,
     exploitOrder: () => [...EXPLOIT_ORDER],
     slotInfo,
+    sideSlots, // (how many side slots are open: 0, 1 (the left) or 2)
+    sideSlotLevel: (i) => SIDE_SLOT_LEVELS[i],
     equipped: () => (tidyLoadout(), [...d.equipped]),
     isEquipped: (id) => (tidyLoadout(), d.equipped.includes(id)),
     // Returns false when it can't (locked, or every slot is taken)

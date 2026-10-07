@@ -10,6 +10,12 @@
 //   KWANZAA    December 26 to January 1 (one more kinara candle lit each day)
 //   NYE        December 31 (a countdown at the player's own midnight)
 //   NEWYEAR    January 1 and 2
+// And the rest of the year (the SEASONAL theme's colors and sounds, GENERATED's styles; no visitors yet):
+//   FROST      January 7 to the end of February
+//   VALENTINE  February 7 to 14 (over FROST)
+//   SPRING     March, April and May
+//   SUMMER     June, July and August
+//   AUTUMN     September
 // The dev page's SEASON switch (bytefall-dev-season), or ?season=christmas, forces one (with the
 // base it sits on: WINTER under the December holidays).
 const Season = (() => {
@@ -44,9 +50,14 @@ const Season = (() => {
     kwanzaa: (d) => kwanzaaDay(d) > 0,
     nye: (d) => d.getMonth() === 11 && d.getDate() === 31,
     newyear: (d) => d.getMonth() === 0 && d.getDate() <= 2,
+    frost: (d) => (d.getMonth() === 0 && d.getDate() >= 7) || d.getMonth() === 1,
+    valentine: (d) => d.getMonth() === 1 && d.getDate() >= 7 && d.getDate() <= 14,
+    spring: (d) => d.getMonth() >= 2 && d.getMonth() <= 4,
+    summer: (d) => d.getMonth() >= 5 && d.getMonth() <= 7,
+    autumn: (d) => d.getMonth() === 8,
   };
-  const BASE = { hanukkah: 'winter', christmas: 'winter', kwanzaa: 'winter', nye: 'winter', newyear: 'winter' };
-  const ORDER = ['nye', 'newyear', 'christmas', 'hanukkah', 'kwanzaa', 'halloween', 'november', 'winter'];
+  const BASE = { hanukkah: 'winter', christmas: 'winter', kwanzaa: 'winter', nye: 'winter', newyear: 'winter', valentine: 'frost' };
+  const ORDER = ['nye', 'newyear', 'christmas', 'hanukkah', 'kwanzaa', 'valentine', 'halloween', 'november', 'winter', 'frost', 'spring', 'summer', 'autumn'];
   function forced() {
     let v = new URLSearchParams(location.search).get('season');
     if (v === null) {

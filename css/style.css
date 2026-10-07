@@ -3143,6 +3143,7 @@ html.pixel-mode .walker.skater.walking[data-look="left"] .bot { transform: none;
 .booster-chip.get { border-style: solid; border-color: var(--fg-dim); color: var(--fg); }
 .booster-chip.starter-slot { border-style: solid; } /* (a side slot: what goes in it, or EMPTY) */
 .booster-chip.starter-slot { min-width: 9.5em; }
+.booster-chip.starter-slot.locked { border-style: dashed; opacity: 0.45; cursor: default; } /* (a side slot not open yet: the level it opens at) */
 /* (a starter slot's card: the theme's color, not the game over's red) */
 #starter-pick { z-index: 207; } /* (over the main menu and its toasts) */
 .starter-pick-box { border-color: var(--fg-dim); box-shadow: 0 0 30px rgba(var(--fg-rgb), 0.25); width: min(360px, calc(100vw - 32px)); padding: 18px 18px; }
@@ -3739,22 +3740,225 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
   --heat-peak-text: #fffaf2;
   --heat-peak-bg: #1c4a2a;
 }
-/* THE HOLIDAYS' lights (season-winter): old filament bulbs strung down the game card's left and
-   right borders, glowing warm and twinkling in turn; and the board lit warm by them */
+[data-theme="season-frost"] {
+  --bg: #050a14;
+  --bg-solid: #02050b;
+  --bg-center: #10203a;
+  --panel: #08111f;
+  --panel-text: #e6f4ff;
+  --popup-bg: #07101d;
+  --overlay-bg: #050c18;
+  --grid-line: #1e3352;
+  --board-bg: #07101c;
+  --cell-bg: #0b1828;
+  --fg: #7fd4ff;
+  --fg-rgb: 127, 212, 255;
+  --fg-dim: #3a7aa8;
+  --accent: #e8f6ff;
+  --accent-rgb: 232, 246, 255;
+  --danger: #ff5a7a;
+  --danger-rgb: 255, 90, 122;
+  --layer-a: #1c2a40;
+  --layer-b: #131e30;
+  --layer-border: #8aa4c4;
+  --layer-text: #a8c0dc;
+  --layer-rgb: 168, 192, 220;
+  --exploit-bg: #0c1a28;
+  --alarm-text: #ffffff;
+  --byte-text: #fff3e0;
+  --hot-rgb: 127, 212, 255;
+  --burst-hot-rgb: 127, 212, 255;
+  --heat-text: #bfe8ff;
+  --heat-bg: #0e2236;
+  --heat-peak-border: #fff3e0;
+  --heat-peak-text: #fffaf2;
+  --heat-peak-bg: #1c3e5e;
+}
+[data-theme="season-valentine"] {
+  --bg: #12050c;
+  --bg-solid: #0a0207;
+  --bg-center: #2a0c1c;
+  --panel: #17060f;
+  --panel-text: #ffe6f0;
+  --popup-bg: #14050d;
+  --overlay-bg: #10040a;
+  --grid-line: #4a1a30;
+  --board-bg: #14060e;
+  --cell-bg: #1c0914;
+  --fg: #ff8ac0;
+  --fg-rgb: 255, 138, 192;
+  --fg-dim: #a84a78;
+  --accent: #ff4f6d;
+  --accent-rgb: 255, 79, 109;
+  --danger: #ff2b2b;
+  --danger-rgb: 255, 43, 43;
+  --layer-a: #2e1220;
+  --layer-b: #220c18;
+  --layer-border: #c48aa4;
+  --layer-text: #e0aac0;
+  --layer-rgb: 224, 170, 192;
+  --exploit-bg: #1e0a14;
+  --alarm-text: #ffffff;
+  --byte-text: #fff3e0;
+  --hot-rgb: 255, 138, 192;
+  --burst-hot-rgb: 255, 138, 192;
+  --heat-text: #ffc2dc;
+  --heat-bg: #3a1024;
+  --heat-peak-border: #fff3e0;
+  --heat-peak-text: #fffaf2;
+  --heat-peak-bg: #5e1a3a;
+}
+[data-theme="season-spring"] {
+  --bg: #06100a;
+  --bg-solid: #030905;
+  --bg-center: #122a18;
+  --panel: #0a170e;
+  --panel-text: #eefae8;
+  --popup-bg: #08140c;
+  --overlay-bg: #07120a;
+  --grid-line: #1f3a26;
+  --board-bg: #08140c;
+  --cell-bg: #0d1e12;
+  --fg: #8fe07a;
+  --fg-rgb: 143, 224, 122;
+  --fg-dim: #4a8a3e;
+  --accent: #ffb3d1;
+  --accent-rgb: 255, 179, 209;
+  --danger: #ff4f6d;
+  --danger-rgb: 255, 79, 109;
+  --layer-a: #1c2e20;
+  --layer-b: #142318;
+  --layer-border: #8aa88e;
+  --layer-text: #a8c8ac;
+  --layer-rgb: 168, 200, 172;
+  --exploit-bg: #0e1e12;
+  --alarm-text: #ffffff;
+  --byte-text: #fff3e0;
+  --hot-rgb: 143, 224, 122;
+  --burst-hot-rgb: 143, 224, 122;
+  --heat-text: #c6f0b8;
+  --heat-bg: #14301a;
+  --heat-peak-border: #fff3e0;
+  --heat-peak-text: #fffaf2;
+  --heat-peak-bg: #24522c;
+}
+[data-theme="season-summer"] {
+  --bg: #04101a;
+  --bg-solid: #020a12;
+  --bg-center: #0c2a40;
+  --panel: #061624;
+  --panel-text: #e8fbff;
+  --popup-bg: #05131f;
+  --overlay-bg: #04101b;
+  --grid-line: #164058;
+  --board-bg: #05141f;
+  --cell-bg: #08202e;
+  --fg: #4fe0d0;
+  --fg-rgb: 79, 224, 208;
+  --fg-dim: #2a8a82;
+  --accent: #ffc23d;
+  --accent-rgb: 255, 194, 61;
+  --danger: #ff5a5a;
+  --danger-rgb: 255, 90, 90;
+  --layer-a: #163040;
+  --layer-b: #0f2432;
+  --layer-border: #7aa8b8;
+  --layer-text: #9cc8d4;
+  --layer-rgb: 156, 200, 212;
+  --exploit-bg: #08202a;
+  --alarm-text: #ffffff;
+  --byte-text: #fff3e0;
+  --hot-rgb: 79, 224, 208;
+  --burst-hot-rgb: 79, 224, 208;
+  --heat-text: #a8f2ea;
+  --heat-bg: #0c3036;
+  --heat-peak-border: #fff3e0;
+  --heat-peak-text: #fffaf2;
+  --heat-peak-bg: #16504e;
+}
+[data-theme="season-autumn"] {
+  --bg: #0b0d10;
+  --bg-solid: #060709;
+  --bg-center: #1c2228;
+  --panel: #101317;
+  --panel-text: #f4f1e6;
+  --popup-bg: #0e1114;
+  --overlay-bg: #0b0e11;
+  --grid-line: #2a3138;
+  --board-bg: #0e1115;
+  --cell-bg: #141a20;
+  --fg: #f2c94c;
+  --fg-rgb: 242, 201, 76;
+  --fg-dim: #9a7f2c;
+  --accent: #e8573a;
+  --accent-rgb: 232, 87, 58;
+  --danger: #ff3b3b;
+  --danger-rgb: 255, 59, 59;
+  --layer-a: #262c33;
+  --layer-b: #1b2026;
+  --layer-border: #9aa3ad;
+  --layer-text: #b8c0c8;
+  --layer-rgb: 184, 192, 200;
+  --exploit-bg: #141a20;
+  --alarm-text: #ffffff;
+  --byte-text: #fff3e0;
+  --hot-rgb: 242, 201, 76;
+  --burst-hot-rgb: 242, 201, 76;
+  --heat-text: #f8e2a0;
+  --heat-bg: #2e2810;
+  --heat-peak-border: #fff3e0;
+  --heat-peak-text: #fffaf2;
+  --heat-peak-bg: #54461a;
+}
+/* THE SEASON'S LIGHTS (the SEASONAL theme in December, October and Valentine's): old filament bulbs
+   strung down the game card's left and right borders, over everything, glowing and twinkling in turn;
+   off with EFFECTS: REDUCED. December's are C9s of every color, October's orange, purple and green with
+   a jack o' lantern and a candy corn, Valentine's pinks, red and white with hearts */
 .card-lights { display: none; }
-[data-theme="season-winter"] .card-lights { display: block; position: absolute; inset: 14px -8px; pointer-events: none; z-index: 3; }
-.card-lights i { position: absolute; top: 0; bottom: 0; width: 14px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='120' viewBox='0 0 14 120'%3E%3Cpath d='M7 0 Q3 6 4 12 Q5 24 10 36 Q11 48 4 60 Q5 72 10 84 Q11 96 4 108 Q3 114 7 120' fill='none' stroke='%231d3a26' stroke-width='1.2'/%3E%3Crect x='2.8' y='12' width='2.4' height='2' fill='%232a3a2e'/%3E%3Cellipse cx='4' cy='16.6' rx='2' ry='3' fill='%23ffe2a8'/%3E%3Cellipse cx='3.4' cy='15.6' rx='0.6' ry='1' fill='%23fff8e8' opacity='0.8'/%3E%3Crect x='8.8' y='36' width='2.4' height='2' fill='%232a3a2e'/%3E%3Cellipse cx='10' cy='40.6' rx='2' ry='3' fill='%23ffae45'/%3E%3Cellipse cx='9.4' cy='39.6' rx='0.6' ry='1' fill='%23fff8e8' opacity='0.8'/%3E%3Crect x='2.8' y='60' width='2.4' height='2' fill='%232a3a2e'/%3E%3Cellipse cx='4' cy='64.6' rx='2' ry='3' fill='%23ff5e4a'/%3E%3Cellipse cx='3.4' cy='63.6' rx='0.6' ry='1' fill='%23fff8e8' opacity='0.8'/%3E%3Crect x='8.8' y='84' width='2.4' height='2' fill='%232a3a2e'/%3E%3Cellipse cx='10' cy='88.6' rx='2' ry='3' fill='%237ee08a'/%3E%3Cellipse cx='9.4' cy='87.6' rx='0.6' ry='1' fill='%23fff8e8' opacity='0.8'/%3E%3Crect x='2.8' y='108' width='2.4' height='2' fill='%232a3a2e'/%3E%3Cellipse cx='4' cy='112.6' rx='2' ry='3' fill='%238ab8ff'/%3E%3Cellipse cx='3.4' cy='111.6' rx='0.6' ry='1' fill='%23fff8e8' opacity='0.8'/%3E%3C/svg%3E") 0 0 / 14px 120px repeat-y; }
+:is([data-theme="season-winter"], [data-theme="season-halloween"], [data-theme="season-valentine"]) .card-lights { display: block; position: absolute; inset: 14px -15px; pointer-events: none; z-index: 300; }
+:root.low-fx .card-lights { display: none !important; }
+.card-lights i { position: absolute; top: 0; bottom: 0; width: 28px; background-position: 0 0; background-size: 28px 240px; background-repeat: repeat-y; }
 .card-lights i.l { left: 0; }
-.card-lights i.r { right: 0; transform: scaleX(-1); background-position: 0 60px; }
-.card-lights i::before, .card-lights i::after { content: ""; position: absolute; inset: 0; background-size: 14px 120px; background-repeat: repeat-y; background-position: inherit; mix-blend-mode: screen; }
-.card-lights i::before { background-image: radial-gradient(circle at 4px 16.6px, rgba(255, 214, 150, 0.85) 0, rgba(255, 214, 150, 0.35) 3px, transparent 7px), radial-gradient(circle at 4px 64.6px, rgba(255, 96, 72, 0.85) 0, rgba(255, 96, 72, 0.35) 3px, transparent 7px), radial-gradient(circle at 4px 112.6px, rgba(128, 178, 255, 0.85) 0, rgba(128, 178, 255, 0.35) 3px, transparent 7px); animation: card-twinkle 2.6s ease-in-out infinite; }
-.card-lights i::after { background-image: radial-gradient(circle at 10px 40.6px, rgba(255, 170, 70, 0.85) 0, rgba(255, 170, 70, 0.35) 3px, transparent 7px), radial-gradient(circle at 10px 88.6px, rgba(110, 224, 130, 0.85) 0, rgba(110, 224, 130, 0.35) 3px, transparent 7px); animation: card-twinkle 2.6s ease-in-out -1.3s infinite; }
+.card-lights i.r { right: 0; transform: scaleX(-1); background-position: 0 120px; }
+.card-lights i::before, .card-lights i::after { content: ""; position: absolute; top: 0; bottom: 0; left: -14px; right: -14px; background-size: 56px 240px; background-repeat: repeat-y; background-position: inherit; mix-blend-mode: screen; } /* (wider than the string: the glows fade out round) */
+.card-lights i::before { animation: card-twinkle 2.6s ease-in-out infinite; }
+.card-lights i::after { animation: card-twinkle 2.6s ease-in-out -1.3s infinite; }
 @keyframes card-twinkle { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
 @media (prefers-reduced-motion: reduce) { .card-lights i::before, .card-lights i::after { animation: none; } }
-:root.low-fx .card-lights i::before, :root.low-fx .card-lights i::after { animation: none; }
-/* (the board in their warm light: a glow off the sides, the empty cells catching it) */
-[data-theme="season-winter"] .board { box-shadow: inset 14px 0 22px -12px rgba(255, 176, 90, 0.28), inset -14px 0 22px -12px rgba(255, 176, 90, 0.28), inset 0 0 30px rgba(255, 190, 120, 0.06); }
-[data-theme="season-winter"] .board .cell:empty:not(.overflow) { box-shadow: inset 0 0 5px rgba(255, 190, 110, 0.14); border-color: rgba(255, 196, 130, 0.16); }
+[data-theme="season-winter"] .card-lights i { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='240' viewBox='0 0 14 120'%3E%3Cpath d='M7 0 Q3 6 4 12 Q5 24 10 36 Q11 48 4 60 Q5 72 10 84 Q11 96 4 108 Q3 114 7 120' fill='none' stroke='%231d3a26' stroke-width='1.2'/%3E%3Crect x='2.8' y='12' width='2.4' height='2' fill='%232a3a2e'/%3E%3Cellipse cx='4' cy='16.6' rx='2' ry='3' fill='%23ffe2a8'/%3E%3Cellipse cx='3.4' cy='15.6' rx='0.6' ry='1' fill='%23fff8e8' opacity='0.8'/%3E%3Crect x='8.8' y='36' width='2.4' height='2' fill='%232a3a2e'/%3E%3Cellipse cx='10' cy='40.6' rx='2' ry='3' fill='%23ffae45'/%3E%3Cellipse cx='9.4' cy='39.6' rx='0.6' ry='1' fill='%23fff8e8' opacity='0.8'/%3E%3Crect x='2.8' y='60' width='2.4' height='2' fill='%232a3a2e'/%3E%3Cellipse cx='4' cy='64.6' rx='2' ry='3' fill='%23ff5e4a'/%3E%3Cellipse cx='3.4' cy='63.6' rx='0.6' ry='1' fill='%23fff8e8' opacity='0.8'/%3E%3Crect x='8.8' y='84' width='2.4' height='2' fill='%232a3a2e'/%3E%3Cellipse cx='10' cy='88.6' rx='2' ry='3' fill='%237ee08a'/%3E%3Cellipse cx='9.4' cy='87.6' rx='0.6' ry='1' fill='%23fff8e8' opacity='0.8'/%3E%3Crect x='2.8' y='108' width='2.4' height='2' fill='%232a3a2e'/%3E%3Cellipse cx='4' cy='112.6' rx='2' ry='3' fill='%238ab8ff'/%3E%3Cellipse cx='3.4' cy='111.6' rx='0.6' ry='1' fill='%23fff8e8' opacity='0.8'/%3E%3C/svg%3E"); }
+[data-theme="season-winter"] .card-lights i::before { background-image: radial-gradient(circle at 22px 33.6px, rgba(255, 214, 150, 0.85) 0, rgba(255, 214, 150, 0.35) 6px, transparent 14px), radial-gradient(circle at 22px 129.6px, rgba(255, 96, 72, 0.85) 0, rgba(255, 96, 72, 0.35) 6px, transparent 14px), radial-gradient(circle at 22px 225.6px, rgba(128, 178, 255, 0.85) 0, rgba(128, 178, 255, 0.35) 6px, transparent 14px); }
+[data-theme="season-winter"] .card-lights i::after { background-image: radial-gradient(circle at 34px 81.6px, rgba(255, 170, 70, 0.85) 0, rgba(255, 170, 70, 0.35) 6px, transparent 14px), radial-gradient(circle at 34px 177.6px, rgba(110, 224, 130, 0.85) 0, rgba(110, 224, 130, 0.35) 6px, transparent 14px); }
+[data-theme="season-winter"] .chain-meter i:nth-child(5n+1)::after { background: #ffd696; box-shadow: 0 0 6px #ffd696; }
+[data-theme="season-winter"] .chain-meter i:nth-child(5n+2)::after { background: #ffaa46; box-shadow: 0 0 6px #ffaa46; }
+[data-theme="season-winter"] .chain-meter i:nth-child(5n+3)::after { background: #ff6048; box-shadow: 0 0 6px #ff6048; }
+[data-theme="season-winter"] .chain-meter i:nth-child(5n+4)::after { background: #6ee082; box-shadow: 0 0 6px #6ee082; }
+[data-theme="season-winter"] .chain-meter i:nth-child(5n+5)::after { background: #80b2ff; box-shadow: 0 0 6px #80b2ff; }
+[data-theme="season-halloween"] .card-lights i { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='240' viewBox='0 0 14 120'%3E%3Cpath d='M7 0 Q3 6 4 12 Q5 24 10 36 Q11 48 4 60 Q5 72 10 84 Q11 96 4 108 Q3 114 7 120' fill='none' stroke='%231a1a1a' stroke-width='1.2'/%3E%3Crect x='2.8' y='12' width='2.4' height='2' fill='%232a3a2e'/%3E%3Cellipse cx='4' cy='16.6' rx='2' ry='3' fill='%23ff8a1f'/%3E%3Cellipse cx='3.4' cy='15.6' rx='0.6' ry='1' fill='%23fff8e8' opacity='0.8'/%3E%3Crect x='8.8' y='36' width='2.4' height='2' fill='%232a3a2e'/%3E%3Cellipse cx='10' cy='40.6' rx='2' ry='3' fill='%23b36bff'/%3E%3Cellipse cx='9.4' cy='39.6' rx='0.6' ry='1' fill='%23fff8e8' opacity='0.8'/%3E%3Crect x='3.6' y='61' width='0.8' height='1.4' fill='%233f7a2a'/%3E%3Cellipse cx='4' cy='65' rx='2.9' ry='2.6' fill='%23ff8a1f'/%3E%3Cpath d='M2.4 64h1v0.9h-1zM4.6 64h1v0.9h-1zM2.4 65.7h3.2v0.5h-0.6v0.5h-0.7v-0.5h-0.6v0.5h-0.7v-0.5h-0.6z' fill='%233a1600'/%3E%3Crect x='8.8' y='84' width='2.4' height='2' fill='%232a3a2e'/%3E%3Cellipse cx='10' cy='88.6' rx='2' ry='3' fill='%237dff5a'/%3E%3Cellipse cx='9.4' cy='87.6' rx='0.6' ry='1' fill='%23fff8e8' opacity='0.8'/%3E%3Crect x='2.8' y='108' width='2.4' height='2' fill='%232a3a2e'/%3E%3Cpath d='M1.6 110.0H6.4L5.4879999999999995 112.508H2.512Z' fill='%23ffd23f'/%3E%3Cpath d='M2.512 112.508H5.4879999999999995L4.6 114.94999999999999H3.4Z' fill='%23ff8a1f'/%3E%3Cpath d='M3.4 114.94999999999999H4.6L4.0 116.6H4.0Z' fill='%23fff6e8'/%3E%3C/svg%3E"); }
+[data-theme="season-halloween"] .card-lights i::before { background-image: radial-gradient(circle at 22px 33.6px, rgba(255, 138, 31, 0.85) 0, rgba(255, 138, 31, 0.35) 6px, transparent 14px), radial-gradient(circle at 22px 129.6px, rgba(255, 138, 31, 0.85) 0, rgba(255, 138, 31, 0.35) 6px, transparent 14px), radial-gradient(circle at 22px 225.6px, rgba(255, 190, 60, 0.85) 0, rgba(255, 190, 60, 0.35) 6px, transparent 14px); }
+[data-theme="season-halloween"] .card-lights i::after { background-image: radial-gradient(circle at 34px 81.6px, rgba(179, 107, 255, 0.85) 0, rgba(179, 107, 255, 0.35) 6px, transparent 14px), radial-gradient(circle at 34px 177.6px, rgba(125, 255, 90, 0.85) 0, rgba(125, 255, 90, 0.35) 6px, transparent 14px); }
+[data-theme="season-halloween"] .chain-meter i:nth-child(5n+1)::after { background: #ff8a1f; box-shadow: 0 0 6px #ff8a1f; }
+[data-theme="season-halloween"] .chain-meter i:nth-child(5n+2)::after { background: #b36bff; box-shadow: 0 0 6px #b36bff; }
+[data-theme="season-halloween"] .chain-meter i:nth-child(5n+3)::after { background: #ff8a1f; box-shadow: 0 0 6px #ff8a1f; }
+[data-theme="season-halloween"] .chain-meter i:nth-child(5n+4)::after { background: #7dff5a; box-shadow: 0 0 6px #7dff5a; }
+[data-theme="season-halloween"] .chain-meter i:nth-child(5n+5)::after { background: #ffbe3c; box-shadow: 0 0 6px #ffbe3c; }
+[data-theme="season-valentine"] .card-lights i { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='240' viewBox='0 0 14 120'%3E%3Cpath d='M7 0 Q3 6 4 12 Q5 24 10 36 Q11 48 4 60 Q5 72 10 84 Q11 96 4 108 Q3 114 7 120' fill='none' stroke='%233a1424' stroke-width='1.2'/%3E%3Crect x='2.8' y='12' width='2.4' height='2' fill='%232a3a2e'/%3E%3Cellipse cx='4' cy='16.6' rx='2' ry='3' fill='%23ff8ac0'/%3E%3Cellipse cx='3.4' cy='15.6' rx='0.6' ry='1' fill='%23fff8e8' opacity='0.8'/%3E%3Crect x='8.8' y='36' width='2.4' height='2' fill='%232a3a2e'/%3E%3Cpath d='M10 44 L7.5 41 A1.25 1.25 0 0 1 10 39.4 A1.25 1.25 0 0 1 12.5 41 Z' fill='%23ff3b5c'/%3E%3Cellipse cx='8.9' cy='40.4' rx='0.5' ry='0.6' fill='%23fff' opacity='0.7'/%3E%3Crect x='2.8' y='60' width='2.4' height='2' fill='%232a3a2e'/%3E%3Cellipse cx='4' cy='64.6' rx='2' ry='3' fill='%23fff0f5'/%3E%3Cellipse cx='3.4' cy='63.6' rx='0.6' ry='1' fill='%23fff8e8' opacity='0.8'/%3E%3Crect x='8.8' y='84' width='2.4' height='2' fill='%232a3a2e'/%3E%3Cpath d='M10 92 L7.5 89 A1.25 1.25 0 0 1 10 87.4 A1.25 1.25 0 0 1 12.5 89 Z' fill='%23ff8ac0'/%3E%3Cellipse cx='8.9' cy='88.4' rx='0.5' ry='0.6' fill='%23fff' opacity='0.7'/%3E%3Crect x='2.8' y='108' width='2.4' height='2' fill='%232a3a2e'/%3E%3Cellipse cx='4' cy='112.6' rx='2' ry='3' fill='%23ff3b5c'/%3E%3Cellipse cx='3.4' cy='111.6' rx='0.6' ry='1' fill='%23fff8e8' opacity='0.8'/%3E%3C/svg%3E"); }
+[data-theme="season-valentine"] .card-lights i::before { background-image: radial-gradient(circle at 22px 33.6px, rgba(255, 138, 192, 0.85) 0, rgba(255, 138, 192, 0.35) 6px, transparent 14px), radial-gradient(circle at 22px 129.6px, rgba(255, 230, 240, 0.85) 0, rgba(255, 230, 240, 0.35) 6px, transparent 14px), radial-gradient(circle at 22px 225.6px, rgba(255, 59, 92, 0.85) 0, rgba(255, 59, 92, 0.35) 6px, transparent 14px); }
+[data-theme="season-valentine"] .card-lights i::after { background-image: radial-gradient(circle at 34px 81.6px, rgba(255, 59, 92, 0.85) 0, rgba(255, 59, 92, 0.35) 6px, transparent 14px), radial-gradient(circle at 34px 177.6px, rgba(255, 138, 192, 0.85) 0, rgba(255, 138, 192, 0.35) 6px, transparent 14px); }
+[data-theme="season-valentine"] .chain-meter i:nth-child(5n+1)::after { background: #ff8ac0; box-shadow: 0 0 6px #ff8ac0; }
+[data-theme="season-valentine"] .chain-meter i:nth-child(5n+2)::after { background: #ff3b5c; box-shadow: 0 0 6px #ff3b5c; }
+[data-theme="season-valentine"] .chain-meter i:nth-child(5n+3)::after { background: #ffe6f0; box-shadow: 0 0 6px #ffe6f0; }
+[data-theme="season-valentine"] .chain-meter i:nth-child(5n+4)::after { background: #ff8ac0; box-shadow: 0 0 6px #ff8ac0; }
+[data-theme="season-valentine"] .chain-meter i:nth-child(5n+5)::after { background: #ff3b5c; box-shadow: 0 0 6px #ff3b5c; }
+/* (December's board in their warm light: a glow off the sides, the empty cells catching it) */
+[data-theme="season-winter"]:not(.low-fx) .board { box-shadow: inset 14px 0 22px -12px rgba(255, 176, 90, 0.28), inset -14px 0 22px -12px rgba(255, 176, 90, 0.28), inset 0 0 30px rgba(255, 190, 120, 0.06); }
+[data-theme="season-winter"]:not(.low-fx) .board .cell:empty:not(.overflow) { box-shadow: inset 0 0 5px rgba(255, 190, 110, 0.14); border-color: rgba(255, 196, 130, 0.16); }
+/* (December's scroll bars: candy canes) */
+/* (the standard scrollbar-color would switch off the striped ::-webkit-scrollbar in Chrome: auto there; Firefox gets a red bar) */
+[data-theme="season-winter"] * { scrollbar-color: auto !important; scrollbar-width: auto !important; }
+@supports not selector(::-webkit-scrollbar) { [data-theme="season-winter"] * { scrollbar-color: #e8423a rgba(255, 255, 255, 0.06) !important; scrollbar-width: thin !important; } }
+[data-theme="season-winter"] *::-webkit-scrollbar, [data-theme="season-winter"]::-webkit-scrollbar { width: 8px; height: 8px; }
+[data-theme="season-winter"] *::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.04); border-radius: 4px; }
+[data-theme="season-winter"] *::-webkit-scrollbar-thumb { border-radius: 4px; background: repeating-linear-gradient(45deg, #e8423a 0 5px, #fff6f0 5px 10px); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15); }
 /* OCTOBER's spooky touches: the card's glow breathing between purple and orange, the title flickering now and then */
 [data-theme="season-halloween"] .crt { animation: spooky-glow 7s ease-in-out infinite; }
 @keyframes spooky-glow {

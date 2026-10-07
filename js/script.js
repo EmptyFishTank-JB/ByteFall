@@ -551,9 +551,11 @@ function initGame() {
   spywareLeft = 0;
   marketOpen = false;
   const taken = Progress.startersTaken();
-  sideSlots = starterFits() && mode !== 'tutorial'
-    ? [0, 1].map((i) => (taken[i] ? { state: 'starter', id: taken[i] } : { state: 'market', id: null })) : [];
+  const open = Progress.sideSlots(); // (by level: the left at Lv 4, the right at Lv 12; one still shut stays hidden)
+  sideSlots = starterFits() && mode !== 'tutorial' && open > 0
+    ? [0, 1].map((i) => (i >= open ? { state: 'locked', id: null } : taken[i] ? { state: 'starter', id: taken[i] } : { state: 'market', id: null })) : [];
   for (const sl of sideSlots) { // (a slot taken in empty is the BLACK MARKET from the start)
+    if (sl.state === 'locked') { sl.state = 'closed'; continue; }
     if (sl.state !== 'market') continue;
     sl.id = marketPick(sideSlots.map((x) => x.id));
     if (!sl.id) sl.state = 'closed'; // (nothing unlocked yet)
@@ -3819,7 +3821,7 @@ const THEMES = [
   { id: 'seasonal', label: 'SEASONAL', desc: '' }, // (free; its colors follow the time of year: seasonTheme)
 ];
 // SEASONAL: the theme for the time of year (seasons.js): OCTOBER's orange, black and purple (with a
-// spooky flicker), NOVEMBER's harvest, December's holidays; the rest of the year, TERMINAL's colors
+// spooky flicker), NOVEMBER's harvest, December's holidays, and the rest of the year's (seasons.js)
 const SEASON_THEMES = [
   ['halloween', 'season-halloween', 'HALLOWEEN: pumpkin orange and witching purple on black, the card glowing between them and the title flickering now and then.'],
   ['november', 'season-harvest', 'HARVEST: gold and rust on deep brown, for November.'],
@@ -3827,6 +3829,11 @@ const SEASON_THEMES = [
   ['hanukkah', 'season-winter', 'THE HOLIDAYS: evergreen and red on a winter night.'],
   ['winter', 'season-winter', 'THE HOLIDAYS: evergreen and red on a winter night.'],
   ['newyear', 'season-winter', 'THE HOLIDAYS: evergreen and red on a winter night.'],
+  ['valentine', 'season-valentine', 'VALENTINE\'S: rose pink and red on deep wine, with heart lights strung down the card.'],
+  ['frost', 'season-frost', 'FROST: ice blue and silver on a polar night, for January and February.'],
+  ['spring', 'season-spring', 'SPRING: fresh green and blossom pink, for March to May.'],
+  ['summer', 'season-summer', 'SUMMER: sea aqua and sunshine yellow on a deep ocean blue, for June to August.'],
+  ['autumn', 'season-autumn', 'SEPTEMBER: school-bus yellow and apple red on chalkboard slate.'],
 ];
 function seasonTheme() {
   for (const [id, theme, desc] of SEASON_THEMES) if (typeof Season !== 'undefined' && Season.is(id)) return { theme, desc };
@@ -4117,7 +4124,7 @@ function updateGenSeedNote() {
 // The SEASONAL theme comes with its audio: picking it puts on GENERATED (in the season's style) and
 // the season's sound effects (October: HAUNTED), as a starting point (either can be changed after);
 // picking another theme puts back the track and sounds from before, if they're still the seasonal ones
-const SEASON_SFX = { halloween: 'haunted' };
+const SEASON_SFX = { halloween: 'haunted', valentine: 'sweetheart', frost: 'icicle', spring: 'birdsong', summer: 'island', autumn: 'schoolyard' }; // (VALENTINE before FROST: it sits on it)
 const PRE_SEASONAL_KEY = 'bytefall-pre-seasonal';
 function seasonalPackage(from, to) {
   if (to === 'seasonal' && from !== 'seasonal') {
@@ -4512,6 +4519,14 @@ function refreshStarterRow() {
   for (let i = 0; i < STARTER_MAX; i++) {
     const b = document.createElement('button');
     b.type = 'button';
+    if (i >= Progress.sideSlots()) { // (not open yet: the level it opens at)
+      b.className = 'booster-chip starter-slot locked';
+      b.disabled = true;
+      b.textContent = `LV ${Progress.sideSlotLevel(i)}`;
+      b.setAttribute('aria-label', `${i ? 'Right' : 'Left'} side slot: opens at level ${Progress.sideSlotLevel(i)}`);
+      row.appendChild(b);
+      continue;
+    }
     b.className = `booster-chip starter-slot${taken[i] ? ' on' : ''}`;
     b.innerHTML = taken[i] ? `${itemIcon(taken[i])} ${itemName(taken[i])}` : 'EMPTY'; // (which side: where it sits)
     b.setAttribute('aria-label', `${i ? 'Right' : 'Left'} starter slot: ${taken[i] ? itemName(taken[i]) : 'empty'}. Tap to choose`);

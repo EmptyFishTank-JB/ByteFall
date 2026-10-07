@@ -42,6 +42,7 @@ const Music = (() => {
     if (S.is('halloween')) return 'halloween';
     if (S.is('november')) return 'harvest';
     if (['winter', 'christmas', 'hanukkah', 'kwanzaa', 'nye', 'newyear'].some((id) => S.is(id))) return 'winter';
+    for (const id of ['valentine', 'frost', 'spring', 'summer', 'autumn']) if (S.is(id)) return id; // (the rest of the year's)
     return 'default';
   }
   let lastGen = null;

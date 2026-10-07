@@ -136,7 +136,7 @@ a game's first drop (SECOND CHANCE only when it saves you); HINT and UNDO sit un
 puzzle's drop buttons, and with none owned a second tap buys one. Never in DAILY or VS. A
 boosted game says so on its result screen.
 
-**THE SIDE SLOTS**: one each side of the exploit button (CLASSIC, BLITZ and ZEN only).
+**THE SIDE SLOTS**: one each side of the exploit button (CLASSIC, BLITZ and ZEN only), opened by level: the left at Lv 4, the right at Lv 12 (`SIDE_SLOT_LEVELS` in progress.js; before then the main menu's STARTERS show LV 4 / LV 12 and the game has none, so the BLACK MARKET comes a slot at a time).
 **STARTER EXPLOITS** (STORE) are exploits of your own, any you've unlocked by level, by tier: tier 1
 (RNG, BITFLIP, BUFFER OVERFLOW, TROJAN, PIVOT) 10 KEYS and about 12 BUGS, CACHE or CRYPTO; tier 2
 (SWAP, WORM VIRUS, KEYLOGGER, PACKET SNIFFER, BACKDOOR) 20 KEYS, about 17 of those and a ROOTKIT;
@@ -559,7 +559,7 @@ Themes (picked from the swatch grid in settings; a locked theme or font shows it
 | PAPER | near-black ink on paper | grey | dark amber (gold) | red |
 | GLYPH | shapes on blueprint blue | slate | amber | red |
 | SPECTRUM | each bit cycles the rainbow on its own | grey (still) | near-white (still) | cycles |
-| SEASONAL | the time of year's: OCTOBER pumpkin orange, NOVEMBER gold, December evergreen (TERMINAL's green the rest of the year) | OCTOBER witching purple, NOVEMBER brown, December slate | OCTOBER purple, NOVEMBER rust, December red | its season's |
+| SEASONAL | the time of year's: OCTOBER pumpkin orange, NOVEMBER gold, December evergreen, FROST (Jan 7 – Feb) ice blue, VALENTINE'S (Feb 7 – 14) rose pink, SPRING (Mar – May) fresh green, SUMMER (Jun – Aug) sea aqua, SEPTEMBER school-bus yellow | each season's | OCTOBER purple, NOVEMBER rust, December red, FROST silver, VALENTINE'S rose red, SPRING blossom pink, SUMMER sunshine, SEPTEMBER apple red | its season's |
 
 GLYPH draws each bit as a shape with one corner per point of its number (1 is
 a teardrop pointing up, 2 a lens, 3 a triangle... 8 an octagon), with a small
@@ -568,8 +568,12 @@ direction and phase, slowly hue-rotates the rest of the page, and turns the
 background grid into dimmed rainbow blocks; it holds still under reduced motion. SEASONAL (free, the
 full-width button under the other themes) follows the calendar: in OCTOBER the card's glow breathes
 between purple and orange and the title flickers now and then like a failing light; in DECEMBER
-(to Jan 6) the background's blocks are bulbs of every filament color, twinkling, strings of old
-filament lights hang down both sides of the card, and the board catches their warm light.
+(to Jan 6) the background's blocks are bulbs of every filament color, twinkling, the board catches
+the lights' warm glow and the scroll bars are candy canes. **THE SEASON'S LIGHTS**: strings of old
+filament bulbs hang down both sides of the card, over everything, glowing and twinkling in turn,
+the CHAIN METER's segments in their colors: December's C9s of every color, October's orange,
+purple and green with jack o' lanterns and candy corn among them, Valentine's pinks, red and white
+with hearts. EFFECTS: REDUCED takes them (and December's warm glow) away.
 
 Every color in `css/style.css` is a named role in `:root`; a theme is a
 `[data-theme="…"]` block that overrides those values, plus an entry in
@@ -1046,7 +1050,11 @@ NEXT is its next pick. The seed picks a style from the
 season's: all year SYNTHWAVE, CHIPTUNE, DRUM & BASS, LO-FI, TECHNO and DREAMWAVE; Halloween HAUNTED
 WALTZ (3/4), MONSTER SURF, HORROR SYNTH, GRAVEYARD MARCH and MUSIC BOX (a warped 3/4 lullaby);
 November HARVEST JIG (6/8), CAMPFIRE, HOEDOWN and AUTUMN LO-FI; December SLEIGH RIDE, SNOW WALTZ
-(3/4), CAROL and COZY LO-FI. Then everything else: the key and mode, the tempo (in the style's
+(3/4), CAROL and COZY LO-FI; FROST (Jan 7 – Feb) AURORA, ICE CAVE, SNOW DAY and FIRESIDE LO-FI;
+VALENTINE'S (Feb 7 – 14) LOVE BALLAD, SLOW JAM, SWEETHEART WALTZ (3/4) and SYNTH CRUSH; SPRING
+(Mar – May) MEADOW FOLK, APRIL SHOWERS, GARDEN WALTZ (3/4) and BLOOM; SUMMER (Jun – Aug) BEACH
+SURF, ISLAND BREEZE, SUNSET HOUSE and ARCADE SUMMER; SEPTEMBER BACK TO SCHOOL, GOLDEN HOUR, EQUINOX
+LO-FI and PORCH SWING (the all-year styles come back with the SONG CODES' D). Then everything else: the key and mode, the tempo (in the style's
 range), the form (INTRO, A, B, a bridge with the beat dropped out or a breakdown, sometimes the last
 part a step up), the progressions (a hand-picked stock, only true major and minor chords in the
 mode; the V made major in the minor ones), the hook (a two-bar rhythm built a beat at a time,
@@ -1055,7 +1063,7 @@ and brought home), the bass line (root, octaves, walking, oom-pah, acid...), the
 strumming, the groove and its fills, the instruments (organ, choir, strings, Rhodes, music box,
 theremin, fiddle, flute, pulse waves, a reese bass...) and a title. The MUSIC PLAYER shows the
 song's title and style; SETTINGS, under the playlist, today's. Every song has a SONG CODE (H1-0KUP3YT:
-its season, H Halloween, N November, W winter, D the rest of the year; the generator's version;
+its season, H Halloween, N November, W winter, F frost, V Valentine's, S spring, U summer, A September, D the all-year styles; the generator's version;
 its seed). The MUSIC PLAYER shows the playing song's (tap it: copied), SHARE copies its name, style and code
 ("PUMPKIN LULLABY" (MUSIC BOX) on ByteFall // song code H1-0KUP3YT), and ENTER SONG CODE plays
 the song a code names on track 16 (any case, the dash optional), so a RANDOM song can be heard
@@ -1067,7 +1075,8 @@ with the stack.
 
 **The SEASONAL theme's audio**: picking the SEASONAL theme puts on GENERATED and the season's sound
 effects (October: HAUNTED, also a SOUND EFFECTS choice of its own all year: creaks and knocks, a cold
-wind, a music box, glass chimes and a church bell, in A harmonic minor), as a starting point: either
+wind, a music box, glass chimes and a church bell, in A harmonic minor; FROST: ICICLE; VALENTINE'S:
+SWEETHEART; SPRING: BIRDSONG; SUMMER: ISLAND; SEPTEMBER: SCHOOLYARD), as a starting point: either
 can be changed after. Picking another theme puts back the track and sounds from before (if they're
 still the seasonal ones).
 
@@ -1092,7 +1101,13 @@ console's, as in that Game Boy battle theme, tuned to its C minor: pulse-wave bl
 buttons, a wave-channel thud as a bit lands, the noise channel's metallic crunch as one decrypts (with
 a note of the scale each time, so a chain plays a little tune), an item-get arpeggio for a chain or a
 reward, the battle's low-HP alarm for a warning and a low buzz for no. The dial-up and the narrator's
-voice are the same in every theme. The dev page's ONE-SHOT EFFECTS plays every theme's take.
+voice are the same in every theme. The seasons' (the SEASONAL theme puts each on in its time, and
+each is a choice of its own all year): **HAUNTED** (October), **ICICLE** (January and February: glass
+pings, ice cracking, a cold wind and bells, in D lydian), **SWEETHEART** (Valentine's: a harp, a
+heartbeat and a kiss, in F major), **BIRDSONG** (spring: birds, raindrops, a woodblock and a marimba,
+in G major), **ISLAND** (summer: a steel pan, a shaker, bongos and the waves, in C major) and
+**SCHOOLYARD** (September: pencil taps, a xylophone, chalk, lockers and the school bell, in A major).
+The dev page's ONE-SHOT EFFECTS plays every theme's take.
 
 ## Effects
 

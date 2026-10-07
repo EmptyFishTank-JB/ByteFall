@@ -240,6 +240,11 @@ const SFX = (() => {
     { id: 'terminal', name: 'TERMINAL', desc: 'The keyboard: clicks, keys, static and an 8-bit crunch.' },
     { id: 'handshake', name: 'HANDSHAKE', desc: 'A handheld game console, as in the HANDSHAKE track: pulse-wave blips, a wave-channel thud and noise-channel crunch.', unlock: 'track-10', track: 'HANDSHAKE' },
     { id: 'haunted', name: 'HAUNTED', desc: 'Halloween\'s (the SEASONAL theme puts it on in October): creaks and knocks, a cold wind, a music box, glass chimes and a church bell, in A harmonic minor.' },
+    { id: 'icicle', name: 'ICICLE', desc: 'January and February\'s (the SEASONAL theme puts it on then): glass pings, ice cracking, a cold wind and bells, in D lydian.' },
+    { id: 'sweetheart', name: 'SWEETHEART', desc: 'Valentine\'s (February 7 to 14, with the SEASONAL theme): a harp, a heartbeat and a kiss, in F major.' },
+    { id: 'birdsong', name: 'BIRDSONG', desc: 'Spring\'s (March to May, with the SEASONAL theme): birds, raindrops, a woodblock and a marimba, in G major.' },
+    { id: 'island', name: 'ISLAND', desc: 'Summer\'s (June to August, with the SEASONAL theme): a steel pan, a shaker, bongos and the waves, in C major.' },
+    { id: 'schoolyard', name: 'SCHOOLYARD', desc: 'September\'s (with the SEASONAL theme): pencil taps, a xylophone, chalk, lockers and the school bell, in A major.' },
   ];
   const THEME_KEY = 'bytefall-sfx-theme';
   let themeId = 'terminal';
@@ -414,7 +419,86 @@ const SFX = (() => {
       tone(c, t, midi(m) * 2.76, 'sine', 0.08, 0.002, 0.25);
     },
   };
-  const SETS = { terminal: sounds, handshake, haunted };
+  // THE REST OF THE YEAR's (the SEASONAL theme puts each on in its season)
+  const pickOf = (list) => list[Math.floor(Math.random() * list.length)];
+  // (a struck bar: the tone and a bright partial over it, quick to fade: a xylophone, a marimba)
+  const bar = (c, t, m, vol, ring = 0.35, partial = 4) => { tone(c, t, midi(m), 'sine', vol, 0.002, ring); tone(c, t, midi(m) * partial, 'sine', vol * 0.18, 0.002, ring * 0.25); };
+  // (a plucked string: a triangle with a quick fall and a little brightness)
+  const pluck = (c, t, m, vol, ring = 0.4) => { tone(c, t, midi(m), 'triangle', vol, 0.003, ring); tone(c, t, midi(m) * 2, 'sine', vol * 0.25, 0.002, ring * 0.4); };
+  // (a steel pan: the note, its octave and twelfth, a soft attack)
+  const pan = (c, t, m, vol, ring = 0.5) => { tone(c, t, midi(m), 'sine', vol, 0.006, ring); tone(c, t, midi(m) * 2, 'sine', vol * 0.45, 0.006, ring * 0.7); tone(c, t, midi(m) * 3, 'sine', vol * 0.18, 0.004, ring * 0.4); };
+  // FROST (January and February): ice and glass, a cold wind, in D lydian, high
+  const LYDIAN = [86, 88, 90, 93, 95, 98];
+  const icicle = {
+    click(c) { tone(c, c.currentTime, 3520, 'sine', 0.14, 0.001, 0.05); },
+    button(c) { const t = c.currentTime; tone(c, t, 2349, 'sine', 0.28, 0.001, 0.18); tone(c, t + 0.03, 3136, 'sine', 0.16, 0.001, 0.16); },
+    punct(c) { const t = c.currentTime; tone(c, t, 1760, 'sine', 0.3, 0.002, 0.6); tone(c, t, 1760 * 2.98, 'sine', 0.08, 0.002, 0.3); },
+    enter(c) { const t = c.currentTime; tone(c, t, 140, 'sine', 0.9, 0.003, 0.14, 80); air(c, t, 0.06, 0.5, 'highpass', 5000, 9000, 1); }, // (a soft thud in the snow, a puff of powder)
+    backspace(c) { air(c, c.currentTime, 0.16, 0.9, 'bandpass', 6000, 2500, 3); }, // (ice cracking)
+    static(c) { const t = c.currentTime; air(c, t, 0.5, 1.4, 'bandpass', 600, 1800, 2.5); air(c, t + 0.15, 0.4, 0.6, 'bandpass', 2200, 900, 4); },
+    alert(c) { const t = c.currentTime; [93, 90, 93, 90].forEach((m, i) => bellTone(c, t + i * 0.13, m - 12, 0.3)); },
+    denied(c) { const t = c.currentTime; tone(c, t, 330, 'triangle', 0.4, 0.005, 0.2, 247); air(c, t, 0.12, 0.4, 'bandpass', 3000, 1500, 2); },
+    egg(c) { const t = c.currentTime; [74, 78, 81, 86, 90].forEach((m, i) => bar(c, t + i * 0.06, m + 12, 0.32, 0.5, 2.76)); },
+    burst(c) { const t = c.currentTime; air(c, t, 0.18, 0.6, 'highpass', 7000, 4000, 1); const m = pickOf(LYDIAN); tone(c, t, midi(m), 'sine', 0.28, 0.001, 0.5); tone(c, t, midi(m) * 2.76, 'sine', 0.07, 0.001, 0.25); },
+  };
+  // VALENTINE'S: a harp, a heartbeat and a kiss, in F major
+  const SWEET = [77, 79, 81, 84, 86, 89];
+  const sweetheart = {
+    click(c) { pluck(c, c.currentTime, 96, 0.14, 0.06); },
+    button(c) { const t = c.currentTime; pluck(c, t, 84, 0.3, 0.3); pluck(c, t + 0.05, 89, 0.24, 0.3); },
+    punct(c) { const t = c.currentTime; tone(c, t, 1400, 'sine', 0.18, 0.004, 0.08, 2600); air(c, t, 0.05, 0.3, 'bandpass', 2500, 4000, 2); }, // (a kiss)
+    enter(c) { const t = c.currentTime; tone(c, t, 70, 'sine', 1, 0.004, 0.12, 50); tone(c, t + 0.16, 66, 'sine', 0.7, 0.004, 0.12, 48); }, // (lub-dub)
+    backspace(c) { air(c, c.currentTime, 0.12, 0.6, 'bandpass', 1200, 3000, 2); },
+    static(c) { const t = c.currentTime; [65, 69, 72, 76, 77, 81].forEach((m, i) => pluck(c, t + i * 0.025, m + 12, 0.14, 0.4)); }, // (a harp glissando)
+    alert(c) { const t = c.currentTime; for (let i = 0; i < 2; i++) { tone(c, t + i * 0.42, 75, 'sine', 1.1, 0.004, 0.13, 50); tone(c, t + i * 0.42 + 0.17, 70, 'sine', 0.8, 0.004, 0.13, 48); } }, // (a racing heart)
+    denied(c) { const t = c.currentTime; tone(c, t, 466, 'sine', 0.35, 0.01, 0.35, 330); tone(c, t, 554, 'sine', 0.2, 0.01, 0.35, 392); }, // (aww)
+    egg(c) { const t = c.currentTime; [77, 81, 84, 88, 89].forEach((m, i) => pluck(c, t + i * 0.07, m + 12, 0.3, 0.6)); },
+    burst(c) { const t = c.currentTime; const m = pickOf(SWEET); pluck(c, t, m + 12, 0.28, 0.5); tone(c, t, 2200, 'sine', 0.06, 0.002, 0.08, 3200); },
+  };
+  // SPRING: birdsong, raindrops and a marimba, in G major
+  const SPRINGS = [79, 81, 83, 86, 88, 91];
+  const chirp = (c, t, f, vol) => { tone(c, t, f, 'sine', vol, 0.004, 0.05, f * 1.5); tone(c, t + 0.06, f * 1.2, 'sine', vol * 0.8, 0.004, 0.05, f * 1.8); };
+  const birdsong = {
+    click(c) { const t = c.currentTime; tone(c, t, 1900, 'sine', 0.14, 0.001, 0.03, 1200); }, // (a raindrop)
+    button(c) { const t = c.currentTime; air(c, t, 0.03, 0.6, 'bandpass', 1800, 1400, 6); tone(c, t, 880, 'sine', 0.3, 0.002, 0.08); }, // (a woodblock)
+    punct(c) { chirp(c, c.currentTime, 2600, 0.18); },
+    enter(c) { const t = c.currentTime; bar(c, t, 55, 0.6, 0.22, 4); tone(c, t, 1500, 'sine', 0.08, 0.001, 0.06, 700); }, // (a low marimba note and a drop)
+    backspace(c) { air(c, c.currentTime, 0.14, 0.7, 'bandpass', 2400, 900, 2); }, // (a rustle)
+    static(c) { const t = c.currentTime; air(c, t, 0.5, 1, 'bandpass', 900, 2600, 1.5); chirp(c, t + 0.2, 3000, 0.1); }, // (a spring breeze)
+    alert(c) { const t = c.currentTime; for (let i = 0; i < 3; i++) chirp(c, t + i * 0.16, 3200, 0.22); }, // (a bird alarmed)
+    denied(c) { const t = c.currentTime; bar(c, t, 50, 0.5, 0.2, 4); bar(c, t + 0.1, 49, 0.45, 0.25, 4); },
+    egg(c) { const t = c.currentTime; [67, 71, 74, 79, 83].forEach((m, i) => bar(c, t + i * 0.06, m + 12, 0.32, 0.35, 4)); chirp(c, t + 0.34, 3400, 0.12); },
+    burst(c) { const t = c.currentTime; const m = pickOf(SPRINGS); bar(c, t, m, 0.3, 0.3, 4); tone(c, t, 2200, 'sine', 0.07, 0.001, 0.05, 1100); },
+  };
+  // SUMMER: a steel pan, a shaker, the waves, in C major
+  const ISLAND = [72, 74, 76, 79, 81, 84];
+  const island = {
+    click(c) { air(c, c.currentTime, 0.04, 0.5, 'highpass', 6000, 8000, 1); }, // (a shaker)
+    button(c) { const t = c.currentTime; pan(c, t, 79, 0.28, 0.25); pan(c, t + 0.06, 84, 0.24, 0.3); },
+    punct(c) { pan(c, c.currentTime, 88, 0.22, 0.35); },
+    enter(c) { const t = c.currentTime; tone(c, t, 110, 'sine', 0.8, 0.004, 0.12, 70); air(c, t, 0.04, 0.4, 'highpass', 5000, 7000, 1); }, // (a bongo)
+    backspace(c) { air(c, c.currentTime, 0.18, 0.7, 'lowpass', 2500, 600, 1); }, // (a splash)
+    static(c) { const t = c.currentTime; air(c, t, 0.7, 1.5, 'lowpass', 500, 2200, 0.8); }, // (a wave rolling in)
+    alert(c) { const t = c.currentTime; [84, 79, 84, 79].forEach((m, i) => pan(c, t + i * 0.1, m, 0.3, 0.2)); },
+    denied(c) { const t = c.currentTime; pan(c, t, 62, 0.35, 0.2); pan(c, t + 0.1, 61, 0.3, 0.3); },
+    egg(c) { const t = c.currentTime; [72, 76, 79, 84, 88].forEach((m, i) => pan(c, t + i * 0.07, m, 0.3, 0.45)); },
+    burst(c) { const t = c.currentTime; air(c, t, 0.12, 0.4, 'highpass', 5000, 8000, 1); pan(c, t, pickOf(ISLAND), 0.28, 0.4); },
+  };
+  // AUTUMN (September, back to school): pencil taps, a xylophone, chalk and the school bell, in A major
+  const SCHOOL = [81, 83, 85, 88, 90, 93];
+  const schoolyard = {
+    click(c) { const t = c.currentTime; air(c, t, 0.02, 0.6, 'bandpass', 3200, 2800, 5); }, // (a pencil tap)
+    button(c) { const t = c.currentTime; bar(c, t, 81, 0.3, 0.2, 3.9); bar(c, t + 0.05, 88, 0.26, 0.2, 3.9); },
+    punct(c) { bar(c, c.currentTime, 93, 0.24, 0.3, 3.9); },
+    enter(c) { const t = c.currentTime; tone(c, t, 160, 'square', 0.12, 0.002, 0.08, 90); tone(c, t, 95, 'sine', 0.8, 0.003, 0.12, 60); }, // (a locker thunk)
+    backspace(c) { air(c, c.currentTime, 0.16, 0.8, 'bandpass', 4200, 3000, 8); }, // (chalk)
+    static(c) { const t = c.currentTime; air(c, t, 0.35, 1, 'bandpass', 1500, 600, 1.5); air(c, t + 0.1, 0.2, 0.4, 'bandpass', 3000, 2000, 3); }, // (pages turning)
+    alert(c) { const t = c.currentTime; for (let i = 0; i < 6; i++) tone(c, t + i * 0.05, 1200, 'square', 0.1, 0.002, 0.045); bellTone(c, t, 76, 0.4); }, // (the school bell)
+    denied(c) { const t = c.currentTime; bar(c, t, 57, 0.45, 0.2, 3.9); bar(c, t + 0.1, 56, 0.4, 0.25, 3.9); },
+    egg(c) { const t = c.currentTime; [69, 73, 76, 81, 85].forEach((m, i) => bar(c, t + i * 0.06, m + 12, 0.3, 0.35, 3.9)); },
+    burst(c) { const t = c.currentTime; air(c, t, 0.08, 0.4, 'bandpass', 3500, 2000, 3); bar(c, t, pickOf(SCHOOL), 0.28, 0.3, 3.9); },
+  };
+  const SETS = { terminal: sounds, handshake, haunted, icicle, sweetheart, birdsong, island, schoolyard };
   const current = () => {
     const t = THEMES.find((x) => x.id === themeId);
     return t && themeOpen(t) ? SETS[themeId] : sounds;

@@ -43,7 +43,8 @@ function weatherSeason() {
   let s = null;
   try { s = new URLSearchParams(location.search).get('season') || localStorage.getItem('bytefall-dev-season'); } catch (e) { s = null; }
   if (s === 'halloween' || s === 'november') return 'autumn';
-  if (['winter', 'hanukkah', 'christmas', 'kwanzaa', 'nye', 'newyear'].includes(s)) return 'winter';
+  if (['winter', 'hanukkah', 'christmas', 'kwanzaa', 'nye', 'newyear', 'frost', 'valentine'].includes(s)) return 'winter';
+  if (['spring', 'summer', 'autumn'].includes(s)) return s;
   const m = new Date().getMonth();
   return m === 11 || m <= 1 ? 'winter' : m <= 4 ? 'spring' : m <= 7 ? 'summer' : 'autumn';
 }
