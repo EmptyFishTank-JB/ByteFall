@@ -55,6 +55,32 @@ the Play Store, Steam and a trademark search before settling on it.
   | SUMMER | Jun 21 – Aug | sunglasses, sun hats | popsicles | an ice-cream truck (they queue), fireflies at dusk | heat shimmer, a beach ball kicked around, a sandcastle |
   | AUTUMN | Sep 22 – 30 | scarves | apple slices | an apple picker, squirrels | falling leaves, leaf piles they jump into |
 
+- **Bots that seem to think** (not AI: the way life sims do it). Today a bot's choices are dice
+  rolls (at a stop: 35% a hop, 30% a snack...). Instead, in steps:
+  1. **Needs**: each bot carries a few meters that drift (energy, hunger, social, fun, curiosity,
+     comfort), and picks what to do by scoring the options against them (hungry: a snack; lonely: a
+     friend; bored: fishing, or poking at a BIT; tired: a sit-down). The biggest single step.
+  2. **Personalities**: fixed traits that weigh those scores (GLITCH impulsive and mischievous,
+     BUNKER cautious and lazy, GRIFTER social and greedy, BOT curious and cheery), so the same
+     moment plays out differently for each.
+  3. **Noticing**: they react to what's around them (a visitor passing, rain starting, a bobber
+     dipping, a sad bot nearby): look, react, or go see. The events already exist; they'd listen.
+  4. **Memory and relationships**: who scared it, who it's met, who it loves, kept per bot between
+     visits; friends drift together, a bot keeps clear of one that startled it, a bot poked too
+     much grows wary of the player's taps.
+  5. **Moods with causes**: moods that come from what happened and fade slowly (a fish caught keeps
+     it happy a while; the rain makes it a little glum).
+  6. **Little plans**: a few steps strung together ("hungry: go to the vending machine, eat, sit on
+     the bench") that read as intent; ByteFall's fishing trip already works this way.
+  Steps 1-3 are a few focused sessions in the bots' code and give most of the feel; 4-6 are the
+  bigger job, growing with the places and things to do. Tuning (lively, not chaotic) is the real
+  work: the BOT SANDBOX is where to do it. A little of 1-3 could come to ByteFall with its bot
+  customization, as the testbed for this.
+- **Bits of life** (the cozy fishing-game feel, after Cast n Chill): a fish jumping and its rings,
+  a dragonfly over the reeds, birds crossing, ripples where the bobber lands, steam off the water
+  on cold mornings, mist on the lake at dawn; and the look: skies graded by the time of day, the
+  far layers paler and bluer with distance, the water reflecting the sky, the trees, the pier and
+  the bot (broken by ripples), softer warmer palettes, lit lamps and windows at night.
 - **Backdrops with the weather** (ByteFall has the first: THE WOODS, trees that come with the fog
   from October to the winter; the fog itself is weather on its own): a backdrop for each part of the
   year, brought in by the weather that suits it, standing for the spell and fading with it.
