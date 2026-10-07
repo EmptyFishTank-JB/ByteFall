@@ -857,13 +857,17 @@ wanderer, its eyes glowing red as it moans ooOOoo, or (60%) one of the monsters,
 mummy, the creature, Nosferatu or the ghost, fading in by a tree near one side, crossing, and
 fading back into the mist before the other; most bots it nears bolt): a heavy bank of coarse-pixel mist drifts in from one side and fills the lane
 (rising a little above it and thinning out; on the start screen only its lower part, clear of the
-title; the twinkling background behind it fading to black as it thickens), and pines and bare
-trees fade in through it one by one as the bank reaches each, dark against the mist, the far ones
-fainter. It comes to the screen saver too (its lane 90px tall for it, the mist fading out at its ends).
-Once it's built, the FOG WANDERER (a pale hooded figure with glowing eyes and a trailing hem)
+title; the twinkling background behind it fading to black as it thickens). The fog is fog alone;
+THE WOODS are a backdrop that comes with it only late in the year (October's HAUNTED FOREST,
+November, the winter): pines and bare trees fading in through it one by one as the bank reaches
+each, dark against the mist, the far ones fainter. The spring and summer mornings' mists
+(WEATHER) come without them. It comes to the screen saver too (its lane 90px tall for it, the mist fading out at its ends).
+Once it's built, the FOG WANDERER (a pale hooded figure with glowing eyes and a trailing hem) may
+come: every October fog has it (or a monster), November's half the time, the winter's now and then,
+the rest of the year's never (a quiet mist that hangs heavy a while, then thins). It
 fades out of the mist, drifts from spot to spot (a bot it nears jumps, or bolts) and fades back
-into the trees by the nearest one (poked, it's gone into the mist at once). The fog then thins to a
-light mist with the trees standing in it for two minutes, and lifts. While it's heavy nothing else
+into the mist (poked, it's gone at once). The fog then thins to a light mist (the trees, if any,
+standing in it) for two minutes, and lifts. While it's heavy nothing else
 comes by and the bots keep to themselves, walking slower (no meetings, snacks, hops or pushed
 scenery; now and then a worried ? or ...); two that walk into each other jump apart (!?), and now
 and then one bolts. The dev page's FOG: OFTEN brings it at the next visit, in any season, its light

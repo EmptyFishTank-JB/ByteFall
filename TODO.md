@@ -55,6 +55,20 @@ the Play Store, Steam and a trademark search before settling on it.
   | SUMMER | Jun 21 – Aug | sunglasses, sun hats | popsicles | an ice-cream truck (they queue), fireflies at dusk | heat shimmer, a beach ball kicked around, a sandcastle |
   | AUTUMN | Sep 22 – 30 | scarves | apple slices | an apple picker, squirrels | falling leaves, leaf piles they jump into |
 
+- **Backdrops with the weather** (ByteFall has the first: THE WOODS, trees that come with the fog
+  from October to the winter; the fog itself is weather on its own): a backdrop for each part of the
+  year, brought in by the weather that suits it, standing for the spell and fading with it.
+  WINTER: a frozen pond and bare birches (with SNOW; the bots slide on the ice), snow-capped pines
+  (BLIZZARD), a log cabin with a lit window (clear nights, the AURORA over it). SPRING: a meadow
+  with flowers that open after RAIN, cherry trees shedding their petals (WIND), a pond with lily
+  pads the rain rings and frogs (DRIZZLE). SUMMER: a beach with a parasol and the sea (SUNNY, a heat
+  haze over the sand), a cornfield at dusk (FIREFLIES), a hill with a telescope (METEORS), a desert
+  with a cactus (dry WIND and the tumbleweed). AUTUMN: an orchard and leaf piles (WIND, falling
+  leaves), a pumpkin patch and scarecrow (DRIZZLE), THE WOODS (FOG). Any time: a city skyline under
+  a THUNDERSTORM, its windows going dark when lightning hits. The FOG WANDERER only in the fog and not
+  every fog (ByteFall: every October fog, half of November's, a few in winter, none the rest of the
+  year); each backdrop could have its own such visitor (a snow spirit in the blizzard, a scarecrow
+  that turns its head in the drizzle).
 - **Holidays and days**: LUNAR NEW YEAR (red lanterns, firecrackers, a dragon dance the bots join, red
   envelopes); VALENTINE'S (Feb 7 – 14: a cupid whose arrows make two bots fall for each other, heart
   balloons, chocolate); PI DAY (Mar 14: pie, the bots lining up as 3.14); ST PATRICK'S (Mar 14 – 17:

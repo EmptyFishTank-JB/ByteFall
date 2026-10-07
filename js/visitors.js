@@ -607,8 +607,8 @@ function createVisitors(api) {
 
   // FOG (NOVEMBER and HALLOWEEN, now and then; on HALLOWEEN scarier: bare, twisted trees only and the
   // wanderer's eyes glowing red, most bots it nears bolting; the dev page's FOG: OFTEN, or ?fog=1, brings it every visit). A
-  // heavy fog rolls in from one side and fills the lane; trees fade in through it, dark against the
-  // mist (some further back, fainter). Once it's built, the FOG WANDERER comes out of the mist,
+  // heavy fog rolls in from one side and fills the lane; with THE WOODS (late in the year: below),
+  // trees fade in through it, dark against the mist (some further back, fainter). Once it's built, the FOG WANDERER comes out of the mist,
   // drifts from spot to spot (any bot it nears is scared: it jumps, or bolts) and fades back into
   // the trees. Then the fog thins to a light mist, the trees standing in it, for a couple of
   // minutes, and lifts. While it's heavy nothing else comes by, and the bots keep to themselves
@@ -757,8 +757,15 @@ function createVisitors(api) {
     t.boxW = 0;
   }
   // instant: the HAUNTED FOREST put back as it stood (already up: back on this card, or on another);
-  // haunted: OCTOBER's forest (the dev page's FOREST brings it any time)
-  function startFog(instant = false, haunted = spooky()) {
+  // THE WOODS (a backdrop): the fog is fog alone; the trees standing in it come with it only in the
+  // last part of the year (OCTOBER's own HAUNTED FOREST, NOVEMBER, the winter), not the spring or
+  // summer mornings' mists (weather.js). And the FOG WANDERER doesn't always come: every OCTOBER fog
+  // has its wanderer (or a monster), NOVEMBER's half the time, the winter's now and then, the rest of
+  // the year's never (a quiet mist)
+  const woodsSeason = () => typeof Season !== 'undefined' && (Season.is('halloween') || Season.is('november') || Season.is('winter'));
+  const wandererOdds = () => (spooky() ? 1 : Season.is('november') ? 0.5 : Season.is('winter') ? 0.3 : 0);
+  // haunted: OCTOBER's forest (the dev page's FOREST brings it any time); trees: the woods with it
+  function startFog(instant = false, haunted = spooky(), trees = haunted || woodsSeason()) {
     if (fog) return;
     const now = performance.now();
     // (dark: the twinkling background behind the lane fading to black under the fog)
@@ -776,7 +783,7 @@ function createVisitors(api) {
     if (!instant) api.botEvent(haunted ? 'visit-forest' : 'visit-fog');
     const W = api.laneW();
     const big = tall(); // (read before the trees go in: a layout read in between would start their fade from full)
-    const n = Math.max(haunted ? 5 : 4, Math.round(W / (haunted ? 55 : 70)));
+    const n = !trees ? 0 : Math.max(haunted ? 5 : 4, Math.round(W / (haunted ? 55 : 70)));
     for (let i = 0; i < n; i++) { // (spread along the card, each nudged a little: some far, some near)
       // (NOVEMBER: mostly pines; the HAUNTED FOREST: pines and bare, twisted trees, bigger)
       const kind = Math.random() < (haunted ? 0.45 : 0.6) ? 'pine' : 'baretree';
@@ -846,12 +853,17 @@ function createVisitors(api) {
     if (f.phase === 'in') {
       f.front = Math.min(1, age / FOG_IN_MS);
       f.level = f.front;
-      if (age > FOG_IN_MS + 2000) { f.phase = 'thick'; f.at = now; wraithIn(); }
+      if (age > FOG_IN_MS + 2000) {
+        f.phase = 'thick';
+        f.at = now;
+        if (f.haunted || Math.random() < wandererOdds()) wraithIn();
+        else f.quietUntil = now + rand(9000, 16000); // (no one comes: it hangs heavy a while, then thins)
+      }
     } else if (f.phase === 'swell') { // (the HAUNTED FOREST's mist thickening again, for its wanderer)
       f.level = f.from + (1 - f.from) * Math.min(1, age / 5000);
       if (age > 6500) { f.phase = 'thick'; f.at = now; wraithIn(); }
     } else if (f.phase === 'thick') { // (until the wanderer's gone)
-      if (f.wraithGone) { f.phase = 'thin'; f.at = now; }
+      if (f.wraithGone || (f.quietUntil && now > f.quietUntil)) { f.phase = 'thin'; f.at = now; f.quietUntil = 0; }
     } else if (f.phase === 'thin') {
       f.level = 1 - 0.65 * Math.min(1, age / 5000);
       if (age > 5000) { f.phase = 'light'; f.at = now; }
