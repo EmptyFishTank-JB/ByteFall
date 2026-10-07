@@ -74,7 +74,9 @@ function createScenes(api) {
     const c = document.createElement('canvas');
     c.className = `scene-layer ${cls}`;
     c.setAttribute('aria-hidden', 'true');
-    api.lane.appendChild(c);
+    // (the ground first in the lane: behind the blown leaves, the settled snow and the visitors at its height)
+    if (cls === 'scene-ground') api.lane.insertBefore(c, api.lane.firstChild);
+    else api.lane.appendChild(c);
     return c;
   }
   function start(kind, ms) {
@@ -141,7 +143,10 @@ function createScenes(api) {
       sc.drawnW = W;
       const r = rng(sc.seed);
       drawFar(prep(far, farCells, W), r, N, S);
-      drawGround(prep(ground, 5, W), rng(sc.seed + 1), N, S);
+      // (the floor runs on under the lane's foot, down to the card's edge: --floor-under, the gap there)
+      const under = Math.ceil((parseFloat(getComputedStyle(api.lane).getPropertyValue('--floor-under')) || 0) / P);
+      ground.style.bottom = near.style.bottom = `${-under * P}px`;
+      drawGround(prep(ground, 5 + under, W), rng(sc.seed + 1), N, S);
       drawNear(prep(near, 6, W), rng(sc.seed + 2), N, S);
     } else if (sc.kind === 'beach' || sc.kind === 'lake') drawFar(prep(far, farCells, W), rng(sc.seed), N, S); // (the waves moving)
   }

@@ -9,7 +9,7 @@ html.byterrium body { display: block; padding: 0; overflow: hidden; }
   background: var(--board-bg); border: 2px solid var(--fg-dim); border-radius: 10px;
   box-shadow: 0 0 18px rgba(var(--fg-rgb), 0.15);
 }
-.byt-world .byt-lane { position: absolute; left: 0; right: 0; top: 0; bottom: 10px; }
+.byt-world .byt-lane { position: absolute; left: 0; right: 0; top: 0; bottom: 10px; --floor-under: 10px; }
 /* (here the place's sky fills the whole world, fading out only near its top) */
 .byterrium .byt-lane .scene-sky { height: 100%; -webkit-mask-image: linear-gradient(to top, #000 70%, transparent); mask-image: linear-gradient(to top, #000 70%, transparent); }
 

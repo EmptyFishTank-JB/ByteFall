@@ -2862,7 +2862,8 @@ html.page-twinkle .page-bg { display: block; }
 @keyframes visitor-glow { 0%, 100% { filter: none; } 50% { filter: brightness(1.5) drop-shadow(0 0 3px #ffd23f); } }
 .visitor-evergreen.v-blink .f-a { animation: visitor-blink 0.24s steps(1) 5; }
 @keyframes visitor-blink { 50% { opacity: 0; } }
-:is(.visitor-menorah, .visitor-kinara, .visitor-evergreen, .visitor-sign) svg { filter: drop-shadow(0 0 1.5px rgba(255, 210, 63, 0.5)); }
+:is(.visitor-menorah, .visitor-kinara, .visitor-sign) svg { filter: drop-shadow(0 0 1.5px rgba(255, 210, 63, 0.5)); }
+.visitor-evergreen svg { filter: drop-shadow(0 0 1.5px rgba(255, 190, 110, 0.75)) drop-shadow(0 0 5px rgba(255, 160, 70, 0.35)); } /* (the filament bulbs' warm glow) */
 :is(.visitor-penguin, .visitor-reindeer, .visitor-snowman, .visitor-dreidel) svg { filter: drop-shadow(0 0 1px rgba(220, 225, 240, 0.4)); }
 .visitor .f-c { display: none; } /* (the penguin on its belly) */
 .visitor.v-slide :is(.f-a, .f-b) { display: none; }
@@ -3300,6 +3301,13 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 
 /* A BLACK MARKET slot before it opens (the first layer hasn't risen): its offer to look at, dimmed */
 .exploit-icon.side-slot.market.locked { opacity: 0.35; }
+/* (the BLACK MARKET's countdown: its frame in four sides, lit, one going dark a drop till it turns over) */
+.exploit-icon.side-slot.market:has(.slot-timer) { border-color: transparent; }
+.slot-timer { position: absolute; inset: -1px; width: calc(100% + 2px); height: calc(100% + 2px); overflow: visible; pointer-events: none; }
+.slot-timer path { fill: none; stroke: rgba(var(--accent-rgb), 0.18); stroke-width: 2; stroke-linecap: square; vector-effect: non-scaling-stroke; transition: stroke 0.3s; }
+.slot-timer path.on { stroke: var(--accent); filter: drop-shadow(0 0 2px rgba(var(--accent-rgb), 0.8)); }
+.exploit-icon.side-slot.turned .slot-timer path.on { animation: slot-relit 0.5s steps(3); }
+@keyframes slot-relit { 0% { stroke: rgba(var(--accent-rgb), 0.18); } 50% { stroke: #fff; } }
 .exploit-icon.side-slot.market.locked .slot-sale { border-color: var(--fg-dim); color: var(--fg-dim); box-shadow: none; }
 
 /* The description in the BLACK MARKET's window */
@@ -3731,6 +3739,22 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
   --heat-peak-text: #fffaf2;
   --heat-peak-bg: #1c4a2a;
 }
+/* THE HOLIDAYS' lights (season-winter): old filament bulbs strung down the game card's left and
+   right borders, glowing warm and twinkling in turn; and the board lit warm by them */
+.card-lights { display: none; }
+[data-theme="season-winter"] .card-lights { display: block; position: absolute; inset: 14px -8px; pointer-events: none; z-index: 3; }
+.card-lights i { position: absolute; top: 0; bottom: 0; width: 14px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='120' viewBox='0 0 14 120'%3E%3Cpath d='M7 0 Q3 6 4 12 Q5 24 10 36 Q11 48 4 60 Q5 72 10 84 Q11 96 4 108 Q3 114 7 120' fill='none' stroke='%231d3a26' stroke-width='1.2'/%3E%3Crect x='2.8' y='12' width='2.4' height='2' fill='%232a3a2e'/%3E%3Cellipse cx='4' cy='16.6' rx='2' ry='3' fill='%23ffe2a8'/%3E%3Cellipse cx='3.4' cy='15.6' rx='0.6' ry='1' fill='%23fff8e8' opacity='0.8'/%3E%3Crect x='8.8' y='36' width='2.4' height='2' fill='%232a3a2e'/%3E%3Cellipse cx='10' cy='40.6' rx='2' ry='3' fill='%23ffae45'/%3E%3Cellipse cx='9.4' cy='39.6' rx='0.6' ry='1' fill='%23fff8e8' opacity='0.8'/%3E%3Crect x='2.8' y='60' width='2.4' height='2' fill='%232a3a2e'/%3E%3Cellipse cx='4' cy='64.6' rx='2' ry='3' fill='%23ff5e4a'/%3E%3Cellipse cx='3.4' cy='63.6' rx='0.6' ry='1' fill='%23fff8e8' opacity='0.8'/%3E%3Crect x='8.8' y='84' width='2.4' height='2' fill='%232a3a2e'/%3E%3Cellipse cx='10' cy='88.6' rx='2' ry='3' fill='%237ee08a'/%3E%3Cellipse cx='9.4' cy='87.6' rx='0.6' ry='1' fill='%23fff8e8' opacity='0.8'/%3E%3Crect x='2.8' y='108' width='2.4' height='2' fill='%232a3a2e'/%3E%3Cellipse cx='4' cy='112.6' rx='2' ry='3' fill='%238ab8ff'/%3E%3Cellipse cx='3.4' cy='111.6' rx='0.6' ry='1' fill='%23fff8e8' opacity='0.8'/%3E%3C/svg%3E") 0 0 / 14px 120px repeat-y; }
+.card-lights i.l { left: 0; }
+.card-lights i.r { right: 0; transform: scaleX(-1); background-position: 0 60px; }
+.card-lights i::before, .card-lights i::after { content: ""; position: absolute; inset: 0; background-size: 14px 120px; background-repeat: repeat-y; background-position: inherit; mix-blend-mode: screen; }
+.card-lights i::before { background-image: radial-gradient(circle at 4px 16.6px, rgba(255, 214, 150, 0.85) 0, rgba(255, 214, 150, 0.35) 3px, transparent 7px), radial-gradient(circle at 4px 64.6px, rgba(255, 96, 72, 0.85) 0, rgba(255, 96, 72, 0.35) 3px, transparent 7px), radial-gradient(circle at 4px 112.6px, rgba(128, 178, 255, 0.85) 0, rgba(128, 178, 255, 0.35) 3px, transparent 7px); animation: card-twinkle 2.6s ease-in-out infinite; }
+.card-lights i::after { background-image: radial-gradient(circle at 10px 40.6px, rgba(255, 170, 70, 0.85) 0, rgba(255, 170, 70, 0.35) 3px, transparent 7px), radial-gradient(circle at 10px 88.6px, rgba(110, 224, 130, 0.85) 0, rgba(110, 224, 130, 0.35) 3px, transparent 7px); animation: card-twinkle 2.6s ease-in-out -1.3s infinite; }
+@keyframes card-twinkle { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+@media (prefers-reduced-motion: reduce) { .card-lights i::before, .card-lights i::after { animation: none; } }
+:root.low-fx .card-lights i::before, :root.low-fx .card-lights i::after { animation: none; }
+/* (the board in their warm light: a glow off the sides, the empty cells catching it) */
+[data-theme="season-winter"] .board { box-shadow: inset 14px 0 22px -12px rgba(255, 176, 90, 0.28), inset -14px 0 22px -12px rgba(255, 176, 90, 0.28), inset 0 0 30px rgba(255, 190, 120, 0.06); }
+[data-theme="season-winter"] .board .cell:empty:not(.overflow) { box-shadow: inset 0 0 5px rgba(255, 190, 110, 0.14); border-color: rgba(255, 196, 130, 0.16); }
 /* OCTOBER's spooky touches: the card's glow breathing between purple and orange, the title flickering now and then */
 [data-theme="season-halloween"] .crt { animation: spooky-glow 7s ease-in-out infinite; }
 @keyframes spooky-glow {
@@ -3807,8 +3831,11 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
    ground behind the bots' feet, a few near details in front of them */
 :is(.start-walkers, .game-walkers) .scene-layer { position: absolute; left: 0; bottom: 0; width: 100%; pointer-events: none; image-rendering: pixelated; opacity: 0; transition: opacity 4s ease; }
 :is(.start-walkers, .game-walkers) .scene-far { z-index: -2; }
-:is(.start-walkers, .game-walkers) .scene-ground { z-index: 0; }
+:is(.start-walkers, .game-walkers) .scene-ground { z-index: -1; } /* (behind the visitors, the leaves and the settled snow; first in the lane, so under the pushed scenery too) */
 :is(.start-walkers, .game-walkers) .scene-near { z-index: 5; }
+/* (the floor reaches down to the card's edge, under the lane's foot, and the card's corners clip it) */
+.game-walkers { --floor-under: 6px; }
+.game-walkers :is(.scene-ground, .scene-near) { clip-path: inset(0 round 0 0 8px 8px); }
 
 /* GONE FISHING (scenes.js): the line, the bobber (tap it: the fish is gone), a splash, the catch;
    out on the water, so behind the bots (z-index 1) that walk past on the shore */

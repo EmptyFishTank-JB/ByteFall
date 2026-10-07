@@ -774,11 +774,11 @@ function createWeather(api) {
       front.fillRect(Math.round((p.x - w / 4) / P) * P, H - P, P * 2, Math.max(1, P * 0.5));
     }
     // the settled snow
-    if (ground.length) {
-      front.fillStyle = snowColor();
+    if (ground.length) { // (on the back canvas: the bots and visitors stand in it, not under it)
+      back.fillStyle = snowColor();
       for (let i = 0; i < ground.length; i++) {
         const h = Math.ceil(ground[i] - 0.15);
-        if (h > 0) front.fillRect(i * P, H - h * P, P, h * P);
+        if (h > 0) back.fillRect(i * P, H - h * P, P, h * P);
       }
     }
   }

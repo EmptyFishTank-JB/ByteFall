@@ -160,7 +160,7 @@ layer). A slot taken in empty, or once its starter is used, is the **BLACK MARKE
 whether you take starters in or not):
 a random exploit you've unlocked or, a quarter of the time, a BLACK BOX, marked for sale with the
 game's own currency sign in its corner (a 0 struck through twice, as a dollar sign is: no one
-country's), changing every 4 drops. A tap opens the BLACK MARKET's window: a neon sign of a border in
+country's), changing every 4 drops (its frame, once the market's open, is four lit sides that go dark one a drop, clockwise from the top, and all light up again as it changes). A tap opens the BLACK MARKET's window: a neon sign of a border in
 the accent, a tilted, flickering sign-sign-sign in its corner and scan lines over it; the item's icon
 in brackets and its name (a box's odds under it), then each part of its price as the resource's icon
 over what you have / what it costs (red and pulsing where you're short), and BUY in the middle
@@ -567,7 +567,9 @@ number in the corner. SPECTRUM gives every bit its own random hue speed,
 direction and phase, slowly hue-rotates the rest of the page, and turns the
 background grid into dimmed rainbow blocks; it holds still under reduced motion. SEASONAL (free, the
 full-width button under the other themes) follows the calendar: in OCTOBER the card's glow breathes
-between purple and orange and the title flickers now and then like a failing light.
+between purple and orange and the title flickers now and then like a failing light; in DECEMBER
+(to Jan 6) the background's blocks are bulbs of every filament color, twinkling, strings of old
+filament lights hang down both sides of the card, and the board catches their warm light.
 
 Every color in `css/style.css` is a named role in `:root`; a theme is a
 `[data-theme="…"]` block that overrides those values, plus an entry in
@@ -1005,8 +1007,8 @@ every bot and visitor but in front of the start card's copyright line. Poked or
 startled mid-push, the pusher lets go (the tree stays where it stopped) and
 reacts as usual. Poke the tree: it creaks and a bat flies out.
 UPROOTED (hidden): see a tree pushed in. The other seasons push theirs in the
-same way: WINTER a SNOWMAN (poked: brrr! and a shiver; SNOW DAY, hidden),
-CHRISTMAS a decorated EVERGREEN with blinking lights, a twinkling star and
+same way: WINTER a SNOWMAN (poked: brrr! and a shiver; SNOW DAY, hidden) or the
+CHRISTMAS TREE, CHRISTMAS that decorated EVERGREEN with warm filament bulbs (warm white, amber and red) glowing and blinking in turn, a twinkling star and
 presents under it (poked: jingle!, its lights flash), HANUKKAH a MENORAH with
 that night's candles lit and the shamash (the flames flicker; EIGHT NIGHTS,
 hidden), KWANZAA a KINARA (three red, the black, three green) with that day's

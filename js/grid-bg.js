@@ -6,12 +6,13 @@
 // (the HUD boxes). active(), if given, pauses it while it returns false (a hidden layer).
 // The theme's color, read once per theme change rather than on every draw (reading it each
 // frame made the browser recompute styles for every canvas, 25 times a second)
-const gridTheme = { fg: '57, 255, 143', rainbow: false, anaglyph: false, n: 0 };
+const gridTheme = { fg: '57, 255, 143', rainbow: false, anaglyph: false, festive: false, n: 0 };
 function readGridTheme() {
   const root = document.documentElement;
   gridTheme.fg = getComputedStyle(root).getPropertyValue('--fg-rgb').trim() || '57, 255, 143';
   gridTheme.rainbow = root.dataset.theme === 'spectrum';
   gridTheme.anaglyph = root.dataset.theme === 'anaglyph';
+  gridTheme.festive = root.dataset.theme === 'season-winter';
   gridTheme.n++; // (each canvas rebuilds its colors when this changes)
 }
 readGridTheme();
@@ -123,6 +124,7 @@ function startGridBackground(canvas, { defrag = true, active } = {}) {
     return x - Math.floor(x);
   };
 
+  const FESTIVE = ['255, 214, 150', '255, 170, 70', '255, 96, 72', '96, 214, 120', '128, 178, 255', '255, 214, 150']; // warm white (twice), amber, red, green, blue
   const ANA_CYCLE = [[70, 76, 84], [255, 40, 80], [205, 211, 217], [0, 220, 255]]; // dark grey, red, light grey, cyan
 
   // The plain themes: each block's brightness rounded to one of SHADES steps (too fine to see),
@@ -167,8 +169,8 @@ function startGridBackground(canvas, { defrag = true, active } = {}) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       return;
     }
-    const { rainbow, anaglyph } = gridTheme;
-    if (!rainbow && !anaglyph) {
+    const { rainbow, anaglyph, festive } = gridTheme;
+    if (!rainbow && !anaglyph && !festive) {
       // (on whole device pixels, so a block cleared leaves no faint edge)
       const dpr = window.devicePixelRatio || 1;
       drawPlain(Math.round((cssW - cols * PITCH + GAP) / 2 * dpr) / dpr, Math.round((cssH - rows * PITCH + GAP) / 2 * dpr) / dpr);
@@ -203,6 +205,13 @@ function startGridBackground(canvas, { defrag = true, active } = {}) {
         const t = pos % 1;
         const mix = (k) => Math.round(from[k] + (to[k] - from[k]) * t);
         ctx.fillStyle = `rgba(${mix(0)}, ${mix(1)}, ${mix(2)}, ${(alpha * 1.3).toFixed(3)})`;
+        ctx.fillRect(x, y, BLOCK, BLOCK);
+        continue;
+      }
+      if (festive) { // (THE HOLIDAYS: each block a bulb on a string, its own filament color, twinkling slowly)
+        const c = FESTIVE[Math.floor(hash(i, 1) * FESTIVE.length)];
+        const tw = 0.75 + 0.45 * Math.sin(secs * (0.6 + hash(i, 2) * 1.4) + hash(i, 3) * 6.28);
+        ctx.fillStyle = `rgba(${c}, ${(alpha * 1.25 * tw).toFixed(3)})`;
         ctx.fillRect(x, y, BLOCK, BLOCK);
         continue;
       }

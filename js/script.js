@@ -4346,12 +4346,12 @@ function showKeys() {
 // its first drop), and GET BOOSTERS (the STORE's)
 // THE STORE'S i: each resource, its icon, and how it's earned (ECONOMY.md has the numbers in full)
 const RES_HOW = {
-  keys: 'The money. 1 for every 10 bits decrypted, +2 for a 5-link chain and +5 at 7; 10 a level and an achievement; 5 for the day\'s first daily game; first puzzle solves; 25 in the DAILY DROP.',
-  bugs: '1 for every 5 bits decrypted down a column. 3 in the DAILY DROP.',
-  cache: '1 for every 5 bits decrypted across a row. 3 in the DAILY DROP.',
-  crypto: '1 for each chain link from the 3rd on. 3 in the DAILY DROP.',
-  rootkits: 'A bit decrypted across and down at once (1 for every 2), encryption layers broken (1 for every 20) and BYTES on HARD (1 each).',
-  master: 'Rare. Every 5th level, the day\'s first daily game and the day\'s first VS win; 3 in the DAILY DROP every 7th day of your LOGIN STREAK. Buys any exploit outright.',
+  keys: 'The STORE\'s money. +1 for every 10 bits you decrypt. +2 when a chain reaches 5 links, +5 at 7. +10 for each level and achievement. +5 for your first daily game of the day. +2 / 4 / 6 the first time you solve an EASY / NORMAL / HARD puzzle. +25 in the DAILY DROP.',
+  bugs: '+1 for every 5 bits you decrypt in a column (a vertical line). +3 in the DAILY DROP.',
+  cache: '+1 for every 5 bits you decrypt in a row (a horizontal line). +3 in the DAILY DROP.',
+  crypto: '+1 for each link in a chain, from the 3rd link on. +3 in the DAILY DROP.',
+  rootkits: '+1 for every 2 bits that decrypt in a row and a column at the same time. +1 for every 20 encryption layers you break. +1 for each BYTE (HARD).',
+  master: 'Rare. +1 every 5th level. +1 for your first daily game of the day. +1 for your first VS win of the day. +3 in the DAILY DROP on every 7th day in a row you play. One buys any exploit, whatever its price.',
 };
 const resInfoEl = document.getElementById('res-info');
 function closeResInfo() { resInfoEl.classList.add('hidden'); }
@@ -4687,6 +4687,8 @@ function updateFreeBtn() {
   countEl.textContent = `x${count}`;
   renderStarters();
 }
+// (the frame's four sides, top, right, bottom, left: MARKET_EVERY of them)
+const MARKET_SIDES = ['M9 1H31', 'M39 9V31', 'M31 39H9', 'M1 31V9'];
 // The side slots: built once, either side of the exploit button, redrawn as they change
 let slotEls = null;
 const sideSlotEls = () => slotEls || (slotEls = [0, 1].map((i) => {
@@ -4719,10 +4721,13 @@ function renderStarters() {
     b.classList.toggle('confirm', market && shopSlot === i);
     b.classList.toggle('locked', market && !marketOpen); // (not open yet: the first layer hasn't risen)
     b.classList.toggle('short', short);
+    // (the BLACK MARKET's frame: a side for each drop till it turns over, going dark one a drop, clockwise from the top)
+    const left = MARKET_EVERY - (marketDrops % MARKET_EVERY);
     b.innerHTML = `<span class="exploit-glyph">${itemIcon(sl.id)}</span>`
+      + (market && marketOpen ? `<svg class="slot-timer" viewBox="0 0 40 40" preserveAspectRatio="none" aria-hidden="true">${MARKET_SIDES.map((d, k) => `<path d="${d}" class="${k >= MARKET_EVERY - left ? 'on' : ''}"/>`).join('')}</svg>` : '')
       + (market ? `<span class="slot-sale" aria-hidden="true">${CURRENCY_SVG}</span>` : `<span class="starter-tag">${sl.state === 'starter' ? 'S' : '✓'}</span>`);
     const name = itemName(sl.id);
-    b.title = market ? `BLACK MARKET // ${name}: ${priceText(price)} (${marketOpen ? 'tap to see it' : `opens in ${marketOpensIn()} drops`})`
+    b.title = market ? `BLACK MARKET // ${name}: ${priceText(price)} (${marketOpen ? `tap to see it; a new one in ${left} drop${left === 1 ? '' : 's'}` : `opens in ${marketOpensIn()} drops`})`
       : sealed ? `${sl.state === 'starter' ? 'STARTER' : 'BOUGHT'} // ${name}: tap to open it`
         : `${sl.state === 'starter' ? 'STARTER' : sl.state === 'opened' ? 'BLACK BOX' : 'BOUGHT'} // ${name}: tap to arm it`;
     b.setAttribute('aria-label', b.title);

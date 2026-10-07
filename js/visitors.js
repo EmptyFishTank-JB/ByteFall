@@ -36,7 +36,7 @@ function createVisitors(api) {
   const ceiling = () => (tall() ? api.laneH() : 100);
   const U = 34 / 16; // (a pixel of the bots' 16-wide grid, in screen pixels)
   const swap = (rows, map) => rows.map((r) => r.replace(/./g, (c) => map[c] || c)); // (blinking: colors traded)
-  const EVERGREEN = ['.......y.......', '......yyy......', '.......y.......', '.......g.......', '......ggG......', '.....grggG.....', '......ggG......', '.....gggoG.....', '....gggggGG....', '...gbggggggG...', '.....ggggG.....', '....ggrgggG....', '...gggggbggG...', '..gggoggggggG..', '....ggggggG....', '...ggbgggrgG...', '..gggggggggGG..', '.ggrggggoggggG.', 'gggggggggggggGG', '.RyR..ttT..ByB.', '.yyy..ttT..yyy.', '.RyR..ttT..ByB.'];
+  const EVERGREEN = ['........y........', '.......yYy.......', '........y........', '........g........', '.......gwG.......', '......gggaG......', '.....grggggG.....', '......gggwG......', '.....gaggggG.....', '....ggggrgggG....', '...gwgggggaggG...', '.....gggwgGG.....', '....grgggggaG....', '...ggggwgggggG...', '..gagggggrggggG..', '....ggwgggggG....', '...ggggggaggrG...', '..grggggggggwgG..', '.gggaggwggggggrG.', 'ggwggggrggggaggGG', '.......ttT.......', '.RRxRR.ttT.BBxBB.', '.xxxxx.ttT.xxxxx.', '.RRxRR.....BBxBB.'];
   const SPRITES = {
     frank: {
       pal: { h: '#1d1d1d', g: '#7fb069', G: '#5e8f4c', e: '#111111', b: '#a0a4aa', m: '#2a2a2a', s: '#2c3140', S: '#1e222d', p: '#3a3226', k: '#0d0d0d' },
@@ -344,10 +344,10 @@ function createVisitors(api) {
       pal: { w: '#f2f4f8', s: '#b8c4d6', k: '#1b1f27', o: '#ff8a1f', h: '#1b1f27', r: '#d23a3a', b: '#6b4a2b' },
       a: ['....hhhhh....', '....hhhhh....', '...hhhhhhh...', '....wwwws....', '...wwkwkws...', '...wwwwwoooo.', '...wwkkkws...', '....wwwws....', '...rrrrrrr...', 'b.wwwwwrrws.b', '.bwwwkwrrwsb.', '..wwwwwwwss..', '..wwwkwwwss..', '...wwwwwss...', '..wwwwwwwss..', '.wwwwwwwwwss.', 'wwwwwwwwwwwss', 'wwwwwwwwwwwss', 'wwwwwwwwwwwss', '.wwwwwwwwwss.', '..wwwwwwwss..'],
     },
-    evergreen: { // (its lights blink, its star twinkles; presents under it)
-      pal: { g: '#1f8a44', G: '#135226', t: '#6b4a2b', T: '#4a3320', y: '#ffd23f', Y: '#fff6c2', r: '#ff3b3b', b: '#3bb8ff', o: '#ffb000', R: '#d23a3a', B: '#3a7bd5' },
+    evergreen: { // (old filament bulbs, warm white, amber and red, glowing and blinking in turn; its star twinkles; presents under it)
+      pal: { g: '#1f7a40', G: '#124a24', t: '#6b4a2b', T: '#4a3320', y: '#ffc94a', Y: '#fff1c4', w: '#ffe6b0', a: '#ffad42', r: '#ff6a45', R: '#c8352e', B: '#2f6a4a', x: '#f2d27a' },
       a: EVERGREEN,
-      b: swap(EVERGREEN, { r: 'o', o: 'b', b: 'r', y: 'Y' }),
+      b: swap(EVERGREEN, { w: 'a', a: 'r', r: 'w', y: 'Y' }),
     },
     // (menorah, kinara and sign: drawn for the night, the day or the year; scenery())
   };
@@ -510,7 +510,7 @@ function createVisitors(api) {
     hanukkah: ['dreidel'],
   };
   // The scenery each season has pushed in (up to two pieces at once, one of each)
-  const SCENERY = { halloween: ['tree', 'jacklantern'], winter: 'snowman', christmas: 'evergreen', hanukkah: 'menorah', kwanzaa: 'kinara', nye: 'sign', newyear: 'sign' };
+  const SCENERY = { halloween: ['tree', 'jacklantern'], winter: ['snowman', 'evergreen'], christmas: 'evergreen', hanukkah: 'menorah', kwanzaa: 'kinara', nye: 'sign', newyear: 'sign' };
   const seasons = () => (typeof Season !== 'undefined' ? Season.active() : []);
   const visits = () => seasons().flatMap((id) => VISITS[id] || []);
 
