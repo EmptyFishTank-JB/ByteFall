@@ -83,6 +83,7 @@ let vsPaused = false;
 let adware = null; // INFECTIONS (runAnti, infections.js): ADWARE's covered column { col, left }
 let spywareLeft = 0; // ...SPYWARE's hidden bits
 let malwareLeft = 0; // ...MALWARE's drops with the board's bits corrupted
+let scareLeft = 0; // (SCAREWARE's drops left: its pop-ups keep coming on their own clock till then)
 let jackLeft = 0; // ...and the CRYPTOJACKER's drops left stealing (RANSOMWARE's locks are on the bits: cell.locked)
 let marketOpen = false; // THE BLACK MARKET sells once the game's first encryption layer rises (ZEN: after as many drops) // PAUSE (any mode): the board covered, the CPU's clock stopped, the drop buttons off
 let keyloggerDrops = 0; // drops left with the keylogger's preview showing
@@ -280,7 +281,7 @@ const ANTI = {
   ransomware: { name: 'RANSOMWARE', does: '3 BITS LOCKED FOR 5 DROPS' },
   malware: { name: 'MALWARE', does: 'BOARD CORRUPTED FOR 3 DROPS' },
   cryptojacker: { name: 'CRYPTOJACKER', does: 'RESOURCES STOLEN FOR 5 DROPS' },
-  scareware: { name: 'SCAREWARE', does: 'CLOSE THE POP-UP' },
+  scareware: { name: 'SCAREWARE', does: 'POP-UPS FOR 8 DROPS' },
 };
 // (a little virus: the INFECTIONS')
 const VIRUS_SVG = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 7V3M12 21v-4M7 12H3M21 12h-4M8.5 8.5 5.5 5.5M18.5 18.5l-3-3M8.5 15.5l-3 3M18.5 5.5l-3 3"/></svg>';
@@ -561,6 +562,7 @@ function initGame() {
   spywareLeft = 0;
   malwareLeft = 0;
   jackLeft = 0;
+  scareLeft = 0;
   Infections.clear();
   marketOpen = false;
   const taken = Progress.startersTaken();
@@ -4429,8 +4431,8 @@ const SECTION_INFO = {
   boxes: ['// BLACK BOXES', [
     'A sealed box with a random exploit inside, for less than it usually holds.',
     'Bring it into a game in a side slot, then tap it to open it. Most of the time you get an exploit of the box\'s tier, to use when you like.',
-    'Sometimes it\'s INFECTED, and the infection hits right away: ADWARE blocks a column with an ad, SPYWARE hides your next bits, RANSOMWARE locks bits so they can\'t decrypt, MALWARE scrambles what your board shows, a CRYPTOJACKER steals the resources you earn, or SCAREWARE throws up a fake alert you have to close.',
-    'Infections stack: open two infected boxes and both hit. The same infection twice starts its count over, a second RANSOMWARE locks more bits, and a second SCAREWARE pops up once you close the first.',
+    'Sometimes it\'s INFECTED, and the infection hits right away: ADWARE blocks a column with an ad, SPYWARE hides your next bits, RANSOMWARE locks bits so they can\'t decrypt, MALWARE scrambles what your board shows, a CRYPTOJACKER steals the resources you earn, or SCAREWARE throws up fake alerts over your board for 8 drops, up to 4 at once, each closed only by its little X.',
+    'Infections stack: open two infected boxes and both hit. The same infection twice starts its count over, a second RANSOMWARE locks more bits, and a second SCAREWARE stacks another pop-up over the first.',
     'The higher the tier, the better the odds. Each box shows its own.']],
 };
 function openSectionInfo(key) {
@@ -4998,12 +5000,14 @@ function marketTick() {
 // (nothing drops into that column, by the button, the grid or the keys); SPYWARE hides the next 3 bits until they land;
 // RANSOMWARE locks 3 bits on the board under a one-peel layer
 const ANTI_DROPS = 3;
+const SCARE_DROPS = 8; // (SCAREWARE: pop-ups for up to eight drops)
 const RANSOM_DROPS = 5; // (RANSOMWARE's locks and the CRYPTOJACKER: five drops)
 const spyHides = (n) => spywareLeft > n; // (the bit n places down the queue: 0 is CURRENT)
 // (after each drop: RANSOMWARE's locks and MALWARE's corruption a drop nearer gone; a lock lifting,
 // the bit falls into any gap under it and the board settles)
 async function tickInfections() {
   if (malwareLeft > 0) malwareLeft--;
+  if (scareLeft > 0 && --scareLeft === 0) Infections.scareEnd(); // (no more come; the ones up stay till closed)
   let lifted = false;
   for (const col of columns) for (const cell of col) if (cell && cell.locked && --cell.locked <= 0) { delete cell.locked; lifted = true; }
   if (lifted) {
@@ -5034,7 +5038,12 @@ function runAnti(id) {
   } else if (id === 'cryptojacker') {
     jackLeft = RANSOM_DROPS;
   } else if (id === 'scareware') {
-    Infections.scare(() => { SFX.play('click'); setMessage('SCAREWARE // CLOSED'); });
+    scareLeft = SCARE_DROPS; // (again: the count starts over, and another pops up over the ones up)
+    Infections.scare({
+      canPop: () => !gameOver && !vsPaused && !document.hidden && document.getElementById('home').hidden,
+      onPop: (n) => { SFX.play('denied'); if (n > 1) setMessage(`SCAREWARE // ${n} POP-UPS`, 'alarm'); },
+      onClose: (n) => { SFX.play('click'); setMessage(n ? `SCAREWARE // ${n} LEFT` : 'SCAREWARE // CLOSED'); },
+    });
   }
   render();
   setMessage(`INFECTED // ${ANTI[id].name}: ${ANTI[id].does}`, 'alarm');

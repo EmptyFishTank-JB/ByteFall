@@ -310,8 +310,7 @@ const Infections = (() => {
     let any = false;
     document.querySelectorAll('.inf-glitch').forEach((g) => { any = true; g.textContent = corrupt(g.dataset.n ? +g.dataset.n : 3); });
     document.querySelectorAll('.inf-eyes').forEach((e) => { any = true; const f = SPY[style.spy]; e.textContent = f[Math.floor(performance.now() / 600) % f.length]; });
-    const scan = els.scare && !els.scare.hidden && els.scare.querySelector('.inf-scan');
-    if (scan) { any = true; scareTick(scan); }
+    for (const w of wins()) { const scan = w.querySelector('.inf-scan'); if (scan) { any = true; scareTick(w, scan); } }
     if (!any) { clearInterval(ticker); ticker = 0; }
   }
   const tickOn = () => { if (!ticker) ticker = setInterval(tick, 110); };
@@ -348,27 +347,27 @@ const Infections = (() => {
     ['UPDATE REQUIRED', 'YOUR BITS ARE OUT OF DATE', 'UPDATE ALL'],
   ];
   const SKULL = [' .-"""-. ', '/  _ _  \\', '| (o)(o) |', ' \\  ^  / ', '  |vvv|  ', "  '---'  "];
-  let scarePct = 0;
   const FILES = ['bits.dat', 'keys.bak', 'save.sav', 'cpu.ini', 'music.mp3', 'photos/', 'system32/'];
-  function scareTick(scan) {
+  function scareTick(win, scan) {
     const kind = scan.dataset.kind;
-    if (kind === 'crash') { scarePct = Math.min(100, scarePct + (Math.random() < 0.3 ? 1 : 0)); scan.textContent = `${scarePct}% COMPLETE`; return; }
-    if (kind === 'delete') { scarePct = (scarePct + 1) % (FILES.length * 6); scan.textContent = `rm ${FILES[Math.floor(scarePct / 6)]} ... OK`; return; }
-    if (kind === 'wheel') {
-      scarePct = (scarePct + 1) % 40;
-      const wh = els.scare.querySelector('.inf-wheel');
-      if (wh) wh.textContent = scarePct < 30 ? WHEEL[scarePct % 3] : '[ 7 ][ 7 ][ 7 ]';
-      scan.textContent = scarePct < 30 ? 'SPINNING...' : 'YOU WON! CLAIM NOW';
-      return;
+    let pct = win.pct || 0;
+    if (kind === 'crash') { pct = Math.min(100, pct + (Math.random() < 0.3 ? 1 : 0)); scan.textContent = `${pct}% COMPLETE`; }
+    else if (kind === 'delete') { pct = (pct + 1) % (FILES.length * 6); scan.textContent = `rm ${FILES[Math.floor(pct / 6)]} ... OK`; }
+    else if (kind === 'wheel') {
+      pct = (pct + 1) % 40;
+      const wh = win.querySelector('.inf-wheel');
+      if (wh) wh.textContent = pct < 30 ? WHEEL[pct % 3] : '[ 7 ][ 7 ][ 7 ]';
+      scan.textContent = pct < 30 ? 'SPINNING...' : 'YOU WON! CLAIM NOW';
+    } else {
+      pct = Math.min(100, pct + 1 + Math.floor(Math.random() * 3));
+      const n = Math.round(pct / 10);
+      scan.textContent = `SCANNING [${'#'.repeat(n)}${'.'.repeat(10 - n)}] ${pct}%${pct >= 100 ? ' !!' : ''}`;
+      if (pct >= 100 && Math.random() < 0.05) pct = 0;
+      const sk = win.querySelector('.inf-skull');
+      if (sk) sk.classList.toggle('lit', Math.floor(performance.now() / 400) % 2 === 0);
     }
-    scarePct = Math.min(100, scarePct + 1 + Math.floor(Math.random() * 3));
-    const n = Math.round(scarePct / 10);
-    scan.textContent = `SCANNING [${'#'.repeat(n)}${'.'.repeat(10 - n)}] ${scarePct}%${scarePct >= 100 ? ' !!' : ''}`;
-    if (scarePct >= 100 && Math.random() < 0.05) scarePct = 0;
-    const sk = els.scare.querySelector('.inf-skull');
-    if (sk) sk.classList.toggle('lit', Math.floor(performance.now() / 400) % 2 === 0);
+    win.pct = pct;
   }
-  let scareDone = null;
   // SCAREWARE's four alerts: the skull and its scan, a crash screen, files deleting, a prize wheel
   const SAD = [':(', '', 'YOUR DEVICE RAN INTO', 'A PROBLEM'];
   const WHEEL = ['[ $ ][ 7 ][ ? ]', '[ 7 ][ ? ][ $ ]', '[ ? ][ $ ][ 7 ]'];
@@ -378,40 +377,85 @@ const Infections = (() => {
     if (k === 3) return `<pre class="inf-skull inf-wheel">${WHEEL[0]}</pre><p class="inf-msg">${msg}</p><p class="inf-scan" data-kind="wheel"></p>`;
     return `<pre class="inf-skull">${SKULL.join('\n').replace(/</g, '&lt;')}</pre><p class="inf-msg">${msg}</p><p class="inf-scan"></p>`;
   }
-  const scareQueue = []; // (a second SCAREWARE while one's up: it pops up as soon as that one's closed)
-  function scare(onClose) {
-    if (scareUp()) { scareQueue.push(onClose); return; }
+  // While it runs (its drops counted by the game), the pop-ups come on their own clock, drop or no
+  // drop: up to SCARE_MAX at once, each somewhere new in the grid, stacked over the last; never two
+  // close together (SCARE_GAP after one appears, SCARE_AFTER_CLOSE after one's closed), and none while
+  // the game's paused (canPop)
+  const SCARE_MAX = 4;
+  const SCARE_GAP = [6000, 11000]; // (ms: the wait after one appears, somewhere in this range)
+  const SCARE_AFTER_CLOSE = 3000;
+  const scareRun = { on: false, nextAt: 0, timer: 0, opts: {} };
+  let scareZ = 0;
+  const wins = () => (els.scare ? [...els.scare.querySelectorAll('.inf-win')] : []);
+  const scareUp = () => wins().length > 0;
+  function spot() { // (a fraction of the grid's free room, as far from the windows up as it can find)
+    const taken = wins().map((w) => [w.fx, w.fy]);
+    let best = null;
+    for (let i = 0; i < 12; i++) {
+      const p = [Math.random(), Math.random()];
+      const d = taken.length ? Math.min(...taken.map(([x, y]) => Math.hypot(x - p[0], y - p[1]))) : 1;
+      if (!best || d > best.d) best = { p, d };
+    }
+    return best.p;
+  }
+  function popWin() {
+    if (wins().length >= SCARE_MAX) return false;
     const el = layer('scare', '');
-    const k = pick('scare');
-    const [title, msg, ok] = SCARES[Math.floor(Math.random() * SCARES.length)];
-    el.innerHTML = `<div class="inf-win" role="alertdialog" aria-label="${title}">`
-      + `<div class="inf-bar"><span>&#9888; ${title}</span><button type="button" class="inf-x" aria-label="Close">&times;</button></div>`
-      + scareBody(k, msg)
-      + `<button type="button" class="inf-ok">${ok}</button></div>`;
     el.removeAttribute('aria-hidden');
     el.hidden = false;
-    scarePct = 0;
-    scareDone = onClose;
-    el.querySelector('.inf-x').addEventListener('click', (e) => { e.stopPropagation(); closeScare(); });
-    const okBtn = el.querySelector('.inf-ok');
+    const k = pick('scare');
+    const [title, msg, ok] = SCARES[Math.floor(Math.random() * SCARES.length)];
+    const win = document.createElement('div');
+    win.className = 'inf-win';
+    win.setAttribute('role', 'alertdialog');
+    win.setAttribute('aria-label', title);
+    win.innerHTML = `<div class="inf-bar"><span>&#9888; ${title}</span><button type="button" class="inf-x" aria-label="Close">&times;</button></div>`
+      + scareBody(k, msg)
+      + `<button type="button" class="inf-ok">${ok}</button>`;
+    [win.fx, win.fy] = spot();
+    win.style.zIndex = ++scareZ;
+    win.querySelector('.inf-x').addEventListener('click', (e) => { e.stopPropagation(); closeWin(win); });
+    const okBtn = win.querySelector('.inf-ok');
     okBtn.addEventListener('click', (e) => { // (it does nothing: it dodges)
       e.stopPropagation();
       okBtn.style.transform = `translate(${Math.round((Math.random() - 0.5) * 60)}px, ${Math.round((Math.random() - 0.5) * 16)}px)`;
       if (typeof SFX !== 'undefined') SFX.play('denied');
     });
-    el.addEventListener('pointerdown', (e) => e.stopPropagation());
+    win.addEventListener('pointerdown', (e) => { e.stopPropagation(); win.style.zIndex = ++scareZ; }); // (tapped: to the front)
+    el.appendChild(win);
+    scareRun.nextAt = performance.now() + SCARE_GAP[0] + Math.random() * (SCARE_GAP[1] - SCARE_GAP[0]);
     tickOn();
     place();
+    if (scareRun.opts.onPop) scareRun.opts.onPop(wins().length);
+    return true;
   }
-  function closeScare() {
-    if (!els.scare || els.scare.hidden) return;
-    els.scare.hidden = true;
-    const done = scareDone;
-    scareDone = null;
-    if (done) done();
-    if (scareQueue.length) setTimeout(() => scare(scareQueue.shift()), 350);
+  function closeWin(win) {
+    if (!win || !win.isConnected) return;
+    win.remove();
+    if (!scareUp()) els.scare.hidden = true;
+    scareRun.nextAt = Math.max(scareRun.nextAt, performance.now() + SCARE_AFTER_CLOSE);
+    if (scareRun.opts.onClose) scareRun.opts.onClose(wins().length);
   }
-  const scareUp = () => !!(els.scare && !els.scare.hidden);
+  const closeScare = () => { const w = wins(); closeWin(w[w.length - 1]); }; // (the newest)
+  function scareLoop() {
+    if (!scareRun.on) { scareRun.timer = 0; return; }
+    const now = performance.now();
+    if (scareRun.opts.canPop && !scareRun.opts.canPop()) scareRun.nextAt = Math.max(scareRun.nextAt, now + 2000); // (paused: and a breath after)
+    else if (now >= scareRun.nextAt) popWin();
+    scareRun.timer = setTimeout(scareLoop, 400);
+  }
+  // SCAREWARE struck (again, maybe): one pops up now, stacked over any up, and more come till scareEnd
+  function scare(opts = {}) {
+    scareRun.opts = opts;
+    scareRun.on = true;
+    popWin();
+    if (!scareRun.timer) scareRun.timer = setTimeout(scareLoop, 400);
+  }
+  function scareEnd() { // (its drops are up: no more come; the ones up stay till closed)
+    scareRun.on = false;
+    clearTimeout(scareRun.timer);
+    scareRun.timer = 0;
+  }
 
   // Lay the overlays over the bits (after each redraw of the board)
   function place(next = {}) {
@@ -441,7 +485,15 @@ const Infections = (() => {
     if (els.scare && !els.scare.hidden) {
       const a = boxOf(state.rows - 1, 0);
       const b = boxOf(0, state.cols - 1);
-      if (a && b) Object.assign(els.scare.style, { left: `${a.x}px`, top: `${a.y}px`, width: `${b.x + b.w - a.x}px`, height: `${b.y + b.h - a.y}px` });
+      if (a && b) {
+        const W = b.x + b.w - a.x;
+        const H = b.y + b.h - a.y;
+        Object.assign(els.scare.style, { left: `${a.x}px`, top: `${a.y}px`, width: `${W}px`, height: `${H}px` });
+        for (const w of wins()) { // (each at its spot in the grid's free room)
+          w.style.left = `${Math.round(Math.max(0, W - w.offsetWidth) * w.fx)}px`;
+          w.style.top = `${Math.round(Math.max(0, H - w.offsetHeight) * w.fy)}px`;
+        }
+      }
     }
     if (document.querySelector('.inf-glitch, .inf-eyes')) tickOn();
     spin();
@@ -450,8 +502,8 @@ const Infections = (() => {
   function steal(n) { stolen = { n, at: performance.now() }; spin(); }
   function clear() {
     place({ adCol: null, jack: false });
-    if (els.scare) { els.scare.hidden = true; scareDone = null; }
-    scareQueue.length = 0;
+    scareEnd();
+    if (els.scare) { els.scare.innerHTML = ''; els.scare.hidden = true; }
   }
-  return { init, place, steal, scare, closeScare, scareUp, ransomHtml, clear, pick, force: (f) => { forced = f; }, glitch: (n = 3) => `<span class="inf-glitch" data-n="${n}">${junk(n)}</span>`, eyes: () => '<span class="inf-eyes">(o_o)</span>' };
+  return { init, place, steal, scare, scareEnd, closeScare, scareUp, scareCount: () => wins().length, ransomHtml, clear, pick, force: (f) => { forced = f; }, glitch: (n = 3) => `<span class="inf-glitch" data-n="${n}">${junk(n)}</span>`, eyes: () => '<span class="inf-eyes">(o_o)</span>' };
 })();

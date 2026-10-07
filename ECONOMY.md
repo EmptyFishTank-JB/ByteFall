@@ -131,8 +131,8 @@ before the resources. A box is the cheaper bet; buying the exploit you want is t
 
 A BLACK BOX's bad luck: it comes up INFECTED. Mild and short; none can end a game by itself. They stack:
 two infected boxes, two infections at once. The same one again starts its count over (ADWARE keeps its
-column), a second RANSOMWARE locks 3 more bits (never ones already locked), and a second SCAREWARE pops up
-once the first is closed. The STORE's BLACK BOXES section warns of all six (BUYER BEWARE). The dev page's
+column), a second RANSOMWARE locks 3 more bits (never ones already locked), and a second SCAREWARE stacks another
+pop-up over the ones up (its 8 drops start over). The STORE's BLACK BOXES section warns of all six (BUYER BEWARE). The dev page's
 BLACK BOX INFECTION makes every box opened come up one (ANY or one kind), and INFECTION LOOK forces look
 1 to 4 (localStorage bytefall-dev-infection / bytefall-dev-infection-look). Each shows
 itself in its own little LED sign or ASCII display, kept within the bits it takes up (js/infections.js), in
@@ -149,7 +149,7 @@ mining pickaxe, a getaway rocket; SCAREWARE a crash screen, files deleting, a pr
 | **RANSOMWARE** | up to 3 bits on the board are padlocked where they are: they can't decrypt or fall (they still count in lines; bits dropped on them rest on them, gaps stay open under them), and settle once it lifts | 5 drops | LED and ASCII: each locked bit's little screen fading between a grinning CPU and typing gibberish, a padlock, its value and the drops left |
 | **MALWARE** | every bit on the board shows as junk | 3 drops | ASCII: flickering characters in each bit |
 | **CRYPTOJACKER** | the resources each drop earns are taken back | 5 drops | LED: a CPU stealing them, on a sign through the overflow row's own cells: a pan with its sack, a close-up of its eyes, MINING YOUR CRYPTO, and a gloat (+N MINE!) when it takes some |
-| **SCAREWARE** | a fake system alert over the board; only its tiny X closes it (its big button dodges) | till closed | ASCII: a blinking skull and a scan crawling to 100% |
+| **SCAREWARE** | fake system alerts over the board, coming on their own clock (not the drops'): up to 4 at once, each at its own random spot in the grid, stacked; never two close together (6 to 11 s after one appears, 3 s after one's closed; none while paused). Only each one's tiny X closes it (its big button dodges) | 8 drops (the ones up stay till closed) | ASCII: a blinking skull and a scan crawling to 100% |
 
 ## BLACK MARKET
 
