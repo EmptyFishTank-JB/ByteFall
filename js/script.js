@@ -445,7 +445,7 @@ Infections.init(boardEl, boardWrapEl, { onPay: (kind) => payInfection(kind) }); 
 
 { // (the dev page's INFECTION LOOK switch: every infection shows that look of its four)
   const look = Number(storage.get('bytefall-dev-infection-look'));
-  if (look >= 1 && look <= 6) Infections.force({ ad: look - 1, jack: look - 1, spy: look - 1, malware: look - 1, ransom: look - 1, scare: look - 1 });
+  if (look >= 1 && look <= 8) Infections.force({ ad: look - 1, jack: look - 1, spy: look - 1, malware: look - 1, ransom: look - 1, scare: look - 1 });
 }
 const columnButtonsEl = document.getElementById('column-buttons');
 const scoreEl = document.getElementById('score');

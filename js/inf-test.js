@@ -41,9 +41,9 @@
   panel.innerHTML = `<div class="inftest-head"><b>INFECTION TESTER</b><button type="button" data-act="hide">HIDE</button></div>
     <div class="inftest-body">
       <div class="inftest-row">${IDS.map((id) => `<button type="button" data-inf="${id}">${id === 'cryptojacker' ? 'CRYPTOJACK' : id.toUpperCase()}</button>`).join('')}</div>
-      <div class="inftest-row"><span>LOOK</span>${['RANDOM', '1', '2', '3', '4', '5', '6'].map((l, i) => `<button type="button" data-look="${i - 1}"${i ? '' : ' class="on"'}>${l}</button>`).join('')}</div>
+      <div class="inftest-row"><span>LOOK</span>${['RANDOM', '1', '2', '3', '4', '5', '6', '7', '8'].map((l, i) => `<button type="button" data-look="${i - 1}"${i ? '' : ' class="on"'}>${l}</button>`).join('')}</div>
       <div class="inftest-row"><button type="button" data-act="drop">DROP (COUNT DOWN)</button><button type="button" data-act="fill">FILL GRID</button><button type="button" data-act="clear">CLEAR</button><button type="button" data-act="keys">+50 KEYS</button><button type="button" data-act="banners"></button><button type="button" data-act="banlook"></button><button type="button" data-act="bantest">TEST BANNER</button><a href="dev-tools/audio.html">DEV PAGE</a></div>
-      <p class="inftest-note">NOT SAVED: nothing played here touches your progress. Tap an ad, the CRYPTOJACKER's sign or a pop-up and it steals KEYS toward its (hidden) demand. Infections stack: tap more than one. RANSOMWARE has 5 looks, MALWARE 6, the rest 4 (a look past theirs picks at random). The column buttons still drop bits.</p>
+      <p class="inftest-note">NOT SAVED: nothing played here touches your progress. Tap an ad, the CRYPTOJACKER's sign or a pop-up and it steals KEYS toward its (hidden) demand. Infections stack: tap more than one. ADWARE and MALWARE have 6 looks, RANSOMWARE 5, the CRYPTOJACKER 8, the rest 4 (a look past theirs picks at random). The column buttons still drop bits.</p>
     </div>`;
   document.body.appendChild(panel);
   const bannersBtn = panel.querySelector('[data-act="banners"]');

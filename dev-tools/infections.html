@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" class="sandbox">
 <head>
-<script src="../js/fonts.js?v=475"></script>
+<script src="../js/fonts.js?v=476"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#020403">
 <title>Infection Wall // BYTEFALL</title>
-<link rel="stylesheet" href="../css/style.css?v=475">
+<link rel="stylesheet" href="../css/style.css?v=476">
 <!-- INFECTION WALL: every INFECTION in every look, all playing at once, a row an infection. Each
      tile is its own copy of the game's infections.js on a little board of bits, so what plays here
      is what plays in the game. -->
@@ -47,8 +47,8 @@
     <div class="wall-bar"><button type="button" id="wall-restart">RESTART ALL</button><button type="button" id="wall-shuffle">NEW BITS</button></div>
     <div id="rows"></div>
   </div>
-<script src="../js/led-banner.js?v=475"></script>
-<script src="../js/infections.js?v=475"></script>
+<script src="../js/led-banner.js?v=476"></script>
+<script src="../js/infections.js?v=476"></script>
 <script>
 (() => {
   const COLS = 5;
@@ -66,8 +66,8 @@
     ad: ['FACE + CLAIMS', 'SALE', 'SLOT MACHINE', 'BOUNCING CPU', 'DOWNLOAD', '1,000,000TH VISITOR'],
     spy: ['EYES', 'REC', 'BINOCULARS', 'KEYHOLE'],
     ransom: ['ANGRY CPU', 'SKULL', 'PADLOCK', 'LAUGHING CPU', 'BINARY ART'],
-    malware: ['JUNK', 'BINARY', 'ERRORS', 'MELT', 'MOSAIC', 'TINY PICTURES'],
-    jack: ['SNEAK', 'PICKPOCKET', 'MINING RIG', 'GETAWAY'],
+    malware: ['JUNK + MELT', 'BINARY WALLS', 'ERRORS', 'ROOMS', 'MOSAIC', 'TINY PICTURES'],
+    jack: ['SNEAK', 'PICKPOCKET', 'MINING RIG', 'GETAWAY', 'SNEAK (ASCII)', 'PICKPOCKET (ASCII)', 'MINING RIG (ASCII)', 'GETAWAY (ASCII)'],
     scare: ['SKULL SCAN', 'CRASH', 'DELETING FILES', 'PRIZE WHEEL'],
   };
   let seed = 1;

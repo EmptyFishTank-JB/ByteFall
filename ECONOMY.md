@@ -136,7 +136,11 @@ steals 1 to 3 KEYS, toward that one's demand only; paid in full, it leaves the t
 goes, the sign goes, the pop-ups all close). Or run out its clock: nothing more's taken. (RANSOMWARE
 just runs its clock.) ADWARE has six looks: the CPU's claims, a SALE, a slot machine (its reels rolling
 sideways, stopping on 7s, WIN under them), the CPU bouncing, DOWNLOAD (a bar stuck at 99%), and the
-1,000,000TH VISITOR (a trophy, the counter rolling up to it). The dev page's INFECTION WALL
+1,000,000TH VISITOR (a trophy, the counter rolling up to it). MALWARE's looks: JUNK + MELT (each bit junk or a melting shade, at random), BINARY WALLS (each bit a
+block of flickering binary), ERRORS, ROOMS (each bit a room drawn in characters, doors to the bits beside
+it, letters and symbols lying about, an @ and an & wandering room to room), MOSAIC and TINY PICTURES.
+The CRYPTOJACKER has eight: its four scenes in LED dots, and the same four drawn in letters, numbers
+and symbols. ADWARE's words and pictures stay clear of its AD tag (its bulbs run behind it). The dev page's INFECTION WALL
 (dev-tools/infections.html) plays every infection in every look at once.
 Achievements: PAID IN FULL (1 paid off), CASH COW (10), EXTORTED (100 KEYS lost to them), WALKING ATM
 (1,000), WE DON'T NEGOTIATE (10 outlasted without paying a key). They stack:

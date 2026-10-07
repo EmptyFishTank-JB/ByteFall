@@ -69,7 +69,10 @@ const makeInfections = () => {
   }
   // Paint a dot buffer onto a canvas: lit dots glowing in their color, the rest faint; only inside
   // the windows given (the bits' own boxes), or everywhere
-  function paint(cv, buf, colors, windows = null, bg = null) {
+  // (ASCII: the same pictures, each lit dot a character: letters, numbers, symbols, a few changing each frame)
+  const ASCII_SET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$#%&@*+=?';
+  const asciiGrid = new WeakMap();
+  function paint(cv, buf, colors, windows = null, bg = null, ascii = false) {
     const g = cv.getContext('2d');
     const dpr = cv.width / Math.max(1, cv.clientWidth);
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -84,6 +87,24 @@ const makeInfections = () => {
       g.clip();
     }
     if (bg) { g.fillStyle = bg; g.fillRect(0, 0, cv.clientWidth, cv.clientHeight); } // (solid: what it's over doesn't show through)
+    if (ascii) {
+      let grid = asciiGrid.get(cv);
+      if (!grid || grid.length !== buf.w * buf.h) { grid = Array.from({ length: buf.w * buf.h }, () => ASCII_SET[Math.floor(Math.random() * ASCII_SET.length)]); asciiGrid.set(cv, grid); }
+      for (let i = 0; i < grid.length / 14; i++) grid[Math.floor(Math.random() * grid.length)] = ASCII_SET[Math.floor(Math.random() * ASCII_SET.length)];
+      g.font = `bold ${(py * 1.2).toFixed(1)}px 'Courier New', monospace`;
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      g.fillStyle = 'rgba(255, 255, 255, 0.08)';
+      for (let y = 0; y < buf.h; y++) for (let x = 0; x < buf.w; x++) if (!buf.b[y * buf.w + x]) g.fillText('.', (x + 0.5) * px, (y + 0.5) * py);
+      for (const v of [1, 2]) {
+        g.fillStyle = colors[v - 1];
+        g.shadowColor = colors[v - 1];
+        g.shadowBlur = reduced() ? 0 : py;
+        for (let y = 0; y < buf.h; y++) for (let x = 0; x < buf.w; x++) if (buf.b[y * buf.w + x] === v) g.fillText(grid[y * buf.w + x], (x + 0.5) * px, (y + 0.5) * py);
+      }
+      g.restore();
+      return;
+    }
     g.fillStyle = 'rgba(255, 255, 255, 0.06)';
     for (let y = 0; y < buf.h; y++) for (let x = 0; x < buf.w; x++) if (!buf.b[y * buf.w + x]) { g.beginPath(); g.arc((x + 0.5) * px, (y + 0.5) * py, r * 0.8, 0, 6.283); g.fill(); }
     for (const v of [1, 2]) {
@@ -106,11 +127,11 @@ const makeInfections = () => {
   // Each infection's four looks: one picked at random each time it strikes
   const style = { ad: 0, jack: 0, spy: 0, malware: 0, ransom: 0, scare: 0 };
   let forced = null; // (the dev page or a test: { kind: look } to show that look next)
-  const LOOKS = { ad: 6, jack: 4, spy: 4, malware: 6, ransom: 5, scare: 4 }; // (how many looks each has)
+  const LOOKS = { ad: 6, jack: 8, spy: 4, malware: 6, ransom: 5, scare: 4 }; // (how many looks each has)
   const pick = (kind) => {
     const f = forced && forced[kind] !== undefined ? forced[kind] : -1;
     style[kind] = f >= 0 && f < LOOKS[kind] ? f : Math.floor(Math.random() * LOOKS[kind]);
-    if (kind === 'malware') mosaic = null; // (a new picture for the board, if it's to be one)
+    if (kind === 'malware') { mosaic = null; mixSeed = 1 + Math.floor(Math.random() * 1e6); walkers.length = 0; } // (a new picture, new melting bits, new rooms)
     return style[kind];
   };
   const ARROW_DOWN = ['..x..', '..x..', '..x..', 'xxxxx', '.xxx.', '..x..'];
@@ -174,13 +195,14 @@ const makeInfections = () => {
       buf.set(x, y, 2);
     }
     const cx = Math.round((W - 11) / 2);
+    const CLEAR = H - 7; // (the last row clear of the AD tag in the corner: words and pictures stay above it; the bulbs go behind it)
     if (style.ad === 1) { // (a SALE: the price tag flashing, its numbers falling, arrows pointing)
       const deals = ['-90%', 'FREE', '$0', 'SALE', '2X1'];
       const d = deals[Math.floor(t / 1.2) % deals.length];
       const on = Math.floor(t * 4) % 2;
       buf.textV(d, Math.round((W - 5) / 2), 3, on ? 1 : 2);
-      for (let k = 0; k < 3; k++) buf.sprite(ARROW_DOWN, Math.round((W - 5) / 2), H - 9 - ((Math.floor(t * 10) + k * 6) % 18) - k * 6);
-      buf.sprite(face('wink', 'grin'), cx, H - 12);
+      for (let k = 0; k < 3; k++) buf.sprite(ARROW_DOWN, Math.round((W - 5) / 2), H - 25 - ((Math.floor(t * 10) + k * 6) % 18) - k * 6);
+      buf.sprite(face('wink', 'grin'), cx, CLEAR - 9); // (above the AD tag)
       paint(cv, buf, [css('--accent', '#ffd23f'), css('--danger', '#ff3b5c')]);
       return;
     }
@@ -230,7 +252,7 @@ const makeInfections = () => {
       [...n].forEach((d, i) => {
         const done = settle * n.length > i;
         const ch = done ? d : String(Math.floor(t * 20 + i * 3) % 10);
-        buf.text(ch, Math.round((W - 5) / 2), 12 + i * 9, done && lit ? 2 : 1);
+        buf.text(ch, Math.round((W - 5) / 2), 12 + i * Math.min(9, Math.floor((CLEAR - 19) / 6)), done && lit ? 2 : 1);
       });
       paint(cv, buf, [css('--accent', '#ffd23f'), css('--danger', '#ff3b5c')]);
       return;
@@ -240,7 +262,7 @@ const makeInfections = () => {
       const y = Math.round(2 + bounce * (H - 40));
       const f = FACES[Math.floor(t * 1.5) % FACES.length];
       buf.sprite(face(f[0], f[1]), cx, y);
-      if (Math.floor(t * 3) % 2) buf.textV('CLICK', Math.round((W - 5) / 2), Math.min(H - 46, y + 12), 2);
+      if (Math.floor(t * 3) % 2) buf.textV('CLICK', Math.round((W - 5) / 2), Math.min(CLEAR - 44, y + 12), 2);
       paint(cv, buf, [css('--accent', '#ffd23f'), css('--danger', '#ff3b5c')]);
       return;
     }
@@ -257,7 +279,7 @@ const makeInfections = () => {
       const y0 = top + (H - 2 - top) - off + rep * span;
       [...msg].forEach((ch, n) => {
         const y = y0 + n * 9 - (H - 2 - top);
-        if (y < top - 6 || y > H - 2) return;
+        if (y < top - 6 || y > CLEAR - 6) return; // (the letters stop short of the AD tag)
         glyph(ch).forEach((row, gy) => [...row].forEach((bit, gx) => { if (bit === '1' && y + gy >= top && y + gy < H - 1) buf.set(Math.round((W - 5) / 2) + gx, y + gy, 1); }));
       });
     }
@@ -269,18 +291,21 @@ const makeInfections = () => {
     const el = els.jack;
     const cv = el.querySelector('canvas');
     sizeCanvas(cv);
-    const W = Math.max(40, Math.round(cv.clientWidth / 3));
-    const H = Math.max(11, Math.round(cv.clientHeight / 3));
+    const ascii = style.jack >= 4; // (looks 5 to 8: the same four, in letters, numbers and symbols)
+    const look = style.jack % 4;
+    const dot = ascii ? 3.4 : 3;
+    const W = Math.max(40, Math.round(cv.clientWidth / dot));
+    const H = Math.max(11, Math.round(cv.clientHeight / dot));
     const buf = buffer(W, H);
     const t = Math.max(0, now - t0) / 1000;
     const mid = Math.round((H - 9) / 2);
     if (stolen && now - stolen.at < 2400) { // (it got some: a gloat)
       const k = (now - stolen.at) / 2400;
       buf.sprite(face('shut', 'laugh'), 2, mid);
-      buf.text(`+${stolen.n} ${['MINE!', 'YOINK!', 'HASHED', 'SEE YA'][style.jack]}`, 16, Math.round((H - 7) / 2));
+      buf.text(`+${stolen.n} ${['MINE!', 'YOINK!', 'HASHED', 'SEE YA'][look]}`, 16, Math.round((H - 7) / 2));
       const cx = Math.round(W - 8 - k * (W - 22));
       buf.sprite(COIN, cx, Math.round((H - 5) / 2));
-    } else if (style.jack === 1) { // (PICKPOCKET: a hand reaching in from the right, a coin at a time)
+    } else if (look === 1) { // (PICKPOCKET: a hand reaching in from the right, a coin at a time)
       const s = (t % 2.4) / 2.4;
       buf.sprite(face('side', 'smug'), 2, mid);
       const reach = Math.round(W - 6 - Math.sin(s * Math.PI) * (W - 30));
@@ -288,7 +313,7 @@ const makeInfections = () => {
       buf.sprite(HAND, reach, Math.round((H - 5) / 2));
       if (s > 0.5) buf.sprite(COIN, reach + 6, Math.round((H - 5) / 2));
       else buf.sprite(COIN, 18 + Math.floor(t) % 3 * 6, Math.round((H - 5) / 2));
-    } else if (style.jack === 2) { // (MINING RIG: its pickaxe on a coin, sparks, the hash rate climbing)
+    } else if (look === 2) { // (MINING RIG: its pickaxe on a coin, sparks, the hash rate climbing)
       const s = (t % 0.8) / 0.8;
       buf.sprite(face('angry', 'teeth'), 2, mid);
       const swing = s < 0.5;
@@ -297,7 +322,7 @@ const makeInfections = () => {
       if (!swing) for (let k = 0; k < 4; k++) buf.set(26 + k * 2, Math.round(H / 2) - 2 + (k % 2) * 3, 2);
       const pct = Math.floor((t * 7) % 100);
       buf.text(`${pct}%`, W - 26, Math.round((H - 7) / 2));
-    } else if (style.jack === 3) { // (GETAWAY: off in a rocket, a trail of coins behind)
+    } else if (look === 3) { // (GETAWAY: off in a rocket, a trail of coins behind)
       const s = (t % 2.6) / 2.6;
       const x = Math.round(-20 + s * (W + 30));
       for (let k = 1; k < 5; k++) buf.sprite(COIN, x - k * 8, Math.round((H - 5) / 2) + (k % 2 ? 1 : -1));
@@ -331,7 +356,7 @@ const makeInfections = () => {
       const b = boxOf(r, c);
       if (b) windows.push({ x: b.x - el.offsetLeft, y: b.y - el.offsetTop, w: b.w, h: b.h });
     }
-    paint(cv, buf, [css('--danger', '#ff3b5c'), css('--accent', '#ffd23f')], windows, '#050607');
+    paint(cv, buf, [css('--danger', '#ff3b5c'), css('--accent', '#ffd23f')], windows, '#050607', ascii);
   }
   function loop(now) {
     frame = 0;
@@ -346,19 +371,85 @@ const makeInfections = () => {
   // ── ASCII: the corrupted bits, the spying eyes, the ransom screens' typing ────────────────────
   const JUNK = '#%&@$?!*<>/\\|~^=+;:{}[]';
   const junk = (n) => Array.from({ length: n }, () => JUNK[Math.floor(Math.random() * JUNK.length)]).join('');
-  // MALWARE's six ways of spoiling a bit: junk, binary, error codes, a shade melting through it; and
-  // the ASCII ART: one big picture in binary across the whole board, each bit showing its piece of
-  // it (MOSAIC), or each bit a tiny picture of its own
+  // MALWARE's six ways of spoiling a bit: junk and a shade melting through, bit by bit at random;
+  // a wall of binary in each; error codes; ROOMS (each bit a room, a character or two wandering
+  // from one to the next); and the ASCII ART: one big picture in binary across the whole board, each
+  // bit showing its piece of it (MOSAIC), or each bit a tiny picture of its own
   const ERRS = ['ERR', 'NaN', '0x?', 'NUL', '404', '???', 'EOF', '-0-'];
   const MELT = ['#', '=', '-', '.', ' ', '.', '-', '='];
+  const GRID_LOOKS = [1, 3, 4, 5]; // (the looks that fill a bit with a block of characters)
+  let mixSeed = 1; // (JUNK + MELT: which bits melt, new each strike)
+  const melts = (r, c) => ((r * 73856093) ^ (c * 19349663) ^ mixSeed) % 5 < 2;
   const corrupt = (n, r, c) => {
     if (style.malware === 4 && r !== undefined) return mosaicPiece(r, c);
     if (style.malware === 5 && r !== undefined) return binFill(MINIS[(r * 3 + c) % MINIS.length]);
-    if (style.malware === 1) return Array.from({ length: n }, () => (Math.random() < 0.5 ? '0' : '1')).join('');
+    if (style.malware === 1 && r !== undefined) return Array.from({ length: CELL_H }, () => Array.from({ length: CELL_W }, () => (Math.random() < 0.5 ? '0' : '1')).join('')).join('\n'); // (a wall of binary)
+    if (style.malware === 3 && r !== undefined) return roomText(r, c);
     if (style.malware === 2) return ERRS[Math.floor(Math.random() * ERRS.length)];
-    if (style.malware === 3) { const k = Math.floor(performance.now() / 120); return Array.from({ length: n }, (_, i) => MELT[(k + i) % MELT.length]).join(''); }
+    if (r !== undefined && melts(r, c)) { const k = Math.floor(performance.now() / 120) + r * 3 + c; return Array.from({ length: n }, (_, i) => MELT[(k + i) % MELT.length]).join(''); }
     return junk(n);
   };
+  // ROOMS: each corrupted bit a room (walls, doors where a neighbour's a room too, things lying about:
+  // letters, numbers, symbols), and a character or two going from room to room
+  const ROOM_ITEMS = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789$%&?*#=+';
+  const walkers = []; // { r, c, x, y, dx, dy, ch }
+  let roomSet = new Set();
+  const roomAt = (r, c) => roomSet.has(`${r},${c}`);
+  function passable(r, c, x, y) {
+    if (x >= 1 && x <= CELL_W - 2 && y >= 1 && y <= CELL_H - 2) return true;
+    const midX = x === Math.floor(CELL_W / 2) - 1 || x === Math.floor(CELL_W / 2);
+    const midY = y === Math.floor(CELL_H / 2) - 1 || y === Math.floor(CELL_H / 2);
+    if (x === 0 && midY) return roomAt(r, c - 1);
+    if (x === CELL_W - 1 && midY) return roomAt(r, c + 1);
+    if (y === 0 && midX) return roomAt(r + 1, c); // (row 0 is the bottom: the room above is r + 1)
+    if (y === CELL_H - 1 && midX) return roomAt(r - 1, c);
+    return false;
+  }
+  function roomText(r, c) {
+    const W = CELL_W;
+    const H = CELL_H;
+    const midX = (x) => x === Math.floor(W / 2) - 1 || x === Math.floor(W / 2);
+    const midY = (y) => y === Math.floor(H / 2) - 1 || y === Math.floor(H / 2);
+    let seed = (r * 7919 + c * 104729 + mixSeed) >>> 0;
+    const rnd = () => { seed = (seed * 1103515245 + 12345) >>> 0; return (seed >>> 16) / 65536; };
+    const items = {};
+    for (let i = 0; i < 4; i++) items[`${1 + Math.floor(rnd() * (W - 2))},${1 + Math.floor(rnd() * (H - 2))}`] = ROOM_ITEMS[Math.floor(rnd() * ROOM_ITEMS.length)];
+    let out = '';
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const who = walkers.find((w) => w.r === r && w.c === c && w.x === x && w.y === y);
+        let ch;
+        if (who) ch = `<b class="inf-walker">${who.ch}</b>`;
+        else if ((x === 0 || x === W - 1) && (y === 0 || y === H - 1)) ch = '+';
+        else if (y === 0 || y === H - 1) ch = midX(x) && passable(r, c, x, y) ? ' ' : '-';
+        else if (x === 0 || x === W - 1) ch = midY(y) && passable(r, c, x, y) ? ' ' : '|';
+        else ch = (items[`${x},${y}`] || ((x + y * 3 + r + c) % 7 === 0 ? '.' : ' ')).replace('&', '&amp;');
+        out += ch;
+      }
+      if (y < H - 1) out += '\n';
+    }
+    return out;
+  }
+  function stepWalkers() {
+    roomSet = new Set([...scope.querySelectorAll('.inf-glitch.rooms')].map((g) => `${g.dataset.r},${g.dataset.c}`));
+    if (!roomSet.size) { walkers.length = 0; return; }
+    const rooms = [...roomSet];
+    const want = Math.min(2, rooms.length);
+    for (let i = walkers.length - 1; i >= 0; i--) if (!roomAt(walkers[i].r, walkers[i].c)) walkers.splice(i, 1); // (its room gone: so is it)
+    while (walkers.length < want) {
+      const [r, c] = rooms[Math.floor(Math.random() * rooms.length)].split(',').map(Number);
+      walkers.push({ r, c, x: 2 + Math.floor(Math.random() * (CELL_W - 4)), y: 1 + Math.floor(Math.random() * (CELL_H - 2)), dx: 1, dy: 0, ch: walkers.length ? '&amp;' : '@' });
+    }
+    for (const w of walkers) {
+      if (Math.random() < 0.18) [w.dx, w.dy] = [[1, 0], [-1, 0], [0, 1], [0, -1]][Math.floor(Math.random() * 4)];
+      let nx = w.x + w.dx;
+      let ny = w.y + w.dy;
+      let { r, c } = w;
+      if (nx < 0) { c--; nx = CELL_W - 1; } else if (nx >= CELL_W) { c++; nx = 0; } else if (ny < 0) { r++; ny = CELL_H - 1; } else if (ny >= CELL_H) { r--; ny = 0; } // (through a door: the next room)
+      if ((r === w.r && c === w.c && passable(r, c, nx, ny)) || ((r !== w.r || c !== w.c) && roomAt(r, c))) Object.assign(w, { r, c, x: nx, y: ny });
+      else { w.dx = -w.dx; w.dy = -w.dy; } // (a wall: back the way it came)
+    }
+  }
   const SPY = [
     ['(o_o)', '(o_o)', '(O_o)', '(o_O)', '(-_-)', '(o_o)', '(>_>)', '(<_<)'], // (eyes)
     ['REC *', 'REC  ', 'REC *', 'REC  '], // (a camera, recording)
@@ -368,10 +459,14 @@ const makeInfections = () => {
   let ticker = 0;
   function tick() {
     let any = false;
+    if (style.malware === 3) stepWalkers();
     scope.querySelectorAll('.inf-glitch').forEach((g) => {
       any = true;
-      if (g.dataset.r !== undefined && style.malware >= 4) binFlicker(g); // (the pictures: their digits flicker, the shape holds)
-      else g.textContent = corrupt(g.dataset.n ? +g.dataset.n : 3);
+      const r = g.dataset.r === undefined ? undefined : +g.dataset.r;
+      const c = g.dataset.c === undefined ? undefined : +g.dataset.c;
+      if (r !== undefined && style.malware === 3) g.innerHTML = roomText(r, c); // (ROOMS: the characters on the move)
+      else if (r !== undefined && GRID_LOOKS.includes(style.malware)) binFlicker(g); // (the blocks: their digits flicker, the shape holds)
+      else g.textContent = corrupt(g.dataset.n ? +g.dataset.n : 3, r, c);
     });
     scope.querySelectorAll('.inf-mini').forEach((m) => { any = true; binFlicker(m); });
     scope.querySelectorAll('.inf-eyes').forEach((e) => { any = true; const f = SPY[style.spy]; e.textContent = f[Math.floor(performance.now() / 600) % f.length]; });
@@ -730,9 +825,10 @@ const makeInfections = () => {
     if (els.scare) { els.scare.innerHTML = ''; els.scare.hidden = true; }
     for (const k of Object.keys(dueText)) due(k, null);
   }
-  return { looks: () => ({ ...LOOKS }), init, place, steal, scare, scareEnd, scareClear, due, closeScare, scareUp, scareCount: () => wins().length, ransomHtml, clear, pick, force: (f) => { forced = f; }, mosaicOn: () => style.malware === 4, glitch: (n = 3, r, c, empty = false) => (style.malware >= 4 && r !== undefined
-    ? `<span class="inf-glitch ${style.malware === 4 ? 'mosaic' : 'mini'}${empty ? ' empty' : ''}" data-n="${n}" data-r="${r}" data-c="${c}">${corrupt(n, r, c)}</span>`
-    : `<span class="inf-glitch" data-n="${n}">${corrupt(n)}</span>`), eyes: () => { // (SPYWARE in CURRENT: its look's first frame, and the ticker on, as CURRENT's drawn after the board)
+  return { looks: () => ({ ...LOOKS }), init, place, steal, scare, scareEnd, scareClear, due, closeScare, scareUp, scareCount: () => wins().length, ransomHtml, clear, pick, force: (f) => { forced = f; }, mosaicOn: () => style.malware === 4, glitch: (n = 3, r, c, empty = false) => (r === undefined ? `<span class="inf-glitch" data-n="${n}">${corrupt(n)}</span>`
+    : GRID_LOOKS.includes(style.malware)
+      ? `<span class="inf-glitch ${{ 1: 'mosaic wall', 3: 'mosaic rooms', 4: 'mosaic', 5: 'mini' }[style.malware]}${empty ? ' empty' : ''}" data-n="${n}" data-r="${r}" data-c="${c}">${corrupt(n, r, c)}</span>`
+      : `<span class="inf-glitch" data-n="${n}" data-r="${r}" data-c="${c}">${corrupt(n, r, c)}</span>`), eyes: () => { // (SPYWARE in CURRENT: its look's first frame, and the ticker on, as CURRENT's drawn after the board)
     setTimeout(tickOn, 0);
     return `<span class="inf-eyes">${SPY[style.spy][0]}</span>`;
   } };
