@@ -427,7 +427,16 @@ rings on the still water, a duck paddling across, a dragonfly darting over the r
 fish jumping, gulls gliding over, a crab scuttling along the sand; and a bug here and there:
 butterflies and a bee over the MEADOW, a beetle or a ladybug on the WOODLAND, FARM and DESERT ground,
 a moth in the woods at night, pigeons pecking along the CITY's sidewalk (the day ones keep in at
-night). Poke the bot and it shushes you. Achievements: GONE FISHING, THE ONE THAT GOT AWAY. No numbered BITs are
+night). And NEAR CRITTERS, bigger, close by on the bots' own floor (in front of them): a frog hopping
+along the lake's shore, a crab on the beach, butterflies, a bee and a rabbit in the meadow, a
+squirrel in the woods, a chicken on the farm, a lizard in the desert, a pigeon in the city, a rabbit
+in the snow. The bots notice one as it passes and it sways their mood: a butterfly a heart, the
+rabbit an "aww", a frog a curious "ribbit?", a crab a start (now and then a pinch: ow!), the bee
+worries them (BUNKER: EEK; GLITCH laughs), GRIFTER eyes the pigeon; each nudges their temper and fun.
+Behind each scene, its SKY: the time of day's (a night navy, a dawn's peach, a day's blue, a dusk's
+orange and violet), turned by the weather (grey in cloud and rain, dark in a storm, pale in the
+snow, brown in a dust storm, warm in a heatwave), crossfading as it changes and fading out up top
+into the card; on the start screen the sun and moon come down into it. Poke the bot and it shushes you. Achievements: GONE FISHING, THE ONE THAT GOT AWAY. No numbered BITs are
 pushed in while the pier's out (one would stand in front of the bot fishing off it). Each is drawn at three depths,
 never all in front: a far layer behind everything, the ground behind the bots' feet, and a few
 details in front of them. The weather leans to suit it (a beach's sunsets and storms, a city's rain,

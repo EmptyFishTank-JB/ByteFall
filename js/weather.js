@@ -471,7 +471,7 @@ function createWeather(api) {
     const c = Math.cos(2 * Math.PI * k);
     const cx = Math.round((wx.moon.side * W) / P) * P;
     const up = Math.min(1, (now - wx.moon.rise) / 20000);
-    const to = H * (game() ? 0.64 : 0.16);
+    const to = H * (game() ? 0.64 : api.scene && api.scene() ? 0.56 : 0.16);
     const cy = Math.round((to + (1 - up * (2 - up)) * H * 0.25) / P) * P;
     // (a full moon in September or October: the HARVEST MOON, low and orange)
     const harvest = k > 0.44 && k < 0.56 && [8, 9].includes(new Date().getMonth());
@@ -654,7 +654,7 @@ function createWeather(api) {
     if (wx && wx.k.sun && !light()) {
       const r = game() ? 5 : 9;
       const cx = Math.round((wx.sunSide * W) / P) * P;
-      const cy = Math.round((H * (game() ? 0.64 : 0.16)) / P) * P; // (the game's: low, in the open sky under the board)
+      const cy = Math.round((H * (game() ? 0.64 : api.scene && api.scene() ? 0.56 : 0.16)) / P) * P; // (the game's: low, in the open sky under the board; the start screen's, in a scene's sky)
       back.globalAlpha = L;
       for (let y = -r; y <= r; y++) for (let x = -r; x <= r; x++) {
         const d = x * x + y * y;

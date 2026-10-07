@@ -75,8 +75,10 @@ function createScenes(api) {
   }
   function end(now = false) {
     if (!sc) return;
+    if (sc.sky) { const sky = sc.sky; sc.sky = null; sky.forEach((d) => { d.style.opacity = '0'; }); setTimeout(() => sky.forEach((d) => d.remove()), now ? 0 : 5000); }
     if (fish) fishEnd(true); // (packed up: the place is going)
     lifeEnd();
+    nearEnd();
     const els = Object.values(sc.els);
     sc = null;
     if (now) { els.forEach((e) => e.remove()); return; }
@@ -757,6 +759,188 @@ function createScenes(api) {
     if (lifeCanvas) { lifeCanvas.remove(); lifeCanvas = null; }
   }
 
+
+  // THE NEAR CRITTERS: bigger ones, close by on the bots' own floor (in front of them, nearer the
+  // camera), that the bots notice as they pass: a frog hopping along the shore (ribbit? a curious
+  // look), a crab (a start, and now and then a pinch: ow!), a butterfly (a smile, a heart), a bee
+  // (BUNKER's scared of it, GLITCH laughs), a squirrel (a start), a rabbit in the snow (aww), a
+  // pigeon (GRIFTER eyes it), a lizard, a chicken (a laugh). Each nudges the bot's mood (its temper,
+  // its fun: bots.js's minds), a little.
+  const NEAR_ART = { // (pixel maps facing right: one letter a pixel, '.' empty; b: a second frame)
+    frog: { pal: { g: '#5aa84a', G: '#3f8a3e', k: '#1a2a1a', y: '#e8e070' }, a: ['.k..k.', 'gggggg', 'gyyyyg', 'gg..gg'], b: ['......', '.k..k.', 'gggggg', 'g.yy.g', 'g....g'] },
+    crab: { pal: { r: '#d8462f', R: '#a8321f', k: '#1a1a1a' }, a: ['.k...k.', 'rr...rr', '.rrrrr.', 'R.rrr.R', '.R...R.'], b: ['.k...k.', 'rr...rr', '.rrrrr.', '.RrrrR.', 'R.....R'] },
+    butterfly: { pal: { w: '#ffb347', W: '#ff8a3c', k: '#2a1a0a' }, a: ['ww.ww', 'WwkwW', '.wkw.', 'w...w'], b: ['..k..', '.wkw.', '.wkw.', '..k..'] },
+    bee: { pal: { y: '#ffd23f', k: '#2a2a2a', w: '#e8f4ff' }, a: ['.ww.', 'ykyk', 'ykyk'], b: ['....', 'ykyk', 'ykyk'] },
+    squirrel: { pal: { b: '#9a5a2a', t: '#c8803a', k: '#1a1a1a' }, a: ['t....', 'tt.bk', '.tbbb', '.bbb.', '.b.b.'], b: ['t....', 'tt.bk', '.tbbb', '.bbb.', 'b...b'] },
+    rabbit: { pal: { w: '#f2f4f8', p: '#f0a0b0', k: '#1a1a1a', W: '#c8d4e2' }, a: ['...w.w', '...wpw', '.wwwwk', 'wwwww.', '.W.W..'], b: ['...w.w', '...wpw', '.wwwwk', 'wwwww.', 'W...W.'] },
+    pigeon: { pal: { g: '#8a909a', G: '#6a707a', p: '#7a6aa0', o: '#c86a50', k: '#1a1a1a' }, a: ['...Gk', '..gpg', 'ggggg', '.o.o.'], b: ['.....', '...Gk', 'ggggp', '.o.o.'] },
+    lizard: { pal: { g: '#7aa84a', G: '#5a8a3a', k: '#1a1a1a' }, a: ['.......k', 'gggggggg', '.G.G..G.'], b: ['.......k', 'gggggggg', 'G.G..G..'] },
+    chicken: { pal: { w: '#f2f2f2', r: '#e0455f', y: '#ffb000', k: '#1a1a1a' }, a: ['..r.', '.wwky', 'wwww.', '.ww..', '.y.y.'], b: ['..r.', '.wwky', 'wwww.', '.ww..', 'y...y'] },
+  };
+  const NEAR = { // [critter, every (seconds, about), only by day]
+    lake: [['frog', 22], ['butterfly', 30, true]],
+    beach: [['crab', 18]],
+    meadow: [['butterfly', 14, true], ['bee', 20, true], ['rabbit', 40, true]],
+    woodland: [['squirrel', 20, true], ['butterfly', 34, true]],
+    farm: [['chicken', 18, true]],
+    desert: [['lizard', 20]],
+    city: [['pigeon', 16, true]],
+    snowfield: [['rabbit', 24, true]],
+  };
+  // How each bot takes each: [mood, emotes, temper, fun] (by bot where they differ)
+  const NEAR_FEEL = {
+    frog: { any: ['happy', ['ribbit?', '?', 'ooh'], -0.04, 0.06], glitch: ['laugh', ['ribbit!', 'haha'], -0.02, 0.08] },
+    crab: { any: ['surprised', ['!', '!?'], 0.02, 0.04], bunker: ['scared', ['eek', '!'], 0.06, 0], pinch: ['annoyed', ['ow!', 'OW', 'hey!'], 0.14, 0] },
+    butterfly: { any: ['love', ['<3', '^^'], -0.1, 0.08], glitch: ['happy', ['ooh', '^^'], -0.06, 0.08] },
+    bee: { any: ['worried', ['!', 'bzz?'], 0.04, 0], bunker: ['scared', ['EEK', '!!'], 0.08, 0], glitch: ['laugh', ['haha', 'bzz'], -0.02, 0.06] },
+    squirrel: { any: ['surprised', ['!?', '!'], 0, 0.05], bot: ['happy', ['ooh', '!'], -0.04, 0.08] },
+    rabbit: { any: ['love', ['aww', '<3'], -0.12, 0.08] },
+    pigeon: { any: ['happy', ['coo?', '^^'], -0.04, 0.04], grifter: ['devious', ['hm', '...'], 0, 0.06] },
+    lizard: { any: ['surprised', ['!', '?'], 0.02, 0.04], bot: ['happy', ['ooh'], -0.04, 0.06] },
+    chicken: { any: ['laugh', ['haha', 'bawk?'], -0.06, 0.08], bunker: ['skeptic', ['...', 'hm'], 0, 0.02] },
+  };
+  let near = [];
+  let nearCanvas = null;
+  let nearNext = {};
+  let nearLast = 0;
+  const FLIES = ['butterfly', 'bee'];
+  function nearSpawn(kind, W) {
+    const d = Math.random() < 0.5 ? 1 : -1;
+    const fly = FLIES.includes(kind);
+    near.push({ kind, dir: d, x: d > 0 ? -16 : W + 16, y: fly ? rand(14 * P, 26 * P) : 0, t: 0, v: { frog: 0, crab: rand(16, 24), butterfly: rand(16, 22), bee: rand(32, 44), squirrel: rand(40, 55), rabbit: 0, pigeon: rand(10, 14), lizard: rand(26, 36), chicken: rand(9, 13) }[kind], stop: rand(1, 2), hop: 0, ph: rand(0, 6.28), met: new Set() });
+  }
+  function nearTick(now) {
+    if (!sc) return;
+    const dt = Math.min(0.1, (now - (nearLast || now)) / 1000);
+    nearLast = now;
+    const W = api.laneW();
+    const H = api.lane.clientHeight;
+    if (!W || !H) return;
+    const day = isDay();
+    for (const [kind, every, dayOnly] of NEAR[sc.kind] || []) {
+      if (dayOnly && !day) continue;
+      const key = `${sc.kind}-${kind}`;
+      if (!nearNext[key]) nearNext[key] = now + rand(3000, every * 1000);
+      if (now > nearNext[key]) { nearNext[key] = now + rand(every * 600, every * 1500); if (!near.some((e) => e.kind === kind)) nearSpawn(kind, W); }
+    }
+    for (const e of near) {
+      e.t += dt;
+      if (e.kind === 'frog' || e.kind === 'rabbit') { // (hops: a pause, a leap)
+        e.hop -= dt;
+        if (e.hop <= -0.45) e.hop = rand(0.6, 1.8);
+        const leaping = e.hop < 0;
+        if (leaping) { e.x += e.dir * (e.kind === 'rabbit' ? 60 : 44) * dt; e.y = Math.sin((-e.hop / 0.45) * Math.PI) * 9; } else e.y = 0;
+        e.frame = leaping ? 'b' : 'a';
+      } else if (FLIES.includes(e.kind)) {
+        e.x += e.dir * e.v * dt;
+        e.y += Math.sin(e.t * (e.kind === 'bee' ? 9 : 2.4) + e.ph) * (e.kind === 'bee' ? 26 : 14) * dt;
+        e.frame = Math.floor(e.t * (e.kind === 'bee' ? 14 : 5)) % 2 ? 'b' : 'a';
+      } else { // (scuttling, scampering, strutting: a stop now and then)
+        e.stop -= dt;
+        if (e.stop < 0) { e.x += e.dir * e.v * dt; if (e.stop < -rand(1.2, 3)) e.stop = rand(0.6, 2.2); }
+        e.frame = e.stop < 0 && Math.floor(e.t * 8) % 2 ? 'b' : 'a';
+      }
+      if (e.x < -30 || e.x > W + 30) e.gone = true;
+      // (the bots it passes: each notices it once)
+      for (const w of api.walkers()) {
+        if (e.met.has(w) || w.claimed || w.leaving || !['walk', 'idle'].includes(w.state)) continue;
+        const gap = Math.abs(w.x + 17 - e.x);
+        if (gap > 30) continue;
+        e.met.add(w);
+        const F = NEAR_FEEL[e.kind];
+        const pinch = e.kind === 'crab' && gap < 12 && Math.random() < 0.35;
+        const [m, says, temper, fun] = pinch ? F.pinch : F[w.bot] || F.any;
+        api.say(w, m, pick(says));
+        if (w.feel) { w.feel('temper', temper); w.feel('fun', fun); }
+        if (api.turn) w.look = e.x > w.x + 17 ? 1 : -1;
+        api.botEvent(`critter-${e.kind}`);
+      }
+    }
+    near = near.filter((e) => !e.gone);
+    if (!nearCanvas) {
+      if (!near.length) return;
+      nearCanvas = document.createElement('canvas');
+      nearCanvas.className = 'scene-life scene-near-life';
+      nearCanvas.setAttribute('aria-hidden', 'true');
+      api.lane.appendChild(nearCanvas);
+    }
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    if (nearCanvas.width !== Math.round(W * dpr) || nearCanvas.height !== Math.round(H * dpr)) { nearCanvas.width = Math.round(W * dpr); nearCanvas.height = Math.round(H * dpr); }
+    const g = nearCanvas.getContext('2d');
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, W, H);
+    g.globalAlpha = sc.night ? 0.7 : 1;
+    for (const e of near) {
+      const art = NEAR_ART[e.kind];
+      const rows = (e.frame === 'b' && art.b) || art.a;
+      const h = rows.length;
+      const w = rows[0].length;
+      const x0 = Math.round((e.x - (w * P) / 2) / P) * P;
+      const y0 = Math.round((H - e.y - h * P) / P) * P;
+      rows.forEach((row, ry) => [...row].forEach((c, rx) => {
+        if (c === '.') return;
+        g.fillStyle = art.pal[c];
+        g.fillRect(x0 + (e.dir > 0 ? rx : w - 1 - rx) * P, y0 + ry * P, P, P);
+      }));
+    }
+    g.globalAlpha = 1;
+  }
+  function nearEnd() {
+    near = [];
+    nearNext = {};
+    if (nearCanvas) { nearCanvas.remove(); nearCanvas = null; }
+  }
+
+
+  // THE SKY behind a scene: the time of day's (night navy, a dawn's peach, a day's blue, a dusk's
+  // orange and violet), turned by the weather (greyed by cloud and rain, darker in a storm, paler in
+  // the snow, brown in a dust storm, warmer in a heatwave), fading out up top into the card. Two
+  // layers, so a change crossfades.
+  const SKY_TIME = { night: ['#0b1026', '#1d2547'], dawn: ['#33457e', '#f2a07a'], day: ['#4a8ed0', '#a8d4f0'], dusk: ['#3a2f6b', '#f08a4b'] };
+  const SKY_WX = { // [toward (top, horizon), how far]
+    overcast: [['#6b7480', '#9aa2ae'], 0.55], drizzle: [['#5f6874', '#8a929e'], 0.6], rain: [['#525a66', '#7a828e'], 0.7],
+    storm: [['#2a2f3a', '#454c58'], 0.85], hail: [['#3a404c', '#5a606c'], 0.8], sleet: [['#6a7482', '#9aa4b2'], 0.7],
+    snow: [['#9aa4b2', '#c8d0dc'], 0.6], flurries: [['#9aa4b2', '#c8d0dc'], 0.45], blizzard: [['#b8c0cc', '#dde3ea'], 0.85],
+    thundersnow: [['#4a5260', '#7a8492'], 0.85], duststorm: [['#8a6a40', '#d8b078'], 0.75], heatwave: [['#5a8ac0', '#f0c080'], 0.35],
+    sunshower: [['#6a90c0', '#c8d8e8'], 0.3],
+  };
+  const hexRgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const mix = (a, b, k) => { const A = hexRgb(a); const B = hexRgb(b); return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * k)).join(', ')})`; };
+  function skyNow() {
+    const h = new Date().getHours();
+    const wxk = api.weatherNow ? api.weatherNow() : null;
+    let time = h >= 20 || h < 5 ? 'night' : h < 8 ? 'dawn' : h < 17 ? 'day' : 'dusk';
+    if (wxk === 'sunrise') time = 'dawn';
+    else if (wxk === 'sunset') time = 'dusk';
+    let [top, low] = SKY_TIME[time];
+    const w = SKY_WX[wxk];
+    if (w) { const k = w[1] * (time === 'night' ? 0.4 : 1); top = mix(top, w[0][0], k); low = mix(low, w[0][1], k); }
+    else { top = mix(top, top, 0); low = mix(low, low, 0); }
+    return `linear-gradient(to top, ${low}, ${top} 75%)`;
+  }
+  function skyTick(now) {
+    if (!sc) return;
+    if (!sc.sky) {
+      sc.sky = [0, 1].map(() => { const d = document.createElement('div'); d.className = 'scene-sky'; d.setAttribute('aria-hidden', 'true'); api.lane.insertBefore(d, api.lane.firstChild); return d; });
+      sc.skyOn = 0;
+      sc.skyKey = skyNow();
+      sc.sky[0].style.background = sc.skyKey;
+      requestAnimationFrame(() => requestAnimationFrame(() => { if (sc && sc.sky) sc.sky[0].style.opacity = '1'; }));
+      sc.skyAt = now;
+      return;
+    }
+    if (now - sc.skyAt < 2500) return;
+    sc.skyAt = now;
+    const key = skyNow();
+    if (key === sc.skyKey) return;
+    sc.skyKey = key;
+    const next = 1 - sc.skyOn;
+    sc.sky[next].style.background = key;
+    sc.sky[next].style.opacity = '1';
+    sc.sky[sc.skyOn].style.opacity = '0';
+    sc.skyOn = next;
+  }
+
   function frame(now) {
     if (!sc && now > nextCheck) {
       nextCheck = now + (often() ? rand(4000, 8000) : rand(360000, 720000));
@@ -766,7 +950,7 @@ function createScenes(api) {
     if (api.foggy() || now > sc.until) { end(); nextCheck = now + rand(300000, 600000); return; } // (the fog has its own; or its time's up)
     if (sc.night !== night()) { sc.night = night(); draw(true); }
     if (now - (sc.drawn || 0) > (sc.kind === 'beach' || sc.kind === 'lake' ? 350 : 1000)) { sc.drawn = now; draw(false); }
-    if (sc) { fishTick(now); lifeTick(now); }
+    if (sc) { fishTick(now); lifeTick(now); nearTick(now); skyTick(now); }
   }
   return { frame, clear: () => end(true), start: (k) => start(k), current: () => (sc ? sc.kind : null), fish: () => { if (sc && sc.dock && !fish) fishStart(); return !!fish; } };
 }

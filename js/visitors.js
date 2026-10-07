@@ -2581,6 +2581,7 @@ function createVisitors(api) {
     lane: api.lane, laneW: api.laneW, laneH: () => api.laneH(), botEvent: api.botEvent,
     foggy: () => !!fog || hauntedForest,
     fitWeather: (kinds) => weather.fit(kinds),
+    weatherNow: () => (weather ? weather.current() : null),
     // (GONE FISHING: a bot taken for it, walked out on the dock, and let go)
     walkers: api.walkers, say: (w, m, text) => api.say(w, m, text),
     claim: api.claim, go: api.go, lift: api.lift, turn: api.turn, release: api.release,
