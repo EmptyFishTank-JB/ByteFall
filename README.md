@@ -422,7 +422,8 @@ pleased, thrown back), now and then a golden one (heart eyes), or an old boot (p
 in 10 a RESOURCE off the bottom, kept and yours (BUGS, CACHE, CRYPTO, ROOTKITS, or rarest, a MASTER
 KEY; a toast says which); then it
 casts again or heads back. TAP THE BOBBER and the fish is gone: the bot's upset (hey! my fish!).
-Poke the bot and it shushes you. Achievements: GONE FISHING, THE ONE THAT GOT AWAY. Each is drawn at three depths,
+Poke the bot and it shushes you. Achievements: GONE FISHING, THE ONE THAT GOT AWAY. No numbered BITs are
+pushed in while the pier's out (one would stand in front of the bot fishing off it). Each is drawn at three depths,
 never all in front: a far layer behind everything, the ground behind the bots' feet, and a few
 details in front of them. The weather leans to suit it (a beach's sunsets and storms, a city's rain,
 a snowfield's snow; never snow on the beach), and half the time it brings a spell of its own. Not

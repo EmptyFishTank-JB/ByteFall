@@ -2177,6 +2177,7 @@ function createVisitors(api) {
   // (bit: a numbered BIT to push instead, its number: wanderers.js)
   function makeScenery(dir, ok = () => true, bit = 0) {
     if (bit && standing().some((v) => v.kind === 'bit')) return null; // (one at a time)
+    if (bit && scenes && ['lake', 'beach'].includes(scenes.current())) return null; // (not with the pier out: it would stand in front of a bot fishing off it)
     const kind = bit ? 'bit' : nextScenery();
     if (!kind) return null;
     if (bit) SPRITES.bit = bitSprite();
