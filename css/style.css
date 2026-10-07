@@ -4244,3 +4244,18 @@ html, body { overflow-x: clip; }
 :root.crt-full body { text-shadow: 0 0 1px currentColor; }
 :root.low-fx .crt-fx::before, :root.low-fx .crt-roll { animation: none; }
 @media (prefers-reduced-motion: reduce) { .crt-fx::before, .crt-roll { animation: none !important; } }
+
+/* EXPLOITS (RULES & RECORDS): its top (the title, the slots) stays put under a ===== line, the list
+   scrolls under it, as the STORE's; the equipped ones filled in, lit against the card */
+.records .menu-pane > .panel.panel-hacks { display: flex; flex-direction: column; overflow: hidden; padding-bottom: 0; }
+.hacks-top { flex: none; }
+.hacks-top h2 { margin-top: 0; }
+.hacks-top .slot-info { margin-bottom: 0; }
+.hacks-top::after { content: "================================================================================"; display: block; margin-top: 8px; overflow: hidden; white-space: nowrap; font-size: 14.5px; line-height: 15px; letter-spacing: 2px; color: var(--accent); opacity: 0.7; }
+.hacks-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; margin-right: -8px; padding: 10px 8px 14px 0;
+  scrollbar-width: thin; scrollbar-color: var(--fg-dim) transparent; }
+.hacks-scroll::-webkit-scrollbar { width: 6px; }
+.hacks-scroll::-webkit-scrollbar-thumb { background: var(--fg-dim); border-radius: 3px; }
+.hacks-scroll .store-rule { margin: 12px 0 2px; }
+.hack-item.equipped { background: linear-gradient(rgba(var(--fg-rgb), 0.13), rgba(var(--fg-rgb), 0.05)), var(--panel); box-shadow: inset 0 0 10px rgba(var(--fg-rgb), 0.12), 0 0 6px rgba(var(--fg-rgb), 0.25); }
+.hack-item.equipped.held { box-shadow: inset 0 0 10px rgba(var(--fg-rgb), 0.12), 0 0 10px rgba(var(--accent-rgb), 0.3); }

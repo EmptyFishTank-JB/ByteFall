@@ -5798,6 +5798,7 @@ document.addEventListener('keydown', (e) => {
 // Exploit cards, in unlock order: locked (with the level that unlocks them), unlocked (tap to
 // equip) or equipped (tap to remove). DAILY shows its fixed five instead.
 const hacksPanelEl = document.querySelector('.panel-hacks');
+const hacksListEl = hacksPanelEl.querySelector('.hacks-scroll') || hacksPanelEl;
 // The loadout can only change before a session's first drop, or once it's over
 const loadoutEditable = () => gameOver || Progress.runDrops() === 0;
 const slotInfoEl = document.getElementById('slot-info');
@@ -5815,7 +5816,7 @@ function refreshExploitCards() {
   for (const id of Progress.exploitOrder()) {
     const el = hacksPanelEl.querySelector(`.hack-item[data-hack="${id}"]`);
     if (!el) continue;
-    hacksPanelEl.appendChild(el); // keep the cards in unlock order
+    hacksListEl.appendChild(el); // keep the cards in unlock order (in the list that scrolls)
     const info = Progress.exploitInfo(id);
     const on = daily ? DAILY_EXPLOITS.includes(id) : equipped.includes(id);
     el.classList.toggle('locked', !daily && !info.unlocked);
