@@ -356,7 +356,7 @@ const makeInfections = () => {
       const b = boxOf(r, c);
       if (b) windows.push({ x: b.x - el.offsetLeft, y: b.y - el.offsetTop, w: b.w, h: b.h });
     }
-    paint(cv, buf, [css('--danger', '#ff3b5c'), css('--accent', '#ffd23f')], windows, '#050607', ascii);
+    paint(cv, buf, [css('--danger', '#ff3b5c'), css('--accent', '#ffd23f')], windows, 'rgba(5, 6, 7, 0.55)', ascii); // (see-through: the overflow row and the background show)
   }
   function loop(now) {
     frame = 0;
