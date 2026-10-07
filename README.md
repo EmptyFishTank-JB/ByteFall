@@ -418,7 +418,9 @@ WOODLAND (spring to autumn: the trees and the path's litter in the season's colo
 (winter), DESERT (summer), FARM (autumn: a red barn, pumpkins) and LAKE (spring to autumn: a woodsy lake,
 reeds and lily pads). The LAKE and the BEACH have a pier: now and then a bot walks out on it (up its
 steps), casts, and waits; the bobber bobs, nibbles and goes under, and it reels in a fish (held up,
-pleased, thrown back), now and then a golden one (heart eyes), or an old boot (put out); then it
+pleased, thrown back), now and then a golden one (heart eyes), or an old boot (put out), and 1 time
+in 10 a RESOURCE off the bottom, kept and yours (BUGS, CACHE, CRYPTO, ROOTKITS, or rarest, a MASTER
+KEY; a toast says which); then it
 casts again or heads back. TAP THE BOBBER and the fish is gone: the bot's upset (hey! my fish!).
 Poke the bot and it shushes you. Achievements: GONE FISHING, THE ONE THAT GOT AWAY. Each is drawn at three depths,
 never all in front: a far layer behind everything, the ground behind the bots' feet, and a few

@@ -464,9 +464,25 @@ function createScenes(api) {
     fish.catch = c;
     fish.catchKind = kind;
   }
+  // (a RESOURCE: its own icon, glowing, from the STORE's table; master keys the rarest)
+  const RES_ODDS = [['bugs', 3], ['cache', 3], ['crypto', 2.5], ['rootkits', 1.2], ['master', 0.6]];
+  function pickRes() {
+    let r = Math.random() * RES_ODDS.reduce((a, [, w]) => a + w, 0);
+    for (const [id, w] of RES_ODDS) if ((r -= w) <= 0) return id;
+    return 'bugs';
+  }
+  function showRes(id) {
+    const c = document.createElement('div');
+    c.className = `fish-catch fish-res res-${id}`;
+    c.setAttribute('aria-hidden', 'true');
+    c.innerHTML = typeof RES_INFO !== 'undefined' && RES_INFO[id] ? RES_INFO[id].svg : '';
+    api.lane.appendChild(c);
+    fish.catch = c;
+    fish.catchKind = 'res';
+  }
   function placeCatch(x, y) {
     if (!fish.catch) return;
-    const a = FISH_ART[fish.catchKind];
+    const a = fish.catchKind === 'res' ? { w: 6, h: 6 } : FISH_ART[fish.catchKind];
     fish.catch.style.left = `${(x - (a.w * U) / 2).toFixed(0)}px`;
     fish.catch.style.bottom = `${(y - a.h * U).toFixed(0)}px`;
   }
@@ -530,18 +546,35 @@ function createScenes(api) {
       sag = -1;
       if (k >= 1) {
         const r = Math.random();
-        const kind = r < 0.12 ? 'boot' : r < 0.2 ? 'gold' : 'fish';
-        showCatch(kind);
+        // (1 in 10: a RESOURCE off the bottom, kept; master keys the rarest of them)
+        let forced = false; // (testing: every catch a resource)
+        try { forced = localStorage.getItem('bytefall-dev-fishres') === 'on'; } catch (e) {}
+        const kind = (r < 0.1 || forced) && typeof Progress !== 'undefined' ? 'res' : r < 0.21 ? 'boot' : r < 0.28 ? 'gold' : 'fish';
+        if (kind === 'res') {
+          const id = pickRes();
+          showRes(id);
+          Progress.addRes(id, 1);
+          if (typeof showToast === 'function') showToast(`GONE FISHING // +1 ${typeof RES_INFO !== 'undefined' && RES_INFO[id] ? RES_INFO[id].name : id.toUpperCase()}`);
+          api.say(w, id === 'master' ? 'love' : 'happy', id === 'master' ? pick(['!!!', 'WOW', '<3']) : pick(['ooh!', 'loot!', '!!']));
+          api.botEvent(`fish-res-${id}`);
+        } else showCatch(kind);
         fish.phase = 'show';
         fish.at = now;
         if (kind === 'boot') api.say(w, 'annoyed', pick(['...', 'a boot?', 'ugh']));
-        else { api.say(w, kind === 'gold' ? 'love' : 'happy', kind === 'gold' ? pick(['WOW', '<3', 'GOLD!']) : pick(['yay!', '!!', 'got one!'])); api.botEvent(kind === 'gold' ? 'fish-gold' : 'fish-caught'); }
+        else if (kind !== 'res') { api.say(w, kind === 'gold' ? 'love' : 'happy', kind === 'gold' ? pick(['WOW', '<3', 'GOLD!']) : pick(['yay!', '!!', 'got one!'])); api.botEvent(kind === 'gold' ? 'fish-gold' : 'fish-caught'); }
       }
     } else if (fish.phase === 'show') { // (held up on the line a moment)
       bx = t.x;
       by = t.y - 6 * U;
       sag = 0;
       placeCatch(bx, by);
+      if (age > 2600 && fish.catchKind === 'res') { // (kept: it's pocketed, and the line goes out again)
+        if (fish.catch) fish.catch.remove();
+        fish.catch = null;
+        api.say(w, 'idle', '');
+        if (fish.casts < 3 && Math.random() < 0.6) cast(); else fishEnd();
+        return;
+      }
       if (age > 2600) { fish.phase = 'toss'; fish.at = now; fish.from = { x: bx, y: by }; }
     } else if (fish.phase === 'toss') { // (thrown back: an arc into the water)
       const k = Math.min(1, age / 700);

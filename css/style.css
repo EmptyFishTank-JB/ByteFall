@@ -3801,3 +3801,7 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
 .fish-catch.wiggle svg { animation: fish-wiggle 0.25s steps(2) infinite; transform-origin: 50% 0; }
 @keyframes fish-wiggle { 50% { transform: rotate(14deg); } }
 .walker { transition: translate 0.35s ease-out; }
+.fish-catch.fish-res { width: calc(34px / 16 * 6); height: calc(34px / 16 * 6); }
+.fish-catch.fish-res svg { width: 100%; height: 100%; filter: drop-shadow(0 0 3px currentColor); animation: fish-res-glint 0.8s ease-in-out infinite alternate; }
+.fish-res.res-bugs { color: var(--res-bugs); } .fish-res.res-cache { color: var(--res-cache); } .fish-res.res-crypto { color: var(--res-crypto); } .fish-res.res-rootkits { color: var(--res-rootkits); } .fish-res.res-master { color: var(--res-master); }
+@keyframes fish-res-glint { to { transform: translateY(-2px); filter: drop-shadow(0 0 6px currentColor); } }
