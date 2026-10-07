@@ -16,6 +16,8 @@ together.
 | **ROOTKITS** | `#`, red `#ff3b4e` | uncommon | a bit decrypted **across and down at once**; **layers broken** down to their bit; **BYTES** (HARD) | 1 per 2 cross decrypts; 1 per 20 layers broken; 1 per BYTE |
 | **MASTER KEYS** | the heavier key, its head carrying the currency sign's two lines, deep gold `#e8b10e` with a glow | rare | **every 5th level**; the **day's first daily game**; the **day's first VS win**; every **7th day in a row** (LOGIN STREAK, with the DAILY DROP) | 1 each; 3 for the streak |
 
+GONE FISHING (the LAKE and BEACH scenes, `js/scenes.js`): 1 catch in 10 off the pier is a resource, kept: weighted BUGS 3, CACHE 3, CRYPTO 2.5, ROOTKITS 1.2, MASTER KEYS 0.6 (about 1 in 17 of those, so roughly 1 master key per 170 catches); 1 each.
+
 The DAILY DROP (claimed in the STORE once a day) also gives 3 each of BUGS, CACHE and CRYPTO, with its 25 KEYS and free exploit. The **LOGIN STREAK** counts the days in a row the game is opened (by the player's own date; a day missed starts it over): every 7th day in a row, the DAILY DROP also holds **3 MASTER KEYS**.
 
 Each resource holds at most **999** (KEYS have no cap); what's earned past that is lost. A bit decrypted both ways counts as a cross decrypt only, not also as BUGS and CACHE. Bits cleared
