@@ -138,7 +138,8 @@ CRYPTOJACKER's sign are solid, covering whatever's under them, and the pop-ups g
 BLACK BOX INFECTION makes every box opened come up one (ANY or one kind), and INFECTION LOOK forces look
 1 to 4 (localStorage bytefall-dev-infection / bytefall-dev-infection-look). Its INFECTION TESTER (index.html?inftest,
 js/inf-test.js) opens the game on a board of bits with a button for each infection, the look, DROP (counts
-down without dropping), FILL GRID and CLEAR. While any's on, a little bot
+down without dropping), FILL GRID and CLEAR; nothing
+played there is saved (its writes kept in memory), and BANNERS switches the UNLOCKED / ACHIEVEMENT pop-ups off. While any's on, a little bot
 at its laptop types away at a virus in CURRENT's corner (xN past one; its name(s) on hover). The
 scareware alerts' ASCII art is pictures made of flickering binary (now and then hex): a skull and
 crossbones, a cluster of spiky viruses, a padlock, a bug, a warning sign, an angry CPU. RANSOMWARE has a 5th look (its screens a tiny picture in

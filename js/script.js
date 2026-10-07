@@ -5161,6 +5161,7 @@ const toastEl = document.getElementById('toast');
 const toastQueue = [];
 let toastShowing = false;
 function showToast(text) {
+  if (window.infTestQuiet && window.infTestQuiet()) return; // (the INFECTION TESTER, its banners switched off)
   toastQueue.push(text);
   if (!toastShowing) nextToast();
 }
