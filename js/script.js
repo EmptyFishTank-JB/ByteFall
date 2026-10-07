@@ -86,13 +86,14 @@ let malwareLeft = 0; // ...MALWARE's drops with the board's bits corrupted
 let infSeq = 0; // (each infection's turn: the later one shows over the earlier where they meet)
 let malwareAt = 0; // (MALWARE's turn; a RANSOMWARE lock keeps its own, cell.lockAt)
 let scareLeft = 0;
-// What the ADWARE, RANSOMWARE, CRYPTOJACKER and SCAREWARE demand: kind -> { want, paid }. Each tap
-// on one takes a few KEYS; paid in full, it leaves the terminal. Run out its clock instead, and
-// nothing more's taken (and not a key paid: WE DON'T NEGOTIATE)
+// What the ADWARE, CRYPTOJACKER and SCAREWARE demand: kind -> { want, paid }, never shown. Each tap on
+// the ad, the sign or a pop-up takes a few KEYS, toward that one's demand only; paid in full, it
+// leaves the terminal. Run out its clock instead, and nothing more's taken (and not a key paid: WE
+// DON'T NEGOTIATE)
 let demands = {};
-const PAYABLE = ['adware', 'ransomware', 'cryptojacker', 'scareware'];
-const DEMAND = [4, 12]; // (KEYS asked, each strike: somewhere in this range)
-const TAKE = [1, 3]; // (KEYS a tap takes) // (SCAREWARE's drops left: its pop-ups keep coming on their own clock till then)
+const PAYABLE = ['adware', 'cryptojacker', 'scareware'];
+const DEMAND = [10, 20]; // (KEYS asked, each strike: somewhere in this range)
+const TAKE = [1, 3]; // (KEYS a tap takes: a few, at random) // (SCAREWARE's drops left: its pop-ups keep coming on their own clock till then)
 let jackLeft = 0; // ...and the CRYPTOJACKER's drops left stealing (RANSOMWARE's locks are on the bits: cell.locked)
 let marketOpen = false; // THE BLACK MARKET sells once the game's first encryption layer rises (ZEN: after as many drops) // PAUSE (any mode): the board covered, the CPU's clock stopped, the drop buttons off
 let keyloggerDrops = 0; // drops left with the keylogger's preview showing
@@ -441,9 +442,7 @@ let timeUp = false;
 const boardEl = document.getElementById('board');
 const boardWrapEl = document.querySelector('.board-wrap');
 Infections.init(boardEl, boardWrapEl, { onPay: (kind) => payInfection(kind) }); // (the INFECTIONS' displays, laid over the board)
-boardEl.addEventListener('click', (e) => { // (a RANSOMWARE-locked bit, tapped: KEYS toward the ransom)
-  if (e.target.closest('.cell.ransom')) payInfection('ransomware');
-});
+
 { // (the dev page's INFECTION LOOK switch: every infection shows that look of its four)
   const look = Number(storage.get('bytefall-dev-infection-look'));
   if (look >= 1 && look <= 6) Infections.force({ ad: look - 1, jack: look - 1, spy: look - 1, malware: look - 1, ransom: look - 1, scare: look - 1 });
@@ -5026,11 +5025,8 @@ const RANSOM_DROPS = 5; // (RANSOMWARE's locks and the CRYPTOJACKER: five drops)
 const spyHides = (n) => spywareLeft > n; // (the bit n places down the queue: 0 is CURRENT)
 // (after each drop: RANSOMWARE's locks and MALWARE's corruption a drop nearer gone; a lock lifting,
 // the bit falls into any gap under it and the board settles)
-// Its demand shown on it
-function showDue(kind) {
-  const dm = demands[kind];
-  Infections.due(kind, dm ? `PAY ${dm.want - dm.paid} KEYS` : null);
-}
+// (the demand's never shown: how much it wants, nor what it's taken)
+function showDue(kind) { Infections.due(kind, null); }
 // Is it still on?
 function infectionOn(kind) {
   if (kind === 'adware') return !!adware;
@@ -5053,7 +5049,7 @@ function settleDemands() {
 let paying = false;
 async function payInfection(kind) {
   const dm = demands[kind];
-  if (!dm || gameOver || vsPaused || paying || (kind === 'ransomware' && busy)) return;
+  if (!dm || gameOver || vsPaused || paying) return;
   const ask = Math.min(dm.want - dm.paid, TAKE[0] + Math.floor(Math.random() * (TAKE[1] - TAKE[0] + 1)));
   const got = Progress.extort(ask);
   const name = ANTI[kind].name;
@@ -5065,7 +5061,7 @@ async function payInfection(kind) {
   dm.paid += got;
   SFX.play('burst');
   if (dm.paid < dm.want) {
-    setMessage(`${name} // -${got} KEY${got === 1 ? '' : 'S'}: ${dm.want - dm.paid} MORE AND IT LEAVES`, 'alarm');
+    setMessage(`${name} // KEYS STOLEN`, 'alarm');
     showDue(kind);
     announce(Progress.check());
     return;
@@ -5078,14 +5074,7 @@ async function payInfection(kind) {
   if (kind === 'adware') adware = null;
   else if (kind === 'cryptojacker') jackLeft = 0;
   else if (kind === 'scareware') { scareLeft = 0; Infections.scareClear(); }
-  else if (kind === 'ransomware') {
-    columns.forEach((col) => col.forEach((c) => { if (c) { delete c.locked; delete c.lockAt; } }));
-    busy = true;
-    await collapse(); // (the freed bits settle, and may decrypt)
-    await resolveChains();
-    busy = false;
-  }
-  setMessage(`${name} // PAID ${dm.want} KEYS: IT LEAVES THE TERMINAL`, 'alarm');
+  setMessage(`${name} // PAID OFF: IT LEAVES THE TERMINAL`, 'alarm');
   burstMessage('warning');
   SFX.play('egg');
   render();
@@ -5172,9 +5161,7 @@ function runAnti(id) {
     showDue(id);
   }
   render();
-  setMessage(id === 'ransomware' && demands.ransomware // (no tag on the bits: the ransom's in the message)
-    ? `INFECTED // RANSOMWARE: TAP A LOCKED BIT TO PAY ${demands.ransomware.want - demands.ransomware.paid} KEYS`
-    : `INFECTED // ${ANTI[id].name}: ${ANTI[id].does}`, 'alarm');
+  setMessage(`INFECTED // ${ANTI[id].name}: ${ANTI[id].does}`, 'alarm');
   burstMessage('warning');
   SFX.play('denied');
   updateHud();

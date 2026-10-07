@@ -12,8 +12,10 @@
 //   SCAREWARE     a fake system alert over the board, a scan bar crawling and a skull (ASCII), closed
 //                 only by its tiny X
 // Each has four looks, one picked at random each time it strikes (STYLES)
-const Infections = (() => {
+// (made by a factory: the game has the one, the dev page's INFECTION WALL one a tile)
+const makeInfections = () => {
   const root = document.documentElement;
+  let scope = document; // (where its ticking displays are looked for: a wall tile keeps to its own)
   const css = (name, fallback) => getComputedStyle(root).getPropertyValue(name).trim() || fallback;
   const reduced = () => root.classList.contains('low-fx') || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
 
@@ -104,7 +106,7 @@ const Infections = (() => {
   // Each infection's four looks: one picked at random each time it strikes
   const style = { ad: 0, jack: 0, spy: 0, malware: 0, ransom: 0, scare: 0 };
   let forced = null; // (the dev page or a test: { kind: look } to show that look next)
-  const LOOKS = { ad: 4, jack: 4, spy: 4, malware: 6, ransom: 5, scare: 4 }; // (how many looks each has)
+  const LOOKS = { ad: 6, jack: 4, spy: 4, malware: 6, ransom: 5, scare: 4 }; // (how many looks each has)
   const pick = (kind) => {
     const f = forced && forced[kind] !== undefined ? forced[kind] : -1;
     style[kind] = f >= 0 && f < LOOKS[kind] ? f : Math.floor(Math.random() * LOOKS[kind]);
@@ -114,6 +116,7 @@ const Infections = (() => {
   const ARROW_DOWN = ['..x..', '..x..', '..x..', 'xxxxx', '.xxx.', '..x..'];
   const SKULL_LED = ['.xxxxxxx.', 'xxxxxxxxx', 'xx..x..xx', 'xx..x..xx', 'xxxx.xxxx', '.xxx.xxx.', '..x.x.x..', '..xxxxx..'];
   const PICK = ['xxxx.', '.xx..', '.x.x.', 'x....', 'x....'];
+  const TROPHY = ['x.xxx.x', 'x.xxx.x', '.xxxxx.', '..xxx..', '...x...', '..xxx..', '.xxxxx.'];
   const ROCKET = ['..xx.....', '.xxxxx...', 'xxxxxxxo.', '.xxxxx...', '..xx.....'];
   const HAND = ['x.x.x', 'x.x.x', 'xxxxx', 'xxxxx', '.xxx.'];
   const SYMS = [['.ooo.', 'o...o', '..oo.', '..o..', '.....', '..o..'], ['ooooo', '...o.', '..o..', '.o...', '.o...', '.o...'], COIN, ['..x..', '.xxx.', 'xx$xx', '.xxx.', '..x..']];
@@ -161,7 +164,7 @@ const Infections = (() => {
     const W = Math.max(11, Math.round(cv.clientWidth / 3.2));
     const H = Math.max(30, Math.round(cv.clientHeight / 3.2));
     const buf = buffer(W, H);
-    const t = (now - t0) / 1000;
+    const t = Math.max(0, now - t0) / 1000;
     // (the bulbs round its edge, chasing)
     const per = 2 * (W + H) - 4;
     for (let i = 0; i < per; i++) {
@@ -181,14 +184,54 @@ const Infections = (() => {
       paint(cv, buf, [css('--accent', '#ffd23f'), css('--danger', '#ff3b5c')]);
       return;
     }
-    if (style.ad === 2) { // (a slot machine: three reels spinning down the column, JACKPOT)
-      const spinning = (t % 4) < 2.6;
+    if (style.ad === 2) { // (a slot machine: three reels down the column, each rolling sideways, stopping one by one on 7)
+      const cyc = t % 4;
+      const step = Math.max(9, Math.floor((H - 46) / 3)); // (the reels kept up top: WIN flashes under them, clear of the AD tag)
+      const SEVEN = 1; // (SYMS[1] is the 7)
       for (let r = 0; r < 3; r++) {
-        const y0 = 3 + r * Math.floor((H - 16) / 3);
-        const sym = spinning ? SYMS[(Math.floor(t * 12) + r * 3) % SYMS.length] : SYMS[1];
-        buf.sprite(sym, Math.round((W - 5) / 2), y0 + (spinning ? Math.floor(t * 24) % 3 : 0));
+        const y0 = 3 + r * step;
+        const stopAt = 1.6 + r * 0.45; // (the reels stop in turn)
+        const dir = r % 2 ? -1 : 1; // (side to side: the middle reel rolls the other way)
+        const run = Math.min(cyc, stopAt);
+        // (the strip: the symbols 6 dots apart, rolling past the reel's window; it lands with the 7 centred)
+        const strip = SYMS.length * 6;
+        // (rolling, slowing near the stop; stopped, the strip sits with the 7 in the middle)
+        const travel = cyc < stopAt ? Math.floor(run * 30 - Math.max(0, run - stopAt + 0.5) * 18) : 0;
+        const base = Math.round((W - 5) / 2) - SEVEN * 6;
+        for (let k = 0; k < SYMS.length; k++) {
+          const off = (((k * 6 + dir * travel) % strip) + strip) % strip;
+          for (const x of [base + off, base + off - strip, base + off + strip]) if (x > -5 && x < W) buf.sprite(SYMS[k], x, y0);
+        }
+        for (let y = y0 - 1; y <= y0 + 5; y++) { buf.set(0, y, 2); buf.set(W - 1, y, 2); } // (the reel's window, edged)
       }
-      if (!spinning && Math.floor(t * 6) % 2) buf.textV('WIN', Math.round((W - 5) / 2), H - 30 > 0 ? H - 30 : 3, 2);
+      if (cyc > 1.6 + 2 * 0.45 + 0.2 && Math.floor(t * 6) % 2) buf.textV('WIN', Math.round((W - 5) / 2), 3 + 3 * step + 2, 2);
+      paint(cv, buf, [css('--accent', '#ffd23f'), css('--danger', '#ff3b5c')]);
+      return;
+    }
+    if (style.ad === 4) { // (DOWNLOAD NOW: GET up top, an arrow dropping into a bar that fills, then FREE flashes)
+      const k = (t % 3.2) / 2.6;
+      buf.textV('GET', Math.round((W - 5) / 2), 3, 2);
+      const barTop = 33;
+      const barBot = H - 9;
+      buf.sprite(ARROW_DOWN, Math.round((W - 5) / 2), barTop - 7 + (Math.floor(t * 8) % 3));
+      for (let y = barTop; y <= barBot; y++) { buf.set(cx + 2, y, 2); buf.set(cx + 8, y, 2); }
+      for (let x = cx + 2; x <= cx + 8; x++) { buf.set(x, barTop, 2); buf.set(x, barBot, 2); }
+      const fill = Math.floor(Math.min(1, k) * (barBot - barTop - 2));
+      for (let y = barBot - 1; y > barBot - 1 - fill; y--) for (let x = cx + 4; x <= cx + 6; x++) buf.set(x, y, 1);
+      if (k >= 1 && Math.floor(t * 6) % 2) buf.textV('99%', Math.round((W - 5) / 2), barTop + 3, 1); // (stuck at 99%)
+      paint(cv, buf, [css('--accent', '#ffd23f'), css('--danger', '#ff3b5c')]);
+      return;
+    }
+    if (style.ad === 5) { // (YOU'RE THE 1,000,000TH VISITOR: a trophy flashing, the counter's digits rolling up to it)
+      const lit = Math.floor(t * 4) % 2;
+      buf.sprite(lit ? TROPHY.map((r) => r.replace(/x/g, 'o')) : TROPHY, Math.round((W - 7) / 2), 2);
+      const n = '1000000';
+      const settle = (t % 5) / 2.5; // (the digits stop one by one, from the top)
+      [...n].forEach((d, i) => {
+        const done = settle * n.length > i;
+        const ch = done ? d : String(Math.floor(t * 20 + i * 3) % 10);
+        buf.text(ch, Math.round((W - 5) / 2), 12 + i * 9, done && lit ? 2 : 1);
+      });
       paint(cv, buf, [css('--accent', '#ffd23f'), css('--danger', '#ff3b5c')]);
       return;
     }
@@ -229,7 +272,7 @@ const Infections = (() => {
     const W = Math.max(40, Math.round(cv.clientWidth / 3));
     const H = Math.max(11, Math.round(cv.clientHeight / 3));
     const buf = buffer(W, H);
-    const t = (now - t0) / 1000;
+    const t = Math.max(0, now - t0) / 1000;
     const mid = Math.round((H - 9) / 2);
     if (stolen && now - stolen.at < 2400) { // (it got some: a gloat)
       const k = (now - stolen.at) / 2400;
@@ -325,13 +368,13 @@ const Infections = (() => {
   let ticker = 0;
   function tick() {
     let any = false;
-    document.querySelectorAll('.inf-glitch').forEach((g) => {
+    scope.querySelectorAll('.inf-glitch').forEach((g) => {
       any = true;
       if (g.dataset.r !== undefined && style.malware >= 4) binFlicker(g); // (the pictures: their digits flicker, the shape holds)
       else g.textContent = corrupt(g.dataset.n ? +g.dataset.n : 3);
     });
-    document.querySelectorAll('.inf-mini').forEach((m) => { any = true; binFlicker(m); });
-    document.querySelectorAll('.inf-eyes').forEach((e) => { any = true; const f = SPY[style.spy]; e.textContent = f[Math.floor(performance.now() / 600) % f.length]; });
+    scope.querySelectorAll('.inf-mini').forEach((m) => { any = true; binFlicker(m); });
+    scope.querySelectorAll('.inf-eyes').forEach((e) => { any = true; const f = SPY[style.spy]; e.textContent = f[Math.floor(performance.now() / 600) % f.length]; });
     for (const w of wins()) { const scan = w.querySelector('.inf-scan'); if (scan) { any = true; scareTick(w, scan); } }
     if (!any) { clearInterval(ticker); ticker = 0; }
   }
@@ -664,10 +707,10 @@ const Infections = (() => {
         }
       }
     }
-    if (document.querySelector('.inf-glitch, .inf-eyes')) tickOn();
+    if (scope.querySelector('.inf-glitch, .inf-eyes, .inf-mini')) tickOn();
     spin();
   }
-  function init(boardEl, wrapEl, h = {}) { board = boardEl; wrap = wrapEl; hooks = h; }
+  function init(boardEl, wrapEl, h = {}) { board = boardEl; wrap = wrapEl; hooks = h; if (h.scope) scope = h.scope; }
   // An infection's demand on it (null: none)
   function due(kind, text) {
     dueText[kind] = text || '';
@@ -687,7 +730,8 @@ const Infections = (() => {
     if (els.scare) { els.scare.innerHTML = ''; els.scare.hidden = true; }
     for (const k of Object.keys(dueText)) due(k, null);
   }
-  return { init, place, steal, scare, scareEnd, scareClear, due, closeScare, scareUp, scareCount: () => wins().length, ransomHtml, clear, pick, force: (f) => { forced = f; }, mosaicOn: () => style.malware === 4, glitch: (n = 3, r, c, empty = false) => (style.malware >= 4 && r !== undefined
+  return { looks: () => ({ ...LOOKS }), init, place, steal, scare, scareEnd, scareClear, due, closeScare, scareUp, scareCount: () => wins().length, ransomHtml, clear, pick, force: (f) => { forced = f; }, mosaicOn: () => style.malware === 4, glitch: (n = 3, r, c, empty = false) => (style.malware >= 4 && r !== undefined
     ? `<span class="inf-glitch ${style.malware === 4 ? 'mosaic' : 'mini'}${empty ? ' empty' : ''}" data-n="${n}" data-r="${r}" data-c="${c}">${corrupt(n, r, c)}</span>`
     : `<span class="inf-glitch" data-n="${n}">${corrupt(n)}</span>`), eyes: () => '<span class="inf-eyes">(o_o)</span>' };
-})();
+};
+const Infections = makeInfections();

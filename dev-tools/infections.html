@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" class="sandbox">
+<head>
+<script src="../js/fonts.js?v=473"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#020403">
+<title>Infection Wall // BYTEFALL</title>
+<link rel="stylesheet" href="../css/style.css?v=473">
+<!-- INFECTION WALL: every INFECTION in every look, all playing at once, a row an infection. Each
+     tile is its own copy of the game's infections.js on a little board of bits, so what plays here
+     is what plays in the game. -->
+<style>
+  html.sandbox, html.sandbox body { min-height: 100%; }
+  html.sandbox body {
+    display: block; margin: 0; padding: 20px 16px 60px; overflow-x: hidden;
+    background: radial-gradient(ellipse at top, #0d1b16 0%, #020403 70%) fixed; background-color: #020403;
+    color: var(--fg); font-family: var(--game-font, 'Courier New', Courier, monospace);
+  }
+  .wall { max-width: 1500px; margin: 0 auto; }
+  .wall-back { color: var(--fg-dim); text-decoration: none; font-size: 12px; letter-spacing: 2px; }
+  .wall h1 { font-size: 20px; letter-spacing: 3px; margin: 14px 0 4px; color: var(--accent); }
+  .wall .lede { font-size: 12px; color: var(--fg-dim); margin: 0 0 14px; line-height: 1.5; max-width: 760px; }
+  .wall-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+  .wall-bar button { font-family: inherit; font-size: 10px; letter-spacing: 1px; padding: 5px 9px; cursor: pointer; background: transparent; color: var(--fg); border: 1px solid var(--fg-dim); border-radius: 4px; }
+  .wall-bar button:hover { background: rgba(var(--fg-rgb), 0.12); }
+  .inf-row { margin-bottom: 22px; }
+  .inf-row h2 { font-size: 13px; letter-spacing: 3px; color: var(--danger); margin: 0 0 2px; font-weight: normal; }
+  .inf-row p { font-size: 10px; color: var(--fg-dim); margin: 0 0 8px; letter-spacing: 1px; }
+  .tiles { display: flex; flex-wrap: wrap; gap: 12px; }
+  .tile { border: 1px solid var(--grid-line); border-radius: 8px; padding: 8px; background: rgba(0, 0, 0, 0.35); }
+  .tile h3 { font-size: 10px; letter-spacing: 2px; color: var(--accent); margin: 0 0 6px; font-weight: normal; }
+  .mini-cur { display: flex; align-items: center; justify-content: center; gap: 8px; height: 30px; margin-bottom: 6px; border: 1px solid var(--grid-line); border-radius: 5px; font-size: 10px; color: var(--fg-dim); letter-spacing: 1px; }
+  .mini-cur b { color: var(--fg); font-size: 14px; }
+  .mini-wrap { position: relative; }
+  .mini-board { display: grid; grid-template-columns: repeat(var(--cols), 34px); gap: 4px; }
+  .mini-board .cell { width: 34px; font-size: 13px; }
+  .tile .inf-win { overflow: hidden; } /* (the boards here are small: the art keeps inside its window) */
+  .mini-board .overflow-line { grid-column: 1 / -1; height: 2px; overflow: hidden; font-size: 6px; line-height: 2px; color: var(--danger); opacity: 0.6; }
+</style>
+</head>
+<body>
+  <div class="wall">
+    <a class="wall-back" href="audio.html">&larr; DEV PAGE</a>
+    <h1>INFECTION WALL</h1>
+    <p class="lede">Every INFECTION in every look, all playing at once: a row an infection, a tile a look (the number the dev page's INFECTION LOOK and the tester use). Each tile runs the game's own infections.js on a little board of bits. The CRYPTOJACKER steals now and then; the pop-ups come back every few seconds.</p>
+    <div class="wall-bar"><button type="button" id="wall-restart">RESTART ALL</button><button type="button" id="wall-shuffle">NEW BITS</button></div>
+    <div id="rows"></div>
+  </div>
+<script src="../js/led-banner.js?v=473"></script>
+<script src="../js/infections.js?v=473"></script>
+<script>
+(() => {
+  const COLS = 5;
+  const ROWS = 6; // (the playable rows)
+  const MAX = 7; // (and the overflow row)
+  const KINDS = [
+    ['adware', 'ad', 'ADWARE', 'Blocks a column with an ad'],
+    ['spyware', 'spy', 'SPYWARE', 'Hides the next bits: eyes in CURRENT'],
+    ['ransomware', 'ransom', 'RANSOMWARE', 'Locks bits where they are'],
+    ['malware', 'malware', 'MALWARE', 'Scrambles what the board shows'],
+    ['cryptojacker', 'jack', 'CRYPTOJACKER', 'Steals resources: a sign through the overflow row'],
+    ['scareware', 'scare', 'SCAREWARE', 'Fake alerts over the board'],
+  ];
+  const NAMES = {
+    ad: ['FACE + CLAIMS', 'SALE', 'SLOT MACHINE', 'BOUNCING CPU', 'DOWNLOAD', '1,000,000TH VISITOR'],
+    spy: ['EYES', 'REC', 'BINOCULARS', 'KEYHOLE'],
+    ransom: ['ANGRY CPU', 'SKULL', 'PADLOCK', 'LAUGHING CPU', 'BINARY ART'],
+    malware: ['JUNK', 'BINARY', 'ERRORS', 'MELT', 'MOSAIC', 'TINY PICTURES'],
+    jack: ['SNEAK', 'PICKPOCKET', 'MINING RIG', 'GETAWAY'],
+    scare: ['SKULL SCAN', 'CRASH', 'DELETING FILES', 'PRIZE WHEEL'],
+  };
+  let seed = 1;
+  const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  // A board of bits: [col] -> heights and values
+  let heights = [];
+  const newBits = () => { heights = Array.from({ length: COLS }, () => 2 + Math.floor(rnd() * 4)); };
+  newBits();
+  const tiles = [];
+  function buildRows() {
+    const rowsEl = document.getElementById('rows');
+    rowsEl.innerHTML = '';
+    for (const [id, key, name, does] of KINDS) {
+      const row = document.createElement('section');
+      row.className = 'inf-row';
+      const n = makeInfections().looks()[key];
+      row.innerHTML = `<h2>${name}</h2><p>${does} // ${n} LOOKS</p><div class="tiles"></div>`;
+      rowsEl.appendChild(row);
+      for (let k = 0; k < n; k++) {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.innerHTML = `<h3>LOOK ${k + 1} // ${(NAMES[key] || [])[k] || ''}</h3>`
+          + (id === 'spyware' ? '<div class="mini-cur">CURRENT <b class="cur"></b></div>' : '')
+          + `<div class="mini-wrap"><div class="mini-board" style="--cols:${COLS}"></div></div>`;
+        row.querySelector('.tiles').appendChild(tile);
+        tiles.push({ id, key, k, tile, inf: null, timers: [] });
+      }
+    }
+  }
+  function cellsHtml(t) {
+    const { id, inf } = t;
+    let html = '';
+    for (let r = MAX - 1; r >= 0; r--) {
+      for (let c = 0; c < COLS; c++) {
+        const has = r < heights[c];
+        const val = 1 + ((r * 3 + c * 2) % 7);
+        let cls = 'cell';
+        let inner = '';
+        if (r >= ROWS) cls += ' overflow';
+        if (has) {
+          if (id === 'ransomware' && (r + c) % 3 === 0 && r < 3) { cls += ' disc ransom'; inner = inf.ransomHtml(val, 5, t.k); } else if (id === 'malware') { cls += ' disc corrupt'; inner = inf.glitch(3, r, c); } else { cls += ' disc'; inner = `[${val}]`; }
+        } else if (id === 'malware' && inf.mosaicOn()) { cls += ' mosaic-empty'; inner = inf.glitch(3, r, c, true); }
+        html += `<div class="${cls}" data-pos="${r},${c}">${inner}</div>`;
+      }
+      if (r === ROWS) html += `<div class="overflow-line">${'='.repeat(60)}</div>`;
+    }
+    return html;
+  }
+  function start(t) {
+    for (const x of t.timers) clearInterval(x);
+    t.timers = [];
+    if (t.inf) t.inf.clear();
+    const wrap = t.tile.querySelector('.mini-wrap');
+    wrap.querySelectorAll('.inf').forEach((e) => e.remove());
+    const board = t.tile.querySelector('.mini-board');
+    const inf = makeInfections();
+    t.inf = inf;
+    inf.init(board, wrap, { scope: t.tile });
+    const f = {};
+    f[t.key] = t.k;
+    inf.force(f);
+    const base = { adCol: null, jack: false, rows: ROWS, maxRows: MAX, cols: COLS };
+    if (['spy', 'malware', 'ransom'].includes(t.key)) inf.pick(t.key);
+    inf.place(base); // (its rows and columns, before the bits are drawn)
+    board.innerHTML = cellsHtml(t);
+    if (t.id === 'spyware') t.tile.querySelector('.cur').innerHTML = inf.eyes();
+    if (t.id === 'adware') inf.place({ ...base, adCol: 2 });
+    else if (t.id === 'cryptojacker') {
+      inf.place({ ...base, jack: true });
+      t.timers.push(setInterval(() => inf.steal(1 + Math.floor(Math.random() * 3)), 6000 + t.k * 700));
+    } else if (t.id === 'scareware') {
+      const pop = () => {
+        inf.scareClear();
+        inf.scare({ canPop: () => false });
+        const trim = () => { while (inf.scareCount() > 1) inf.closeScare(); inf.place(base); };
+        trim();
+        setTimeout(trim, 800); // (a burst's others come a moment later: one's enough here)
+      };
+      pop();
+      t.timers.push(setInterval(pop, 7000));
+    } else inf.place(base);
+  }
+  buildRows();
+  tiles.forEach(start);
+  document.getElementById('wall-restart').addEventListener('click', () => tiles.forEach(start));
+  document.getElementById('wall-shuffle').addEventListener('click', () => { seed = Math.floor(Math.random() * 1e9) + 1; newBits(); tiles.forEach(start); });
+})();
+</script>
+</body>
+</html>

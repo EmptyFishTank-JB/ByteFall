@@ -130,10 +130,14 @@ before the resources. A box is the cheaper bet; buying the exploit you want is t
 ## Infections
 
 A BLACK BOX's bad luck: it comes up INFECTED. Mild and short; none can end a game by itself.
-ADWARE, RANSOMWARE, the CRYPTOJACKER and SCAREWARE each DEMAND KEYS: 4 to 12 a strike (added on if it
-strikes again), shown on it (PAY n KEYS; RANSOMWARE's in the message). Every tap on the ad, the sign, a
-pop-up (anywhere but its X) or a locked bit takes 1 to 3 KEYS toward it; paid in full, it leaves the
-terminal at once (the locks lift, the pop-ups all close). Or run out its clock: nothing more's taken.
+ADWARE, the CRYPTOJACKER and SCAREWARE each DEMAND KEYS: 10 to 20 a strike (added on if it strikes
+again), never shown, nor what it takes. Every tap on the ad, the sign or a pop-up (anywhere but its X)
+steals 1 to 3 KEYS, toward that one's demand only; paid in full, it leaves the terminal at once (the ad
+goes, the sign goes, the pop-ups all close). Or run out its clock: nothing more's taken. (RANSOMWARE
+just runs its clock.) ADWARE has six looks: the CPU's claims, a SALE, a slot machine (its reels rolling
+sideways, stopping on 7s, WIN under them), the CPU bouncing, DOWNLOAD (a bar stuck at 99%), and the
+1,000,000TH VISITOR (a trophy, the counter rolling up to it). The dev page's INFECTION WALL
+(dev-tools/infections.html) plays every infection in every look at once.
 Achievements: PAID IN FULL (1 paid off), CASH COW (10), EXTORTED (100 KEYS lost to them), WALKING ATM
 (1,000), WE DON'T NEGOTIATE (10 outlasted without paying a key). They stack:
 two infected boxes, two infections at once. The same one again starts its count over (ADWARE keeps its
