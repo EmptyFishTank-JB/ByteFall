@@ -3401,14 +3401,7 @@ function fitHome() {
   if (homeEl.hidden) return;
   const FIT = '#level-bar, .home .modes button, .home-row button, #home-play, #difficulty-row button, .home .booster-one, #home-best, #home-mode-name, .home .booster-title';
   for (const el of homeEl.querySelectorAll(FIT)) fitText(el, 10); // (single lines; never under 10px)
-  // (the title line, as one; where even 10px won't fit it, without its // DECRYPTION TERMINAL)
-  const head = homeEl.querySelector('.home-head');
-  head.classList.remove('no-tag');
-  fitText(head, 10);
-  if (head.scrollWidth > head.clientWidth + 1 || head.querySelector('h1').getBoundingClientRect().left < homeEl.querySelector('.home-back').getBoundingClientRect().right) {
-    head.classList.add('no-tag');
-    fitText(head, 10);
-  }
+  fitText(homeEl.querySelector('.home-head'), 10); // (the title, between BACK and the far edge)
   homePanelMore();
 }
 // (and the game's other set boxes with words that change: the message line, VS's setup note)

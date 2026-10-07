@@ -2977,7 +2977,6 @@ html.page-twinkle .page-bg { display: block; }
 }
 .home > * { pointer-events: auto; }
 .home-head h1 { font-size: 34px; letter-spacing: 6px; }
-.home-head .tagline { margin-top: 6px; }
 .home .level-bar { margin-top: 0; }
 .home .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; max-width: 340px; margin-top: 0; }
 .home .modes button { padding: 10px 4px; font-size: 13px; letter-spacing: 1px; }
@@ -3672,7 +3671,6 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
 .home { padding-top: 8px; }
 .home-head { display: flex; align-items: baseline; justify-content: center; gap: 10px; white-space: nowrap; }
 .home-head h1 { font-size: 20px; letter-spacing: 3px; margin: 0; }
-.home-head .tagline { margin: 0; font-size: 12px; }
 .home .home-panel { max-height: 420px; }
 .home-panel-body { flex: 1 1 auto; min-height: 0; width: 100%; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; align-items: center; gap: var(--gap); }
 .home-panel-body > * { flex-shrink: 0; }
@@ -3683,7 +3681,6 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
 /* (the title line in em, so the whole line shrinks together to fit the card's width) */
 .home-head { width: 100%; overflow: hidden; font-size: 12px; gap: 0.8em; }
 .home-head h1 { font-size: 1.6em; letter-spacing: 0.15em; }
-.home-head .tagline { font-size: 1em; letter-spacing: 0.1em; }
 .home .home-panel { max-height: 360px; }
 /* (more below: the panel's body fades out at its foot until scrolled to the end) */
 .home-panel-body.more { -webkit-mask-image: linear-gradient(#000 calc(100% - 22px), transparent); mask-image: linear-gradient(#000 calc(100% - 22px), transparent); }
@@ -3708,8 +3705,7 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
 .home .home-back { position: absolute; top: 8px; left: 8px; z-index: 2; }
 @media (hover: hover) { .home .home-back:hover { background: rgba(var(--fg-rgb), 0.12); } }
 .home-head { padding: 0 80px; } /* (BACK's width and a gap, both sides: the title stays centred) */
-.home-head.no-tag .tagline { display: none; }
-.home-head h1 { letter-spacing: 0.1em; } .home-head .tagline { letter-spacing: 0.04em; } .home-head { gap: 0.6em; } /* (tighter, so the whole line fits beside the arrow on more phones) */
+.home-head h1 { letter-spacing: 0.1em; } /* (the title alone: its // DECRYPTION TERMINAL is the title card's) */
 /* (the mode's card only as tall as what it holds: PLAY the one 8px gap under its last piece, the
    card's foot right under PLAY and the rows under the card right after; a mode with more than the
    screen has room for scrolls inside it) */
