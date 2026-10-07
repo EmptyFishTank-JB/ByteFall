@@ -4354,3 +4354,8 @@ body.in-game.can-pause .records-btn.pause-queued { background: rgba(var(--fg-rgb
 /* With CRT DISPLAY on, the whole screen has its scanlines: the infected bits' own little CRTs drop
    theirs (two sets would beat against each other in a moire), keeping only the inset and dimmed edges */
 :root:is(.crt-soft, .crt-full) .cell .inf-glitch:is(.mosaic, .mini)::after { background: none; }
+/* (the infected bits' blocks of characters: back to filling the bit, clipped only by its own border;
+   no inset screen or scanlines, just a soft dark fade in from the border) */
+.cell .inf-glitch:is(.mosaic, .mini) { inset: 0; border-radius: inherit; }
+.cell .inf-glitch:is(.mosaic, .mini)::after,
+:root:is(.crt-soft, .crt-full) .cell .inf-glitch:is(.mosaic, .mini)::after { background: none; box-shadow: inset 0 0 6px 1px rgba(0, 0, 0, 0.75); }
