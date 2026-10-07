@@ -132,7 +132,9 @@ before the resources. A box is the cheaper bet; buying the exploit you want is t
 A BLACK BOX's bad luck: it comes up INFECTED. Mild and short; none can end a game by itself. They stack:
 two infected boxes, two infections at once. The same one again starts its count over (ADWARE keeps its
 column), a second RANSOMWARE locks 3 more bits (never ones already locked), and a second SCAREWARE stacks another
-pop-up over the ones up (its 8 drops start over). The STORE's BLACK BOXES section warns of all six (BUYER BEWARE). The dev page's
+pop-up over the ones up (its 8 drops start over). Where two meet, the later one shows: MALWARE after
+a RANSOMWARE lock covers that bit, a lock after MALWARE shows over it; ADWARE's frame and the
+CRYPTOJACKER's sign are solid, covering whatever's under them, and the pop-ups go over everything. The STORE's BLACK BOXES section warns of all six (BUYER BEWARE). The dev page's
 BLACK BOX INFECTION makes every box opened come up one (ANY or one kind), and INFECTION LOOK forces look
 1 to 4 (localStorage bytefall-dev-infection / bytefall-dev-infection-look). While any's on, a little bot
 at its laptop types away at a virus in CURRENT's corner (xN past one; its name(s) on hover). The

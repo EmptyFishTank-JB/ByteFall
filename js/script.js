@@ -83,6 +83,8 @@ let vsPaused = false;
 let adware = null; // INFECTIONS (runAnti, infections.js): ADWARE's covered column { col, left }
 let spywareLeft = 0; // ...SPYWARE's hidden bits
 let malwareLeft = 0; // ...MALWARE's drops with the board's bits corrupted
+let infSeq = 0; // (each infection's turn: the later one shows over the earlier where they meet)
+let malwareAt = 0; // (MALWARE's turn; a RANSOMWARE lock keeps its own, cell.lockAt)
 let scareLeft = 0; // (SCAREWARE's drops left: its pop-ups keep coming on their own clock till then)
 let jackLeft = 0; // ...and the CRYPTOJACKER's drops left stealing (RANSOMWARE's locks are on the bits: cell.locked)
 let marketOpen = false; // THE BLACK MARKET sells once the game's first encryption layer rises (ZEN: after as many drops) // PAUSE (any mode): the board covered, the CPU's clock stopped, the drop buttons off
@@ -1143,7 +1145,8 @@ function render(popped = [], falling = null) {
         if (swapPicks.some((p) => p.r === r && p.c === c)) div.classList.add('swap-pick');
       }
       if (cell) {
-        if (cell.type === 'number' && cell.locked) { // (RANSOMWARE: locked where it is, its little screen and padlock)
+        const lockShows = cell.locked && !(malwareLeft > 0 && malwareAt > (cell.lockAt || 0)); // (MALWARE after the lock: its spoiling covers it)
+        if (cell.type === 'number' && cell.locked && lockShows) { // (RANSOMWARE: locked where it is, its little screen and padlock)
           div.classList.add('disc', 'ransom');
           div.innerHTML = Infections.ransomHtml(cell.val, cell.locked, cell.lockLook || 0);
           div.title = `RANSOMWARE: locked for ${cell.locked} more drop${cell.locked === 1 ? '' : 's'}`;
@@ -5065,9 +5068,11 @@ function runAnti(id) {
       const { r, c } = cells.splice(Math.floor(Math.random() * cells.length), 1)[0];
       columns[c][r].locked = RANSOM_DROPS;
       columns[c][r].lockLook = look;
+      columns[c][r].lockAt = ++infSeq;
     }
   } else if (id === 'malware') {
     malwareLeft = ANTI_DROPS;
+    malwareAt = ++infSeq;
     Infections.pick('malware');
   } else if (id === 'cryptojacker') {
     jackLeft = RANSOM_DROPS;

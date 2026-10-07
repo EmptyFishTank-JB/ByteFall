@@ -4118,10 +4118,10 @@ html, body { overflow-x: clip; }
 .inf[hidden] { display: none; }
 .inf canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 /* ADWARE: its own frame over the column, below the overflow line */
-.inf-ad { border: 2px solid var(--accent); border-radius: 6px; background: rgba(4, 4, 6, 0.86); box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.45), inset 0 0 8px rgba(0, 0, 0, 0.8); overflow: hidden; }
+.inf-ad { border: 2px solid var(--accent); border-radius: 6px; background: #040406; box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.45), inset 0 0 8px rgba(0, 0, 0, 0.8); overflow: hidden; }
 .inf-ad-tag { position: absolute; right: 3px; bottom: 3px; padding: 0 3px; font-size: 8px; line-height: 11px; letter-spacing: 0; color: #111; background: var(--accent); border-radius: 2px; font-weight: bold; }
 /* CRYPTOJACKER: its sign seen through the overflow row's own cells */
-.inf-jack { z-index: 5; mix-blend-mode: screen; opacity: 0.9; }
+.inf-jack { z-index: 5; } /* (its sign solid in each cell: nothing under it shows through) */
 /* RANSOMWARE: a locked bit's little screen, its padlock, its value and the drops left */
 .cell.ransom { position: relative; overflow: hidden; color: var(--danger); border-color: var(--danger); }
 .inf-screen { position: absolute; inset: 3px; border-radius: 3px; background: #050607; overflow: hidden; box-shadow: inset 0 0 4px rgba(var(--danger-rgb), 0.5); }

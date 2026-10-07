@@ -67,7 +67,7 @@ const Infections = (() => {
   }
   // Paint a dot buffer onto a canvas: lit dots glowing in their color, the rest faint; only inside
   // the windows given (the bits' own boxes), or everywhere
-  function paint(cv, buf, colors, windows = null) {
+  function paint(cv, buf, colors, windows = null, bg = null) {
     const g = cv.getContext('2d');
     const dpr = cv.width / Math.max(1, cv.clientWidth);
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -81,6 +81,7 @@ const Infections = (() => {
       for (const wdw of windows) g.roundRect ? g.roundRect(wdw.x, wdw.y, wdw.w, wdw.h, 3) : g.rect(wdw.x, wdw.y, wdw.w, wdw.h);
       g.clip();
     }
+    if (bg) { g.fillStyle = bg; g.fillRect(0, 0, cv.clientWidth, cv.clientHeight); } // (solid: what it's over doesn't show through)
     g.fillStyle = 'rgba(255, 255, 255, 0.06)';
     for (let y = 0; y < buf.h; y++) for (let x = 0; x < buf.w; x++) if (!buf.b[y * buf.w + x]) { g.beginPath(); g.arc((x + 0.5) * px, (y + 0.5) * py, r * 0.8, 0, 6.283); g.fill(); }
     for (const v of [1, 2]) {
@@ -281,7 +282,7 @@ const Infections = (() => {
       const b = boxOf(r, c);
       if (b) windows.push({ x: b.x - el.offsetLeft, y: b.y - el.offsetTop, w: b.w, h: b.h });
     }
-    paint(cv, buf, [css('--danger', '#ff3b5c'), css('--accent', '#ffd23f')], windows);
+    paint(cv, buf, [css('--danger', '#ff3b5c'), css('--accent', '#ffd23f')], windows, '#050607');
   }
   function loop(now) {
     frame = 0;
