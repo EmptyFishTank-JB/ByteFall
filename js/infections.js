@@ -117,8 +117,10 @@ const makeInfections = () => {
     }
     g.restore();
   }
+  // (how much it's zoomed by a CSS zoom above it, as on the wall's blown-up tile: 1 in the game)
+  const zoomOf = (el) => (el.offsetWidth ? el.getBoundingClientRect().width / el.offsetWidth : 1) || 1;
   const sizeCanvas = (cv) => {
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = (window.devicePixelRatio || 1) * zoomOf(cv); // (sharp, zoomed or not)
     const w = Math.round(cv.clientWidth * dpr);
     const h = Math.round(cv.clientHeight * dpr);
     if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
@@ -169,7 +171,8 @@ const makeInfections = () => {
     if (!cell) return null;
     const a = cell.getBoundingClientRect();
     const o = wrap.getBoundingClientRect();
-    return { x: a.left - o.left, y: a.top - o.top, w: a.width, h: a.height };
+    const z = zoomOf(wrap); // (back to the wrap's own pixels)
+    return { x: (a.left - o.left) / z, y: (a.top - o.top) / z, w: a.width / z, h: a.height / z };
   }
 
   let state = { adCol: null, jack: false, rows: 7, maxRows: 8, cols: 7 };

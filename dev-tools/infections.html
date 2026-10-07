@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" class="sandbox">
 <head>
-<script src="../js/fonts.js?v=496"></script>
+<script src="../js/fonts.js?v=497"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#020403">
 <title>Infection Wall // BYTEFALL</title>
-<link rel="stylesheet" href="../css/style.css?v=496">
+<link rel="stylesheet" href="../css/style.css?v=497">
 <!-- INFECTION WALL: every INFECTION in every look, all playing at once, a row an infection. Each
      tile is its own copy of the game's infections.js on a little board of bits, so what plays here
      is what plays in the game. -->
@@ -36,6 +36,13 @@
   .mini-board { display: grid; grid-template-columns: repeat(var(--cols), 34px); gap: 4px; }
   .mini-board .cell { width: 34px; font-size: 13px; }
   .tile .inf-win { overflow: hidden; } /* (the boards here are small: the art keeps inside its window) */
+  .tiles .tile { cursor: zoom-in; }
+  .tiles .tile:hover { border-color: var(--accent); }
+  /* (a tile tapped: blown up over the page, the same infection playing, for a close look) */
+  .wall-zoom { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; background: rgba(2, 4, 3, 0.92); cursor: zoom-out; }
+  .wall-zoom[hidden] { display: none; }
+  .wall-zoom .tile { cursor: default; background: #020403; }
+  .wall-zoom-hint { font-size: 11px; letter-spacing: 2px; color: var(--fg-dim); }
   .mini-board .overflow-line { grid-column: 1 / -1; height: 2px; overflow: hidden; font-size: 6px; line-height: 2px; color: var(--danger); opacity: 0.6; }
 </style>
 </head>
@@ -43,12 +50,13 @@
   <div class="wall">
     <a class="wall-back" href="audio.html">&larr; DEV PAGE</a>
     <h1>INFECTION WALL</h1>
-    <p class="lede">Every INFECTION in every look, all playing at once: a row an infection, a tile a look (the number the dev page's INFECTION LOOK and the tester use). Each tile runs the game's own infections.js on a little board of bits. The CRYPTOJACKER steals now and then; the pop-ups come back every few seconds.</p>
+    <p class="lede">Every INFECTION in every look, all playing at once: a row an infection, a tile a look (the number the dev page's INFECTION LOOK and the tester use). Each tile runs the game's own infections.js on a little board of bits; tap one to blow it up. The CRYPTOJACKER steals now and then; the pop-ups come back every few seconds.</p>
     <div class="wall-bar"><button type="button" id="wall-restart">RESTART ALL</button><button type="button" id="wall-shuffle">NEW BITS</button></div>
     <div id="rows"></div>
   </div>
-<script src="../js/led-banner.js?v=496"></script>
-<script src="../js/infections.js?v=496"></script>
+  <div class="wall-zoom" id="wall-zoom" hidden><div class="wall-zoom-hint">TAP OUTSIDE OR PRESS ESC TO CLOSE</div></div>
+<script src="../js/led-banner.js?v=497"></script>
+<script src="../js/infections.js?v=497"></script>
 <script>
 (() => {
   const COLS = 5;
@@ -87,16 +95,48 @@
       row.innerHTML = `<h2>${name}</h2><p>${does} // ${n} LOOKS</p><div class="tiles"></div>`;
       rowsEl.appendChild(row);
       for (let k = 0; k < n; k++) {
-        const tile = document.createElement('div');
-        tile.className = 'tile';
-        tile.innerHTML = `<h3>LOOK ${k + 1} // ${(NAMES[key] || [])[k] || ''}</h3>`
-          + (id === 'spyware' ? '<div class="mini-cur">CURRENT <b class="cur"></b></div>' : '')
-          + `<div class="mini-wrap"><div class="mini-board" style="--cols:${COLS}"></div></div>`;
+        const tile = makeTile(id, key, k);
         row.querySelector('.tiles').appendChild(tile);
-        tiles.push({ id, key, k, tile, inf: null, timers: [] });
+        const t = { id, key, k, tile, inf: null, timers: [] };
+        tile.addEventListener('click', () => zoomIn(t));
+        tiles.push(t);
       }
     }
   }
+  function makeTile(id, key, k) {
+    const tile = document.createElement('div');
+    tile.className = 'tile';
+    tile.innerHTML = `<h3>LOOK ${k + 1} // ${(NAMES[key] || [])[k] || ''}</h3>`
+      + (id === 'spyware' ? '<div class="mini-cur">CURRENT <b class="cur"></b></div>' : '')
+      + `<div class="mini-wrap"><div class="mini-board" style="--cols:${COLS}"></div></div>`;
+    return tile;
+  }
+  // The blow-up: a copy of the tile, CSS-zoomed to fill the screen, its own infection started fresh
+  const zoomEl = document.getElementById('wall-zoom');
+  let big = null;
+  function zoomIn(t) {
+    zoomOut();
+    const tile = makeTile(t.id, t.key, t.k);
+    tile.addEventListener('click', (e) => e.stopPropagation());
+    zoomEl.prepend(tile);
+    zoomEl.hidden = false;
+    big = { ...t, tile, inf: null, timers: [] };
+    start(big); // (its bits in: then it's measured, zoomed to fit, and started again at that size)
+    const r = tile.getBoundingClientRect();
+    const z = Math.max(1, Math.min(5, (innerWidth - 32) / r.width, (innerHeight - 70) / r.height));
+    tile.style.zoom = z.toFixed(3);
+    start(big);
+  }
+  function zoomOut() {
+    if (!big) return;
+    for (const x of big.timers) clearInterval(x);
+    big.inf.clear();
+    big.tile.remove();
+    big = null;
+    zoomEl.hidden = true;
+  }
+  zoomEl.addEventListener('click', zoomOut);
+  addEventListener('keydown', (e) => { if (e.key === 'Escape') zoomOut(); });
   function cellsHtml(t) {
     const { id, inf } = t;
     let html = '';
@@ -152,8 +192,8 @@
   }
   buildRows();
   tiles.forEach(start);
-  document.getElementById('wall-restart').addEventListener('click', () => tiles.forEach(start));
-  document.getElementById('wall-shuffle').addEventListener('click', () => { seed = Math.floor(Math.random() * 1e9) + 1; newBits(); tiles.forEach(start); });
+  document.getElementById('wall-restart').addEventListener('click', () => { tiles.forEach(start); if (big) start(big); });
+  document.getElementById('wall-shuffle').addEventListener('click', () => { seed = Math.floor(Math.random() * 1e9) + 1; newBits(); tiles.forEach(start); if (big) start(big); });
 })();
 </script>
 </body>
