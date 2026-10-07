@@ -4332,6 +4332,30 @@ function showKeys() {
 // The main menu's BOOSTERS: one button, saying what's on (none or its name); a tap opens its card:
 // the ones owned for this mode, one of them switched on at a time (on: used up in the next game, at
 // its first drop), and GET BOOSTERS (the STORE's)
+// THE STORE'S i: each resource, its icon, and how it's earned (ECONOMY.md has the numbers in full)
+const RES_HOW = {
+  keys: 'The money. 1 for every 10 bits decrypted, +2 for a 5-link chain and +5 at 7; 10 a level and an achievement; 5 for the day\'s first daily game; first puzzle solves; 25 in the DAILY DROP.',
+  bugs: '1 for every 5 bits decrypted down a column. 3 in the DAILY DROP.',
+  cache: '1 for every 5 bits decrypted across a row. 3 in the DAILY DROP.',
+  crypto: '1 for each chain link from the 3rd on. 3 in the DAILY DROP.',
+  rootkits: 'A bit decrypted across and down at once (1 for every 2), encryption layers broken (1 for every 20) and BYTES on HARD (1 each).',
+  master: 'Rare. Every 5th level, the day\'s first daily game and the day\'s first VS win; 3 in the DAILY DROP every 7th day of your LOGIN STREAK. Buys any exploit outright.',
+};
+const resInfoEl = document.getElementById('res-info');
+function closeResInfo() { resInfoEl.classList.add('hidden'); }
+function openResInfo() {
+  const list = document.getElementById('res-info-list');
+  list.innerHTML = ['keys', ...Progress.resIds()].map((id) => `<div class="res-info-row res-${id}"><b>${RES_INFO[id].svg}${RES_INFO[id].name}</b><span>${RES_HOW[id] || ''}</span></div>`).join('');
+  resInfoEl.classList.remove('hidden');
+  document.getElementById('res-info-close').focus();
+}
+document.getElementById('store-info').addEventListener('click', openResInfo);
+document.getElementById('store-wallet').addEventListener('click', openResInfo);
+document.getElementById('store-wallet').addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openResInfo(); } });
+document.getElementById('res-info-close').addEventListener('click', closeResInfo);
+resInfoEl.addEventListener('click', (e) => { if (e.target === resInfoEl) closeResInfo(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !resInfoEl.classList.contains('hidden')) { e.stopImmediatePropagation(); closeResInfo(); } }, true);
+
 const boosterPickEl = document.getElementById('booster-pick');
 const boosterIds = () => Object.keys(BOOSTERS).filter((id) => !BOOSTERS[id].inGame && boosterFits(id));
 function boostersChanged() {

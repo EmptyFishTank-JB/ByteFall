@@ -115,7 +115,7 @@ and **MASTER KEYS** (every 5th level, the day's first daily game, the day's firs
 DAILY earn them all, BLITZ and ZEN at half the rate, VS only CRYPTO, ROOTKITS and MASTER KEYS, PUZZLE
 none. Each holds at most 999 (KEYS have no cap). Each has its own color in every theme (BUGS roach brown, CACHE light grey, CRYPTO Bitcoin orange,
 ROOTKITS red, MASTER KEYS gold with a glow; KEYS the theme's accent; PAPER darker, MONOCHROME in greys).
-The main menu shows them in a line under the level bar, the STORE too; a drop that earns some
+The main menu shows them in a line under the level bar, the STORE too (its ringed **i** by the title, or a tap on that line, opens a card of each resource and how it's earned); a drop that earns some
 floats them up off the board, and the result screen lists the game's haul. BOOSTERS cost KEYS;
 STARTER EXPLOITS and BLACK BOXES cost KEYS and resources (a MASTER KEY buys any exploit outright):
 

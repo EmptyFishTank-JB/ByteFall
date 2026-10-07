@@ -3354,6 +3354,22 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 .store-top::after { content: "================================================================================"; display: block; margin-top: 8px; overflow: hidden; white-space: nowrap; font-size: 14.5px; line-height: 15px; letter-spacing: 2px; color: var(--accent); opacity: 0.7; } /* (as .store-rule) */
 .store-top h2 { margin-top: 0; }
 .store-top .wallet { margin-bottom: 0; }
+/* The STORE's i (how resources are earned): a small ringed i by the title; the resources' line opens it too */
+.store-info { all: unset; box-sizing: border-box; position: relative; display: inline-flex; vertical-align: middle; margin: -4px 0 0 6px; width: 24px; height: 24px; align-items: center; justify-content: center;
+  border: 1.5px solid var(--fg-dim); border-radius: 50%; font-size: 13px; font-weight: bold; font-style: italic; letter-spacing: 0; text-shadow: none; color: var(--fg); cursor: pointer; }
+.store-info::before { content: ""; position: absolute; inset: -9px; } /* (a bigger target for a thumb) */
+.store-info:hover, .store-info:focus-visible { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+.store-wallet-btn { cursor: pointer; border-radius: 6px; }
+.store-wallet-btn:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
+#res-info { z-index: 207; }
+.res-info-box { width: min(400px, calc(100vw - 32px)); max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); overflow-y: auto; }
+.res-info-list { display: flex; flex-direction: column; gap: 10px; margin: 10px 0 12px; text-align: left; }
+.res-info-row { display: flex; flex-direction: column; gap: 3px; padding-bottom: 9px; border-bottom: 1px solid var(--grid-line); }
+.res-info-row b { display: inline-flex; align-items: center; gap: 6px; font-weight: normal; font-size: 13px; letter-spacing: 2px; color: var(--fg); }
+.res-info-row b .key-ico { width: 15px; height: 15px; }
+.res-keys b .key-ico { color: var(--accent); }
+.res-info-row span { font-size: 11px; line-height: 1.5; color: var(--fg-dim); }
+.res-info-note { text-align: left; font-size: 11px; line-height: 1.5; }
 .store-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; margin-right: -8px; padding: 0 8px 14px 0;
   scrollbar-width: thin; scrollbar-color: var(--fg-dim) transparent; }
 .store-scroll::-webkit-scrollbar { width: 6px; }

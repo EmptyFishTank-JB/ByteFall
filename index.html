@@ -29,8 +29,8 @@
   } catch (e) {}
 </script>
 <title>BYTEFALL // decryption terminal</title>
-<script src="js/fonts.js?v=438"></script>
-<link rel="stylesheet" href="css/style.css?v=438">
+<script src="js/fonts.js?v=439"></script>
+<link rel="stylesheet" href="css/style.css?v=439">
 </head>
 <body>
   <!-- Dev: TWINKLE BACKGROUND (grid-bg.js): the starlight behind the whole game, off by default -->
@@ -220,9 +220,10 @@
             <div class="shop-sign store-sign" id="store-sign" aria-hidden="true"></div>
             <!-- (stays put: the title, your KEYS and resources; the rest scrolls under it) -->
             <div class="store-top">
-              <h2>STORE</h2>
+              <!-- (i: how each resource is earned; the resources' line opens it too) -->
+              <h2>STORE <button type="button" class="store-info" id="store-info" aria-label="How resources are earned" aria-haspopup="dialog" aria-controls="res-info">i</button></h2>
               <p class="store-keys">YOUR KEYS <b id="store-key-count">0</b></p>
-              <div class="wallet" id="store-wallet" aria-label="Resources"></div>
+              <div class="wallet store-wallet-btn" id="store-wallet" role="button" tabindex="0" aria-label="Resources: how each is earned" aria-haspopup="dialog" aria-controls="res-info"></div>
             </div>
             <div class="store-scroll">
             <!-- DAILY DROP (script.js): once a day, a free exploit and some KEYS, claimed here -->
@@ -697,6 +698,17 @@
     </div>
   </div>
   <!-- A STARTER SLOT's card (script.js): the starter exploits owned, to pick one for that slot -->
+  <!-- The STORE's i card (script.js's openResInfo): each resource and how it's earned -->
+  <div id="res-info" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="res-info-title">
+    <div class="overlay-box starter-pick-box res-info-box">
+      <h2 id="res-info-title">// HOW THEY'RE EARNED</h2>
+      <div class="res-info-list" id="res-info-list"></div>
+      <p class="overlay-note res-info-note">BLITZ and ZEN earn resources at half the rate; VS only CRYPTO, ROOTKITS and MASTER KEYS; PUZZLE only KEYS, for first solves. Bits cleared by exploits earn none. A bot fishing off a pier now and then reels one in. Each holds up to 999 (KEYS have no cap).</p>
+      <div class="starter-pick-foot">
+        <button type="button" id="res-info-close">DONE</button>
+      </div>
+    </div>
+  </div>
   <!-- The main menu's BOOSTERS card (script.js's openBoosterPick): the ones owned for this mode, each switched on or off -->
   <div id="booster-pick" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="booster-pick-title">
     <div class="overlay-box starter-pick-box">
@@ -740,48 +752,48 @@
     </div>
   </div>
 
-  <script src="js/bot-svg.js?v=438"></script>
-  <script src="js/unlocks.js?v=438"></script>
-  <script src="js/progress.js?v=438"></script>
-  <script src="js/music/output.js?v=438"></script>
-  <script src="js/music/mixes.js?v=438"></script>
-  <script src="js/sfx.js?v=438"></script>
-  <script src="js/music/music-bytefall-theme.js?v=438"></script>
-  <script src="js/music/music-sleep-mode.js?v=438"></script>
-  <script src="js/music/music-brute-force.js?v=438"></script>
-  <script src="js/music/music-deep-web.js?v=438"></script>
-  <script src="js/music/music-zero-day.js?v=438"></script>
-  <script src="js/music/music-system-restore.js?v=438"></script>
-  <script src="js/music/music-night-drive.js?v=438"></script>
-  <script src="js/music/music-standby-mode.js?v=438"></script>
-  <script src="js/music/music-core-dump.js?v=438"></script>
-  <script src="js/music/music-handshake.js?v=438"></script>
-  <script src="js/music/music-stack-overflow.js?v=438"></script>
-  <script src="js/music/music-generated.js?v=438"></script>
-  <script src="js/music/music.js?v=438"></script>
-  <script src="js/data/puzzles.js?v=438"></script>
-  <script src="js/data/daily-puzzles.js?v=438"></script>
-  <script src="js/cpu.js?v=438"></script>
-  <script src="js/fx.js?v=438"></script>
-  <script src="js/viz.js?v=438"></script>
-  <script src="js/pixel.js?v=438"></script>
-  <script src="js/minibot.js?v=438"></script>
-  <script src="js/seasons.js?v=438"></script>
-  <script src="js/bigart.js?v=438"></script>
-  <script src="js/scenes.js?v=438"></script>
-  <script src="js/weather.js?v=438"></script>
-  <script src="js/visitors.js?v=438"></script>
-  <script src="js/data/bot-anims.js?v=438"></script>
-<script src="js/wanderers.js?v=438"></script>
-  <script src="js/tutorial.js?v=438"></script>
-  <script src="js/puzzle-sim.js?v=438"></script>
-  <script src="js/script.js?v=438"></script>
-  <script src="js/grid-bg.js?v=438"></script>
-  <script src="js/extsource.js?v=438"></script>
-  <script src="js/player.js?v=438"></script>
-  <script src="js/store.js?v=438"></script>
-  <script src="js/start.js?v=438"></script>
-  <script src="js/place.js?v=438"></script>
-  <script src="js/saver.js?v=438"></script>
+  <script src="js/bot-svg.js?v=439"></script>
+  <script src="js/unlocks.js?v=439"></script>
+  <script src="js/progress.js?v=439"></script>
+  <script src="js/music/output.js?v=439"></script>
+  <script src="js/music/mixes.js?v=439"></script>
+  <script src="js/sfx.js?v=439"></script>
+  <script src="js/music/music-bytefall-theme.js?v=439"></script>
+  <script src="js/music/music-sleep-mode.js?v=439"></script>
+  <script src="js/music/music-brute-force.js?v=439"></script>
+  <script src="js/music/music-deep-web.js?v=439"></script>
+  <script src="js/music/music-zero-day.js?v=439"></script>
+  <script src="js/music/music-system-restore.js?v=439"></script>
+  <script src="js/music/music-night-drive.js?v=439"></script>
+  <script src="js/music/music-standby-mode.js?v=439"></script>
+  <script src="js/music/music-core-dump.js?v=439"></script>
+  <script src="js/music/music-handshake.js?v=439"></script>
+  <script src="js/music/music-stack-overflow.js?v=439"></script>
+  <script src="js/music/music-generated.js?v=439"></script>
+  <script src="js/music/music.js?v=439"></script>
+  <script src="js/data/puzzles.js?v=439"></script>
+  <script src="js/data/daily-puzzles.js?v=439"></script>
+  <script src="js/cpu.js?v=439"></script>
+  <script src="js/fx.js?v=439"></script>
+  <script src="js/viz.js?v=439"></script>
+  <script src="js/pixel.js?v=439"></script>
+  <script src="js/minibot.js?v=439"></script>
+  <script src="js/seasons.js?v=439"></script>
+  <script src="js/bigart.js?v=439"></script>
+  <script src="js/scenes.js?v=439"></script>
+  <script src="js/weather.js?v=439"></script>
+  <script src="js/visitors.js?v=439"></script>
+  <script src="js/data/bot-anims.js?v=439"></script>
+<script src="js/wanderers.js?v=439"></script>
+  <script src="js/tutorial.js?v=439"></script>
+  <script src="js/puzzle-sim.js?v=439"></script>
+  <script src="js/script.js?v=439"></script>
+  <script src="js/grid-bg.js?v=439"></script>
+  <script src="js/extsource.js?v=439"></script>
+  <script src="js/player.js?v=439"></script>
+  <script src="js/store.js?v=439"></script>
+  <script src="js/start.js?v=439"></script>
+  <script src="js/place.js?v=439"></script>
+  <script src="js/saver.js?v=439"></script>
 </body>
 </html>
