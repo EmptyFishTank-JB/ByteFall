@@ -101,6 +101,9 @@ const Progress = (() => {
     resPart: {}, // resource -> the part of the next one earned so far
     resEarned: {}, // resource -> every one ever earned
     vsMasterDay: '', // the day a VS win last paid a MASTER KEY (one a day)
+    ransomsPaid: 0, // INFECTIONS whose demand was paid in full (tapped till they took what they asked)
+    keysExtorted: 0, // KEYS lost to infections, all told
+    infectionsOutlasted: 0, // infections that ran out their clock without getting a key
   });
 
   let d = fresh();
@@ -234,6 +237,12 @@ const Progress = (() => {
   const kindsToday = () => (d.dailyDay.date === localDay() ? count(d.dailyDay.kinds) : 0);
 
   const ACHIEVEMENTS = [
+    // INFECTIONS: paying them off, or not
+    { id: 'paid-in-full', name: 'PAID IN FULL', desc: "Pay an infection's demand in full", value: () => d.ransomsPaid, goal: 1 },
+    { id: 'cash-cow', name: 'CASH COW', desc: "Pay 10 infections' demands in full", value: () => d.ransomsPaid, goal: 10 },
+    { id: 'extorted', name: 'EXTORTED', desc: 'Lose 100 KEYS to infections', value: () => d.keysExtorted, goal: 100 },
+    { id: 'walking-atm', name: 'WALKING ATM', desc: 'Lose 1,000 KEYS to infections', value: () => d.keysExtorted, goal: 1000 },
+    { id: 'we-dont-negotiate', name: "WE DON'T NEGOTIATE", desc: 'Outlast 10 infections without paying them a key', value: () => d.infectionsOutlasted, goal: 10 },
     { id: 'first-contact', name: 'FIRST CONTACT', desc: 'Start your first session', value: () => d.games, goal: 1 },
     { id: 'regular', name: 'REGULAR', desc: 'Play 25 sessions', value: () => d.games, goal: 25 },
     { id: 'veteran', name: 'VETERAN', desc: 'Play 100 sessions', value: () => d.games, goal: 100 },
@@ -476,6 +485,7 @@ const Progress = (() => {
     ['VS BOTS', ['debugged', 'outhustled', 'bunker-buster', 'patched', 'rogues-gallery', 'kill-9']],
     ['VS MODES AND SETTINGS', ['stack-overflow', 'war-of-attrition', 'frag-limit', 'rope-a-dope', 'multi-boot', 'long-haul', 'heavyweight', 'bankrupt', 'knockout', 'bare-metal', 'arms-race', 'zero-mercy']],
     ['BOTS', ['poke', 'boo', 'the-eyebrow', 'third-wheel', 'matchmaker', 'jump-scare', 'now-you-see-me', 'full-crew', 'personal-space', 'hr-wants-a-word', 'rabid', 'costume-party', 'sweet-tooth', 'monster-mash', 'uprooted', 'gobble-gobble', 'snow-day', 'belly-slide', 'red-nose', 'eight-nights', 'gimel', 'seven-candles', 'midnight', 'developer-options']],
+    ['INFECTIONS', ['paid-in-full', 'cash-cow', 'extorted', 'walking-atm', 'we-dont-negotiate']],
     ['THANK YOU', ['indie-supporter']],
     ['SECRETS', ['konami']],
   ];
@@ -965,6 +975,17 @@ const Progress = (() => {
     keys: () => d.keys,
     runKeys: () => (run && run.keys) || 0,
     claimKeys(n) { earn(n); save(); },
+    // INFECTIONS taking KEYS: up to n (what's there), counted; returns what it got
+    extort(n) {
+      const got = Math.max(0, Math.min(n, d.keys));
+      if (!got) return 0;
+      d.keys -= got;
+      if (run.mode !== 'tutorial') d.keysExtorted += got;
+      save();
+      return got;
+    },
+    ransomPaid() { if (run.mode === 'tutorial') return; d.ransomsPaid++; save(); },
+    outlasted() { if (run.mode === 'tutorial') return; d.infectionsOutlasted++; save(); },
     spendKeys(n) {
       if (d.keys < n) return false;
       d.keys -= n;

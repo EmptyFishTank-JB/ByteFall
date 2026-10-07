@@ -19,7 +19,7 @@
       render(); updateHud();`);
   }
   function clearAll() {
-    run(`adware = null; spywareLeft = 0; malwareLeft = 0; jackLeft = 0; scareLeft = 0;
+    run(`adware = null; spywareLeft = 0; malwareLeft = 0; jackLeft = 0; scareLeft = 0; demands = {};
       columns.forEach((col) => col.forEach((cell) => { if (cell) { delete cell.locked; delete cell.lockAt; } }));
       Infections.clear(); render(); updateHud(); updateColumnButtons();`);
   }
@@ -42,8 +42,8 @@
     <div class="inftest-body">
       <div class="inftest-row">${IDS.map((id) => `<button type="button" data-inf="${id}">${id === 'cryptojacker' ? 'CRYPTOJACK' : id.toUpperCase()}</button>`).join('')}</div>
       <div class="inftest-row"><span>LOOK</span>${['RANDOM', '1', '2', '3', '4', '5', '6'].map((l, i) => `<button type="button" data-look="${i - 1}"${i ? '' : ' class="on"'}>${l}</button>`).join('')}</div>
-      <div class="inftest-row"><button type="button" data-act="drop">DROP (COUNT DOWN)</button><button type="button" data-act="fill">FILL GRID</button><button type="button" data-act="clear">CLEAR</button><button type="button" data-act="banners"></button><button type="button" data-act="banlook"></button><button type="button" data-act="bantest">TEST BANNER</button><a href="dev-tools/audio.html">DEV PAGE</a></div>
-      <p class="inftest-note">NOT SAVED: nothing played here touches your progress. Infections stack: tap more than one. RANSOMWARE has 5 looks, MALWARE 6, the rest 4 (a look past theirs picks at random). The column buttons still drop bits.</p>
+      <div class="inftest-row"><button type="button" data-act="drop">DROP (COUNT DOWN)</button><button type="button" data-act="fill">FILL GRID</button><button type="button" data-act="clear">CLEAR</button><button type="button" data-act="keys">+50 KEYS</button><button type="button" data-act="banners"></button><button type="button" data-act="banlook"></button><button type="button" data-act="bantest">TEST BANNER</button><a href="dev-tools/audio.html">DEV PAGE</a></div>
+      <p class="inftest-note">NOT SAVED: nothing played here touches your progress. Tap an ad, the CRYPTOJACKER's sign, a pop-up or a locked bit to pay toward its demand. Infections stack: tap more than one. RANSOMWARE has 5 looks, MALWARE 6, the rest 4 (a look past theirs picks at random). The column buttons still drop bits.</p>
     </div>`;
   document.body.appendChild(panel);
   const bannersBtn = panel.querySelector('[data-act="banners"]');
@@ -67,6 +67,7 @@
     } else if (b.dataset.act === 'drop') tickDrop();
     else if (b.dataset.act === 'fill') { if (run('gameOver')) run('resetNow()'); fill(); }
     else if (b.dataset.act === 'clear') clearAll();
+    else if (b.dataset.act === 'keys') { Progress.claimKeys(50); run(`setMessage('TESTER // +50 KEYS: ' + Progress.keys() + ' IN ALL')`); }
     else if (b.dataset.act === 'banlook') {
       try { localStorage.setItem('bytefall-banner-look', BAN_STEPS[(BAN_STEPS.indexOf(LedBanner.look()) + 1) % BAN_STEPS.length]); } catch (err) {}
       showBanLook();

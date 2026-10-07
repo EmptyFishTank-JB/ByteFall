@@ -1,17 +1,17 @@
 // LED BANNERS: the UNLOCKED / ACHIEVEMENT pop-ups as a sign of small lights. The text is drawn in
 // the game's own font (the FONT setting) at a small size, then read back a pixel at a time, and
 // each pixel becomes a light. Its looks (the dev page's BANNER LOOK, bytefall-banner-look):
-//   DOTS    round LEDs, the unlit ones faint behind (the default)
+//   DOTS    round LEDs, the unlit ones faint behind
 //   PIXELS  small square pixels, finer, no unlit grid
 //   MARQUEE round LEDs, one line, the words running across
 //   CHASE   round LEDs, a border of bulbs chasing round the sign
-//   CLASSIC the plain box it was
+//   CLASSIC the plain box it was (the default, till a sign's settled on)
 const LedBanner = (() => {
   const LOOKS = ['dots', 'pixels', 'marquee', 'chase', 'classic'];
   const look = () => {
     let v = null;
     try { v = localStorage.getItem('bytefall-banner-look'); } catch (e) {}
-    return LOOKS.includes(v) ? v : 'dots';
+    return LOOKS.includes(v) ? v : 'classic';
   };
   const css = (name, fb) => getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fb;
   const reduced = () => document.documentElement.classList.contains('low-fx') || matchMedia('(prefers-reduced-motion: reduce)').matches;

@@ -129,7 +129,13 @@ before the resources. A box is the cheaper bet; buying the exploit you want is t
 
 ## Infections
 
-A BLACK BOX's bad luck: it comes up INFECTED. Mild and short; none can end a game by itself. They stack:
+A BLACK BOX's bad luck: it comes up INFECTED. Mild and short; none can end a game by itself.
+ADWARE, RANSOMWARE, the CRYPTOJACKER and SCAREWARE each DEMAND KEYS: 4 to 12 a strike (added on if it
+strikes again), shown on it (PAY n KEYS; RANSOMWARE's in the message). Every tap on the ad, the sign, a
+pop-up (anywhere but its X) or a locked bit takes 1 to 3 KEYS toward it; paid in full, it leaves the
+terminal at once (the locks lift, the pop-ups all close). Or run out its clock: nothing more's taken.
+Achievements: PAID IN FULL (1 paid off), CASH COW (10), EXTORTED (100 KEYS lost to them), WALKING ATM
+(1,000), WE DON'T NEGOTIATE (10 outlasted without paying a key). They stack:
 two infected boxes, two infections at once. The same one again starts its count over (ADWARE keeps its
 column), a second RANSOMWARE locks 3 more bits (never ones already locked), and a second SCAREWARE stacks another
 pop-up over the ones up (its 8 drops start over). Where two meet, the later one shows: MALWARE after

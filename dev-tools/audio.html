@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="../js/fonts.js?v=468"></script>
+<script src="../js/fonts.js?v=469"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#020403">
@@ -246,7 +246,7 @@
       <button type="button" id="dev-fog">FOG: RARE</button>
       <button type="button" id="dev-infection">BLACK BOX INFECTION: OFF</button>
       <button type="button" id="dev-inflook">INFECTION LOOK: RANDOM</button>
-      <button type="button" id="dev-banner">BANNER LOOK: DOTS</button>
+      <button type="button" id="dev-banner">BANNER LOOK: CLASSIC</button>
     </div>
     <p class="sec-desc" style="margin-top: 14px;"><a href="../index.html?inftest" style="color: var(--amber);">INFECTION TESTER &rarr;</a> The game with a board of bits and a panel of buttons: set off any INFECTION on the grid (several to stack them), in any of its looks or at random, count drops down without dropping, refill the board or clear it all. The column buttons still drop bits, so you can play against them. Nothing played there is saved, and BANNERS switches the achievement pop-ups off.</p>
     <p class="sec-desc"><a href="bots.html" style="color: var(--amber);">BOT SANDBOX &rarr;</a> The wandering bots on the game's own code: spawn any bot at any level, call up every visitor, virus, season and the fog, play the music for the headphones, and set off every mood and reaction on a button, on the game card, the start screen or the screen saver.</p>
@@ -271,10 +271,10 @@
   <footer>GENERATED FROM SOURCE &mdash; NO AUDIO FILES, ALL SYNTHESIZED ON PLAY</footer>
 </div>
 
-<script src="../js/music/output.js?v=468"></script>
-<script src="../js/music/mixes.js?v=468"></script>
-<script src="../js/sfx.js?v=468"></script>
-<script src="tracks-info.js?v=468"></script>
+<script src="../js/music/output.js?v=469"></script>
+<script src="../js/music/mixes.js?v=469"></script>
+<script src="../js/sfx.js?v=469"></script>
+<script src="tracks-info.js?v=469"></script>
 <script>
 (() => {
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -564,8 +564,8 @@
     const BAN = 'bytefall-banner-look';
     const BAN_STEPS = ['dots', 'pixels', 'marquee', 'chase', 'classic'];
     const banBtn = document.getElementById('dev-banner');
-    const banNow = () => (BAN_STEPS.includes(get(BAN)) ? get(BAN) : 'dots');
-    const showBan = () => { banBtn.textContent = `BANNER LOOK: ${banNow().toUpperCase()}`; banBtn.classList.toggle('on', banNow() !== 'dots'); };
+    const banNow = () => (BAN_STEPS.includes(get(BAN)) ? get(BAN) : 'classic');
+    const showBan = () => { banBtn.textContent = `BANNER LOOK: ${banNow().toUpperCase()}`; banBtn.classList.toggle('on', banNow() !== 'classic'); };
     banBtn.addEventListener('click', () => { set(BAN, BAN_STEPS[(BAN_STEPS.indexOf(banNow()) + 1) % BAN_STEPS.length]); showBan(); status.textContent = 'Saved. The next banner in the game shows it (the INFECTION TESTER has a TEST BANNER button).'; });
     showBan();
     const FG = 'bytefall-dev-fog';

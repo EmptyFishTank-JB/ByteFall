@@ -176,5 +176,10 @@ BOTS,GIMEL,See the Hanukkah dreidel land on GIMEL,1,Hidden,gimel
 BOTS,SEVEN CANDLES,Watch a bot push a kinara onto the card during Kwanzaa,1,Hidden,seven-candles
 BOTS,MIDNIGHT,Be there when the bots count down to the new year,1,Hidden,midnight
 BOTS,DEVELOPER OPTIONS,Tap the VS CPU seven times in a row,1,Hidden,developer-options
+INFECTIONS,PAID IN FULL,Pay an infection's demand in full,1,Standard,paid-in-full
+INFECTIONS,CASH COW,Pay 10 infections' demands in full,10,Standard,cash-cow
+INFECTIONS,EXTORTED,Lose 100 KEYS to infections,100,Standard,extorted
+INFECTIONS,WALKING ATM,"Lose 1,000 KEYS to infections",1000,Standard,walking-atm
+INFECTIONS,WE DON'T NEGOTIATE,Outlast 10 infections without paying them a key,10,Standard,we-dont-negotiate
 THANK YOU,INDIE SUPPORTER,Buy REMOVE ADS or FULL ACCESS in the STORE. Thank you for supporting an indie game!,1,Standard,indie-supporter
 SECRETS,KONAMI,Enter the Konami code,1,Hidden,konami

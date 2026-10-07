@@ -120,6 +120,8 @@ const Infections = (() => {
 
   // ── The board's overlays: made once, laid over the bits after each redraw (place) ─────────────
   let wrap = null;
+  let hooks = {}; // { onPay(kind) }: the game's, for a tap on an ad, the sign or a pop-up
+  const dueText = {}; // kind -> its demand, shown on it ('3/9 KEYS')
   let board = null;
   const els = {};
   function layer(name, html) {
@@ -131,6 +133,10 @@ const Infections = (() => {
     el.innerHTML = html;
     wrap.appendChild(el);
     els[name] = el;
+    if (name === 'ad' || name === 'jack') { // (tapped: it takes KEYS toward its demand)
+      el.addEventListener('pointerdown', (e) => e.stopPropagation());
+      el.addEventListener('click', (e) => { e.stopPropagation(); if (hooks.onPay) hooks.onPay(name === 'ad' ? 'adware' : 'cryptojacker'); });
+    }
     return el;
   }
   // (a bit's box, against the board's wrap)
@@ -556,17 +562,23 @@ const Infections = (() => {
     win.setAttribute('aria-label', title);
     win.innerHTML = `<div class="inf-bar"><span>&#9888; ${title}</span><button type="button" class="inf-x" aria-label="Close">&times;</button></div>`
       + scareBody(k, msg)
-      + `<button type="button" class="inf-ok">${ok}</button>`;
+      + `<button type="button" class="inf-ok">${ok}</button><p class="inf-due">${dueText.scareware || ''}</p>`;
     [win.fx, win.fy] = spot();
     win.style.zIndex = ++scareZ;
     win.querySelector('.inf-x').addEventListener('click', (e) => { e.stopPropagation(); closeWin(win); });
     const okBtn = win.querySelector('.inf-ok');
-    okBtn.addEventListener('click', (e) => { // (it does nothing: it dodges)
+    okBtn.addEventListener('click', (e) => { // (it dodges, and takes KEYS)
       e.stopPropagation();
+      if (hooks.onPay) hooks.onPay('scareware');
       okBtn.style.transform = `translate(${Math.round((Math.random() - 0.5) * 60)}px, ${Math.round((Math.random() - 0.5) * 16)}px)`;
       if (typeof SFX !== 'undefined') SFX.play('denied');
     });
     win.addEventListener('pointerdown', (e) => { e.stopPropagation(); win.style.zIndex = ++scareZ; }); // (tapped: to the front)
+    win.addEventListener('click', (e) => { // (anywhere but its X: it takes KEYS)
+      if (e.target.closest('.inf-x, .inf-ok')) return;
+      e.stopPropagation();
+      if (hooks.onPay) hooks.onPay('scareware');
+    });
     el.appendChild(win);
     scareRun.nextAt = performance.now() + SCARE_GAP[0] + Math.random() * (SCARE_GAP[1] - SCARE_GAP[0]);
     tickOn();
@@ -613,7 +625,7 @@ const Infections = (() => {
   function place(next = {}) {
     if (!wrap) return;
     state = { ...state, ...next };
-    const ad = layer('ad', '<canvas></canvas><span class="inf-ad-tag">AD</span>');
+    const ad = layer('ad', '<canvas></canvas><span class="inf-ad-tag">AD</span><span class="inf-due"></span>');
     if (state.adCol !== null && state.adCol !== undefined) {
       if (ad.hidden) {
         pick('ad');
@@ -629,7 +641,7 @@ const Infections = (() => {
         ad.hidden = false;
       }
     } else ad.hidden = true;
-    const jack = layer('jack', '<canvas></canvas>');
+    const jack = layer('jack', '<canvas></canvas><span class="inf-due"></span>');
     if (state.jack) {
       if (jack.hidden) pick('jack');
       const a = boxOf(state.maxRows - 1, 0);
@@ -655,14 +667,27 @@ const Infections = (() => {
     if (document.querySelector('.inf-glitch, .inf-eyes')) tickOn();
     spin();
   }
-  function init(boardEl, wrapEl) { board = boardEl; wrap = wrapEl; }
+  function init(boardEl, wrapEl, h = {}) { board = boardEl; wrap = wrapEl; hooks = h; }
+  // An infection's demand on it (null: none)
+  function due(kind, text) {
+    dueText[kind] = text || '';
+    const set = (el) => { if (el) { el.textContent = dueText[kind]; el.hidden = !text; } };
+    if (kind === 'adware' && els.ad) set(els.ad.querySelector('.inf-due'));
+    if (kind === 'cryptojacker' && els.jack) set(els.jack.querySelector('.inf-due'));
+    if (kind === 'scareware') wins().forEach((w) => set(w.querySelector('.inf-due')));
+  }
+  function scareClear() { // (paid off: every pop-up gone at once)
+    scareEnd();
+    if (els.scare) { els.scare.innerHTML = ''; els.scare.hidden = true; }
+  }
   function steal(n) { stolen = { n, at: performance.now() }; spin(); }
   function clear() {
     place({ adCol: null, jack: false });
     scareEnd();
     if (els.scare) { els.scare.innerHTML = ''; els.scare.hidden = true; }
+    for (const k of Object.keys(dueText)) due(k, null);
   }
-  return { init, place, steal, scare, scareEnd, closeScare, scareUp, scareCount: () => wins().length, ransomHtml, clear, pick, force: (f) => { forced = f; }, mosaicOn: () => style.malware === 4, glitch: (n = 3, r, c, empty = false) => (style.malware >= 4 && r !== undefined
+  return { init, place, steal, scare, scareEnd, scareClear, due, closeScare, scareUp, scareCount: () => wins().length, ransomHtml, clear, pick, force: (f) => { forced = f; }, mosaicOn: () => style.malware === 4, glitch: (n = 3, r, c, empty = false) => (style.malware >= 4 && r !== undefined
     ? `<span class="inf-glitch ${style.malware === 4 ? 'mosaic' : 'mini'}${empty ? ' empty' : ''}" data-n="${n}" data-r="${r}" data-c="${c}">${corrupt(n, r, c)}</span>`
     : `<span class="inf-glitch" data-n="${n}">${corrupt(n)}</span>`), eyes: () => '<span class="inf-eyes">(o_o)</span>' };
 })();
