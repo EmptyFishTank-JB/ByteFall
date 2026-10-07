@@ -392,11 +392,20 @@ gives each day a lean (a wet day, a dry one, a stormy one, a calm one: the same 
 WINTER (Dec-Feb): SNOW that settles on the floor, a BLIZZARD (sideways, a whiteout), SLEET, a
 crisp SUNNY day, the AURORA on clear nights. SPRING (Mar-May): DRIZZLE, RAIN (puddles that drops
 ring, the bots' umbrellas up), a THUNDERSTORM (bolts, flashes, the bots flinching at the thunder),
-a SUNSHOWER, WIND full of blossom petals, HAIL that bounces (an "ow"), SUNNY, a misty morning
+a SUNSHOWER, WIND full of green leaves and blossom petals, HAIL that bounces (an "ow"), SUNNY, a misty morning
 (the fog). SUMMER (Jun-Aug): SUNNY (a heat haze, the bots puffing), THUNDERSTORMS, a SUNSHOWER, a
-dry WIND (dust and a tumbleweed), FIREFLIES in the evening, a METEOR SHOWER at night (the most in
-August). AUTUMN (Sep-Nov): WIND full of falling leaves, DRIZZLE, RAIN, a THUNDERSTORM, HAIL, a
-foggy morning, SUNNY. After the rain, now and then, a RAINBOW. The game card's lane gets its clouds
+WIND of green leaves, FIREFLIES in the evening, a METEOR SHOWER at night (the most in
+August). AUTUMN (Sep-Nov): WIND full of red and gold leaves (blown in along the whole height of the side, settling across the floor), DRIZZLE, RAIN, a THUNDERSTORM, HAIL, a
+foggy morning, SUNNY. After the rain, now and then, a RAINBOW. And through the year: OVERCAST days (the clouds alone),
+FLURRIES (winter, autumn's first snow, a late one in spring), THUNDERSNOW (rare: lightning in the
+snow), DIAMOND DUST (a bitter winter morning: ice crystals glittering), POLLEN and DANDELION FLUFF
+(spring and summer; a bot sneezes), a HEATWAVE (glare, a heavy haze), a DUST STORM (summer: a brown
+sky, dust streaming, a tumbleweed), HEAT LIGHTNING (summer nights: far flickers in the clouds), SUNRISE and SUNSET
+(the sky pink or orange, a big low sun rising or sinking), and THE MOON on clear nights in its real
+phase for the player's date (lit on the right as it waxes, the left as it wanes, the rest faint;
+none at the new moon), now and then over the other night skies too; in September and October its
+full moon is the orange HARVEST MOON. October's own moons (the werewolf's, the blood moon) stay as
+they are. The game card's lane gets its clouds
 for the rain, the snow and the storms (dark for a storm, pale for snow). Achievements: STORM
 CHASER (a thunderstorm, a blizzard and hail) and STARGAZER (the aurora, a meteor shower and
 fireflies). The dev page's WEATHER brings it OFTEN, in a chosen season, or one kind to stay; the

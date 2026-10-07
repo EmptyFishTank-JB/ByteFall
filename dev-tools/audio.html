@@ -469,7 +469,7 @@
       set(SEA, SEA_STEPS[(SEA_STEPS.indexOf(seaNow()) + 1) % SEA_STEPS.length]);
       showSea();
     const WX = 'bytefall-dev-weather';
-    const WX_STEPS = ['auto', 'often', 'spring', 'summer', 'autumn', 'winter', 'drizzle', 'rain', 'storm', 'sunshower', 'hail', 'sleet', 'snow', 'blizzard', 'wind', 'sunny', 'rainbow', 'aurora', 'fireflies', 'meteors', 'fog'];
+    const WX_STEPS = ['auto', 'often', 'spring', 'summer', 'autumn', 'winter', 'drizzle', 'rain', 'storm', 'sunshower', 'hail', 'sleet', 'snow', 'blizzard', 'wind', 'sunny', 'rainbow', 'aurora', 'fireflies', 'meteors', 'moon', 'fog', 'overcast', 'flurries', 'thundersnow', 'diamonddust', 'pollen', 'fluff', 'heatwave', 'duststorm', 'heatlightning', 'sunrise', 'sunset'];
     const wxBtn = document.getElementById('dev-weather');
     const wxNow = () => (WX_STEPS.includes(get(WX)) ? get(WX) : 'auto');
     const showWx = () => {
@@ -486,7 +486,7 @@
     });
     showSea();
     const WX = 'bytefall-dev-weather';
-    const WX_STEPS = ['auto', 'often', 'spring', 'summer', 'autumn', 'winter', 'drizzle', 'rain', 'storm', 'sunshower', 'hail', 'sleet', 'snow', 'blizzard', 'wind', 'sunny', 'rainbow', 'aurora', 'fireflies', 'meteors', 'fog'];
+    const WX_STEPS = ['auto', 'often', 'spring', 'summer', 'autumn', 'winter', 'drizzle', 'rain', 'storm', 'sunshower', 'hail', 'sleet', 'snow', 'blizzard', 'wind', 'sunny', 'rainbow', 'aurora', 'fireflies', 'meteors', 'moon', 'fog', 'overcast', 'flurries', 'thundersnow', 'diamonddust', 'pollen', 'fluff', 'heatwave', 'duststorm', 'heatlightning', 'sunrise', 'sunset'];
     const wxBtn = document.getElementById('dev-weather');
     const wxNow = () => (WX_STEPS.includes(get(WX)) ? get(WX) : 'auto');
     const showWx = () => {

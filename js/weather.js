@@ -17,8 +17,17 @@
 // overcast) for the rain, the snow and the storms. The bots react: umbrellas up in the rain, a
 // flinch at the thunder, an "ow" in the hail, a "phew" in the heat.
 // The dev page's WEATHER (or ?weather=) brings it OFTEN, in a season, or one kind to stay.
-const WEATHER_KINDS = ['drizzle', 'rain', 'storm', 'sunshower', 'hail', 'sleet', 'snow', 'blizzard', 'wind', 'sunny', 'rainbow', 'aurora', 'fireflies', 'meteors', 'fog'];
-const WEATHER_NAMES = { drizzle: 'DRIZZLE', rain: 'RAIN', storm: 'THUNDERSTORM', sunshower: 'SUNSHOWER', hail: 'HAIL', sleet: 'SLEET', snow: 'SNOW', blizzard: 'BLIZZARD', wind: 'WIND', sunny: 'SUNNY', rainbow: 'RAINBOW', aurora: 'AURORA', fireflies: 'FIREFLIES', meteors: 'METEOR SHOWER', fog: 'FOG' };
+const WEATHER_KINDS = ['drizzle', 'rain', 'storm', 'sunshower', 'hail', 'sleet', 'snow', 'blizzard', 'wind', 'sunny', 'rainbow', 'aurora', 'fireflies', 'meteors', 'moon', 'fog', 'overcast', 'flurries', 'thundersnow', 'diamonddust', 'pollen', 'fluff', 'heatwave', 'duststorm', 'heatlightning', 'sunrise', 'sunset'];
+const WEATHER_NAMES = { drizzle: 'DRIZZLE', rain: 'RAIN', storm: 'THUNDERSTORM', sunshower: 'SUNSHOWER', hail: 'HAIL', sleet: 'SLEET', snow: 'SNOW', blizzard: 'BLIZZARD', wind: 'WIND', sunny: 'SUNNY', rainbow: 'RAINBOW', aurora: 'AURORA', fireflies: 'FIREFLIES', meteors: 'METEOR SHOWER', moon: 'MOON', fog: 'FOG', overcast: 'OVERCAST', flurries: 'FLURRIES', thundersnow: 'THUNDERSNOW', diamonddust: 'DIAMOND DUST', pollen: 'POLLEN', fluff: 'DANDELION FLUFF', heatwave: 'HEATWAVE', duststorm: 'DUST STORM', heatlightning: 'HEAT LIGHTNING', sunrise: 'SUNRISE', sunset: 'SUNSET' };
+// THE MOON: tonight's real phase (from a known new moon and the synodic month): 0 new, 0.5 full
+function moonPhase(d = new Date()) {
+  const SYNODIC = 29.530588853;
+  const days = (d.getTime() - Date.UTC(2000, 0, 6, 18, 14)) / 86400000;
+  return (((days / SYNODIC) % 1) + 1) % 1;
+}
+function moonPhaseName(k = moonPhase()) {
+  return ['NEW MOON', 'WAXING CRESCENT', 'FIRST QUARTER', 'WAXING GIBBOUS', 'FULL MOON', 'WANING GIBBOUS', 'LAST QUARTER', 'WANING CRESCENT'][Math.floor(((k + 1 / 16) % 1) * 8)];
+}
 const WEATHER_SEASONS = ['winter', 'spring', 'summer', 'autumn'];
 // (what the dev page or the address asks for: auto, often, a season, or a kind)
 function weatherForced() {
@@ -70,17 +79,29 @@ function createWeather(api) {
     aurora: { aurora: true, night: true },
     fireflies: { fireflies: true, night: true },
     meteors: { meteors: true, night: true },
+    moon: { moon: true, night: true }, // (a clear night, tonight's moon in its real phase)
+    overcast: { clouds: 'grey' }, // (a grey day: the clouds alone)
+    flurries: { snow: 0.45, clouds: 'snow' }, // (a few flakes: the first snow of autumn, a late one in spring)
+    thundersnow: { snow: 1.8, clouds: 'storm', lightning: true, settle: true, umbrellas: 0 }, // (rare: lightning in the snow)
+    diamonddust: { motes: 'sparkle', cold: true }, // (a still, bitter morning: ice crystals glittering in the air)
+    pollen: { motes: 'pollen', sun: true },
+    fluff: { motes: 'fluff', wind: 0.3 }, // (dandelion seeds drifting by)
+    heatwave: { sun: true, heat: 3, tint: 'heat' },
+    duststorm: { blown: true, dust: 4, wind: 1.2, tint: 'dust' },
+    heatlightning: { night: true, flicker: true, clouds: 'storm' }, // (summer nights: far-off flashes in the clouds, no rain, no thunder)
+    sunrise: { low: 'rise', tint: 'rise' },
+    sunset: { low: 'set', tint: 'set' },
   };
   // The year's: [kind, weight, when it can come]
   const TABLE = {
-    winter: [['snow', 4], ['blizzard', 1], ['sleet', 1.2], ['sunny', 1, 'day'], ['aurora', 2, 'night'], ['drizzle', 0.5]],
-    spring: [['drizzle', 2], ['rain', 3], ['storm', 1], ['sunshower', 1.2, 'day'], ['wind', 2], ['sunny', 2, 'day'], ['hail', 0.5], ['fog', 0.6, 'morning']],
-    summer: [['sunny', 4, 'day'], ['storm', 2], ['sunshower', 1, 'day'], ['wind', 1], ['rain', 1], ['fireflies', 2.5, 'evening'], ['meteors', 1.5, 'night']],
-    autumn: [['wind', 3], ['drizzle', 2], ['rain', 2], ['storm', 0.6], ['hail', 0.4], ['fog', 1, 'morning'], ['sunny', 1, 'day']],
+    winter: [['snow', 4], ['flurries', 3], ['blizzard', 1], ['sleet', 1.2], ['thundersnow', 0.3], ['overcast', 2], ['sunny', 1, 'day'], ['diamonddust', 1.2, 'morning'], ['sunrise', 0.8, 'dawn'], ['sunset', 1, 'dusk'], ['aurora', 2, 'night'], ['moon', 2.5, 'night'], ['drizzle', 0.5]],
+    spring: [['drizzle', 2], ['rain', 3], ['storm', 1], ['sunshower', 1.2, 'day'], ['wind', 2], ['sunny', 2, 'day'], ['hail', 0.5], ['fog', 0.6, 'morning'], ['overcast', 1.5], ['pollen', 1.5, 'day'], ['fluff', 1, 'day'], ['flurries', 0.3], ['sunrise', 0.8, 'dawn'], ['sunset', 1, 'dusk'], ['moon', 2, 'night']],
+    summer: [['sunny', 4, 'day'], ['storm', 2], ['sunshower', 1, 'day'], ['wind', 1], ['rain', 1], ['fireflies', 2.5, 'evening'], ['meteors', 1.5, 'night'], ['moon', 2.5, 'night'], ['heatwave', 1.5, 'day'], ['duststorm', 0.5, 'day'], ['heatlightning', 1.5, 'night'], ['fluff', 1, 'day'], ['overcast', 0.8], ['sunrise', 0.8, 'dawn'], ['sunset', 1.5, 'dusk']],
+    autumn: [['wind', 3], ['drizzle', 2], ['rain', 2], ['storm', 0.6], ['hail', 0.4], ['fog', 1, 'morning'], ['sunny', 1, 'day'], ['overcast', 2], ['flurries', 0.6], ['heatlightning', 0.3, 'night'], ['sunrise', 0.8, 'dawn'], ['sunset', 1.2, 'dusk'], ['moon', 2.5, 'night']],
   };
-  const WHEN = { day: isDay, night: isNight, evening: isEvening, morning: isMorning };
-  const WET = ['drizzle', 'rain', 'storm', 'sunshower', 'sleet', 'snow'];
-  const DRY = ['sunny', 'wind', 'fireflies', 'meteors', 'aurora'];
+  const WHEN = { day: isDay, night: isNight, evening: isEvening, morning: isMorning, dawn: () => hour() >= 5 && hour() < 9, dusk: () => hour() >= 17 && hour() < 21 };
+  const WET = ['drizzle', 'rain', 'storm', 'sunshower', 'sleet', 'snow', 'flurries', 'overcast'];
+  const DRY = ['sunny', 'wind', 'fireflies', 'meteors', 'aurora', 'heatwave', 'pollen', 'fluff', 'sunset'];
   // The day's character, from the date: the same for everyone that day
   function dayCharacter() {
     const d = new Date();
@@ -97,7 +118,7 @@ function createWeather(api) {
     const opts = TABLE[season].filter(([k, , when]) => forced || !when || WHEN[when]())
       .filter(([k]) => !(light() && KIND[k] && KIND[k].night)) // (the light themes keep their card: no night sky)
       .filter(([k]) => !(api.foggy() && !['drizzle', 'rain', 'storm', 'wind', 'sleet', 'snow'].includes(k))) // (in the fog: only what falls or blows)
-      .map(([k, w]) => [k, w * (character === 'wet' && WET.includes(k) ? 2 : character === 'dry' && DRY.includes(k) ? 2 : character === 'stormy' && ['storm', 'hail', 'blizzard'].includes(k) ? 2.5 : 1)
+      .map(([k, w]) => [k, w * (character === 'wet' && WET.includes(k) ? 2 : character === 'dry' && DRY.includes(k) ? 2 : character === 'stormy' && ['storm', 'hail', 'blizzard', 'thundersnow', 'duststorm', 'heatlightning'].includes(k) ? 2.5 : 1)
         * (season === 'summer' && k === 'meteors' && new Date().getMonth() === 7 ? 3 : 1)]);
     let r = Math.random() * opts.reduce((a, [, w]) => a + w, 0);
     for (const [k, w] of opts) if ((r -= w) <= 0) return k;
@@ -120,6 +141,7 @@ function createWeather(api) {
   let rainbow = null; // { at, until, canvas }
   let tumble = null;
   let haze = [];
+  let motes = []; // (diamond dust, pollen, dandelion fluff)
   const forcedNow = () => weatherForced();
   const often = () => !!forcedNow();
   let nextCheck = performance.now() + (often() ? rand(2000, 4000) : rand(40000, 90000));
@@ -160,8 +182,11 @@ function createWeather(api) {
     if (k.clouds) api.clouds(k.clouds);
     if (k.rainbowNow) rainbowIn(now, wx.until - now);
     if (k.night || k.aurora || k.meteors) makeStars();
+    // (the moon: the night's own, and now and then over the other night skies; not on a new moon,
+    // nor with October's own moons up, the werewolf's or the blood moon)
+    if (k.night && (k.moon || Math.random() < 0.4) && moonPhase() > 0.035 && moonPhase() < 0.965 && !api.lane.querySelector('.moon-sky')) wx.moon = { side: Math.random() < 0.5 ? 0.16 : 0.84, rise: now };
     if (k.fireflies) { const n = Math.round(14 * areaK()); flies = Array.from({ length: n }, () => newFly()); }
-    if (k.sun) wx.sunSide = Math.random() < 0.5 ? 0.12 : 0.88;
+    if (k.sun || k.low) wx.sunSide = Math.random() < 0.5 ? 0.12 : 0.88;
     if (!k.clouds) api.releaseClouds(true); // (a clear sky: what's left of the last spell's clouds lifts)
     if (k.umbrellas) setTimeout(() => umbrellasUp(k.umbrellas), rand(1200, 3000));
     api.botEvent(`weather-${kind}`);
@@ -179,7 +204,7 @@ function createWeather(api) {
     if (wx && wx.k.clouds) api.releaseClouds();
     wx = null;
     umbrellasDown(true);
-    drops = []; flakes = []; pellets = []; bits = []; splashes = []; puddles = []; ground = []; flies = []; meteors = []; stars = []; bolt = null; rainbow = null; tumble = null; haze = [];
+    drops = []; flakes = []; pellets = []; bits = []; splashes = []; puddles = []; ground = []; flies = []; meteors = []; stars = []; bolt = null; rainbow = null; tumble = null; haze = []; motes = [];
     dropLayers();
   }
 
@@ -322,25 +347,28 @@ function createWeather(api) {
   // WIND: leaves (autumn), blossom petals (spring), dust and now and then a tumbleweed (summer),
   // the snow in winter's
   const BLOWN = {
+    // (the leaves by the time of year: autumn's reds and golds; spring's fresh greens with blossom
+    // petals among them; summer's deep greens; winter's last dry, faded ones; the dust storm's dust)
     autumn: ['#d2691e', '#e8a33c', '#b8401f', '#8c5a2b', '#c9a227', '#a0522d'],
-    spring: ['#f7b8d0', '#ffe4ef', '#f39ac0', '#ffffff'],
-    summer: ['#c8b48a', '#b39d70', '#d9c9a0'],
-    winter: ['#eef2f8'],
+    spring: ['#8fd16a', '#a8e07a', '#6fbf4f', '#f7b8d0', '#ffe4ef'],
+    summer: ['#3f8f3a', '#4fa845', '#2f7a33', '#5cb84e', '#6a9a3a'],
+    winter: ['#8a7a62', '#a39276', '#6f6250', '#b8ad98'],
+    dust: ['#c8b48a', '#b39d70', '#d9c9a0'],
   };
   function blowTick(dt, W, H, now) {
     const season = weatherSeason();
     const blowing = wx && wx.k.blown && wx.phase !== 'out';
     if (blowing) {
-      const rate = (season === 'summer' ? 26 : 9) * wx.level * areaK() * (lowFx() ? 0.5 : 1);
+      const rate = (wx.k.dust ? 26 * wx.k.dust : 9) * wx.level * areaK() * (lowFx() ? 0.5 : 1);
       for (let i = poisson(rate * dt); i > 0; i--) {
-        const dust = season === 'summer';
+        const dust = !!wx.k.dust; // (the DUST STORM's; every other wind carries the season's leaves)
         bits.push({
-          x: wx.dir > 0 ? rand(-30, -4) : rand(W + 4, W + 30), y: dust ? rand(H * 0.45, H - 2) : rand(0, H * 0.75),
-          vx: wx.dir * (dust ? rand(160, 260) : rand(60, 150)), vy: dust ? rand(-6, 6) : rand(10, 34), c: pick(BLOWN[season]),
+          x: wx.dir > 0 ? rand(-30, -4) : rand(W + 4, W + 30), y: dust ? rand(H * 0.45, H - 2) : rand(game() ? H * 0.3 : 0, H - P), // (in from the whole height of the side, down to the floor)
+          vx: wx.dir * (dust ? rand(160, 260) : rand(60, 150)), vy: dust ? rand(-6, 6) : rand(10, 34), c: pick(BLOWN[dust ? 'dust' : season]),
           spin: rand(0, 6.28), dust, front: Math.random() < 0.4, life: 0,
         });
       }
-      if (season === 'summer' && !tumble && now > wx.nextTumble) {
+      if (wx.k.dust && !tumble && now > wx.nextTumble) {
         wx.nextTumble = now + rand(12000, 26000);
         tumble = { x: wx.dir > 0 ? -16 : W + 16, y: H - 6 * P, vy: 0, rot: 0 };
       }
@@ -426,6 +454,34 @@ function createWeather(api) {
   }
   function newFly() { return { x: Math.random(), y: rand(0.4, 0.95), vx: rand(-0.02, 0.02), vy: rand(-0.02, 0.02), on: 0, next: rand(0.2, 3) }; }
 
+  // The moon: a disc of pixels, lit on the right as it waxes and the left as it wanes (as from the
+  // north), its dark part faint (earthshine), a few craters; rising into place
+  const CRATERS = [[-2, -2], [-1, -2], [2, -1], [3, -1], [1, 2], [2, 2], [-3, 1], [-2, 2], [0, 0]];
+  function drawMoon(g, W, H, now, L) {
+    const r = game() ? 6 : 11;
+    const k = moonPhase();
+    const c = Math.cos(2 * Math.PI * k);
+    const cx = Math.round((wx.moon.side * W) / P) * P;
+    const up = Math.min(1, (now - wx.moon.rise) / 20000);
+    const to = H * (game() ? 0.64 : 0.16);
+    const cy = Math.round((to + (1 - up * (2 - up)) * H * 0.25) / P) * P;
+    // (a full moon in September or October: the HARVEST MOON, low and orange)
+    const harvest = k > 0.44 && k < 0.56 && [8, 9].includes(new Date().getMonth());
+    const crater = new Set(CRATERS.map(([x, y]) => `${Math.round((x * r) / 6)},${Math.round((y * r) / 6)}`));
+    g.globalAlpha = L;
+    for (let y = -r; y <= r; y++) {
+      for (let x = -r; x <= r; x++) {
+        if (x * x + y * y > r * r + 1) continue;
+        const half = Math.sqrt(Math.max(0, 1 - (y / (r + 0.5)) ** 2));
+        const nx = (x + 0.5) / (r + 0.5);
+        const lit = k < 0.5 ? nx >= c * half : nx <= -c * half;
+        g.fillStyle = !lit ? 'rgba(120, 125, 150, 0.22)' : crater.has(`${x},${y}`) ? (harvest ? '#d9822b' : '#cfc7a2') : harvest ? '#ffb347' : '#f3edcf';
+        g.fillRect(cx + x * P, cy + y * P, P, P);
+      }
+    }
+    g.globalAlpha = 1;
+  }
+
   function frame(now, dt) {
     // (a spell now and then; the dev page's: sooner, or one kind kept on)
     const f = forcedNow();
@@ -455,6 +511,11 @@ function createWeather(api) {
       if (w && wx.kind === 'hail') api.say(w, 'annoyed', pick(['ow!', 'ow', 'hey!']));
       else if (w && wx.kind === 'sunny' && weatherSeason() === 'summer') api.say(w, 'tired', pick(['phew', 'hot', '...']));
       else if (w && wx.kind === 'blizzard') api.say(w, 'surprised', pick(['brrr', '!?']));
+      else if (w && wx.kind === 'heatwave') api.say(w, 'tired', pick(['phew', 'so hot', '...']));
+      else if (w && wx.kind === 'duststorm') api.say(w, 'annoyed', pick(['*cough*', 'ugh']));
+      else if (w && (wx.kind === 'diamonddust' || wx.kind === 'flurries')) api.say(w, 'happy', pick(['brrr', 'ooh', '*']));
+      else if (w && wx.kind === 'pollen') api.say(w, 'surprised', pick(['achoo!', 'ah-choo']));
+      else if (w && (wx.kind === 'sunset' || wx.kind === 'sunrise' || (wx.moon && moonPhaseName() === 'FULL MOON'))) api.say(w, 'love', pick(['ooh', '<3']));
     }
     if (wx && wx.k.umbrellas && wx.phase !== 'out') for (const w of api.walkers()) if (!w.umbrellaRolled) { w.umbrellaRolled = true; if (Math.random() < wx.k.umbrellas) umbrellaOn(w); }
     if (wx && wx.k.fireflies) for (const fl of flies) {
@@ -473,7 +534,17 @@ function createWeather(api) {
     }
     for (const m of meteors) { m.age += dt; m.x += m.vx * dt; m.y += m.vy * dt; }
     meteors = meteors.filter((m) => m.age < m.life);
-    if (wx && wx.kind === 'sunny' && weatherSeason() === 'summer' && Math.random() < dt * 3) haze.push({ x: rand(0, W), y: H - rand(0, P * 3), age: 0, w: rand(3, 7) });
+    if (wx && wx.k.flicker && wx.phase === 'on' && now > wx.nextBolt) { // (heat lightning: a far flicker in the clouds)
+      wx.nextBolt = now + rand(1800, 6000);
+      if (!calm()) { api.lane.classList.add('lightning'); setTimeout(() => api.lane.classList.remove('lightning'), rand(60, 140)); }
+    }
+    if (wx && wx.k.motes && wx.phase !== 'out') {
+      const rate = { sparkle: 14, pollen: 8, fluff: 3 }[wx.k.motes] * areaK() * wx.level * (lowFx() ? 0.5 : 1);
+      for (let i = poisson(rate * dt); i > 0; i--) motes.push({ kind: wx.k.motes, x: wx.k.motes === 'fluff' ? (wx.dir > 0 ? -8 : W + 8) : rand(0, W), y: rand(H * (game() ? 0.45 : 0.05), H - P), vx: wx.k.motes === 'fluff' ? wx.dir * rand(18, 40) : rand(-4, 4), vy: wx.k.motes === 'sparkle' ? rand(2, 6) : rand(-5, 3), ph: rand(0, 6.28), age: 0, life: wx.k.motes === 'fluff' ? 30 : rand(3, 7) });
+    }
+    for (const m of motes) { m.age += dt; m.ph += dt * 3; m.x += (m.vx + (m.kind === 'pollen' ? Math.sin(m.ph) * 6 : 0)) * dt; m.y += (m.vy + (m.kind === 'fluff' ? Math.sin(m.ph * 0.7) * 8 : 0)) * dt; }
+    motes = motes.filter((m) => m.age < m.life && m.x > -20 && m.x < W + 20);
+    if (wx && (wx.k.heat || (wx.kind === 'sunny' && weatherSeason() === 'summer')) && Math.random() < dt * 3 * (wx.k.heat || 1)) haze.push({ x: rand(0, W), y: H - rand(0, P * 3), age: 0, w: rand(3, 7) });
     for (const h of haze) h.age += dt;
     haze = haze.filter((h) => h.age < 2.2);
     if (!wx || !wx.k.settle) for (let i = 0; i < ground.length; i++) ground[i] = Math.max(0, ground[i] - dt * 0.04);
@@ -484,7 +555,14 @@ function createWeather(api) {
     layers.glow.style.opacity = (wx && wx.k.sun ? 0.85 * L : 0).toFixed(2);
     if (wx && wx.k.sun) layers.glow.style.setProperty('--sx', `${(wx.sunSide * 100).toFixed(0)}%`);
     layers.night.style.opacity = (wx && wx.k.night ? 0.8 * L : 0).toFixed(2);
-    layers.white.style.opacity = (wx && wx.k.white ? 0.3 * L : 0).toFixed(2);
+    layers.white.style.opacity = (wx && wx.k.white ? 0.3 * L : wx && wx.k.tint === 'dust' ? 0.45 * L : 0).toFixed(2);
+    // (the sky's color: a dust storm's brown, a heatwave's glare, a sunrise's pink, a sunset's orange)
+    const tint = wx && wx.k.tint;
+    layers.white.style.background = tint === 'dust' ? 'linear-gradient(to bottom, rgba(170, 130, 80, 0.75), rgba(190, 150, 100, 0.45))' : '';
+    layers.glow.style.background = tint === 'set' ? 'linear-gradient(to top, rgba(255, 120, 40, 0.42), rgba(220, 70, 110, 0.22) 45%, rgba(90, 40, 120, 0.12) 75%, transparent)'
+      : tint === 'rise' ? 'linear-gradient(to top, rgba(255, 170, 120, 0.38), rgba(255, 140, 170, 0.2) 45%, rgba(120, 150, 220, 0.1) 75%, transparent)'
+        : tint === 'heat' ? 'radial-gradient(circle at var(--sx, 80%) 30%, rgba(255, 200, 80, 0.4), rgba(255, 140, 40, 0.16) 50%, transparent 85%)' : '';
+    if (tint === 'set' || tint === 'rise' || tint === 'heat') layers.glow.style.opacity = (0.9 * L).toFixed(2);
 
     const lowfx = lowFx();
     if (now - drawn < (lowfx ? 50 : 0)) return;
@@ -513,6 +591,7 @@ function createWeather(api) {
     const L = wx ? wx.level : 0;
     const t = now / 1000;
     // the night sky: stars
+    if (wx && wx.moon) drawMoon(back, W, H, now, L);
     if (wx && wx.k.night && stars.length) {
       for (const s of stars) {
         const a = (0.35 + 0.35 * Math.sin(t * s.sp + s.tw)) * L;
@@ -538,6 +617,30 @@ function createWeather(api) {
           }
         }
       }
+    }
+    // a sunrise's or sunset's sun: big, low, half down behind the floor, rising or sinking slowly
+    if (wx && wx.k.low && !light()) {
+      const r = game() ? 8 : 14;
+      const cx = Math.round(((wx.sunSide < 0.5 ? 0.2 : 0.8) * W) / P) * P;
+      const age = (now - wx.at) / 1000;
+      const drift = Math.min(1, age / 240) * r * 0.6 * (wx.k.low === 'rise' ? -1 : 1);
+      const cy = Math.round((H - r * P * 1.1 + drift * P) / P) * P; // (its foot just under the floor)
+      back.globalAlpha = L;
+      for (let y = -r; y <= r; y++) for (let x = -r; x <= r; x++) {
+        const d = x * x + y * y;
+        if (d > r * r + 1 || cy + y * P > H - P) continue;
+        back.fillStyle = d < (r - 3) * (r - 3) ? (wx.k.low === 'rise' ? '#ffe2a8' : '#ffc46b') : wx.k.low === 'rise' ? '#ffb27a' : '#ff8a3c';
+        if ((y + Math.floor(age)) % 5 === 0 && y > 0) continue; // (bands of haze across its lower half)
+        back.fillRect(cx + x * P, cy + y * P, P, P);
+      }
+      back.globalAlpha = 1;
+    }
+    // diamond dust, pollen, dandelion fluff
+    for (const m of motes) {
+      const fade = Math.min(1, m.age / 0.6, (m.life - m.age) / 0.8);
+      if (m.kind === 'sparkle') { front.fillStyle = `rgba(235, 245, 255, ${(fade * Math.abs(Math.sin(m.ph * 1.7))).toFixed(2)})`; px(front, m.x, m.y); }
+      else if (m.kind === 'pollen') { back.fillStyle = `rgba(255, 224, 102, ${(0.7 * fade).toFixed(2)})`; px(back, m.x, m.y); }
+      else { front.fillStyle = `rgba(245, 245, 240, ${(0.85 * fade).toFixed(2)})`; px(front, m.x, m.y, 2, 1); front.fillStyle = `rgba(245, 245, 240, ${(0.5 * fade).toFixed(2)})`; px(front, m.x + P * 0.5, m.y + P); }
     }
     // the sun: a disc of pixels and its rays, turning
     if (wx && wx.k.sun && !light()) {
@@ -672,5 +775,5 @@ function createWeather(api) {
     }
   }
 
-  return { frame, clear, start: (kind) => start(kind), stop: () => end(), current: () => (wx ? wx.kind : null) };
+  return { frame, clear, start: (kind) => start(kind), stop: () => end(), current: () => (wx ? wx.kind : null), moon: () => moonPhaseName() };
 }
