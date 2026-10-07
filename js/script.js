@@ -364,8 +364,6 @@ const storedStep = (key, range) => {
 };
 let vsTarget = storedStep('bytefall-vs-target', VS_TARGET);
 let vsPool = storedStep('bytefall-vs-pool', VS_POOL);
-const vsModeText = () => (vsMode === 'classic' ? `LAYERS ${vsLayers ? 'ON' : 'OFF'}`
-  : vsMode === 'tug' ? `TUG OF WAR ${fmt(vsPool)}` : `${VS_MODES[vsMode].label} ${fmt(vsTarget)}`);
 const vsLevelOpen = (id) => (id === 'hard' || id === 'insane' ? Progress.isUnlocked(`vs-${id}`) : true);
 const vsBotOpen = (id) => id === 'bot' || Progress.isUnlocked(`bot-${id}`);
 if (!vsLevelOpen(vsLevel)) vsLevel = 'normal';
@@ -3487,7 +3485,7 @@ function showCpuDesc() {
 // The status line in the mode row's place, and how many stat rows the left column has
 function updateVsChrome() {
   const rows = [...document.querySelectorAll('.hud > .stat:not(.cpu-stat):not(.cpu-face), .hud > .hud-bits')].filter((el) => !el.hidden && getComputedStyle(el).display !== 'none').length;
-  document.getElementById('vs-status').textContent = `${CpuBoard.BOTS[vsBot].label} ${CpuBoard.LEVELS[vsLevel].label} // ${vsModeText()}`;
+  document.getElementById('vs-status').textContent = VS_MODES[vsMode].label; // (just the game mode: the CPU's named over its board)
   fitVsStatus();
   document.querySelector('.hud').style.setProperty('--vs-rows', rows);
 }
