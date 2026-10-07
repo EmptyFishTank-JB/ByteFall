@@ -570,7 +570,7 @@ full-width button under the other themes) follows the calendar: in OCTOBER the c
 between purple and orange and the title flickers now and then like a failing light; in DECEMBER
 (to Jan 6) the background's blocks are bulbs of every filament color, twinkling, the board catches
 the lights' warm glow and the scroll bars are candy canes. **THE SEASON'S LIGHTS**: strings of old
-filament bulbs hang down both sides of the card, over everything, glowing and twinkling in turn,
+filament bulbs in fine pixel art (finer than the bots', each hanging at its own tilt) hang down both sides of the card, over everything, glowing and twinkling in turn,
 the CHAIN METER's segments in their colors: December's C9s of every color, October's orange,
 purple and green with jack o' lanterns and candy corn among them, Valentine's pinks, red and white
 with hearts. EFFECTS: REDUCED takes them (and December's warm glow) away.
