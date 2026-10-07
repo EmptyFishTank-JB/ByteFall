@@ -166,9 +166,21 @@
   // (the Android app: with the player open, the music keeps playing when the app is in the
   // background; tools/android/MainActivity.java)
   const toApp = (on) => { try { if (window.BytefallAndroid) window.BytefallAndroid.setPlayerOpen(on); } catch (e) {} };
+  // The card laid exactly over the game card: the same size and place
+  const card = el.querySelector('.mp-inner');
+  const crt = document.querySelector('.crt');
+  function fitCard() {
+    if (el.hidden || !crt) return;
+    const r = crt.getBoundingClientRect();
+    if (r.width < 60 || r.height < 60) return;
+    Object.assign(card.style, { position: 'absolute', maxWidth: 'none', left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px` });
+  }
+  addEventListener('resize', fitCard);
+  if (window.ResizeObserver && crt) new ResizeObserver(fitCard).observe(crt);
   function open() {
     if (typeof setSettingsOpen === 'function') setSettingsOpen(false);
     el.hidden = false;
+    fitCard();
     document.body.classList.add('player-open');
     toApp(true);
     Music.setFullMix(true);

@@ -218,11 +218,11 @@ let overlayNext = null; // what the overlay button does in PUZZLE: 'next' or 're
 const BOOSTERS = {
   'head-start': { name: 'HEAD START', cost: 15, desc: 'The CHAIN METER starts half full.', modes: ['classic', 'blitz', 'zen'] },
   'firewall-delay': { name: 'FIREWALL DELAY', cost: 20, desc: 'The first encryption layer rises 4 drops later.', modes: ['classic', 'blitz'] },
-  lookahead: { name: 'LOOKAHEAD', cost: 15, desc: 'The next bit is shown for the first 60 seconds of play (EASY always shows it).', modes: ['classic', 'blitz', 'zen'] },
+  lookahead: { name: 'LOOKAHEAD', cost: 15, desc: 'See your next bit for the first 60 seconds (EASY always shows it).', modes: ['classic', 'blitz', 'zen'] },
   overtime: { name: 'OVERTIME', cost: 20, desc: '+15 seconds on the BLITZ clock.', modes: ['blitz'] },
-  'second-chance': { name: 'SECOND CHANCE', cost: 40, desc: 'When the trace completes, everything above the bottom 3 rows is wiped and the game goes on. Once a game.', modes: ['classic', 'blitz', 'zen'] },
-  hint: { name: 'HINT', cost: 10, desc: 'PUZZLE: lights the column the next bit goes in.', modes: ['puzzle'], inGame: true },
-  undo: { name: 'UNDO', cost: 8, desc: 'PUZZLE: takes back your last drop, even after running out of bits.', modes: ['puzzle'], inGame: true },
+  'second-chance': { name: 'SECOND CHANCE', cost: 40, desc: 'If the trace completes, everything above the bottom 3 rows is wiped and you keep playing. Once a game.', modes: ['classic', 'blitz', 'zen'] },
+  hint: { name: 'HINT', cost: 10, desc: 'PUZZLE: lights up the column your next bit should go in.', modes: ['puzzle'], inGame: true },
+  undo: { name: 'UNDO', cost: 8, desc: 'PUZZLE: takes back your last drop, even after your bits run out.', modes: ['puzzle'], inGame: true },
 };
 // Each booster's own icon (in the STORE, in brackets, and on the main menu's booster buttons)
 const BOOSTER_SVG = {
@@ -296,9 +296,9 @@ const ITEM_DESC = {
   'dictionary-attack': 'Every encryption layer on the board loses one level.',
   'rainbow-table': 'Decrypts every bit showing the most common number on the board.',
   'black-box': 'Opens into a random exploit, any of them.',
-  'box-1': 'A sealed pull, opened in the game: most likely a tier 1 exploit.',
-  'box-2': 'A sealed pull, opened in the game: most likely a tier 2 exploit.',
-  'box-3': 'A sealed pull, opened in the game: good odds of a tier 3 exploit.',
+  'box-1': 'Most likely a tier 1 exploit.',
+  'box-2': 'Most likely a tier 2 exploit.',
+  'box-3': 'Good odds of a tier 3 exploit.',
 };
 const itemDesc = (id) => ITEM_DESC[id] || '';
 const itemName = (id) => (BOX_TIERS[id] ? `BLACK BOX ${BOX_TIERS[id]}` : ANTI[id] ? ANTI[id].name : HACKS[id] ? HACKS[id].name : id);
@@ -4364,9 +4364,43 @@ function closeResInfo() { resInfoEl.classList.add('hidden'); }
 function openResInfo() {
   const list = document.getElementById('res-info-list');
   list.innerHTML = ['keys', ...Progress.resIds()].map((id) => `<div class="res-info-row res-${id}"><b>${RES_INFO[id].svg}${RES_INFO[id].name}</b><span>${RES_HOW[id] || ''}</span></div>`).join('');
+  showInfo('// HOW THEY\'RE EARNED', true);
+}
+// THE STORE's sections' [i]s: what each kind of thing is (what each one does is on its own tag)
+const SECTION_INFO = {
+  boosters: ['// BOOSTERS', [
+    'A booster gives your next game an edge.',
+    'Buy them with KEYS. Before a game, tap BOOSTERS on the main menu and switch one on.',
+    'One per game. It\'s used up when the game starts (SECOND CHANCE only when it saves you).',
+    'Not in DAILY or VS.']],
+  starters: ['// STARTER EXPLOITS', [
+    'An exploit you own and bring into a game, instead of waiting for the CHAIN METER to earn one.',
+    'Pick up to two under STARTERS on the main menu. Each sits in a side slot next to the exploit button: the left slot opens at Lv 4, the right at Lv 12.',
+    'In the game, tap one to use it as your next drop. Any you don\'t use stay yours.',
+    'Short on resources? A MASTER KEY buys any exploit.',
+    'An empty side slot turns into the BLACK MARKET once the first encryption layer rises: something for sale that changes every 4 drops.',
+    'CLASSIC, BLITZ and ZEN only.']],
+  boxes: ['// BLACK BOXES', [
+    'A sealed box with a random exploit inside, for less than it usually holds.',
+    'Bring it into a game in a side slot, then tap it to open it. Most of the time you get an exploit of the box\'s tier, to use when you like.',
+    'Sometimes it\'s an ANTI-EXPLOIT that goes off right away: ADWARE blocks a column for 3 drops, SPYWARE hides your next 3 bits, RANSOMWARE locks 3 bits under a layer.',
+    'The higher the tier, the better the odds. Each box shows its own.']],
+};
+function openSectionInfo(key) {
+  const [title, lines] = SECTION_INFO[key];
+  const body = document.getElementById('res-info-body');
+  body.innerHTML = lines.map((l) => `<p>${l}</p>`).join('');
+  showInfo(title, false);
+}
+function showInfo(title, resources) {
+  document.getElementById('res-info-title').textContent = title;
+  document.getElementById('res-info-list').hidden = !resources;
+  document.getElementById('res-info-note').hidden = !resources;
+  document.getElementById('res-info-body').hidden = resources;
   resInfoEl.classList.remove('hidden');
   document.getElementById('res-info-close').focus();
 }
+document.querySelectorAll('.store-info[data-info]').forEach((b) => b.addEventListener('click', () => openSectionInfo(b.dataset.info)));
 document.getElementById('store-info').addEventListener('click', openResInfo);
 document.getElementById('store-wallet').addEventListener('click', openResInfo);
 document.getElementById('store-wallet').addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openResInfo(); } });

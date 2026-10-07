@@ -774,14 +774,14 @@ body.vs-mode .vs-title span { color: var(--accent); text-shadow: 0 0 8px var(--a
 }
 [data-theme="spectrum"] .cabinet,
 [data-theme="spectrum"] footer,
-[data-theme="spectrum"] .music-player .mp-inner > :not(.mp-viz) { animation: page-hue 48s linear infinite; }
+[data-theme="spectrum"] .music-player :is(.mp-head, .mp-scroll > :not(.mp-viz)) { animation: page-hue 48s linear infinite; }
 [data-theme="spectrum"] .cell.pop { animation: pop-out 0.16s ease-out forwards; }
 
 @media (prefers-reduced-motion: reduce) {
   [data-theme="spectrum"] .cell.disc,
   [data-theme="spectrum"] .cabinet,
   [data-theme="spectrum"] footer,
-  [data-theme="spectrum"] .music-player .mp-inner > :not(.mp-viz) { animation: none; }
+  [data-theme="spectrum"] .music-player :is(.mp-head, .mp-scroll > :not(.mp-viz)) { animation: none; }
 }
 
 .cell.overflow {
@@ -2240,17 +2240,21 @@ html { touch-action: manipulation; }
 }
 .music-player[hidden] { display: none; }
 body.player-open { overflow: hidden; }
-/* (a card like the game's: its border and glow, 16px in from the screen's edges, as wide as the game card) */
-.music-player { padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom)); box-sizing: border-box; }
+/* (a card like the game's: its border and glow, laid exactly over the game card (player.js's fitCard),
+   the head staying put and what's under it scrolling inside the card, as the game's own cards do) */
+.music-player { overflow: hidden; padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom)); box-sizing: border-box; }
 .mp-inner {
-  display: flex; flex-direction: column; align-items: stretch; gap: 14px;
-  width: 100%; max-width: 480px; min-height: 100%; height: max-content; box-sizing: border-box;
-  padding: 14px clamp(12px, 4vw, 24px) 20px;
+  display: flex; flex-direction: column; align-items: stretch; gap: 12px; overflow: hidden;
+  width: 100%; max-width: 480px; height: 100%; box-sizing: border-box;
+  padding: 14px clamp(12px, 4vw, 24px) 0;
   background: var(--panel); border: 2px solid var(--fg-dim); border-radius: 10px;
   box-shadow: 0 0 30px rgba(var(--fg-rgb), 0.15), inset 0 0 40px rgba(0, 0, 0, 0.5);
 }
 /* (its head as the game's cards': BACK top left, the title beside it) */
-.mp-head { margin-bottom: 0; }
+.mp-head { margin-bottom: 0; flex: none; }
+.mp-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 14px; padding-bottom: 20px; scrollbar-width: thin; scrollbar-color: var(--fg-dim) transparent; }
+.mp-scroll::-webkit-scrollbar { width: 6px; }
+.mp-scroll::-webkit-scrollbar-thumb { background: var(--fg-dim); border-radius: 3px; }
 .mp-title { font-size: 13px; letter-spacing: 2px; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
 @media (hover: hover) { .mp-close:hover { background: rgba(var(--fg-rgb), 0.12); } }
 .mp-viz {
@@ -3404,6 +3408,11 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 .res-keys b .key-ico { color: var(--accent); }
 .res-info-row span { font-size: 11px; line-height: 1.5; color: var(--fg-dim); }
 .res-info-note { text-align: left; font-size: 11px; line-height: 1.5; }
+.res-info-body { margin: 10px 0 14px; text-align: left; }
+.res-info-body p { margin: 0 0 8px; font-size: 12px; line-height: 1.55; color: var(--fg-dim); }
+.res-info-body p:first-child { color: var(--fg); }
+.store-sub .store-info { font-size: 14px; margin-left: 4px; }
+.store-sub .store-info svg { width: 8px; height: 13px; }
 .store-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; margin-right: -8px; padding: 0 8px 14px 0;
   scrollbar-width: thin; scrollbar-color: var(--fg-dim) transparent; }
 .store-scroll::-webkit-scrollbar { width: 6px; }
