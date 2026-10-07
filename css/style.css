@@ -1,3 +1,20 @@
+/* ═══════════════════════════════════════════════════════════════════════════════════════════════
+   FONT SIZE RULES: read before adding or changing any text. The menus (RULES & RECORDS, EXPLOITS,
+   the STORE, SETTINGS, the info cards) share one scale; use one of these sizes, not a new one.
+     17px    a card's title (h2: EXPLOITS, STORE) and an item's name (h3: an exploit, a booster)
+     15.5px  a section head (STORE's BOOSTERS, EXPLOITS' TIER 1, SETTINGS' // SOUND); the banners
+     14.5px  body text in the cards' pages; the ===== lines (14.5px, line-height 15px, 2px apart)
+     13px    notes and descriptions under a head or an option (store notes, tier notes, settings
+             notes and sub-heads like THEME)
+     12px    buttons (BACK, the settings toggles, BUY)
+     11.5px  small tags (EQUIPPED, TAP TO REMOVE, LOCKED, the footer, prices' small print)
+     10.5px  the HUD's box labels (SCORE, CHAIN...) and the tiniest inline tags
+     9px     the floor: nothing smaller (--label-min; a theme's LV tag); past it, text wraps instead
+   Text with no size of its own in the cards' pages, notes, the tutorial and the game-over box
+   takes 1.3x what it inherits (see :where(...) { font-size: 1.3em } further down).
+   Sections in a card are parted by ===== lines (.store-rule, or a ::before/::after like it),
+   never dashes. Fonts are sized to Courier's metrics (js/fonts.js), so these hold in any font.
+   ═══════════════════════════════════════════════════════════════════════════════════════════════ */
 /* FONTS: COURIER (the default) and five unlockable fonts, bundled in assets/fonts/ (SIL OFL) and
    set up by js/fonts.js, which fits each to Courier's line height and capital height so switching
    fonts moves and resizes nothing. [data-font] on <html> picks one; everything reads var(--font). */
@@ -1775,7 +1792,7 @@ body.vs-mode header #mode-info { display: none; }
 .settings .toggle-btn.on { color: var(--fg); border-color: var(--fg-dim); }
 
 .settings-note + .toggle-btn { margin-top: 10px; }
-.settings > .toggle-btn + .toggle-btn { margin-top: 6px; } /* (two in a row, no note between: VIBRATION, then DROP BY; the same 6px as SOUND / MUSIC to SOUND OUTPUT) */
+.settings-panel > .toggle-btn + .toggle-btn { margin-top: 6px; } /* (two in a row, no note between: VIBRATION, then DROP BY; the same 6px as SOUND / MUSIC to SOUND OUTPUT) */
 
 .settings-note {
   margin: 6px 2px 0;
@@ -1953,10 +1970,16 @@ header { margin-bottom: 6px; }
   padding: 0; background: var(--board-bg); border: 1px solid var(--grid-line); border-radius: 6px; cursor: pointer;
   color: var(--fg-dim); --dim: 0.6; font-family: inherit; -webkit-tap-highlight-color: transparent;
 }
-/* (the background solid, the starlight twinkling in it as in the HUD boxes; only what's on it dims) */
+/* (in layers, as the grid's own slots: the starlight twinkling, the slot's see-through shading over it,
+   then the icon. The icon's dimmed, never see-through; bought, it's as bright as a dropped bit) */
 .exploit-icon { isolation: isolate; background: var(--board-bg); }
-.exploit-icon > :not(.stat-bg) { opacity: var(--dim, 0.6); }
-.exploit-icon > .stat-bg { border-radius: inherit; }
+.exploit-icon > .stat-bg { border-radius: inherit; z-index: -2; }
+.exploit-icon::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+  background: rgba(var(--fg-rgb), 0.04); box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.55); }
+.exploit-icon > :not(.stat-bg) { filter: brightness(var(--dim, 0.6)); }
+.exploit-icon.side-slot.owned { text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.6); }
+.exploit-icon.side-slot.owned .exploit-glyph { filter: drop-shadow(0 0 4px rgba(var(--accent-rgb), 0.55)); }
+.exploit-icon.side-slot.armed, .exploit-icon.side-slot.armed:disabled { color: var(--accent); --dim: 1; border-style: solid; border-color: var(--accent); animation: amber-pulse 0.9s ease-in-out infinite; cursor: default; }
 .exploit-glyph { display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; line-height: 1; }
 .exploit-glyph svg { width: 22px; height: 22px; }
 .exploit-count { position: absolute; top: -7px; right: -7px; padding: 0 4px; border-radius: 6px; background: var(--fg); color: var(--panel); font-size: 10px; font-weight: bold; }
@@ -3622,7 +3645,7 @@ body.in-game.can-pause .records-btn svg { left: auto; right: 4px; } /* (hugging 
 .store-item { margin-top: var(--gap); }
 .hack-item { margin-top: var(--gap); }
 .theme-list, .settings-row { gap: var(--gap); }
-.settings > .toggle-btn + .toggle-btn { margin-top: var(--gap); }
+.settings-panel > .toggle-btn + .toggle-btn { margin-top: var(--gap); }
 /* (the STORE's card starts where EXPLOITS' does, right under the card's top bar) */
 .records .menu-pane[data-pane="store"]:not([hidden]) { padding-top: 0; }
 .settings-row { margin-bottom: var(--gap); }
@@ -4273,3 +4296,19 @@ html, body { overflow-x: clip; }
   font-size: inherit; line-height: inherit; color: inherit; padding: 4px 12px 14px; scrollbar-width: thin; scrollbar-color: var(--fg-dim) transparent; }
 .settings-panel::-webkit-scrollbar { width: 6px; }
 .settings-panel::-webkit-scrollbar-thumb { background: var(--fg-dim); border-radius: 3px; }
+
+/* SETTINGS on the menus' type scale (as the STORE, EXPLOITS and RULES): section heads 15.5px, their
+   sub-heads and notes 13px, buttons 12px, small tags 11.5px; and its sections parted by ===== lines,
+   not dashes */
+.settings .settings-title { font-size: 13px; }
+.settings .settings-title.settings-section { font-size: 15.5px; }
+.settings .toggle-btn { font-size: 12px; }
+.settings .dev-unlock-btn { font-size: 11.5px; }
+.settings button .need { font-size: 10.5px; }
+body.cards-in-settings .settings footer { font-size: 11.5px; }
+.settings .settings-section, .settings .settings-options { border-top: 0; padding-top: 0; }
+.settings .settings-section:not(.settings-first)::before, .settings .settings-options::before {
+  content: "================================================================================"; display: block; margin: 4px 0 10px; overflow: hidden; white-space: nowrap;
+  font-size: 14.5px; line-height: 15px; letter-spacing: 2px; color: var(--accent); opacity: 0.7; text-shadow: none; }
+body.cards-in-settings .settings footer :is(p, span, a) { font-size: 11.5px; }
+.settings .theme-option .lv-tag { font-size: 9px; } /* (the smallest label the game allows) */

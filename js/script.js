@@ -107,6 +107,7 @@ let breached = false; // BREACH: the board was cleared
 let started = false; // the session's first drop has landed (PUZZLE counts as started right away)
 let heldHacks = []; // earned exploits waiting in the exploit button
 let armedHack = null; // the exploit armed as the next drop (no taking it back)
+let armedSlot = null; // (armed from a side slot: that slot, where it stays lit till it's dropped)
 
 const storage = {
   get(key) {
@@ -541,6 +542,7 @@ function initGame() {
   started = mode === 'puzzle';
   heldHacks = [];
   armedHack = null;
+  armedSlot = null;
   streak = 0;
   chainLit = 0;
   pulseInterval = mode === 'vs' ? BASE_INTERVAL : DIFFICULTIES[difficulty].interval(0); // (VS: both boards on the same pace)
@@ -1413,7 +1415,15 @@ async function attemptDrop(col) {
   chainLog = []; // (what this drop decrypts, link by link, for the tutorial's explanations)
   dropLinks = 0;
   const piece = queue.shift();
-  if (piece.type === 'hack') armedHack = null;
+  if (piece.type === 'hack') {
+    armedHack = null;
+    if (armedSlot !== null) { // (dropped: its side slot opens to the market now)
+      const sl = sideSlots[armedSlot];
+      armedSlot = null;
+      if (sl && sl.state === 'armed') slotSpent(sl, sl.id);
+      renderStarters();
+    }
+  }
   refillQueue();
   if (keyloggerDrops > 0) keyloggerDrops--;
   const sniffedOut = snifferBits === 1 && piece.type === 'number'; // the Packet Sniffer's last bit
@@ -4816,10 +4826,11 @@ function updateFreeBtn() {
   updateTopIcons();
   showChainMeter();
   const ready = nextExploit();
-  const shown = armedHack || ready;
+  const centreArmed = armedHack && armedSlot === null; // (one armed from a side slot shows there, not here)
+  const shown = (centreArmed && armedHack) || ready;
   showExploitNotice();
   document.getElementById('exploit-glyph').innerHTML = shown ? iconHtml(shown) : LIGHTNING_SVG;
-  exploitBtn.classList.toggle('armed', !!armedHack);
+  exploitBtn.classList.toggle('armed', !!centreArmed);
   exploitBtn.classList.toggle('ready', !armedHack && !!ready);
   exploitBtn.title = armedHack ? `${HACKS[armedHack].name} // ARMED: drop it`
     : ready ? `${HACKS[ready].name} // tap to arm it as your next drop` : 'Exploits';
@@ -4873,6 +4884,7 @@ function renderStarters() {
     b.classList.toggle('owned', !market);
     b.classList.toggle('sealed', sealed && !market);
     b.classList.toggle('confirm', market && shopSlot === i);
+    b.classList.toggle('armed', sl.state === 'armed');
     b.classList.toggle('locked', market && !marketOpen); // (not open yet: the first layer hasn't risen)
     b.classList.toggle('short', short);
     // (the BLACK MARKET's frame: a side for each drop till it turns over, going dark one a drop, clockwise from the top)
@@ -4884,11 +4896,11 @@ function renderStarters() {
       b.dataset.key = key;
       b.innerHTML = `<span class="exploit-glyph">${itemIcon(sl.id)}</span>`
         + (market && marketOpen ? `<svg class="slot-timer" viewBox="0 0 40 40" preserveAspectRatio="none" aria-hidden="true">${MARKET_SIDES.map((d) => `<path d="${d}"/>`).join('')}</svg>` : '')
-        + (market ? `<span class="slot-sale" aria-hidden="true">${CURRENCY_SVG}</span>` : `<span class="starter-tag">${sl.state === 'starter' ? 'S' : '✓'}</span>`);
+        + (market ? `<span class="slot-sale" aria-hidden="true">${CURRENCY_SVG}</span>` : sl.state === 'armed' ? '' : `<span class="starter-tag">${sl.state === 'starter' ? 'S' : '✓'}</span>`);
     }
     b.querySelectorAll('.slot-timer path').forEach((path, k) => path.classList.toggle('on', k >= MARKET_EVERY - left));
     const name = itemName(sl.id);
-    b.title = market ? `BLACK MARKET // ${name}: ${priceText(price)} (${marketOpen ? `tap to see it; a new one in ${left} drop${left === 1 ? '' : 's'}` : `opens in ${marketOpensIn()} drops`})`
+    b.title = sl.state === 'armed' ? `${itemName(sl.id)} // ARMED: drop it` : market ? `BLACK MARKET // ${name}: ${priceText(price)} (${marketOpen ? `tap to see it; a new one in ${left} drop${left === 1 ? '' : 's'}` : `opens in ${marketOpensIn()} drops`})`
       : sealed ? `${sl.state === 'starter' ? 'STARTER' : 'BOUGHT'} // ${name}: tap to open it`
         : `${sl.state === 'starter' ? 'STARTER' : sl.state === 'opened' ? 'BLACK BOX' : 'BOUGHT'} // ${name}: tap to arm it`;
     b.setAttribute('aria-label', b.title);
@@ -4912,7 +4924,7 @@ function openMarket() {
 }
 function slotTap(i) {
   const sl = sideSlots[i];
-  if (!sl || gameOver || sl.state === 'closed' || sl.state === 'locked' || sl.state === 'rolling') return;
+  if (!sl || gameOver || sl.state === 'closed' || sl.state === 'locked' || sl.state === 'rolling' || sl.state === 'armed') return; // (armed: no taking it back)
   if (sl.state !== 'market') {
     if (Progress.isBox(sl.id)) openBox(i);
     else if (!armExploit(i)) SFX.play('denied');
@@ -5217,7 +5229,8 @@ function armExploit(slot = null) {
       label = 'STARTER';
     } else label = sl.state === 'opened' ? 'BLACK BOX' : 'BLACK MARKET';
     id = sl.id;
-    slotSpent(sl, id); // (the slot opens to the market)
+    sl.state = 'armed'; // (it stays in its slot, lit, till it's dropped; then the slot opens to the market)
+    armedSlot = slot;
   } else if (!id) {
     if (!freeAllowed()) return false;
     id = freeExploitId();

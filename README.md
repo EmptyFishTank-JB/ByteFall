@@ -604,6 +604,14 @@ after a few seconds), then the board melts down like a traced run before the
 new one starts. Once a run is over, or before the first drop, they act straight
 away.
 
+## Font sizes
+
+One scale for every menu card (RULES & RECORDS, EXPLOITS, the STORE, SETTINGS, the info cards); the
+full rules head css/style.css, so they're the first thing seen when changing styles. In short:
+17px card titles and item names, 15.5px section heads and banners, 14.5px body text and the =====
+lines, 13px notes and sub-heads, 12px buttons, 11.5px small tags, 10.5px HUD labels, 9px the floor.
+Sections are parted by ===== lines, never dashes.
+
 ## Files
 
 `index.html` (and `byterrium.html`, `dev-tools/audio.html`, `dev-tools/mixer.html`) load their CSS and JS with a `?v=N`
