@@ -4343,3 +4343,10 @@ body.in-game.can-pause .records-btn.pause-queued { background: rgba(var(--fg-rgb
 .theme-black { position: fixed; inset: 0; z-index: 9990; background: #000; opacity: 0; pointer-events: none; transition: opacity 0.22s ease-in; }
 .theme-black.on { opacity: 1; pointer-events: auto; transition-timing-function: ease-out; }
 .settings .theme-option .lv-tag { padding: 1px 3px; border-radius: 2px; background: var(--panel); top: 1px; right: 2px; } /* (over the end of a long name: it reads clean) */
+/* The buttons on the game card get a solid base in the card's own colour (their tints laid over it),
+   so what's behind them (OCTOBER's trees, the scenery, the bots) doesn't show through and swallow them:
+   on the dark themes it looks the same, on PAPER it's what keeps them readable */
+.column-buttons button { background: linear-gradient(rgba(var(--fg-rgb), 0.08), rgba(var(--fg-rgb), 0.08)), var(--panel); }
+.difficulty button:not(.active) { background-color: var(--panel); }
+@media (hover: hover) { .difficulty button:not(.active):hover { background-image: linear-gradient(rgba(var(--fg-rgb), 0.15), rgba(var(--fg-rgb), 0.15)); } }
+.vs-start { background: linear-gradient(rgba(var(--fg-rgb), 0.12), rgba(var(--fg-rgb), 0.12)), var(--panel); }
