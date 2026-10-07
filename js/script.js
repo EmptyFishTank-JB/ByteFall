@@ -551,11 +551,10 @@ function initGame() {
   spywareLeft = 0;
   marketOpen = false;
   const taken = Progress.startersTaken();
-  const open = Progress.sideSlots(); // (by level: the left at Lv 4, the right at Lv 12; one still shut stays hidden)
-  sideSlots = starterFits() && mode !== 'tutorial' && open > 0
+  const open = Progress.sideSlots(); // (by level: the left at Lv 4, the right at Lv 12; one still shut shows its padlock and level)
+  sideSlots = starterFits() && mode !== 'tutorial'
     ? [0, 1].map((i) => (i >= open ? { state: 'locked', id: null } : taken[i] ? { state: 'starter', id: taken[i] } : { state: 'market', id: null })) : [];
   for (const sl of sideSlots) { // (a slot taken in empty is the BLACK MARKET from the start)
-    if (sl.state === 'locked') { sl.state = 'closed'; continue; }
     if (sl.state !== 'market') continue;
     sl.id = marketPick(sideSlots.map((x) => x.id));
     if (!sl.id) sl.state = 'closed'; // (nothing unlocked yet)
@@ -3847,23 +3846,6 @@ const themeMeta = document.querySelector('meta[name="theme-color"]');
 Progress.setThemeCount(THEMES.length);
 let themeId = THEMES.some((t) => t.id === storage.get('bytefall-theme')) ? storage.get('bytefall-theme') : 'terminal';
 
-// THE SEASON'S LIGHTS (style.css): their strings run from the screen's top edge to its bottom one,
-// off the screen both ways, down the card's sides (to the screen, not past it: the page never scrolls)
-const cardLightsEl = document.querySelector('.card-lights');
-function fitLights() {
-  if (!cardLightsEl || !cardLightsEl.offsetParent) return;
-  const card = cardLightsEl.parentElement.getBoundingClientRect();
-  const border = cardLightsEl.parentElement.clientTop || 0;
-  cardLightsEl.style.top = `${-Math.max(0, card.top + scrollY) - border}px`;
-  const below = innerHeight - card.bottom;
-  cardLightsEl.style.bottom = below >= 0 ? `${-below - border}px` : '';
-}
-if (cardLightsEl) {
-  addEventListener('resize', fitLights);
-  if (window.ResizeObserver) new ResizeObserver(fitLights).observe(cardLightsEl.parentElement);
-  new MutationObserver(fitLights).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class'] });
-  requestAnimationFrame(fitLights);
-}
 let themeFade = 0; // the timer that ends the page's fade to a newly picked theme
 function applyTheme() {
   const theme = THEMES.find((t) => t.id === themeId);
@@ -4721,6 +4703,8 @@ function updateFreeBtn() {
 }
 // (the frame's four sides, top, right, bottom, left: MARKET_EVERY of them)
 const MARKET_SIDES = ['M9 1H31', 'M39 9V31', 'M31 39H9', 'M1 31V9'];
+// (a side slot not open yet: a pixel padlock)
+const SLOT_LOCK_SVG = '<svg class="slot-lock" viewBox="0 0 10 12" aria-hidden="true" shape-rendering="crispEdges"><path d="M3 1h4v1h1v3H7V2H3v3H2V2h1zM1 5h8v6H1zM4 7v2h2V7z" fill="currentColor" fill-rule="evenodd"/></svg>';
 // The side slots: built once, either side of the exploit button, redrawn as they change
 let slotEls = null;
 const sideSlotEls = () => slotEls || (slotEls = [0, 1].map((i) => {
@@ -4740,7 +4724,16 @@ function renderStarters() {
     const show = !!sl && !gameOver && mode !== 'tutorial';
     b.hidden = !sideSlots.length || gameOver || mode === 'tutorial';
     b.classList.toggle('closed', !show || sl.state === 'closed');
+    b.classList.toggle('locked-slot', show && sl.state === 'locked');
     if (!show || sl.state === 'closed') { b.innerHTML = ''; b.disabled = true; return; }
+    if (sl.state === 'locked') { // (not open yet: a padlock and the level it opens at)
+      b.className = 'exploit-icon side-slot locked-slot';
+      b.disabled = true;
+      b.innerHTML = `${SLOT_LOCK_SVG}<span class="slot-lv">LV ${Progress.sideSlotLevel(i)}</span>`;
+      b.title = `${i ? 'RIGHT' : 'LEFT'} SIDE SLOT // opens at Lv ${Progress.sideSlotLevel(i)}`;
+      b.setAttribute('aria-label', b.title);
+      return;
+    }
     if (sl.state === 'rolling') return; // (the reel draws itself)
     const market = sl.state === 'market';
     const price = Progress.price(sl.id);
@@ -4783,7 +4776,7 @@ function openMarket() {
 }
 function slotTap(i) {
   const sl = sideSlots[i];
-  if (!sl || gameOver || sl.state === 'closed' || sl.state === 'rolling') return;
+  if (!sl || gameOver || sl.state === 'closed' || sl.state === 'locked' || sl.state === 'rolling') return;
   if (sl.state !== 'market') {
     if (Progress.isBox(sl.id)) openBox(i);
     else if (!armExploit(i)) SFX.play('denied');

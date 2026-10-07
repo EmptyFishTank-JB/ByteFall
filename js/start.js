@@ -1,7 +1,8 @@
 // START SCREEN: a fresh launch (see the inline script in index.html) opens on the title over the
-// twinkling starlight with TAP TO START blinking. A tap (or Enter / Space) fades it to black; the
-// first time the game is ever opened the black fades into the TUTORIAL (tutorial.js), after that
-// into the game itself. The tap also counts as the gesture that lets the music start.
+// twinkling starlight with TAP TO START blinking, on a card the game card's own size and place (laid
+// over it: fitStart). A tap (or Enter / Space) fades what's on the card out, its border staying, and
+// the game card's contents in, within the same border: the first time the game is ever opened the
+// TUTORIAL (tutorial.js), after that the main menu. The tap also counts as the gesture that lets the music start.
 // BACK (the phone's back button, or the browser's) outside a game comes back here (showStart).
 (() => {
   const screen = document.getElementById('start-screen');
@@ -24,9 +25,11 @@
     screen.classList.add('starting');
     SFX.play('static');
     setTimeout(() => {
-      black.classList.add('on');
+      card.classList.add('leaving'); // (its contents fade; the border stays, the game card's under it)
       setTimeout(() => {
         screen.hidden = true;
+        card.classList.remove('leaving');
+        cardIn();
         if (typeof gameWalkers !== 'undefined') gameWalkers.start(); // (the game card's, held while this was up)
         if (firstTime()) {
           try { localStorage.setItem(INTRO_KEY, '1'); } catch (e) {}
@@ -35,18 +38,32 @@
           daily = false;
           resetNow();
         } else showHome(); // (the main menu)
-        requestAnimationFrame(() => {
-          fitBoard();
-          black.classList.remove('on');
-        });
+        requestAnimationFrame(() => fitBoard());
       }, FADE_MS);
     }, 350); // (a quick flicker of TAP TO START first)
+  }
+  // The game card's contents fading in (or out) inside its border, which stays
+  const crt = document.querySelector('.crt');
+  function cardIn() {
+    crt.classList.remove('card-out', 'card-in');
+    void crt.offsetWidth;
+    crt.classList.add('card-in');
+    setTimeout(() => crt.classList.remove('card-in'), FADE_MS + 50);
+  }
+  // The start card laid exactly over the game card: the same size and place (and so the season's
+  // lights, strung down the game card's sides, run down this one's too)
+  function fitStart() {
+    if (screen.hidden || !crt) return;
+    const r = crt.getBoundingClientRect();
+    if (r.width < 60 || r.height < 60) return;
+    Object.assign(card.style, { position: 'absolute', flex: 'none', left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px` });
+    placeStart();
   }
 
   // Back to this screen (BACK outside a game): through black, as it went
   function showStart() {
     if (!screen.hidden) return;
-    black.classList.add('on');
+    crt.classList.add('card-out'); // (the game card's contents fade; then this card's fade in over it, in the same border)
     setTimeout(() => {
       setRecordsOpen(false);
       setSettingsOpen(false);
@@ -56,9 +73,12 @@
       screen.hidden = false;
       try { sessionStorage.removeItem('bytefall-started'); } catch (e) {}
       window.startWalkers.start();
-      placeStart();
+      fitStart();
+      card.classList.add('entering');
+      void card.offsetWidth;
+      card.classList.remove('entering');
+      crt.classList.remove('card-out');
       startBtn.focus({ preventScroll: true });
-      requestAnimationFrame(() => black.classList.remove('on'));
     }, FADE_MS);
   }
   window.showStartScreen = showStart;
@@ -126,8 +146,9 @@
     startBtn.style.top = `${Math.round(top)}px`;
     startBtn.style.bottom = 'auto';
   }
-  placeStart();
-  window.addEventListener('resize', placeStart);
+  fitStart();
+  window.addEventListener('resize', fitStart);
+  if (window.ResizeObserver && crt) new ResizeObserver(fitStart).observe(crt);
   if (document.fonts) {
     document.fonts.ready.then(placeStart);
     document.fonts.addEventListener('loadingdone', placeStart);

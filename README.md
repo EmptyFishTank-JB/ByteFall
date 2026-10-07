@@ -136,7 +136,7 @@ a game's first drop (SECOND CHANCE only when it saves you); HINT and UNDO sit un
 puzzle's drop buttons, and with none owned a second tap buys one. Never in DAILY or VS. A
 boosted game says so on its result screen.
 
-**THE SIDE SLOTS**: one each side of the exploit button (CLASSIC, BLITZ and ZEN only), opened by level: the left at Lv 4, the right at Lv 12 (`SIDE_SLOT_LEVELS` in progress.js; before then the main menu's STARTERS show LV 4 / LV 12 and the game has none, so the BLACK MARKET comes a slot at a time).
+**THE SIDE SLOTS**: one each side of the exploit button (CLASSIC, BLITZ and ZEN only), opened by level: the left at Lv 4, the right at Lv 12 (`SIDE_SLOT_LEVELS` in progress.js; before then the main menu's STARTERS show LV 4 / LV 12 and in a game the slot shows a padlock over its level, so the BLACK MARKET comes a slot at a time).
 **STARTER EXPLOITS** (STORE) are exploits of your own, any you've unlocked by level, by tier: tier 1
 (RNG, BITFLIP, BUFFER OVERFLOW, TROJAN, PIVOT) 10 KEYS and about 12 BUGS, CACHE or CRYPTO; tier 2
 (SWAP, WORM VIRUS, KEYLOGGER, PACKET SNIFFER, BACKDOOR) 20 KEYS, about 17 of those and a ROOTKIT;
@@ -572,7 +572,7 @@ full-width button under the other themes) follows the calendar: in OCTOBER the c
 between purple and orange and the title flickers now and then like a failing light; in DECEMBER
 (to Jan 6) the background's blocks are bulbs of every filament color, twinkling, the board catches
 the lights' warm glow and the scroll bars are candy canes. **THE SEASON'S LIGHTS**: strings of old
-filament bulbs in fine pixel art (finer than the bots', each turned its own way: hanging, leaning, sideways, a few pointing up off the wire) run down both sides of the card from the top of the screen off its bottom, over everything, glowing and twinkling in turn,
+filament bulbs in fine pixel art (finer than the bots', each turned its own way: hanging, leaning, sideways, a few pointing up off the wire) run down both sides of the card from the top of its border to the bottom, a bulb at either end (js/lights.js builds them to the card's height), over everything, glowing and twinkling in turn,
 the CHAIN METER's segments in their colors: December's C9s of every color, October's orange,
 purple and green with jack o' lanterns and candy corn among them, Valentine's pinks, red and white
 with hearts. EFFECTS: REDUCED takes them (and December's warm glow) away.
@@ -782,7 +782,7 @@ filling the screen with the starlight twinkling across it, the BYTEFALL title
 in the middle and a glowing START button below it, as far under the tagline as
 the tagline is under the title (measured letter to letter, in every font; `js/start.js`). A tap anywhere
 else lets the music begin (browsers need one) and leaves you on the screen.
-START (or Enter / Space) fades it to black, then fades into the MAIN MENU. The very first time the game is opened, it fades into the
+START (or Enter / Space) fades the start card's contents out, its border staying (the start card is laid exactly over the game card: the same size and place, on a phone or in a browser), and the MAIN MENU fades in inside the same border. The very first time the game is opened, it fades into the
 TUTORIAL instead (EXIT skips it, to the main menu). A refresh puts you back where you were: on the start screen until START is
 pressed, then on the main menu or in the game, with whatever was open still open (the MENU on its tab
 and sub-tab, scrolled where it was; SETTINGS; the MUSIC PLAYER) or the TUTORIAL

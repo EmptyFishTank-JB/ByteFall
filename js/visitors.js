@@ -720,13 +720,19 @@ function createVisitors(api) {
   function sinkTree(t) {
     const svgH = parseFloat(t.el.querySelector('svg').getAttribute('height'));
     const rows = SPRITES[t.kind].a.length;
-    const below = Math.max(0, innerHeight - api.lane.getBoundingClientRect().bottom);
-    t.y = -Math.round(below + (svgH / rows) * (SPRITES[t.kind].sink || 3)); // (its roots below the floor)
+    // (on a card, its trunk runs on down to the screen's foot; in the screen saver, just past the scene's floor)
+    const below = saverLane() ? laneBelow() : Math.max(0, innerHeight - api.lane.getBoundingClientRect().bottom);
+    const roots = (svgH / rows) * (SPRITES[t.kind].sink || 3);
+    t.y = -Math.round(below + roots); // (its roots below the floor)
+    t.el.style.setProperty('--roots', `${Math.round(roots)}px`); // (the screen saver fades it out from the floor down)
   }
   // The big trees' layer: over the lane, its box the lane's, cut off at the sides as the lane is
   // but open below (the lane cuts off at its floor, for what comes up through it)
   // (from the lane's foot to the card's inside edge: 6px on the game card, more on the start screen)
+  const saverLane = () => api.lane.classList.contains('saver-lane');
+  const SAVER_BELOW = 28; // (the screen saver's scene: its floor runs this far past the lane's foot, fading to black)
   function laneBelow() {
+    if (saverLane()) return SAVER_BELOW;
     const card = api.lane.offsetParent;
     if (!card) return 6;
     const cs = getComputedStyle(card);
@@ -749,6 +755,7 @@ function createVisitors(api) {
       sync();
       window.addEventListener('resize', sync);
       if (window.ResizeObserver) new ResizeObserver(sync).observe(api.lane);
+      new MutationObserver(sync).observe(api.lane, { attributes: true, attributeFilter: ['style', 'class'] }); // (the screen saver moving its lane: the trees go with it)
     }
     return f;
   }
