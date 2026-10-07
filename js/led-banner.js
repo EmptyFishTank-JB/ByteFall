@@ -131,8 +131,14 @@ const LedBanner = (() => {
   }
   // A little tag in pixels (ADWARE's AD): the text in the game's font, dark pixels on a lit plate
   // with stepped corners; cell: CSS px a pixel
+  // A megaphone in pixels: ADWARE's mark, read the same in any language (no letters to translate)
+  const MEGAPHONE = ['.......xx', '.....xxxx', 'xxx.xxxxx', 'xxxxxxxxx', 'xxx.xxxxx', '.x...xxxx', '.x.....xx'];
+  const fromRows = (rows) => ({ w: rows[0].length, h: rows.length, on: (x, y) => y >= 0 && x >= 0 && y < rows.length && x < rows[0].length && rows[y][x] !== '.' });
+  // The same, as an SVG in the text's own colour (for a button)
+  const iconSvg = (rows = MEGAPHONE) => `<svg class="px-icon" viewBox="0 0 ${rows[0].length} ${rows.length}" shape-rendering="crispEdges" aria-hidden="true">${rows.map((r, y) => [...r].map((ch, x) => (ch === '.' ? '' : `<rect x="${x}" y="${y}" width="1" height="1"/>`)).join('')).join('')}</svg>`;
+  // text: words (drawn in the game's font) or pixel rows (an icon)
   function tag(text, { px = 9, cell = 1.5, fg = '#111', bg = css('--accent', '#ffd166') } = {}) {
-    const r = raster(text, px);
+    const r = Array.isArray(text) ? fromRows(text) : raster(text, px);
     let x0 = r.w;
     let x1 = 0;
     let y0 = r.h;
@@ -160,5 +166,5 @@ const LedBanner = (() => {
     }
     return cv;
   }
-  return { show, tag, looks: () => [...LOOKS], look };
+  return { show, tag, iconSvg, MEGAPHONE, looks: () => [...LOOKS], look };
 })();

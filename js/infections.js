@@ -763,13 +763,13 @@ const makeInfections = () => {
   function place(next = {}) {
     if (!wrap) return;
     state = { ...state, ...next };
-    const ad = layer('ad', '<canvas></canvas><span class="inf-ad-tag">AD</span><span class="inf-due"></span>');
+    const ad = layer('ad', '<canvas></canvas><span class="inf-ad-tag" aria-label="Ad">AD</span><span class="inf-due"></span>');
     if (state.adCol !== null && state.adCol !== undefined) {
       if (ad.hidden) {
         pick('ad');
         adClaims = [];
         const t = ad.querySelector('.inf-ad-tag'); // (its AD tag in pixels, in the game's font as it is now)
-        if (t && typeof LedBanner !== 'undefined') t.replaceChildren(LedBanner.tag('AD'));
+        if (t && typeof LedBanner !== 'undefined') t.replaceChildren(LedBanner.tag(LedBanner.MEGAPHONE)); // (a megaphone: no word to translate)
       }
       const top = boxOf(state.rows - 1, state.adCol);
       const bot = boxOf(0, state.adCol);

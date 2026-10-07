@@ -1044,7 +1044,7 @@ function updateColumnButtons() {
     // (ADWARE: a pop-up over one button; its column takes no drop at all, attemptDrop)
     const ad = !!adware && adware.col === c && pivotFrom === null;
     btn.classList.toggle('adware', ad);
-    if (ad) { btn.disabled = true; btn.textContent = 'AD'; }
+    if (ad) { btn.disabled = true; btn.innerHTML = typeof LedBanner !== 'undefined' ? LedBanner.iconSvg() : 'AD'; btn.setAttribute('aria-label', 'Blocked by an ad'); } else btn.removeAttribute('aria-label');
   });
 }
 
@@ -4848,16 +4848,17 @@ function renderStarters() {
     b.hidden = !sideSlots.length || gameOver || mode === 'tutorial';
     b.classList.toggle('closed', !show || sl.state === 'closed');
     b.classList.toggle('locked-slot', show && sl.state === 'locked');
-    if (!show || sl.state === 'closed') { b.innerHTML = ''; b.disabled = true; return; }
+    if (!show || sl.state === 'closed') { b.innerHTML = ''; b.dataset.key = ''; b.disabled = true; return; }
     if (sl.state === 'locked') { // (not open yet: a padlock and the level it opens at)
       b.className = 'exploit-icon side-slot locked-slot';
       b.disabled = true;
       b.innerHTML = `${SLOT_LOCK_SVG}<span class="slot-lv">LV ${Progress.sideSlotLevel(i)}</span>`;
+      b.dataset.key = '';
       b.title = `${i ? 'RIGHT' : 'LEFT'} SIDE SLOT // opens at Lv ${Progress.sideSlotLevel(i)}`;
       b.setAttribute('aria-label', b.title);
       return;
     }
-    if (sl.state === 'rolling') return; // (the reel draws itself)
+    if (sl.state === 'rolling') { b.dataset.key = ''; return; } // (the reel draws itself)
     const market = sl.state === 'market';
     const price = Progress.price(sl.id);
     const sealed = Progress.isBox(sl.id);
@@ -4871,9 +4872,16 @@ function renderStarters() {
     b.classList.toggle('short', short);
     // (the BLACK MARKET's frame: a side for each drop till it turns over, going dark one a drop, clockwise from the top)
     const left = MARKET_EVERY - (marketDrops % MARKET_EVERY);
-    b.innerHTML = `<span class="exploit-glyph">${itemIcon(sl.id)}</span>`
-      + (market && marketOpen ? `<svg class="slot-timer" viewBox="0 0 40 40" preserveAspectRatio="none" aria-hidden="true">${MARKET_SIDES.map((d, k) => `<path d="${d}" class="${k >= MARKET_EVERY - left ? 'on' : ''}"/>`).join('')}</svg>` : '')
-      + (market ? `<span class="slot-sale" aria-hidden="true">${CURRENCY_SVG}</span>` : `<span class="starter-tag">${sl.state === 'starter' ? 'S' : '✓'}</span>`);
+    // (drawn afresh only when what it holds changes: a new item, bought, opened, the market opening; a
+    // drop only darkens a side of the frame, so its icon's animation runs on unbroken)
+    const key = `${sl.id}|${sl.state}|${market && marketOpen}`;
+    if (b.dataset.key !== key) {
+      b.dataset.key = key;
+      b.innerHTML = `<span class="exploit-glyph">${itemIcon(sl.id)}</span>`
+        + (market && marketOpen ? `<svg class="slot-timer" viewBox="0 0 40 40" preserveAspectRatio="none" aria-hidden="true">${MARKET_SIDES.map((d) => `<path d="${d}"/>`).join('')}</svg>` : '')
+        + (market ? `<span class="slot-sale" aria-hidden="true">${CURRENCY_SVG}</span>` : `<span class="starter-tag">${sl.state === 'starter' ? 'S' : '✓'}</span>`);
+    }
+    b.querySelectorAll('.slot-timer path').forEach((path, k) => path.classList.toggle('on', k >= MARKET_EVERY - left));
     const name = itemName(sl.id);
     b.title = market ? `BLACK MARKET // ${name}: ${priceText(price)} (${marketOpen ? `tap to see it; a new one in ${left} drop${left === 1 ? '' : 's'}` : `opens in ${marketOpensIn()} drops`})`
       : sealed ? `${sl.state === 'starter' ? 'STARTER' : 'BOUGHT'} // ${name}: tap to open it`
@@ -4988,6 +4996,7 @@ function openBox(i) {
   const result = devInfection() || Progress.rollBox(box);
   sl.state = 'rolling';
   const b = sideSlotEls()[i];
+  b.dataset.key = ''; // (the reel's: drawn afresh after)
   b.classList.remove('market', 'short', 'confirm', 'sealed');
   b.classList.add('owned', 'rolling');
   const faces = [...Progress.exploitOrder().filter((id) => id !== 'black-box'), ...Progress.antiIds()];
