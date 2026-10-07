@@ -1137,9 +1137,9 @@ function render(popped = [], falling = null) {
         if (swapPicks.some((p) => p.r === r && p.c === c)) div.classList.add('swap-pick');
       }
       if (cell) {
-        if (cell.type === 'number' && cell.locked) { // (RANSOMWARE: locked, its little screen and padlock; it falls as any bit)
+        if (cell.type === 'number' && cell.locked) { // (RANSOMWARE: locked where it is, its little screen and padlock)
           div.classList.add('disc', 'ransom');
-          div.innerHTML = Infections.ransomHtml(cell.val, cell.locked);
+          div.innerHTML = Infections.ransomHtml(cell.val, cell.locked, cell.lockLook || 0);
           div.title = `RANSOMWARE: locked for ${cell.locked} more drop${cell.locked === 1 ? '' : 's'}`;
         } else if (cell.type === 'number' && malwareLeft > 0) { // (MALWARE: the bits shown as junk)
           div.classList.add('disc', 'corrupt');
@@ -1463,7 +1463,7 @@ async function attemptDrop(col) {
     if (n) { Progress.siphon(taken); Infections.steal(n); setMessage(`CRYPTOJACKER // ${n} STOLEN`, 'alarm'); }
     jackLeft--;
   }
-  tickInfections();
+  await tickInfections();
   showPickup(resBefore);
   Progress.endDrop({
     hack: piece.type === 'hack', heights: columns.map((c) => c.length), rows: ROWS, over: overflowed(),
@@ -1513,14 +1513,30 @@ async function injectPulse() {
 }
 
 // Drops everything above each gap by one row per frame so falls read block by block.
+// One step of falling in a column: the lowest gap with something above it that can fall (up to the
+// next RANSOMWARE-locked bit, which hangs where it was locked) closes by one. False: nothing moves
+function fallStep(col) {
+  for (let i = 0; i < col.length; i++) {
+    if (col[i] !== null) continue;
+    let end = i + 1;
+    while (end < col.length && !(col[end] && col[end].locked)) end++;
+    let any = false;
+    for (let k = i + 1; k < end; k++) if (col[k]) { any = true; break; }
+    if (!any) continue;
+    for (let k = i; k < end - 1; k++) col[k] = col[k + 1];
+    col[end - 1] = null;
+    return true;
+  }
+  return false;
+}
 async function collapse() {
   while (true) {
     for (const col of columns) {
       while (col.length && col[col.length - 1] === null) col.pop();
     }
-    const gapped = columns.filter((col) => col.includes(null));
-    if (!gapped.length) break;
-    for (const col of gapped) col.splice(col.indexOf(null), 1);
+    let moved = false;
+    for (const col of columns) if (fallStep(col)) moved = true;
+    if (!moved) break;
     render();
     SFX.play('click');
     await sleep(STEP_MS);
@@ -1896,7 +1912,7 @@ async function runHack(id, row, col) {
     columns[col].pop();
     const peeled = [];
     columns.forEach((stack, c) => stack.forEach((cell, r) => {
-      if (cell.type === 'firewall') peeled.push({ row: r, col: c });
+      if (cell && cell.type === 'firewall') peeled.push({ row: r, col: c });
     }));
     FX.burst(cellsAt(peeled));
     let revealed = false;
@@ -1929,12 +1945,12 @@ async function runHack(id, row, col) {
     columns[col].pop();
     const counts = {};
     columns.forEach((stack) => stack.forEach((cell) => {
-      if (cell.type === 'number') counts[cell.val] = (counts[cell.val] || 0) + 1;
+      if (cell && cell.type === 'number') counts[cell.val] = (counts[cell.val] || 0) + 1;
     }));
     const target = Object.keys(counts).map(Number).sort((a, b) => counts[b] - counts[a] || b - a)[0];
     const hits = [];
     columns.forEach((stack, c) => stack.forEach((cell, r) => {
-      if (cell.type === 'number' && cell.val === target) hits.push({ row: r, col: c });
+      if (cell && cell.type === 'number' && cell.val === target) hits.push({ row: r, col: c });
     }));
     if (hits.length) {
       setMessage(`RAINBOW TABLE // CRACKED EVERY [${target}]`);
@@ -1996,7 +2012,7 @@ async function runHack(id, row, col) {
     for (const stack of columns) {
       if (id === 'bitflip') stack.reverse();
       stack.forEach((cell, r) => {
-        if (cell.type !== 'number') return;
+        if (!cell || cell.type !== 'number') return;
         if (id === 'buffer-overflow') {
           stack[r] = cell.val === COLS ? newFirewall(2) : { type: 'number', val: cell.val + 1 };
         } else if (id === 'rng') {
@@ -4973,10 +4989,17 @@ function marketTick() {
 const ANTI_DROPS = 3;
 const RANSOM_DROPS = 5; // (RANSOMWARE's locks and the CRYPTOJACKER: five drops)
 const spyHides = (n) => spywareLeft > n; // (the bit n places down the queue: 0 is CURRENT)
-// (after each drop: RANSOMWARE's locks and MALWARE's corruption a drop nearer gone)
-function tickInfections() {
+// (after each drop: RANSOMWARE's locks and MALWARE's corruption a drop nearer gone; a lock lifting,
+// the bit falls into any gap under it and the board settles)
+async function tickInfections() {
   if (malwareLeft > 0) malwareLeft--;
-  for (const col of columns) for (const cell of col) if (cell && cell.locked && --cell.locked <= 0) delete cell.locked;
+  let lifted = false;
+  for (const col of columns) for (const cell of col) if (cell && cell.locked && --cell.locked <= 0) { delete cell.locked; lifted = true; }
+  if (lifted) {
+    await collapse();
+    await resolveChains();
+  }
+  render();
 }
 function runAnti(id) {
   if (id === 'adware') {
@@ -4984,14 +5007,18 @@ function runAnti(id) {
     if (open.length) adware = { col: open[Math.floor(Math.random() * open.length)], left: ANTI_DROPS };
   } else if (id === 'spyware') {
     spywareLeft = ANTI_DROPS;
-  } else if (id === 'ransomware') { // (up to 3 bits locked: they can't decrypt till it lifts, but fall as any bit)
+    Infections.pick('spy');
+  } else if (id === 'ransomware') { // (up to 3 bits locked where they are: they can't decrypt, nor fall, till it lifts)
     const cells = numberCells();
+    const look = Infections.pick('ransom');
     for (let n = 0; n < ANTI_DROPS && cells.length; n++) {
       const { r, c } = cells.splice(Math.floor(Math.random() * cells.length), 1)[0];
       columns[c][r].locked = RANSOM_DROPS;
+      columns[c][r].lockLook = look;
     }
   } else if (id === 'malware') {
     malwareLeft = ANTI_DROPS;
+    Infections.pick('malware');
   } else if (id === 'cryptojacker') {
     jackLeft = RANSOM_DROPS;
   } else if (id === 'scareware') {

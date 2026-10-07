@@ -130,13 +130,18 @@ before the resources. A box is the cheaper bet; buying the exploit you want is t
 ## Infections
 
 A BLACK BOX's bad luck: it comes up INFECTED. Mild and short; none can end a game by itself. Each shows
-itself in its own little LED sign or ASCII display, kept within the bits it takes up (js/infections.js).
+itself in its own little LED sign or ASCII display, kept within the bits it takes up (js/infections.js), in
+one of four looks picked at random each time (below, the first of each; the others: ADWARE a flashing SALE
+with arrows, a slot machine, the CPU bouncing over CLICK; SPYWARE a REC light, binoculars, an eye at a
+keyhole; RANSOMWARE's screens a skull and PAY UP!, a padlock and a hex dump, a laughing CPU and KEYS OR
+BITS; MALWARE binary, error codes, a shade melting through; the CRYPTOJACKER a pickpocket's hand, a
+mining pickaxe, a getaway rocket; SCAREWARE a crash screen, files deleting, a prize wheel).
 
 | Infection | What it does | For | Its display |
 |---|---|---|---|
 | **ADWARE** | an ad in its own frame over one column, below the overflow line: nothing drops there by the button, the grid or the number keys (it gives way if every other column is full); its drop button reads `AD` | 3 drops | LED: chasing bulbs round the frame, a CPU pulling faces, its claims (FREE KEYS, DOWNLOAD RAM...) marching up the sign |
 | **SPYWARE** | CURRENT, the NEXT preview and the bit over the grid are hidden until each lands | the next 3 bits | ASCII: a pair of eyes watching from CURRENT |
-| **RANSOMWARE** | up to 3 bits on the board are padlocked: they can't decrypt (they still count in lines, and fall as any bit) | 5 drops | LED and ASCII: each locked bit's little screen fading between a grinning CPU and typing gibberish, a padlock, its value and the drops left |
+| **RANSOMWARE** | up to 3 bits on the board are padlocked where they are: they can't decrypt or fall (they still count in lines; bits dropped on them rest on them, gaps stay open under them), and settle once it lifts | 5 drops | LED and ASCII: each locked bit's little screen fading between a grinning CPU and typing gibberish, a padlock, its value and the drops left |
 | **MALWARE** | every bit on the board shows as junk | 3 drops | ASCII: flickering characters in each bit |
 | **CRYPTOJACKER** | the resources each drop earns are taken back | 5 drops | LED: a CPU stealing them, on a sign through the overflow row's own cells: a pan with its sack, a close-up of its eyes, MINING YOUR CRYPTO, and a gloat (+N MINE!) when it takes some |
 | **SCAREWARE** | a fake system alert over the board; only its tiny X closes it (its big button dodges) | till closed | ASCII: a blinking skull and a scan crawling to 100% |

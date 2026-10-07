@@ -157,10 +157,10 @@ armed when you like, or comes up INFECTED, which glitches red and goes off at on
 little LED sign or ASCII display within the bits it takes up (js/infections.js; ECONOMY.md has the table):
 **ADWARE** (an ad in its own frame blocks a column below the overflow line for 3 drops, a CPU pulling faces and
 its claims marching up it), **SPYWARE** (the next 3 bits hidden, eyes watching from CURRENT), **RANSOMWARE**
-(up to 3 bits padlocked for 5 drops: they can't decrypt, their little screens fading between a grinning CPU and
-typing gibberish), **MALWARE** (the board's bits shown as flickering junk for 3 drops), a **CRYPTOJACKER**
+(up to 3 bits padlocked where they are for 5 drops: they can't decrypt or fall, their little screens fading between
+a grinning CPU and typing gibberish), **MALWARE** (the board's bits shown as flickering junk for 3 drops), a **CRYPTOJACKER**
 (5 drops' resources stolen, a CPU making off with them on a sign through the overflow row) or **SCAREWARE**
-(a fake alert over the board, closed only by its tiny X). A slot taken in empty, or once its starter is used, is the **BLACK MARKET** (so it's there
+(a fake alert over the board, closed only by its tiny X). Each has four looks, one picked at random each time. A slot taken in empty, or once its starter is used, is the **BLACK MARKET** (so it's there
 whether you take starters in or not):
 a random exploit you've unlocked or, a quarter of the time, a BLACK BOX, marked for sale with the
 game's own currency sign in its corner (a 0 struck through twice, as a dollar sign is: no one

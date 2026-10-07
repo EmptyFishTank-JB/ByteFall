@@ -11,6 +11,7 @@
 //                 pans, close-ups, and a gloat whenever it takes some (LED)
 //   SCAREWARE     a fake system alert over the board, a scan bar crawling and a skull (ASCII), closed
 //                 only by its tiny X
+// Each has four looks, one picked at random each time it strikes (STYLES)
 const Infections = (() => {
   const root = document.documentElement;
   const css = (name, fallback) => getComputedStyle(root).getPropertyValue(name).trim() || fallback;
@@ -99,6 +100,17 @@ const Infections = (() => {
     if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
   };
 
+  // Each infection's four looks: one picked at random each time it strikes
+  const style = { ad: 0, jack: 0, spy: 0, malware: 0, ransom: 0, scare: 0 };
+  let forced = null; // (the dev page or a test: { kind: look } to show that look next)
+  const pick = (kind) => { style[kind] = forced && forced[kind] !== undefined ? forced[kind] : Math.floor(Math.random() * 4); return style[kind]; };
+  const ARROW_DOWN = ['..x..', '..x..', '..x..', 'xxxxx', '.xxx.', '..x..'];
+  const SKULL_LED = ['.xxxxxxx.', 'xxxxxxxxx', 'xx..x..xx', 'xx..x..xx', 'xxxx.xxxx', '.xxx.xxx.', '..x.x.x..', '..xxxxx..'];
+  const PICK = ['xxxx.', '.xx..', '.x.x.', 'x....', 'x....'];
+  const ROCKET = ['..xx.....', '.xxxxx...', 'xxxxxxxo.', '.xxxxx...', '..xx.....'];
+  const HAND = ['x.x.x', 'x.x.x', 'xxxxx', 'xxxxx', '.xxx.'];
+  const SYMS = [['.ooo.', 'o...o', '..oo.', '..o..', '.....', '..o..'], ['ooooo', '...o.', '..o..', '.o...', '.o...', '.o...'], COIN, ['..x..', '.xxx.', 'xx$xx', '.xxx.', '..x..']];
+
   // ── The board's overlays: made once, laid over the bits after each redraw (place) ─────────────
   let wrap = null;
   let board = null;
@@ -145,9 +157,40 @@ const Infections = (() => {
       if (i < W) { x = i; y = 0; } else if (i < W + H - 1) { x = W - 1; y = i - W + 1; } else if (i < 2 * W + H - 2) { x = W - 1 - (i - (W + H - 2)); y = H - 1; } else { x = 0; y = H - 1 - (i - (2 * W + H - 3)); }
       buf.set(x, y, 2);
     }
+    const cx = Math.round((W - 11) / 2);
+    if (style.ad === 1) { // (a SALE: the price tag flashing, its numbers falling, arrows pointing)
+      const deals = ['-90%', 'FREE', '$0', 'SALE', '2X1'];
+      const d = deals[Math.floor(t / 1.2) % deals.length];
+      const on = Math.floor(t * 4) % 2;
+      buf.textV(d, Math.round((W - 5) / 2), 3, on ? 1 : 2);
+      for (let k = 0; k < 3; k++) buf.sprite(ARROW_DOWN, Math.round((W - 5) / 2), H - 9 - ((Math.floor(t * 10) + k * 6) % 18) - k * 6);
+      buf.sprite(face('wink', 'grin'), cx, H - 12);
+      paint(cv, buf, [css('--accent', '#ffd23f'), css('--danger', '#ff3b5c')]);
+      return;
+    }
+    if (style.ad === 2) { // (a slot machine: three reels spinning down the column, JACKPOT)
+      const spinning = (t % 4) < 2.6;
+      for (let r = 0; r < 3; r++) {
+        const y0 = 3 + r * Math.floor((H - 16) / 3);
+        const sym = spinning ? SYMS[(Math.floor(t * 12) + r * 3) % SYMS.length] : SYMS[1];
+        buf.sprite(sym, Math.round((W - 5) / 2), y0 + (spinning ? Math.floor(t * 24) % 3 : 0));
+      }
+      if (!spinning && Math.floor(t * 6) % 2) buf.textV('WIN', Math.round((W - 5) / 2), H - 30 > 0 ? H - 30 : 3, 2);
+      paint(cv, buf, [css('--accent', '#ffd23f'), css('--danger', '#ff3b5c')]);
+      return;
+    }
+    if (style.ad === 3) { // (the CPU bouncing down the sign, CLICK HERE blinking under it)
+      const bounce = Math.abs(Math.sin(t * 2.4));
+      const y = Math.round(2 + bounce * (H - 40));
+      const f = FACES[Math.floor(t * 1.5) % FACES.length];
+      buf.sprite(face(f[0], f[1]), cx, y);
+      if (Math.floor(t * 3) % 2) buf.textV('CLICK', Math.round((W - 5) / 2), Math.min(H - 46, y + 12), 2);
+      paint(cv, buf, [css('--accent', '#ffd23f'), css('--danger', '#ff3b5c')]);
+      return;
+    }
     // (the CPU at the top, a new face every second or so)
     const f = FACES[Math.floor(t * 0.9) % FACES.length];
-    buf.sprite(face(f[0], f[1]), Math.round((W - 11) / 2), 2);
+    buf.sprite(face(f[0], f[1]), cx, 2);
     // (its claims marching up the sign, a letter under a letter)
     if (!adClaims.length) adClaims = [...CLAIMS].sort(() => Math.random() - 0.5);
     const msg = `${adClaims.join('  *  ')}  *  `;
@@ -178,9 +221,32 @@ const Infections = (() => {
     if (stolen && now - stolen.at < 2400) { // (it got some: a gloat)
       const k = (now - stolen.at) / 2400;
       buf.sprite(face('shut', 'laugh'), 2, mid);
-      buf.text(`+${stolen.n} MINE!`, 16, Math.round((H - 7) / 2));
+      buf.text(`+${stolen.n} ${['MINE!', 'YOINK!', 'HASHED', 'SEE YA'][style.jack]}`, 16, Math.round((H - 7) / 2));
       const cx = Math.round(W - 8 - k * (W - 22));
       buf.sprite(COIN, cx, Math.round((H - 5) / 2));
+    } else if (style.jack === 1) { // (PICKPOCKET: a hand reaching in from the right, a coin at a time)
+      const s = (t % 2.4) / 2.4;
+      buf.sprite(face('side', 'smug'), 2, mid);
+      const reach = Math.round(W - 6 - Math.sin(s * Math.PI) * (W - 30));
+      for (let x = reach + 5; x < W; x++) buf.set(x, Math.round(H / 2), 1);
+      buf.sprite(HAND, reach, Math.round((H - 5) / 2));
+      if (s > 0.5) buf.sprite(COIN, reach + 6, Math.round((H - 5) / 2));
+      else buf.sprite(COIN, 18 + Math.floor(t) % 3 * 6, Math.round((H - 5) / 2));
+    } else if (style.jack === 2) { // (MINING RIG: its pickaxe on a coin, sparks, the hash rate climbing)
+      const s = (t % 0.8) / 0.8;
+      buf.sprite(face('angry', 'teeth'), 2, mid);
+      const swing = s < 0.5;
+      buf.sprite(PICK, 15, Math.round((H - 5) / 2) - (swing ? 2 : 0));
+      buf.sprite(COIN, 20, Math.round((H - 5) / 2));
+      if (!swing) for (let k = 0; k < 4; k++) buf.set(26 + k * 2, Math.round(H / 2) - 2 + (k % 2) * 3, 2);
+      const pct = Math.floor((t * 7) % 100);
+      buf.text(`${pct}%`, W - 26, Math.round((H - 7) / 2));
+    } else if (style.jack === 3) { // (GETAWAY: off in a rocket, a trail of coins behind)
+      const s = (t % 2.6) / 2.6;
+      const x = Math.round(-20 + s * (W + 30));
+      for (let k = 1; k < 5; k++) buf.sprite(COIN, x - k * 8, Math.round((H - 5) / 2) + (k % 2 ? 1 : -1));
+      buf.sprite(ROCKET, x, Math.round((H - 5) / 2));
+      buf.sprite(face('wink', 'grin'), x + 10, mid);
     } else {
       const scene = Math.floor(t / 3) % 4;
       const s = (t % 3) / 3;
@@ -224,12 +290,26 @@ const Infections = (() => {
   // ── ASCII: the corrupted bits, the spying eyes, the ransom screens' typing ────────────────────
   const JUNK = '#%&@$?!*<>/\\|~^=+;:{}[]';
   const junk = (n) => Array.from({ length: n }, () => JUNK[Math.floor(Math.random() * JUNK.length)]).join('');
-  const EYES_ASCII = ['(o_o)', '(o_o)', '(O_o)', '(o_O)', '(-_-)', '(o_o)', '(>_>)', '(<_<)'];
+  // MALWARE's four ways of spoiling a bit: junk, binary, error codes, a shade melting through it
+  const ERRS = ['ERR', 'NaN', '0x?', 'NUL', '404', '???', 'EOF', '-0-'];
+  const MELT = ['#', '=', '-', '.', ' ', '.', '-', '='];
+  const corrupt = (n) => {
+    if (style.malware === 1) return Array.from({ length: n }, () => (Math.random() < 0.5 ? '0' : '1')).join('');
+    if (style.malware === 2) return ERRS[Math.floor(Math.random() * ERRS.length)];
+    if (style.malware === 3) { const k = Math.floor(performance.now() / 120); return Array.from({ length: n }, (_, i) => MELT[(k + i) % MELT.length]).join(''); }
+    return junk(n);
+  };
+  const SPY = [
+    ['(o_o)', '(o_o)', '(O_o)', '(o_O)', '(-_-)', '(o_o)', '(>_>)', '(<_<)'], // (eyes)
+    ['REC *', 'REC  ', 'REC *', 'REC  '], // (a camera, recording)
+    ['[oo]  ', ' [oo] ', '  [oo]', ' [oo] '], // (binoculars, sweeping)
+    ['|o |', '| o|', '|o |', '|  |'], // (an eye at the keyhole)
+  ];
   let ticker = 0;
   function tick() {
     let any = false;
-    document.querySelectorAll('.inf-glitch').forEach((g) => { any = true; g.textContent = junk(g.dataset.n ? +g.dataset.n : 3); });
-    document.querySelectorAll('.inf-eyes').forEach((e) => { any = true; e.textContent = EYES_ASCII[Math.floor(performance.now() / 600) % EYES_ASCII.length]; });
+    document.querySelectorAll('.inf-glitch').forEach((g) => { any = true; g.textContent = corrupt(g.dataset.n ? +g.dataset.n : 3); });
+    document.querySelectorAll('.inf-eyes').forEach((e) => { any = true; const f = SPY[style.spy]; e.textContent = f[Math.floor(performance.now() / 600) % f.length]; });
     const scan = els.scare && !els.scare.hidden && els.scare.querySelector('.inf-scan');
     if (scan) { any = true; scareTick(scan); }
     if (!any) { clearInterval(ticker); ticker = 0; }
@@ -244,10 +324,17 @@ const Infections = (() => {
     rows.forEach((r, y) => [...r].forEach((ch, x) => { dots += `<circle cx="${x + 0.5}" cy="${y + 0.5}" r="0.38" class="${ch === '.' ? 'off' : ch === 'o' ? 'on2' : 'on'}"/>`; }));
     return `<svg class="inf-led" viewBox="0 0 ${rows[0].length} ${rows.length}">${dots}</svg>`;
   }
-  const RANSOM_FACE = ledSvg(face('angry', 'grin'));
-  const TERM = () => Array.from({ length: 4 }, () => `<span>${junk(5).replace(/[<>&]/g, '#')}</span>`).join('');
-  function ransomHtml(val, left) {
-    return `<span class="inf-screen"><span class="inf-face">${RANSOM_FACE}</span><span class="inf-term">${TERM()}</span></span>`
+  // RANSOMWARE's four screens: an LED picture fading into ASCII and back
+  const RANSOM_LED = [ledSvg(face('angry', 'grin')), ledSvg(SKULL_LED), ledSvg(['..xxx..', '.x...x.', '.x...x.', 'xxxxxxx', 'xxx.xxx', 'xxx.xxx', 'xxxxxxx']), ledSvg(face('shut', 'laugh'))];
+  const TERMS = [
+    () => Array.from({ length: 4 }, () => junk(5).replace(/[<>&]/g, '#')), // (gibberish typing)
+    () => ['PAY', 'UP!', '$$$', '>:)'], // (the demand)
+    () => ['LOCK', 'ED.', '0x7F', 'FF..'], // (a hex dump)
+    () => ['KEYS', 'OR', 'BITS', 'BYE'], // (the threat)
+  ];
+  const TERM = (k) => TERMS[k]().map((l) => `<span>${l}</span>`).join('');
+  function ransomHtml(val, left, k = style.ransom) {
+    return `<span class="inf-screen"><span class="inf-face">${RANSOM_LED[k]}</span><span class="inf-term">${TERM(k)}</span></span>`
       + `${LOCK}<span class="inf-ransom-val">${val}</span><span class="inf-ransom-left">${left}</span>`;
   }
 
@@ -262,7 +349,18 @@ const Infections = (() => {
   ];
   const SKULL = [' .-"""-. ', '/  _ _  \\', '| (o)(o) |', ' \\  ^  / ', '  |vvv|  ', "  '---'  "];
   let scarePct = 0;
+  const FILES = ['bits.dat', 'keys.bak', 'save.sav', 'cpu.ini', 'music.mp3', 'photos/', 'system32/'];
   function scareTick(scan) {
+    const kind = scan.dataset.kind;
+    if (kind === 'crash') { scarePct = Math.min(100, scarePct + (Math.random() < 0.3 ? 1 : 0)); scan.textContent = `${scarePct}% COMPLETE`; return; }
+    if (kind === 'delete') { scarePct = (scarePct + 1) % (FILES.length * 6); scan.textContent = `rm ${FILES[Math.floor(scarePct / 6)]} ... OK`; return; }
+    if (kind === 'wheel') {
+      scarePct = (scarePct + 1) % 40;
+      const wh = els.scare.querySelector('.inf-wheel');
+      if (wh) wh.textContent = scarePct < 30 ? WHEEL[scarePct % 3] : '[ 7 ][ 7 ][ 7 ]';
+      scan.textContent = scarePct < 30 ? 'SPINNING...' : 'YOU WON! CLAIM NOW';
+      return;
+    }
     scarePct = Math.min(100, scarePct + 1 + Math.floor(Math.random() * 3));
     const n = Math.round(scarePct / 10);
     scan.textContent = `SCANNING [${'#'.repeat(n)}${'.'.repeat(10 - n)}] ${scarePct}%${scarePct >= 100 ? ' !!' : ''}`;
@@ -271,13 +369,22 @@ const Infections = (() => {
     if (sk) sk.classList.toggle('lit', Math.floor(performance.now() / 400) % 2 === 0);
   }
   let scareDone = null;
+  // SCAREWARE's four alerts: the skull and its scan, a crash screen, files deleting, a prize wheel
+  const SAD = [':(', '', 'YOUR DEVICE RAN INTO', 'A PROBLEM'];
+  const WHEEL = ['[ $ ][ 7 ][ ? ]', '[ 7 ][ ? ][ $ ]', '[ ? ][ $ ][ 7 ]'];
+  function scareBody(k, msg) {
+    if (k === 1) return `<pre class="inf-skull inf-sad">${SAD.join('\n')}</pre><p class="inf-msg">${msg}</p><p class="inf-scan" data-kind="crash"></p>`;
+    if (k === 2) return `<pre class="inf-skull">DELETING FILES</pre><p class="inf-msg">${msg}</p><p class="inf-scan" data-kind="delete"></p>`;
+    if (k === 3) return `<pre class="inf-skull inf-wheel">${WHEEL[0]}</pre><p class="inf-msg">${msg}</p><p class="inf-scan" data-kind="wheel"></p>`;
+    return `<pre class="inf-skull">${SKULL.join('\n').replace(/</g, '&lt;')}</pre><p class="inf-msg">${msg}</p><p class="inf-scan"></p>`;
+  }
   function scare(onClose) {
     const el = layer('scare', '');
+    const k = pick('scare');
     const [title, msg, ok] = SCARES[Math.floor(Math.random() * SCARES.length)];
     el.innerHTML = `<div class="inf-win" role="alertdialog" aria-label="${title}">`
       + `<div class="inf-bar"><span>&#9888; ${title}</span><button type="button" class="inf-x" aria-label="Close">&times;</button></div>`
-      + `<pre class="inf-skull">${SKULL.join('\n').replace(/</g, '&lt;')}</pre>`
-      + `<p class="inf-msg">${msg}</p><p class="inf-scan"></p>`
+      + scareBody(k, msg)
       + `<button type="button" class="inf-ok">${ok}</button></div>`;
     el.removeAttribute('aria-hidden');
     el.hidden = false;
@@ -309,6 +416,7 @@ const Infections = (() => {
     state = { ...state, ...next };
     const ad = layer('ad', '<canvas></canvas><span class="inf-ad-tag">AD</span>');
     if (state.adCol !== null && state.adCol !== undefined) {
+      if (ad.hidden) { pick('ad'); adClaims = []; }
       const top = boxOf(state.rows - 1, state.adCol);
       const bot = boxOf(0, state.adCol);
       if (top && bot) {
@@ -319,6 +427,7 @@ const Infections = (() => {
     } else ad.hidden = true;
     const jack = layer('jack', '<canvas></canvas>');
     if (state.jack) {
+      if (jack.hidden) pick('jack');
       const a = boxOf(state.maxRows - 1, 0);
       const b = boxOf(state.rows, state.cols - 1);
       if (a && b) {
@@ -340,5 +449,5 @@ const Infections = (() => {
     place({ adCol: null, jack: false });
     if (els.scare) { els.scare.hidden = true; scareDone = null; }
   }
-  return { init, place, steal, scare, closeScare, scareUp, ransomHtml, clear, glitch: (n = 3) => `<span class="inf-glitch" data-n="${n}">${junk(n)}</span>`, eyes: () => '<span class="inf-eyes">(o_o)</span>' };
+  return { init, place, steal, scare, closeScare, scareUp, ransomHtml, clear, pick, force: (f) => { forced = f; }, glitch: (n = 3) => `<span class="inf-glitch" data-n="${n}">${junk(n)}</span>`, eyes: () => '<span class="inf-eyes">(o_o)</span>' };
 })();
