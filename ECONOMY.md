@@ -136,7 +136,9 @@ pop-up over the ones up (its 8 drops start over). Where two meet, the later one 
 a RANSOMWARE lock covers that bit, a lock after MALWARE shows over it; ADWARE's frame and the
 CRYPTOJACKER's sign are solid, covering whatever's under them, and the pop-ups go over everything. The STORE's BLACK BOXES section warns of all six (BUYER BEWARE). The dev page's
 BLACK BOX INFECTION makes every box opened come up one (ANY or one kind), and INFECTION LOOK forces look
-1 to 4 (localStorage bytefall-dev-infection / bytefall-dev-infection-look). While any's on, a little bot
+1 to 4 (localStorage bytefall-dev-infection / bytefall-dev-infection-look). Its INFECTION TESTER (index.html?inftest,
+js/inf-test.js) opens the game on a board of bits with a button for each infection, the look, DROP (counts
+down without dropping), FILL GRID and CLEAR. While any's on, a little bot
 at its laptop types away at a virus in CURRENT's corner (xN past one; its name(s) on hover). The
 scareware alerts' ASCII art is pictures made of flickering binary (now and then hex): a skull and
 crossbones, a cluster of spiky viruses, a padlock, a bug, a warning sign, an angry CPU. RANSOMWARE has a 5th look (its screens a tiny picture in

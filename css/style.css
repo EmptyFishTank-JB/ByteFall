@@ -4171,3 +4171,16 @@ html, body { overflow-x: clip; }
 @media (prefers-reduced-motion: reduce) { .inf-face, .inf-term, .inf-term span { animation: none; } .inf-term { opacity: 0; } .inf-term span { width: 5ch; } }
 .inf-skull.inf-sad { font-size: 12px; line-height: 14px; color: var(--danger); text-align: center; }
 .inf-skull.inf-wheel { font-size: 12px; line-height: 16px; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.6); }
+
+/* INFECTION TESTER (index.html?inftest): its panel along the bottom of the screen */
+.inftest { position: fixed; left: 8px; right: 8px; bottom: 8px; z-index: 400; max-width: 520px; margin: 0 auto; padding: 6px 8px 8px; background: rgba(2, 6, 4, 0.94); border: 1px solid var(--accent); border-radius: 8px; box-shadow: 0 0 14px rgba(0, 0, 0, 0.8); font-family: 'Courier New', monospace; color: var(--fg); }
+.inftest-head { display: flex; align-items: center; justify-content: space-between; font-size: 10px; letter-spacing: 2px; color: var(--accent); }
+.inftest-head b { font-weight: normal; }
+.inftest.min .inftest-body { display: none; }
+.inftest-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 6px; }
+.inftest-row span { font-size: 9px; letter-spacing: 1px; color: var(--fg-dim); margin-right: 2px; }
+.inftest button, .inftest a { all: unset; cursor: pointer; font-size: 9px; letter-spacing: 1px; padding: 4px 6px; border: 1px solid var(--fg-dim); border-radius: 3px; color: var(--fg); }
+.inftest [data-inf] { border-color: var(--danger); color: #ff8a96; }
+.inftest button.on { background: var(--fg); color: #020403; border-color: var(--fg); }
+.inftest a { color: var(--fg-dim); margin-left: auto; }
+.inftest-note { margin: 6px 0 0; font-size: 8.5px; line-height: 1.4; color: var(--fg-dim); }
