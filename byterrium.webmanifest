@@ -1,0 +1,18 @@
+{
+  "name": "Byterrium",
+  "short_name": "Byterrium",
+  "description": "The CPU bots' own little world: take them places, watch them live.",
+  "id": "./byterrium.html",
+  "start_url": "./byterrium.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "landscape",
+  "background_color": "#020403",
+  "theme_color": "#020403",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

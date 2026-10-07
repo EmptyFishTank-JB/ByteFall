@@ -31,6 +31,20 @@ const SCENE_SEASONS = {
   summer: [['beach', 3], ['lake', 2.5], ['meadow', 2], ['desert', 1.5], ['city', 1]],
   autumn: [['woodland', 3], ['farm', 2.5], ['lake', 1.5], ['city', 1.5]],
 };
+// BYTERRIUM (byterrium.html: the bots' own world, on these same files) sets window.BYTERRIUM: a place
+// is where you take them (its travel menu) and it stays till you go elsewhere; ByteFall's lane
+// gets one now and then, as a preview. Either way a place looks the same each time (its layout kept)
+const worldMode = () => typeof window !== 'undefined' && !!window.BYTERRIUM;
+const PLACES_KEY = 'byterrium-places';
+function placeLayout(kind) {
+  let all = {};
+  try { all = JSON.parse(localStorage.getItem(PLACES_KEY)) || {}; } catch (e) { all = {}; }
+  if (!all[kind]) {
+    all[kind] = { seed: Math.floor(Math.random() * 1e9), dockSide: Math.random() < 0.5 ? 1 : -1 };
+    try { localStorage.setItem(PLACES_KEY, JSON.stringify(all)); } catch (e) {}
+  }
+  return all[kind];
+}
 function sceneForced() {
   let v = null;
   try { v = new URLSearchParams(location.search).get('scene') || localStorage.getItem('bytefall-dev-scene'); } catch (e) { v = null; }
@@ -67,7 +81,8 @@ function createScenes(api) {
     if (sc) end(true);
     if (!SCENE_KINDS.includes(kind)) return;
     const now = performance.now();
-    sc = { dockSide: Math.random() < 0.5 ? 1 : -1, kind, at: now, until: now + (ms || rand(600000, 1200000)), seed: Math.floor(Math.random() * 1e9), els: { far: canvas('scene-far'), ground: canvas('scene-ground'), near: canvas('scene-near') }, drawnW: 0, wave: 0, night: night() };
+    const keep = placeLayout(kind); // (the same place each visit)
+    sc = { dockSide: keep.dockSide, kind, at: now, until: worldMode() ? Infinity : now + (ms || rand(600000, 1200000)), seed: keep.seed, els: { far: canvas('scene-far'), ground: canvas('scene-ground'), near: canvas('scene-near') }, drawnW: 0, wave: 0, night: night() };
     draw(true);
     requestAnimationFrame(() => requestAnimationFrame(() => { if (sc) Object.values(sc.els).forEach((e) => { e.style.opacity = '1'; }); }));
     api.botEvent(`scene-${kind}`);
@@ -109,7 +124,7 @@ function createScenes(api) {
     const W = api.laneW();
     if (!W || !sc) return;
     const H = api.laneH();
-    const farCells = Math.round((game() ? H * 0.42 : Math.min(H * 0.17, 140)) / P);
+    const farCells = Math.round((game() ? H * 0.42 : worldMode() ? Math.min(H * 0.32, 300) : Math.min(H * 0.17, 140)) / P); // (BYTERRIUM's: the place fills more of its world)
     const N = sc.night ? 0.45 : 0;
     const S = season();
     const { far, ground, near } = sc.els;
@@ -119,7 +134,8 @@ function createScenes(api) {
       const FH = farCells * P;
       const side = sc.dockSide;
       const x0 = W * (side > 0 ? 0.4 : 0.6);
-      sc.dock = { side, x0, x1: x0 + side * 9 * P, x2: W * (side > 0 ? 0.82 : 0.18), top: (1 - D.top) * FH, water: (1 - D.top) * FH - 3 * P, W };
+      const top = Math.min((1 - D.top) * FH, 12 * P); // (its boards a fixed height off the floor, however tall the place)
+      sc.dock = { side, x0, x1: x0 + side * 9 * P, x2: W * (side > 0 ? 0.82 : 0.18), top, water: top - 3 * P, W };
     }
     if (full || sc.drawnW !== W) {
       sc.drawnW = W;
@@ -138,7 +154,7 @@ function createScenes(api) {
     const d = sc.dock;
     if (!d) return;
     const c = (px) => Math.round(px / P);
-    const pr = Math.round(ch * DOCK[sc.kind].top);
+    const pr = ch - Math.round(d.top / P); // (its boards' row: the dock's height off the floor)
     const a = Math.min(c(d.x1), c(d.x2));
     const b = Math.max(c(d.x1), c(d.x2));
     for (let x = a; x <= b; x += 6) { g.fillStyle = dim('#5a4028', N); g.fillRect(x, pr + 2, 1, ch - pr - 2); } // (its posts)
@@ -362,6 +378,7 @@ function createScenes(api) {
   // back) or now and then an old boot (put out), and casts again or heads back. Tap the BOBBER and
   // the fish is gone: the bot's upset. Poke the bot and it shushes you.
   const U = 34 / 16; // (a pixel of the bot's own grid)
+  const FEET = 2.5 * U; // (a bot's feet stand that far up its sprite: on the ground, it's mid-floor)
   const SVGNS = 'http://www.w3.org/2000/svg';
   let fish = null;
   let nextFish = performance.now() + rand(4000, 9000);
@@ -385,7 +402,7 @@ function createScenes(api) {
     if (!d) return 0;
     const cx = w.x + 17;
     const t = (cx - d.x0) / (d.x1 - d.x0);
-    return Math.max(0, Math.min(1, t)) * d.top;
+    return Math.max(0, Math.min(1, t)) * (Math.round(d.top / P) * P - FEET); // (the boards' top, less the room under a bot's feet)
   }
   function fishStart() {
     const d = sc.dock;
@@ -556,7 +573,7 @@ function createScenes(api) {
         // (1 in 10: a RESOURCE off the bottom, kept; master keys the rarest of them)
         let forced = false; // (testing: every catch a resource)
         try { forced = localStorage.getItem('bytefall-dev-fishres') === 'on'; } catch (e) {}
-        const kind = (r < 0.1 || forced) && typeof Progress !== 'undefined' ? 'res' : r < 0.21 ? 'boot' : r < 0.28 ? 'gold' : 'fish';
+        const kind = (r < 0.1 || forced) && typeof Progress !== 'undefined' && typeof Progress.addRes === 'function' ? 'res' : r < 0.21 ? 'boot' : r < 0.28 ? 'gold' : 'fish';
         if (kind === 'res') {
           const id = pickRes();
           showRes(id);
@@ -942,12 +959,12 @@ function createScenes(api) {
   }
 
   function frame(now) {
-    if (!sc && now > nextCheck) {
+    if (!sc && now > nextCheck && !worldMode()) { // (BYTERRIUM: only where you take them)
       nextCheck = now + (often() ? rand(4000, 8000) : rand(360000, 720000));
       if (!api.foggy() && (often() || Math.random() < 0.4)) start(choose(), SCENE_KINDS.includes(sceneForced()) ? 1e9 : (often() ? rand(30000, 50000) : 0));
     }
     if (!sc) return;
-    if (api.foggy() || now > sc.until) { end(); nextCheck = now + rand(300000, 600000); return; } // (the fog has its own; or its time's up)
+    if (!worldMode() && (api.foggy() || now > sc.until)) { end(); nextCheck = now + rand(300000, 600000); return; } // (the fog has its own; or its time's up; in BYTERRIUM a place stays)
     if (sc.night !== night()) { sc.night = night(); draw(true); }
     if (now - (sc.drawn || 0) > (sc.kind === 'beach' || sc.kind === 'lake' ? 350 : 1000)) { sc.drawn = now; draw(false); }
     if (sc) { fishTick(now); lifeTick(now); nearTick(now); skyTick(now); }

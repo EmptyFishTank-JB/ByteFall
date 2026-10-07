@@ -1,0 +1,90 @@
+/* BYTERRIUM (byterrium.html): the bots' world, full screen, on ByteFall's own styles (style.css: the
+   bots, the visitors, the weather, the places); only the page's frame, header and travel menu here */
+html.byterrium, html.byterrium body { height: 100%; }
+html.byterrium body { display: block; padding: 0; overflow: hidden; }
+
+/* The world: a card filling the screen (16px from its edges), the bots along its foot */
+.byt-world {
+  position: fixed; inset: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom)); overflow: hidden; isolation: isolate;
+  background: var(--board-bg); border: 2px solid var(--fg-dim); border-radius: 10px;
+  box-shadow: 0 0 18px rgba(var(--fg-rgb), 0.15);
+}
+.byt-world .byt-lane { position: absolute; left: 0; right: 0; top: 0; bottom: 10px; }
+/* (here the place's sky fills the whole world, fading out only near its top) */
+.byterrium .byt-lane .scene-sky { height: 100%; -webkit-mask-image: linear-gradient(to top, #000 70%, transparent); mask-image: linear-gradient(to top, #000 70%, transparent); }
+
+/* The header: the name, where they are, the time and weather; TRAVEL */
+.byt-head { position: absolute; left: 0; right: 0; top: 0; z-index: 10; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 14px 16px; pointer-events: none; }
+.byt-where { display: flex; flex-direction: column; gap: 4px; min-width: 0; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8); }
+.byt-title { font-size: 12px; letter-spacing: 4px; color: var(--fg-dim); }
+.byt-place { font-size: 18px; letter-spacing: 3px; color: var(--accent); text-shadow: 0 0 8px rgba(var(--accent-rgb), 0.45), 0 1px 2px rgba(0, 0, 0, 0.8); }
+.byt-info { font-size: 11px; letter-spacing: 1px; color: var(--fg); opacity: 0.85; }
+.byt-travel-btn {
+  pointer-events: auto; display: inline-flex; align-items: center; gap: 8px; flex: none;
+  font-family: inherit; font-size: 12px; letter-spacing: 2px; padding: 8px 12px; cursor: pointer;
+  color: var(--fg); background: rgba(0, 0, 0, 0.45); border: 1px solid var(--fg-dim); border-radius: 6px;
+}
+.byt-travel-btn svg { width: 14px; height: 14px; }
+.byt-travel-btn:hover, .byt-travel-btn:focus-visible { border-color: var(--fg); box-shadow: 0 0 8px rgba(var(--fg-rgb), 0.35); outline: none; }
+
+/* Travelling: a fade to black and back */
+.byt-fade { position: absolute; inset: 0; z-index: 20; background: #000; opacity: 0; pointer-events: none; transition: opacity 0.6s ease; }
+.byt-fade.on { opacity: 1; }
+
+/* The travel menu: a card over the world */
+.byt-travel { position: fixed; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(0, 0, 0, 0.55); }
+.byt-travel[hidden] { display: none; }
+.byt-travel-card {
+  width: min(560px, 100%); max-height: calc(100% - 32px); overflow-y: auto; box-sizing: border-box; padding: 16px;
+  background: var(--board-bg); border: 2px solid var(--fg-dim); border-radius: 10px; box-shadow: 0 0 24px rgba(var(--fg-rgb), 0.2);
+}
+.byt-travel-top { display: flex; align-items: center; justify-content: space-between; }
+.byt-travel-top h2 { margin: 0; font-size: 14px; letter-spacing: 3px; color: var(--accent); font-weight: normal; }
+.byt-close { font-family: inherit; font-size: 20px; line-height: 1; width: 32px; height: 32px; padding: 0; cursor: pointer; color: var(--fg); background: transparent; border: 1px solid var(--grid-line); border-radius: 6px; }
+.byt-travel-note { margin: 8px 0 12px; font-size: 11px; line-height: 1.5; color: var(--fg-dim); }
+.byt-places { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 420px) { .byt-places { grid-template-columns: 1fr; } }
+.byt-place-btn {
+  display: flex; flex-direction: column; gap: 4px; text-align: left; padding: 10px 12px; cursor: pointer;
+  font-family: inherit; color: var(--fg); background: transparent; border: 1px solid var(--grid-line); border-radius: 6px;
+}
+.byt-place-btn b { font-weight: normal; font-size: 12px; letter-spacing: 2px; }
+.byt-place-btn span { font-size: 10px; line-height: 1.4; color: var(--fg-dim); }
+.byt-place-btn:hover, .byt-place-btn:focus-visible { border-color: var(--fg); outline: none; }
+.byt-place-btn.here { border-color: var(--accent); }
+.byt-place-btn.here b { color: var(--accent); }
+@media (prefers-reduced-motion: reduce) { .byt-fade { transition: none; } }
+
+/* SIDEWAYS: made for a phone on its side (the S23 Ultra's 823x384); the world inset from the
+   screen's curves and camera (the safe areas) as well as its 16px */
+.byt-world { inset: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
+@media (max-height: 500px) {
+  .byt-head { padding: 10px 12px; }
+  .byt-title { font-size: 10px; letter-spacing: 3px; }
+  .byt-place { font-size: 15px; }
+  .byt-info { font-size: 10px; }
+  .byt-travel-btn { padding: 6px 10px; font-size: 11px; }
+  .byt-travel-card { width: min(780px, 100%); padding: 12px 14px; }
+  .byt-travel-note { margin: 6px 0 8px; }
+  .byt-places { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .byt-place-btn { padding: 7px 10px; }
+  .byt-place-btn span { font-size: 9px; }
+}
+.byt-travel-tools { display: flex; align-items: center; gap: 8px; }
+.byt-tool { font-family: inherit; font-size: 11px; letter-spacing: 2px; padding: 7px 10px; cursor: pointer; color: var(--fg); background: transparent; border: 1px solid var(--fg-dim); border-radius: 6px; }
+.byt-tool:hover, .byt-tool:focus-visible { border-color: var(--fg); outline: none; }
+.byt-tool.quiet { color: var(--fg-dim); border-color: var(--grid-line); }
+
+/* A phone held upright: turn it sideways (or go full screen and let it lock), or stay upright */
+.byt-rotate { display: none; }
+@media (orientation: portrait) and (max-width: 700px) {
+  html:not(.upright-ok) .byt-rotate {
+    position: fixed; inset: 0; z-index: 40; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px; text-align: center;
+    background: radial-gradient(ellipse at center, var(--bg-center) 0%, var(--bg-solid) 100%);
+  }
+}
+.byt-rotate-icon { width: 72px; height: 72px; color: var(--fg); animation: byt-turn 2.4s ease-in-out infinite; }
+@keyframes byt-turn { 0%, 30% { transform: rotate(0); } 55%, 85% { transform: rotate(-90deg); } 100% { transform: rotate(0); } }
+.byt-rotate h2 { margin: 0; font-size: 16px; letter-spacing: 3px; color: var(--accent); font-weight: normal; }
+.byt-rotate p { margin: 0 0 6px; font-size: 12px; color: var(--fg-dim); }
+@media (prefers-reduced-motion: reduce) { .byt-rotate-icon { animation: none; } }

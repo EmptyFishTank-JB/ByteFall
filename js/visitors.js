@@ -2573,7 +2573,7 @@ function createVisitors(api) {
       if (!c.spooky) c.tone = tone;
     },
     releaseClouds: (soon) => { if (clouds && (clouds.held || soon) && !clouds.stays) { clouds.held = false; clouds.until = performance.now() + (soon ? 0 : rand(6000, 16000)); } },
-    fog: () => { if (!fog) startFog(false, false); },
+    fog: () => { if (!fog) startFog(false, false, window.BYTERRIUM ? false : undefined); }, // (BYTERRIUM: a mist over the place, no woods)
   }) : null;
   // SCENES (scenes.js): now and then the lane becomes a place (a meadow, a beach, a city...), with
   // weather to suit; not with the fog or the HAUNTED FOREST
@@ -2590,7 +2590,8 @@ function createVisitors(api) {
     const W = api.laneW();
     if (weather) weather.frame(now, dt);
     if (scenes) scenes.frame(now);
-    if (!fog && hauntedForest && spooky()) startFog(true); // (the HAUNTED FOREST stands, all month)
+    const world = !!window.BYTERRIUM; // (BYTERRIUM, byterrium.html: its places are its own; no forest or woods coming over them)
+    if (!world && !fog && hauntedForest && spooky()) startFog(true); // (the HAUNTED FOREST stands, all month)
     if (fog) fogFrame(now);
     if (clouds) cloudsFrame(now);
     if (lights) lightsFrame(now);
@@ -2600,7 +2601,7 @@ function createVisitors(api) {
       // season's visitors, if any)
       if (virusOften() || Math.random() < VIRUS_ODDS) visit('virus');
       else if (fog && fog.haunted && fog.phase === 'light' && Math.random() < 0.4) forestVisit();
-      else if (!fog && (fogOften() || ((Season.is('november') || Season.is('halloween')) && Math.random() < (spooky() && !hauntedForest ? FOREST_FIRST_ODDS : FOG_ODDS)))) startFog();
+      else if (!world && !fog && (fogOften() || ((Season.is('november') || Season.is('halloween')) && Math.random() < (spooky() && !hauntedForest ? FOREST_FIRST_ODDS : FOG_ODDS)))) startFog();
       else if (!clouds && cloudLane() && cloudSeason() && Math.random() < CLOUD_ODDS) startClouds();
       else if (visits().length) visit();
       nextVisit = now + (virusOften() ? rand(3000, 6000) : rand(20000, 45000));
@@ -2857,5 +2858,5 @@ function createVisitors(api) {
     }
     return { sprites, anims, kinds: { ...KINDS, 'tree-walking': { frameMs: 190 }, 'baretree-walking': { frameMs: 190 }, 'pine-walking': { frameMs: 190 } } };
   }
-  return { frame, clear, visit, list: () => list, makeScenery, moveTree, foggy, spirit, art, weather: () => (weather ? weather.current() : null) };
+  return { frame, clear, visit, list: () => list, makeScenery, moveTree, foggy, spirit, art, weather: () => (weather ? weather.current() : null), scene: () => (scenes ? scenes.current() : null) };
 }

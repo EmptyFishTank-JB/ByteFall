@@ -29,10 +29,27 @@ Mechanically it's a Drop7-style puzzle:
 
 The music player's visualizers as their own app, for whatever the phone plays (Pandora, Spotify, YouTube, ...), with the song from any app shown and played / paused / skipped: `visualizer/` (see `visualizer/README.md`), built by Actions → ByteFall Viz APK.
 
+## Byterrium
+
+The CPU bots' own world, with nothing of the game: https://emptyfishtank-jb.github.io/ByteFall/byterrium.html
+(`byterrium.html`). It runs on ByteFall's very files (the bots and their minds, the visitors, the
+weather, the places, the fishing), so the lanes in ByteFall are a preview of it, and a change to
+either shows in both. Played sideways (made for a phone on its side): held upright it asks to be
+turned, with a button that goes full screen and locks the screen sideways where the browser allows
+(or STAY UPRIGHT), and installed from the browser (`byterrium.webmanifest`) it opens sideways.
+
+- **TRAVEL** (the button, or T): the places (THE GRID, MEADOW, LAKE, BEACH, WOODLAND, FARM, CITY,
+  DESERT, SNOWFIELD). The bots fade out and back in somewhere new and stay there till you pick
+  another; each place keeps its look, and the bots keep their minds, between visits and reloads.
+- The header says where they are, the time, the weather and (at night) the moon.
+- In the world mode (`window.BYTERRIUM`) a place never runs out and the scheduled fog stays away
+  (the weather still comes and goes); ByteFall's scenes still come now and then and pass.
+
 ## Repo layout
 
 ```
 index.html              the game page (GitHub Pages serves it from the root)
+byterrium.html          Byterrium, the bots' world (js/byterrium.js, css/byterrium.css, byterrium.webmanifest)
 manifest.webmanifest    the installed app's name, colors and icons
 css/style.css           all the styles and the themes
 js/                     the game: script.js (the game itself), player.js (the music player), progress.js (levels, unlocks,
@@ -577,7 +594,7 @@ away.
 
 ## Files
 
-`index.html` (and `dev-tools/audio.html`, `dev-tools/mixer.html`) load their CSS and JS with a `?v=N`
+`index.html` (and `byterrium.html`, `dev-tools/audio.html`, `dev-tools/mixer.html`) load their CSS and JS with a `?v=N`
 tag. Bump `N` on all of those links whenever any of those files change, so browsers don't pair a fresh page
 with a cached older script (GitHub Pages lets browsers cache for 10 minutes).
 
@@ -1106,7 +1123,7 @@ stack heights the game settles on, eased between as the intensity moves.
 - **CORE DUMP (track 09)**: its trial layers still wait for picks.
 - **Sound effect themes**: more in the style of the tracks (TERMINAL and HANDSHAKE so far: SETTINGS → SOUND EFFECTS).
 - **Future games** (separate from ByteFall): BYTERRIUM, a Tamagotchi-style spin-off for the CPU
-  bots, a Jumanji / Zathura-style board game of events the players survive together, and three Halo
+  bots (its first piece is live: [Byterrium](#byterrium)), a Jumanji / Zathura-style board game of events the players survive together, and three Halo
   game types to rebuild in Halo Infinite (AVALANCHE, WARTHOG ARENA, PAC-MAN ARENA FIESTA). See
   [TODO.md](TODO.md#future-games-separate-from-bytefall).
 

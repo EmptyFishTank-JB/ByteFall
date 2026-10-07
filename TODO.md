@@ -20,6 +20,9 @@ Ideas for games of their own, written down so they're not lost; nothing here is 
 
 ### BYTERRIUM (working title; the ByteFall spin-off)
 
+**Live** (`byterrium.html`, sideways): the bots in a place you pick from TRAVEL that stays, on
+ByteFall's own files. The rest below is still to come.
+
 A Tamagotchi-style pet game with a Terraria look, in a closed little world (a terrarium) where you
 raise the CPU bots, your "cache critters". ByteFall stays a puzzle game; the deeper wanderer ideas
 below are kept for this one (any could still come back to ByteFall as an update). Check the name on

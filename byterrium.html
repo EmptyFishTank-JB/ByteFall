@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" class="byterrium">
+<head>
+<script src="js/fonts.js?v=438"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#020403">
+<title>Byterrium</title>
+<link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+<link rel="manifest" href="byterrium.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="stylesheet" href="css/style.css?v=438">
+<link rel="stylesheet" href="css/byterrium.css?v=438">
+<!-- BYTERRIUM: the CPU bots' own world, nothing of the game. It runs on ByteFall's very files (the
+     bots, their minds, the visitors, the weather, the places, the fishing): ByteFall's lanes are a
+     preview of this. Here a place is where you take them and it stays (window.BYTERRIUM, read by
+     scenes.js and visitors.js); TRAVEL picks the next. Kept in this browser: where you are, each
+     place's look, each bot's mind. -->
+<script>
+  window.BYTERRIUM = true;
+  // (ByteFall's progress isn't part of this world: the bots' events go nowhere for now)
+  window.Progress = { botEvent() {}, check: () => [], isUnlocked: () => true, unlock: () => ({ need: '', goal: 0, value: () => 0 }), heardTrack() {} };
+</script>
+</head>
+<body>
+  <main class="byt-world" id="world">
+    <div class="start-walkers byt-lane" id="world-lane" aria-label="The bots' world"></div>
+    <header class="byt-head">
+      <div class="byt-where">
+        <span class="byt-title">BYTERRIUM</span>
+        <span class="byt-place" id="place-name">// THE GRID</span>
+        <span class="byt-info" id="world-info"></span>
+      </div>
+      <button type="button" class="byt-travel-btn" id="travel-btn" aria-haspopup="dialog" aria-controls="travel">
+        <svg viewBox="0 0 16 16" aria-hidden="true" shape-rendering="crispEdges"><path d="M7 1h2v1h1v1h1v4h-1v2h-1v2h-1v2h-1v1H7v-1H6v-2H5V9H4V7H3V3h1V2h1V1zm0 3v2h2V4z" fill="currentColor"/></svg>
+        TRAVEL
+      </button>
+    </header>
+    <div class="byt-fade" id="fade" aria-hidden="true"></div>
+  </main>
+
+  <div class="byt-travel" id="travel" role="dialog" aria-modal="true" aria-labelledby="travel-title" hidden>
+    <div class="byt-travel-card">
+      <div class="byt-travel-top">
+        <h2 id="travel-title">// TRAVEL</h2>
+        <div class="byt-travel-tools">
+          <button type="button" class="byt-tool" id="full-btn">FULL SCREEN</button>
+          <button type="button" class="byt-close" id="travel-close" aria-label="Close">&times;</button>
+        </div>
+      </div>
+      <p class="byt-travel-note">Take the bots somewhere. They stay till you take them elsewhere, and a place is as you left it.</p>
+      <div class="byt-places" id="places"></div>
+    </div>
+  </div>
+
+  <!-- (a phone held upright: Byterrium is played sideways) -->
+  <div class="byt-rotate" id="rotate" role="dialog" aria-modal="true" aria-labelledby="rotate-title">
+    <svg class="byt-rotate-icon" viewBox="0 0 32 32" aria-hidden="true" shape-rendering="crispEdges">
+      <path d="M11 4h10v1h1v22h-1v1H11v-1h-1V5h1zm1 2v18h8V6zm3 19h2v1h-2z" fill="currentColor"/>
+      <path d="M24 9h3v1h1v3h1l-2 2-2-2h1v-2h-2z" fill="currentColor"/>
+    </svg>
+    <h2 id="rotate-title">TURN YOUR PHONE SIDEWAYS</h2>
+    <p>Byterrium is played in landscape.</p>
+    <button type="button" class="byt-tool" id="rotate-full">FULL SCREEN, SIDEWAYS</button>
+    <button type="button" class="byt-tool quiet" id="rotate-stay">STAY UPRIGHT</button>
+  </div>
+
+  <div class="stat cpu-face" id="cpu-face" hidden aria-hidden="true"></div>
+
+  <script src="js/bot-svg.js?v=438"></script>
+  <script src="js/pixel.js?v=438"></script>
+  <script src="js/minibot.js?v=438"></script>
+  <script src="js/seasons.js?v=438"></script>
+  <script src="js/bigart.js?v=438"></script>
+  <script src="js/scenes.js?v=438"></script>
+  <script src="js/weather.js?v=438"></script>
+  <script src="js/visitors.js?v=438"></script>
+  <script src="js/data/bot-anims.js?v=438"></script>
+  <script src="js/wanderers.js?v=438"></script>
+  <script src="js/byterrium.js?v=438"></script>
+</body>
+</html>
