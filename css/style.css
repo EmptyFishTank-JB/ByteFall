@@ -4141,6 +4141,10 @@ html, body { overflow-x: clip; }
 .inf-ransom-left { position: absolute; right: 2px; bottom: 0; font-size: 8px; line-height: 11px; color: var(--danger); text-shadow: 0 0 3px #000; z-index: 1; }
 /* MALWARE: the bits a jumble of flickering characters */
 .cell.corrupt { color: var(--danger); border-color: rgba(var(--danger-rgb), 0.7); }
+.inf-glitch.mosaic, .inf-glitch.mini { white-space: pre; letter-spacing: 0; text-shadow: 0 0 3px rgba(var(--danger-rgb), 0.6); }
+.inf-glitch.mosaic { font-size: 4.6px; line-height: 5.4px; color: #ff7080; text-shadow: 0 0 3px rgba(var(--danger-rgb), 0.9); } /* (each bit its piece of one big picture) */
+.inf-glitch.mini { font-size: 3.2px; line-height: 3.4px; }
+.inf-mini { margin: 0; font-size: 3px; line-height: 3px; letter-spacing: 0; color: var(--danger); font-family: 'Courier New', monospace; text-shadow: 0 0 2px rgba(var(--danger-rgb), 0.7); }
 .inf-glitch { font-family: 'Courier New', monospace; letter-spacing: 0; font-size: 0.8em; text-shadow: 1px 0 rgba(0, 220, 255, 0.6), -1px 0 rgba(255, 40, 80, 0.6); }
 /* SPYWARE: eyes watching from the CURRENT box */
 .inf-eyes { font-family: 'Courier New', monospace; font-size: 0.62em; letter-spacing: 0; color: var(--danger); white-space: nowrap; }

@@ -137,7 +137,10 @@ BLACK BOX INFECTION makes every box opened come up one (ANY or one kind), and IN
 1 to 4 (localStorage bytefall-dev-infection / bytefall-dev-infection-look). While any's on, a little bot
 at its laptop types away at a virus in CURRENT's corner (xN past one; its name(s) on hover). The
 scareware alerts' ASCII art is pictures made of flickering binary (now and then hex): a skull and
-crossbones, a cluster of spiky viruses, a padlock, a bug, a warning sign, an angry CPU. Each shows
+crossbones, a cluster of spiky viruses, a padlock, a bug, a warning sign, an angry CPU. RANSOMWARE has a 5th look (its screens a tiny picture in
+binary: a skull, a padlock, a virus or a CPU, with hex streaming) and MALWARE a 5th and 6th (one big
+picture in binary across the whole board, each corrupted bit showing its piece of it; or each bit a
+tiny picture of its own). Each shows
 itself in its own little LED sign or ASCII display, kept within the bits it takes up (js/infections.js), in
 one of four looks picked at random each time (below, the first of each; the others: ADWARE a flashing SALE
 with arrows, a slot machine, the CPU bouncing over CLICK; SPYWARE a REC light, binoculars, an eye at a

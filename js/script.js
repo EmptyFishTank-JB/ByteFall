@@ -434,7 +434,7 @@ const boardWrapEl = document.querySelector('.board-wrap');
 Infections.init(boardEl, boardWrapEl); // (the INFECTIONS' displays, laid over the board)
 { // (the dev page's INFECTION LOOK switch: every infection shows that look of its four)
   const look = Number(storage.get('bytefall-dev-infection-look'));
-  if (look >= 1 && look <= 4) Infections.force({ ad: look - 1, jack: look - 1, spy: look - 1, malware: look - 1, ransom: look - 1, scare: look - 1 });
+  if (look >= 1 && look <= 6) Infections.force({ ad: look - 1, jack: look - 1, spy: look - 1, malware: look - 1, ransom: look - 1, scare: look - 1 });
 }
 const columnButtonsEl = document.getElementById('column-buttons');
 const scoreEl = document.getElementById('score');
@@ -1149,7 +1149,7 @@ function render(popped = [], falling = null) {
           div.title = `RANSOMWARE: locked for ${cell.locked} more drop${cell.locked === 1 ? '' : 's'}`;
         } else if (cell.type === 'number' && malwareLeft > 0) { // (MALWARE: the bits shown as junk)
           div.classList.add('disc', 'corrupt');
-          div.innerHTML = Infections.glitch(3);
+          div.innerHTML = Infections.glitch(3, r, c);
         } else if (cell.type === 'number') {
           div.classList.add('disc');
           fillBit(div, cell.val);

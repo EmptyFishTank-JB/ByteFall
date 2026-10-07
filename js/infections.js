@@ -103,7 +103,13 @@ const Infections = (() => {
   // Each infection's four looks: one picked at random each time it strikes
   const style = { ad: 0, jack: 0, spy: 0, malware: 0, ransom: 0, scare: 0 };
   let forced = null; // (the dev page or a test: { kind: look } to show that look next)
-  const pick = (kind) => { style[kind] = forced && forced[kind] !== undefined ? forced[kind] : Math.floor(Math.random() * 4); return style[kind]; };
+  const LOOKS = { ad: 4, jack: 4, spy: 4, malware: 6, ransom: 5, scare: 4 }; // (how many looks each has)
+  const pick = (kind) => {
+    const f = forced && forced[kind] !== undefined ? forced[kind] : -1;
+    style[kind] = f >= 0 && f < LOOKS[kind] ? f : Math.floor(Math.random() * LOOKS[kind]);
+    if (kind === 'malware') mosaic = null; // (a new picture for the board, if it's to be one)
+    return style[kind];
+  };
   const ARROW_DOWN = ['..x..', '..x..', '..x..', 'xxxxx', '.xxx.', '..x..'];
   const SKULL_LED = ['.xxxxxxx.', 'xxxxxxxxx', 'xx..x..xx', 'xx..x..xx', 'xxxx.xxxx', '.xxx.xxx.', '..x.x.x..', '..xxxxx..'];
   const PICK = ['xxxx.', '.xx..', '.x.x.', 'x....', 'x....'];
@@ -290,10 +296,14 @@ const Infections = (() => {
   // ── ASCII: the corrupted bits, the spying eyes, the ransom screens' typing ────────────────────
   const JUNK = '#%&@$?!*<>/\\|~^=+;:{}[]';
   const junk = (n) => Array.from({ length: n }, () => JUNK[Math.floor(Math.random() * JUNK.length)]).join('');
-  // MALWARE's four ways of spoiling a bit: junk, binary, error codes, a shade melting through it
+  // MALWARE's six ways of spoiling a bit: junk, binary, error codes, a shade melting through it; and
+  // the ASCII ART: one big picture in binary across the whole board, each bit showing its piece of
+  // it (MOSAIC), or each bit a tiny picture of its own
   const ERRS = ['ERR', 'NaN', '0x?', 'NUL', '404', '???', 'EOF', '-0-'];
   const MELT = ['#', '=', '-', '.', ' ', '.', '-', '='];
-  const corrupt = (n) => {
+  const corrupt = (n, r, c) => {
+    if (style.malware === 4 && r !== undefined) return mosaicPiece(r, c);
+    if (style.malware === 5 && r !== undefined) return binFill(MINIS[(r * 3 + c) % MINIS.length]);
     if (style.malware === 1) return Array.from({ length: n }, () => (Math.random() < 0.5 ? '0' : '1')).join('');
     if (style.malware === 2) return ERRS[Math.floor(Math.random() * ERRS.length)];
     if (style.malware === 3) { const k = Math.floor(performance.now() / 120); return Array.from({ length: n }, (_, i) => MELT[(k + i) % MELT.length]).join(''); }
@@ -308,7 +318,12 @@ const Infections = (() => {
   let ticker = 0;
   function tick() {
     let any = false;
-    document.querySelectorAll('.inf-glitch').forEach((g) => { any = true; g.textContent = corrupt(g.dataset.n ? +g.dataset.n : 3); });
+    document.querySelectorAll('.inf-glitch').forEach((g) => {
+      any = true;
+      if (g.dataset.r !== undefined && style.malware >= 4) binFlicker(g); // (the pictures: their digits flicker, the shape holds)
+      else g.textContent = corrupt(g.dataset.n ? +g.dataset.n : 3);
+    });
+    document.querySelectorAll('.inf-mini').forEach((m) => { any = true; binFlicker(m); });
     document.querySelectorAll('.inf-eyes').forEach((e) => { any = true; const f = SPY[style.spy]; e.textContent = f[Math.floor(performance.now() / 600) % f.length]; });
     for (const w of wins()) { const scan = w.querySelector('.inf-scan'); if (scan) { any = true; scareTick(w, scan); } }
     if (!any) { clearInterval(ticker); ticker = 0; }
@@ -330,10 +345,12 @@ const Infections = (() => {
     () => ['PAY', 'UP!', '$$$', '>:)'], // (the demand)
     () => ['LOCK', 'ED.', '0x7F', 'FF..'], // (a hex dump)
     () => ['KEYS', 'OR', 'BITS', 'BYE'], // (the threat)
+    () => Array.from({ length: 4 }, () => Array.from({ length: 4 }, () => '0123456789ABCDEF'[Math.floor(Math.random() * 16)]).join('')), // (hex, streaming)
   ];
   const TERM = (k) => TERMS[k]().map((l) => `<span>${l}</span>`).join('');
   function ransomHtml(val, left, k = style.ransom) {
-    return `<span class="inf-screen"><span class="inf-face">${RANSOM_LED[k]}</span><span class="inf-term">${TERM(k)}</span></span>`
+    const face = k === 4 ? `<pre class="inf-mini">${binFill(MINIS[(val + left) % MINIS.length])}</pre>` : RANSOM_LED[k]; // (the ASCII ART: a tiny picture in binary)
+    return `<span class="inf-screen"><span class="inf-face">${face}</span><span class="inf-term">${TERM(k)}</span></span>`
       + `${LOCK}<span class="inf-ransom-val">${val}</span><span class="inf-ransom-left">${left}</span>`;
   }
 
@@ -413,6 +430,45 @@ const Infections = (() => {
     return wide(rows);
   }
   const VIRUS_BIN = virusMask();
+  // (tiny ones, for inside a bit: a skull, a padlock, a virus, an angry CPU)
+  const MINIS = [
+    ['.xxxxxx.', 'xxxxxxxx', 'x..xx..x', 'x..xx..x', 'xxx..xxx', '.xxxxxx.', '.x.xx.x.', '..xxxx..'],
+    ['..xxxx..', '.x....x.', '.x....x.', 'xxxxxxxx', 'xxx..xxx', 'xxx..xxx', 'xxxx.xxx', 'xxxxxxxx'],
+    ['x...x...x', '.x..x..x.', '..xxxxx..', '..x.xxx..', 'xxxxx.xxx', '..xxxxx..', '..xx.xx..', '.x..x..x.', 'x...x...x'],
+    ['.x.x.x.x', 'xxxxxxxx', 'x..xx..x', 'xxxxxxxx', 'xx....xx', 'xxxxxxxx', '.x.x.x.x'],
+  ].map(wide);
+  // MOSAIC: one of the big pictures fitted to the whole board (CELL_W x CELL_H characters a bit),
+  // kept to its shape, centred
+  const CELL_W = 12;
+  const CELL_H = 6;
+  let mosaic = null;
+  function mosaicPiece(r, c) {
+    const cols = state.cols || 7;
+    const rows = state.maxRows || 10;
+    if (!mosaic) {
+      const pics = [SKULL_BIN, VIRUS_BIN, WARN_BIN]; // (the ones that read big, through the gaps between the bits)
+      const art = pics[Math.floor(Math.random() * pics.length)];
+      const W = cols * CELL_W;
+      const H = rows * CELL_H;
+      const k = Math.min(W / art[0].length, H / art.length); // (characters to characters: same shape)
+      const w = Math.round(art[0].length * k);
+      const h = Math.round(art.length * k);
+      const x0 = Math.floor((W - w) / 2);
+      const y0 = Math.floor((H - h) / 2);
+      mosaic = Array.from({ length: H }, (_, y) => Array.from({ length: W }, (_, x) => {
+        const sx = Math.floor((x - x0) / k);
+        const sy = Math.floor((y - y0) / k);
+        return x >= x0 && y >= y0 && sy < art.length && sx < art[0].length && art[sy][sx] !== '.';
+      }));
+    }
+    const top = (rows - 1 - r) * CELL_H; // (row 0 is the bottom)
+    const lines = [];
+    for (let y = top; y < top + CELL_H; y++) {
+      const row = mosaic[y] || [];
+      lines.push(Array.from({ length: CELL_W }, (_, x) => (row[c * CELL_W + x] ? (Math.random() < 0.5 ? '0' : '1') : '.')).join('')); // (around it, dots: the picture's bright on them)
+    }
+    return lines.join('\n');
+  }
   // (the pool, and what each is filled with: binary mostly, hex now and then)
   const ARTS = [SKULL_BIN, VIRUS_BIN, PADLOCK_BIN, BUG_BIN, WARN_BIN, CPU_BIN];
   const artHtml = (cls = '') => {
@@ -428,7 +484,7 @@ const Infections = (() => {
     const t = [...pre.textContent];
     for (let i = 0; i < t.length / 12; i++) {
       const k = Math.floor(Math.random() * t.length);
-      if (t[k] !== ' ' && t[k] !== '\n') t[k] = digit(hex);
+      if (/[0-9A-F]/.test(t[k])) t[k] = digit(hex);
     }
     pre.textContent = t.join('');
   }
@@ -599,5 +655,7 @@ const Infections = (() => {
     scareEnd();
     if (els.scare) { els.scare.innerHTML = ''; els.scare.hidden = true; }
   }
-  return { init, place, steal, scare, scareEnd, closeScare, scareUp, scareCount: () => wins().length, ransomHtml, clear, pick, force: (f) => { forced = f; }, glitch: (n = 3) => `<span class="inf-glitch" data-n="${n}">${junk(n)}</span>`, eyes: () => '<span class="inf-eyes">(o_o)</span>' };
+  return { init, place, steal, scare, scareEnd, closeScare, scareUp, scareCount: () => wins().length, ransomHtml, clear, pick, force: (f) => { forced = f; }, glitch: (n = 3, r, c) => (style.malware >= 4 && r !== undefined
+    ? `<span class="inf-glitch ${style.malware === 4 ? 'mosaic' : 'mini'}" data-n="${n}" data-r="${r}" data-c="${c}">${corrupt(n, r, c)}</span>`
+    : `<span class="inf-glitch" data-n="${n}">${corrupt(n)}</span>`), eyes: () => '<span class="inf-eyes">(o_o)</span>' };
 })();
