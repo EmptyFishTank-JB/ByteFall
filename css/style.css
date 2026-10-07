@@ -4259,3 +4259,8 @@ html, body { overflow-x: clip; }
 .hacks-scroll .store-rule { margin: 12px 0 2px; }
 .hack-item.equipped { background: linear-gradient(rgba(var(--fg-rgb), 0.13), rgba(var(--fg-rgb), 0.05)), var(--panel); box-shadow: inset 0 0 10px rgba(var(--fg-rgb), 0.12), 0 0 6px rgba(var(--fg-rgb), 0.25); }
 .hack-item.equipped.held { box-shadow: inset 0 0 10px rgba(var(--fg-rgb), 0.12), 0 0 10px rgba(var(--accent-rgb), 0.3); }
+
+/* EXPLOITS' tier sections: a heading and a line on what the tier's for, each under a ===== line */
+.tier-head .store-rule { margin: 16px 0 4px; }
+.tier-sub { margin: 4px 0 2px; font-size: 15.5px; letter-spacing: 2px; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+.tier-note { margin: 0 0 4px; font-size: 13px; color: var(--fg-dim); }

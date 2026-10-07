@@ -5807,6 +5807,20 @@ const hacksListEl = hacksPanelEl.querySelector('.hacks-scroll') || hacksPanelEl;
 // The loadout can only change before a session's first drop, or once it's over
 const loadoutEditable = () => gameOver || Progress.runDrops() === 0;
 const slotInfoEl = document.getElementById('slot-info');
+// The list's sections, by tier (as priced in the STORE and the BLACK MARKET), each under a ===== line
+const EXPLOIT_TIERS = [
+  ['TIER 1 // THE BASICS', 'Quick fixes that shake up the board. The first you unlock, and the cheapest to buy.'],
+  ['TIER 2 // PRECISION TOOLS', 'Aim these where they do the most. Their price takes ROOTKITS too.'],
+  ['TIER 3 // HEAVY HITTERS', 'Big plays that change the whole board. The last to unlock, and the dearest.'],
+  ['SPECIAL // UNKNOWN', 'Never sold. Nobody knows what\'s inside until it opens.'],
+];
+const tierHeads = EXPLOIT_TIERS.map(([title, note], t) => {
+  const el = document.createElement('div');
+  el.className = 'tier-head';
+  el.innerHTML = `${t ? '<div class="store-rule" aria-hidden="true">================================================================================</div>' : ''}<h3 class="tier-sub">${title}</h3><p class="tier-note">${note}</p>`;
+  return el;
+});
+const tierOfCard = (id) => (id === 'black-box' ? 3 : Progress.tierOf(id));
 function refreshExploitCards() {
   const { slots, max, nextLevel } = Progress.slotInfo();
   const equipped = Progress.equipped();
@@ -5818,9 +5832,12 @@ function refreshExploitCards() {
       + (slots < max ? (nextLevel ? ` // NEXT SLOT AT LV ${nextLevel}` : ' // MORE SLOTS WITH DECRYPTOR RANKS') : '')
       + (editable ? '' : ' // LOCKED UNTIL THE SESSION ENDS');
   }
+  tierHeads.forEach((h) => { delete h.dataset.placed; });
   for (const id of Progress.exploitOrder()) {
     const el = hacksPanelEl.querySelector(`.hack-item[data-hack="${id}"]`);
     if (!el) continue;
+    const head = tierHeads[tierOfCard(id)];
+    if (!head.dataset.placed) { hacksListEl.appendChild(head); head.dataset.placed = '1'; } // (its tier's heading first)
     hacksListEl.appendChild(el); // keep the cards in unlock order (in the list that scrolls)
     const info = Progress.exploitInfo(id);
     const on = daily ? DAILY_EXPLOITS.includes(id) : equipped.includes(id);
