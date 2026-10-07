@@ -2,3 +2,6 @@
 /node_modules/
 /www/
 /android/
+
+# Test screenshots (Playwright runs from the repo root): never committed
+/*.png
