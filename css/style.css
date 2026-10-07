@@ -3919,6 +3919,8 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
 .card-lights { display: none; }
 :is([data-theme="season-winter"], [data-theme="season-halloween"], [data-theme="season-valentine"]) .card-lights { display: block; position: absolute; inset: 14px -15px; pointer-events: none; z-index: 300; }
 :root.low-fx .card-lights { display: none !important; }
+/* (they reach a little past the screen's sides: the page is clipped there, so it never scrolls or zooms out for them) */
+html, body { overflow-x: clip; }
 .card-lights i { image-rendering: pixelated; position: absolute; top: 0; bottom: 0; width: 28px; background-position: 0 0; background-size: 28px 240px; background-repeat: repeat-y; }
 .card-lights i.l { left: 0; }
 .card-lights i.r { right: 0; transform: scaleX(-1); background-position: 0 144px; } /* (three bulbs down: the sides don't match) */
