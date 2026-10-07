@@ -382,7 +382,7 @@ DAILY's cards, the options) scrolls inside it on a short screen, fading out at i
 there's more. The wanderers' lane at the card's foot is one fixed height (192px), the same on the
 main menu and in every game, whatever else is on the card; the defrag backgrounds (the grid's card,
 the mode card, VS's setup) are a little see-through (92%), so the lane's trees show faintly behind
-them, and the HAUNTED FOREST's two big trees in front (the oaks, or now and then slim, gnarled ones) stand
+them, and the HAUNTED FOREST's two big trees in front (drawn in the frame editor at half the bots' pixels, finer than the rest: one for each edge, their crowns arching in) stand
 on trunks that run down to the card's foot, inside its border (the card frames the scene), the bots passing
 behind them; about one forest in three, the HOLLOW stands between them, as big, a dead tree with two
 red eyes and a gaping mouth in its trunk. The two edge trees never match: each has its own crown (which edge gets which, at random). The forest has a floor: a silhouetted ground along the lane's foot down to the

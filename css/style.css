@@ -3921,7 +3921,9 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
 :root.low-fx .card-lights { display: none !important; }
 .card-lights i { image-rendering: pixelated; position: absolute; top: 0; bottom: 0; width: 28px; background-position: 0 0; background-size: 28px 240px; background-repeat: repeat-y; }
 .card-lights i.l { left: 0; }
-.card-lights i.r { right: 0; transform: scaleX(-1); background-position: 0 120px; }
+.card-lights i.r { right: 0; transform: scaleX(-1); background-position: 0 144px; } /* (three bulbs down: the sides don't match) */
+/* (each string ends on a whole bulb, its glow inside it: nothing cut off at the ends) */
+@supports (height: round(down, 100%, 48px)) { .card-lights i { bottom: auto; height: round(down, 100%, 48px); } }
 .card-lights i::before, .card-lights i::after { content: ""; position: absolute; top: 0; bottom: 0; left: -14px; right: -14px; background-size: 56px 240px; background-repeat: repeat-y; background-position: inherit; mix-blend-mode: screen; } /* (wider than the string: the glows fade out round) */
 .card-lights i::before { animation: card-twinkle 2.6s ease-in-out infinite; }
 .card-lights i::after { animation: card-twinkle 2.6s ease-in-out -1.3s infinite; }
