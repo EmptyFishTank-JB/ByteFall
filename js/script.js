@@ -3941,7 +3941,23 @@ const themeMeta = document.querySelector('meta[name="theme-color"]');
 Progress.setThemeCount(THEMES.length);
 let themeId = THEMES.some((t) => t.id === storage.get('bytefall-theme')) ? storage.get('bytefall-theme') : 'terminal';
 
-let themeFade = 0; // the timer that ends the page's fade to a newly picked theme
+let themeFade = 0; // the timer that brings the screen back from black after a theme change
+const themeBlackEl = document.getElementById('theme-black');
+let themeSwap = null; // (what goes in while it's black: the latest pick)
+function themeThroughBlack(swap) {
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce || !themeBlackEl) { swap(); return; }
+  const dark = themeBlackEl.classList.contains('on');
+  themeSwap = swap;
+  themeBlackEl.classList.add('on');
+  clearTimeout(themeFade);
+  themeFade = setTimeout(() => {
+    const go = themeSwap;
+    themeSwap = null;
+    if (go) go();
+    requestAnimationFrame(() => requestAnimationFrame(() => themeBlackEl.classList.remove('on'))); // (once it's drawn)
+  }, dark ? 60 : 260);
+}
 function applyTheme() {
   const theme = THEMES.find((t) => t.id === themeId);
   const shown = themeAvailable(theme) ? theme : THEMES[0];
@@ -3992,18 +4008,14 @@ function applyTheme() {
         const lightChange = (themeId === 'paper') !== (t.id === 'paper');
         themeId = t.id;
         storage.set('bytefall-theme', themeId);
-        // The page fades to the new theme over 1s (1.25s into or out of the light PAPER, so it
-        // doesn't flash). A pick mid-fade cuts that fade short and fades to the latest.
-        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (!reduce) {
-          const ms = lightChange ? 1250 : 1000;
-          document.documentElement.style.setProperty('--theme-fade', `${ms}ms`);
-          document.documentElement.classList.add('theme-fade');
-          clearTimeout(themeFade);
-          themeFade = setTimeout(() => document.documentElement.classList.remove('theme-fade'), ms + 100);
-        }
-        applyTheme();
-        seasonalPackage(was, themeId);
+        // The screen fades to black, the new theme goes in behind it (redrawing everything at once,
+        // out of sight: no colours easing across every element, which was slow on phones), and it
+        // fades back in. A pick while it's dark just changes what goes in.
+        void lightChange;
+        themeThroughBlack(() => {
+          applyTheme();
+          seasonalPackage(was, themeId);
+        });
       });
     }
     themeListEl.appendChild(btn);

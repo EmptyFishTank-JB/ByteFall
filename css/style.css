@@ -7,9 +7,10 @@
      13px    notes and descriptions under a head or an option (store notes, tier notes, settings
              notes and sub-heads like THEME)
      12px    buttons (BACK, the settings toggles, BUY)
-     11.5px  small tags (EQUIPPED, TAP TO REMOVE, LOCKED, the footer, prices' small print)
-     10.5px  the HUD's box labels (SCORE, CHAIN...) and the tiniest inline tags
-     9px     the floor: nothing smaller (--label-min; a theme's LV tag); past it, text wraps instead
+     11.5px  small tags, and the smallest text there is: EQUIPPED, TAP TO REMOVE, every locked
+             item's LV n (tracks, themes, fonts, the side slots), the footer, prices' small print
+     10.5px  only the HUD's box labels (SCORE, CHAIN...), which shrink to fit
+     9px     only how far those HUD labels may shrink (--label-min); past it, they wrap
    Text with no size of its own in the cards' pages, notes, the tutorial and the game-over box
    takes 1.3x what it inherits (see :where(...) { font-size: 1.3em } further down).
    Sections in a card are parted by ===== lines (.store-rule, or a ::before/::after like it),
@@ -4328,3 +4329,17 @@ body.in-game.can-pause .records-btn.pause-queued { background: rgba(var(--fg-rgb
 @media (prefers-reduced-motion: reduce) { .exploit-icon.side-slot.market > .slot-sale { animation: none; } }
 /* (the theme and font tiles' names: button labels, so 12px, as the scale has them) */
 .settings .theme-option > span:not(.lv-tag) { font-size: 12px; }
+/* (the corner buttons, PAUSE and SETTINGS, over the title: a theme that animates the title (HALLOWEEN's
+   flicker) lifts it into a layer of its own, and it would take their taps) */
+.crt > :is(.records-btn, .settings-btn) { z-index: 30; }
+
+/* Every locked item's LV n at the smallest text size (11.5px), in the accent colour, never dimmed with
+   what it's on: the playlist's and the music player's tracks, the themes and fonts, the side slots */
+.settings button .need, .mp-tracks .need, .settings .theme-option .lv-tag { font-size: 11.5px; }
+.exploit-icon.side-slot.locked-slot > .slot-lv { font-size: 11.5px; letter-spacing: 0; color: var(--accent); filter: none; text-shadow: 0 0 4px rgba(var(--accent-rgb), 0.45); }
+
+/* A theme change: the screen dips to black (over everything but the CRT glass), the theme goes in
+   unseen, and it comes back */
+.theme-black { position: fixed; inset: 0; z-index: 9990; background: #000; opacity: 0; pointer-events: none; transition: opacity 0.22s ease-in; }
+.theme-black.on { opacity: 1; pointer-events: auto; transition-timing-function: ease-out; }
+.settings .theme-option .lv-tag { padding: 1px 3px; border-radius: 2px; background: var(--panel); top: 1px; right: 2px; } /* (over the end of a long name: it reads clean) */
