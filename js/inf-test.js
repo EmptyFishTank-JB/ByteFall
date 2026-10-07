@@ -42,13 +42,20 @@
     <div class="inftest-body">
       <div class="inftest-row">${IDS.map((id) => `<button type="button" data-inf="${id}">${id === 'cryptojacker' ? 'CRYPTOJACK' : id.toUpperCase()}</button>`).join('')}</div>
       <div class="inftest-row"><span>LOOK</span>${['RANDOM', '1', '2', '3', '4', '5', '6'].map((l, i) => `<button type="button" data-look="${i - 1}"${i ? '' : ' class="on"'}>${l}</button>`).join('')}</div>
-      <div class="inftest-row"><button type="button" data-act="drop">DROP (COUNT DOWN)</button><button type="button" data-act="fill">FILL GRID</button><button type="button" data-act="clear">CLEAR</button><button type="button" data-act="banners"></button><a href="dev-tools/audio.html">DEV PAGE</a></div>
+      <div class="inftest-row"><button type="button" data-act="drop">DROP (COUNT DOWN)</button><button type="button" data-act="fill">FILL GRID</button><button type="button" data-act="clear">CLEAR</button><button type="button" data-act="banners"></button><button type="button" data-act="banlook"></button><button type="button" data-act="bantest">TEST BANNER</button><a href="dev-tools/audio.html">DEV PAGE</a></div>
       <p class="inftest-note">NOT SAVED: nothing played here touches your progress. Infections stack: tap more than one. RANSOMWARE has 5 looks, MALWARE 6, the rest 4 (a look past theirs picks at random). The column buttons still drop bits.</p>
     </div>`;
   document.body.appendChild(panel);
   const bannersBtn = panel.querySelector('[data-act="banners"]');
   const showBanners = () => { bannersBtn.textContent = `BANNERS: ${quiet ? 'OFF' : 'ON'}`; bannersBtn.classList.toggle('on', quiet); };
   showBanners();
+  // (the banners' look: the game reads it from storage, here kept in memory, so it's the tester's own)
+  const BAN_STEPS = LedBanner.looks();
+  const banLookBtn = panel.querySelector('[data-act="banlook"]');
+  const showBanLook = () => { banLookBtn.textContent = `LOOK: ${LedBanner.look().toUpperCase()}`; };
+  showBanLook();
+  const TESTS = ['ACHIEVEMENT // FIRST BREACH', 'UNLOCKED // SYNTHWAVE THEME', 'ACHIEVEMENT // CHAIN REACTION: A 10X CHAIN', 'LEVEL UP // LV 12'];
+  let testN = 0;
   panel.addEventListener('click', (e) => {
     const b = e.target.closest('button');
     if (!b) return;
@@ -60,7 +67,15 @@
     } else if (b.dataset.act === 'drop') tickDrop();
     else if (b.dataset.act === 'fill') { if (run('gameOver')) run('resetNow()'); fill(); }
     else if (b.dataset.act === 'clear') clearAll();
-    else if (b.dataset.act === 'banners') {
+    else if (b.dataset.act === 'banlook') {
+      try { localStorage.setItem('bytefall-banner-look', BAN_STEPS[(BAN_STEPS.indexOf(LedBanner.look()) + 1) % BAN_STEPS.length]); } catch (err) {}
+      showBanLook();
+    } else if (b.dataset.act === 'bantest') { // (one shows even with BANNERS off)
+      const was = quiet;
+      quiet = false;
+      run(`showToast(${JSON.stringify(TESTS[testN++ % TESTS.length])})`);
+      quiet = was;
+    } else if (b.dataset.act === 'banners') {
       quiet = !quiet;
       try { sessionStorage.setItem(QUIET, quiet ? '1' : '0'); } catch (e) {}
       if (quiet) document.querySelectorAll('.toast').forEach((t) => { t.hidden = true; }); // (any up now, gone)

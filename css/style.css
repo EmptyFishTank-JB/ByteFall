@@ -1612,6 +1612,12 @@ body.vs-mode header #mode-info { display: none; }
 .toast.on-board { translate: -50% -50%; white-space: nowrap; }
 .toast.on-board.wrap { white-space: normal; width: max-content; }
 .toast.show { animation: byte-in 0.35s ease-out; }
+/* LED BANNERS (led-banner.js): a sign of small lights in a dark frame */
+.toast.led { padding: 5px; line-height: 0; background: #050607; border: 2px solid rgba(var(--accent-rgb), 0.75); border-radius: 4px; box-shadow: 0 0 0 1px #000, 0 0 14px rgba(var(--accent-rgb), 0.35), inset 0 0 8px rgba(0, 0, 0, 0.9); }
+.toast.led.on-board.wrap { width: auto; }
+.toast.led canvas { display: block; }
+.toast.led-pixels { border-radius: 0; }
+.led-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 .settings-btn {
   position: absolute;
@@ -2207,6 +2213,8 @@ body.vs-mode .overlay { background: transparent; }
 @keyframes pause-out { from { opacity: 1; } to { opacity: 0; } }
 .board-frame #board { transition: opacity 0.15s ease-out; }
 .board-frame.paused #board, .board-frame.paused .incoming { opacity: 0; pointer-events: none; }
+/* (paused, or a panel up over the board: the INFECTIONS' displays and pop-ups out of sight with the bits) */
+.board-wrap:has(.board-frame.paused) > .inf, .board-wrap:has(.vs-pause:not([hidden])) > .inf { visibility: hidden; }
 .vs-pause .pause-row { gap: 8px; }
 .vs-pause .pause-row button { font-size: 12px; padding: 6px 14px; min-width: 9ch; }
 .vs-setup .difficulty.two-rows { flex-wrap: wrap; justify-content: center; max-width: 100%; }
@@ -4120,6 +4128,8 @@ html, body { overflow-x: clip; }
 /* ADWARE: its own frame over the column, below the overflow line */
 .inf-ad { border: 2px solid var(--accent); border-radius: 6px; background: #040406; box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.45), inset 0 0 8px rgba(0, 0, 0, 0.8); overflow: hidden; }
 .inf-ad-tag { position: absolute; right: 3px; bottom: 3px; padding: 0 3px; font-size: 8px; line-height: 11px; letter-spacing: 0; color: #111; background: var(--accent); border-radius: 2px; font-weight: bold; }
+.inf-ad-tag:has(.px-tag) { padding: 0; background: none; border-radius: 0; line-height: 0; filter: drop-shadow(0 0 3px rgba(var(--accent-rgb), 0.5)); } /* (in pixels: led-banner.js draws it) */
+.inf-ad-tag .px-tag { position: static; display: block; image-rendering: pixelated; }
 /* CRYPTOJACKER: its sign seen through the overflow row's own cells */
 .inf-jack { z-index: 5; } /* (its sign solid in each cell: nothing under it shows through) */
 /* RANSOMWARE: a locked bit's little screen, its padlock, its value and the drops left */

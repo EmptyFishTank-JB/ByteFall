@@ -662,6 +662,7 @@ function showRunKeys() {
 
 function showPuzzleResult(solved, firstTime = false) {
   gameOver = true;
+  Infections.clear();
   busy = true;
   setMessage('');
   SFX.play(solved ? 'egg' : 'denied');
@@ -2087,6 +2088,7 @@ function meltBoard(run) {
 // reason: 'trace' (something left above the line) or 'time' (BLITZ ran out)
 function endGame(reason = 'trace') {
   gameOver = true;
+  Infections.clear(); // (the infections' displays and pop-ups gone: the game-over card over a plain board)
   refreshExploitCards(); // the loadout can change again
   busy = true;
   clockRunning = false;
@@ -5184,9 +5186,9 @@ function nextToast() {
   }
   const text = toastQueue.splice(at, 1)[0];
   const showMs = text.startsWith('ACHIEVEMENT') ? ACHIEVEMENT_SHOW_MS : TOAST_SHOW_MS;
-  toastEl.textContent = text;
   toastEl.classList.toggle('exploit-ready', text.startsWith('EXPLOIT READY'));
   toastEl.hidden = false;
+  LedBanner.show(toastEl, text, toastRoom()); // (a sign of small lights, or CLASSIC: the plain text)
   placeToast();
   toastEl.classList.remove('show');
   void toastEl.offsetWidth; // restart the pop-in animation
@@ -5201,6 +5203,14 @@ function nextToast() {
 // Centers the pop-up over the overflow row, masking its blocks; falls back to
 // the top of the screen when the board isn't on screen, and in the TUTORIAL (whose banner sits
 // over the board's top rows)
+// (the room across the pop-up has: the board's width over it, or the screen's)
+function toastRoom() {
+  const row = boardEl.querySelectorAll('.cell.overflow');
+  const a = row[0] && row[0].getBoundingClientRect();
+  const z = row.length && row[row.length - 1].getBoundingClientRect();
+  const onBoard = a && a.width > 0 && a.bottom > 0 && a.top < innerHeight && mode !== 'tutorial' && !homeOpen;
+  return Math.max(120, (onBoard ? z.right - a.left + 12 : innerWidth - 32) - 16);
+}
 function placeToast() {
   const row = boardEl.querySelectorAll('.cell.overflow');
   const a = row[0] && row[0].getBoundingClientRect();
@@ -5215,7 +5225,7 @@ function placeToast() {
   toastEl.classList.toggle('wrap', !!onBoard && bigText);
   // (on one line over the board: a wide font closes up, then shrinks, to stay on the screen)
   toastEl.style.letterSpacing = toastEl.style.fontSize = '';
-  if (!onBoard || bigText) return;
+  if (!onBoard || bigText || toastEl.classList.contains('led')) return;
   let ls = parseFloat(getComputedStyle(toastEl).letterSpacing) || 0;
   let size = parseFloat(getComputedStyle(toastEl).fontSize);
   const wide = () => toastEl.scrollWidth > toastEl.clientWidth + 0.5;

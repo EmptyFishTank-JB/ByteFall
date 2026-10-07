@@ -615,7 +615,12 @@ const Infections = (() => {
     state = { ...state, ...next };
     const ad = layer('ad', '<canvas></canvas><span class="inf-ad-tag">AD</span>');
     if (state.adCol !== null && state.adCol !== undefined) {
-      if (ad.hidden) { pick('ad'); adClaims = []; }
+      if (ad.hidden) {
+        pick('ad');
+        adClaims = [];
+        const t = ad.querySelector('.inf-ad-tag'); // (its AD tag in pixels, in the game's font as it is now)
+        if (t && typeof LedBanner !== 'undefined') t.replaceChildren(LedBanner.tag('AD'));
+      }
       const top = boxOf(state.rows - 1, state.adCol);
       const bot = boxOf(0, state.adCol);
       if (top && bot) {
