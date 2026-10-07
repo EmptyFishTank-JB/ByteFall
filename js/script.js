@@ -3400,16 +3400,16 @@ if (document.fonts) document.fonts.addEventListener('loadingdone', refitHome);
 // The MAIN MENU is laid out for the phone the game's designed on (its card 352 x 791); on a bigger card
 // (a browser window) it's scaled up to fill it as the game's board does, never down
 const HOME_BASE = [352, 791];
-function fitHome() {
+function zoomHome() {
   const r = crtEl.getBoundingClientRect();
   if (!r.width) return;
   const z = Math.min(1.6, r.width / HOME_BASE[0], r.height / HOME_BASE[1]);
   homeEl.style.zoom = z > 1.02 ? z.toFixed(3) : '';
 }
-addEventListener('resize', fitHome);
-requestAnimationFrame(fitHome);
+addEventListener('resize', () => { zoomHome(); refitHome(); });
+requestAnimationFrame(zoomHome);
 function showHome() {
-  fitHome();
+  zoomHome();
   if (xpHold || pendingEarned.length) flushEarned(); // (out of a game: what it held back shows now)
   if (mode === 'tutorial') return; // (the lesson leaves by its own EXIT, which comes here)
   disarmReset();
