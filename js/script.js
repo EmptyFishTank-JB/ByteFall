@@ -550,9 +550,6 @@ function initGame() {
   document.querySelectorAll('#difficulty-row button').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.difficulty === classicDifficulty);
   });
-  document.getElementById('hack-intro').textContent = difficulty === 'hard'
-    ? `Fill the CHAIN METER (${HACK_COMBO} links in one chain) to get a random exploit from your equipped slots, one at a time.`
-    : `Fill the CHAIN METER (${HACK_COMBO} links, carried over from drop to drop) to get a random exploit from your equipped slots, one at a time.`;
   document.querySelectorAll('.hack-item').forEach((el) => {
     el.querySelector('.combo').textContent = '';
   });
@@ -4456,6 +4453,14 @@ function openResInfo() {
 }
 // THE STORE's sections' [i]s: what each kind of thing is (what each one does is on its own tag)
 const SECTION_INFO = {
+  // (EXPLOITS' [i]: how they're earned depends on the difficulty, so it's written as it opens)
+  exploits: () => ['// EXPLOITS', [
+    'Exploits are power-ups you drop onto the board like a bit, and they go off wherever they land.',
+    difficulty === 'hard'
+      ? `Make chains to fill the CHAIN METER beside the grid. On HARD, the ${HACK_COMBO} links have to come from one chain. Fill it and you get a random exploit from the ones you've equipped.`
+      : `Make chains to fill the CHAIN METER beside the grid: ${HACK_COMBO} links, and they carry over from drop to drop. Fill it and you get a random exploit from the ones you've equipped.`,
+    'It waits in the EXPLOIT button under the grid. Tap the button when you want it, and it becomes your next drop. Once it\'s armed, there\'s no taking it back.',
+    'Tap an exploit below to equip it, or tap an equipped one to take it off. You get more slots as you level up.']],
   boosters: ['// BOOSTERS', [
     'A booster gives your next game an edge.',
     'Buy them with KEYS. Before a game, tap BOOSTERS on the main menu and switch one on.',
@@ -4476,7 +4481,7 @@ const SECTION_INFO = {
     'The higher the tier, the better the odds. Each box shows its own.']],
 };
 function openSectionInfo(key) {
-  const [title, lines] = SECTION_INFO[key];
+  const [title, lines] = typeof SECTION_INFO[key] === 'function' ? SECTION_INFO[key]() : SECTION_INFO[key];
   const body = document.getElementById('res-info-body');
   body.innerHTML = lines.map((l) => `<p>${l}</p>`).join('');
   showInfo(title, false);
