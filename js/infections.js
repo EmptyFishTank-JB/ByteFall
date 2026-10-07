@@ -378,7 +378,9 @@ const Infections = (() => {
     if (k === 3) return `<pre class="inf-skull inf-wheel">${WHEEL[0]}</pre><p class="inf-msg">${msg}</p><p class="inf-scan" data-kind="wheel"></p>`;
     return `<pre class="inf-skull">${SKULL.join('\n').replace(/</g, '&lt;')}</pre><p class="inf-msg">${msg}</p><p class="inf-scan"></p>`;
   }
+  const scareQueue = []; // (a second SCAREWARE while one's up: it pops up as soon as that one's closed)
   function scare(onClose) {
+    if (scareUp()) { scareQueue.push(onClose); return; }
     const el = layer('scare', '');
     const k = pick('scare');
     const [title, msg, ok] = SCARES[Math.floor(Math.random() * SCARES.length)];
@@ -407,6 +409,7 @@ const Infections = (() => {
     const done = scareDone;
     scareDone = null;
     if (done) done();
+    if (scareQueue.length) setTimeout(() => scare(scareQueue.shift()), 350);
   }
   const scareUp = () => !!(els.scare && !els.scare.hidden);
 
@@ -448,6 +451,7 @@ const Infections = (() => {
   function clear() {
     place({ adCol: null, jack: false });
     if (els.scare) { els.scare.hidden = true; scareDone = null; }
+    scareQueue.length = 0;
   }
   return { init, place, steal, scare, closeScare, scareUp, ransomHtml, clear, pick, force: (f) => { forced = f; }, glitch: (n = 3) => `<span class="inf-glitch" data-n="${n}">${junk(n)}</span>`, eyes: () => '<span class="inf-eyes">(o_o)</span>' };
 })();

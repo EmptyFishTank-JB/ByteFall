@@ -431,6 +431,10 @@ let timeUp = false;
 const boardEl = document.getElementById('board');
 const boardWrapEl = document.querySelector('.board-wrap');
 Infections.init(boardEl, boardWrapEl); // (the INFECTIONS' displays, laid over the board)
+{ // (the dev page's INFECTION LOOK switch: every infection shows that look of its four)
+  const look = Number(storage.get('bytefall-dev-infection-look'));
+  if (look >= 1 && look <= 4) Infections.force({ ad: look - 1, jack: look - 1, spy: look - 1, malware: look - 1, ransom: look - 1, scare: look - 1 });
+}
 const columnButtonsEl = document.getElementById('column-buttons');
 const scoreEl = document.getElementById('score');
 const bestEl = document.getElementById('best');
@@ -1868,7 +1872,7 @@ currentEl.addEventListener('click', () => sniff(1));
 // Every numbered bit on the board ({ r, c })
 function numberCells() {
   const out = [];
-  columns.forEach((stack, c) => stack.forEach((cell, r) => { if (cell && cell.type === 'number') out.push({ r, c }); }));
+  columns.forEach((stack, c) => stack.forEach((cell, r) => { if (cell && cell.type === 'number' && !cell.locked) out.push({ r, c }); }));
   return out;
 }
 function cellsAt(positions) {
@@ -4426,6 +4430,7 @@ const SECTION_INFO = {
     'A sealed box with a random exploit inside, for less than it usually holds.',
     'Bring it into a game in a side slot, then tap it to open it. Most of the time you get an exploit of the box\'s tier, to use when you like.',
     'Sometimes it\'s INFECTED, and the infection hits right away: ADWARE blocks a column with an ad, SPYWARE hides your next bits, RANSOMWARE locks bits so they can\'t decrypt, MALWARE scrambles what your board shows, a CRYPTOJACKER steals the resources you earn, or SCAREWARE throws up a fake alert you have to close.',
+    'Infections stack: open two infected boxes and both hit. The same infection twice starts its count over, a second RANSOMWARE locks more bits, and a second SCAREWARE pops up once you close the first.',
     'The higher the tier, the better the odds. Each box shows its own.']],
 };
 function openSectionInfo(key) {
@@ -4923,6 +4928,12 @@ shopEl.addEventListener('click', (e) => { if (e.target === shopEl) closeShop(); 
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && shopSlot !== null) { e.stopImmediatePropagation(); closeShop(); } }, true);
 // A BLACK BOX opened in its slot: the reel spins through the icons, slowing, and lands on what
 // Progress rolled. An exploit waits there to be armed; an INFECTION goes off
+// (the dev page's INFECTION switch: every box opens as that infection, or a random one on ANY)
+function devInfection() {
+  const v = storage.get('bytefall-dev-infection');
+  if (v === 'any') return Progress.antiIds()[Math.floor(Math.random() * Progress.antiIds().length)];
+  return Progress.isAnti(v) ? v : null;
+}
 const REEL_STEPS = [50, 50, 55, 60, 65, 75, 85, 100, 115, 135, 160, 190, 230, 280];
 function openBox(i) {
   const sl = sideSlots[i];
@@ -4932,7 +4943,7 @@ function openBox(i) {
     usedStarters.push(box);
   }
   Progress.openedBlackBox();
-  const result = Progress.rollBox(box);
+  const result = devInfection() || Progress.rollBox(box);
   sl.state = 'rolling';
   const b = sideSlotEls()[i];
   b.classList.remove('market', 'short', 'confirm', 'sealed');
@@ -5004,11 +5015,12 @@ async function tickInfections() {
 function runAnti(id) {
   if (id === 'adware') {
     const open = columns.map((c, n) => n).filter((n) => columns[n].length < MAX_ROWS);
-    if (open.length) adware = { col: open[Math.floor(Math.random() * open.length)], left: ANTI_DROPS };
+    if (adware) adware.left = ANTI_DROPS; // (one already up: its column stays blocked, the count starts over)
+    else if (open.length) adware = { col: open[Math.floor(Math.random() * open.length)], left: ANTI_DROPS };
   } else if (id === 'spyware') {
     spywareLeft = ANTI_DROPS;
     Infections.pick('spy');
-  } else if (id === 'ransomware') { // (up to 3 bits locked where they are: they can't decrypt, nor fall, till it lifts)
+  } else if (id === 'ransomware') { // (up to 3 more bits locked where they are, never ones already locked: they can't decrypt, nor fall, till it lifts)
     const cells = numberCells();
     const look = Infections.pick('ransom');
     for (let n = 0; n < ANTI_DROPS && cells.length; n++) {
