@@ -76,6 +76,7 @@ function createScenes(api) {
   function end(now = false) {
     if (!sc) return;
     if (fish) fishEnd(true); // (packed up: the place is going)
+    lifeEnd();
     const els = Object.values(sc.els);
     sc = null;
     if (now) { els.forEach((e) => e.remove()); return; }
@@ -110,6 +111,7 @@ function createScenes(api) {
     const N = sc.night ? 0.45 : 0;
     const S = season();
     const { far, ground, near } = sc.els;
+    sc.FH = farCells * P; // (for the life in it: where the water and the sky are)
     if (DOCK[sc.kind]) { // (the pier, in the lane's own pixels: the fishing walks it)
       const D = DOCK[sc.kind];
       const FH = farCells * P;
@@ -614,6 +616,147 @@ function createScenes(api) {
     fish.bob.classList.toggle('under', fish.phase === 'bite' || fish.phase === 'show' || fish.phase === 'toss');
   }
 
+
+  // BITS OF LIFE: small things going on in each place. The LAKE: a fish jumping (rings where it
+  // goes in), rings on still water, a duck paddling across, a dragonfly darting over the reeds. The
+  // BEACH: a fish jumping, gulls gliding over, a crab scuttling along the sand. And a bug here and
+  // there: butterflies and a bee over the MEADOW, a beetle or a ladybug on the WOODLAND, FARM and
+  // DESERT ground, a moth in the woods at night, pigeons pecking along the CITY's sidewalk. Fewer at
+  // night (the day ones keep in). On their own canvas, behind the bots, in the bots' own pixels.
+  let life = [];
+  let lifeCanvas = null;
+  let lifeLast = 0;
+  let lifeDrawn = 0;
+  let lifeNext = {};
+  const isDay = () => { const h = new Date().getHours(); return h >= 7 && h < 19; };
+  const LIFE = { // [kind, every (seconds, about), at most, only by day]
+    lake: [['jump', 9, 1], ['ripple', 4, 3], ['duck', 35, 1, true], ['dragonfly', 18, 1, true]],
+    beach: [['jump', 12, 1], ['gull', 12, 2, true], ['crab', 22, 1]],
+    meadow: [['butterfly', 9, 3, true], ['bee', 13, 2, true]],
+    woodland: [['beetle', 18, 1], ['butterfly', 28, 1, true], ['moth', 16, 1, 'night']],
+    farm: [['ladybug', 20, 1], ['butterfly', 30, 1, true]],
+    desert: [['beetle', 22, 1]],
+    city: [['pigeon', 14, 2, true]],
+    snowfield: [],
+  };
+  const waterBand = () => { // (from the floor: where the water shows, above the shore)
+    const FH = sc.FH || 80;
+    return sc.kind === 'lake' ? [6 * P, 0.48 * FH] : [6 * P, 0.38 * FH];
+  };
+  function lifeSpawn(kind, W) {
+    const d = Math.random() < 0.5 ? 1 : -1;
+    const edge = d > 0 ? -10 : W + 10;
+    const [wl, wh] = sc.kind === 'lake' || sc.kind === 'beach' ? waterBand() : [0, 0];
+    const FH = sc.FH || 80;
+    const e = { kind, t: 0, dir: d };
+    if (kind === 'jump') Object.assign(e, { x: rand(W * 0.08, W * 0.92), y: rand(wl + 4, wh - 4), dur: rand(0.7, 1.1), h: rand(8, 16) });
+    else if (kind === 'ripple') Object.assign(e, { x: rand(W * 0.05, W * 0.95), y: rand(wl + 3, wh - 3), life: rand(0.8, 1.3) });
+    else if (kind === 'duck') Object.assign(e, { x: edge, y: rand(wl + 2, wl + (wh - wl) * 0.5), v: rand(7, 11) });
+    else if (kind === 'dragonfly') Object.assign(e, { x: edge, y: rand(wh - 6, wh + 22), tx: rand(W * 0.2, W * 0.8), ty: rand(wh - 6, wh + 22), hop: 0, life: rand(14, 22) });
+    else if (kind === 'gull') Object.assign(e, { x: edge, y: rand(FH * 1.05, FH * (game() ? 1.5 : 2.6)), v: rand(28, 46) });
+    else if (kind === 'crab') Object.assign(e, { x: edge, y: P, v: rand(14, 22), stop: rand(1, 3) });
+    else if (kind === 'butterfly' || kind === 'moth') Object.assign(e, { x: edge, y: rand(8 * P, 30 * P), v: rand(14, 22), ph: rand(0, 6.28), c: kind === 'moth' ? '#d8cfb8' : pick(['#ffb347', '#ffffff', '#8fb8ff', '#ffe066']) });
+    else if (kind === 'bee') Object.assign(e, { x: edge, y: rand(6 * P, 20 * P), v: rand(30, 45), ph: rand(0, 6.28) });
+    else if (kind === 'beetle' || kind === 'ladybug') Object.assign(e, { x: edge, y: P * 1.5, v: rand(4, 7), stop: rand(2, 5) });
+    else if (kind === 'pigeon') Object.assign(e, { x: edge, y: P, v: rand(10, 16), peck: 0, stop: rand(1, 3), life: rand(14, 24) });
+    life.push(e);
+  }
+  function lifeTick(now) {
+    if (!sc) return;
+    const dt = Math.min(0.1, (now - (lifeLast || now)) / 1000);
+    lifeLast = now;
+    const W = api.laneW();
+    const H = api.lane.clientHeight;
+    if (!W || !H) return;
+    const day = isDay();
+    for (const [kind, every, most, when] of LIFE[sc.kind] || []) {
+      if (when === true && !day) continue;
+      if (when === 'night' && day) continue;
+      const key = `${sc.kind}-${kind}`;
+      if (!lifeNext[key]) lifeNext[key] = now + rand(1000, every * 1000);
+      if (now > lifeNext[key]) {
+        lifeNext[key] = now + rand(every * 500, every * 1500);
+        if (life.filter((e) => e.kind === kind).length < most) lifeSpawn(kind, W);
+      }
+    }
+    for (const e of life) {
+      e.t += dt;
+      if (e.kind === 'jump') {
+        if (e.t > e.dur) { e.gone = true; life.push({ kind: 'ripple', x: e.x + e.dir * 6, y: e.y, t: 0, life: 1 }); }
+        if (!e.rung) { e.rung = true; life.push({ kind: 'ripple', x: e.x, y: e.y, t: 0, life: 0.9 }); }
+      } else if (e.kind === 'ripple') { if (e.t > e.life) e.gone = true; }
+      else if (e.kind === 'duck' || e.kind === 'gull') e.x += e.dir * e.v * dt;
+      else if (e.kind === 'dragonfly') { // (hovers, then darts somewhere else)
+        e.hop -= dt;
+        if (e.hop <= 0) { e.hop = rand(0.8, 2.2); e.tx = e.t > e.life ? (e.dir > 0 ? W + 20 : -20) : rand(W * 0.1, W * 0.9); e.ty = e.y + rand(-10, 10); }
+        e.x += (e.tx - e.x) * Math.min(1, dt * 5);
+        e.y += (e.ty - e.y) * Math.min(1, dt * 5) + Math.sin(e.t * 9) * 0.3;
+        if (e.t > e.life + 3) e.gone = true;
+      } else if (e.kind === 'crab' || e.kind === 'beetle' || e.kind === 'ladybug' || e.kind === 'pigeon') { // (along the ground, stopping now and then)
+        e.stop -= dt;
+        if (e.stop < 0) { e.x += e.dir * e.v * dt; if (e.stop < -rand(1.5, 4)) e.stop = rand(0.8, 3); }
+        if (e.kind === 'pigeon') { e.peck = e.stop > 0 ? (Math.sin(e.t * 12) > 0 ? 1 : 0) : 0; if (e.t > e.life && !e.fly) { e.fly = true; e.vy = 30; } if (e.fly) { e.y += e.vy * dt; e.x += e.dir * 40 * dt; } }
+      } else if (e.kind === 'butterfly' || e.kind === 'moth') { e.x += e.dir * e.v * dt; e.y += Math.sin(e.t * 2 + e.ph) * 12 * dt; }
+      else if (e.kind === 'bee') { e.x += e.dir * e.v * dt; e.y += Math.sin(e.t * 9 + e.ph) * 30 * dt; }
+      if (e.x < -40 || e.x > W + 40 || e.y > H + 20) e.gone = true;
+    }
+    life = life.filter((e) => !e.gone);
+    if (!life.length) { if (lifeCanvas) lifeCanvas.getContext('2d').clearRect(0, 0, lifeCanvas.width, lifeCanvas.height); return; }
+    if (now - lifeDrawn < 33) return;
+    lifeDrawn = now;
+    if (!lifeCanvas) {
+      lifeCanvas = document.createElement('canvas');
+      lifeCanvas.className = 'scene-life';
+      lifeCanvas.setAttribute('aria-hidden', 'true');
+      api.lane.appendChild(lifeCanvas);
+    }
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    if (lifeCanvas.width !== Math.round(W * dpr) || lifeCanvas.height !== Math.round(H * dpr)) { lifeCanvas.width = Math.round(W * dpr); lifeCanvas.height = Math.round(H * dpr); }
+    const g = lifeCanvas.getContext('2d');
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, W, H);
+    const dimN = sc.night ? 0.55 : 1;
+    const dot = (x, y, c, w = 1, h = 1, a = 1) => { g.globalAlpha = a * dimN; g.fillStyle = c; g.fillRect(Math.round(x / P) * P, Math.round((H - y) / P) * P - (h - 1) * P, w * P, h * P); };
+    for (const e of life) {
+      const f = Math.floor(e.t * 8) % 2; // (a flap, a step)
+      if (e.kind === 'jump') {
+        const k = e.t / e.dur;
+        const x = e.x + e.dir * k * 12;
+        const y = e.y + Math.sin(k * Math.PI) * e.h;
+        dot(x, y, '#9fb8c8', 2, 1); dot(x + e.dir * 2 * P, y + (k < 0.5 ? -P : P), '#7f98a8');
+      } else if (e.kind === 'ripple') {
+        const r = 1 + (e.t / e.life) * 5;
+        const a = 1 - e.t / e.life;
+        dot(e.x - r * P, e.y, '#9cc8dc', 1, 1, a); dot(e.x + r * P, e.y, '#9cc8dc', 1, 1, a); dot(e.x - r * P * 0.6, e.y + P * 0.5, '#9cc8dc', 1, 1, a * 0.6); dot(e.x + r * P * 0.6, e.y + P * 0.5, '#9cc8dc', 1, 1, a * 0.6);
+      } else if (e.kind === 'duck') {
+        dot(e.x, e.y, '#8a6a4a', 4, 2); dot(e.x + (e.dir > 0 ? 3 : 0) * P, e.y + 2 * P, '#2f7a33'); dot(e.x + (e.dir > 0 ? 4 : -1) * P, e.y + 2 * P, '#ffb000');
+        dot(e.x - e.dir * 2 * P, e.y, '#9cc8dc', 1, 1, 0.6); dot(e.x - e.dir * 4 * P, e.y, '#9cc8dc', 1, 1, 0.35); // (its wake)
+      } else if (e.kind === 'dragonfly') {
+        dot(e.x, e.y, '#3ab0c8', 3, 1); dot(e.x + P, e.y + P, f ? '#e8f4ff' : '#9cc8dc', 1, 1, 0.7); dot(e.x + P * (f ? 0 : 2), e.y + P, '#e8f4ff', 1, 1, 0.5);
+      } else if (e.kind === 'gull') {
+        dot(e.x, e.y, '#f2f2f2'); dot(e.x - P, e.y + (f ? P : 0), '#e8e8e8'); dot(e.x + P, e.y + (f ? P : 0), '#e8e8e8'); dot(e.x - 2 * P, e.y + (f ? 2 * P : -P), '#d8d8d8'); dot(e.x + 2 * P, e.y + (f ? 2 * P : -P), '#d8d8d8');
+      } else if (e.kind === 'crab') {
+        const step = e.stop < 0 ? f : 0;
+        dot(e.x, e.y + P, '#d8462f', 3, 1); dot(e.x - P, e.y + 2 * P, '#e8603f'); dot(e.x + 3 * P, e.y + 2 * P, '#e8603f');
+        dot(e.x + (step ? 0 : P), e.y, '#a8321f'); dot(e.x + (step ? 2 : P) * P, e.y, '#a8321f');
+      } else if (e.kind === 'butterfly' || e.kind === 'moth') {
+        dot(e.x, e.y, '#3a2a1a'); dot(e.x - P, e.y + (f ? P : 0), e.c); dot(e.x + P, e.y + (f ? P : 0), e.c);
+      } else if (e.kind === 'bee') { dot(e.x, e.y, '#ffd23f'); dot(e.x + e.dir * P, e.y, '#2a2a2a'); dot(e.x, e.y + P, '#e8f4ff', 1, 1, f ? 0.7 : 0.3); }
+      else if (e.kind === 'beetle') dot(e.x, e.y, '#2a3a2a', 2, 1);
+      else if (e.kind === 'ladybug') { dot(e.x, e.y, '#d0342c', 2, 1); dot(e.x + (e.dir > 0 ? P : 0), e.y, '#1a1a1a'); }
+      else if (e.kind === 'pigeon') {
+        if (e.fly) { dot(e.x, e.y, '#8a909a'); dot(e.x - P, e.y + (f ? P : 0), '#a0a6b0'); dot(e.x + P, e.y + (f ? P : 0), '#a0a6b0'); }
+        else { dot(e.x, e.y + P, '#8a909a', 3, 1); dot(e.x + (e.dir > 0 ? 2 : 0) * P, e.y + (e.peck ? P : 2 * P), '#6a707a'); dot(e.x + P, e.y, '#c86a50'); }
+      }
+    }
+    g.globalAlpha = 1;
+  }
+  function lifeEnd() {
+    life = [];
+    lifeNext = {};
+    if (lifeCanvas) { lifeCanvas.remove(); lifeCanvas = null; }
+  }
+
   function frame(now) {
     if (!sc && now > nextCheck) {
       nextCheck = now + (often() ? rand(4000, 8000) : rand(360000, 720000));
@@ -623,7 +766,7 @@ function createScenes(api) {
     if (api.foggy() || now > sc.until) { end(); nextCheck = now + rand(300000, 600000); return; } // (the fog has its own; or its time's up)
     if (sc.night !== night()) { sc.night = night(); draw(true); }
     if (now - (sc.drawn || 0) > (sc.kind === 'beach' || sc.kind === 'lake' ? 350 : 1000)) { sc.drawn = now; draw(false); }
-    if (sc) fishTick(now);
+    if (sc) { fishTick(now); lifeTick(now); }
   }
   return { frame, clear: () => end(true), start: (k) => start(k), current: () => (sc ? sc.kind : null), fish: () => { if (sc && sc.dock && !fish) fishStart(); return !!fish; } };
 }

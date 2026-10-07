@@ -2,6 +2,13 @@
 // card's with SETTINGS → WANDERING BOTS on). createWanderers(lane, active) runs them in `lane` (a
 // strip along the card's bottom) for as long as active() says so, and returns { start, list,
 // startle }: start() brings them back after active() turned false.
+// (each bot's mind kept between visits: one of each bot, so it's the same one coming back; shared
+// by the start screen's and the game card's lanes, kept in this browser)
+const BOT_MINDS = (() => { try { return JSON.parse(localStorage.getItem('bytefall-bot-minds')) || {}; } catch (e) { return {}; } })();
+function keepBotMind(bot, m) {
+  BOT_MINDS[bot] = { energy: m.energy, social: m.social, fun: m.fun, temper: m.temper, at: Date.now() };
+  try { localStorage.setItem('bytefall-bot-minds', JSON.stringify(BOT_MINDS)); } catch (e) {}
+}
 function createWanderers(lane, active = () => true) {
   // One to four of the CPUs (never the same one twice at once) stroll along the bottom
   // of the card, in from either side and back out again, looking the way they go. Now and then
@@ -42,8 +49,21 @@ function createWanderers(lane, active = () => true) {
     const l = t < 0.25 ? 'easy' : t < 0.55 ? 'normal' : t < 0.8 ? 'hard' : 'insane';
     return (NEVER_LEVEL[w.bot] || []).includes(l) ? 'normal' : l;
   };
-  function mindInit(w) {
-    w.mind = { energy: rand(0.55, 1), social: rand(0.3, 0.9), fun: rand(0.3, 0.9), temper: LEVEL_TEMPER[w.el.dataset.level] + rand(-0.04, 0.04), seenAt: 0 };
+  // (a bot back after time away: rested, its temper cooled toward its calm, its company and fun
+  // drifted toward even; a little different each time)
+  function cameBack(bot, k) {
+    const min = Math.max(0, (Date.now() - (k.at || 0)) / 60000);
+    const P = PERSONA[bot] || PERSONA.bot;
+    const ease = (v, to, rate) => to + (v - to) * Math.exp(-min / rate);
+    return {
+      energy: Math.min(1, ease(k.energy, 1, 4)),
+      social: ease(k.social, 0.5, 20),
+      fun: ease(k.fun, 0.5, 20),
+      temper: Math.max(0, Math.min(1, ease(k.temper, P.calm, 8) + rand(-0.05, 0.05))),
+    };
+  }
+  function mindInit(w, kept) {
+    w.mind = kept ? { ...kept, seenAt: 0 } : { energy: rand(0.55, 1), social: rand(0.3, 0.9), fun: rand(0.3, 0.9), temper: LEVEL_TEMPER[w.el.dataset.level] + rand(-0.04, 0.04), seenAt: 0 };
     w.feel = (k, amt) => feel(w, k, amt); // (for scenes.js and the rest: a need nudged)
   }
   const persona = (w) => PERSONA[w.bot] || PERSONA.bot;
@@ -591,7 +611,8 @@ function createWanderers(lane, active = () => true) {
     if (!free.length && !o.bot) return;
     const bot = o.bot || pick(free);
     const fromLeft = o.enter === 'left' ? true : o.enter === 'right' ? false : Math.random() < 0.5;
-    const el = miniBot(bot, o.level || pickLevel(bot));
+    const kept = !o.level && BOT_MINDS[bot] ? cameBack(bot, BOT_MINDS[bot]) : null; // (back again: as it left, eased by the time away)
+    const el = miniBot(bot, o.level || (kept ? temperLevel({ bot }, kept.temper) : pickLevel(bot)));
     el.classList.add('walker');
     if (o.costume !== false) dress(el, bot, !!o.costume);
     const emote = document.createElement('span');
@@ -608,7 +629,7 @@ function createWanderers(lane, active = () => true) {
       state: 'walk', target: 0, until: 0, leaving: false, running: false, born: now, metAt: 0, partner: null,
     };
     w.target = freeSpot(w);
-    mindInit(w);
+    mindInit(w, kept);
     walkers.push(w);
     if (o.phones || (o.phones === undefined && music() && Math.random() < 0.1)) phonesOn(w, now, true); // (walks in wearing a pair)
     const how = o.enter === 'pop' ? 0 : o.enter === 'run' ? 0.2 : o.enter ? 0.5 : Math.random();
@@ -1210,7 +1231,7 @@ function createWanderers(lane, active = () => true) {
     }
     if (beat && walkers.some((w) => w.phones)) groove(now, beat);
     walkers = walkers.filter((w) => {
-      if (w.gone) w.el.remove();
+      if (w.gone) { w.el.remove(); if (w.mind) keepBotMind(w.bot, w.mind); }
       return !w.gone;
     });
     if (visitors) visitors.frame(now, dt);

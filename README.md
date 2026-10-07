@@ -422,7 +422,12 @@ pleased, thrown back), now and then a golden one (heart eyes), or an old boot (p
 in 10 a RESOURCE off the bottom, kept and yours (BUGS, CACHE, CRYPTO, ROOTKITS, or rarest, a MASTER
 KEY; a toast says which); then it
 casts again or heads back. TAP THE BOBBER and the fish is gone: the bot's upset (hey! my fish!).
-Poke the bot and it shushes you. Achievements: GONE FISHING, THE ONE THAT GOT AWAY. No numbered BITs are
+BITS OF LIFE in each place, behind the bots: at the LAKE a fish jumping (rings where it goes in),
+rings on the still water, a duck paddling across, a dragonfly darting over the reeds; at the BEACH a
+fish jumping, gulls gliding over, a crab scuttling along the sand; and a bug here and there:
+butterflies and a bee over the MEADOW, a beetle or a ladybug on the WOODLAND, FARM and DESERT ground,
+a moth in the woods at night, pigeons pecking along the CITY's sidewalk (the day ones keep in at
+night). Poke the bot and it shushes you. Achievements: GONE FISHING, THE ONE THAT GOT AWAY. No numbered BITs are
 pushed in while the pier's out (one would stand in front of the bot fishing off it). Each is drawn at three depths,
 never all in front: a far layer behind everything, the ground behind the bots' feet, and a few
 details in front of them. The weather leans to suit it (a beach's sunsets and storms, a city's rain,
@@ -799,7 +804,10 @@ most), puts on headphones (GLITCH most), goes over to another when lonely, fidge
 notices things: it wanders over to watch a bot fishing, joins a headbanging bot (with headphones), turns
 to look at a visitor going by. A tired one walks slower, and BUNKER or a tired bot headbangs where the
 others windmill. Meetings come as often as they want company, and a cross one is annoyed in them. The
-BOT SANDBOX's MINDS panel shows each one's face and needs, live. Looking the way
+BOT SANDBOX's MINDS panel shows each one's face and needs, live. They keep their minds between
+visits (one of each bot: the same one comes back), as they left, eased by the time away: rested, its
+temper cooled toward its own calm, so a bot you made cross comes back still a little cross a while
+(kept in this browser). Looking the way
 they walk (eyes and mouth a pixel that way): in from either side, idling (now
 and then bored or tapping a foot), finding a free spot and heading back out.
 Two that meet may stop no closer than an arm's overlap, face each other and
