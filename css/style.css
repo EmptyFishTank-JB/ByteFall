@@ -3355,10 +3355,14 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 .store-top h2 { margin-top: 0; }
 .store-top .wallet { margin-bottom: 0; }
 /* The STORE's i (how resources are earned): a small ringed i by the title; the resources' line opens it too */
-.store-info { all: unset; box-sizing: border-box; position: relative; display: inline-flex; vertical-align: middle; margin: -4px 0 0 6px; width: 24px; height: 24px; align-items: center; justify-content: center;
-  border: 1.5px solid var(--fg-dim); border-radius: 50%; font-size: 13px; font-weight: bold; font-style: italic; letter-spacing: 0; text-shadow: none; color: var(--fg); cursor: pointer; }
+/* (a pixel i in the brackets the exploits and boosters wear, like a bit on the board) */
+.store-info { all: unset; box-sizing: border-box; position: relative; display: inline-flex; vertical-align: middle; margin: 0 0 0 2px; gap: 1px; align-items: center;
+  font-size: 17px; letter-spacing: 0; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.6); cursor: pointer; }
+.store-info .ico-br { color: var(--fg); opacity: 0.75; text-shadow: none; }
+.store-info svg { width: 10px; height: 16px; filter: drop-shadow(0 0 3px rgba(var(--accent-rgb), 0.7)); }
 .store-info::before { content: ""; position: absolute; inset: -9px; } /* (a bigger target for a thumb) */
-.store-info:hover, .store-info:focus-visible { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+.store-info:hover .ico-br, .store-info:focus-visible .ico-br { color: var(--accent); }
+.store-info:focus-visible { outline: 1px solid var(--accent); outline-offset: 3px; }
 .store-wallet-btn { cursor: pointer; border-radius: 6px; }
 .store-wallet-btn:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
 #res-info { z-index: 207; }
