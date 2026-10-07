@@ -4346,8 +4346,11 @@ body.in-game.can-pause .records-btn.pause-queued { background: rgba(var(--fg-rgb
 /* The buttons on the game card get a base in the card's own colour (their tints laid over it), mostly
    solid with a hint of what's behind: OCTOBER's trees, the scenery and the bots show faintly through,
    never enough to swallow them. On the dark themes it looks the same; on PAPER it keeps them readable */
-:root { --btn-base: color-mix(in srgb, var(--panel) 82%, transparent); }
+:root { --btn-base: color-mix(in srgb, var(--panel) 92%, transparent); } /* (92%: as the board) */
 .column-buttons button { background: linear-gradient(rgba(var(--fg-rgb), 0.08), rgba(var(--fg-rgb), 0.08)), var(--btn-base); }
 .difficulty button:not(.active) { background-color: var(--btn-base); }
 @media (hover: hover) { .difficulty button:not(.active):hover { background-image: linear-gradient(rgba(var(--fg-rgb), 0.15), rgba(var(--fg-rgb), 0.15)); } }
 .vs-start { background: linear-gradient(rgba(var(--fg-rgb), 0.12), rgba(var(--fg-rgb), 0.12)), var(--btn-base); }
+/* With CRT DISPLAY on, the whole screen has its scanlines: the infected bits' own little CRTs drop
+   theirs (two sets would beat against each other in a moire), keeping only the inset and dimmed edges */
+:root:is(.crt-soft, .crt-full) .cell .inf-glitch:is(.mosaic, .mini)::after { background: none; }
