@@ -583,8 +583,8 @@ const Progress = (() => {
     'box-3': { keys: 20, crypto: 8, rootkits: 2 },
   };
   const BOX_IDS = ['box-1', 'box-2', 'box-3'];
-  const ANTI_IDS = ['adware', 'spyware', 'ransomware'];
-  // Each BLACK BOX's odds, in percent: a tier 1, 2 or 3 exploit, or an ANTI-EXPLOIT
+  const ANTI_IDS = ['adware', 'spyware', 'ransomware', 'malware', 'cryptojacker', 'scareware']; // (the INFECTIONS)
+  // Each BLACK BOX's odds, in percent: a tier 1, 2 or 3 exploit, or an INFECTION (any of the six alike)
   const BOX_ODDS = { 'box-1': [65, 20, 3, 12], 'box-2': [35, 45, 12, 8], 'box-3': [10, 45, 42, 3] };
   const tierOf = (id) => Math.min(2, Math.floor(EXPLOIT_ORDER.indexOf(id) / 5)); // 0, 1, 2
   const sellable = (id) => !!PRICES[id];
@@ -607,7 +607,7 @@ const Progress = (() => {
     return true;
   }
   // A BLACK BOX opened: an exploit of the tier its odds land on (any of the tier, unlocked or not;
-  // not BLACK BOX itself), or an ANTI-EXPLOIT
+  // not BLACK BOX itself), or an INFECTION
   function rollBox(box, rnd = Math.random) {
     const odds = BOX_ODDS[box];
     let roll = rnd() * 100;
@@ -1007,6 +1007,16 @@ const Progress = (() => {
     rollBox,
     // (testing and the dev page)
     addRes(id, n) { gain(id, n); save(); },
+    // The CRYPTOJACKER: what a drop earned, taken back ({ resource: n })
+    siphon(taken) {
+      for (const [res, n] of Object.entries(taken)) {
+        const k = Math.min(n, d.res[res] || 0);
+        d.res[res] = (d.res[res] || 0) - k;
+        d.resEarned[res] = Math.max(0, (d.resEarned[res] || 0) - k);
+        if (run && run.res) run.res[res] = Math.max(0, (run.res[res] || 0) - k);
+      }
+      save();
+    },
     starters: (id) => d.starters[id] || 0,
     addStarter(id, n = 1) { d.starters[id] = (d.starters[id] || 0) + n; save(); },
     useStarter(id) {

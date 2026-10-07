@@ -57,7 +57,7 @@ const Store = (() => {
     item.innerHTML = `<h3><span class="store-ico bracketed">${bracketIcon(id)}</span><span class="store-name">${itemName(id)}</span>`
       + `<span class="store-price">${box ? '' : `TIER ${Progress.tierOf(id) + 1}`}</span></h3>`
       + `<p class="store-desc">${itemDesc(id)}</p>`
-      + (box ? `<p class="store-odds">TIER 1 EXPLOIT ${odds[0]}% // TIER 2 ${odds[1]}% // TIER 3 ${odds[2]}% // ANTI-EXPLOIT ${odds[3]}%</p>` : '')
+      + (box ? `<p class="store-odds">TIER 1 EXPLOIT ${odds[0]}% // TIER 2 ${odds[1]}% // TIER 3 ${odds[2]}% // INFECTION ${odds[3]}%</p>` : '')
       // (the price and how many are owned as one block, BUY level with it; what's short pulses red)
       + `<div class="store-deal"><div class="store-terms"><div class="store-costs"></div><span class="booster-owned"></span></div><div class="store-btns">${box ? '' : `<button type="button" class="store-buy store-master" hidden title="Use a MASTER KEY in place of the price" aria-label="Use a MASTER KEY">USE ${RES_INFO.master.svg}</button>`}<button type="button" class="store-buy store-pay">${BUY_HTML(Progress.price(id).keys)}</button></div></div>`;
     const buy = (master) => {

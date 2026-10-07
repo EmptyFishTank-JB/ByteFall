@@ -4089,3 +4089,50 @@ html, body { overflow-x: clip; }
 :is(.start-walkers, .game-walkers) .scene-sky { position: absolute; left: 0; right: 0; bottom: 0; height: 55%; z-index: -6; pointer-events: none; opacity: 0; transition: opacity 5s ease;
   -webkit-mask-image: linear-gradient(to top, #000 45%, transparent); mask-image: linear-gradient(to top, #000 45%, transparent); }
 .game-walkers .scene-sky { top: calc(-1 * var(--feather)); height: auto; }
+
+/* INFECTIONS (infections.js): each in its own little display, LED or ASCII, within the bits it takes up */
+.board-wrap { position: relative; }
+.inf { position: absolute; pointer-events: none; z-index: 6; }
+.inf[hidden] { display: none; }
+.inf canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+/* ADWARE: its own frame over the column, below the overflow line */
+.inf-ad { border: 2px solid var(--accent); border-radius: 6px; background: rgba(4, 4, 6, 0.86); box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.45), inset 0 0 8px rgba(0, 0, 0, 0.8); overflow: hidden; }
+.inf-ad-tag { position: absolute; right: 3px; bottom: 3px; padding: 0 3px; font-size: 8px; line-height: 11px; letter-spacing: 0; color: #111; background: var(--accent); border-radius: 2px; font-weight: bold; }
+/* CRYPTOJACKER: its sign seen through the overflow row's own cells */
+.inf-jack { z-index: 5; mix-blend-mode: screen; opacity: 0.9; }
+/* RANSOMWARE: a locked bit's little screen, its padlock, its value and the drops left */
+.cell.ransom { position: relative; overflow: hidden; color: var(--danger); border-color: var(--danger); }
+.inf-screen { position: absolute; inset: 3px; border-radius: 3px; background: #050607; overflow: hidden; box-shadow: inset 0 0 4px rgba(var(--danger-rgb), 0.5); }
+.inf-face, .inf-term { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.inf-face { animation: inf-swap 3.2s ease-in-out infinite; }
+.inf-term { flex-direction: column; align-items: flex-start; justify-content: center; padding: 0 2px; gap: 0; animation: inf-swap 3.2s ease-in-out -1.6s infinite; }
+@keyframes inf-swap { 0%, 40% { opacity: 1; } 50%, 90% { opacity: 0; } 100% { opacity: 1; } }
+.inf-led { width: 76%; height: auto; }
+.inf-led .on { fill: var(--danger); filter: drop-shadow(0 0 0.4px var(--danger)); }
+.inf-led .on2 { fill: var(--accent); }
+.inf-led .off { fill: rgba(255, 255, 255, 0.07); }
+.inf-term span { display: block; overflow: hidden; white-space: nowrap; width: 0; font-size: 7px; line-height: 8px; letter-spacing: 0; font-family: 'Courier New', monospace; color: #6dff9a; animation: inf-type 3.2s steps(5) infinite; }
+.inf-term span:nth-child(2) { animation-delay: 0.3s; } .inf-term span:nth-child(3) { animation-delay: 0.6s; } .inf-term span:nth-child(4) { animation-delay: 0.9s; }
+@keyframes inf-type { 0% { width: 0; } 40%, 100% { width: 5ch; } }
+.inf-lock { position: absolute; top: 1px; right: 1px; width: 8px; height: 10px; color: var(--accent); filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.9)); z-index: 1; }
+.inf-ransom-val { position: absolute; left: 2px; bottom: 0; font-size: 9px; line-height: 11px; color: var(--fg); text-shadow: 0 0 3px #000; z-index: 1; }
+.inf-ransom-left { position: absolute; right: 2px; bottom: 0; font-size: 8px; line-height: 11px; color: var(--danger); text-shadow: 0 0 3px #000; z-index: 1; }
+/* MALWARE: the bits a jumble of flickering characters */
+.cell.corrupt { color: var(--danger); border-color: rgba(var(--danger-rgb), 0.7); }
+.inf-glitch { font-family: 'Courier New', monospace; letter-spacing: 0; font-size: 0.8em; text-shadow: 1px 0 rgba(0, 220, 255, 0.6), -1px 0 rgba(255, 40, 80, 0.6); }
+/* SPYWARE: eyes watching from the CURRENT box */
+.inf-eyes { font-family: 'Courier New', monospace; font-size: 0.62em; letter-spacing: 0; color: var(--danger); white-space: nowrap; }
+/* SCAREWARE: a fake system alert, over the board; its tiny X the only way out */
+.inf-scare { z-index: 8; pointer-events: auto; display: flex; align-items: center; justify-content: center; }
+.inf-win { width: 86%; max-width: 300px; background: #0b0b10; border: 2px solid var(--danger); border-radius: 4px; box-shadow: 0 0 0 1px #000, 0 6px 24px rgba(0, 0, 0, 0.8), 0 0 18px rgba(var(--danger-rgb), 0.5); font-family: 'Courier New', monospace; text-align: center; animation: inf-pop 0.18s steps(3); }
+@keyframes inf-pop { from { transform: scale(0.6); opacity: 0; } }
+.inf-bar { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 2px 3px 2px 6px; background: var(--danger); color: #fff; font-size: 10px; letter-spacing: 1px; text-align: left; }
+.inf-x { all: unset; width: 11px; height: 11px; line-height: 10px; font-size: 10px; text-align: center; color: #fff; border: 1px solid rgba(255, 255, 255, 0.8); cursor: pointer; flex: none; }
+.inf-x::before { content: ""; position: absolute; inset: -6px; } /* (a fair target, but it looks tiny) */
+.inf-x { position: relative; }
+.inf-skull { margin: 8px 0 2px; font-size: 9px; line-height: 10px; color: rgba(var(--danger-rgb), 0.45); }
+.inf-skull.lit { color: var(--danger); text-shadow: 0 0 6px var(--danger); }
+.inf-msg { margin: 4px 8px; font-size: 11px; color: #fff; letter-spacing: 1px; }
+.inf-scan { margin: 2px 6px 8px; font-size: 10px; color: var(--danger); letter-spacing: 0; white-space: pre; }
+.inf-ok { all: unset; display: inline-block; margin: 0 0 10px; padding: 4px 12px; font-size: 11px; letter-spacing: 1px; color: #fff; background: rgba(var(--danger-rgb), 0.3); border: 1px solid var(--danger); cursor: pointer; transition: transform 0.12s steps(2); }
+@media (prefers-reduced-motion: reduce) { .inf-face, .inf-term, .inf-term span { animation: none; } .inf-term { opacity: 0; } .inf-term span { width: 5ch; } }

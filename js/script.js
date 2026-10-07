@@ -80,8 +80,10 @@ let gameOver = false;
 let busy = false; // true while animating/resolving, blocks input
 let runId = 0; // bumped on every new game so a pending game-over sequence can tell it's stale
 let vsPaused = false;
-let adware = null; // ANTI-EXPLOITS (runAnti): ADWARE's covered column { col, left }
-let spywareLeft = 0; // ...and SPYWARE's hidden bits
+let adware = null; // INFECTIONS (runAnti, infections.js): ADWARE's covered column { col, left }
+let spywareLeft = 0; // ...SPYWARE's hidden bits
+let malwareLeft = 0; // ...MALWARE's drops with the board's bits corrupted
+let jackLeft = 0; // ...and the CRYPTOJACKER's drops left stealing (RANSOMWARE's locks are on the bits: cell.locked)
 let marketOpen = false; // THE BLACK MARKET sells once the game's first encryption layer rises (ZEN: after as many drops) // PAUSE (any mode): the board covered, the CPU's clock stopped, the drop buttons off
 let keyloggerDrops = 0; // drops left with the keylogger's preview showing
 let snifferBits = 0; // bits left whose number the player can pick
@@ -242,7 +244,7 @@ window.BOOSTERS = BOOSTERS;
 // of one kind, or one each of two), one in each slot, each used once; a tap arms an exploit as the
 // next drop, as an earned one, and it's used up (the ones not used stay owned). A BLACK BOX waits
 // sealed: a tap opens it (used up), its slot rolling like a slot machine's reel and landing on an
-// exploit, which then waits there to be armed, or an ANTI-EXPLOIT, which goes off at once. A slot
+// exploit, which then waits there to be armed, or an INFECTION, which goes off at once. A slot
 // taken in empty, or whose starter is used, is the BLACK MARKET: a random exploit (of
 // the ones unlocked by level) or BLACK BOX at the STORE's price, changing every MARKET_EVERY drops.
 // A tap opens its window: the price, and BUY (short of it, an exploit takes a MASTER KEY instead, if
@@ -270,14 +272,17 @@ function marketPick(not = []) {
   const from = pool.length ? pool : all;
   return from[Math.floor(Math.random() * from.length)] || null;
 }
-// BLACK BOXES and ANTI-EXPLOITS beside the exploits: their names and icons
+// BLACK BOXES and INFECTIONS beside the exploits: their names and icons
 const BOX_TIERS = { 'box-1': 'I', 'box-2': 'II', 'box-3': 'III' };
 const ANTI = {
-  adware: { name: 'ADWARE', does: 'A POP-UP BLOCKS A COLUMN FOR 3 DROPS' },
-  spyware: { name: 'SPYWARE', does: 'YOUR NEXT 3 BITS ARE HIDDEN' },
-  ransomware: { name: 'RANSOMWARE', does: '3 BITS LOCKED UNDER A LAYER' },
+  adware: { name: 'ADWARE', does: 'A COLUMN BLOCKED FOR 3 DROPS' },
+  spyware: { name: 'SPYWARE', does: 'NEXT 3 BITS HIDDEN' },
+  ransomware: { name: 'RANSOMWARE', does: '3 BITS LOCKED FOR 5 DROPS' },
+  malware: { name: 'MALWARE', does: 'BOARD CORRUPTED FOR 3 DROPS' },
+  cryptojacker: { name: 'CRYPTOJACKER', does: 'RESOURCES STOLEN FOR 5 DROPS' },
+  scareware: { name: 'SCAREWARE', does: 'CLOSE THE POP-UP' },
 };
-// (a little virus: the ANTI-EXPLOITS')
+// (a little virus: the INFECTIONS')
 const VIRUS_SVG = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 7V3M12 21v-4M7 12H3M21 12h-4M8.5 8.5 5.5 5.5M18.5 18.5l-3-3M8.5 15.5l-3 3M18.5 5.5l-3 3"/></svg>';
 // What each one does, for the STORE and the BLACK MARKET's window (the README's exploit table, short)
 const ITEM_DESC = {
@@ -425,6 +430,7 @@ let timeUp = false;
 
 const boardEl = document.getElementById('board');
 const boardWrapEl = document.querySelector('.board-wrap');
+Infections.init(boardEl, boardWrapEl); // (the INFECTIONS' displays, laid over the board)
 const columnButtonsEl = document.getElementById('column-buttons');
 const scoreEl = document.getElementById('score');
 const bestEl = document.getElementById('best');
@@ -549,6 +555,9 @@ function initGame() {
   marketDrops = 0;
   adware = null;
   spywareLeft = 0;
+  malwareLeft = 0;
+  jackLeft = 0;
+  Infections.clear();
   marketOpen = false;
   const taken = Progress.startersTaken();
   const open = Progress.sideSlots(); // (by level: the left at Lv 4, the right at Lv 12; one still shut shows its padlock and level)
@@ -1128,7 +1137,14 @@ function render(popped = [], falling = null) {
         if (swapPicks.some((p) => p.r === r && p.c === c)) div.classList.add('swap-pick');
       }
       if (cell) {
-        if (cell.type === 'number') {
+        if (cell.type === 'number' && cell.locked) { // (RANSOMWARE: locked, its little screen and padlock; it falls as any bit)
+          div.classList.add('disc', 'ransom');
+          div.innerHTML = Infections.ransomHtml(cell.val, cell.locked);
+          div.title = `RANSOMWARE: locked for ${cell.locked} more drop${cell.locked === 1 ? '' : 's'}`;
+        } else if (cell.type === 'number' && malwareLeft > 0) { // (MALWARE: the bits shown as junk)
+          div.classList.add('disc', 'corrupt');
+          div.innerHTML = Infections.glitch(3);
+        } else if (cell.type === 'number') {
           div.classList.add('disc');
           fillBit(div, cell.val);
           spinBit(div, cell);
@@ -1169,6 +1185,7 @@ function render(popped = [], falling = null) {
   if (mode === 'tutorial') Tutorial.decorate(); // (its pulsing cells, redrawn with the board)
   if (typeof placeGhost === 'function') placeGhost(); // (a bit being aimed stays in the top row)
   if (typeof placeChainMeter === 'function') placeChainMeter();
+  Infections.place({ adCol: adware && !gameOver ? adware.col : null, jack: jackLeft > 0 && !gameOver, rows: ROWS, maxRows: MAX_ROWS, cols: COLS }); // (their displays, over the bits)
   // PIVOT waiting for a side: arrows in the top row over the two neighbors (as on the buttons)
   if (pivotFrom !== null) {
     for (const c of [pivotFrom - 1, pivotFrom + 1]) {
@@ -1240,7 +1257,7 @@ function updateHud() {
     currentEl.title = '';
   } else if (queue[0]) {
     showPiece(currentEl, queue[0]);
-    if (spyHides(0) && queue[0].type === 'number') { currentEl.textContent = '[?]'; currentEl.classList.remove('has-glyph'); } // (SPYWARE)
+    if (spyHides(0) && queue[0].type === 'number') { currentEl.innerHTML = Infections.eyes(); currentEl.classList.remove('has-glyph'); } // (SPYWARE: eyes watching where it should be)
   } else {
     currentEl.textContent = '';
     currentEl.classList.remove('hack');
@@ -1438,6 +1455,15 @@ async function attemptDrop(col) {
   }
   if (mode === 'vs' && !overflowed()) await vsAfterDrop(score - scoreBefore);
   endStreakDrop(piece.type === 'hack');
+  if (jackLeft > 0) { // (the CRYPTOJACKER: what this drop earned, taken)
+    const now = Progress.runRes();
+    const taken = {};
+    for (const id of Progress.resIds()) if ((now[id] || 0) > (resBefore[id] || 0)) taken[id] = now[id] - (resBefore[id] || 0);
+    const n = Object.values(taken).reduce((a, b) => a + b, 0);
+    if (n) { Progress.siphon(taken); Infections.steal(n); setMessage(`CRYPTOJACKER // ${n} STOLEN`, 'alarm'); }
+    jackLeft--;
+  }
+  tickInfections();
   showPickup(resBefore);
   Progress.endDrop({
     hack: piece.type === 'hack', heights: columns.map((c) => c.length), rows: ROWS, over: overflowed(),
@@ -1655,7 +1681,7 @@ async function resolveChains() {
     for (let r = 0; r < MAX_ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
         const cell = grid[r][c];
-        if (!cell || cell.type !== 'number') continue;
+        if (!cell || cell.type !== 'number' || cell.locked) continue; // (RANSOMWARE's locked bits: held)
         const vertical = computeRunLength(grid, r, c, 1, 0);
         const horizontal = computeRunLength(grid, r, c, 0, 1);
         if (cell.val === vertical || cell.val === horizontal) {
@@ -1677,7 +1703,7 @@ async function resolveChains() {
         for (let dr = -BLAST_RADIUS; dr <= BLAST_RADIUS; dr++) {
           for (let dc = -BLAST_RADIUS; dc <= BLAST_RADIUS; dc++) {
             const cell = grid[r + dr] && grid[r + dr][c + dc];
-            if (cell && cell.type === 'number' && values.includes(cell.val) && !pops.some((p) => p.row === r + dr && p.col === c + dc)) {
+            if (cell && cell.type === 'number' && !cell.locked && values.includes(cell.val) && !pops.some((p) => p.row === r + dr && p.col === c + dc)) {
               pops.push({ row: r + dr, col: c + dc });
             }
           }
@@ -4383,7 +4409,7 @@ const SECTION_INFO = {
   boxes: ['// BLACK BOXES', [
     'A sealed box with a random exploit inside, for less than it usually holds.',
     'Bring it into a game in a side slot, then tap it to open it. Most of the time you get an exploit of the box\'s tier, to use when you like.',
-    'Sometimes it\'s an ANTI-EXPLOIT that goes off right away: ADWARE blocks a column for 3 drops, SPYWARE hides your next 3 bits, RANSOMWARE locks 3 bits under a layer.',
+    'Sometimes it\'s INFECTED, and the infection hits right away: ADWARE blocks a column with an ad, SPYWARE hides your next bits, RANSOMWARE locks bits so they can\'t decrypt, MALWARE scrambles what your board shows, a CRYPTOJACKER steals the resources you earn, or SCAREWARE throws up a fake alert you have to close.',
     'The higher the tier, the better the odds. Each box shows its own.']],
 };
 function openSectionInfo(key) {
@@ -4835,7 +4861,7 @@ function openShop(i) {
   const master = missing.length > 0 && !box && Progress.res('master') > 0;
   const odds = box ? Progress.boxOdds(id) : null;
   document.getElementById('shop-item').innerHTML = `<span class="shop-ico">${bracketIcon(id)}</span><span class="shop-name">${itemName(id)}</span>`
-    + `<span class="shop-tier">${box ? `T1 ${odds[0]}% // T2 ${odds[1]}% // T3 ${odds[2]}% // ANTI ${odds[3]}%` : `TIER ${Progress.tierOf(id) + 1} EXPLOIT`}</span>`
+    + `<span class="shop-tier">${box ? `T1 ${odds[0]}% // T2 ${odds[1]}% // T3 ${odds[2]}% // INFECTION ${odds[3]}%` : `TIER ${Progress.tierOf(id) + 1} EXPLOIT`}</span>`
     + `<span class="shop-desc">${itemDesc(id)}</span>`;
   document.getElementById('shop-costs').innerHTML = costHtml(price);
   const buy = document.getElementById('shop-buy');
@@ -4880,7 +4906,7 @@ document.getElementById('shop-close').addEventListener('click', closeShop);
 shopEl.addEventListener('click', (e) => { if (e.target === shopEl) closeShop(); }); // (a tap off the window)
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && shopSlot !== null) { e.stopImmediatePropagation(); closeShop(); } }, true);
 // A BLACK BOX opened in its slot: the reel spins through the icons, slowing, and lands on what
-// Progress rolled. An exploit waits there to be armed; an ANTI-EXPLOIT goes off
+// Progress rolled. An exploit waits there to be armed; an INFECTION goes off
 const REEL_STEPS = [50, 50, 55, 60, 65, 75, 85, 100, 115, 135, 160, 190, 230, 280];
 function openBox(i) {
   const sl = sideSlots[i];
@@ -4939,26 +4965,40 @@ function marketTick() {
   renderStarters();
 }
 
-// ANTI-EXPLOITS (a BLACK BOX's bad luck): mild and short. ADWARE blocks one column for 3 drops
+// INFECTIONS (a BLACK BOX's bad luck): mild and short, each with its own display (infections.js).
+// ADWARE an ad blocking a column; SPYWARE eyes where your next bits should be; RANSOMWARE padlocked bits;
+// MALWARE a corrupted board; the CRYPTOJACKER stealing resources; SCAREWARE a fake alert to close. ADWARE blocks one column for 3 drops
 // (nothing drops into that column, by the button, the grid or the keys); SPYWARE hides the next 3 bits until they land;
 // RANSOMWARE locks 3 bits on the board under a one-peel layer
 const ANTI_DROPS = 3;
+const RANSOM_DROPS = 5; // (RANSOMWARE's locks and the CRYPTOJACKER: five drops)
 const spyHides = (n) => spywareLeft > n; // (the bit n places down the queue: 0 is CURRENT)
+// (after each drop: RANSOMWARE's locks and MALWARE's corruption a drop nearer gone)
+function tickInfections() {
+  if (malwareLeft > 0) malwareLeft--;
+  for (const col of columns) for (const cell of col) if (cell && cell.locked && --cell.locked <= 0) delete cell.locked;
+}
 function runAnti(id) {
   if (id === 'adware') {
     const open = columns.map((c, n) => n).filter((n) => columns[n].length < MAX_ROWS);
     if (open.length) adware = { col: open[Math.floor(Math.random() * open.length)], left: ANTI_DROPS };
   } else if (id === 'spyware') {
     spywareLeft = ANTI_DROPS;
-  } else if (id === 'ransomware') {
+  } else if (id === 'ransomware') { // (up to 3 bits locked: they can't decrypt till it lifts, but fall as any bit)
     const cells = numberCells();
     for (let n = 0; n < ANTI_DROPS && cells.length; n++) {
       const { r, c } = cells.splice(Math.floor(Math.random() * cells.length), 1)[0];
-      columns[c][r] = { type: 'firewall', level: 1, hidden: columns[c][r].val };
+      columns[c][r].locked = RANSOM_DROPS;
     }
-    render();
+  } else if (id === 'malware') {
+    malwareLeft = ANTI_DROPS;
+  } else if (id === 'cryptojacker') {
+    jackLeft = RANSOM_DROPS;
+  } else if (id === 'scareware') {
+    Infections.scare(() => { SFX.play('click'); setMessage('SCAREWARE // CLOSED'); });
   }
-  setMessage(`BLACK BOX // ${ANTI[id].name}: ${ANTI[id].does}`, 'alarm');
+  render();
+  setMessage(`INFECTED // ${ANTI[id].name}: ${ANTI[id].does}`, 'alarm');
   burstMessage('warning');
   SFX.play('denied');
   updateHud();

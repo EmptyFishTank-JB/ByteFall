@@ -74,7 +74,7 @@ a slot whose starter is used becomes one.
 
 Tiers follow the unlock order, five to a tier. A MASTER KEY pays the whole price of any exploit.
 BLACK BOX (the exploit) isn't sold; the chain meter's BLACK BOX still opens into any exploit and
-never an anti-exploit.
+never an infection.
 
 | Tier | Exploit | Unlocks | KEYS | BUGS | CACHE | CRYPTO | ROOTKITS |
 |---|---|---|---|---|---|---|---|
@@ -100,10 +100,10 @@ Only exploits unlocked by level can be bought (in the STORE and on the BLACK MAR
 
 Bought in the STORE (or found on the BLACK MARKET), taken into a game sealed. A tap in the game
 opens it: the slot spins like a slot machine's reel for about 1.5 seconds and lands on what it
-rolled. An exploit then waits in the slot to be armed when you like; an anti-exploit goes off at
+rolled. An exploit then waits in the slot to be armed when you like; an infection goes off at
 once. A box can land on any exploit of its tier, **unlocked or not** (not BLACK BOX itself).
 
-| Box | KEYS | CRYPTO | ROOTKITS | Tier 1 | Tier 2 | Tier 3 | Anti-exploit |
+| Box | KEYS | CRYPTO | ROOTKITS | Tier 1 | Tier 2 | Tier 3 | Infection |
 |---|---|---|---|---|---|---|---|
 | **BLACK BOX I** | 5 | 3 | | 65% | 20% | 3% | 12% |
 | **BLACK BOX II** | 12 | 5 | 1 | 35% | 45% | 12% | 8% |
@@ -112,14 +112,14 @@ once. A box can land on any exploit of its tier, **unlocked or not** (not BLACK 
 ### Odds per pull, by result
 
 Each tier's share split evenly over its exploits (5 in tiers 1 and 2, 4 in tier 3), and the
-anti-exploit share over the 3 anti-exploits.
+infection share over the 6 infections.
 
 | Result | BLACK BOX I | BLACK BOX II | BLACK BOX III |
 |---|---|---|---|
 | RNG, BITFLIP, BUFFER OVERFLOW, TROJAN, PIVOT (each) | 13% | 7% | 2% |
 | SWAP, WORM VIRUS, KEYLOGGER, PACKET SNIFFER, BACKDOOR (each) | 4% | 9% | 9% |
 | LOGIC BOMB, HONEYPOT, DICTIONARY ATTACK, RAINBOW TABLE (each) | 0.75% | 3% | 10.5% |
-| ADWARE, SPYWARE, RANSOMWARE (each) | 4% | 2.67% | 1% |
+| ADWARE, SPYWARE, RANSOMWARE, MALWARE, CRYPTOJACKER, SCAREWARE (each) | 2% | 1.33% | 0.5% |
 
 ### Is a box worth it?
 
@@ -127,15 +127,19 @@ Counting only the KEYS part of a price (tier 1 is 10, tier 2 is 20, tier 3 is 30
 is worth about 11 KEYS from BLACK BOX I (which costs 5), 16 from II (costs 12) and 23 from III (costs 20),
 before the resources. A box is the cheaper bet; buying the exploit you want is the safe one.
 
-## Anti-exploits
+## Infections
 
-Mild and short. None can end a game by itself.
+A BLACK BOX's bad luck: it comes up INFECTED. Mild and short; none can end a game by itself. Each shows
+itself in its own little LED sign or ASCII display, kept within the bits it takes up (js/infections.js).
 
-| Anti-exploit | What it does | For |
-|---|---|---|
-| **ADWARE** | a pop-up covers one drop button (`AD`) and blocks its column: nothing drops there by the button, the grid or the number keys (it gives way if every other column is full) | 3 drops |
-| **SPYWARE** | CURRENT, the NEXT preview and the bit over the grid show `?` until each lands | the next 3 bits |
-| **RANSOMWARE** | 3 random bits on the board go under a one-peel layer (one decrypt beside each frees it, the same bit) | until peeled |
+| Infection | What it does | For | Its display |
+|---|---|---|---|
+| **ADWARE** | an ad in its own frame over one column, below the overflow line: nothing drops there by the button, the grid or the number keys (it gives way if every other column is full); its drop button reads `AD` | 3 drops | LED: chasing bulbs round the frame, a CPU pulling faces, its claims (FREE KEYS, DOWNLOAD RAM...) marching up the sign |
+| **SPYWARE** | CURRENT, the NEXT preview and the bit over the grid are hidden until each lands | the next 3 bits | ASCII: a pair of eyes watching from CURRENT |
+| **RANSOMWARE** | up to 3 bits on the board are padlocked: they can't decrypt (they still count in lines, and fall as any bit) | 5 drops | LED and ASCII: each locked bit's little screen fading between a grinning CPU and typing gibberish, a padlock, its value and the drops left |
+| **MALWARE** | every bit on the board shows as junk | 3 drops | ASCII: flickering characters in each bit |
+| **CRYPTOJACKER** | the resources each drop earns are taken back | 5 drops | LED: a CPU stealing them, on a sign through the overflow row's own cells: a pan with its sack, a close-up of its eyes, MINING YOUR CRYPTO, and a gloat (+N MINE!) when it takes some |
+| **SCAREWARE** | a fake system alert over the board; only its tiny X closes it (its big button dodges) | till closed | ASCII: a blinking skull and a scan crawling to 100% |
 
 ## BLACK MARKET
 

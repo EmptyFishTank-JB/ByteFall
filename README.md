@@ -102,7 +102,7 @@ android && node tools/setup-android.js`, then open `android/` in Android Studio.
 ## Keys, resources and boosters
 
 **[ECONOMY.md](ECONOMY.md) has the whole economy in tables**: every resource, how and where it's
-earned, every price, the BLACK BOX odds and the anti-exploits.
+earned, every price, the BLACK BOX odds and the infections.
 
 KEYS are the game's currency, earned by playing and kept on the device
 (progress.js): 1 for every 10 bits decrypted, +2 when a chain reaches 5 links and +5 at 7,
@@ -145,7 +145,7 @@ ROOTKITS (ECONOMY.md has each). The STORE shows each with its icon, its price in
 short of it (its amount pulses red; a BUY tapped without enough flashes it), and USE A MASTER KEY when it's short and there's one. BLACK BOX itself isn't
 sold; **BLACK BOXES** I, II and III are (5 KEYS and 3 CRYPTO; 12, 5 and a ROOTKIT; 20, 8 and 2), a
 random pull each, their odds on them: an exploit of tier 1, 2 or 3 (any of the tier, unlocked or not)
-or an **ANTI-EXPLOIT** (I: 65 / 20 / 3 / 12%; II: 35 / 45 / 12 / 8%; III: 10 / 45 / 42 / 3%).
+or an **INFECTION** (I: 65 / 20 / 3 / 12%; II: 35 / 45 / 12 / 8%; III: 10 / 45 / 42 / 3%).
 Pick 2 on the main menu to take into a game, one in each slot (marked S): two of one kind
 (if you have two) or one each of two. The menu shows the two slots (STARTERS), left and right, and what's in each (a long name trails off).
 A tap on a slot opens its card: every starter and box you own and how many, to put in that slot, EMPTY
@@ -153,10 +153,14 @@ THIS SLOT, and BUY EXPLOITS (the STORE's starters); each is used once in the gam
 the game, a tap arms an exploit as your next drop, as an earned one, and it's used up (the ones not
 used stay yours). A box waits sealed (pulsing); a tap opens it: the slot spins like a slot machine's
 reel for about 1.5 seconds and lands on an exploit, which waits there (a tick in its corner) to be
-armed when you like, or an anti-exploit, which glitches red and goes off at once: **ADWARE** (a pop-up,
-AD, covers one drop button and blocks its column for 3 drops: nothing drops there, by the button, the grid or the number keys, unless every other column is full), **SPYWARE** (the
-next 3 bits show as ? until they land) or **RANSOMWARE** (3 bits on the board go under a one-peel
-layer). A slot taken in empty, or once its starter is used, is the **BLACK MARKET** (so it's there
+armed when you like, or comes up INFECTED, which glitches red and goes off at once, each infection in its own
+little LED sign or ASCII display within the bits it takes up (js/infections.js; ECONOMY.md has the table):
+**ADWARE** (an ad in its own frame blocks a column below the overflow line for 3 drops, a CPU pulling faces and
+its claims marching up it), **SPYWARE** (the next 3 bits hidden, eyes watching from CURRENT), **RANSOMWARE**
+(up to 3 bits padlocked for 5 drops: they can't decrypt, their little screens fading between a grinning CPU and
+typing gibberish), **MALWARE** (the board's bits shown as flickering junk for 3 drops), a **CRYPTOJACKER**
+(5 drops' resources stolen, a CPU making off with them on a sign through the overflow row) or **SCAREWARE**
+(a fake alert over the board, closed only by its tiny X). A slot taken in empty, or once its starter is used, is the **BLACK MARKET** (so it's there
 whether you take starters in or not):
 a random exploit you've unlocked or, a quarter of the time, a BLACK BOX, marked for sale with the
 game's own currency sign in its corner (a 0 struck through twice, as a dollar sign is: no one
