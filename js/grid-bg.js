@@ -282,6 +282,17 @@ document.querySelectorAll('.hud .stat:not(.cpu-stat):not(.cpu-face)').forEach((s
   startGridBackground(canvas, { defrag: false, active: gameShown });
 });
 
+// The EXPLOIT button and the side slots: the starlight too, behind their icons (their insides are
+// redrawn often: the canvas is put back first whenever it's been swept out)
+document.querySelectorAll('.exploit-row .exploit-icon').forEach((btn) => {
+  const canvas = document.createElement('canvas');
+  canvas.className = 'stat-bg';
+  canvas.setAttribute('aria-hidden', 'true');
+  btn.prepend(canvas);
+  new MutationObserver(() => { if (canvas.parentNode !== btn) btn.prepend(canvas); }).observe(btn, { childList: true });
+  startGridBackground(canvas, { defrag: false, active: gameShown });
+});
+
 // Dev: TWINKLE BACKGROUND (dev tools, or ?twinkle): the starlight across the whole screen behind
 // the game card, in place of the plain gradient. Re-read on coming back from the dev page.
 const pageBg = document.getElementById('page-bg');

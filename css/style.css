@@ -1951,27 +1951,31 @@ header { margin-bottom: 6px; }
 .exploit-icon {
   position: relative; width: var(--cell, 40px); height: var(--cell, 40px); display: flex; align-items: center; justify-content: center;
   padding: 0; background: var(--board-bg); border: 1px solid var(--grid-line); border-radius: 6px; cursor: pointer;
-  color: var(--fg-dim); opacity: 0.6; font-family: inherit; -webkit-tap-highlight-color: transparent;
+  color: var(--fg-dim); --dim: 0.6; font-family: inherit; -webkit-tap-highlight-color: transparent;
 }
+/* (the background solid, the starlight twinkling in it as in the HUD boxes; only what's on it dims) */
+.exploit-icon { isolation: isolate; background: var(--board-bg); }
+.exploit-icon > :not(.stat-bg) { opacity: var(--dim, 0.6); }
+.exploit-icon > .stat-bg { border-radius: inherit; }
 .exploit-glyph { display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; line-height: 1; }
 .exploit-glyph svg { width: 22px; height: 22px; }
 .exploit-count { position: absolute; top: -7px; right: -7px; padding: 0 4px; border-radius: 6px; background: var(--fg); color: var(--panel); font-size: 10px; font-weight: bold; }
 .exploit-count[hidden] { display: none; }
 /* An exploit to arm: bright green glow, showing that exploit's icon */
-.exploit-icon.ready { color: var(--fg); opacity: 1; border-color: var(--fg); box-shadow: 0 0 12px rgba(var(--fg-rgb), 0.7); text-shadow: 0 0 8px rgba(var(--fg-rgb), 0.9); }
+.exploit-icon.ready { color: var(--fg); --dim: 1; border-color: var(--fg); box-shadow: 0 0 12px rgba(var(--fg-rgb), 0.7); text-shadow: 0 0 8px rgba(var(--fg-rgb), 0.9); }
 /* Armed as the next drop: glowing, pulsing amber */
-.exploit-icon.armed { color: var(--accent); opacity: 1; border-color: var(--accent); animation: amber-pulse 0.9s ease-in-out infinite; }
+.exploit-icon.armed { color: var(--accent); --dim: 1; border-color: var(--accent); animation: amber-pulse 0.9s ease-in-out infinite; }
 /* THE SIDE SLOTS, either side of the exploit button: a STARTER (an R in its corner) or one bought (a
    tick), ready to arm; or the BLACK MARKET's offer (dashed, its price in KEYS under it; a first
    tap lights it, pulsing, for the second to buy) */
 .exploit-row { gap: 10px; }
 .exploit-icon.side-slot[hidden] { display: none; }
 .exploit-icon.side-slot.closed { visibility: hidden; }
-.exploit-icon.side-slot.owned { color: var(--accent); opacity: 1; border-color: rgba(var(--accent-rgb), 0.7); }
-.exploit-icon.side-slot.owned:disabled { opacity: 0.35; cursor: default; }
-.exploit-icon.side-slot.market { opacity: 0.85; border-style: dashed; border-color: rgba(var(--accent-rgb), 0.55); color: var(--fg-dim); }
-.exploit-icon.side-slot.market.short { opacity: 0.4; }
-.exploit-icon.side-slot.market.confirm { opacity: 1; color: var(--accent); border-style: solid; border-color: var(--accent); animation: amber-pulse 0.9s ease-in-out infinite; }
+.exploit-icon.side-slot.owned { color: var(--accent); --dim: 1; border-color: rgba(var(--accent-rgb), 0.7); }
+.exploit-icon.side-slot.owned:disabled { --dim: 0.35; cursor: default; }
+.exploit-icon.side-slot.market { --dim: 0.85; border-style: dashed; border-color: rgba(var(--accent-rgb), 0.55); color: var(--fg-dim); }
+.exploit-icon.side-slot.market.short { --dim: 0.4; }
+.exploit-icon.side-slot.market.confirm { --dim: 1; color: var(--accent); border-style: solid; border-color: var(--accent); animation: amber-pulse 0.9s ease-in-out infinite; }
 .exploit-icon.side-slot.turned .exploit-glyph { animation: slot-turn 0.35s steps(3); }
 @keyframes slot-turn { 0% { opacity: 0; transform: translateY(6px); } 100% { opacity: 1; transform: none; } }
 .slot-price { position: absolute; bottom: -15px; left: 0; right: 0; text-align: center; font-size: 10px; line-height: 1; color: var(--accent); }
@@ -3350,9 +3354,9 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 @media (prefers-reduced-motion: reduce) { .shop-box, .shop-sign .cur-ico, .cell.scrambling, .panel-store { animation: none; } }
 
 /* A BLACK MARKET slot before it opens (the first layer hasn't risen): its offer to look at, dimmed */
-.exploit-icon.side-slot.market.locked { opacity: 0.35; }
+.exploit-icon.side-slot.market.locked { --dim: 0.35; }
 /* (a side slot not open yet: dim, a padlock over the level it opens at) */
-.exploit-icon.side-slot.locked-slot { flex-direction: column; gap: 2px; opacity: 0.5; border-style: dashed; color: var(--fg-dim); cursor: default; }
+.exploit-icon.side-slot.locked-slot { flex-direction: column; gap: 2px; --dim: 0.5; border-style: dashed; color: var(--fg-dim); cursor: default; }
 .slot-lock { width: 12px; height: 14px; }
 .slot-lv { font-size: 9px; letter-spacing: 1px; line-height: 1; }
 /* (the BLACK MARKET's countdown: its frame in four sides, lit, one going dark a drop till it turns over) */
