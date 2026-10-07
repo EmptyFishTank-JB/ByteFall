@@ -2212,7 +2212,7 @@ body.vs-mode .overlay { background: transparent; }
 @keyframes pause-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes pause-out { from { opacity: 1; } to { opacity: 0; } }
 .board-frame #board { transition: opacity 0.15s ease-out; }
-.board-frame.paused #board, .board-frame.paused .incoming { opacity: 0; pointer-events: none; }
+.board-frame.paused #board, .board-frame.paused .incoming, .board-frame.paused .chain-meter { opacity: 0; pointer-events: none; } /* (the EXPLOIT meter goes with the bits) */
 /* (paused, or a panel up over the board: the INFECTIONS' displays and pop-ups out of sight with the bits) */
 .board-wrap:has(.board-frame.paused) > .inf, .board-wrap:has(.vs-pause:not([hidden])) > .inf { visibility: hidden; }
 .vs-pause .pause-row { gap: 8px; }
