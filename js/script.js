@@ -775,12 +775,35 @@ document.querySelectorAll('[data-ptier-pick]').forEach((btn) => {
 // bottom), between MIN_BOARD and the CSS maximum.
 const MIN_BOARD = 240;
 const crtEl = document.querySelector('.crt');
-// Phones: nudge the header so the tops of the title's letters sit level with the tops of the
-// trophy and settings icons (each font draws its letters at a different height in the line)
+// Phones: nudge the header so the title's capitals sit centred on the PAUSE button, as the main
+// menu's title sits on its BACK arrow (each font draws its letters at a different height in the line)
 const headerEl = document.querySelector('header');
 const titleEl = headerEl.querySelector('h1');
 const measureCtx = document.createElement('canvas').getContext('2d');
+// A title in the top row shrinks (never under min px) till its letters keep 8px clear of the corner
+// buttons (PAUSE, BACK): on a narrow phone they'd run into each other
+function clearOfCorners(el, min) {
+  el.style.fontSize = '';
+  el.style.letterSpacing = '';
+  const btns = [...crtEl.querySelectorAll(':scope > :is(.records-btn, .settings-btn)')].filter((b) => b.offsetWidth && getComputedStyle(b).visibility !== 'hidden');
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  const hits = () => {
+    const t = range.getBoundingClientRect();
+    return btns.some((b) => { const r = b.getBoundingClientRect(); return t.left < r.right + 8 && t.right > r.left - 8 && t.top < r.bottom && t.bottom > r.top; });
+  };
+  const size0 = parseFloat(getComputedStyle(el).fontSize);
+  const ls0 = parseFloat(getComputedStyle(el).letterSpacing) || 0;
+  let size = size0;
+  while (hits() && size > min) { // (its letter spacing in step with it)
+    size -= 0.5;
+    el.style.fontSize = `${size}px`;
+    el.style.letterSpacing = `${(ls0 * size / size0).toFixed(2)}px`;
+  }
+}
 function alignHeader() {
+  titleEl.style.fontSize = '';
+  titleEl.style.letterSpacing = '';
   headerEl.style.removeProperty('--head-nudge');
   if (!document.body.classList.contains('cards-in-settings') || mode === 'vs') return;
   const cs = getComputedStyle(titleEl);
@@ -789,12 +812,14 @@ function alignHeader() {
   measureCtx.font = `${cs.fontWeight} ${cs.fontSize} 'Courier New', Courier, monospace`;
   const m = measureCtx.measureText(titleEl.textContent);
   if (!m.fontBoundingBoxAscent) return;
-  const lineHeight = titleEl.getBoundingClientRect().height;
+  const box = titleEl.getBoundingClientRect();
   const content = m.fontBoundingBoxAscent + m.fontBoundingBoxDescent;
-  const inkTop = titleEl.getBoundingClientRect().top + (lineHeight - content) / 2 + m.fontBoundingBoxAscent - m.actualBoundingBoxAscent;
-  const icon = document.querySelector('.records-btn svg').getBoundingClientRect();
-  const iconTop = icon.top + icon.height * (3 / 24); // the icons' outlines start ~3 units down their 24-unit box
-  headerEl.style.setProperty('--head-nudge', `${(iconTop - inkTop).toFixed(1)}px`);
+  const baseline = box.top + (box.height - content) / 2 + m.fontBoundingBoxAscent;
+  const inkMid = baseline - m.actualBoundingBoxAscent / 2; // (capitals: nothing below the line)
+  const btn = document.querySelector('.records-btn').getBoundingClientRect();
+  if (!btn.height) return;
+  headerEl.style.setProperty('--head-nudge', `${(btn.top + btn.height / 2 - inkMid).toFixed(1)}px`);
+  clearOfCorners(titleEl, 14);
 }
 
 const HUD_MIN_W = 300;
@@ -810,12 +835,6 @@ function fitBoard() {
   crtEl.classList.add('measuring');
   const rest = crtEl.getBoundingClientRect().height - frame.getBoundingClientRect().height;
   crtEl.classList.remove('measuring');
-  // The spacer that keeps the HUD, grid and message centered in the card under the top-pinned
-  // header (see style.css): what's above them minus what's below them
-  const cs = getComputedStyle(crtEl);
-  const header = document.querySelector('header');
-  const above = parseFloat(cs.paddingTop) + header.offsetHeight + parseFloat(getComputedStyle(header).marginTop) + parseFloat(getComputedStyle(header).marginBottom);
-  crtEl.style.setProperty('--head-space', `${Math.max(0, above - parseFloat(cs.paddingBottom))}px`);
   const pad = parseFloat(getComputedStyle(document.body).paddingTop) * 2;
   const ratio = frame.offsetHeight / frame.offsetWidth;
   const width = Math.max(MIN_BOARD, Math.min(cssMax, (viewportHeight() - pad - rest) / ratio));
@@ -868,7 +887,7 @@ function fitVsSetup() {
 // the lines of text above buttons (notes, descriptions): each keeps the height it has in
 // Courier, so a wider font wrapping onto another line can't push the buttons below it down.
 // Re-measured when the layout changes (fitBoard), a text changes, or one comes into view.
-const LOCKED_BUTTONS = '.modes button, .difficulty button, #vs-layers-btn, #vs-exploits-btn, #vs-start, #pause-resume, #pause-menu, #home-play, #overlay-restart-btn, #overlay-menu-btn, #overlay-share-btn, .records-tabs button, #vs-goal, .menu-tabs button, .store-buy, .store-restore, .store-shortcut';
+const LOCKED_BUTTONS = '.card-back, #records-btn, .modes button, .difficulty button, #vs-layers-btn, #vs-exploits-btn, #vs-start, #pause-resume, #pause-menu, #home-play, #overlay-restart-btn, #overlay-menu-btn, #overlay-share-btn, .records-tabs button, #vs-goal, .menu-tabs button, .store-buy, .store-restore, .store-shortcut';
 const LOCKED_TEXT = '#mode-info, .settings-note, .vs-setup-note, .vs-setup-msg, #overlay-note, footer p, .panel-store p';
 function unfitButton(b) {
   if (!('fitLs' in b.dataset)) return;
@@ -907,7 +926,7 @@ function fitBlockText(t) {
 }
 function lockButtons() {
   // (not the main menu's: its boxes are set sizes of their own, their words fitted by fitHome)
-  const shown = (el) => el.getClientRects().length && !el.closest('#home');
+  const shown = (el) => el.getClientRects().length && (!el.closest('#home') || el.id === 'home-back'); // (its ← BACK locked as every BACK is)
   const btns = [...document.querySelectorAll(LOCKED_BUTTONS)].filter(shown);
   const texts = [...document.querySelectorAll(LOCKED_TEXT)].filter(shown);
   for (const b of [...btns, ...texts]) {
@@ -3348,9 +3367,15 @@ function updateHome() {
 }
 function updateTopIcons() {
   const inGame = !homeOpen; // (the tutorial too: PAUSE, as in a game)
+  const was = document.body.className;
   document.body.classList.toggle('in-game', inGame);
   document.body.classList.toggle('can-pause', inGame && (canPause() || vsPaused));
   document.body.classList.toggle('at-home', homeOpen);
+  if (document.body.className !== was && inGame) { // (PAUSE or BACK in the corner now: locked to its Courier size, the title fitted beside it)
+    lockButtons();
+    if (mode === 'vs') alignVsTitle();
+    else alignHeader();
+  }
   document.getElementById('records-btn').setAttribute('aria-label', !inGame ? 'Menu: rules, exploits and records' : vsPaused ? 'Resume' : canPause() ? 'Pause' : 'Back to the main menu');
 }
 // Fixed boxes, fitted words: the main menu's buttons and panel keep one size in every mode, font
@@ -3494,10 +3519,9 @@ function layoutVsTop() {
   info.hidden = true;
   // (relative to the game card, which can move as the page re-centers)
   const cardTop = () => crtEl.getBoundingClientRect().top;
-  // Below the top icons by the same gap as between their tops and the card's top border
-  const icon = document.querySelector('.records-btn svg').getBoundingClientRect();
-  const iconGap = icon.top - cardTop() - crtEl.clientTop;
-  const top = icon.bottom - cardTop() + iconGap;
+  // 8px below the top corner's button (PAUSE, or BACK before a match), as Classic's panels sit 8px
+  // under its header
+  const top = document.querySelector('.records-btn').getBoundingClientRect().bottom - cardTop() + 8;
   // (at least VS_TOP_MIN tall: the regular header is only the title and the mode's name, so
   // where there's no room under it the board comes down and fitBoard shrinks it to fit)
   const bottom = Math.max(hud.getBoundingClientRect().bottom - cardTop(), top + VS_TOP_MIN);
@@ -3530,6 +3554,8 @@ function layoutVsTop() {
 // The VS title's letters centered on the top icons (each font sits differently in its line)
 function alignVsTitle() {
   const el = document.querySelector('.vs-title');
+  el.style.fontSize = '';
+  el.style.letterSpacing = '';
   el.style.removeProperty('--vs-title-nudge');
   const cs = getComputedStyle(el);
   measureCtx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
@@ -3540,8 +3566,9 @@ function alignVsTitle() {
   const box = range.getBoundingClientRect();
   const baseline = box.top + (box.height - m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2 + m.fontBoundingBoxAscent;
   const inkMid = baseline - m.actualBoundingBoxAscent / 2; // (no descenders)
-  const icon = document.querySelector('.records-btn svg').getBoundingClientRect();
-  el.style.setProperty('--vs-title-nudge', `${(icon.top + icon.height / 2 - inkMid).toFixed(1)}px`);
+  const btn = document.querySelector('.records-btn').getBoundingClientRect(); // (PAUSE, or BACK)
+  el.style.setProperty('--vs-title-nudge', `${(btn.top + btn.height / 2 - inkMid).toFixed(1)}px`);
+  clearOfCorners(el, 14);
 }
 // The VS info line shrinks to fit its column
 function fitVsStatus() {

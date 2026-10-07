@@ -504,8 +504,8 @@ h1 span { color: var(--accent); text-shadow: 0 0 8px var(--accent); }
 body.vs-mode .vs-title {
   position: absolute;
   top: 12px;
-  left: 76px;
-  right: 76px;
+  left: 8px;
+  right: 8px; /* (script.js's clearOfCorners keeps the words off the corner buttons) */
   height: 28px;
   display: flex;
   align-items: center;
@@ -2047,14 +2047,17 @@ body.cards-in-settings .crt { height: 100%; display: flex; flex-direction: colum
 /* VS places its HUD from the top itself (script.js's layoutVsTop) */
 body.cards-in-settings.vs-mode .crt { justify-content: flex-start; }
 body.cards-in-settings .crt.measuring { height: auto; align-self: start; } /* script.js's fitBoard measures the contents */
-/* The header sits at the top of the card, level with the trophy and settings icons; the HUD, grid
-   and message stay centered in the card (auto margins around them, plus a spacer after them as
-   tall as what sits above them, --head-space, set by script.js's fitBoard) */
+/* The header sits at the top of the card, its title level with PAUSE (as the main menu's is with
+   its BACK arrow); the HUD, grid and message follow straight under it */
 body.cards-in-settings:not(.vs-mode):not(.vs-measure) .crt { justify-content: flex-start; padding-top: 12px; }
 body.cards-in-settings:not(.vs-mode):not(.vs-measure) header { margin-top: var(--head-nudge, 0px); }
-body.cards-in-settings:not(.vs-mode):not(.vs-measure) .crt > .hud { margin-top: auto; }
+/* (the header's title, subtitle and the HUD's panels 8px apart, all at the top: any height to
+   spare goes under the message, at the bottom) */
+body.cards-in-settings:not(.vs-mode):not(.vs-measure) header { margin-bottom: 0; }
+body.cards-in-settings:not(.vs-mode):not(.vs-measure) header h1 { line-height: 1; }
+body.cards-in-settings:not(.vs-mode):not(.vs-measure) header .tagline { margin-top: 8px; line-height: 1; }
+body.cards-in-settings:not(.vs-mode):not(.vs-measure) .crt > .hud { margin-top: 8px; }
 body.cards-in-settings:not(.vs-mode):not(.vs-measure) .crt > .message-slot { margin-bottom: auto; }
-body.cards-in-settings:not(.vs-mode):not(.vs-measure) .crt::after { content: ""; flex: 0 1 var(--head-space, 0px); min-height: 0; }
 body.cards-in-settings .crt.measuring::after { display: none; }
 
 /* Every confirm (and QUIT while pressed) (RESTART, QUIT, mode / difficulty / DAILY / VS switches mid-run, DECRYPTOR,
@@ -2999,10 +3002,10 @@ body.at-home .crt > :is(header, .hud, .board-wrap, .message-slot, .corner-btn, .
 .records-btn svg { position: absolute; left: 4px; top: 4.5px; }
 .records-btn .rb-pause { visibility: hidden; }
 .records-btn span.rb-back { display: none; pointer-events: none; }
-body.in-game .records-btn .rb-menu { visibility: hidden; }
+body.in-game .records-btn .rb-menu { display: none; } /* (gone, not just hidden: PAUSE's words are fitted to what's in the button) */
 body.in-game.can-pause .records-btn .rb-pause { visibility: visible; }
 body.in-game:not(.can-pause) .records-btn span.rb-back { display: inline-flex; }
-body.in-game:not(.can-pause) .records-btn { opacity: 1; width: auto; height: auto; }
+body.in-game:not(.can-pause) .records-btn { opacity: 1; width: auto; height: auto; top: 8px; } /* (the main menu's ← BACK's inset) */
 @media (hover: hover) { body.in-game:not(.can-pause) .records-btn:hover .rb-back { background: rgba(var(--fg-rgb), 0.12); } }
 body.in-game .settings-btn:not([aria-expanded="true"]) { visibility: hidden; }
 /* PAUSE in every mode: RESUME, RESTART (and EXIT in VS), RULES & RECORDS and SETTINGS, MAIN MENU */
@@ -3608,7 +3611,8 @@ body.in-game.can-pause .records-btn svg { left: auto; right: 4px; } /* (hugging 
 .message-slot .message { height: 18px; min-height: 0; line-height: 18px; white-space: nowrap; font-size: 18px; }
 #vs-setup-note { height: 50px; overflow: hidden; font-size: 14.5px; }
 #pause-note { height: 17px; line-height: 17px; overflow: hidden; white-space: nowrap; font-size: 14.5px; }
-.card-back, :is(.records, .settings) .card-back { width: 88px; justify-content: center; }
+/* (BACK everywhere, the main menu's and the cards': as wide as its words, 26px tall) */
+.card-back, :is(.records, .settings) .card-back { width: auto; height: 26px; padding: 0 10px; align-items: center; justify-content: center; }
 #tutorial-btn { width: 100px; text-align: center; }
 .panel-store .store-rule + .store-sub { margin-top: 6px; } /* (each STORE section under its ===== line, as RECORDS' sections) */
 /* The DAILY DROP's LOGIN STREAK: days in a row, a pip for each day of this run of 7 */
@@ -3699,12 +3703,11 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
 #pause-note { height: 20px; line-height: 20px; }
 .home-best { height: 18px; line-height: 18px; }
 .home-head { height: 26px; align-items: center; } /* (one height in every font) */
-/* THE MAIN MENU's ← in its top left corner, back to the title screen; the title line keeps clear of it */
-.home-back { position: absolute; top: 8px; left: 8px; z-index: 2; width: 34px; height: 26px; padding: 0; display: flex; align-items: center; justify-content: center;
-  background: transparent; border: 1px solid var(--fg-dim); border-radius: 4px; color: var(--fg); cursor: pointer; }
-.home-back svg { width: 18px; height: 18px; }
-@media (hover: hover) { .home-back:hover { border-color: var(--fg); background: rgba(var(--fg-rgb), 0.08); } }
-.home-head { padding: 0 40px; }
+/* THE MAIN MENU's ← BACK in its top left corner, back to the title screen: the cards' own BACK button
+   (one BACK everywhere); the title line keeps clear of it */
+.home .home-back { position: absolute; top: 8px; left: 8px; z-index: 2; }
+@media (hover: hover) { .home .home-back:hover { background: rgba(var(--fg-rgb), 0.12); } }
+.home-head { padding: 0 80px; } /* (BACK's width and a gap, both sides: the title stays centred) */
 .home-head.no-tag .tagline { display: none; }
 .home-head h1 { letter-spacing: 0.1em; } .home-head .tagline { letter-spacing: 0.04em; } .home-head { gap: 0.6em; } /* (tighter, so the whole line fits beside the arrow on more phones) */
 /* (the mode's card only as tall as what it holds: PLAY the one 8px gap under its last piece, the
@@ -4315,8 +4318,11 @@ body.cards-in-settings .settings footer :is(p, span, a) { font-size: 11.5px; }
 .settings .theme-option .lv-tag { font-size: 9px; } /* (the smallest label the game allows) */
 /* PAUSE in a game: a bordered button like BACK and the rest (the bars centred in it, at full strength;
    its bigger tap area, ::before, still reaches past the border) */
-body.in-game.can-pause .records-btn { width: 44px; height: 28px; opacity: 1; border: 1px solid var(--fg); border-radius: 4px; background: transparent; color: var(--fg); }
-body.in-game.can-pause .records-btn svg.rb-pause { position: static; width: 34px; height: 14px; }
+/* (formatted as ← BACK: its width, height, border and lettering, the bars where BACK's arrow is) */
+body.in-game.can-pause .records-btn { top: 8px; right: 8px; width: auto; height: 26px; padding: 0 10px; gap: 6px; opacity: 1; border: 1px solid var(--fg); border-radius: 4px; background: transparent; color: var(--fg); font-family: inherit; font-size: 12px; letter-spacing: 1px; }
+body.in-game.can-pause .records-btn svg.rb-pause { position: static; width: 10px; height: 10px; flex: none; } /* (never squeezed: the words shrink instead) */
+.records-btn .rb-pause-word { display: none; }
+body.in-game.can-pause .records-btn .rb-pause-word { display: inline; }
 @media (hover: hover) { body.in-game.can-pause .records-btn:hover { background: rgba(var(--fg-rgb), 0.12); filter: none; } }
 body.in-game.can-pause .records-btn.pause-queued { background: rgba(var(--fg-rgb), 0.16); }
 /* The BLACK MARKET's $: lit and glowing while what's in the slot is for sale (the market open), a slow
