@@ -4215,3 +4215,27 @@ html, body { overflow-x: clip; }
 .inftest button.on { background: var(--fg); color: #020403; border-color: var(--fg); }
 .inftest a { color: var(--fg-dim); margin-left: auto; }
 .inftest-note { margin: 6px 0 0; font-size: 8.5px; line-height: 1.4; color: var(--fg-dim); }
+
+/* CRT DISPLAY (SETTINGS): the whole screen as an old tube, laid over everything and never in the way
+   of a tap. SOFT: scanlines, the glass darkening toward its rounded corners. FULL: and the phosphor's
+   red / green / blue stripes, a faint flicker, a bright band rolling slowly down. */
+.crt-fx { display: none; position: fixed; inset: 0; z-index: 10000; pointer-events: none; overflow: hidden; }
+:root:is(.crt-soft, .crt-full) .crt-fx { display: block; }
+.crt-fx::before { content: ""; position: absolute; inset: 0;
+  background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.22) 0 1px, transparent 1px 3px); }
+.crt-fx::after { content: ""; position: absolute; inset: 0; border-radius: 22px / 26px;
+  background: radial-gradient(ellipse 85% 80% at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.42) 100%);
+  box-shadow: inset 0 0 40px 8px rgba(0, 0, 0, 0.7), 0 0 0 40px #000; }
+:root.crt-full .crt-fx::before {
+  background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(to right, rgba(255, 40, 40, 0.06) 0 1px, rgba(40, 255, 80, 0.06) 1px 2px, rgba(60, 90, 255, 0.06) 2px 3px);
+  animation: crt-flicker 0.12s steps(2) infinite; }
+.crt-roll { display: none; position: absolute; left: 0; right: 0; height: 22%; top: -22%;
+  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.035) 50%, transparent); }
+:root.crt-full .crt-roll { display: block; animation: crt-roll 7s linear infinite; }
+@keyframes crt-flicker { 50% { opacity: 0.88; } }
+@keyframes crt-roll { to { transform: translateY(560%); } }
+/* (a touch of glow on the tube's light) */
+:root.crt-full body { text-shadow: 0 0 1px currentColor; }
+:root.low-fx .crt-fx::before, :root.low-fx .crt-roll { animation: none; }
+@media (prefers-reduced-motion: reduce) { .crt-fx::before, .crt-roll { animation: none !important; } }

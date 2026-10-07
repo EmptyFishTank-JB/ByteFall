@@ -3679,6 +3679,24 @@ effectsBtn.addEventListener('click', () => {
 });
 updateEffectsBtn();
 
+// CRT DISPLAY: OFF / SOFT / FULL: the whole screen as a tube (style.css, .crt-fx over everything)
+const crtBtn = document.getElementById('crt-btn');
+const CRT_STEPS = ['off', 'soft', 'full'];
+const crtNow = () => (document.documentElement.classList.contains('crt-full') ? 'full' : document.documentElement.classList.contains('crt-soft') ? 'soft' : 'off');
+function updateCrtBtn() {
+  crtBtn.textContent = `CRT DISPLAY: ${crtNow().toUpperCase()}`;
+  crtBtn.classList.toggle('on', crtNow() !== 'off');
+}
+crtBtn.addEventListener('click', () => {
+  const next = CRT_STEPS[(CRT_STEPS.indexOf(crtNow()) + 1) % CRT_STEPS.length];
+  document.documentElement.classList.remove('crt-soft', 'crt-full');
+  if (next !== 'off') document.documentElement.classList.add(`crt-${next}`);
+  storage.set('bytefall-crt', next);
+  updateCrtBtn();
+  SFX.play('punct');
+});
+updateCrtBtn();
+
 // (SETTINGS' switch, and the same one in the MUSIC PLAYER)
 const outputBtn = document.getElementById('output-btn');
 const mpOutputBtn = document.getElementById('mp-output-btn');
