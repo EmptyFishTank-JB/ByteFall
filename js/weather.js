@@ -109,6 +109,13 @@ function createWeather(api) {
     for (const c of `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}-wx`) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }
     return ['normal', 'normal', 'wet', 'dry', 'stormy', 'calm'][h % 6];
   }
+  // (a scene out, scenes.js: the weather that suits it comes more, what doesn't belong never)
+  function sceneLean(k) {
+    const s = api.scene && api.scene();
+    const fit = s && typeof SCENE_FITS !== 'undefined' && SCENE_FITS[s];
+    if (!fit) return 1;
+    return fit.never.includes(k) ? 0 : fit.fits.includes(k) ? 3 : 0.6;
+  }
   function choose() {
     const f = weatherForced();
     if (WEATHER_KINDS.includes(f)) return f;
@@ -119,7 +126,8 @@ function createWeather(api) {
       .filter(([k]) => !(light() && KIND[k] && KIND[k].night)) // (the light themes keep their card: no night sky)
       .filter(([k]) => !(api.foggy() && !['drizzle', 'rain', 'storm', 'wind', 'sleet', 'snow'].includes(k))) // (in the fog: only what falls or blows)
       .map(([k, w]) => [k, w * (character === 'wet' && WET.includes(k) ? 2 : character === 'dry' && DRY.includes(k) ? 2 : character === 'stormy' && ['storm', 'hail', 'blizzard', 'thundersnow', 'duststorm', 'heatlightning'].includes(k) ? 2.5 : 1)
-        * (season === 'summer' && k === 'meteors' && new Date().getMonth() === 7 ? 3 : 1)]);
+        * (season === 'summer' && k === 'meteors' && new Date().getMonth() === 7 ? 3 : 1)
+        * sceneLean(k)]);
     let r = Math.random() * opts.reduce((a, [, w]) => a + w, 0);
     for (const [k, w] of opts) if ((r -= w) <= 0) return k;
     return opts.length ? opts[0][0] : null;
@@ -775,5 +783,15 @@ function createWeather(api) {
     }
   }
 
-  return { frame, clear, start: (kind) => start(kind), stop: () => end(), current: () => (wx ? wx.kind : null), moon: () => moonPhaseName() };
+  // (a scene's arrived, scenes.js: with nothing out, half the time a spell to suit it, from the
+  // season's and the hour's; and what can't be out with it, cleared)
+  function fit(kinds) {
+    const s = api.scene && api.scene();
+    if (wx && s && SCENE_FITS[s] && SCENE_FITS[s].never.includes(wx.kind)) end();
+    if (wx || Math.random() < 0.5 || WEATHER_KINDS.includes(weatherForced())) return;
+    const season = weatherSeason();
+    const opts = TABLE[season].filter(([k, , when]) => kinds.includes(k) && (!when || WHEN[when]()) && !(light() && KIND[k] && KIND[k].night));
+    if (opts.length) start(pick(opts)[0]);
+  }
+  return { frame, clear, fit, start: (kind) => start(kind), stop: () => end(), current: () => (wx ? wx.kind : null), moon: () => moonPhaseName() };
 }

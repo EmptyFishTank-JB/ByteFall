@@ -3780,3 +3780,10 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
 .game-walkers .wx-flash { clip-path: inset(0 round 0 0 8px 8px); }
 :is([data-theme="paper"], [data-theme="daylight"]) :is(.wx-night, .wx-glow) { display: none; }
 @media (prefers-reduced-motion: reduce) { :is(.start-walkers, .game-walkers) .wx-flash { display: none; } }
+
+/* SCENES (scenes.js): a place for a while, at three depths: the far layer behind everything, the
+   ground behind the bots' feet, a few near details in front of them */
+:is(.start-walkers, .game-walkers) .scene-layer { position: absolute; left: 0; bottom: 0; width: 100%; pointer-events: none; image-rendering: pixelated; opacity: 0; transition: opacity 4s ease; }
+:is(.start-walkers, .game-walkers) .scene-far { z-index: -2; }
+:is(.start-walkers, .game-walkers) .scene-ground { z-index: 0; }
+:is(.start-walkers, .game-walkers) .scene-near { z-index: 5; }

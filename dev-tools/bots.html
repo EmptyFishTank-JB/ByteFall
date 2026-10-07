@@ -132,6 +132,8 @@
         <h2>WEATHER</h2>
         <p>Each kind on now (it stays a few minutes, then clears); CLEAR takes it away at once. The game brings its own by the season and the time of day.</p>
         <div class="row" id="weather"></div>
+        <h2>SCENES</h2>
+        <div class="row" id="scenes"></div>
       </div>
 
       <div class="grp">
@@ -172,6 +174,7 @@
 <script src="../js/minibot.js?v=358"></script>
 <script src="../js/seasons.js?v=358"></script>
 <script src="../js/bigart.js?v=358"></script>
+<script src="../js/scenes.js?v=358"></script>
 <script src="../js/weather.js?v=358"></script>
 <script src="../js/visitors.js?v=358"></script>
 <script src="../js/data/bot-anims.js?v=358"></script>
@@ -312,6 +315,11 @@
     const b = el('button', { type: 'button' }, (WEATHER_NAMES[k] || k).toUpperCase());
     b.addEventListener('click', () => W().visit(`wx-${k}`));
     $('weather').appendChild(b);
+  }
+  for (const k of [...SCENE_KINDS, 'clear']) {
+    const b = el('button', { type: 'button' }, (SCENE_NAMES[k] || k).toUpperCase());
+    b.addEventListener('click', () => W().visit(`sc-${k}`));
+    $('scenes').appendChild(b);
   }
   for (const v of VISITS) {
     const b = el('button', { type: 'button' }, v.toUpperCase());

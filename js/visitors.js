@@ -546,6 +546,7 @@ function createVisitors(api) {
   // One visit: a monster, the ghost, a flock of bats or a crow or two, in from either side
   function visit(what = pick(visits().length ? visits() : VISITS.halloween)) {
     if (what === 'countdown') return countdown();
+    if (typeof what === 'string' && what.startsWith('sc-')) return scenes && (what === 'sc-clear' ? scenes.clear() : scenes.start(what.slice(3)));
     if (typeof what === 'string' && what.startsWith('wx-')) return weather && (what === 'wx-clear' ? weather.clear() : weather.start(what.slice(3)));
     if (what === 'fog') return startFog();
     if (what === 'overcast') return startClouds();
@@ -2558,8 +2559,10 @@ function createVisitors(api) {
 
   // WEATHER (weather.js): its own spells over this lane (not the screen saver's), with the clouds
   // and the fog from here
+  let scenes = null;
   const weather = typeof createWeather === 'function' && !api.lane.classList.contains('saver-lane') ? createWeather({
     lane: api.lane, tall, foggy: () => !!fog, walkers: api.walkers, botEvent: api.botEvent,
+    scene: () => (scenes ? scenes.current() : null),
     say: (w, m, text) => api.say(w, m, text),
     clouds: (tone) => {
       const c = clouds && clouds.phase === 'lift' ? null : clouds || startClouds(false, tone);
@@ -2570,9 +2573,17 @@ function createVisitors(api) {
     releaseClouds: (soon) => { if (clouds && (clouds.held || soon) && !clouds.stays) { clouds.held = false; clouds.until = performance.now() + (soon ? 0 : rand(6000, 16000)); } },
     fog: () => { if (!fog) startFog(false, false); },
   }) : null;
+  // SCENES (scenes.js): now and then the lane becomes a place (a meadow, a beach, a city...), with
+  // weather to suit; not with the fog or the HAUNTED FOREST
+  scenes = typeof createScenes === 'function' && weather ? createScenes({
+    lane: api.lane, laneW: api.laneW, laneH: () => api.laneH(), botEvent: api.botEvent,
+    foggy: () => !!fog || hauntedForest,
+    fitWeather: (kinds) => weather.fit(kinds),
+  }) : null;
   function frame(now, dt) {
     const W = api.laneW();
     if (weather) weather.frame(now, dt);
+    if (scenes) scenes.frame(now);
     if (!fog && hauntedForest && spooky()) startFog(true); // (the HAUNTED FOREST stands, all month)
     if (fog) fogFrame(now);
     if (clouds) cloudsFrame(now);
@@ -2804,6 +2815,7 @@ function createVisitors(api) {
   function clear(forget = false) {
     if (forget) hauntedForest = false;
     if (weather) weather.clear();
+    if (scenes) scenes.clear();
     horde = null;
     if (clouds) endClouds();
     if (fog) { if (fog.ground) fog.ground.remove(); fog.back.remove(); fog.fore.remove(); fog.dark.remove(); if (fog.moon) fog.moon.remove(); fog = null; }

@@ -411,6 +411,17 @@ CHASER (a thunderstorm, a blizzard and hail) and STARGAZER (the aurora, a meteor
 fireflies). The dev page's WEATHER brings it OFTEN, in a chosen season, or one kind to stay; the
 BOT SANDBOX has a button for each.
 
+**SCENES** (`js/scenes.js`): now and then (a few times an hour, 10-20 minutes each) the lane
+becomes a place, by the time of year: MEADOW (spring, summer), BEACH (summer: the sea's waves
+moving, a parasol), CITY (any time: a skyline, more windows lit at night, a sidewalk, a hydrant),
+WOODLAND (spring to autumn: the trees and the path's litter in the season's colors), SNOWFIELD
+(winter), DESERT (summer) and FARM (autumn: a red barn, pumpkins). Each is drawn at three depths,
+never all in front: a far layer behind everything, the ground behind the bots' feet, and a few
+details in front of them. The weather leans to suit it (a beach's sunsets and storms, a city's rain,
+a snowfield's snow; never snow on the beach), and half the time it brings a spell of its own. Not
+with the fog or October's HAUNTED FOREST. The dev page's SCENE brings them OFTEN or keeps one; the
+BOT SANDBOX has a button for each.
+
 A button's tick (and buzz) comes on a successful tap, released on it, not
 on a touch that slides off. The buttons are one size in every mode and font, their words centered; a word that
 won't fit on a button shrinks, never under 10px. Through the game the font never changes a
