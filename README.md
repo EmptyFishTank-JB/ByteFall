@@ -786,8 +786,20 @@ behind it rests: the background animations stop, the card's wanderers go, the
 menus and the player close; the music plays on. A bot can be poked as ever; a tap
 anywhere else, or a key, wakes it (the blocks breaking up, quicker), and that tap
 goes no further. On the start screen one to four of the CPUs (BOT, GRIFTER, BUNKER, GLITCH;
-never two of the same; each at a level for its resting face, mostly EASY (35%) and NORMAL (45%),
-the angry HARD (14%) and red-eyed INSANE (6%) now and then) wander along the bottom of the card, looking the way
+never two of the same; each arriving with a face, mostly EASY (35%) and NORMAL (45%),
+the angry HARD (14%) and red-eyed INSANE (6%) now and then) wander along the bottom of the card. They have
+MINDS (`js/wanderers.js`): each a personality (BOT curious and cheery, GRIFTER social and greedy, BUNKER
+lazy and cautious, GLITCH impulsive and mischievous) and needs that drift (ENERGY, spent walking; SOCIAL,
+wanting company; FUN; and TEMPER). Its TEMPER is its face, the difficulty faces as moods: calm EASY,
+even NORMAL, cross HARD, fuming INSANE. Poked, scared or robbed of a fish it gets crosser (a "grr" as
+it turns HARD), and a HARD or INSANE one snaps when poked, so poke a calm one a few times and watch it
+climb, then snap; good things (a snack, company, a catch) and time calm it back to its own calm. At each
+stop it does what it needs, weighed by who it is: rests when tired (BUNKER most), hops, snacks (GRIFTER
+most), puts on headphones (GLITCH most), goes over to another when lonely, fidgets when bored. It
+notices things: it wanders over to watch a bot fishing, joins a headbanging bot (with headphones), turns
+to look at a visitor going by. A tired one walks slower, and BUNKER or a tired bot headbangs where the
+others windmill. Meetings come as often as they want company, and a cross one is annoyed in them. The
+BOT SANDBOX's MINDS panel shows each one's face and needs, live. Looking the way
 they walk (eyes and mouth a pixel that way): in from either side, idling (now
 and then bored or tapping a foot), finding a free spot and heading back out.
 Two that meet may stop no closer than an arm's overlap, face each other and

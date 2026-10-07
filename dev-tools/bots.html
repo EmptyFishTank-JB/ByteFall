@@ -117,6 +117,12 @@
       </div>
 
       <div class="grp">
+        <h2>MINDS</h2>
+        <p>Each bot on the stage: its face (its TEMPER: EASY calm, NORMAL even, HARD cross, INSANE fuming; poke one a few times and watch it climb, then snap), and its needs: ENERGY, SOCIAL, FUN (full bars are satisfied). What it does at each stop comes from these and its personality.</p>
+        <pre id="minds" style="font-size: 11px; line-height: 1.5; margin: 0; white-space: pre;"></pre>
+      </div>
+
+      <div class="grp">
         <h2>SEASON</h2>
         <div class="row" id="seasons"></div>
       </div>
@@ -316,6 +322,12 @@
     b.addEventListener('click', () => W().visit(`wx-${k}`));
     $('weather').appendChild(b);
   }
+  // (the MINDS readout: each bot's face and needs, live)
+  const bar = (v) => '#'.repeat(Math.round(v * 10)).padEnd(10, '.');
+  setInterval(() => {
+    const list = (W().list ? W().list() : []).filter((w) => w.mind);
+    $('minds').textContent = list.length ? list.map((w) => `${w.bot.toUpperCase().padEnd(8)}${w.el.dataset.level.toUpperCase().padEnd(7)} ENERGY ${bar(w.mind.energy)} SOCIAL ${bar(w.mind.social)} FUN ${bar(w.mind.fun)} TEMPER ${bar(w.mind.temper)}  ${w.claimed ? 'FISHING' : w.state.toUpperCase()}`).join('\n') : '(no bots on the stage)';
+  }, 400);
   for (const k of [...SCENE_KINDS, 'fish', 'clear']) {
     const b = el('button', { type: 'button' }, k === 'fish' ? 'GONE FISHING' : (SCENE_NAMES[k] || k).toUpperCase());
     b.addEventListener('click', () => W().visit(`sc-${k}`));

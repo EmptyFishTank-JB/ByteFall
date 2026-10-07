@@ -18,6 +18,121 @@ function createWanderers(lane, active = () => true) {
     for (const [l, n] of ok) if ((r -= n) < 0) return l;
     return 'normal';
   }
+  // MINDS (not AI: the way life sims do it). Each bot has a PERSONALITY (fixed) and NEEDS that drift:
+  // ENERGY (spent walking, back resting), SOCIAL (wanes alone, filled by meeting another), FUN (wanes,
+  // filled by hops, snacks, music, fishing) and TEMPER (up when it's poked, scared or loses a fish,
+  // down with good things, easing back to its own calm). Its TEMPER is its face: the difficulty faces
+  // are its moods: calm, the EASY smile; even, NORMAL; cross, HARD's frown; fuming, INSANE's red eyes
+  // (and a HARD or INSANE one snaps when poked: poke a calm one enough and it gets there). At each stop
+  // it picks what to do by what it needs, weighed by who it is, not by a dice roll; and it NOTICES
+  // things: a bot fishing (it wanders over to watch), one headbanging (it joins in, with headphones),
+  // a visitor going by (it turns to look). One of each bot at most, as ever.
+  //   BOT      curious and cheery: goes to see what's going on
+  //   GRIFTER  social and greedy: seeks company, never says no to a snack
+  //   BUNKER   lazy and cautious: tires fast, rests long, slow to anger, nods rather than headbangs
+  //   GLITCH   impulsive and mischievous: hops, music, quick to anger, never calm (never EASY)
+  const PERSONA = {
+    bot: { curious: 0.9, social: 0.6, lazy: 0.4, impulsive: 0.4, greedy: 0.4, fuse: 0.5, music: 0.5, calm: 0.2 },
+    grifter: { curious: 0.5, social: 0.95, lazy: 0.4, impulsive: 0.5, greedy: 0.95, fuse: 0.6, music: 0.5, calm: 0.3 },
+    bunker: { curious: 0.3, social: 0.4, lazy: 0.95, impulsive: 0.2, greedy: 0.6, fuse: 0.35, music: 0.3, calm: 0.25 },
+    glitch: { curious: 0.6, social: 0.4, lazy: 0.2, impulsive: 0.95, greedy: 0.5, fuse: 0.85, music: 0.95, calm: 0.45 },
+  };
+  const LEVEL_TEMPER = { easy: 0.12, normal: 0.4, hard: 0.67, insane: 0.9 };
+  const temperLevel = (w, t) => {
+    const l = t < 0.25 ? 'easy' : t < 0.55 ? 'normal' : t < 0.8 ? 'hard' : 'insane';
+    return (NEVER_LEVEL[w.bot] || []).includes(l) ? 'normal' : l;
+  };
+  function mindInit(w) {
+    w.mind = { energy: rand(0.55, 1), social: rand(0.3, 0.9), fun: rand(0.3, 0.9), temper: LEVEL_TEMPER[w.el.dataset.level] + rand(-0.04, 0.04), seenAt: 0 };
+    w.feel = (k, amt) => feel(w, k, amt); // (for scenes.js and the rest: a need nudged)
+  }
+  const persona = (w) => PERSONA[w.bot] || PERSONA.bot;
+  function feel(w, k, amt) {
+    if (!w.mind) return;
+    w.mind[k] = Math.max(0, Math.min(1, w.mind[k] + amt));
+    if (k === 'temper') faceTemper(w, true);
+  }
+  // (its face follows its temper; a little huff as it crosses into cross or fuming)
+  function faceTemper(w, now) {
+    const l = temperLevel(w, w.mind.temper);
+    const was = w.el.dataset.level;
+    if (l === was) return;
+    // (a band's edge crossed by a little: held, so it doesn't flicker back and forth)
+    if (!now && Math.abs(w.mind.temper - LEVEL_TEMPER[was]) < 0.2) return;
+    w.el.dataset.level = l;
+    const rising = LEVEL_TEMPER[l] > LEVEL_TEMPER[was];
+    if (rising && MAD.includes(l) && (w.state === 'idle' || w.state === 'walk')) mood(w, 'angry', l === 'insane' ? pick(['#@!', 'GRR']) : pick(['grr', 'hmph']));
+  }
+  function mindTick(w, dt, now) {
+    const m = w.mind;
+    if (!m) return;
+    const P = persona(w);
+    const walking = w.state === 'walk';
+    m.energy = Math.max(0, Math.min(1, m.energy + dt * (walking ? -(0.01 + 0.012 * P.lazy) * (w.running ? 3 : 1) : w.state === 'held' ? 0.01 : 0.03)));
+    m.social = Math.max(0, m.social - dt * 0.006 * (0.5 + P.social));
+    m.fun = Math.max(0, Math.min(1, m.fun + dt * (w.phones && music() ? 0.03 : -0.008 * (0.5 + P.impulsive))));
+    m.temper += (P.calm - m.temper) * Math.min(1, dt * 0.012); // (easing back to its own calm)
+    if (now - (m.faceAt || 0) > 1000) { m.faceAt = now; faceTemper(w, false); }
+  }
+  // At a stop: what it does, by what it needs and who it is (weighed, then a pick among the best)
+  function decide(w, now) {
+    const m = w.mind;
+    const P = persona(w);
+    const opts = [
+      ['rest', (1 - m.energy) * 1.6 * (0.5 + P.lazy)],
+      ['hop', (1 - m.fun) * 0.9 * (0.3 + P.impulsive) * (m.energy > 0.3 ? 1 : 0.2)],
+      ['snack', snackColors().length ? (1 - m.fun) * 0.5 + P.greedy * 0.4 : 0],
+      ['phones', !w.phones && music() ? (1 - m.fun) * 0.6 + P.music * 0.5 : 0],
+      ['company', (1 - m.social) * 1.2 * P.social * (walkers.some((o) => o !== w && inside(o) && !o.leaving && !o.claimed) ? 1 : 0)],
+      ['fidget', (1 - m.fun) * 0.35],
+      ['wander', 0.35],
+    ].filter(([, s]) => s > 0.02);
+    const best = Math.max(...opts.map(([, s]) => s));
+    const near = opts.filter(([, s]) => s > best * 0.6); // (the best few: so it isn't always the same)
+    let r = Math.random() * near.reduce((a, [, s]) => a + s, 0);
+    let pickd = near[0][0];
+    for (const [k, s] of near) if ((r -= s) <= 0) { pickd = k; break; }
+    if (pickd === 'rest') {
+      w.until = now + rand(3500, 7000) * (0.6 + P.lazy);
+      if (m.energy < 0.35) mood(w, 'tired', pick(['phew', '...', 'huff']));
+    } else if (pickd === 'hop') {
+      const hops = Math.random() < 0.5 + P.impulsive * 0.3 ? 2 : 1;
+      w.el.style.setProperty('--hops', hops);
+      w.el.classList.add('hopping');
+      setTimeout(() => w.el.classList.remove('hopping'), hops * HOP_MS + 50);
+      w.until = Math.max(w.until, now + hops * HOP_MS + 400);
+      feel(w, 'fun', 0.12);
+    } else if (pickd === 'snack') { snack(w, now); feel(w, 'fun', 0.25); feel(w, 'temper', -0.12); }
+    else if (pickd === 'phones') phonesOn(w, now);
+    else if (pickd === 'company') { // (over to the nearest other one)
+      const others = walkers.filter((o) => o !== w && inside(o) && !o.leaving && !o.claimed).sort((a, b) => Math.abs(a.x - w.x) - Math.abs(b.x - w.x));
+      if (others.length) walkTo(w, Math.max(0, Math.min(laneW() - SIZE, others[0].x + (others[0].x > w.x ? -SIZE - 4 : SIZE + 4))));
+    } else if (pickd === 'fidget') w.el.dataset.variant = pick(['bored', 'tapping']);
+  }
+  // Noticing: a bot fishing, one headbanging, a visitor going by; true if it went off to see
+  function notice(w, now) {
+    const m = w.mind;
+    if (!m || now - m.seenAt < 4000) return false;
+    m.seenAt = now;
+    const P = persona(w);
+    const fisher = walkers.find((o) => o !== w && o.claimed && o.el.querySelector('.fish-rod'));
+    if (fisher && Math.random() < P.curious * 0.5) { // (to the shore to watch)
+      const x = Math.max(0, Math.min(laneW() - SIZE, fisher.x + rand(-60, 60)));
+      walkTo(w, x);
+      mood(w, 'happy', pick(['ooh', '?', '']));
+      return true;
+    }
+    const banger = walkers.find((o) => o !== w && o.pose && inside(o));
+    if (banger && w.phones && music() && Math.random() < P.music * 0.6) { // (in beside it)
+      walkTo(w, Math.max(0, Math.min(laneW() - SIZE, banger.x + (banger.x > w.x ? -SIZE - 2 : SIZE + 2))));
+      return true;
+    }
+    if (visitors) { // (a visitor near: it turns to look)
+      const v = visitors.list().find((o) => o.state !== 'fogtree' && o.state !== 'scenery' && Math.abs(o.x - w.x) < 90);
+      if (v && Math.random() < P.curious) { w.look = v.x > w.x ? 1 : -1; if (Math.random() < 0.4) mood(w, 'surprised', '?'); }
+    }
+    return false;
+  }
   const MEETINGS = [['happy', 'happy'], ['smug', 'annoyed'], ['devious', 'worried'], ['hit', 'happy'], ['annoyed', 'annoyed'],
     ['happy', 'smug'], ['devious', 'devious'], ['love', 'surprised'], ['laugh', 'annoyed'], ['surprised', 'surprised'],
     ['laugh', 'laugh'], ['scared', 'devious'], ['dizzy', 'laugh'], ['love', 'love']];
@@ -161,6 +276,8 @@ function createWanderers(lane, active = () => true) {
       if (!w.el.classList.contains('grooving')) continue;
       if (feeling) {
         for (const h of felt) {
+          // (BUNKER, or a tired one: no windmill, a headbang instead)
+          if (h.feel === 'blast' && (w.bot === 'bunker' || (w.mind && w.mind.energy < 0.3))) { if (h.beat) pose(w, 'bang', P); continue; }
           if (h.feel === 'blast') { const n = millBeats(P); if ((n === 1 ? h.beat : h.half) && !(w.pose && w.pose.kind === 'mill' && performance.now() - w.pose.start < P * (n - 0.2))) pose(w, 'mill', P); } // (a cycle every beat or two, as drawn, from the beats)
           else if (h.feel === 'gallop' || h.half) pose(w, h.feel === 'half' ? 'bang-heavy' : 'bang', P);
         }
@@ -491,6 +608,7 @@ function createWanderers(lane, active = () => true) {
       state: 'walk', target: 0, until: 0, leaving: false, running: false, born: now, metAt: 0, partner: null,
     };
     w.target = freeSpot(w);
+    mindInit(w);
     walkers.push(w);
     if (o.phones || (o.phones === undefined && music() && Math.random() < 0.1)) phonesOn(w, now, true); // (walks in wearing a pair)
     const how = o.enter === 'pop' ? 0 : o.enter === 'run' ? 0.2 : o.enter ? 0.5 : Math.random();
@@ -609,6 +727,8 @@ function createWanderers(lane, active = () => true) {
     if (w.leaving || ['vanish', 'startled', 'poked'].includes(w.state)) return;
     if (w.possessed) return exorcise(w, now);
     if (w.claimed && w.onPoke) { botEvent('pokes'); w.onPoke(); return; } // (busy: the scene says how it takes it)
+    const wasMad = MAD.includes(w.el.dataset.level); // (the face it had: a calm one shows it's cross first, then snaps)
+    if (w.mind) feel(w, 'temper', 0.16 + 0.22 * persona(w).fuse); // (poked: crosser; enough and it's HARD's frown, then it snaps)
     letGo(w);
     botEvent('pokes');
     if (w.partner) {
@@ -620,7 +740,7 @@ function createWanderers(lane, active = () => true) {
       p.state = 'idle';
       p.until = now + rand(1200, 1700);
     }
-    if (MAD.includes(w.el.dataset.level)) return rabid(w, now);
+    if (wasMad) return rabid(w, now);
     if (Math.random() < 0.4) {
       botEvent('bolts');
       return fright(w, now);
@@ -836,6 +956,7 @@ function createWanderers(lane, active = () => true) {
   // Spooked: a start (and a !), then off the card at a sprint; anyone near flinches
   function fright(w, now) {
     letGo(w);
+    if (w.mind) { feel(w, 'temper', 0.08 * persona(w).fuse); feel(w, 'energy', -0.12); } // (shaken)
     mood(w, 'scared', pick(['!', '!!', '!?']));
     w.el.classList.remove('shaking', 'hopping', 'headshaking', 'snapping');
     w.state = 'startled';
@@ -960,6 +1081,7 @@ function createWanderers(lane, active = () => true) {
     }
     const beat = music();
     for (const w of walkers) {
+      mindTick(w, dt, now);
       if (w.phones) {
         if (!beat && !w.leaving) phonesOff(w);
         else if (beat && now - (w.beatSynced || 0) > 2000) syncBeat(w, beat); // (the tempo can move)
@@ -969,7 +1091,7 @@ function createWanderers(lane, active = () => true) {
       // (not one poked or startled half on the card: it reacts where it is, peeking in)
       if ((w.state === 'idle' || w.state === 'meet') && !w.leaving && w.x > laneW() - SIZE) w.x = Math.max(0, laneW() - SIZE);
       if (w.state === 'walk') {
-        const pace = (w.running ? 3.4 : 1) * (foggy() && !w.running ? 0.7 : 1); // (feeling its way in the fog)
+        const pace = (w.running ? 3.4 : 1) * (foggy() && !w.running ? 0.7 : 1) * (w.mind ? 0.65 + 0.35 * w.mind.energy : 1); // (feeling its way in the fog; slower when tired)
         // (a skater surges with each push, then glides; GLITCH lurches)
         const surge = w.skating && !w.running ? 0.55 + 0.9 * Math.abs(Math.sin(now / 380)) : 1;
         const step = w.speed * pace * surge * dt * (w.bot === 'glitch' && Math.random() < 0.08 ? 3 : 1);
@@ -1018,16 +1140,8 @@ function createWanderers(lane, active = () => true) {
             w.until = now + rand(900, 3200);
             mood(w, 'idle');
             if (foggy()) { if (Math.random() < 0.35) mood(w, 'worried', pick(['?', '...'])); } // (in the fog: keeping to itself, uneasy)
-            else if (w.phones && music()) { w.until = now + rand(4000, 8000); mood(w, 'happy', Math.random() < 0.4 ? '♪' : ''); } // (vibing a while)
-            else if (!w.phones && music() && Math.random() < 0.15) phonesOn(w, now);
-            else if (snackColors().length && Math.random() < 0.3) snack(w, now); // (a seasonal snack)
-            else if (Math.random() < 0.35) { // a hop or two, then on
-              const hops = Math.random() < 0.5 ? 1 : 2;
-              w.el.style.setProperty('--hops', hops);
-              w.el.classList.add('hopping');
-              setTimeout(() => w.el.classList.remove('hopping'), hops * HOP_MS + 50);
-              w.until = Math.max(w.until, now + hops * HOP_MS + 400);
-            } else if (Math.random() < 0.35) w.el.dataset.variant = pick(['bored', 'tapping']);
+            else if (w.phones && music()) { w.until = now + rand(4000, 8000); mood(w, 'happy', Math.random() < 0.4 ? '♪' : ''); feel(w, 'fun', 0.08); } // (vibing a while)
+            else decide(w, now); // (what it needs, by who it is)
           }
         }
       } else if (w.state === 'startled') {
@@ -1052,7 +1166,7 @@ function createWanderers(lane, active = () => true) {
         }
       } else if (now > w.until) {
         mood(w, 'idle');
-        if (now - w.born > 9000 && Math.random() < 0.35) depart(w, now);
+        if (notice(w, now)) { /* (off to see) */ } else if (now - w.born > 9000 && Math.random() < 0.35 * (w.mind ? 0.5 + w.mind.social : 1)) depart(w, now); // (satisfied company: likelier to go)
         else walkTo(w, freeSpot(w));
       }
       place(w);
@@ -1071,11 +1185,16 @@ function createWanderers(lane, active = () => true) {
         if (busyWith(a) || busyWith(b) || !inside(a) || !inside(b)) continue;
         if (Math.abs(a.x - b.x) > SIZE + 6 || now - a.metAt < 7000 || now - b.metAt < 7000) continue;
         a.metAt = b.metAt = now;
-        if (Math.random() > 0.55) continue; // (not every time)
+        // (as likely as they want company; a cross one isn't in the mood)
+        const want = a.mind && b.mind ? ((1 - a.mind.social) * persona(a).social + (1 - b.mind.social) * persona(b).social) / 2 : 0.45;
+        if (Math.random() > Math.min(0.85, 0.15 + want * 1.4)) continue;
         let pair = pick(MEETINGS);
         for (let k = 0; k < 12 && !pairFits(a, b, pair); k++) pair = pick(MEETINGS);
         if (!pairFits(a, b, pair)) pair = ['surprised', 'surprised'];
         if (a.possessed || b.possessed) pair = [a.possessed ? 'devious' : 'scared', b.possessed ? 'devious' : 'scared']; // (one of them isn't itself)
+        if (a.mind && a.mind.temper > 0.6 && !a.possessed && !b.possessed) pair = ['annoyed', pair[1]]; // (a cross one's cross)
+        if (b.mind && b.mind.temper > 0.6 && !a.possessed && !b.possessed) pair = [pair[0], 'annoyed'];
+        for (const o of [a, b]) if (o.mind) { feel(o, 'social', 0.45); feel(o, 'fun', 0.08); }
         const [ma, mb] = pair;
         if (ma === 'love' && mb === 'love') botEvent('love-pair');
         const until = now + rand(1500, 2300);

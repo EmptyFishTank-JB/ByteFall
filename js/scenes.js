@@ -388,9 +388,11 @@ function createScenes(api) {
     const { W } = lanePx();
     const free = api.walkers().filter((w) => !w.claimed && !w.leaving && w.x > 0 && w.x < W - 34 && (w.state === 'idle' || w.state === 'walk'));
     if (!free.length) return;
-    const w = pick(free);
+    // (the one that most wants something to do: least fun, and the curious more often)
+    const w = free.sort((a, b) => (a.mind ? a.mind.fun : 0.5) - (b.mind ? b.mind.fun : 0.5))[Math.random() < 0.7 ? 0 : Math.floor(Math.random() * free.length)];
     if (!api.claim(w, () => fishPoked())) return;
     fish = { w, phase: 'out', side: d.side, casts: 0 };
+    if (w.feel) w.feel('fun', 0.15);
     api.say(w, 'happy', pick(['fishing!', '♪', '']));
     api.go(w, d.x0 - 17, () => api.go(w, d.side > 0 ? d.x2 - 36 : d.x2 + 2, cast));
     api.botEvent('fishing');
@@ -453,6 +455,7 @@ function createScenes(api) {
     w.el.classList.add('headshaking');
     setTimeout(() => w.el.classList.remove('headshaking'), 900);
     api.botEvent('fish-lost');
+    if (w.feel) w.feel('temper', 0.3); // (cross about it: its face shows it)
   }
   function fishPoked() { if (fish) api.say(fish.w, 'annoyed', pick(['shh!', 'shhh', '...!'])); }
   function showCatch(kind) {
@@ -558,6 +561,7 @@ function createScenes(api) {
           api.say(w, id === 'master' ? 'love' : 'happy', id === 'master' ? pick(['!!!', 'WOW', '<3']) : pick(['ooh!', 'loot!', '!!']));
           api.botEvent(`fish-res-${id}`);
         } else showCatch(kind);
+        if (w.feel) { w.feel('fun', kind === 'boot' ? 0.05 : 0.35); w.feel('temper', kind === 'boot' ? 0.05 : -0.2); }
         fish.phase = 'show';
         fish.at = now;
         if (kind === 'boot') api.say(w, 'annoyed', pick(['...', 'a boot?', 'ugh']));
