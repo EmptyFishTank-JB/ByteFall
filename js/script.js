@@ -3847,6 +3847,23 @@ const themeMeta = document.querySelector('meta[name="theme-color"]');
 Progress.setThemeCount(THEMES.length);
 let themeId = THEMES.some((t) => t.id === storage.get('bytefall-theme')) ? storage.get('bytefall-theme') : 'terminal';
 
+// THE SEASON'S LIGHTS (style.css): their strings run from the screen's top edge to its bottom one,
+// off the screen both ways, down the card's sides (to the screen, not past it: the page never scrolls)
+const cardLightsEl = document.querySelector('.card-lights');
+function fitLights() {
+  if (!cardLightsEl || !cardLightsEl.offsetParent) return;
+  const card = cardLightsEl.parentElement.getBoundingClientRect();
+  const border = cardLightsEl.parentElement.clientTop || 0;
+  cardLightsEl.style.top = `${-Math.max(0, card.top + scrollY) - border}px`;
+  const below = innerHeight - card.bottom;
+  cardLightsEl.style.bottom = below >= 0 ? `${-below - border}px` : '';
+}
+if (cardLightsEl) {
+  addEventListener('resize', fitLights);
+  if (window.ResizeObserver) new ResizeObserver(fitLights).observe(cardLightsEl.parentElement);
+  new MutationObserver(fitLights).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class'] });
+  requestAnimationFrame(fitLights);
+}
 let themeFade = 0; // the timer that ends the page's fade to a newly picked theme
 function applyTheme() {
   const theme = THEMES.find((t) => t.id === themeId);
