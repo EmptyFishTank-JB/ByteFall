@@ -444,7 +444,7 @@ const Infections = (() => {
   let mosaic = null;
   function mosaicPiece(r, c) {
     const cols = state.cols || 7;
-    const rows = state.maxRows || 10;
+    const rows = state.rows || 7; // (the playable rows: not the overflow row)
     if (!mosaic) {
       const pics = [SKULL_BIN, VIRUS_BIN, WARN_BIN]; // (the ones that read big, through the gaps between the bits)
       const art = pics[Math.floor(Math.random() * pics.length)];
@@ -461,6 +461,7 @@ const Infections = (() => {
         return x >= x0 && y >= y0 && sy < art.length && sx < art[0].length && art[sy][sx] !== '.';
       }));
     }
+    if (r >= rows) return Array(CELL_H).fill('.'.repeat(CELL_W)).join('\n'); // (the overflow row: just the dots)
     const top = (rows - 1 - r) * CELL_H; // (row 0 is the bottom)
     const lines = [];
     for (let y = top; y < top + CELL_H; y++) {
