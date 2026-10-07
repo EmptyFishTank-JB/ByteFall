@@ -655,7 +655,7 @@ const Infections = (() => {
     scareEnd();
     if (els.scare) { els.scare.innerHTML = ''; els.scare.hidden = true; }
   }
-  return { init, place, steal, scare, scareEnd, closeScare, scareUp, scareCount: () => wins().length, ransomHtml, clear, pick, force: (f) => { forced = f; }, glitch: (n = 3, r, c) => (style.malware >= 4 && r !== undefined
-    ? `<span class="inf-glitch ${style.malware === 4 ? 'mosaic' : 'mini'}" data-n="${n}" data-r="${r}" data-c="${c}">${corrupt(n, r, c)}</span>`
+  return { init, place, steal, scare, scareEnd, closeScare, scareUp, scareCount: () => wins().length, ransomHtml, clear, pick, force: (f) => { forced = f; }, mosaicOn: () => style.malware === 4, glitch: (n = 3, r, c, empty = false) => (style.malware >= 4 && r !== undefined
+    ? `<span class="inf-glitch ${style.malware === 4 ? 'mosaic' : 'mini'}${empty ? ' empty' : ''}" data-n="${n}" data-r="${r}" data-c="${c}">${corrupt(n, r, c)}</span>`
     : `<span class="inf-glitch" data-n="${n}">${corrupt(n)}</span>`), eyes: () => '<span class="inf-eyes">(o_o)</span>' };
 })();

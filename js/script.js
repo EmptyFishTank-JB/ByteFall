@@ -1171,6 +1171,10 @@ function render(popped = [], falling = null) {
           div.textContent = cell.level < 2 ? '[-]' : '[=]';
         }
       }
+      if (!cell && malwareLeft > 0 && !gameOver && Infections.mosaicOn()) { // (MALWARE's big picture: the empty spots show their piece too, in the grid's colors)
+        div.classList.add('mosaic-empty');
+        div.innerHTML = Infections.glitch(3, r, c, true);
+      }
       if (popped.some((p) => p.row === r && p.col === c)) {
         div.classList.add('pop');
       }

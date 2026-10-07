@@ -4143,6 +4143,8 @@ html, body { overflow-x: clip; }
 .cell.corrupt { color: var(--danger); border-color: rgba(var(--danger-rgb), 0.7); }
 .inf-glitch.mosaic, .inf-glitch.mini { white-space: pre; letter-spacing: 0; text-shadow: 0 0 3px rgba(var(--danger-rgb), 0.6); }
 .inf-glitch.mosaic { font-size: 4.6px; line-height: 5.4px; color: #ff7080; text-shadow: 0 0 3px rgba(var(--danger-rgb), 0.9); } /* (each bit its piece of one big picture) */
+.cell.mosaic-empty { display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.inf-glitch.mosaic.empty { color: rgba(var(--fg-rgb), 0.5); text-shadow: 0 0 3px rgba(var(--fg-rgb), 0.35); } /* (the empty spots: the grid's green, see-through, the background shows behind) */
 .inf-glitch.mini { font-size: 3.2px; line-height: 3.4px; }
 .inf-mini { margin: 0; font-size: 3px; line-height: 3px; letter-spacing: 0; color: var(--danger); font-family: 'Courier New', monospace; text-shadow: 0 0 2px rgba(var(--danger-rgb), 0.7); }
 .inf-glitch { font-family: 'Courier New', monospace; letter-spacing: 0; font-size: 0.8em; text-shadow: 1px 0 rgba(0, 220, 255, 0.6), -1px 0 rgba(255, 40, 80, 0.6); }
