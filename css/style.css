@@ -2396,6 +2396,20 @@ body:not(.vs-mode) .hud .stat:not(.cpu-stat):not(.cpu-face) > .label {
    last 2 seconds (the bit then drops by itself) */
 .drop-timer { position: absolute; left: 4px; right: 4px; bottom: 3px; height: 3px; border-radius: 2px; background: rgba(var(--fg-rgb), 0.15); overflow: hidden; }
 .drop-timer[hidden] { display: none; }
+/* INFECTED: the little bot at its laptop, in CURRENT's corner */
+.inf-badge { position: absolute; right: 4px; bottom: 7px; display: flex; align-items: flex-end; gap: 2px; pointer-events: auto; font-style: normal; }
+.inf-badge[hidden] { display: none; }
+.inf-badge svg { width: 24px; height: 12px; display: block; }
+.inf-badge b { font-weight: normal; font-size: 8px; line-height: 8px; color: var(--danger); }
+.inf-badge .ib-H, .inf-badge .ib-A { fill: var(--fg); }
+.inf-badge .ib-E { fill: var(--board-bg); }
+.inf-badge .ib-S, .inf-badge .ib-K { fill: var(--fg-dim); }
+.inf-badge .ib-R { fill: var(--danger); animation: ib-blink 0.9s steps(1) infinite; }
+.inf-badge .ib-a1 { animation: ib-type 0.32s steps(1) infinite; }
+.inf-badge .ib-a2 { animation: ib-type 0.32s steps(1) infinite reverse; }
+@keyframes ib-blink { 50% { opacity: 0.25; } }
+@keyframes ib-type { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .inf-badge .ib-R, .inf-badge .ib-a1, .inf-badge .ib-a2 { animation: none; } .inf-badge .ib-a2 { opacity: 0; } }
 .drop-timer::after { content: ''; position: absolute; inset: 0; transform-origin: left; transform: scaleX(var(--left, 1)); background: var(--fg); transition: transform 0.1s linear; }
 .drop-timer.low::after { background: var(--danger); animation: warn-pulse 0.5s ease-in-out infinite; }
 /* The CPU's attack still charging: hollow pips, and your own charging attack by its score */
@@ -4140,6 +4154,11 @@ html, body { overflow-x: clip; }
 .inf-x { position: relative; }
 .inf-skull { margin: 8px 0 2px; font-size: 9px; line-height: 10px; color: rgba(var(--danger-rgb), 0.45); }
 .inf-skull.lit { color: var(--danger); text-shadow: 0 0 6px var(--danger); }
+/* the binary art: shapes of flickering 0s and 1s */
+.inf-bin { margin: 6px 0 0; font-size: 6px; line-height: 6px; letter-spacing: 0; color: rgba(var(--danger-rgb), 0.55); }
+.inf-bin.lit { color: var(--danger); text-shadow: 0 0 4px rgba(var(--danger-rgb), 0.8); }
+.inf-bin.big { font-size: 5px; line-height: 5px; } /* (the viruses: more of them) */
+.inf-bin-alt { color: #ff6b7a; text-shadow: 0 0 3px rgba(var(--danger-rgb), 0.6); }
 .inf-msg { margin: 4px 8px; font-size: 11px; color: #fff; letter-spacing: 1px; }
 .inf-scan { margin: 2px 6px 8px; font-size: 10px; color: var(--danger); letter-spacing: 0; white-space: pre; }
 .inf-ok { all: unset; display: inline-block; margin: 0 0 10px; padding: 4px 12px; font-size: 11px; letter-spacing: 1px; color: #fff; background: rgba(var(--danger-rgb), 0.3); border: 1px solid var(--danger); cursor: pointer; transition: transform 0.12s steps(2); }

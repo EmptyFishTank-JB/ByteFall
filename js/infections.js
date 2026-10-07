@@ -346,7 +346,92 @@ const Infections = (() => {
     ['SECURITY RISK', 'YOUR CPU IS OVERHEATING!', 'COOL IT'],
     ['UPDATE REQUIRED', 'YOUR BITS ARE OUT OF DATE', 'UPDATE ALL'],
   ];
-  const SKULL = [' .-"""-. ', '/  _ _  \\', '| (o)(o) |', ' \\  ^  / ', '  |vvv|  ', "  '---'  "];
+  // BINARY ART: shapes filled with flickering 0s and 1s (the skull and crossbones; a cluster of
+  // spiky viruses), their holes left dark
+  const SKULL_BIN = [
+    '........xxxxxxxxxx........',
+    '......xxxxxxxxxxxxxx......',
+    '.....xxxxxxxxxxxxxxxx.....',
+    '.....xxxxxxxxxxxxxxxx.....',
+    '.....xxx....xx....xxx.....',
+    '.....xxx....xx....xxx.....',
+    '.....xxxx..xxxx..xxxx.....',
+    '......xxxxxx..xxxxxx......',
+    '.......xxxxxxxxxxxx.......',
+    '........x.x.xx.x.x........',
+    '.........xxxxxxxx.........',
+    'xxx....................xxx',
+    'xxxxxx..............xxxxxx',
+    '...xxxxxx........xxxxxx...',
+    '......xxxxxx..xxxxxx......',
+    '.........xxxxxxxx.........',
+    '......xxxxxx..xxxxxx......',
+    '...xxxxxx........xxxxxx...',
+    'xxxxxx..............xxxxxx',
+    'xxx....................xxx',
+  ];
+  // (the rest drawn in square pixels, each two characters wide: a character's about half as wide as tall)
+  const wide = (rows) => rows.map((r) => [...r].map((c) => c + c).join(''));
+  const PADLOCK_BIN = wide(['....xxxxxx....', '...xx....xx...', '..xx......xx..', '..xx......xx..', '..xx......xx..', '.xxxxxxxxxxxx.', '.xxxxxxxxxxxx.', '.xxxxx..xxxxx.', '.xxxxx..xxxxx.', '.xxxxxx.xxxxx.', '.xxxxxx.xxxxx.', '.xxxxxxxxxxxx.', '.xxxxxxxxxxxx.']);
+  const BUG_BIN = wide(['...x.......x...', '....x.....x....', '.....xxxxx.....', 'x...xxxxxxx...x', '.x.xxxxxxxxx.x.', '..xxxx.x.xxxx..', '...xxxx.xxxx...', 'xxxxxxx.xxxxxxx', '...xxxx.xxxx...', '..xxxxx.xxxxx..', '.x.xxxx.xxxx.x.', 'x...xxx.xxx...x', '.....xxxxx.....']);
+  const WARN_BIN = wide(['.......x.......', '......xxx......', '......xxx......', '.....xx.xx.....', '.....xx.xx.....', '....xxx.xxx....', '....xxx.xxx....', '...xxxx.xxxx...', '...xxxxxxxxx...', '..xxxxx.xxxxx..', '.xxxxxxxxxxxxx.', 'xxxxxxxxxxxxxxx']);
+  const CPU_BIN = wide(['..x.x.x.x.x.x.', '.xxxxxxxxxxxx.', 'xxxxxxxxxxxxxx', 'xx...xxxx...xx', 'xxx...xx...xxx', 'xxxx.xxxx.xxxx', 'xxxxxxxxxxxxxx', 'xxx........xxx', 'xxx.x.x.x.xxxx', 'xxxxxxxxxxxxxx', '.xxxxxxxxxxxx.', '..x.x.x.x.x.x.']);
+  // (the viruses, like the ones under a microscope: round, pocked, spiked all round, a knob on each
+  // spike; worked out on square pixels, eight spikes so the lines step cleanly)
+  function virusMask() {
+    const W = 29;
+    const H = 22;
+    const bugs = [ // [x, y, body radius, spike length, holes [dx, dy, r]]
+      [11, 11.5, 5.8, 3, [[-2.2, -2, 1.3], [2, -1, 1.6], [-0.8, 2.4, 1.1], [2.4, 2.8, 0.8], [-3.4, 1.2, 0.7]]],
+      [24.5, 5, 2.4, 1.6, [[-0.6, -0.4, 0.7]]],
+      [24, 16, 1.7, 1.4, []],
+    ];
+    const rows = [];
+    for (let y = 0; y < H; y++) {
+      let row = '';
+      for (let x = 0; x < W; x++) {
+        let on = false;
+        for (const [cx, cy, r, len, holes] of bugs) {
+          const dx = x + 0.5 - cx;
+          const dy = y + 0.5 - cy;
+          const d = Math.hypot(dx, dy);
+          if (d < r) { on = !holes.some(([hx, hy, hr]) => Math.hypot(dx - hx, dy - hy) < hr); break; }
+          for (let k = 0; k < 8 && !on; k++) {
+            const a = (k * Math.PI) / 4;
+            const ux = Math.cos(a);
+            const uy = Math.sin(a);
+            const along = dx * ux + dy * uy;
+            if (along > r - 0.5 && along < r + len && Math.abs(dx * uy - dy * ux) < 0.55) on = true;
+            if (Math.hypot(dx - ux * (r + len + 0.4), dy - uy * (r + len + 0.4)) < 0.95) on = true;
+          }
+          if (on) break;
+        }
+        row += on ? 'x' : '.';
+      }
+      rows.push(row);
+    }
+    return wide(rows);
+  }
+  const VIRUS_BIN = virusMask();
+  // (the pool, and what each is filled with: binary mostly, hex now and then)
+  const ARTS = [SKULL_BIN, VIRUS_BIN, PADLOCK_BIN, BUG_BIN, WARN_BIN, CPU_BIN];
+  const artHtml = (cls = '') => {
+    const hex = Math.random() < 0.25;
+    const art = ARTS[forced && forced.art !== undefined ? forced.art : Math.floor(Math.random() * ARTS.length)];
+    return `<pre class="inf-bin ${cls}${art[0].length > 40 ? ' big' : ''}" data-set="${hex ? 'hex' : 'bin'}">${binFill(art, hex)}</pre>`;
+  };
+  const HEX = '0123456789ABCDEF';
+  const digit = (hex) => (hex ? HEX[Math.floor(Math.random() * 16)] : Math.random() < 0.5 ? '0' : '1');
+  const binFill = (mask, hex) => mask.map((r) => [...r].map((c) => (c === '.' ? ' ' : digit(hex))).join('')).join('\n');
+  function binFlicker(pre) { // (a few digits change each tick)
+    const hex = pre.dataset.set === 'hex';
+    const t = [...pre.textContent];
+    for (let i = 0; i < t.length / 12; i++) {
+      const k = Math.floor(Math.random() * t.length);
+      if (t[k] !== ' ' && t[k] !== '\n') t[k] = digit(hex);
+    }
+    pre.textContent = t.join('');
+  }
   const FILES = ['bits.dat', 'keys.bak', 'save.sav', 'cpu.ini', 'music.mp3', 'photos/', 'system32/'];
   function scareTick(win, scan) {
     const kind = scan.dataset.kind;
@@ -367,15 +452,17 @@ const Infections = (() => {
       if (sk) sk.classList.toggle('lit', Math.floor(performance.now() / 400) % 2 === 0);
     }
     win.pct = pct;
+    const bin = win.querySelector('.inf-bin');
+    if (bin) binFlicker(bin);
   }
   // SCAREWARE's four alerts: the skull and its scan, a crash screen, files deleting, a prize wheel
   const SAD = [':(', '', 'YOUR DEVICE RAN INTO', 'A PROBLEM'];
   const WHEEL = ['[ $ ][ 7 ][ ? ]', '[ 7 ][ ? ][ $ ]', '[ ? ][ $ ][ 7 ]'];
   function scareBody(k, msg) {
     if (k === 1) return `<pre class="inf-skull inf-sad">${SAD.join('\n')}</pre><p class="inf-msg">${msg}</p><p class="inf-scan" data-kind="crash"></p>`;
-    if (k === 2) return `<pre class="inf-skull">DELETING FILES</pre><p class="inf-msg">${msg}</p><p class="inf-scan" data-kind="delete"></p>`;
+    if (k === 2) return `${artHtml('inf-bin-alt')}<p class="inf-msg">${msg}</p><p class="inf-scan" data-kind="delete"></p>`;
     if (k === 3) return `<pre class="inf-skull inf-wheel">${WHEEL[0]}</pre><p class="inf-msg">${msg}</p><p class="inf-scan" data-kind="wheel"></p>`;
-    return `<pre class="inf-skull">${SKULL.join('\n').replace(/</g, '&lt;')}</pre><p class="inf-msg">${msg}</p><p class="inf-scan"></p>`;
+    return `${artHtml('inf-skull')}<p class="inf-msg">${msg}</p><p class="inf-scan"></p>`;
   }
   // While it runs (its drops counted by the game), the pop-ups come on their own clock, drop or no
   // drop: up to SCARE_MAX at once, each somewhere new in the grid, stacked over the last; never two
@@ -437,18 +524,25 @@ const Infections = (() => {
     if (scareRun.opts.onClose) scareRun.opts.onClose(wins().length);
   }
   const closeScare = () => { const w = wins(); closeWin(w[w.length - 1]); }; // (the newest)
+  // Each time, 1 pop-up (3 times in 4) or a burst of 2 to 4, never past SCARE_MAX on screen
+  function burst() {
+    const n = Math.min(Math.random() < 0.75 ? 1 : 2 + Math.floor(Math.random() * 3), SCARE_MAX - wins().length);
+    if (n < 1) return;
+    popWin();
+    for (let i = 1; i < n; i++) setTimeout(() => { if (scareRun.on) popWin(); }, i * 160); // (one after another, quick)
+  }
   function scareLoop() {
     if (!scareRun.on) { scareRun.timer = 0; return; }
     const now = performance.now();
     if (scareRun.opts.canPop && !scareRun.opts.canPop()) scareRun.nextAt = Math.max(scareRun.nextAt, now + 2000); // (paused: and a breath after)
-    else if (now >= scareRun.nextAt) popWin();
+    else if (now >= scareRun.nextAt) burst();
     scareRun.timer = setTimeout(scareLoop, 400);
   }
   // SCAREWARE struck (again, maybe): one pops up now, stacked over any up, and more come till scareEnd
   function scare(opts = {}) {
     scareRun.opts = opts;
     scareRun.on = true;
-    popWin();
+    burst();
     if (!scareRun.timer) scareRun.timer = setTimeout(scareLoop, 400);
   }
   function scareEnd() { // (its drops are up: no more come; the ones up stay till closed)

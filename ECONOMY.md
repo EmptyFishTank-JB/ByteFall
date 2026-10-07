@@ -134,7 +134,10 @@ two infected boxes, two infections at once. The same one again starts its count 
 column), a second RANSOMWARE locks 3 more bits (never ones already locked), and a second SCAREWARE stacks another
 pop-up over the ones up (its 8 drops start over). The STORE's BLACK BOXES section warns of all six (BUYER BEWARE). The dev page's
 BLACK BOX INFECTION makes every box opened come up one (ANY or one kind), and INFECTION LOOK forces look
-1 to 4 (localStorage bytefall-dev-infection / bytefall-dev-infection-look). Each shows
+1 to 4 (localStorage bytefall-dev-infection / bytefall-dev-infection-look). While any's on, a little bot
+at its laptop types away at a virus in CURRENT's corner (xN past one; its name(s) on hover). The
+scareware alerts' ASCII art is pictures made of flickering binary (now and then hex): a skull and
+crossbones, a cluster of spiky viruses, a padlock, a bug, a warning sign, an angry CPU. Each shows
 itself in its own little LED sign or ASCII display, kept within the bits it takes up (js/infections.js), in
 one of four looks picked at random each time (below, the first of each; the others: ADWARE a flashing SALE
 with arrows, a slot machine, the CPU bouncing over CLICK; SPYWARE a REC light, binoculars, an eye at a
@@ -149,7 +152,7 @@ mining pickaxe, a getaway rocket; SCAREWARE a crash screen, files deleting, a pr
 | **RANSOMWARE** | up to 3 bits on the board are padlocked where they are: they can't decrypt or fall (they still count in lines; bits dropped on them rest on them, gaps stay open under them), and settle once it lifts | 5 drops | LED and ASCII: each locked bit's little screen fading between a grinning CPU and typing gibberish, a padlock, its value and the drops left |
 | **MALWARE** | every bit on the board shows as junk | 3 drops | ASCII: flickering characters in each bit |
 | **CRYPTOJACKER** | the resources each drop earns are taken back | 5 drops | LED: a CPU stealing them, on a sign through the overflow row's own cells: a pan with its sack, a close-up of its eyes, MINING YOUR CRYPTO, and a gloat (+N MINE!) when it takes some |
-| **SCAREWARE** | fake system alerts over the board, coming on their own clock (not the drops'): up to 4 at once, each at its own random spot in the grid, stacked; never two close together (6 to 11 s after one appears, 3 s after one's closed; none while paused). Only each one's tiny X closes it (its big button dodges) | 8 drops (the ones up stay till closed) | ASCII: a blinking skull and a scan crawling to 100% |
+| **SCAREWARE** | fake system alerts over the board, coming on their own clock (not the drops'): each time 1 (3 in 4) or a burst of 2 to 4 (1 in 4), never past 4 at once, each at its own random spot in the grid, stacked; never two close together (6 to 11 s after one appears, 3 s after one's closed; none while paused). Only each one's tiny X closes it (its big button dodges) | 8 drops (the ones up stay till closed) | ASCII: a blinking skull and a scan crawling to 100% |
 
 ## BLACK MARKET
 

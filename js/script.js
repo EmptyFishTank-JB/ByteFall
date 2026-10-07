@@ -1192,6 +1192,7 @@ function render(popped = [], falling = null) {
   if (typeof placeGhost === 'function') placeGhost(); // (a bit being aimed stays in the top row)
   if (typeof placeChainMeter === 'function') placeChainMeter();
   Infections.place({ adCol: adware && !gameOver ? adware.col : null, jack: jackLeft > 0 && !gameOver, rows: ROWS, maxRows: MAX_ROWS, cols: COLS }); // (their displays, over the bits)
+  updateInfBadge();
   // PIVOT waiting for a side: arrows in the top row over the two neighbors (as on the buttons)
   if (pivotFrom !== null) {
     for (const c of [pivotFrom - 1, pivotFrom + 1]) {
@@ -5016,6 +5017,35 @@ async function tickInfections() {
   }
   render();
 }
+// INFECTED: a little bot at its laptop in CURRENT's corner, typing away at the virus on its screen,
+// while any infection's on (its count beside it past one)
+const INF_BADGE_SVG = (() => {
+  const A = ['..H.............', '.HHHHH..SSSSSSS.', '.HEHEH..S.R.R.S.', '.HHHHH..S..R..S.', '..HHH...S.R.R.S.', '.HHHHH..SSSSSSS.', '.HHHHH.KKKKKKKKK'];
+  let px = '';
+  A.forEach((r, y) => [...r].forEach((ch, x) => { if (ch !== '.') px += `<rect class="ib-${ch}" x="${x}" y="${y}" width="1" height="1"/>`; }));
+  return `<svg viewBox="0 0 16 8" shape-rendering="crispEdges" aria-hidden="true">${px}<rect class="ib-A ib-a1" x="6" y="5" width="1" height="1"/><rect class="ib-A ib-a2" x="6" y="6" width="1" height="1"/></svg>`;
+})();
+function activeInfections() {
+  const on = [];
+  if (adware) on.push('ADWARE');
+  if (spywareLeft > 0) on.push('SPYWARE');
+  if (columns.some((col) => col.some((c) => c && c.locked))) on.push('RANSOMWARE');
+  if (malwareLeft > 0) on.push('MALWARE');
+  if (jackLeft > 0) on.push('CRYPTOJACKER');
+  if (scareLeft > 0 || Infections.scareUp()) on.push('SCAREWARE');
+  return on;
+}
+function updateInfBadge() {
+  const infBadgeEl = document.getElementById('inf-badge');
+  if (!infBadgeEl) return;
+  const on = gameOver ? [] : activeInfections();
+  infBadgeEl.hidden = !on.length;
+  if (!on.length) return;
+  if (!infBadgeEl.firstChild) infBadgeEl.innerHTML = `${INF_BADGE_SVG}<b></b>`;
+  infBadgeEl.lastChild.textContent = on.length > 1 ? `x${on.length}` : '';
+  infBadgeEl.title = `INFECTED: ${on.join(', ')}`;
+  infBadgeEl.setAttribute('aria-label', infBadgeEl.title);
+}
 function runAnti(id) {
   if (id === 'adware') {
     const open = columns.map((c, n) => n).filter((n) => columns[n].length < MAX_ROWS);
@@ -5042,7 +5072,7 @@ function runAnti(id) {
     Infections.scare({
       canPop: () => !gameOver && !vsPaused && !document.hidden && document.getElementById('home').hidden,
       onPop: (n) => { SFX.play('denied'); if (n > 1) setMessage(`SCAREWARE // ${n} POP-UPS`, 'alarm'); },
-      onClose: (n) => { SFX.play('click'); setMessage(n ? `SCAREWARE // ${n} LEFT` : 'SCAREWARE // CLOSED'); },
+      onClose: (n) => { SFX.play('click'); setMessage(n ? `SCAREWARE // ${n} LEFT` : 'SCAREWARE // CLOSED'); updateInfBadge(); },
     });
   }
   render();

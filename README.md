@@ -160,7 +160,7 @@ its claims marching up it), **SPYWARE** (the next 3 bits hidden, eyes watching f
 (up to 3 bits padlocked where they are for 5 drops: they can't decrypt or fall, their little screens fading between
 a grinning CPU and typing gibberish), **MALWARE** (the board's bits shown as flickering junk for 3 drops), a **CRYPTOJACKER**
 (5 drops' resources stolen, a CPU making off with them on a sign through the overflow row) or **SCAREWARE**
-(fake alerts over the board for 8 drops, popping up on their own clock with a cooldown between, up to 4 stacked at random spots in the grid, each closed only by its tiny X). Each has four looks, one picked at random each time. Infections stack (two infected boxes, two infections), and the STORE's BLACK BOXES section warns of all six. A slot taken in empty, or once its starter is used, is the **BLACK MARKET** (so it's there
+(fake alerts over the board for 8 drops, popping up on their own clock with a cooldown between, now and then a burst of 2 to 4, up to 4 stacked at random spots in the grid, each closed only by its tiny X). Each has four looks, one picked at random each time. Infections stack (two infected boxes, two infections), and the STORE's BLACK BOXES section warns of all six. While any's on, a little bot at its laptop types away at a virus in CURRENT's corner. A slot taken in empty, or once its starter is used, is the **BLACK MARKET** (so it's there
 whether you take starters in or not):
 a random exploit you've unlocked or, a quarter of the time, a BLACK BOX, marked for sale with the
 game's own currency sign in its corner (a 0 struck through twice, as a dollar sign is: no one
