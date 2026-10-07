@@ -415,7 +415,12 @@ BOT SANDBOX has a button for each.
 becomes a place, by the time of year: MEADOW (spring, summer), BEACH (summer: the sea's waves
 moving, a parasol), CITY (any time: a skyline, more windows lit at night, a sidewalk, a hydrant),
 WOODLAND (spring to autumn: the trees and the path's litter in the season's colors), SNOWFIELD
-(winter), DESERT (summer) and FARM (autumn: a red barn, pumpkins). Each is drawn at three depths,
+(winter), DESERT (summer), FARM (autumn: a red barn, pumpkins) and LAKE (spring to autumn: a woodsy lake,
+reeds and lily pads). The LAKE and the BEACH have a pier: now and then a bot walks out on it (up its
+steps), casts, and waits; the bobber bobs, nibbles and goes under, and it reels in a fish (held up,
+pleased, thrown back), now and then a golden one (heart eyes), or an old boot (put out); then it
+casts again or heads back. TAP THE BOBBER and the fish is gone: the bot's upset (hey! my fish!).
+Poke the bot and it shushes you. Achievements: GONE FISHING, THE ONE THAT GOT AWAY. Each is drawn at three depths,
 never all in front: a far layer behind everything, the ground behind the bots' feet, and a few
 details in front of them. The weather leans to suit it (a beach's sunsets and storms, a city's rain,
 a snowfield's snow; never snow on the beach), and half the time it brings a spell of its own. Not

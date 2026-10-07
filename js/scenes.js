@@ -12,10 +12,11 @@
 //   FARM       autumn           furrowed fields and a red barn; soil and straw; pumpkins
 // Not while the fog or OCTOBER's HAUNTED FOREST is out (they have their own). Pixels in the bots'
 // own size; darker at night. The dev page's SCENE (or ?scene=) brings them OFTEN or keeps one.
-const SCENE_KINDS = ['meadow', 'beach', 'city', 'woodland', 'snowfield', 'desert', 'farm'];
-const SCENE_NAMES = { meadow: 'MEADOW', beach: 'BEACH', city: 'CITY', woodland: 'WOODLAND', snowfield: 'SNOWFIELD', desert: 'DESERT', farm: 'FARM' };
+const SCENE_KINDS = ['meadow', 'beach', 'city', 'woodland', 'snowfield', 'desert', 'farm', 'lake'];
+const SCENE_NAMES = { meadow: 'MEADOW', beach: 'BEACH', city: 'CITY', woodland: 'WOODLAND', snowfield: 'SNOWFIELD', desert: 'DESERT', farm: 'FARM', lake: 'LAKE' };
 // (the weather each suits, which comes more while it's out; and what never comes with it)
 const SCENE_FITS = {
+  lake: { fits: ['sunny', 'sunrise', 'sunset', 'drizzle', 'overcast', 'fireflies', 'moon', 'wind', 'fluff', 'pollen', 'meteors'], never: ['duststorm', 'blizzard', 'thundersnow'] },
   meadow: { fits: ['sunny', 'pollen', 'fluff', 'wind', 'sunrise', 'sunset', 'drizzle', 'rain', 'sunshower', 'rainbow', 'fireflies', 'moon'], never: ['blizzard', 'duststorm', 'thundersnow'] },
   beach: { fits: ['sunny', 'heatwave', 'sunset', 'sunrise', 'sunshower', 'storm', 'meteors', 'moon'], never: ['snow', 'flurries', 'blizzard', 'sleet', 'thundersnow', 'diamonddust', 'duststorm'] },
   city: { fits: ['rain', 'drizzle', 'storm', 'overcast', 'snow', 'flurries', 'heatlightning', 'moon', 'sunset'], never: ['duststorm', 'pollen'] },
@@ -26,9 +27,9 @@ const SCENE_FITS = {
 };
 const SCENE_SEASONS = {
   winter: [['snowfield', 3], ['city', 2]],
-  spring: [['meadow', 3], ['woodland', 2], ['city', 1.5]],
-  summer: [['beach', 3], ['meadow', 2], ['desert', 1.5], ['city', 1]],
-  autumn: [['woodland', 3], ['farm', 2.5], ['city', 1.5]],
+  spring: [['meadow', 3], ['woodland', 2], ['lake', 2], ['city', 1.5]],
+  summer: [['beach', 3], ['lake', 2.5], ['meadow', 2], ['desert', 1.5], ['city', 1]],
+  autumn: [['woodland', 3], ['farm', 2.5], ['lake', 1.5], ['city', 1.5]],
 };
 function sceneForced() {
   let v = null;
@@ -66,7 +67,7 @@ function createScenes(api) {
     if (sc) end(true);
     if (!SCENE_KINDS.includes(kind)) return;
     const now = performance.now();
-    sc = { kind, at: now, until: now + (ms || rand(600000, 1200000)), seed: Math.floor(Math.random() * 1e9), els: { far: canvas('scene-far'), ground: canvas('scene-ground'), near: canvas('scene-near') }, drawnW: 0, wave: 0, night: night() };
+    sc = { dockSide: Math.random() < 0.5 ? 1 : -1, kind, at: now, until: now + (ms || rand(600000, 1200000)), seed: Math.floor(Math.random() * 1e9), els: { far: canvas('scene-far'), ground: canvas('scene-ground'), near: canvas('scene-near') }, drawnW: 0, wave: 0, night: night() };
     draw(true);
     requestAnimationFrame(() => requestAnimationFrame(() => { if (sc) Object.values(sc.els).forEach((e) => { e.style.opacity = '1'; }); }));
     api.botEvent(`scene-${kind}`);
@@ -74,6 +75,7 @@ function createScenes(api) {
   }
   function end(now = false) {
     if (!sc) return;
+    if (fish) fishEnd(true); // (packed up: the place is going)
     const els = Object.values(sc.els);
     sc = null;
     if (now) { els.forEach((e) => e.remove()); return; }
@@ -108,15 +110,53 @@ function createScenes(api) {
     const N = sc.night ? 0.45 : 0;
     const S = season();
     const { far, ground, near } = sc.els;
+    if (DOCK[sc.kind]) { // (the pier, in the lane's own pixels: the fishing walks it)
+      const D = DOCK[sc.kind];
+      const FH = farCells * P;
+      const side = sc.dockSide;
+      const x0 = W * (side > 0 ? 0.4 : 0.6);
+      sc.dock = { side, x0, x1: x0 + side * 9 * P, x2: W * (side > 0 ? 0.82 : 0.18), top: (1 - D.top) * FH, water: (1 - D.top) * FH - 3 * P, W };
+    }
     if (full || sc.drawnW !== W) {
       sc.drawnW = W;
       const r = rng(sc.seed);
       drawFar(prep(far, farCells, W), r, N, S);
       drawGround(prep(ground, 5, W), rng(sc.seed + 1), N, S);
       drawNear(prep(near, 6, W), rng(sc.seed + 2), N, S);
-    } else if (sc.kind === 'beach') drawFar(prep(far, farCells, W), rng(sc.seed), N, S); // (the waves moving)
+    } else if (sc.kind === 'beach' || sc.kind === 'lake') drawFar(prep(far, farCells, W), rng(sc.seed), N, S); // (the waves moving)
   }
 
+  // THE PIER (the lake's and the beach's): out over the water from steps up off the shore; top: where
+  // its boards are, down the far layer (0 its top, 1 the floor)
+  const DOCK = { lake: { top: 0.66 }, beach: { top: 0.7 } };
+  function pier(o, N) {
+    const { g, cw, ch } = o;
+    const d = sc.dock;
+    if (!d) return;
+    const c = (px) => Math.round(px / P);
+    const pr = Math.round(ch * DOCK[sc.kind].top);
+    const a = Math.min(c(d.x1), c(d.x2));
+    const b = Math.max(c(d.x1), c(d.x2));
+    for (let x = a; x <= b; x += 6) { g.fillStyle = dim('#5a4028', N); g.fillRect(x, pr + 2, 1, ch - pr - 2); } // (its posts)
+    g.fillStyle = dim('#8a6440', N);
+    g.fillRect(a, pr, b - a + 1, 2);
+    g.fillStyle = dim('#a87c50', N);
+    g.fillRect(a, pr, b - a + 1, 1);
+    g.fillStyle = dim('#6b4a2e', N);
+    for (let x = a + 2; x < b; x += 3) g.fillRect(x, pr + 1, 1, 1); // (the boards' joints)
+    const steps = 4; // (steps up from the shore)
+    const s0 = c(d.x0);
+    const s1 = c(d.x1);
+    for (let j = 0; j < steps; j++) {
+      const xa = Math.round(s0 + ((s1 - s0) * j) / steps);
+      const xb = Math.round(s0 + ((s1 - s0) * (j + 1)) / steps);
+      const y = Math.round(ch - 5 - ((ch - 5 - pr) * (j + 1)) / steps);
+      g.fillStyle = dim('#8a6440', N);
+      g.fillRect(Math.min(xa, xb), y, Math.abs(xb - xa) + 1, 1);
+      g.fillStyle = dim('#5a4028', N);
+      g.fillRect(Math.min(xa, xb), y + 1, Math.abs(xb - xa) + 1, ch - y - 1);
+    }
+  }
   const rp = (r, list) => list[Math.floor(r() * list.length)]; // (a seeded pick: the same as it redraws)
   // THE FAR LAYER: behind everything
   function hills(o, r, base, amp, col, freq) {
@@ -172,6 +212,24 @@ function createScenes(api) {
       g.fillStyle = dim('#6b5a3e', N);
       g.fillRect(px, ch - 9, 1, 9);
       for (let i = 0; i < 4; i++) for (let x = -i * 2 - 1; x <= i * 2 + 1; x++) { g.fillStyle = dim(cols[Math.floor((x + 9) / 2) % 2], N); g.fillRect(px + x, ch - 13 + i, 1, 1); }
+      pier(o, N);
+    } else if (k === 'lake') { // (a woodsy lake: the trees on the far shore, the still water, reeds, lily pads)
+      const C = { spring: ['#6fbf4f', '#5aa84a'], summer: ['#2f7a33', '#3f8f3a'], autumn: ['#c9661e', '#e8a33c', '#b8401f'], winter: ['#6f6250', '#8a7a62'] }[S] || ['#3f8f3a'];
+      const shore = Math.round(ch * 0.5);
+      for (let x = Math.round(r() * 4); x < cw; x += 4 + Math.round(r() * 4)) {
+        const h = Math.round(ch * (0.12 + r() * 0.2));
+        g.fillStyle = dim('#3d2b1c', N + 0.2);
+        g.fillRect(x, shore - h + 2, 1, h - 2);
+        blob(g, x, shore - h + 2, 2 + Math.round(r() * 2), dim(rp(r, C), N + 0.2));
+      }
+      for (let y = shore; y < ch; y++) { g.fillStyle = dim(y < shore + 1 ? '#3f7f95' : '#2f6f86', N); g.fillRect(0, y, cw, 1); }
+      sc.wave = (sc.wave + 1) % 1000;
+      g.fillStyle = dim('#6fa8bc', N);
+      for (let y = shore + 3; y < ch; y += 4) for (let x = (y * 5 + Math.floor(sc.wave / 2)) % 13; x < cw; x += 13) g.fillRect(x, y, 2, 1);
+      const rr = rng(sc.seed + 9); // (the reeds and lily pads stay put while the water moves)
+      for (let i = 0, n = Math.round(cw / 30); i < n; i++) { const x = Math.round(rr() * cw); for (let j = 0; j < 4; j++) { g.fillStyle = dim('#4a7a3a', N); g.fillRect(x + j * 2, shore - 2 - Math.round(rr() * 3), 1, 5); } }
+      for (let i = 0, n = Math.round(cw / 40); i < n; i++) { const x = Math.round(rr() * cw); const y = shore + 3 + Math.round(rr() * (ch - shore - 8)); g.fillStyle = dim('#3f8a3e', N); g.fillRect(x, y, 3, 1); g.fillRect(x + 1, y - 1, 1, 1); }
+      pier(o, N);
     } else if (k === 'city') {
       let x = 0;
       while (x < cw) { // (a skyline of blocks, windows lit: most at night)
@@ -231,7 +289,8 @@ function createScenes(api) {
     const k = sc.kind;
     const fill = (col) => { g.fillStyle = dim(col, N); g.fillRect(0, 0, cw, ch); };
     const dots = (cols, density) => { for (let y = 0; y < ch; y++) for (let x = 0; x < cw; x++) if (r() < density) { g.fillStyle = dim(rp(r, cols), N); g.fillRect(x, y, 1, 1); } };
-    if (k === 'meadow') { fill('#4f9a4a'); dots(['#3f8a3e', '#5fb85a'], 0.25); dots(['#ffe066', '#ffffff', '#f39ac0'], 0.03); }
+    if (k === 'lake') { fill('#4f8a4a'); dots(['#3f7a3e', '#6b5a3e', '#5a9a52'], 0.3); dots(['#9a9a9a', '#b0a898'], 0.03); }
+    else if (k === 'meadow') { fill('#4f9a4a'); dots(['#3f8a3e', '#5fb85a'], 0.25); dots(['#ffe066', '#ffffff', '#f39ac0'], 0.03); }
     else if (k === 'beach') { fill('#d9c08a'); g.fillStyle = dim('#b89b6a', N); g.fillRect(0, 0, cw, 1); dots(['#c4a873', '#e6d3a2'], 0.2); }
     else if (k === 'city') {
       fill('#5b6170');
@@ -256,7 +315,11 @@ function createScenes(api) {
     const k = sc.kind;
     const put = (x, y, col) => { if (x >= 0 && x < cw && y >= 0 && y < ch) { g.fillStyle = dim(col, N); g.fillRect(x, y, 1, 1); } };
     const every = (lo, hi, fn) => { for (let x = Math.round(r() * hi); x < cw; x += lo + Math.round(r() * (hi - lo))) fn(x); };
-    if (k === 'meadow') every(7, 16, (x) => { // (tufts of grass, now and then a flower in one)
+    if (k === 'lake') every(9, 20, (x) => { // (cattails and stones at the water's edge)
+      if (r() < 0.6) { for (let i = 0; i < 5; i++) put(x, ch - 1 - i, '#5a8a3a'); put(x, ch - 6, '#6b4428'); put(x, ch - 7, '#6b4428'); put(x + 2, ch - 1, '#5a8a3a'); put(x + 2, ch - 2, '#5a8a3a'); put(x + 2, ch - 3, '#5a8a3a'); }
+      else { put(x, ch - 1, '#8a8a8a'); put(x + 1, ch - 1, '#a0a0a0'); put(x + 1, ch - 2, '#8a8a8a'); }
+    });
+    else if (k === 'meadow') every(7, 16, (x) => { // (tufts of grass, now and then a flower in one)
       for (const [dx, h] of [[0, 3], [1, 4], [2, 2]]) for (let i = 0; i < h; i++) put(x + dx, ch - 1 - i, i === h - 1 ? '#7fd06a' : '#5fb85a');
       if (r() < 0.35) put(x + 1, ch - 5, rp(r, ['#ffe066', '#f39ac0', '#ffffff']));
     });
@@ -289,6 +352,231 @@ function createScenes(api) {
     });
   }
 
+
+  // GONE FISHING (the LAKE and the BEACH): now and then a bot walks out along the pier, casts, and
+  // waits; the bobber bobs, nibbles, and goes under; it reels in a fish (held up, pleased, tossed
+  // back) or now and then an old boot (put out), and casts again or heads back. Tap the BOBBER and
+  // the fish is gone: the bot's upset. Poke the bot and it shushes you.
+  const U = 34 / 16; // (a pixel of the bot's own grid)
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  let fish = null;
+  let nextFish = performance.now() + rand(4000, 9000);
+  const FISH_ART = { // (what comes up on the line: a fish, or a boot)
+    fish: { w: 7, h: 4, px: [[1, 0, '#9fb8c8'], [2, 0, '#9fb8c8'], [3, 0, '#9fb8c8'], [0, 1, '#9fb8c8'], [1, 1, '#22303a'], [2, 1, '#9fb8c8'], [3, 1, '#9fb8c8'], [4, 1, '#9fb8c8'], [5, 1, '#7f98a8'], [6, 0, '#7f98a8'], [6, 2, '#7f98a8'], [1, 2, '#dfe8ee'], [2, 2, '#dfe8ee'], [3, 2, '#dfe8ee'], [4, 2, '#9fb8c8'], [5, 2, '#7f98a8'], [2, 3, '#7f98a8']] },
+    gold: { w: 7, h: 4, px: [[1, 0, '#ffb000'], [2, 0, '#ffb000'], [3, 0, '#ffb000'], [0, 1, '#ffb000'], [1, 1, '#22303a'], [2, 1, '#ffd23f'], [3, 1, '#ffd23f'], [4, 1, '#ffb000'], [5, 1, '#e08a1e'], [6, 0, '#e08a1e'], [6, 2, '#e08a1e'], [1, 2, '#fff3a0'], [2, 2, '#fff3a0'], [3, 2, '#ffd23f'], [4, 2, '#ffb000'], [5, 2, '#e08a1e'], [2, 3, '#e08a1e']] },
+    boot: { w: 5, h: 5, px: [[1, 0, '#5a4028'], [2, 0, '#5a4028'], [1, 1, '#6b4a2e'], [2, 1, '#6b4a2e'], [1, 2, '#6b4a2e'], [2, 2, '#6b4a2e'], [0, 3, '#6b4a2e'], [1, 3, '#6b4a2e'], [2, 3, '#6b4a2e'], [3, 3, '#6b4a2e'], [4, 3, '#6b4a2e'], [0, 4, '#3a2a1a'], [1, 4, '#3a2a1a'], [2, 4, '#3a2a1a'], [3, 4, '#3a2a1a'], [4, 4, '#3a2a1a']] },
+  };
+  const artSvg = (a, k = 1) => `<svg viewBox="0 0 ${a.w} ${a.h}" width="${a.w * U * k}" height="${a.h * U * k}" shape-rendering="crispEdges">${a.px.map(([x, y, c]) => `<rect x="${x}" y="${y}" width="1" height="1" fill="${c}"/>`).join('')}</svg>`;
+  // (the rod in the bot's own pixels, out over the water the way it faces)
+  function rodSvg(side) {
+    const cells = [];
+    for (let i = 0; i < 9; i++) cells.push([13 + i, 10 - i, i < 3 ? '#4a3422' : '#6b4a2a']);
+    cells.push([12, 10, '#9aa3ae'], [12, 11, '#9aa3ae']);
+    return `<g class="fish-rod">${cells.map(([x, y, c]) => `<rect x="${side > 0 ? x : 15 - x}" y="${y}" width="1" height="1" fill="${c}"/>`).join('')}</g>`;
+  }
+  const lanePx = () => ({ W: api.laneW(), H: api.lane.clientHeight });
+  // (the dock's rise under a bot: up the steps, then the boards' height)
+  function liftAt(w) {
+    const d = sc && sc.dock;
+    if (!d) return 0;
+    const cx = w.x + 17;
+    const t = (cx - d.x0) / (d.x1 - d.x0);
+    return Math.max(0, Math.min(1, t)) * d.top;
+  }
+  function fishStart() {
+    const d = sc.dock;
+    const { W } = lanePx();
+    const free = api.walkers().filter((w) => !w.claimed && !w.leaving && w.x > 0 && w.x < W - 34 && (w.state === 'idle' || w.state === 'walk'));
+    if (!free.length) return;
+    const w = pick(free);
+    if (!api.claim(w, () => fishPoked())) return;
+    fish = { w, phase: 'out', side: d.side, casts: 0 };
+    api.say(w, 'happy', pick(['fishing!', '♪', '']));
+    api.go(w, d.x0 - 17, () => api.go(w, d.side > 0 ? d.x2 - 36 : d.x2 + 2, cast));
+    api.botEvent('fishing');
+  }
+  function tip() { // (the rod's tip, in the lane: x across, y up from the floor)
+    const { w, side } = fish;
+    return { x: w.x + (side > 0 ? 21.5 : -5.5) * U, y: liftAt(w) + (17 - 2.5) * U };
+  }
+  function overlay() {
+    if (fish.svg) return;
+    const svg = document.createElementNS(SVGNS, 'svg');
+    svg.setAttribute('class', 'fish-line');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.innerHTML = '<path fill="none" stroke="rgba(230, 236, 240, 0.7)" stroke-width="1"/>';
+    api.lane.appendChild(svg);
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'fish-bobber';
+    b.setAttribute('aria-label', 'The bobber');
+    b.innerHTML = '<span></span>';
+    b.addEventListener('pointerdown', (e) => { e.stopPropagation(); bobberTapped(); });
+    api.lane.appendChild(b);
+    fish.svg = svg;
+    fish.bob = b;
+  }
+  function cast() {
+    if (!fish) return;
+    const { w, side } = fish;
+    const d = sc.dock;
+    const { W } = lanePx();
+    api.turn(w, side);
+    if (!w.el.querySelector('.fish-rod')) w.el.querySelector('svg').insertAdjacentHTML('beforeend', rodSvg(side));
+    overlay();
+    const lo = side > 0 ? Math.min(W - 16, d.x2 + 14) : 16;
+    const hi = side > 0 ? W - 16 : Math.max(16, d.x2 - 14);
+    fish.target = { x: rand(lo, hi), y: d.water };
+    fish.from = tip();
+    fish.phase = 'cast';
+    fish.at = performance.now();
+    fish.casts++;
+    api.say(w, 'idle', '');
+  }
+  function splash(x, y) {
+    const sp = document.createElement('span');
+    sp.className = 'fish-splash';
+    sp.setAttribute('aria-hidden', 'true');
+    sp.style.left = `${x.toFixed(0)}px`;
+    sp.style.bottom = `${y.toFixed(0)}px`;
+    api.lane.appendChild(sp);
+    setTimeout(() => sp.remove(), 700);
+  }
+  function bobberTapped() { // (scared off: the fish is gone, and the bot's upset with you)
+    if (!fish || !['wait', 'nibble', 'bite', 'reel'].includes(fish.phase)) return;
+    const { w } = fish;
+    splash(fish.bx, fish.by);
+    fish.phase = 'lost';
+    fish.at = performance.now();
+    fish.from = { x: fish.bx, y: fish.by };
+    api.say(w, 'annoyed', pick(['hey!', 'aw!', 'my fish!', '>:(', 'NOOO']));
+    w.el.classList.add('headshaking');
+    setTimeout(() => w.el.classList.remove('headshaking'), 900);
+    api.botEvent('fish-lost');
+  }
+  function fishPoked() { if (fish) api.say(fish.w, 'annoyed', pick(['shh!', 'shhh', '...!'])); }
+  function showCatch(kind) {
+    const c = document.createElement('div');
+    c.className = `fish-catch${kind === 'boot' ? '' : ' wiggle'}`;
+    c.setAttribute('aria-hidden', 'true');
+    c.innerHTML = artSvg(FISH_ART[kind]);
+    api.lane.appendChild(c);
+    fish.catch = c;
+    fish.catchKind = kind;
+  }
+  function placeCatch(x, y) {
+    if (!fish.catch) return;
+    const a = FISH_ART[fish.catchKind];
+    fish.catch.style.left = `${(x - (a.w * U) / 2).toFixed(0)}px`;
+    fish.catch.style.bottom = `${(y - a.h * U).toFixed(0)}px`;
+  }
+  function packUp(then) { // (rod away, line in, back down off the dock)
+    if (!fish) return;
+    const { w } = fish;
+    if (fish.svg) fish.svg.remove();
+    if (fish.bob) fish.bob.remove();
+    if (fish.catch) fish.catch.remove();
+    fish.svg = fish.bob = fish.catch = null;
+    const rod = w.el.querySelector('.fish-rod');
+    if (rod) rod.remove();
+    if (then) then();
+  }
+  function fishEnd(now) {
+    if (!fish) return;
+    const f = fish;
+    packUp();
+    if (now || !sc || !sc.dock) { api.release(f.w); fish = null; return; }
+    f.phase = 'back';
+    api.go(f.w, sc.dock.x0 - 17 - sc.dock.side * 20, () => { api.release(f.w); if (fish === f) fish = null; });
+  }
+  function fishTick(now) {
+    const d = sc && sc.dock;
+    if (!d) { if (fish) fishEnd(true); return; }
+    if (!fish) {
+      if (now > nextFish) { nextFish = now + (often() ? rand(2000, 4000) : rand(15000, 40000)); if (often() || Math.random() < 0.75) fishStart(); }
+      return;
+    }
+    const { w } = fish;
+    // (taken away from it: startled off, or gone)
+    if (!w.claimed || w.leaving || !['walk', 'held'].includes(w.state) || !api.walkers().includes(w)) { const f = fish; packUp(); api.release(f.w); fish = null; return; }
+    api.lift(w, liftAt(w));
+    if (!fish.svg) return;
+    const { H } = lanePx();
+    const age = now - fish.at;
+    const t = tip();
+    let bx = fish.target.x;
+    let by = fish.target.y;
+    let sag = 6;
+    if (fish.phase === 'cast') { // (the line flies out in an arc)
+      const k = Math.min(1, age / 700);
+      bx = fish.from.x + (fish.target.x - fish.from.x) * k;
+      by = fish.from.y + (fish.target.y - fish.from.y) * k + Math.sin(k * Math.PI) * 26;
+      sag = 0;
+      if (k >= 1) { splash(bx, by); fish.phase = 'wait'; fish.at = now; fish.waitFor = rand(5000, 14000); }
+    } else if (fish.phase === 'wait') {
+      by += Math.sin(now / 420) * 1;
+      if (age > fish.waitFor) { fish.phase = 'nibble'; fish.at = now; }
+    } else if (fish.phase === 'nibble') { // (two quick dips)
+      by -= (Math.sin(age / 90) > 0.6 ? 2 * U : 0);
+      if (age > 1600) { fish.phase = Math.random() < 0.8 ? 'bite' : 'wait'; fish.at = now; fish.waitFor = rand(3000, 7000); if (fish.phase === 'bite') api.say(w, 'surprised', '!'); }
+    } else if (fish.phase === 'bite') { // (under: it's on!)
+      by -= 3 * U;
+      sag = -2;
+      if (age > 900) { fish.phase = 'reel'; fish.at = now; fish.from = { x: bx, y: by }; }
+    } else if (fish.phase === 'reel') { // (reeled in, toward the tip)
+      const k = Math.min(1, age / 1100);
+      bx = fish.from.x + (t.x - fish.from.x) * k;
+      by = fish.from.y + (t.y - 6 * U - fish.from.y) * k;
+      sag = -1;
+      if (k >= 1) {
+        const r = Math.random();
+        const kind = r < 0.12 ? 'boot' : r < 0.2 ? 'gold' : 'fish';
+        showCatch(kind);
+        fish.phase = 'show';
+        fish.at = now;
+        if (kind === 'boot') api.say(w, 'annoyed', pick(['...', 'a boot?', 'ugh']));
+        else { api.say(w, kind === 'gold' ? 'love' : 'happy', kind === 'gold' ? pick(['WOW', '<3', 'GOLD!']) : pick(['yay!', '!!', 'got one!'])); api.botEvent(kind === 'gold' ? 'fish-gold' : 'fish-caught'); }
+      }
+    } else if (fish.phase === 'show') { // (held up on the line a moment)
+      bx = t.x;
+      by = t.y - 6 * U;
+      sag = 0;
+      placeCatch(bx, by);
+      if (age > 2600) { fish.phase = 'toss'; fish.at = now; fish.from = { x: bx, y: by }; }
+    } else if (fish.phase === 'toss') { // (thrown back: an arc into the water)
+      const k = Math.min(1, age / 700);
+      const tx = fish.target.x;
+      const ty = fish.target.y;
+      bx = t.x;
+      by = t.y - 6 * U;
+      placeCatch(fish.from.x + (tx - fish.from.x) * k, fish.from.y + (ty - fish.from.y) * k + Math.sin(k * Math.PI) * 20);
+      if (k >= 1) {
+        splash(tx, ty);
+        if (fish.catch) fish.catch.remove();
+        fish.catch = null;
+        api.say(w, 'idle', '');
+        if (fish.casts < 3 && Math.random() < 0.6) cast(); else fishEnd();
+        return;
+      }
+    } else if (fish.phase === 'lost') { // (the line snaps back, empty; a sulk, then try again or give up)
+      const k = Math.min(1, age / 500);
+      bx = fish.from.x + (t.x - 6 * U * 0 - fish.from.x) * k;
+      by = fish.from.y + (t.y - 8 * U - fish.from.y) * k;
+      if (age > 2600) { api.say(w, 'idle', ''); if (fish.casts < 3 && Math.random() < 0.5) cast(); else fishEnd(); return; }
+    }
+    fish.bx = bx;
+    fish.by = by;
+    // the line: from the tip to the bobber, sagging a little (in the svg's own top-down y)
+    const x1 = t.x;
+    const y1 = H - t.y;
+    const x2 = bx;
+    const y2 = H - by;
+    fish.svg.firstChild.setAttribute('d', `M${x1.toFixed(1)} ${y1.toFixed(1)} Q${((x1 + x2) / 2).toFixed(1)} ${(Math.max(y1, y2) + sag).toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}`);
+    fish.bob.style.left = `${bx.toFixed(1)}px`;
+    fish.bob.style.bottom = `${by.toFixed(1)}px`;
+    fish.bob.classList.toggle('under', fish.phase === 'bite' || fish.phase === 'show' || fish.phase === 'toss');
+  }
+
   function frame(now) {
     if (!sc && now > nextCheck) {
       nextCheck = now + (often() ? rand(4000, 8000) : rand(360000, 720000));
@@ -297,7 +585,8 @@ function createScenes(api) {
     if (!sc) return;
     if (api.foggy() || now > sc.until) { end(); nextCheck = now + rand(300000, 600000); return; } // (the fog has its own; or its time's up)
     if (sc.night !== night()) { sc.night = night(); draw(true); }
-    if (now - (sc.drawn || 0) > (sc.kind === 'beach' ? 350 : 1000)) { sc.drawn = now; draw(false); }
+    if (now - (sc.drawn || 0) > (sc.kind === 'beach' || sc.kind === 'lake' ? 350 : 1000)) { sc.drawn = now; draw(false); }
+    if (sc) fishTick(now);
   }
-  return { frame, clear: () => end(true), start: (k) => start(k), current: () => (sc ? sc.kind : null) };
+  return { frame, clear: () => end(true), start: (k) => start(k), current: () => (sc ? sc.kind : null), fish: () => { if (sc && sc.dock && !fish) fishStart(); return !!fish; } };
 }

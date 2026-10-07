@@ -316,8 +316,8 @@
     b.addEventListener('click', () => W().visit(`wx-${k}`));
     $('weather').appendChild(b);
   }
-  for (const k of [...SCENE_KINDS, 'clear']) {
-    const b = el('button', { type: 'button' }, (SCENE_NAMES[k] || k).toUpperCase());
+  for (const k of [...SCENE_KINDS, 'fish', 'clear']) {
+    const b = el('button', { type: 'button' }, k === 'fish' ? 'GONE FISHING' : (SCENE_NAMES[k] || k).toUpperCase());
     b.addEventListener('click', () => W().visit(`sc-${k}`));
     $('scenes').appendChild(b);
   }

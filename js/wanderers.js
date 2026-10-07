@@ -608,6 +608,7 @@ function createWanderers(lane, active = () => true) {
   function poke(w, now) {
     if (w.leaving || ['vanish', 'startled', 'poked'].includes(w.state)) return;
     if (w.possessed) return exorcise(w, now);
+    if (w.claimed && w.onPoke) { botEvent('pokes'); w.onPoke(); return; } // (busy: the scene says how it takes it)
     letGo(w);
     botEvent('pokes');
     if (w.partner) {
@@ -878,6 +879,26 @@ function createWanderers(lane, active = () => true) {
     // (LIGHTS OUT: one somewhere else when they come back on; and the POSSESSED bot)
     move: (w, x) => { w.x = Math.max(0, Math.min(laneW() - SIZE, x)); w.target = w.x; place(w); },
     possess: (w) => possess(w),
+    // (a scene's errand, scenes.js: a bot taken for it (onPoke: how a poke lands while it's busy),
+    // walked somewhere (onArrive when it's there), raised (onto the dock), and let go again)
+    claim: (w, onPoke) => {
+      if (w.claimed || w.leaving || !['walk', 'idle'].includes(w.state)) return false;
+      if (w.partner) { w.partner.partner = null; w.partner = null; }
+      w.claimed = true;
+      w.onPoke = onPoke;
+      return true;
+    },
+    go: (w, x, onArrive) => { if (!w.claimed) return; w.onArrive = onArrive; walkTo(w, x); },
+    lift: (w, px) => { w.el.style.translate = px ? `0 ${(-px).toFixed(1)}px` : ''; },
+    turn: (w, dir) => { w.look = dir; place(w); },
+    release: (w) => {
+      if (!w.claimed) return;
+      w.claimed = false;
+      w.onPoke = null;
+      w.onArrive = null;
+      w.el.style.translate = '';
+      if (w.state === 'held') { w.state = 'idle'; w.until = performance.now() + rand(800, 1600); }
+    },
     // (the BIT a bot was pushing, poked away from under its hands: it stops, put out)
     lostPush: (t) => {
       for (const w of walkers) {
@@ -931,7 +952,7 @@ function createWanderers(lane, active = () => true) {
       spawn(now);
       nextSpawn = now + rand(1500, 4500);
     } else if (staying.length > want && now > nextDepart) {
-      const w = staying.find((x) => x.state !== 'meet' && x.state !== 'poked' && x.state !== 'snack' && !x.pushing);
+      const w = staying.find((x) => x.state !== 'meet' && x.state !== 'poked' && x.state !== 'snack' && !x.pushing && !x.claimed);
       if (w) {
         depart(w, now);
         nextDepart = now + rand(1200, 3000);
@@ -961,6 +982,15 @@ function createWanderers(lane, active = () => true) {
         if ((w.dir > 0 && w.x >= w.target) || (w.dir < 0 && w.x <= w.target)) {
           w.x = w.target;
           if (w.leaving) { w.gone = true; continue; }
+          if (w.claimed) { // (a scene's errand, scenes.js: it waits there for what's next)
+            w.running = false;
+            w.state = 'held';
+            place(w);
+            const next = w.onArrive;
+            w.onArrive = null;
+            if (next) next();
+            continue;
+          }
           if (w.pushing) { // (the tree's in place: a breather, then on its way)
             pushTree(w);
             letGo(w);
@@ -1004,6 +1034,8 @@ function createWanderers(lane, active = () => true) {
         if (now > w.until) { w.leaving = false; leave(w, true); }
       } else if (w.state === 'vanish') {
         // (decrypting away)
+      } else if (w.state === 'held') {
+        // (a scene has it: fishing off the dock, scenes.js)
       } else if (w.state === 'meet') {
         // Shuffle to a body's width apart, facing each other
         const o = w.partner;
@@ -1034,7 +1066,7 @@ function createWanderers(lane, active = () => true) {
       for (let j = i + 1; j < walkers.length; j++) {
         const a = walkers[i];
         const b = walkers[j];
-        const busyWith = (w) => w.state === 'meet' || w.state === 'startled' || w.state === 'vanish' || w.state === 'poked' || w.state === 'snack' || w.pushing || w.leaving || w.winded
+        const busyWith = (w) => w.claimed || w.state === 'held' || w.state === 'meet' || w.state === 'startled' || w.state === 'vanish' || w.state === 'poked' || w.state === 'snack' || w.pushing || w.leaving || w.winded
           || w.el.dataset.mood === 'tired' || w.el.dataset.mood === 'surprised';
         if (busyWith(a) || busyWith(b) || !inside(a) || !inside(b)) continue;
         if (Math.abs(a.x - b.x) > SIZE + 6 || now - a.metAt < 7000 || now - b.metAt < 7000) continue;

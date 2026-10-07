@@ -434,6 +434,8 @@ const Progress = (() => {
         { id: 'seven-candles', name: 'SEVEN CANDLES', desc: 'Watch a bot push a kinara onto the card during Kwanzaa', value: n('push-kinara'), goal: 1, hidden: true },
         { id: 'storm-chaser', name: 'STORM CHASER', desc: 'See a thunderstorm, a blizzard and hail roll over the bots', value: () => ['storm', 'blizzard', 'hail'].filter((k) => d.bots[`weather-${k}`]).length, goal: 3, hidden: true },
         { id: 'stargazer', name: 'STARGAZER', desc: 'See the northern lights, a meteor shower and fireflies over the bots', value: () => ['aurora', 'meteors', 'fireflies'].filter((k) => d.bots[`weather-${k}`]).length, goal: 3, hidden: true },
+        { id: 'gone-fishing', name: 'GONE FISHING', desc: 'Watch a bot reel in a fish off the dock', value: () => (d.bots['fish-caught'] || 0) + (d.bots['fish-gold'] || 0), goal: 1, hidden: true },
+        { id: 'the-one-that-got-away', name: 'THE ONE THAT GOT AWAY', desc: 'Tap a fishing bot\'s bobber and scare off its fish', value: n('fish-lost'), goal: 1, hidden: true },
         { id: 'midnight', name: 'MIDNIGHT', desc: 'Be there when the bots count down to the new year', value: n('countdown'), goal: 1, hidden: true },
         { id: 'costume-party', name: 'COSTUME PARTY', desc: 'All four bots on screen at once in their Halloween costumes', value: n('costume-party'), goal: 1, hidden: true },
         { id: 'rabid', name: 'RABID', desc: 'Poke a HARD or INSANE bot and get snapped at', value: n('bitten'), goal: 1, hidden: true },

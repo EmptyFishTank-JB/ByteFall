@@ -3787,3 +3787,17 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
 :is(.start-walkers, .game-walkers) .scene-far { z-index: -2; }
 :is(.start-walkers, .game-walkers) .scene-ground { z-index: 0; }
 :is(.start-walkers, .game-walkers) .scene-near { z-index: 5; }
+
+/* GONE FISHING (scenes.js): the line, the bobber (tap it: the fish is gone), a splash, the catch */
+:is(.start-walkers, .game-walkers) .fish-line { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 2; }
+:is(.start-walkers, .game-walkers) button.fish-bobber { all: unset; position: absolute; z-index: 3; width: 24px; height: 24px; margin: 0 0 -12px -12px; pointer-events: auto; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+:is(.start-walkers, .game-walkers) button.fish-bobber:focus-visible { outline: 1px dashed rgba(255, 255, 255, 0.6); }
+.fish-bobber span { position: absolute; left: 50%; top: 50%; width: calc(34px / 16 * 2); height: calc(34px / 16 * 2); transform: translate(-50%, -50%); background: linear-gradient(#e0455f 50%, #f7f2e8 50%); }
+.fish-bobber.under span { height: calc(34px / 16); background: #e0455f; opacity: 0.7; }
+:is(.start-walkers, .game-walkers) .fish-splash { position: absolute; z-index: 2; width: 4px; height: 2px; margin-left: -2px; border: 1px solid rgba(200, 225, 240, 0.8); border-radius: 50%; pointer-events: none; animation: fish-splash 0.6s ease-out forwards; }
+@keyframes fish-splash { to { width: 26px; height: 6px; margin-left: -13px; opacity: 0; } }
+:is(.start-walkers, .game-walkers) .fish-catch { position: absolute; z-index: 3; pointer-events: none; }
+.fish-catch svg { display: block; }
+.fish-catch.wiggle svg { animation: fish-wiggle 0.25s steps(2) infinite; transform-origin: 50% 0; }
+@keyframes fish-wiggle { 50% { transform: rotate(14deg); } }
+.walker { transition: translate 0.35s ease-out; }
