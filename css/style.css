@@ -3530,6 +3530,10 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 /* In a game, PAUSE sits in the top-right corner (SETTINGS' spot, empty in a game); ← BACK, when there's
    nothing to pause, stays top left like the cards' BACK */
 body.in-game.can-pause .records-btn { left: auto; right: 12px; }
+/* (PAUSE: a fingertip-sized target round its two small bars, reaching past the button on every side;
+   lit the moment it's pressed, even when it waits for a drop to finish) */
+body.in-game.can-pause .records-btn::before { content: ""; position: absolute; inset: -12px -10px -14px -16px; }
+body.in-game.can-pause .records-btn.pause-queued { opacity: 1; filter: drop-shadow(0 0 4px rgba(var(--fg-rgb), 0.6)); }
 body.in-game.can-pause .records-btn svg { left: auto; right: 4px; } /* (hugging the right corner, as it hugged the left) */
 
 /* THE MAIN MENU stays put. Pinned to the top. Every box a set size in every mode, font and TEXT SIZE:

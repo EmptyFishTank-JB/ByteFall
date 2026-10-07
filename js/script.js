@@ -2646,6 +2646,7 @@ function startVs() {
   vsLost = false;
   vsPaused = false;
   pauseQueued = false;
+  document.getElementById('records-btn').classList.remove('pause-queued');
   vsLanded = 0;
   vsSent = 0;
   document.getElementById('vs-pause').hidden = true;
@@ -3232,11 +3233,12 @@ vsQuitBtn.addEventListener('click', quitVs);
 const vsPauseEl = document.getElementById('vs-pause');
 const canPause = () => !gameOver && (mode !== 'vs' || vsStarted);
 function requestPause() {
-  if (busy) pauseQueued = true; // (once the drop finishes)
+  if (busy) { pauseQueued = true; recordsBtn.classList.add('pause-queued'); } // (once the drop finishes; lit meanwhile, so the tap shows it took)
   else openPause();
 }
 function openPause() {
   pauseQueued = false;
+  recordsBtn.classList.remove('pause-queued');
   if (!canPause() || vsPaused) return;
   vsPaused = true;
   vsPausedAt = performance.now();
@@ -5977,9 +5979,10 @@ window.bytefallBack = () => {
 (() => {
   let held = null; // { el, id }
   let cancelled = null; // the button whose next click is swallowed
+  const SLOP = 16; // (a finger rolls a little as it lifts: only a real slide off cancels)
   const inside = (el, e) => {
     const r = el.getBoundingClientRect();
-    return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+    return e.clientX >= r.left - SLOP && e.clientX <= r.right + SLOP && e.clientY >= r.top - SLOP && e.clientY <= r.bottom + SLOP;
   };
   const release = () => {
     if (held) held.el.classList.remove('pressing');
