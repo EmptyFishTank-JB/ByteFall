@@ -1850,12 +1850,13 @@ async function resolveChains() {
     chainEl.textContent = `${chain}x`;
     setChainMeter(exploitWaiting() ? 0 : chain); // (an exploit waiting: the meter doesn't charge)
 
+    // (no waiting on the burst: its pieces hold the bits' place on the effects layer until they fly
+    // (fx.js), so the board moves on at once and the next drop is free sooner)
     FX.burst(cellsAt([...pops, ...sprung]));
     render([...pops, ...sprung]);
     updateHud();
     SFX.play('burst');
     if (chain >= 2) SFX.play('egg');
-    await sleep(220);
 
     let cracked = false;
     let revealed = false;
@@ -1888,11 +1889,9 @@ async function resolveChains() {
     for (const p of [...pops, ...sprung]) columns[p.col][p.row] = null;
     await collapse();
     updateHud();
-    await sleep(100);
   }
 
   if (chain > 0) {
-    await sleep(300);
     const kind = mode === 'puzzle' ? null : DIFFICULTIES[difficulty].packet;
     // (on the 8x8 board, every 8 make a BYTE and 4 of what's left a NIBBLE; on 7x7, NIBBLEs)
     const bytes = kind === 'byte' ? Math.floor(cleared / BYTE_BITS) : 0;
@@ -1946,11 +1945,10 @@ async function tickBombs() {
     }
   }
   setMessage('LOGIC BOMB // DETONATED');
-  FX.burst(cellsAt(hits));
+  FX.burst(cellsAt(hits)); // (no waiting on it, as a chain's)
   render(hits);
   SFX.play('burst');
   SFX.play('denied');
-  await sleep(260);
   score += pointsFor(hits.filter((h) => columns[h.col][h.row].type !== 'bomb'));
   for (const h of hits) columns[h.col][h.row] = null;
   Progress.bombHits(hits.length - blasts.length);
@@ -2003,10 +2001,9 @@ async function runHack(id, row, col) {
         }
       }
     }
-    FX.burst(cellsAt(hits));
+    FX.burst(cellsAt(hits)); // (no waiting on the bursts, as a chain's)
     render(hits);
     SFX.play('burst');
-    await sleep(220);
     score += pointsFor(hits.filter((h) => !(h.row === row && h.col === col))); // not the exploit itself
     for (const h of hits) columns[h.col][h.row] = null;
     await collapse();
@@ -2031,7 +2028,6 @@ async function runHack(id, row, col) {
     }
     render();
     SFX.play(revealed ? 'punct' : 'backspace');
-    await sleep(300);
   } else if (id === 'backdoor') {
     // Delete the whole bottom row, layers included; everything drops by one
     columns[col].pop();
@@ -2039,7 +2035,6 @@ async function runHack(id, row, col) {
     FX.burst(cellsAt(hits));
     render(hits);
     SFX.play('burst');
-    await sleep(220);
     score += pointsFor(hits);
     for (const h of hits) columns[h.col][0] = null;
     await collapse();
@@ -2060,7 +2055,6 @@ async function runHack(id, row, col) {
       FX.burst(cellsAt(hits));
       render(hits);
       SFX.play('burst');
-      await sleep(220);
       for (const h of hits) columns[h.col][h.row] = null;
       Progress.decrypted(hits.map(() => target), 1);
       score += pointsFor(hits);

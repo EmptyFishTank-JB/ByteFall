@@ -746,7 +746,9 @@ with a cached older script (GitHub Pages lets browsers cache for 10 minutes).
 - `js/data/puzzles.js` — the PUZZLE boards, generated and verified by brute force (1-3 solutions each, none solvable in fewer drops)
 - `js/data/daily-puzzles.js` — the DAILY PUZZLE boards, one per UTC day for about three years (then they loop), generated and verified the same way (1-3 solutions each)
 - `js/fx.js` — particle overlay: cleared cells dissolve into pixel fragments and
-  drifting hex/binary glyphs (skipped under reduced motion)
+  drifting hex/binary glyphs (skipped under reduced motion). The game never waits on a burst: its
+  pieces hold the bits' place until they fly, while the board collapses, the chain carries on and the
+  next drop is open (a single link frees it in about a third of a second, a second or so before)
 - `js/viz.js` — the shared music visualizer (LED bars or auto-gained
   oscilloscope wave with a CRT trail) used by the playlist and the dev page;
   the chosen style is remembered for both
