@@ -808,7 +808,7 @@ function alignHeader() {
   titleEl.style.fontSize = '';
   titleEl.style.letterSpacing = '';
   headerEl.style.removeProperty('--head-nudge');
-  if (!document.body.classList.contains('cards-in-settings') || mode === 'vs') return;
+  if (!document.body.classList.contains('cards-in-settings')) return;
   const cs = getComputedStyle(titleEl);
   // (measured in COURIER: js/fonts.js puts every font's capitals where Courier's are, so the
   // header sits in the same place whatever the font)
@@ -2496,13 +2496,18 @@ function stepVsGoal(dir) {
 }
 document.getElementById('vs-goal-down').addEventListener('click', () => stepVsGoal(-1));
 document.getElementById('vs-goal-up').addEventListener('click', () => stepVsGoal(1));
+// (the setup's − / + line and the match's status line: NO TARGET, TARGET 2,000 or START 1,000)
+function vsGoalText() {
+  if (vsMode === 'classic') return 'NO TARGET';
+  return vsMode === 'tug' ? `START ${fmt(vsPool)}` : `TARGET ${fmt(vsTarget)}`;
+}
 function showVsGoal() {
   const tug = vsMode === 'tug';
   const range = tug ? VS_POOL : VS_TARGET;
   const now = tug ? vsPool : vsTarget;
   const row = document.getElementById('vs-goal-row');
   row.classList.toggle('off', vsMode === 'classic');
-  document.getElementById('vs-goal').textContent = vsMode === 'classic' ? 'NO TARGET' : `${tug ? 'START' : 'TARGET'} ${fmt(now)}`;
+  document.getElementById('vs-goal').textContent = vsGoalText();
   document.getElementById('vs-goal-down').disabled = vsMode === 'classic' || now <= range.min;
   document.getElementById('vs-goal-up').disabled = vsMode === 'classic' || now >= range.max;
 }
@@ -2592,7 +2597,8 @@ function applyModeUi() {
   // (on the menu's panel, under the mode's name: without the name it starts with; DAILY's: the day,
   // the streak and the turnover, over its cards)
   document.getElementById('mode-info').textContent = daily ? dailyHeader() : MODES[mode].info(todayKey()).replace(/^[A-Z ]+ \/\/ (.)/, (_, c) => c.toUpperCase());
-  document.getElementById('game-mode-label').textContent = `// ${modeLine()}`;
+  // (VS: VS. CPU // its game mode, under BYTEFALL as in every game)
+  document.getElementById('game-mode-label').textContent = mode === 'vs' ? `VS. CPU // ${VS_MODES[vsMode].label}` : `// ${modeLine()}`;
   document.getElementById('difficulty-row').hidden = mode !== 'classic';
   document.getElementById('daily-kinds').hidden = !daily;
   document.querySelectorAll('#vs-levels button[data-vs]').forEach((btn) => {
@@ -2603,9 +2609,8 @@ function applyModeUi() {
   vsExploitsBtn.textContent = `EXPLOITS: ${vsExploits ? 'ON' : 'OFF'}`;
   vsExploitsBtn.classList.toggle('active', vsExploits);
   document.body.classList.toggle('vs-mode', mode === 'vs'); // a slimmer header, room for the boards
-  // (VS keeps it with layers off, dimmed, so nothing shifts when the option changes)
+  // (VS keeps it with layers off, its count a -, so nothing shifts when the option changes)
   document.getElementById('pulse-stat').hidden = !!MODES[mode].noLayers && mode !== 'puzzle' && mode !== 'breach' && mode !== 'vs' && mode !== 'tutorial';
-  document.getElementById('pulse-stat').classList.toggle('off', mode === 'vs' && !vsLayers);
   document.getElementById('pulse-label').textContent = mode === 'puzzle' ? 'BITS LEFT' : mode === 'breach' ? 'LAYERS LEFT' : 'ENCRYPT IN';
   // (ENCRYPT IN: a ===== under the count, the layer it's counting down to, as [n] is a bit)
   document.getElementById('pulse-stat').classList.toggle('counts-layers', mode !== 'puzzle' && mode !== 'breach');
@@ -3421,8 +3426,7 @@ function updateTopIcons() {
   document.body.classList.toggle('at-home', homeOpen);
   if (document.body.className !== was && inGame) { // (PAUSE or BACK in the corner now: locked to its Courier size, the title fitted beside it)
     lockButtons();
-    if (mode === 'vs') alignVsTitle();
-    else alignHeader();
+    alignHeader();
   }
   document.getElementById('records-btn').setAttribute('aria-label', !inGame ? 'Menu: rules, exploits and records' : vsPaused ? 'Resume' : canPause() ? 'Pause' : 'Back to the main menu');
 }
@@ -3533,16 +3537,18 @@ function showCpuDesc() {
   while (tooBig() && size > 7) el.style.fontSize = `${(size -= 0.5)}px`;
 }
 
-// The status line in the mode row's place, and how many stat rows the left column has
+// The status line over your stats (the target, or the points each side starts with), and how many
+// stat rows the left column has
 function updateVsChrome() {
   const rows = [...document.querySelectorAll('.hud > .stat:not(.cpu-stat):not(.cpu-face), .hud > .hud-bits')].filter((el) => !el.hidden && getComputedStyle(el).display !== 'none').length;
-  document.getElementById('vs-status').textContent = VS_MODES[vsMode].label; // (just the game mode: the CPU's named over its board)
+  document.getElementById('vs-status').textContent = vsGoalText();
   fitVsStatus();
   document.querySelector('.hud').style.setProperty('--vs-rows', rows);
 }
 
-// VS: the HUD takes the room from under the corner icons to where the regular HUD ends, so your
-// board keeps its regular size and place. Measured by briefly laying out the regular header and HUD.
+// VS: under the header (BYTEFALL and VS. CPU // the game mode, as every game has), the HUD starts where
+// the regular HUD does and takes the room to where it ends (at least VS_TOP_MIN), so your board keeps
+// its regular size and place. Measured by briefly laying out the regular header and HUD.
 const VS_TOP_MIN = 168;
 function layoutVsTop() {
   const hud = document.querySelector('.hud');
@@ -3561,11 +3567,10 @@ function layoutVsTop() {
   info.hidden = true;
   // (relative to the game card, which can move as the page re-centers)
   const cardTop = () => crtEl.getBoundingClientRect().top;
-  // 8px below the top corner's button (PAUSE, or BACK before a match), as Classic's panels sit 8px
-  // under its header
-  const top = document.querySelector('.records-btn').getBoundingClientRect().bottom - cardTop() + 8;
-  // (at least VS_TOP_MIN tall: the regular header is only the title and the mode's name, so
-  // where there's no room under it the board comes down and fitBoard shrinks it to fit)
+  // (8px under the header, as Classic's panels sit)
+  const top = hud.getBoundingClientRect().top - cardTop();
+  // (at least VS_TOP_MIN tall: the regular HUD is shorter than VS's squares, BOT and the CPU's board
+  // need, so the board comes down and fitBoard shrinks it to fit where it must)
   const bottom = Math.max(hud.getBoundingClientRect().bottom - cardTop(), top + VS_TOP_MIN);
   [diffRow.hidden, info.hidden] = wasHidden;
   cpuStatEl.hidden = false;
@@ -3578,7 +3583,6 @@ function layoutVsTop() {
   hud.style.height = `${bottom - top}px`;
   layoutVsSquares();
   fitVsStatus();
-  alignVsTitle();
 }
 // The 2x2 info squares: exactly as tall as the strip allows under the status line (6px gaps),
 // BOT's box and the CPU's board sharing the width left; unless that would squeeze those two
@@ -3596,25 +3600,6 @@ function layoutVsSquares() {
   }
   hud.style.setProperty('--vs-cpu-w', `${Math.floor(cpuW)}px`);
   hud.style.setProperty('--vs-sq', `${Math.floor(sq)}px`);
-}
-// The VS title's letters centered on the top icons (each font sits differently in its line)
-function alignVsTitle() {
-  const el = document.querySelector('.vs-title');
-  el.style.fontSize = '';
-  el.style.letterSpacing = '';
-  el.style.removeProperty('--vs-title-nudge');
-  const cs = getComputedStyle(el);
-  measureCtx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
-  const m = measureCtx.measureText(el.textContent);
-  if (!m.fontBoundingBoxAscent) return;
-  const range = document.createRange();
-  range.selectNodeContents(el);
-  const box = range.getBoundingClientRect();
-  const baseline = box.top + (box.height - m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2 + m.fontBoundingBoxAscent;
-  const inkMid = baseline - m.actualBoundingBoxAscent / 2; // (no descenders)
-  const btn = document.querySelector('.records-btn').getBoundingClientRect(); // (PAUSE, or BACK)
-  el.style.setProperty('--vs-title-nudge', `${(btn.top + btn.height / 2 - inkMid).toFixed(1)}px`);
-  clearOfCorners(el, 14);
 }
 // The VS info line shrinks to fit its column
 function fitVsStatus() {
@@ -5946,6 +5931,7 @@ function showMenuPane(pane) {
   menuPane = pane;
   if (!SOLO_PANES[pane]) rulesPane = pane;
   recordsEl.classList.toggle('solo', !!SOLO_PANES[pane]);
+  recordsEl.classList.toggle('puzzles', pane === 'puzzles'); // (BYTEFALL over its name, as a game's top)
   document.getElementById('records-title').textContent = SOLO_PANES[pane] || '// RULES & RECORDS';
   recordsEl.querySelectorAll('.menu-tabs button').forEach((b) => {
     b.setAttribute('aria-selected', String(b.dataset.pane === pane));

@@ -248,8 +248,6 @@ button, input, select, textarea { line-height: inherit; }
 /* The 3D-glasses fringes: text and edges split into a red left and a cyan right */
 [data-theme="anaglyph"] h1,
 [data-theme="anaglyph"] h1 span,
-[data-theme="anaglyph"] .vs-title,
-[data-theme="anaglyph"] .vs-title span,
 [data-theme="anaglyph"] .cell.disc,
 [data-theme="anaglyph"] .hud .stat .value,
 [data-theme="anaglyph"] #current-piece,
@@ -496,31 +494,6 @@ h1 {
 
 h1 span { color: var(--accent); text-shadow: 0 0 8px var(--accent); }
 
-/* VS: the title sits between the top icons, colored like the main title (green VS., amber CPU) */
-.vs-title { display: none; }
-body.vs-mode .vs-title {
-  position: absolute;
-  top: 12px;
-  left: 8px;
-  right: 8px; /* (script.js's clearOfCorners keeps the words off the corner buttons) */
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
-  font-size: 22px;
-  font-weight: bold;
-  letter-spacing: 3px;
-  text-indent: 3px; /* balances the spacing after the last letter */
-  line-height: 1;
-  white-space: pre;
-  color: var(--fg);
-  text-shadow: 0 0 8px var(--fg);
-  pointer-events: none;
-  transform: translateY(var(--vs-title-nudge, 0px));
-}
-body.vs-mode .vs-title span { color: var(--accent); text-shadow: 0 0 8px var(--accent); }
-
 .tagline {
   margin: 4px 0 0;
   font-size: 11px;
@@ -552,8 +525,6 @@ body.vs-mode .vs-title span { color: var(--accent); text-shadow: 0 0 8px var(--a
 }
 .stat-bg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; border-radius: 5px; pointer-events: none; }
 .cpu-stat { background: var(--inset-bg); }
-/* VS with ENCRYPTED LAYERS off: ENCRYPT IN stays in place, dimmed */
-.stat.off { opacity: 0.35; }
 
 .stat .label {
   display: block;
@@ -1202,10 +1173,9 @@ body.vs-mode .stat-best { display: none; }
   cursor: pointer;
 }
 /* VS layout: your stats and QUIT stacked on the left, the CPU's board on the right */
-/* In VS the header (title, tagline, level bar, modes) gives its room to the VS info, your stats
-   and the CPU's board */
+/* VS: the header as in every game (BYTEFALL, then VS. CPU // the game mode), the target in the
+   status line over your stats */
 .vs-status { display: none; }
-body.vs-mode header { display: none; }
 body.vs-mode .vs-status { display: flex; align-items: center; justify-content: center; font-size: 11px; letter-spacing: 1px; text-align: center; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
 /* Before the match: pick the CPU level and LAYERS, then START */
 .vs-setup {
@@ -2046,16 +2016,17 @@ body.cards-in-settings .crt { height: 100%; display: flex; flex-direction: colum
 body.cards-in-settings.vs-mode .crt { justify-content: flex-start; }
 body.cards-in-settings .crt.measuring { height: auto; align-self: start; } /* script.js's fitBoard measures the contents */
 /* The header sits at the top of the card, its title level with PAUSE (as the main menu's is with
-   its BACK arrow); the HUD, grid and message follow straight under it */
-body.cards-in-settings:not(.vs-mode) .crt { justify-content: flex-start; padding-top: 8px; }
-body.cards-in-settings:not(.vs-mode) header { margin-top: var(--head-nudge, 0px); }
+   its BACK arrow); the HUD, grid and message follow straight under it. VS too: BYTEFALL, VS. CPU //
+   its game mode, then its HUD (script.js's layoutVsTop) */
+body.cards-in-settings .crt { justify-content: flex-start; padding-top: 8px; }
+body.cards-in-settings header { margin-top: var(--head-nudge, 0px); }
 /* (the header's title, subtitle and the HUD's panels 8px apart, all at the top: any height to
    spare goes under the message, at the bottom) */
-body.cards-in-settings:not(.vs-mode) header { margin-bottom: 0; }
-body.cards-in-settings:not(.vs-mode) header h1 { line-height: 1; }
-body.cards-in-settings:not(.vs-mode) header .tagline { margin-top: 8px; line-height: 1; }
-body.cards-in-settings:not(.vs-mode) .crt > .hud { margin-top: 8px; }
-body.cards-in-settings:not(.vs-mode) .crt > .message-slot { margin-bottom: auto; }
+body.cards-in-settings header { margin-bottom: 0; }
+body.cards-in-settings header h1 { line-height: 1; }
+body.cards-in-settings header .tagline { margin-top: 8px; line-height: 1; }
+body.cards-in-settings .crt > .hud { margin-top: 8px; }
+body.cards-in-settings .crt > .message-slot { margin-bottom: auto; }
 body.cards-in-settings .crt.measuring::after { display: none; }
 
 /* Every confirm (and QUIT while pressed) (RESTART, QUIT, mode / difficulty / DAILY / VS switches mid-run, DECRYPTOR,
@@ -2990,7 +2961,7 @@ html.page-twinkle .page-bg { display: block; }
 .home-best:empty { display: none; }
 .home-play { margin-top: 2px; }
 /* The game under the menu: hidden (still laid out, so nothing jumps when PLAY shows it) */
-body.at-home .crt > :is(header, .hud, .board-wrap, .message-slot, .corner-btn, .vs-title, .dev-badge) { visibility: hidden; }
+body.at-home .crt > :is(header, .hud, .board-wrap, .message-slot, .corner-btn, .dev-badge) { visibility: hidden; }
 
 /* In a game (not the tutorial): the top-left icon is PAUSE (← BACK to the main menu, like the
    cards' BACK, when there's nothing to pause: VS's setup, a finished run), and SETTINGS waits on
@@ -4043,9 +4014,9 @@ html, body { overflow-x: clip; }
 [data-theme="season-winter"] *::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.04); border-radius: 4px; }
 [data-theme="season-winter"] *::-webkit-scrollbar-thumb { border-radius: 4px; background: repeating-linear-gradient(45deg, #e8423a 0 5px, #fff6f0 5px 10px); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15); }
 /* OCTOBER's spooky touch: the title flickering now and then */
-[data-theme="season-halloween"] :is(header h1, .home-head h1) { animation: spooky-flicker 9s steps(1) infinite; }
+[data-theme="season-halloween"] :is(header h1, .home-head h1, .card-brand) { animation: spooky-flicker 9s steps(1) infinite; }
 @keyframes spooky-flicker { 0%, 90% { opacity: 1; } 91% { opacity: 0.35; } 92% { opacity: 1; } 95% { opacity: 0.6; } 96%, 100% { opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { [data-theme="season-halloween"] :is(header h1, .home-head h1) { animation: none; } }
+@media (prefers-reduced-motion: reduce) { [data-theme="season-halloween"] :is(header h1, .home-head h1, .card-brand) { animation: none; } }
 /* SEASONAL's button: the full width, under the two columns of themes */
 .theme-list .theme-seasonal { grid-column: 1 / -1; }
 /* THE OVERCAST (visitors.js): three cloud layers over the game card's lane, the sky dimmed under
@@ -4399,3 +4370,15 @@ body.vs-setup-up #vs-setup { position: relative; inset: auto; }
 #vs-setup .vs-goal-row button { width: 32px; height: 26px; }
 #vs-setup .vs-goal { font-size: 13px; }
 #vs-setup .vs-start { display: flex; align-items: center; justify-content: center; height: 36px; padding: 0 34px; }
+/* ONE TITLE: BYTEFALL at the main menu's size in every game (VS too) and on the PUZZLES card (the
+   menu's is 1.6em of its 12px line; script.js's clearOfCorners shrinks a game's only where it would
+   touch a corner button) */
+header h1, .card-brand { font-size: 19.2px; letter-spacing: 0.1em; }
+/* THE PUZZLES card, as a game's top: BACK in its corner, BYTEFALL centered on it as on the main menu,
+   // PUZZLES under it as a game's mode line, the puzzles 8px under that */
+.card-brand { display: none; }
+.records.puzzles .card-head { position: relative; flex-direction: column; justify-content: flex-start; gap: 8px; margin-bottom: 6px; }
+.records.puzzles .card-head .card-back { position: absolute; left: 0; top: 0; }
+.records.puzzles .card-brand { display: block; margin: calc((26px - 1em) / 2 + 2px) 0 0; line-height: 1; white-space: nowrap; } /* (its capitals level with the main menu's and every game's) */
+.records.puzzles #records-title { font-size: 11px; line-height: 1; letter-spacing: 2px; color: var(--fg-dim); text-shadow: none; }
+.card-head .card-brand span { font-size: inherit; letter-spacing: inherit; color: var(--accent); text-shadow: 0 0 8px var(--accent); } /* (FALL as the title's, not the card's heading) */
