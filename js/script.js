@@ -664,6 +664,9 @@ function checkPuzzle() {
 
 // The KEYS and RESOURCES this game earned, under the score
 function showRunKeys() {
+  const earnedBox = document.getElementById('overlay-earned'); // (EARNED: filled once the level meter's done)
+  earnedBox.hidden = true;
+  earnedBox.innerHTML = '';
   const el = document.getElementById('overlay-keys');
   const n = Progress.runKeys();
   const got = Progress.runRes();
@@ -1690,11 +1693,12 @@ async function awardPackets(kind, count) {
   await sleep(150);
 }
 
-// An earned exploit waits in the exploit button until the player arms it (the notice stays over
-// the grid until it's used: an exploit is easy to forget about; showExploitNotice)
+// An earned exploit waits in the exploit button until the player arms it: EXPLOIT READY on the notice
+// line for a moment, and the button pulses until it's used
 function awardHack(id) {
   heldHacks.push(id);
-  setMessage(`EXPLOIT READY // ${HACKS[id].name}`);
+  setMessage('');
+  if (mode !== 'tutorial') showToast(`EXPLOIT READY // ${HACKS[id].name}`, { log: false }); // (the button pulses on; the tutorial says it in its banner)
   SFX.play('egg');
   updateHud();
   updateFreeBtn();
@@ -2359,7 +2363,7 @@ document.querySelectorAll('#difficulty-row button').forEach((btn) => {
     if (next === classicDifficulty) return;
     if (next === 'hard' && !Progress.isUnlocked('mode-hard')) {
       SFX.play('denied');
-      showToast(`LOCKED // ${Progress.unlock('mode-hard').need.toUpperCase()}`);
+      noteAt(btn, `LOCKED // ${Progress.unlock('mode-hard').need.toUpperCase()}`);
       return;
     }
     requestReset(btn, 'CONFIRM?', () => {
@@ -4536,6 +4540,7 @@ freeGrantedNow = newDay();
 const streakPays = () => loginStreak.days % STREAK_EVERY === 0 && loginStreak.paid !== localDay();
 window.dailyDrop = {
   claimable: () => !!freeExploit.claimable,
+  got: () => (!freeExploit.claimable && freeExploit.day === localDay() && freeExploit.got) || '', // (today's, once claimed)
   // (the STORE's streak line: days in a row, and how far into this run of 7)
   streak: () => ({ days: loginStreak.days, into: ((loginStreak.days - 1) % STREAK_EVERY) + 1, every: STREAK_EVERY, masters: STREAK_MASTERS, paysToday: streakPays() }),
   claim() {
@@ -4552,7 +4557,10 @@ window.dailyDrop = {
       saveStreak();
     }
     SFX.play('egg');
-    showToast(streak ? `${loginStreak.days}-DAY STREAK // +${STREAK_MASTERS} MASTER KEYS +${DAILY_DROP_KEYS} KEYS, FREE EXPLOIT READY` : `DAILY DROP // FREE EXPLOIT READY +${DAILY_DROP_KEYS} KEYS +3 BUGS, CACHE, CRYPTO`);
+    // (no pop-up: the STORE card shows it where it was claimed; NOTICES keeps it)
+    freeExploit.got = `+${DAILY_DROP_KEYS} KEYS, +3 BUGS, CACHE AND CRYPTO${streak ? `, +${STREAK_MASTERS} MASTER KEYS (${loginStreak.days}-DAY STREAK)` : ''} AND A FREE EXPLOIT FOR YOUR NEXT GAME`;
+    saveFree();
+    logNotice(`DAILY DROP // ${freeExploit.got}`, true);
     updateFreeBtn();
     showKeys();
     return true;
@@ -4615,15 +4623,22 @@ function showWallet() {
     if (el) el.innerHTML = html;
   }
 }
-// What a drop earned, floating up off the board for a moment
+// What a drop earned, in the SCORE box along its foot (as far up from its bottom border as SCORE is down
+// from its top), every resource on the one line at once (a long line shrinks to fit), for a moment
 function showPickup(before) {
   const now = Progress.runRes();
   const parts = Progress.resIds().filter((id) => (now[id] || 0) > (before[id] || 0)).map((id) => resChip(id, `+${now[id] - (before[id] || 0)}`));
   if (!parts.length) return;
+  const box = document.getElementById('score-stat');
+  box.querySelectorAll('.res-pop').forEach((old) => old.remove());
   const el = document.createElement('div');
   el.className = 'res-pop';
-  el.innerHTML = parts.join(' ');
-  boardWrapEl.appendChild(el);
+  el.innerHTML = parts.join('');
+  const label = box.querySelector('.label').getBoundingClientRect();
+  el.style.bottom = `${Math.max(2, label.top - box.getBoundingClientRect().top - 1).toFixed(1)}px`; // (less the box's border)
+  box.appendChild(el);
+  let size = parseFloat(getComputedStyle(el).fontSize);
+  while (el.scrollWidth > el.clientWidth + 0.5 && size > 6) el.style.fontSize = `${(size -= 0.5)}px`;
   setTimeout(() => el.remove(), 1700);
 }
 function showKeys() {
@@ -4998,22 +5013,6 @@ function nextExploit() {
   if (heldHacks.length) return heldHacks[0];
   return freeAllowed() ? freeExploitId() : null;
 }
-// EXPLOIT READY // NAME over the overflow row while an earned exploit waits (or is armed), until
-// it's used (not in the tutorial, which explains it in its banner; the pause screen covers it)
-const exploitNoticeEl = document.getElementById('exploit-notice');
-function showExploitNotice() {
-  const id = armedHack || heldHacks[0];
-  const show = !!id && !gameOver && mode !== 'tutorial' && !!HACKS[id];
-  exploitNoticeEl.hidden = !show;
-  if (!show) return;
-  exploitNoticeEl.textContent = `EXPLOIT READY // ${HACKS[id].name}`;
-  const cell = boardEl.querySelector('.cell.overflow');
-  if (!cell) return;
-  const frame = exploitNoticeEl.parentElement.getBoundingClientRect();
-  const r = cell.getBoundingClientRect();
-  exploitNoticeEl.style.top = `${r.top - frame.top + r.height / 2}px`;
-}
-window.addEventListener('resize', () => exploitNoticeEl.hidden || showExploitNotice());
 function updateFreeBtn() {
   // (retired: RESTART is on the pause screen now; the button stays for its code paths)
   restartBtn.hidden = true;
@@ -5031,7 +5030,6 @@ function updateFreeBtn() {
   const ready = nextExploit();
   const centerArmed = armedHack && armedSlot === null; // (one armed from a side slot shows there, not here)
   const shown = (centerArmed && armedHack) || ready;
-  showExploitNotice();
   document.getElementById('exploit-glyph').innerHTML = shown ? iconHtml(shown) : LIGHTNING_SVG;
   exploitBtn.classList.toggle('armed', !!centerArmed);
   exploitBtn.classList.toggle('ready', !armedHack && !!ready);
@@ -5550,87 +5548,143 @@ exploitBtn.addEventListener('click', () => {
   SFX.play('denied'); // (nothing held: the EXPLOITS card opens only from RULES & RECORDS)
 });
 
-// UNLOCKED / ACHIEVEMENT pop-ups, shown one at a time: each pops in, holds, bursts apart, and
-// only then does the next one show
-const TOAST_SHOW_MS = 2200;
-// Achievements stay up longer before they crumble, as on a console (about 5.5 seconds)
-const ACHIEVEMENT_SHOW_MS = 5500;
-const TOAST_GAP_MS = 1250; // the burst's longest particles live 1.2s
-const toastEl = document.getElementById('toast');
-const toastQueue = [];
-let toastShowing = false;
-function showToast(text) {
+// THE NOTICE LINE (style.css's .notice-line): every notice in one spot on every screen, the line under
+// BYTEFALL (a game's // CLASSIC // NORMAL, the main menu's // MAIN MENU), in the ENCRYPTION warning's
+// style: plain glowing words fading in over the line's own, holding, then bursting into pixels; one at
+// a time, the next waiting for it. They wait while a card is open (RULES & RECORDS, SETTINGS, the music
+// player) and while the title screen is up. Each is kept in RULES & RECORDS → NOTICES too, unless
+// opts.log is false (the passing ones: EXPLOIT READY); opts.read keeps it without the unread dot
+const NOTICE_MS = 2600;
+const NOTICE_LONG_MS = 3600; // (an ACHIEVEMENT, a LEVEL UP, an UNLOCKED: a little longer to read)
+const NOTICE_GAP_MS = 350;
+const noticeEl = document.getElementById('notice-line');
+const noticeQueue = [];
+let noticeShowing = false;
+function showToast(text, opts = {}) {
   if (window.infTestQuiet && window.infTestQuiet()) return; // (the INFECTION TESTER, its banners switched off)
-  toastQueue.push(text);
-  if (!toastShowing) nextToast();
+  if (opts.log !== false) logNotice(text, opts.read);
+  noticeQueue.push(text);
+  if (!noticeShowing) nextNotice();
 }
-// Pop-ups wait while RECORDS or SETTINGS is open (one already showing finishes above the panel)
+// (a card over the game, the title screen or the screen saver: notices wait)
 const panelOpen = () => !recordsEl.hidden || !settingsEl.hidden || !document.getElementById('music-player').hidden;
-function nextToast() {
-  toastShowing = toastQueue.length > 0;
-  if (!toastShowing) return;
-  if (panelOpen()) {
-    setTimeout(nextToast, 250);
+const noticeWaits = () => panelOpen() || startScreenUp() || document.getElementById('start-black').classList.contains('on') || document.documentElement.classList.contains('saver-on'); // (and the screen saver)
+function nextNotice() {
+  noticeShowing = noticeQueue.length > 0;
+  if (!noticeShowing) return;
+  if (noticeWaits()) {
+    setTimeout(nextNotice, 250);
     return;
   }
-  // While the start screen (or its fade to black) is up, only achievements show; notifications
-  // (DAILY BONUS and the like) wait for the game
-  const titleUp = startScreenUp() || document.getElementById('start-black').classList.contains('on');
-  const at = titleUp ? toastQueue.findIndex((t) => t.startsWith('ACHIEVEMENT')) : 0;
-  if (at < 0) {
-    setTimeout(nextToast, 250);
-    return;
-  }
-  const text = toastQueue.splice(at, 1)[0];
-  const showMs = text.startsWith('ACHIEVEMENT') ? ACHIEVEMENT_SHOW_MS : TOAST_SHOW_MS;
-  toastEl.classList.toggle('exploit-ready', text.startsWith('EXPLOIT READY'));
-  toastEl.hidden = false;
-  LedBanner.show(toastEl, text, toastRoom()); // (a sign of small lights, or CLASSIC: the plain text)
-  placeToast();
-  toastEl.classList.remove('show');
-  void toastEl.offsetWidth; // restart the pop-in animation
-  toastEl.classList.add('show');
+  const text = noticeQueue.shift();
+  placeNotice(text);
+  noticeEl.classList.remove('show');
+  void noticeEl.offsetWidth; // (the fade in from the start)
+  noticeEl.classList.add('show');
+  document.body.classList.add('noticing');
+  const long = /^(ACHIEVEMENT|LEVEL UP|UNLOCKED|DECRYPTOR)/.test(text);
   setTimeout(() => {
-    FX.burst([{ el: toastEl, type: 'warning' }]);
-    toastEl.hidden = true;
-    setTimeout(nextToast, TOAST_GAP_MS); // the next one waits until this one has crumbled away
-  }, showMs);
+    const range = document.createRange();
+    range.selectNodeContents(noticeEl);
+    FX.burst([{ rect: range.getBoundingClientRect(), type: 'warning' }]);
+    noticeEl.hidden = true;
+    noticeEl.classList.remove('show');
+    document.body.classList.remove('noticing');
+    setTimeout(nextNotice, NOTICE_GAP_MS);
+  }, long ? NOTICE_LONG_MS : NOTICE_MS);
+}
+// On the line under BYTEFALL (the main menu's, or the game's), one line across the screen: a long
+// one closes up, then shrinks, to fit
+function placeNotice(text) {
+  const line = homeOpen ? document.querySelector('.home-tagline') : headerEl.querySelector('.tagline');
+  const r = line.getBoundingClientRect();
+  const card = crtEl.getBoundingClientRect();
+  noticeEl.style.top = `${(r.top + r.height / 2 - card.top).toFixed(1)}px`;
+  noticeEl.textContent = text;
+  noticeEl.hidden = false;
+  noticeEl.style.letterSpacing = noticeEl.style.fontSize = '';
+  const wide = () => noticeEl.scrollWidth > noticeEl.clientWidth + 0.5;
+  let ls = parseFloat(getComputedStyle(noticeEl).letterSpacing) || 0;
+  let size = parseFloat(getComputedStyle(noticeEl).fontSize);
+  while (wide() && ls > 0) noticeEl.style.letterSpacing = `${(ls = Math.max(0, ls - 0.5))}px`;
+  while (wide() && size > 8) noticeEl.style.fontSize = `${(size -= 0.5)}px`;
 }
 
-// Centers the pop-up over the overflow row, masking its blocks; falls back to
-// the top of the screen when the board isn't on screen, and in the TUTORIAL (whose banner sits
-// over the board's top rows)
-// (the room across the pop-up has: the board's width over it, or the screen's)
-function toastRoom() {
-  const row = boardEl.querySelectorAll('.cell.overflow');
-  const a = row[0] && row[0].getBoundingClientRect();
-  const z = row.length && row[row.length - 1].getBoundingClientRect();
-  const onBoard = a && a.width > 0 && a.bottom > 0 && a.top < innerHeight && mode !== 'tutorial' && !homeOpen;
-  return Math.max(120, (onBoard ? z.right - a.left + 12 : innerWidth - 32) - 16);
+// NOTICES (RULES & RECORDS' third tab): every notice kept, newest first, with when it came; the RULES &
+// RECORDS buttons (the main menu's, the pause screen's) and the tab get a dot while some are unread
+const NOTICES_KEY = 'bytefall-notices';
+const NOTICES_MAX = 60;
+let notices = []; // ({ t: when, text, read })
+try { notices = JSON.parse(storage.get(NOTICES_KEY)) || []; } catch (e) { notices = []; }
+const saveNotices = () => storage.set(NOTICES_KEY, JSON.stringify(notices));
+function logNotice(text, read = false) {
+  const looking = !recordsEl.hidden && menuPane === 'notices';
+  notices.push({ t: Date.now(), text, read: read || looking }); // (read: seen where it happened, the result screen or the STORE)
+  if (notices.length > NOTICES_MAX) notices = notices.slice(-NOTICES_MAX);
+  saveNotices();
+  updateNoticeDots();
+  if (looking) renderNotices();
 }
-function placeToast() {
-  const row = boardEl.querySelectorAll('.cell.overflow');
-  const a = row[0] && row[0].getBoundingClientRect();
-  const z = row.length && row[row.length - 1].getBoundingClientRect();
-  const onBoard = a && a.width > 0 && a.bottom > 0 && a.top < innerHeight && mode !== 'tutorial' && !homeOpen;
-  toastEl.classList.toggle('on-board', !!onBoard);
-  toastEl.style.top = onBoard ? `${(a.top + a.bottom) / 2}px` : '';
-  toastEl.style.left = onBoard ? `${(a.left + z.right) / 2}px` : '';
-  // (no wider than the board; the game's text is large, so it wraps onto a second line rather than shrinking back)
-  const bigText = true;
-  toastEl.style.maxWidth = onBoard ? `${z.right - a.left + 12}px` : '';
-  toastEl.classList.toggle('wrap', !!onBoard && bigText);
-  // (on one line over the board: a wide font closes up, then shrinks, to stay on the screen)
-  toastEl.style.letterSpacing = toastEl.style.fontSize = '';
-  if (!onBoard || bigText || toastEl.classList.contains('led')) return;
-  let ls = parseFloat(getComputedStyle(toastEl).letterSpacing) || 0;
-  let size = parseFloat(getComputedStyle(toastEl).fontSize);
-  const wide = () => toastEl.scrollWidth > toastEl.clientWidth + 0.5;
-  while (wide() && ls > 0) toastEl.style.letterSpacing = `${(ls = Math.max(0, ls - 0.5))}px`;
-  while (wide() && size > 7) toastEl.style.fontSize = `${(size -= 0.5)}px`;
+function markNoticesRead() {
+  if (!notices.some((n) => !n.read)) return;
+  notices.forEach((n) => { n.read = true; });
+  saveNotices();
+  updateNoticeDots();
 }
-window.addEventListener('resize', () => toastEl.hidden || placeToast());
-window.addEventListener('scroll', () => toastEl.hidden || placeToast(), { passive: true });
+function updateNoticeDots() {
+  const unread = notices.some((n) => !n.read);
+  for (const el of document.querySelectorAll('#home-records, #pause-records, .menu-tabs [data-pane="notices"]')) el.classList.toggle('has-unread', unread);
+}
+// (when: the time today, YESTERDAY and the time, or the date)
+function noticeWhen(t) {
+  const d = new Date(t);
+  const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  const day = (x) => x.toLocaleDateString('en-CA');
+  const y = new Date();
+  y.setDate(y.getDate() - 1);
+  if (day(d) === day(new Date())) return `TODAY ${time}`;
+  if (day(d) === day(y)) return `YESTERDAY ${time}`;
+  return `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase()} ${time}`;
+}
+function renderNotices() {
+  const body = document.getElementById('notices-body');
+  body.innerHTML = notices.length
+    ? notices.slice().reverse().map((n) => `<div class="notice-item${n.read ? '' : ' unread'}"><span class="notice-when">${noticeWhen(n.t)}</span><span class="notice-text">${n.text}</span></div>`).join('')
+    : '<p class="notices-empty">Nothing yet. Achievements, unlocks, level ups and rewards are kept here as they come.</p>';
+}
+updateNoticeDots();
+
+// A "can't do that" note beside what was tapped (LOADOUT LOCKED, SLOTS FULL, a locked level), in the
+// notice line's style: it fades in just over the button (under it at the top of the screen), holds,
+// and bursts into pixels
+let sideNoteTimer = 0;
+function noteAt(el, text) {
+  let note = document.getElementById('side-note');
+  if (!note) {
+    note = document.createElement('p');
+    note.id = 'side-note';
+    note.className = 'side-note';
+    note.setAttribute('role', 'status');
+    document.body.appendChild(note);
+  }
+  clearTimeout(sideNoteTimer);
+  note.textContent = text;
+  note.hidden = false;
+  note.classList.remove('show');
+  void note.offsetWidth;
+  note.classList.add('show');
+  const r = el.getBoundingClientRect();
+  const n = note.getBoundingClientRect();
+  const left = Math.min(innerWidth - 8 - n.width, Math.max(8, r.left + r.width / 2 - n.width / 2));
+  const top = r.top - n.height - 6 >= 8 ? r.top - n.height - 6 : r.bottom + 6;
+  note.style.left = `${left}px`;
+  note.style.top = `${top}px`;
+  sideNoteTimer = setTimeout(() => {
+    FX.burst([{ el: note, type: 'warning' }]);
+    note.hidden = true;
+  }, 2200);
+}
+
 
 // Track unlocks are named TRACK 03 etc.; add the title once the track exists.
 function unlockLabel(name) {
@@ -5639,19 +5693,34 @@ function unlockLabel(name) {
   return track ? `${name} // ${track.title}` : name;
 }
 
+const earnedText = (e) => `${e.type} // ${unlockLabel(e.name)}${e.keys ? ` +${e.keys} KEYS` : ''}`;
 function announce(earned) {
   updateLevelBar();
-  if (xpHold) { // (in a game: LEVEL UP and what it unlocks wait for the level meter, after it)
-    pendingEarned.push(...earned.filter((e) => e.type === 'LEVEL UP' || e.type === 'UNLOCKED'));
-    earned = earned.filter((e) => e.type !== 'LEVEL UP' && e.type !== 'UNLOCKED');
-    if (!earned.length) { showKeys(); return; }
+  if (xpHold) { // (in a game: everything earned waits, quietly, for the result screen's EARNED list)
+    pendingEarned.push(...earned);
+    showKeys();
+    return;
   }
   if (!earned.length) return;
   SFX.play('egg');
-  for (const e of earned) showToast(`${e.type} // ${unlockLabel(e.name)}${e.keys ? ` +${e.keys} KEYS` : ''}`);
+  for (const e of earned) showToast(earnedText(e));
   showKeys();
   applyUnlocks();
   if (!recordsEl.hidden) renderRecords();
+}
+// The result screen's EARNED: what the game held back, listed under its level meter (and kept in
+// NOTICES, read); left another way (MAIN MENU from PAUSE, say), it shows on the notice line instead
+function showEarned(held) {
+  const box = document.getElementById('overlay-earned');
+  if (overlayEl.classList.contains('hidden') || mode === 'tutorial') return false;
+  box.innerHTML = `<p class="oe-head">EARNED</p>${held.map((e) => `<p class="oe-item">${earnedText(e)}</p>`).join('')}`;
+  box.hidden = false;
+  for (const e of held) logNotice(earnedText(e), true);
+  SFX.play('egg');
+  showKeys();
+  applyUnlocks();
+  if (!recordsEl.hidden) renderRecords();
+  return true;
 }
 
 // THE LEVEL METER (Pokemon-style): through a game the level stays as it was; once it's over, the
@@ -5665,7 +5734,7 @@ function flushEarned() {
   xpHold = false;
   const held = pendingEarned;
   pendingEarned = [];
-  if (held.length) announce(held);
+  if (held.length && !showEarned(held)) announce(held);
 }
 // The result screen's score, racking up from 0 to the game's (quickly: under a second and a half,
 // however big), ticking as it counts; then done(). A tap on the result box skips to the end
@@ -6029,6 +6098,7 @@ function showMenuPane(pane) {
   });
   recordsEl.querySelectorAll('.menu-pane').forEach((el) => { el.hidden = el.dataset.pane !== pane; });
   if (pane === 'records') renderRecords();
+  if (pane === 'notices') { renderNotices(); markNoticesRead(); } // (seen: the dots go)
   if (pane === 'puzzles') { puzzleListTier = puzzleTier; renderPuzzleSelect(); }
   if (typeof Store !== 'undefined') Store.render(); // (and the REMOVE ADS link, off on its own tab)
   const box = menuScroller();
@@ -6194,7 +6264,7 @@ hacksPanelEl.addEventListener('click', (e) => {
   if (!card || daily || !Progress.exploitInfo(card.dataset.hack).unlocked) return;
   if (!loadoutEditable()) {
     SFX.play('denied');
-    showToast('LOADOUT LOCKED // FINISH OR RESTART TO CHANGE IT');
+    noteAt(card, 'LOADOUT LOCKED // FINISH OR RESTART TO CHANGE IT');
     return;
   }
   const id = card.dataset.hack;
@@ -6205,7 +6275,7 @@ hacksPanelEl.addEventListener('click', (e) => {
     SFX.play('enter');
   } else {
     SFX.play('denied');
-    showToast(Progress.slotInfo().slots ? 'SLOTS FULL // REMOVE ONE TO SWAP' : 'NO EXPLOIT SLOTS YET');
+    noteAt(card, Progress.slotInfo().slots ? 'SLOTS FULL // REMOVE ONE TO SWAP' : 'NO EXPLOIT SLOTS YET');
   }
   refreshExploitCards();
 });
@@ -6257,7 +6327,7 @@ for (const k of ['bytefall-layout-edits', 'bytefall-layout-locks', 'bytefall-lay
 }
 initGame();
 updateFreeBtn();
-if (freeGrantedNow) showToast('DAILY DROP // CLAIM IT IN THE STORE');
+if (freeGrantedNow) logNotice('DAILY DROP // READY TO CLAIM IN THE STORE'); // (no pop-up: the STORE buttons light up, and NOTICES has it)
 showKeys();
 // (the date turned while the game was open: the new day's drop lit in the STORE, and said)
 function checkNewDay() {
@@ -6265,7 +6335,7 @@ function checkNewDay() {
   updateFreeBtn();
   showKeys();
   if (typeof Store !== 'undefined') Store.render();
-  showToast('DAILY DROP // CLAIM IT IN THE STORE');
+  logNotice('DAILY DROP // READY TO CLAIM IN THE STORE');
 }
 document.addEventListener('visibilitychange', () => { if (!document.hidden) checkNewDay(); });
 setInterval(() => document.hidden || checkNewDay(), 60000);

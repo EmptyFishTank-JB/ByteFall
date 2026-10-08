@@ -1,4 +1,5 @@
-// LED BANNERS: the UNLOCKED / ACHIEVEMENT pop-ups as a sign of small lights. The text is drawn in
+// LED BANNERS: once the UNLOCKED / ACHIEVEMENT pop-ups as a sign of small lights (the notices are the
+// notice line's plain words now, script.js's showToast; what's still used here is the icons: tag, iconSvg). The text is drawn in
 // the game's own font (the FONT setting) at a small size, then read back a pixel at a time, and
 // each pixel becomes a light. Its looks (the dev page's BANNER LOOK, bytefall-banner-look):
 //   DOTS    round LEDs, the unlit ones faint behind

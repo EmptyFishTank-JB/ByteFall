@@ -310,14 +310,32 @@ nibble: **NIBBLE DECRYPTED** adds a 16-point (2^4) bonus per nibble.
 High scores are saved in your browser, one per difficulty (Hard's started
 fresh when it moved to 8×8).
 
+## Notices
+
+Every notice has one spot on every screen: **the notice line**, the line under BYTEFALL (a game's
+// CLASSIC // NORMAL, the main menu's // MAIN MENU). An achievement, an unlock, a LEVEL UP, a DECRYPTOR
+rank, a reward or EXPLOIT READY fades in there over the line's own words, in the ENCRYPTION warning's
+style (plain glowing words, nothing boxed), holds a few seconds and bursts into pixels; one at a time,
+the next waiting. Nothing covers the board or the menu. They wait while a card is open, while the title
+screen or the screen saver is up, and through a game (see the level meter below: what a game earns waits
+for its result screen's EARNED list). **NOTICES**, RULES & RECORDS' third tab, keeps every one with when it
+came, newest first, the unread ones lit; while some are unread, a dot sits on RULES & RECORDS (the main
+menu's and the pause screen's) and on the tab. The DAILY DROP never pops up: a new day's is in NOTICES and
+lights the STORE buttons, and claimed, the STORE's DAILY DROP card shows what it gave right under CLAIM. A
+"can't do that" (HARD still locked, LOADOUT LOCKED, SLOTS FULL) shows beside what was tapped, in the notice
+line's style on a soft dark plate, then bursts. What a drop earns in RESOURCES shows in the SCORE box along
+its foot (as far up from its bottom border as SCORE is down from its top), every resource on one line at
+once, shrinking to fit if it must.
+
 ## Levels, DECRYPTOR ranks and unlocks
 
-**The level meter.** Through a game the level stays as it was: LEVEL UP and what it unlocks aren't
-announced until it's over. Then the result screen's score racks up from 0 (well under a second and
+**The level meter.** Through a game the level stays as it was, and nothing earned is announced
+(LEVEL UP, UNLOCKED, achievements): a game stays clean. Then the result screen's score racks up from 0 (well under a second and
 a half, ticking higher as it nears the total), and its meter fills with the game's bits, a rising tone
 as it fills, a little fanfare and a flash at each LEVEL UP (about 1.2 seconds a level, the whole fill
-over in about 4), and after it the LEVEL UP and UNLOCKED pop-ups. A tap on the meter skips to the
-end. PUZZLE too: its bits count toward the level and KEYS as in any mode, but a puzzle already
+over in about 4), and under it an EARNED list of everything the game held back (achievements,
+unlocks, level ups), each kept in NOTICES too; left another way (MAIN MENU from PAUSE), they show on the
+notice line instead. A tap on the meter skips to the end. PUZZLE too: its bits count toward the level and KEYS as in any mode, but a puzzle already
 solved, played again, pays them once a day (its first solve, or a replay's solve, marks the day;
 another replay that day pays nothing, and the result says so).
 
@@ -546,7 +564,7 @@ reeds and lily pads). The LAKE and the BEACH have a pier: now and then a bot wal
 steps), casts, and waits; the bobber bobs, nibbles and goes under, and it reels in a fish (held up,
 pleased, thrown back), now and then a golden one (heart eyes), or an old boot (put out), and 1 time
 in 10 a RESOURCE off the bottom, kept and yours (BUGS, CACHE, CRYPTO, ROOTKITS, or rarest, a MASTER
-KEY; a toast says which); then it
+KEY; the notice line says which); then it
 casts again or heads back. TAP THE BOBBER and the fish is gone: the bot's upset (hey! my fish!).
 BITS OF LIFE in each place, behind the bots: at the LAKE a fish jumping (rings where it goes in),
 rings on the still water, a duck paddling across, a dragonfly darting over the reeds; at the BEACH a
@@ -643,8 +661,8 @@ chain ends, so the 5 links have to come in one chain. Only one exploit at a time
 waits (earned, the daily free one, or armed) chains don't charge the meter at all; it waits
 empty, pulsing amber, until the exploit is used. ZEN and the tutorial play NORMAL's rules, BLITZ its difficulty's, VS the
 CPU's level's; the CPU's exploits come from the same streak on the same rules, one at a
-time. While an exploit is ready, the bars pulse amber, and an earned one also shows
-EXPLOIT READY // its name over the grid's overflow row, staying there (steady) until the exploit is used. ENCRYPT IN has a ===== under its count
+time. While an exploit is ready, the bars pulse amber (and the exploit button pulses), and an earned one also shows
+EXPLOIT READY // its name on the notice line for a few seconds. ENCRYPT IN has a ===== under its count
 (the layer it counts down to, as a bit is [n]), flashing with the line under the
 board when the next drop brings one.
 
@@ -902,7 +920,7 @@ nothing), EXPLOITS (the loadout) and ← BACK, SETTINGS and what's in it, ← BA
 open menu the banner moves to the bottom of the screen. BACK (from step 2 on)
 redoes the step just played, or before a drop goes to the step before, putting
 the board, bits, score, chain and exploit back as they were. EXIT leaves at any
-point. It counts toward nothing (no XP, stats, achievements or best score). Pop-ups (a poke's achievement, say) show at the top of the screen during it, clear of the banner.
+point. It counts toward nothing (no XP, stats, achievements or best score). Notices (a poke's achievement, say) show on the notice line under BYTEFALL, clear of the banner.
 
 ## Startup
 

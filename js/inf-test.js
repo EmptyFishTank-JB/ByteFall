@@ -42,18 +42,13 @@
     <div class="inftest-body">
       <div class="inftest-row">${IDS.map((id) => `<button type="button" data-inf="${id}">${id === 'cryptojacker' ? 'CRYPTOJACK' : id.toUpperCase()}</button>`).join('')}</div>
       <div class="inftest-row"><span>LOOK</span>${['RANDOM', '1', '2', '3', '4', '5', '6', '7', '8'].map((l, i) => `<button type="button" data-look="${i - 1}"${i ? '' : ' class="on"'}>${l}</button>`).join('')}</div>
-      <div class="inftest-row"><button type="button" data-act="drop">DROP (COUNT DOWN)</button><button type="button" data-act="fill">FILL GRID</button><button type="button" data-act="clear">CLEAR</button><button type="button" data-act="keys">+50 KEYS</button><button type="button" data-act="banners"></button><button type="button" data-act="banlook"></button><button type="button" data-act="bantest">TEST BANNER</button><a href="dev-tools/audio.html">DEV PAGE</a></div>
+      <div class="inftest-row"><button type="button" data-act="drop">DROP (COUNT DOWN)</button><button type="button" data-act="fill">FILL GRID</button><button type="button" data-act="clear">CLEAR</button><button type="button" data-act="keys">+50 KEYS</button><button type="button" data-act="banners"></button><button type="button" data-act="bantest">TEST NOTICE</button><a href="dev-tools/audio.html">DEV PAGE</a></div>
       <p class="inftest-note">NOT SAVED: nothing played here touches your progress. Tap an ad, the CRYPTOJACKER's sign or a pop-up and it steals KEYS toward its (hidden) demand; tap a RANSOMWARE-locked bit and it pays 1 to 8 KEYS of the ransom on it (paid off, the bit's free). Infections stack: tap more than one. ADWARE and MALWARE have 6 looks, RANSOMWARE 5, the CRYPTOJACKER 8, the rest 4 (a look past theirs picks at random). The column buttons still drop bits.</p>
     </div>`;
   document.body.appendChild(panel);
   const bannersBtn = panel.querySelector('[data-act="banners"]');
   const showBanners = () => { bannersBtn.textContent = `BANNERS: ${quiet ? 'OFF' : 'ON'}`; bannersBtn.classList.toggle('on', quiet); };
   showBanners();
-  // (the banners' look: the game reads it from storage, here kept in memory, so it's the tester's own)
-  const BAN_STEPS = LedBanner.looks();
-  const banLookBtn = panel.querySelector('[data-act="banlook"]');
-  const showBanLook = () => { banLookBtn.textContent = `LOOK: ${LedBanner.look().toUpperCase()}`; };
-  showBanLook();
   const TESTS = ['ACHIEVEMENT // FIRST BREACH', 'UNLOCKED // SYNTHWAVE THEME', 'ACHIEVEMENT // CHAIN REACTION: A 10X CHAIN', 'LEVEL UP // LV 12'];
   let testN = 0;
   panel.addEventListener('click', (e) => {
@@ -68,18 +63,15 @@
     else if (b.dataset.act === 'fill') { if (run('gameOver')) run('resetNow()'); fill(); }
     else if (b.dataset.act === 'clear') clearAll();
     else if (b.dataset.act === 'keys') { Progress.claimKeys(50); run(`setMessage('TESTER // +50 KEYS: ' + Progress.keys() + ' IN ALL')`); }
-    else if (b.dataset.act === 'banlook') {
-      try { localStorage.setItem('bytefall-banner-look', BAN_STEPS[(BAN_STEPS.indexOf(LedBanner.look()) + 1) % BAN_STEPS.length]); } catch (err) {}
-      showBanLook();
-    } else if (b.dataset.act === 'bantest') { // (one shows even with BANNERS off)
+    else if (b.dataset.act === 'bantest') { // (one shows on the notice line even with BANNERS off; not kept in NOTICES)
       const was = quiet;
       quiet = false;
-      run(`showToast(${JSON.stringify(TESTS[testN++ % TESTS.length])})`);
+      run(`showToast(${JSON.stringify(TESTS[testN++ % TESTS.length])}, { log: false })`);
       quiet = was;
     } else if (b.dataset.act === 'banners') {
       quiet = !quiet;
       try { sessionStorage.setItem(QUIET, quiet ? '1' : '0'); } catch (e) {}
-      if (quiet) document.querySelectorAll('.toast').forEach((t) => { t.hidden = true; }); // (any up now, gone)
+      if (quiet) document.querySelectorAll('#notice-line').forEach((t) => { t.hidden = true; }); // (any up now, gone)
       showBanners();
     }
     else if (b.dataset.act === 'hide') { panel.classList.toggle('min'); b.textContent = panel.classList.contains('min') ? 'SHOW' : 'HIDE'; }

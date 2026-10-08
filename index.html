@@ -42,8 +42,8 @@
   } catch (e) {}
 </script>
 <title>BYTEFALL // decryption terminal</title>
-<script src="js/fonts.js?v=520"></script>
-<link rel="stylesheet" href="css/style.css?v=520">
+<script src="js/fonts.js?v=521"></script>
+<link rel="stylesheet" href="css/style.css?v=521">
 </head>
 <body>
   <!-- Dev: TWINKLE BACKGROUND (grid-bg.js): the starlight behind the whole game, off by default -->
@@ -113,6 +113,10 @@
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3 H17 V9 A5 5 0 0 1 7 9 Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M7 5 H3 V7 A4 4 0 0 0 7.5 11 M17 5 H21 V7 A4 4 0 0 1 16.5 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M12 14 V18 M8 21 H16 M9.5 18 H14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             RECORDS
           </button>
+          <button type="button" role="tab" data-pane="notices">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 17 V11 A6 6 0 0 1 18 11 V17 L20 19 H4 Z M10 21.5 H14" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"/></svg>
+            NOTICES
+          </button>
           <button type="button" role="tab" data-pane="exploits">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 10-13h-7z" fill="currentColor"/></svg>
             EXPLOITS
@@ -146,6 +150,13 @@
               <button type="button" role="tab" data-tab="stats">STATS</button>
             </div>
             <div id="records-body" class="records-body"></div>
+          </section>
+        </div>
+        <!-- NOTICES (script.js's renderNotices): every notice the game has shown, newest first -->
+        <div class="menu-pane" data-pane="notices" hidden>
+          <section class="panel panel-notices">
+            <h2>NOTICES</h2>
+            <div class="notices-body" id="notices-body"></div>
           </section>
         </div>
         <div class="menu-pane" data-pane="exploits">
@@ -254,6 +265,8 @@
               <p>Once a day: a free exploit for your next game (not in DAILY, PUZZLE or VS), 25 KEYS, and 3 each of BUGS, CACHE and CRYPTO. Every 7th day in a row you play, 3 MASTER KEYS too.</p>
               <p class="store-streak" id="login-streak"></p>
               <button type="button" class="store-buy" id="daily-claim">CLAIM</button>
+              <!-- (what today's drop gave, once it's claimed: here, not as a pop-up) -->
+              <p class="daily-got" id="daily-got" hidden></p>
             </div>
             <!-- BOOSTERS (script.js's BOOSTERS, store.js): bought with KEYS -->
             <div class="store-rule" aria-hidden="true">================================================================================</div>
@@ -398,6 +411,7 @@
         <button type="button" class="card-back home-back" id="home-back" aria-label="Back to the title screen">&larr; BACK</button>
         <div class="home-head">
           <h1>BYTE<span>FALL</span></h1>
+          <p class="home-tagline">// MAIN MENU</p>
         </div>
         <div class="level-bar" id="level-bar" aria-label="Level and Decryptor rank">
           <span id="level-label">LV 0</span>
@@ -460,6 +474,9 @@
         <h1>BYTE<span>FALL</span></h1>
         <p class="tagline" id="game-mode-label">// DECRYPTION TERMINAL</p>
       </header>
+      <!-- THE NOTICE LINE (script.js's showToast): every notice in one spot on every screen, the line
+           under BYTEFALL, over its own words while it shows -->
+      <p class="notice-line" id="notice-line" role="status" aria-live="polite" hidden></p>
 
       <div class="hud">
         <div class="vs-status" id="vs-status"></div>
@@ -523,8 +540,6 @@
           <div class="chain-meter left" aria-hidden="true"></div>
           <div class="chain-meter right" aria-hidden="true"></div>
           <div class="incoming" id="incoming" hidden></div>
-          <!-- EXPLOIT READY // NAME: over the overflow row, on screen until the exploit is used -->
-          <div class="exploit-notice" id="exploit-notice" hidden></div>
           <div class="board cpu-full" id="cpu-full" hidden aria-hidden="true"></div>
           <!-- VS CPU: pick the opponent, then START (it bursts apart; it comes back after the match).
                Laid out as the main menu's mode card, in the board's place until START -->
@@ -728,7 +743,6 @@
   </div>
 
   <canvas id="board-fx" aria-hidden="true"></canvas>
-  <div id="toast" class="toast" role="status" hidden></div>
   <div class="crt-fx" aria-hidden="true"><i class="crt-roll"></i></div>
 
   <!-- THE BLACK MARKET's window (script.js's openShop): a side slot's offer, its price, BUY -->
@@ -795,6 +809,8 @@
         <span class="oxp-bar"><i id="oxp-fill"></i></span>
         <span class="oxp-gain" id="oxp-gain">+0 BITS</span>
       </div>
+      <!-- EARNED: the achievements, unlocks and level ups the game held back till its end -->
+      <div class="overlay-earned" id="overlay-earned" hidden></div>
       <p id="new-best" class="new-best" hidden>NEW HIGH SCORE</p>
       <!-- (no space between the two: a space is a different width in each font) -->
       <button id="overlay-restart-btn">NEW SESSION</button><button id="overlay-share-btn" class="overlay-share-btn" hidden>SHARE</button>
@@ -802,55 +818,55 @@
     </div>
   </div>
 
-  <script src="js/bot-svg.js?v=520"></script>
-  <script src="js/unlocks.js?v=520"></script>
-  <script src="js/progress.js?v=520"></script>
-  <script src="js/music/output.js?v=520"></script>
-  <script src="js/music/mixes.js?v=520"></script>
-  <script src="js/sfx.js?v=520"></script>
-  <script src="js/music/music-bytefall-theme.js?v=520"></script>
-  <script src="js/music/music-sleep-mode.js?v=520"></script>
-  <script src="js/music/music-brute-force.js?v=520"></script>
-  <script src="js/music/music-deep-web.js?v=520"></script>
-  <script src="js/music/music-zero-day.js?v=520"></script>
-  <script src="js/music/music-system-restore.js?v=520"></script>
-  <script src="js/music/music-night-drive.js?v=520"></script>
-  <script src="js/music/music-standby-mode.js?v=520"></script>
-  <script src="js/music/music-core-dump.js?v=520"></script>
-  <script src="js/music/music-handshake.js?v=520"></script>
-  <script src="js/music/music-stack-overflow.js?v=520"></script>
-  <script src="js/music/music-generated.js?v=520"></script>
-  <script src="js/music/music.js?v=520"></script>
-  <script src="js/data/puzzles.js?v=520"></script>
-  <script src="js/data/daily-puzzles.js?v=520"></script>
-  <script src="js/cpu.js?v=520"></script>
-  <script src="js/fx.js?v=520"></script>
-  <script src="js/viz.js?v=520"></script>
-  <script src="js/pixel.js?v=520"></script>
-  <script src="js/minibot.js?v=520"></script>
-  <script src="js/seasons.js?v=520"></script>
-  <script src="js/bigart.js?v=520"></script>
-  <script src="js/scenes.js?v=520"></script>
-  <script src="js/weather.js?v=520"></script>
-  <script src="js/visitors.js?v=520"></script>
-  <script src="js/data/bot-anims.js?v=520"></script>
-<script src="js/wanderers.js?v=520"></script>
-  <script src="js/tutorial.js?v=520"></script>
-  <script src="js/puzzle-sim.js?v=520"></script>
-  <script src="js/led-banner.js?v=520"></script>
-  <script src="js/infections.js?v=520"></script>
-  <script src="js/script.js?v=520"></script>
-  <script src="js/grid-bg.js?v=520"></script>
-  <script src="js/lights.js?v=520"></script>
-  <script src="js/inf-test.js?v=520"></script>
-  <script src="js/extsource.js?v=520"></script>
-  <script src="js/player.js?v=520"></script>
-  <script src="js/billing.js?v=520"></script>
-  <script src="js/store.js?v=520"></script>
-  <script src="js/ads-config.js?v=520"></script>
-  <script src="js/ads.js?v=520"></script>
-  <script src="js/start.js?v=520"></script>
-  <script src="js/place.js?v=520"></script>
-  <script src="js/saver.js?v=520"></script>
+  <script src="js/bot-svg.js?v=521"></script>
+  <script src="js/unlocks.js?v=521"></script>
+  <script src="js/progress.js?v=521"></script>
+  <script src="js/music/output.js?v=521"></script>
+  <script src="js/music/mixes.js?v=521"></script>
+  <script src="js/sfx.js?v=521"></script>
+  <script src="js/music/music-bytefall-theme.js?v=521"></script>
+  <script src="js/music/music-sleep-mode.js?v=521"></script>
+  <script src="js/music/music-brute-force.js?v=521"></script>
+  <script src="js/music/music-deep-web.js?v=521"></script>
+  <script src="js/music/music-zero-day.js?v=521"></script>
+  <script src="js/music/music-system-restore.js?v=521"></script>
+  <script src="js/music/music-night-drive.js?v=521"></script>
+  <script src="js/music/music-standby-mode.js?v=521"></script>
+  <script src="js/music/music-core-dump.js?v=521"></script>
+  <script src="js/music/music-handshake.js?v=521"></script>
+  <script src="js/music/music-stack-overflow.js?v=521"></script>
+  <script src="js/music/music-generated.js?v=521"></script>
+  <script src="js/music/music.js?v=521"></script>
+  <script src="js/data/puzzles.js?v=521"></script>
+  <script src="js/data/daily-puzzles.js?v=521"></script>
+  <script src="js/cpu.js?v=521"></script>
+  <script src="js/fx.js?v=521"></script>
+  <script src="js/viz.js?v=521"></script>
+  <script src="js/pixel.js?v=521"></script>
+  <script src="js/minibot.js?v=521"></script>
+  <script src="js/seasons.js?v=521"></script>
+  <script src="js/bigart.js?v=521"></script>
+  <script src="js/scenes.js?v=521"></script>
+  <script src="js/weather.js?v=521"></script>
+  <script src="js/visitors.js?v=521"></script>
+  <script src="js/data/bot-anims.js?v=521"></script>
+<script src="js/wanderers.js?v=521"></script>
+  <script src="js/tutorial.js?v=521"></script>
+  <script src="js/puzzle-sim.js?v=521"></script>
+  <script src="js/led-banner.js?v=521"></script>
+  <script src="js/infections.js?v=521"></script>
+  <script src="js/script.js?v=521"></script>
+  <script src="js/grid-bg.js?v=521"></script>
+  <script src="js/lights.js?v=521"></script>
+  <script src="js/inf-test.js?v=521"></script>
+  <script src="js/extsource.js?v=521"></script>
+  <script src="js/player.js?v=521"></script>
+  <script src="js/billing.js?v=521"></script>
+  <script src="js/store.js?v=521"></script>
+  <script src="js/ads-config.js?v=521"></script>
+  <script src="js/ads.js?v=521"></script>
+  <script src="js/start.js?v=521"></script>
+  <script src="js/place.js?v=521"></script>
+  <script src="js/saver.js?v=521"></script>
 </body>
 </html>

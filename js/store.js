@@ -93,8 +93,14 @@ const Store = (() => {
   document.getElementById('store-sign').innerHTML = CURRENCY_SVG.repeat(3);
   const claimBtn = document.getElementById('daily-claim');
   claimBtn.addEventListener('click', () => {
-    if (window.dailyDrop && window.dailyDrop.claim()) say('CLAIMED // YOUR FREE EXPLOIT IS ON THE EXPLOIT BUTTON');
+    const got = !!(window.dailyDrop && window.dailyDrop.claim());
     render();
+    if (got) { // (what it gave, right under CLAIM: no pop-up)
+      const line = document.getElementById('daily-got');
+      line.classList.remove('fresh');
+      void line.offsetWidth;
+      line.classList.add('fresh');
+    }
   });
 
   function render() {
@@ -126,6 +132,10 @@ const Store = (() => {
     claimBtn.disabled = !claimable;
     claimBtn.textContent = claimable ? 'CLAIM' : 'CLAIMED \u2713';
     document.getElementById('daily-drop-state').textContent = claimable ? 'READY' : 'BACK TOMORROW';
+    const got = window.dailyDrop && window.dailyDrop.got ? window.dailyDrop.got() : '';
+    const gotEl = document.getElementById('daily-got');
+    gotEl.hidden = !got;
+    gotEl.textContent = got ? `CLAIMED TODAY // ${got}` : '';
     if (window.dailyDrop) { // LOGIN STREAK: days in a row, a pip for each day of this run of 7
       const s = window.dailyDrop.streak();
       const pips = Array.from({ length: s.every }, (_, i) => `<i class="${i < s.into ? 'on' : ''}"></i>`).join('');
