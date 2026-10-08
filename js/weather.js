@@ -66,8 +66,8 @@ function createWeather(api) {
 
   // What each kind brings (rain, snow, hail: how heavy; wind: how hard; clouds: their tone)
   const KIND = {
-    drizzle: { rain: 0.35, len: 2, speed: [230, 290], clouds: 'grey', umbrellas: 0.45, puddles: 0.4 },
-    rain: { rain: 1, len: 3, speed: [380, 460], clouds: 'grey', umbrellas: 0.8, puddles: 1, rainbow: 0.45 },
+    drizzle: { rain: 0.35, len: 2, speed: [230, 290], clouds: 'gray', umbrellas: 0.45, puddles: 0.4 },
+    rain: { rain: 1, len: 3, speed: [380, 460], clouds: 'gray', umbrellas: 0.8, puddles: 1, rainbow: 0.45 },
     storm: { rain: 1.8, len: 5, speed: [520, 640], wind: 0.35, clouds: 'storm', lightning: true, umbrellas: 0.9, puddles: 1.3, rainbow: 0.35 },
     sunshower: { rain: 0.55, len: 3, speed: [360, 430], sun: true, umbrellas: 0.5, puddles: 0.4, rainbow: 0.9 },
     hail: { hail: 1, rain: 0.35, len: 3, speed: [420, 500], clouds: 'storm', umbrellas: 0.8 },
@@ -81,7 +81,7 @@ function createWeather(api) {
     fireflies: { fireflies: true, night: true },
     meteors: { meteors: true, night: true },
     moon: { moon: true, night: true }, // (a clear night, tonight's moon in its real phase)
-    overcast: { clouds: 'grey' }, // (a grey day: the clouds alone)
+    overcast: { clouds: 'gray' }, // (a gray day: the clouds alone)
     flurries: { snow: 0.45, clouds: 'snow' }, // (a few flakes: the first snow of autumn, a late one in spring)
     thundersnow: { snow: 1.8, clouds: 'storm', lightning: true, settle: true, umbrellas: 0 }, // (rare: lightning in the snow)
     diamonddust: { motes: 'sparkle', cold: true }, // (a still, bitter morning: ice crystals glittering in the air)

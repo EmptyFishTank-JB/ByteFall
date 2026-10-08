@@ -295,12 +295,12 @@ function composeGenerated(opts = {}) {
   };
   // A phrase of two bars from bar b0: 0 the hook, 1 its answer (its end turned), 3 the cadence (cut
   // short, home to the key's chord's root and held)
-  function realize(cell, b0, centre, variant) {
-    const lo = centre - 4;
-    const hi = centre + 5;
+  function realize(cell, b0, center, variant) {
+    const lo = center - 4;
+    const hi = center + 5;
     const list = variant === 3 ? cell.notes.filter((n) => n.s <= BS + (BEAT === 6 ? 0 : BEAT)) : cell.notes;
     const out = [];
-    let d = toneNear(bars[b0], centre + cell.start - 2);
+    let d = toneNear(bars[b0], center + cell.start - 2);
     list.forEach((n, i) => {
       const b = bars[(b0 + Math.floor(n.s / BS)) % N];
       if (i > 0) {
@@ -328,9 +328,9 @@ function composeGenerated(opts = {}) {
     const len = role === 'intro' || role === 'break' ? 4 : 8;
     if (len === 8) {
       const cell = cells[role] || cells.A;
-      const centre = 7 + (role === 'B' ? 2 : role === 'C' ? -1 : 0);
+      const center = 7 + (role === 'B' ? 2 : role === 'C' ? -1 : 0);
       [0, 1, 0, 3].forEach((variant, p) => {
-        for (const n of realize(cell, at + p * 2, centre, variant)) {
+        for (const n of realize(cell, at + p * 2, center, variant)) {
           const b = bars[(at + p * 2 + Math.floor(n.s / BS)) % N];
           b.lead[n.s % BS] = { m: dm(n.d, b), dur: n.dur };
           b.harm[n.s % BS] = { m: dm(n.d - 2, b), dur: n.dur };

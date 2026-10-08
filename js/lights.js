@@ -23,7 +23,7 @@
       '..ccccCC..', '...cccC...', '....cC....'],
   };
   const BASE = { s: '#3a4a3e', S: '#5a6a5e', g: '#3f7a2a', o: '#ff8a1f', O: '#c8600f', y: '#ffd23f', Y: '#d9a81c', w: '#fff6e8', h: '#fff8e8' };
-  // (each bulb: its kind, its color, its glow; the angles go round with them, so no two neighbours match)
+  // (each bulb: its kind, its color, its glow; the angles go round with them, so no two neighbors match)
   const c9 = (c, glow) => ({ kind: 'c9', c, glow });
   const SETS = {
     'season-winter': { wire: '#1d3a26', bulbs: [c9('#ffe2a8', '255, 214, 150'), c9('#ffae45', '255, 170, 70'), c9('#ff5e4a', '255, 96, 72'), c9('#7ee08a', '110, 224, 130'), c9('#8ab8ff', '128, 178, 255')] },

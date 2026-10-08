@@ -257,7 +257,7 @@ function createVisitors(api) {
         '..HH.....HH...HH....HH....', '..H.......H..HH......H....', '.HH.......HH.H.......HH...', '.ss........s.ss.......s...'],
       b: { 16: '...HHH.HHH....HHHHHH......', 17: '....HHHH......HHHH........', 18: '....HH.HH....HH..HH.......', 19: '...HH...HH..HH....HH......', 20: '...H.....H..H......H......', 21: '..ss.....ss.ss.....ss.....' },
     },
-    // A ZOMBIE (OCTOBER, in a horde): grey-green, its arms out, shuffling; c and d, the THRILLER
+    // A ZOMBIE (OCTOBER, in a horde): gray-green, its arms out, shuffling; c and d, the THRILLER
     // (claws up to one side, then the other)
     zombie: {
       pal: { h: '#2b2420', k: '#8aa279', e: '#f4f1b0', m: '#2a1a1a', c: '#5a4a6e', C: '#3e3350', K: '#6d8560', p: '#3b3a33', s: '#1b1b1b' },
@@ -1055,12 +1055,12 @@ function createVisitors(api) {
   // drawn in masses with lit tops and dark undersides, so their stacking and thickness show where
   // they overlap. The birds and bats fly at one of three depths among them (behind the middle
   // layer, between, or in front of them all) and now and then climb or dip a layer, so they fly in
-  // and out of the cloud. In OCTOBER it's purple-grey, and lightning flickers inside it now and
+  // and out of the cloud. In OCTOBER it's purple-gray, and lightning flickers inside it now and
   // then, lighting it from within. After a few minutes it lifts (over the forest it stays).
   const CLOUD_ODDS = 0.25; // (each OCTOBER or NOVEMBER visit that comes due: the overcast instead)
   const CLOUD_TONES = {
     spooky: [[30, 24, 40], [50, 40, 64], [76, 63, 94]],
-    grey: [[42, 45, 51], [62, 66, 73], [88, 92, 100]],
+    gray: [[42, 45, 51], [62, 66, 73], [88, 92, 100]],
     storm: [[26, 29, 38], [42, 47, 58], [62, 68, 82]], // (weather.js's: a thunderstorm's, the hail's)
     snow: [[74, 78, 88], [100, 104, 114], [128, 132, 142]], // (and the snow's: pale, heavy)
   };
@@ -1131,7 +1131,7 @@ function createVisitors(api) {
     const cw = Math.ceil(W / cell);
     const ch = Math.ceil(H / cell);
     if (cv.width !== cw || cv.height !== ch) { cv.width = cw; cv.height = ch; }
-    const tone = CLOUD_TONES[c.spooky ? 'spooky' : c.tone || 'grey'][i];
+    const tone = CLOUD_TONES[c.spooky ? 'spooky' : c.tone || 'gray'][i];
     const drift = [0.05, 0.1, 0.17][i] * c.t * c.dir;
     const seed = [3, 47, 91][i];
     const sx = cell / [70, 56, 44][i];

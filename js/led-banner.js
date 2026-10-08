@@ -95,7 +95,7 @@ const LedBanner = (() => {
         if (xx < 0 || yy < 0 || xx >= W || yy >= H) return false;
         const r = rows[Math.floor(yy / lineH)];
         if (kind === 'marquee') return r.on((xx + shift) % r.w, yy % lineH);
-        const off = Math.floor((W - r.w) / 2); // (each line centred)
+        const off = Math.floor((W - r.w) / 2); // (each line centered)
         return r.on(xx - off, yy % lineH);
       };
       const R = cell * (kind === 'pixels' ? 0.5 : 0.4);
@@ -134,7 +134,7 @@ const LedBanner = (() => {
   // A megaphone in pixels: ADWARE's mark, read the same in any language (no letters to translate)
   const MEGAPHONE = ['.......xx', '.....xxxx', 'xxx.xxxxx', 'xxxxxxxxx', 'xxx.xxxxx', '.x...xxxx', '.x.....xx'];
   const fromRows = (rows) => ({ w: rows[0].length, h: rows.length, on: (x, y) => y >= 0 && x >= 0 && y < rows.length && x < rows[0].length && rows[y][x] !== '.' });
-  // The same, as an SVG in the text's own colour (for a button)
+  // The same, as an SVG in the text's own color (for a button)
   const iconSvg = (rows = MEGAPHONE) => `<svg class="px-icon" viewBox="0 0 ${rows[0].length} ${rows.length}" shape-rendering="crispEdges" aria-hidden="true">${rows.map((r, y) => [...r].map((ch, x) => (ch === '.' ? '' : `<rect x="${x}" y="${y}" width="1" height="1"/>`)).join('')).join('')}</svg>`;
   // text: words (drawn in the game's font) or pixel rows (an icon)
   function tag(text, { px = 9, cell = 1.5, fg = '#111', bg = css('--accent', '#ffd166') } = {}) {

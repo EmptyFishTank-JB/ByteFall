@@ -218,7 +218,7 @@ const makeInfections = () => {
         const stopAt = 1.6 + r * 0.45; // (the reels stop in turn)
         const dir = r % 2 ? -1 : 1; // (side to side: the middle reel rolls the other way)
         const run = Math.min(cyc, stopAt);
-        // (the strip: the symbols 6 dots apart, rolling past the reel's window; it lands with the 7 centred)
+        // (the strip: the symbols 6 dots apart, rolling past the reel's window; it lands with the 7 centered)
         const strip = SYMS.length * 6;
         // (rolling, slowing near the stop; stopped, the strip sits with the 7 in the middle)
         const travel = cyc < stopAt ? Math.floor(run * 30 - Math.max(0, run - stopAt + 0.5) * 18) : 0;
@@ -392,7 +392,7 @@ const makeInfections = () => {
     if (r !== undefined && melts(r, c)) { const k = Math.floor(performance.now() / 120) + r * 3 + c; return Array.from({ length: n }, (_, i) => MELT[(k + i) % MELT.length]).join(''); }
     return junk(n);
   };
-  // ROOMS: each corrupted bit a room (walls, doors where a neighbour's a room too, things lying about:
+  // ROOMS: each corrupted bit a room (walls, doors where a neighbor's a room too, things lying about:
   // letters, numbers, symbols), and a character or two going from room to room
   const ROOM_ITEMS = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789$%&?*#=+';
   const walkers = []; // { r, c, x, y, dx, dy, ch }
@@ -586,7 +586,7 @@ const makeInfections = () => {
     ['.x.x.x.x', 'xxxxxxxx', 'x..xx..x', 'xxxxxxxx', 'xx....xx', 'xxxxxxxx', '.x.x.x.x'],
   ].map(wide);
   // MOSAIC: one of the big pictures fitted to the whole board (CELL_W x CELL_H characters a bit),
-  // kept to its shape, centred
+  // kept to its shape, centered
   const CELL_W = 12;
   const CELL_H = 6;
   let mosaic = null;

@@ -11,7 +11,7 @@ together.
 |---|---|---|---|---|
 | **KEYS** | key, the theme's accent | money | bits decrypted (any way), chains of 5 and 7, levels, achievements, first puzzle solves, the day's first daily game, the DAILY DROP | 1 per 10 bits; +2 at a 5-link chain, +5 at 7; 10 a level; 10 an achievement; 5 the first daily game; 25 the DAILY DROP; first puzzle solves 2 / 4 / 6 (EASY / NORMAL / HARD) |
 | **BUGS** | bug with two antennae, roach brown `#b5824a` | common | bits decrypted **down a column** | 1 per 5 |
-| **CACHE** | stacked disks, light grey `#c8ccd0` | common | bits decrypted **across a row** | 1 per 5 |
+| **CACHE** | stacked disks, light gray `#c8ccd0` | common | bits decrypted **across a row** | 1 per 5 |
 | **CRYPTO** | the game's coin: a hexagon with a C struck through twice, Bitcoin orange `#f7931a` | common | **chain links** from the 3rd on | 1 per link |
 | **ROOTKITS** | `#`, red `#ff3b4e` | uncommon | a bit decrypted **across and down at once**; **layers broken** down to their bit; **BYTES** (HARD) | 1 per 2 cross decrypts; 1 per 20 layers broken; 1 per BYTE |
 | **MASTER KEYS** | the heavier key, its head carrying the currency sign's two lines, deep gold `#e8b10e` with a glow | rare | **every 5th level**; the **day's first daily game**; the **day's first VS win**; every **7th day in a row** (LOGIN STREAK, with the DAILY DROP) | 1 each; 3 for the streak |
@@ -23,7 +23,7 @@ The DAILY DROP (claimed in the STORE once a day) also gives 3 each of BUGS, CACH
 Each resource holds at most **999** (KEYS have no cap); what's earned past that is lost. A bit decrypted both ways counts as a cross decrypt only, not also as BUGS and CACHE. Bits cleared
 by exploits earn no resources. Resources come whole once enough
 events add up; the part toward the next one is kept between games. The colors are the same in
-every theme (`--res-*` in `css/style.css`), but PAPER uses darker ones and MONOCHROME greys.
+every theme (`--res-*` in `css/style.css`), but PAPER uses darker ones and MONOCHROME grays.
 
 ## Where each mode earns
 

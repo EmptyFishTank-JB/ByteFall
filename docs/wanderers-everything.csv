@@ -1,5 +1,5 @@
 ﻿Category,Item,Season / when,What it does,In game,Status,Where
-Season,ALL YEAR,Every day,"Headphones, viruses, the bots' everyday behaviour",✓,In game,js/seasons.js
+Season,ALL YEAR,Every day,"Headphones, viruses, the bots' everyday behavior",✓,In game,js/seasons.js
 Season,HALLOWEEN,Oct 1 – 31,"Costumes, gummy-drop snacks, monsters, the scary tree, the jack o' lantern, the scary fog",✓,In game,js/seasons.js
 Season,NOVEMBER,All of November,"Turkey, crows, migrating birds, the fog and the fog wanderer",✓,In game,js/seasons.js
 Season,WINTER,Dec 1 – Jan 6,"Snow, beanies/earmuffs/scarves, cookie bites, the penguin, skaters, the snowman (sits under the December holidays)",✓,In game,js/seasons.js
@@ -81,29 +81,29 @@ Weather / event,Fog,"NOVEMBER (and HALLOWEEN, as the haunted forest)","Heavy fog
 Weather / event,Falling snow,WINTER,Snow falling over the lane,✓,In game,js/visitors.js
 Weather / event,Fireworks,"NEW YEAR'S EVE, NEW YEAR","A rocket up, bursting into pixel sparks",✓,In game,js/visitors.js
 Weather / event,Midnight countdown,NEW YEAR'S EVE,At the player's own midnight the bots count down from 10 and cheer; the sky fills with fireworks,✓,In game,js/visitors.js
-Animation / behaviour,Walk in and out,All year,"From either side, looking the way they go; up to four at once, never the same bot twice",✓,In game,"js/wanderers.js, js/visitors.js"
-Animation / behaviour,Idle,All year,Stops for a while,✓,In game,"js/wanderers.js, js/visitors.js"
-Animation / behaviour,Meet and pull faces,All year,"Two that meet stop a body apart, face each other and pull faces (14 face pairings: happy/happy, smug/annoyed, love/surprised...)",✓,In game,"js/wanderers.js, js/visitors.js"
-Animation / behaviour,Emotes,All year,"Little speech bits that fit the mood (^^, ?!, -_-, <3, haha, grr...)",✓,In game,"js/wanderers.js, js/visitors.js"
-Animation / behaviour,Poked: bolt or shake off,All year,"40% bolt off startled; otherwise -_-, shakes itself off as if dirty, a raised eyebrow, wanders on",✓,In game,"js/wanderers.js, js/visitors.js"
-Animation / behaviour,Poked: rabid (HARD / INSANE),All year,"Shakes its head, bares its teeth, three snapping lunges; then stomps off or glares",✓,In game,"js/wanderers.js, js/visitors.js"
-Animation / behaviour,Startle,All year,"Bots near a sudden pop, decrypt or bolt face it, startled (cuts a meeting short; the partner is put out)",✓,In game,"js/wanderers.js, js/visitors.js"
-Animation / behaviour,Spooked bolt,All year,"A start and a !, then off at a sprint; those near flinch",✓,In game,"js/wanderers.js, js/visitors.js"
-Animation / behaviour,"Run in, out of breath",All year,"Arrives at a run, stops to catch its breath (huff, phew)",✓,In game,"js/wanderers.js, js/visitors.js"
-Animation / behaviour,Pop in (pixelate in),All year,"Appears in place, pixelating in; those near jump",✓,In game,"js/wanderers.js, js/visitors.js"
-Animation / behaviour,Decrypt out,All year,5% leave by pixelating away,✓,In game,"js/wanderers.js, js/visitors.js"
-Animation / behaviour,GLITCH lurch,All year,GLITCH walks in lurches,✓,In game,"js/wanderers.js, js/visitors.js"
-Animation / behaviour,Push scenery,All year,"Arrives pushing the season's piece, slowly, straining, and leaves it standing",✓,In game,"js/wanderers.js, js/visitors.js"
-Animation / behaviour,Skating (WINTER),WINTER,"Skates in with long pushes, leaning into the glide, powder trail that melts, a blade under each foot",✓,In game,"js/wanderers.js, js/visitors.js"
-Animation / behaviour,Headphones vibe,All year,"Nodders follow the kicks, tappers the hats; steps on the beat while walking",✓,In game,"js/wanderers.js, js/visitors.js"
-Animation / behaviour,CORE DUMP headbang,All year,"Drawn 8-frame headbang with long hair, one a beat in the gallop, a heavy one over two beats in the half-time",✓,In game,"js/wanderers.js, js/visitors.js"
-Animation / behaviour,CORE DUMP windmill,All year,Drawn 16-frame windmill with long hair in the blast beats,✓,In game,"js/wanderers.js, js/visitors.js"
-Animation / behaviour,Snack,All year,"Seasonal snack: pulled out, tossed, caught, chewed",✓,In game,"js/wanderers.js, js/visitors.js"
-Animation / behaviour,Fog bumps,"NOVEMBER, HALLOWEEN (fog)",In the fog two that walk into each other jump and knock apart; now and then one bolts,✓,In game,"js/wanderers.js, js/visitors.js"
-Animation / behaviour,Countdown cheer,NEW YEAR'S EVE,Count down from 10 at midnight NYE and cheer,✓,In game,"js/wanderers.js, js/visitors.js"
-Animation / behaviour,Snowman sneaks off,WINTER,"After a while: eyes shift side to side, a blink, then hops off; 1 in 5 trips or loses its head, then comes apart into a fine powder of snow from the top down, settling in a heap that melts away",✓,In game,"js/wanderers.js, js/visitors.js"
-Animation / behaviour,TROJAN reveal,All year,"Disguise peels off pixel by pixel from the top, horse resolving under it",✓,In game,"js/wanderers.js, js/visitors.js"
-Animation / behaviour,PIXEL MODE,—,"Bots on a pixel grid at twice the art's resolution: whole-pixel moves, turns redrawn (in the BOT SANDBOX only so far)",,Planned (TODO),"TODO.md: PIXEL MODE, pass 2 (visitors and viruses, then on in the game)"
+Animation / behavior,Walk in and out,All year,"From either side, looking the way they go; up to four at once, never the same bot twice",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behavior,Idle,All year,Stops for a while,✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behavior,Meet and pull faces,All year,"Two that meet stop a body apart, face each other and pull faces (14 face pairings: happy/happy, smug/annoyed, love/surprised...)",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behavior,Emotes,All year,"Little speech bits that fit the mood (^^, ?!, -_-, <3, haha, grr...)",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behavior,Poked: bolt or shake off,All year,"40% bolt off startled; otherwise -_-, shakes itself off as if dirty, a raised eyebrow, wanders on",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behavior,Poked: rabid (HARD / INSANE),All year,"Shakes its head, bares its teeth, three snapping lunges; then stomps off or glares",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behavior,Startle,All year,"Bots near a sudden pop, decrypt or bolt face it, startled (cuts a meeting short; the partner is put out)",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behavior,Spooked bolt,All year,"A start and a !, then off at a sprint; those near flinch",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behavior,"Run in, out of breath",All year,"Arrives at a run, stops to catch its breath (huff, phew)",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behavior,Pop in (pixelate in),All year,"Appears in place, pixelating in; those near jump",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behavior,Decrypt out,All year,5% leave by pixelating away,✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behavior,GLITCH lurch,All year,GLITCH walks in lurches,✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behavior,Push scenery,All year,"Arrives pushing the season's piece, slowly, straining, and leaves it standing",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behavior,Skating (WINTER),WINTER,"Skates in with long pushes, leaning into the glide, powder trail that melts, a blade under each foot",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behavior,Headphones vibe,All year,"Nodders follow the kicks, tappers the hats; steps on the beat while walking",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behavior,CORE DUMP headbang,All year,"Drawn 8-frame headbang with long hair, one a beat in the gallop, a heavy one over two beats in the half-time",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behavior,CORE DUMP windmill,All year,Drawn 16-frame windmill with long hair in the blast beats,✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behavior,Snack,All year,"Seasonal snack: pulled out, tossed, caught, chewed",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behavior,Fog bumps,"NOVEMBER, HALLOWEEN (fog)",In the fog two that walk into each other jump and knock apart; now and then one bolts,✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behavior,Countdown cheer,NEW YEAR'S EVE,Count down from 10 at midnight NYE and cheer,✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behavior,Snowman sneaks off,WINTER,"After a while: eyes shift side to side, a blink, then hops off; 1 in 5 trips or loses its head, then comes apart into a fine powder of snow from the top down, settling in a heap that melts away",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behavior,TROJAN reveal,All year,"Disguise peels off pixel by pixel from the top, horse resolving under it",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behavior,PIXEL MODE,—,"Bots on a pixel grid at twice the art's resolution: whole-pixel moves, turns redrawn (in the BOT SANDBOX only so far)",,Planned (TODO),"TODO.md: PIXEL MODE, pass 2 (visitors and viruses, then on in the game)"
 Mood (face),HAPPY,All year,A face the bots make (with its emotes),✓,In game,js/wanderers.js MOOD_EMOTES
 Mood (face),HIT,All year,A face the bots make (with its emotes),✓,In game,js/wanderers.js MOOD_EMOTES
 Mood (face),WORRIED,All year,A face the bots make (with its emotes),✓,In game,js/wanderers.js MOOD_EMOTES
@@ -120,10 +120,10 @@ Mood (face),SKEPTIC,All year,A face the bots make (with its emotes),✓,In game,
 Mood (face),ANGRY,All year,A face the bots make (with its emotes),✓,In game,js/wanderers.js MOOD_EMOTES
 Mood (face),SNARL,All year,A face the bots make (with its emotes),✓,In game,js/wanderers.js MOOD_EMOTES
 Mood (face),MUNCH,All year,A face the bots make (with its emotes),✓,In game,js/wanderers.js MOOD_EMOTES
-Animation / behaviour,LIGHTS OUT,HALLOWEEN,"The card goes dark, only the bots' eyes blinking; back on, one has moved or a monster stands among them",✓,In game,js/visitors.js
+Animation / behavior,LIGHTS OUT,HALLOWEEN,"The card goes dark, only the bots' eyes blinking; back on, one has moved or a monster stands among them",✓,In game,js/visitors.js
 Visitor,The HAND from under the floor,HALLOWEEN,"Rises under a bot and grabs it; it struggles, breaks free and runs; poked: lets go",✓,In game,js/visitors.js
 Visitor,Glowing eyes,HALLOWEEN (haunted forest),"Blink between the trees, edging after the bots; poked: shut",✓,In game,js/visitors.js
-Animation / behaviour,POSSESSED bot,HALLOWEEN,"Red glowing eyes, stiff slow walk, others scared of it; poked: a little ghost shakes out and floats away",✓,In game,"js/wanderers.js, js/visitors.js"
+Animation / behavior,POSSESSED bot,HALLOWEEN,"Red glowing eyes, stiff slow walk, others scared of it; poked: a little ghost shakes out and floats away",✓,In game,"js/wanderers.js, js/visitors.js"
 Visitor,WEREWOLF (full moon),HALLOWEEN,"Night falls, a full moon rises; it lopes in and howls (bots near bolt), then runs off; poked: growls and runs",✓,In game,js/visitors.js
 Weather / event,BLOOD FOG,HALLOWEEN (haunted forest; rare),"The mist turns from white to red as a blood moon rises behind the trees; the wanderer chases a bot",✓,In game,js/visitors.js
 Idea: by month,Resolution runner,January,,,Idea,WANDERERS.md

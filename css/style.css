@@ -61,9 +61,9 @@ button, input, select, textarea { line-height: inherit; }
   --accent: #ffd166; /* exploits, warnings, cracked layers */
   --accent-rgb: 255, 209, 102;
   --cracked: var(--accent); /* cracked layers; SPECTRUM keeps them still */
-  /* The RESOURCES' own colors, the same in every theme (PAPER darker, MONOCHROME in greys); KEYS take the accent */
+  /* The RESOURCES' own colors, the same in every theme (PAPER darker, MONOCHROME in grays); KEYS take the accent */
   --res-bugs: #b5824a; /* roach brown */
-  --res-cache: #c8ccd0; /* light grey */
+  --res-cache: #c8ccd0; /* light gray */
   --res-crypto: #f7931a; /* Bitcoin orange */
   --res-rootkits: #ff3b4e; /* red */
   --res-master: #e8b10e; /* deep gold, with a glow */
@@ -128,7 +128,7 @@ button, input, select, textarea { line-height: inherit; }
   --heat-peak-bg: #124656;
 }
 
-/* AMBER CRT: an old amber monitor, grey layers, cyan for cracks and exploits (the amber's opposite) */
+/* AMBER CRT: an old amber monitor, gray layers, cyan for cracks and exploits (the amber's opposite) */
 [data-theme="amber-crt"] {
   --bg: #0a0703;
   --bg-solid: #040301;
@@ -356,7 +356,7 @@ button, input, select, textarea { line-height: inherit; }
   --cell-bg: #fffdf7;
   --fg: #1b1d1c; /* near-black ink */
   --fg-rgb: 27, 29, 28;
-  --fg-dim: #6a6a68; /* grey */
+  --fg-dim: #6a6a68; /* gray */
   --accent: #a35f00;
   --accent-rgb: 163, 95, 0;
   --danger: #c62828;
@@ -454,7 +454,7 @@ button, input, select, textarea { line-height: inherit; }
   --heat-peak-border: #ffe0ea;
   --heat-peak-text: #fff5f8;
   --heat-peak-bg: #5a1a2c;
-  --cracked: #e4e4e4; /* layers stay still: grey, and near-white once cracked */
+  --cracked: #e4e4e4; /* layers stay still: gray, and near-white once cracked */
 }
 
 * { box-sizing: border-box; }
@@ -774,7 +774,7 @@ body.vs-mode .vs-title span { color: var(--accent); text-shadow: 0 0 8px var(--a
 }
 
 /* SPECTRUM: each bit cycles hue on its own (random speed, start and direction, set per bit
-   by script.js); the rest of the page drifts slowly through the hues together. Grey and
+   by script.js); the rest of the page drifts slowly through the hues together. Gray and
    white (the layers) are untouched by hue-rotate, so they stay still. */
 @property --bit-h {
   syntax: '<number>';
@@ -1163,7 +1163,7 @@ body.vs-mode .stat-best { display: none; }
 .cpu-grid i.over { border-color: rgba(var(--danger-rgb), 0.45); }
 .cpu-grid i.over-edge { border-bottom: 2px solid var(--danger); }
 .cpu-grid i.bit { background: rgba(var(--fg-rgb), 0.14); border-color: var(--fg-dim); text-shadow: 0 0 4px rgba(var(--fg-rgb), 0.6); }
-/* Layers colored like yours: [=] in the layer grey, [-] (cracked) in the cracked color */
+/* Layers colored like yours: [=] in the layer gray, [-] (cracked) in the cracked color */
 .cpu-grid i.layer { background: repeating-linear-gradient(45deg, var(--layer-a), var(--layer-a) 2px, var(--layer-b) 2px, var(--layer-b) 4px); border: 1px dashed var(--layer-border); color: var(--layer-text); }
 .cpu-grid i.layer.cracked { border-color: var(--cracked); color: var(--cracked); }
 .cpu-grid i.over.bit, .cpu-grid i.over.layer { border-color: var(--danger); color: var(--danger); }
@@ -1953,7 +1953,7 @@ header { margin-bottom: 6px; }
 .corner-btn[hidden] { display: none; }
 #restart-btn.corner-btn, #vs-quit.corner-btn { padding: 0; letter-spacing: 0; } /* not the old text buttons' padding */
 @media (hover: hover) { #restart-btn.corner-btn:hover { background: rgba(var(--fg-rgb), 0.08); } }
-/* Nothing to restart yet (before the first drop, or once the run is over): greyed out */
+/* Nothing to restart yet (before the first drop, or once the run is over): grayed out */
 #restart-btn.corner-btn:disabled { color: var(--fg-dim); opacity: 0.4; cursor: default; background: rgba(255, 255, 255, 0.02); }
 .corner-btn svg { width: 20px; height: 20px; display: block; }
 .restart-icon, .quit-icon { left: 12px; }
@@ -3706,7 +3706,7 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
    (one BACK everywhere); the title line keeps clear of it */
 .home .home-back { position: absolute; top: 8px; left: 8px; z-index: 2; zoom: calc(1 / var(--home-zoom, 1)); } /* (not scaled with the menu on a big screen: the same BACK as everywhere, in the same corner) */
 @media (hover: hover) { .home .home-back:hover { background: rgba(var(--fg-rgb), 0.12); } }
-.home-head { padding: 0 80px; } /* (BACK's width and a gap, both sides: the title stays centred) */
+.home-head { padding: 0 80px; } /* (BACK's width and a gap, both sides: the title stays centered) */
 .home-head h1 { letter-spacing: 0.1em; } /* (the title alone: its // DECRYPTION TERMINAL is the title card's) */
 /* (the mode's card only as tall as what it holds: PLAY the one 8px gap under its last piece, the
    card's foot right under PLAY and the rows under the card right after; a mode with more than the
@@ -4315,7 +4315,7 @@ body.cards-in-settings .settings footer { font-size: 11.5px; }
   font-size: 14.5px; line-height: 15px; letter-spacing: 2px; color: var(--accent); opacity: 0.7; text-shadow: none; }
 body.cards-in-settings .settings footer :is(p, span, a) { font-size: 11.5px; }
 .settings .theme-option .lv-tag { font-size: 9px; } /* (the smallest label the game allows) */
-/* PAUSE in a game: a bordered button like BACK and the rest (the bars centred in it, at full strength;
+/* PAUSE in a game: a bordered button like BACK and the rest (the bars centered in it, at full strength;
    its bigger tap area, ::before, still reaches past the border) */
 /* (formatted as ← BACK: its width, height, border and lettering, the bars where BACK's arrow is) */
 body.in-game.can-pause .records-btn { top: 8px; right: 8px; width: auto; height: 26px; padding: 0 10px; gap: 6px; opacity: 1; border: 1px solid var(--fg); border-radius: 4px; background: transparent; color: var(--fg); font-family: inherit; font-size: 12px; letter-spacing: 1px; }
@@ -4338,7 +4338,7 @@ body.in-game.can-pause .records-btn.pause-queued { background: rgba(var(--fg-rgb
    flicker) lifts it into a layer of its own, and it would take their taps) */
 .crt > :is(.records-btn, .settings-btn) { z-index: 30; }
 
-/* Every locked item's LV n at the smallest text size (11.5px), in the accent colour, never dimmed with
+/* Every locked item's LV n at the smallest text size (11.5px), in the accent color, never dimmed with
    what it's on: the playlist's and the music player's tracks, the themes and fonts, the side slots */
 .settings button .need, .mp-tracks .need, .settings .theme-option .lv-tag { font-size: 11.5px; }
 .exploit-icon.side-slot.locked-slot > .slot-lv { font-size: 11.5px; letter-spacing: 0; color: var(--accent); filter: none; text-shadow: 0 0 4px rgba(var(--accent-rgb), 0.45); }
@@ -4348,7 +4348,7 @@ body.in-game.can-pause .records-btn.pause-queued { background: rgba(var(--fg-rgb
 .theme-black { position: fixed; inset: 0; z-index: 9990; background: #000; opacity: 0; pointer-events: none; transition: opacity 0.22s ease-in; }
 .theme-black.on { opacity: 1; pointer-events: auto; transition-timing-function: ease-out; }
 .settings .theme-option .lv-tag { padding: 1px 3px; border-radius: 2px; background: var(--panel); top: 1px; right: 2px; } /* (over the end of a long name: it reads clean) */
-/* The buttons on the game card get a base in the card's own colour (their tints laid over it), mostly
+/* The buttons on the game card get a base in the card's own color (their tints laid over it), mostly
    solid with a hint of what's behind: OCTOBER's trees, the scenery and the bots show faintly through,
    never enough to swallow them. On the dark themes it looks the same; on PAPER it keeps them readable */
 :root { --btn-base: color-mix(in srgb, var(--panel) 92%, transparent); } /* (92%: as the board) */

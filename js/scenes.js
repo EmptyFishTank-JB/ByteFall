@@ -915,7 +915,7 @@ function createScenes(api) {
 
 
   // THE SKY behind a scene: the time of day's (night navy, a dawn's peach, a day's blue, a dusk's
-  // orange and violet), turned by the weather (greyed by cloud and rain, darker in a storm, paler in
+  // orange and violet), turned by the weather (grayed by cloud and rain, darker in a storm, paler in
   // the snow, brown in a dust storm, warmer in a heatwave), fading out up top into the card. Two
   // layers, so a change crossfades.
   const SKY_TIME = { night: ['#0b1026', '#1d2547'], dawn: ['#33457e', '#f2a07a'], day: ['#4a8ed0', '#a8d4f0'], dusk: ['#3a2f6b', '#f08a4b'] };

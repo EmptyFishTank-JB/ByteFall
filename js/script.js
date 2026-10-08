@@ -773,7 +773,7 @@ document.querySelectorAll('[data-ptier-pick]').forEach((btn) => {
 // bottom), between MIN_BOARD and the CSS maximum.
 const MIN_BOARD = 240;
 const crtEl = document.querySelector('.crt');
-// Phones: nudge the header so the title's capitals sit centred on the PAUSE button, as the main
+// Phones: nudge the header so the title's capitals sit centered on the PAUSE button, as the main
 // menu's title sits on its BACK arrow (each font draws its letters at a different height in the line)
 const headerEl = document.querySelector('header');
 const titleEl = headerEl.querySelector('h1');
@@ -975,7 +975,7 @@ function lockButtons() {
 // below it (the body becomes the frame for fixed layers too). Its height is the banner's own, as it
 // reports it (0 till one has loaded, and once ads are removed).
 // Dev: AD BANNER PREVIEW (dev tools: OFF by default, then 50 / 60 / 90px; or ?adpreview=60) holds
-// a grey strip there on the web, at the top (or bottom), the size a phone's banner would be. Re-read
+// a gray strip there on the web, at the top (or bottom), the size a phone's banner would be. Re-read
 // on coming back from the dev page, so it changes without a reload.
 // (its class names never say "ad": ad blockers hide anything named like .ad-top, and on the
 // root element that blanks the whole page)
@@ -1001,7 +1001,7 @@ function applyAdPreview() {
     document.body.append(adPreviewBar);
   }
   if (adPreviewBar) {
-    adPreviewBar.hidden = !adPreviewH || real; // (the grey stand-in: not under a real one)
+    adPreviewBar.hidden = !adPreviewH || real; // (the gray stand-in: not under a real one)
     adPreviewBar.textContent = `AD BANNER // ${adPreviewH}PX`;
   }
 }
@@ -2642,7 +2642,7 @@ const vsCap = () => VS_CAP[vsLevel] || 16;
 // overflow when it can), so waiting out the CPU is no way to win
 const VS_DROP_MS = { easy: 9000, normal: 7000, hard: 5500, insane: 4500 };
 let dropClock = 0; // ms the current bit has waited
-// Attacks build up, then go: the blocks a chain sends (after cancelling what's headed your
+// Attacks build up, then go: the blocks a chain sends (after canceling what's headed your
 // way) charge while the chains keep coming, and cross over once VS_SEND_MS pass with nothing
 // added (and your drop has finished). The CPU's charge the same way.
 const VS_SEND_MS = 1500;
@@ -2796,7 +2796,7 @@ function sendToCpu(blocks) {
   const fromCharge = Math.min(blocks - cancel, cpuOutgoing);
   cpuOutgoing -= fromCharge;
   cancel += fromCharge;
-  if (cancel > 0) Progress.vsCancelled(cancel);
+  if (cancel > 0) Progress.vsCanceled(cancel);
   const rest = blocks - cancel;
   vsSent += rest;
   if (rest > 0) {
@@ -3947,14 +3947,14 @@ updateWanderersBtn();
 // Color themes: each id matches a [data-theme] block in style.css ('terminal' is the default :root).
 // Every theme but TERMINAL is unlocked by progress.js (theme-<id>). Keep the head script in index.html in sync.
 const THEMES = [
-  { id: 'terminal', label: 'TERMINAL', desc: 'green bits, grey layers, amber cracks and exploits.' },
+  { id: 'terminal', label: 'TERMINAL', desc: 'green bits, gray layers, amber cracks and exploits.' },
   { id: 'cipher', label: 'CIPHER', desc: 'cyan bits, magenta layers, yellow cracks and exploits.' },
-  { id: 'amber-crt', label: 'AMBER CRT', desc: 'an old amber monitor: grey layers, cyan cracks and exploits.' },
+  { id: 'amber-crt', label: 'AMBER CRT', desc: 'an old amber monitor: gray layers, cyan cracks and exploits.' },
   { id: 'monochrome', label: 'MONOCHROME', desc: 'black and white; layers are told apart by stripes and dashed borders.' },
   { id: 'anaglyph', label: 'ANAGLYPH', desc: 'red/cyan 3D glasses: every bit split into a red and a cyan edge, red layers, cyan cracks.' },
   { id: 'synthwave', label: 'SYNTHWAVE', desc: 'pink bits, purple layers, orange cracks and a cyan trace.' },
   { id: 'dot-matrix', label: 'DOT MATRIX', desc: 'four shades of olive green, like an old handheld game screen.' },
-  { id: 'paper', label: 'PAPER', desc: 'near-black ink and grey on pale paper with gold accents, for bright rooms and outdoors.' },
+  { id: 'paper', label: 'PAPER', desc: 'near-black ink and gray on pale paper with gold accents, for bright rooms and outdoors.' },
   { id: 'glyph', label: 'GLYPH', desc: 'bits become shapes with one corner per point: a teardrop is 1, a triangle 3, an octagon 8.' },
   { id: 'spectrum', label: 'SPECTRUM', desc: 'every bit cycles through the rainbow on its own while the page drifts slowly behind them.' },
   { id: 'seasonal', label: 'SEASONAL', desc: '' }, // (free; its colors follow the time of year: seasonTheme)
@@ -4054,7 +4054,7 @@ function applyTheme() {
         themeId = t.id;
         storage.set('bytefall-theme', themeId);
         // The screen fades to black, the new theme goes in behind it (redrawing everything at once,
-        // out of sight: no colours easing across every element, which was slow on phones), and it
+        // out of sight: no colors easing across every element, which was slow on phones), and it
         // fades back in. A pick while it's dark just changes what goes in.
         void lightChange;
         themeThroughBlack(() => {
@@ -4854,7 +4854,7 @@ const footerEl = document.querySelector('footer');
 (document.getElementById('settings-panel') || settingsEl).append(footerEl); // (in the box that scrolls)
 document.body.classList.add('cards-in-settings');
 
-// The lower corners: RESTART (QUIT in VS; greyed out until the first drop), and the
+// The lower corners: RESTART (QUIT in VS; grayed out until the first drop), and the
 // exploit button
 const exploitBtn = document.getElementById('exploit-btn');
 const LIGHTNING_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 10-13h-7z" fill="currentColor"/></svg>';
@@ -4884,7 +4884,7 @@ window.addEventListener('resize', () => exploitNoticeEl.hidden || showExploitNot
 function updateFreeBtn() {
   // (retired: RESTART is on the pause screen now; the button stays for its code paths)
   restartBtn.hidden = true;
-  // (EXIT until the first drop; greyed out once the run is over)
+  // (EXIT until the first drop; grayed out once the run is over)
   const exit = !started && !gameOver;
   if (exit !== restartBtn.classList.contains('exit')) {
     restartBtn.classList.toggle('exit', exit);
@@ -4896,11 +4896,11 @@ function updateFreeBtn() {
   updateTopIcons();
   showChainMeter();
   const ready = nextExploit();
-  const centreArmed = armedHack && armedSlot === null; // (one armed from a side slot shows there, not here)
-  const shown = (centreArmed && armedHack) || ready;
+  const centerArmed = armedHack && armedSlot === null; // (one armed from a side slot shows there, not here)
+  const shown = (centerArmed && armedHack) || ready;
   showExploitNotice();
   document.getElementById('exploit-glyph').innerHTML = shown ? iconHtml(shown) : LIGHTNING_SVG;
-  exploitBtn.classList.toggle('armed', !!centreArmed);
+  exploitBtn.classList.toggle('armed', !!centerArmed);
   exploitBtn.classList.toggle('ready', !armedHack && !!ready);
   exploitBtn.title = armedHack ? `${HACKS[armedHack].name} // ARMED: drop it`
     : ready ? `${HACKS[ready].name} // tap to arm it as your next drop` : 'Exploits';
@@ -6124,7 +6124,7 @@ window.bytefallBack = () => {
 // or mouse off it before letting go cancels the press, even where the browser would still click
 (() => {
   let held = null; // { el, id }
-  let cancelled = null; // the button whose next click is swallowed
+  let canceled = null; // the button whose next click is swallowed
   const SLOP = 16; // (a finger rolls a little as it lifts: only a real slide off cancels)
   const inside = (el, e) => {
     const r = el.getBoundingClientRect();
@@ -6139,7 +6139,7 @@ window.bytefallBack = () => {
     const el = e.target.closest('button, a[href]');
     if (!el || el.disabled) return;
     held = { el, id: e.pointerId };
-    cancelled = null;
+    canceled = null;
     el.classList.add('pressing');
   }, true);
   document.addEventListener('pointermove', (e) => {
@@ -6149,17 +6149,17 @@ window.bytefallBack = () => {
     if (!held || e.pointerId !== held.id) return;
     if (!inside(held.el, e)) {
       const el = held.el;
-      cancelled = el;
-      setTimeout(() => { if (cancelled === el) cancelled = null; }, 400); // (no click came)
+      canceled = el;
+      setTimeout(() => { if (canceled === el) canceled = null; }, 400); // (no click came)
     }
     release();
   }, true);
   document.addEventListener('pointercancel', release, true);
   document.addEventListener('click', (e) => {
-    if (cancelled && cancelled.contains(e.target) && e.detail !== 0) {
+    if (canceled && canceled.contains(e.target) && e.detail !== 0) {
       e.preventDefault();
       e.stopImmediatePropagation();
-      cancelled = null;
+      canceled = null;
     }
   }, true);
 })();

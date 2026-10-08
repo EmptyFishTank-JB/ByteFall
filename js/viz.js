@@ -999,7 +999,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
 
   // OCEAN (GRID or MESH): a sea of particles out to the horizon and past every edge of the screen,
   // each joined to its neighbors by a thin line (a square grid, or a triangle mesh), fading out
-  // with the distance, and travelling: the view drifts over it in a slowly wandering direction,
+  // with the distance, and traveling: the view drifts over it in a slowly wandering direction,
   // and turns slowly about as it goes, now one way, now the other (its heading drawn along after
   // it, so it mostly looks where it's going). The sea is endless: its swell is one big square tile
   // mirrored on all four sides, so it carries on seamlessly however far it goes, and its grid stays
@@ -1225,7 +1225,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       tri ? (i, j) => [[1, 0], [0, 1], [j & 1 ? 1 : -1, 1]] : () => SQUARE);
   }
 
-  // OCEAN DEPTHS: the travelling sea (the same view, turns, swell and music's swells as OCEAN GRID)
+  // OCEAN DEPTHS: the traveling sea (the same view, turns, swell and music's swells as OCEAN GRID)
   // as its points alone, each with a thin line hanging straight down from it into the depths,
   // fading to black the deeper it goes; the points on OCEAN HEX's honeycomb (its corners), which
   // leaves the fewest open lanes between them, sized for its DENSITY
@@ -1240,7 +1240,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       () => [], 1.6 * (opt('depth') / 100));
   }
 
-  // OCEAN HEX: the travelling sea again (the same view, turns, swell and music's swells as OCEAN GRID), its
+  // OCEAN HEX: the traveling sea again (the same view, turns, swell and music's swells as OCEAN GRID), its
   // particles joined in a honeycomb: each row a zigzag, every other point linked to the row
   // behind, so the lines close into hexagons
   function drawOceanHex(an, w, h, now) {
@@ -1256,7 +1256,7 @@ function createVisualizer(canvas, getAnalyser, { bars = 28, modes = ['bars', 'wa
       (k, j) => ((k + j) & 1 ? ALONG : BOTH));
   }
 
-  // OCEAN TOPO: the travelling sea (the same view, turns, swell and music's swells as OCEAN GRID) drawn as a map's
+  // OCEAN TOPO: the traveling sea (the same view, turns, swell and music's swells as OCEAN GRID) drawn as a map's
   // contour lines over hills of its own, fixed on the sea so the rings flow by as it travels (the
   // music raising them): a ring for each height, so as the sea rises its higher rings appear and
   // as it falls they shrink away; the highest in the accent, all fading into the distance

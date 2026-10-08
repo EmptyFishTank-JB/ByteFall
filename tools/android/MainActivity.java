@@ -42,7 +42,7 @@ import org.json.JSONObject;
 
 // ByteFall's Android app (copied over Capacitor's own by tools/setup-android.js):
 // - full screen, as the installed web app is (the system bars come back with a swipe, then hide),
-//   on black, so the strip a bar leaves (or the camera's notch) is black, not grey
+//   on black, so the strip a bar leaves (or the camera's notch) is black, not gray
 // - the music starts as the app opens (no tap needed first)
 // - in the background everything rests: the game's timers and animation stop, and the music with
 //   them (music.js), until it's opened again; except with the MUSIC PLAYER open, when the music

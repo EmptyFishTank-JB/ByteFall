@@ -86,7 +86,7 @@ const Progress = (() => {
     vsBotLevelWins: {}, // 'bot:level' -> true once beaten
     vsModeWins: {}, // VS game mode -> wins
     vsFeats: {}, // one-off VS wins (BARE METAL, FLAWLESS and the like) -> true
-    vsBestCancel: 0, // most incoming blocks one attack cancelled
+    vsBestCancel: 0, // most incoming blocks one attack canceled
     vsBestSent: 0, // most blocks sent at the CPU in one match
     vsLossStreak: 0, // VS losses in a row
     bots: {}, // the bots on the start screen and the VS CPU: event -> count (pokes, bolts, eyebrow-<bot> ...)
@@ -897,8 +897,8 @@ const Progress = (() => {
       d.bots[id] = (d.bots[id] || 0) + 1;
       save();
     },
-    // One attack cancelled `n` blocks headed your way
-    vsCancelled(n) { d.vsBestCancel = Math.max(d.vsBestCancel, n); },
+    // One attack canceled `n` blocks headed your way
+    vsCanceled(n) { d.vsBestCancel = Math.max(d.vsBestCancel, n); },
     dailyPuzzleSolved(weekday, tries) {
       if (weekday === 6) d.sundaySolves++;
       if (tries === 1) d.dailyFirstTries++;

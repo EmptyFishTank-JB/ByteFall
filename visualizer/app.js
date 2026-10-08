@@ -238,7 +238,7 @@
   $('btn-more').addEventListener('click', () => { const open = $('more').hidden; closePanels(); $('more').hidden = !open; });
   $('more-close').addEventListener('click', closePanels);
   // SOURCE: a list to pick from, the one listening lit; picking the one already on starts it again
-  // (after a share was cancelled or stopped, or capture stopped from its notification)
+  // (after a share was canceled or stopped, or capture stopped from its notification)
   const SOURCE_HELP = {
     auto: 'Other apps directly where they allow it, the microphone where they don\'t (Pandora)',
     apps: 'Other apps directly only (silent for apps that refuse, like Pandora)',
@@ -322,7 +322,7 @@
       bin.w += w; bin.r += r * w; bin.g += gg * w; bin.b += b * w;
     }
     const order = bins.map((b, i) => ({ ...b, i })).filter((b) => b.w > 0).sort((a, b) => b.w - a.w);
-    if (!order.length) return null; // (a grey cover: the fixed colors)
+    if (!order.length) return null; // (a gray cover: the fixed colors)
     const first = order[0];
     const second = order.find((b) => Math.min(Math.abs(b.i - first.i), 18 - Math.abs(b.i - first.i)) >= 3 && b.w > first.w * 0.08);
     const glow = (b) => { // (to a bright, full color)

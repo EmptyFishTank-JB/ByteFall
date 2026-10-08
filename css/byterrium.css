@@ -27,7 +27,7 @@ html.byterrium body { display: block; padding: 0; overflow: hidden; }
 .byt-travel-btn svg { width: 14px; height: 14px; }
 .byt-travel-btn:hover, .byt-travel-btn:focus-visible { border-color: var(--fg); box-shadow: 0 0 8px rgba(var(--fg-rgb), 0.35); outline: none; }
 
-/* Travelling: a fade to black and back */
+/* Traveling: a fade to black and back */
 .byt-fade { position: absolute; inset: 0; z-index: 20; background: #000; opacity: 0; pointer-events: none; transition: opacity 0.6s ease; }
 .byt-fade.on { opacity: 1; }
 

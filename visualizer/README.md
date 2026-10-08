@@ -8,7 +8,7 @@ game's MUSIC PLAYER (`js/viz.js`, shared with the game), edge to edge, turning w
   computer, SOURCE: SCREEN AUDIO (the default) hears what the browser's screen share carries: pick the
   tab playing the music (Pandora, YouTube, ...) or, on Windows and ChromeOS, the entire screen for the
   whole computer's sound, with SHARE AUDIO on (the picture is asked for too, as browsers require, but
-  never used); stopping or cancelling the share says so in the corner, and picking SCREEN AUDIO again in SOURCE asks again. SOURCE opens a list to pick from. MICROPHONE: the
+  never used); stopping or canceling the share says so in the corner, and picking SCREEN AUDIO again in SOURCE asks again. SOURCE opens a list to pick from. MICROPHONE: the
   room. Phones' browsers: the microphone only. Keys: ← → styles, F full screen, H hides the controls;
   the mouse brings them back.
 - **Android app:** `com.emptyfishtank.bytefallviz`, built by Actions → **ByteFall Viz APK**
@@ -30,7 +30,7 @@ game's MUSIC PLAYER (`js/viz.js`, shared with the game), edge to edge, turning w
 - **NOW PLAYING**: the song from any app, Pandora included (title, artist, app, its art, how far
   along), with previous / play-pause / next, from Android's media sessions, as the lock screen
   shows them. Android gives them only to an app with **notification access**; ALLOW opens that
-  page. An app installed outside a store (a test APK) has the switch greyed out until App info →
+  page. An app installed outside a store (a test APK) has the switch grayed out until App info →
   ⋮ → Allow restricted settings (the card links there). SONG hides or shows the card.
 - **COLOR**: ALBUM ART (the default: the two strongest colors of the song's art, brightened),
   MATRIX, CIPHER, AMBER, NEON, MONO, SPECTRUM (a cycling rainbow).

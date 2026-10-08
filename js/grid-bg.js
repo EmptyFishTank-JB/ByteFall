@@ -125,7 +125,7 @@ function startGridBackground(canvas, { defrag = true, active } = {}) {
   };
 
   const FESTIVE = ['255, 214, 150', '255, 170, 70', '255, 96, 72', '96, 214, 120', '128, 178, 255', '255, 214, 150']; // warm white (twice), amber, red, green, blue
-  const ANA_CYCLE = [[70, 76, 84], [255, 40, 80], [205, 211, 217], [0, 220, 255]]; // dark grey, red, light grey, cyan
+  const ANA_CYCLE = [[70, 76, 84], [255, 40, 80], [205, 211, 217], [0, 220, 255]]; // dark gray, red, light gray, cyan
 
   // The plain themes: each block's brightness rounded to one of SHADES steps (too fine to see),
   // and only the blocks whose step changed since the last frame redrawn (most sit still: only
@@ -181,7 +181,7 @@ function startGridBackground(canvas, { defrag = true, active } = {}) {
     const offX = (cssW - cols * PITCH + GAP) / 2;
     const offY = (cssH - rows * PITCH + GAP) / 2;
     const { fg } = gridTheme;
-    // ANAGLYPH: each block cycles dark grey, red, light grey, cyan at its own speed and phase
+    // ANAGLYPH: each block cycles dark gray, red, light gray, cyan at its own speed and phase
     // (like SPECTRUM's hues), over a red fringe on its left and a cyan one on its right, like the bits
     const secs = performance.now() / 1000;
     for (let i = 0; i < size; i++) {

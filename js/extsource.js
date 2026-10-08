@@ -2,7 +2,7 @@
 // ByteFall. In the Android app, whatever the phone is playing, from any app (Pandora, Spotify,
 // ...): from Android 10 on by audio playback capture (tools/android/CaptureService.java: Android
 // asks each time, as for a screen recording; the sound itself comes over, in stereo, and is
-// analysed here as Web Audio's analyser would), before that through Android's Visualizer
+// analyzed here as Web Audio's analyser would), before that through Android's Visualizer
 // (MainActivity.java; phones that send some apps' music by a low-power path it can't hear show
 // silence there); and the microphone, in the app and on the web (a page can't hear other
 // apps), which hears whatever plays out loud. Either way it's handed to the visualizers as an
@@ -139,7 +139,7 @@ const ExtSource = (() => {
       if (!fft) return;
       const n = fft.length / 2;
       if (!smooth || smooth.length !== n) smooth = new Float32Array(n);
-      // (levelled by itself: phones hand over the sound at different strengths, so the top of the
+      // (leveled by itself: phones hand over the sound at different strengths, so the top of the
       // range follows the loudest of late, as a meter's range would, and 54dB below it is silence)
       const db = new Float32Array(n);
       let top = -99;
