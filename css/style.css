@@ -2219,16 +2219,15 @@ body.vs-mode .overlay { background: transparent; }
 .vs-pause .pause-row button { font-size: 12px; padding: 6px 14px; min-width: 9ch; }
 .vs-setup .difficulty.two-rows { flex-wrap: wrap; justify-content: center; max-width: 100%; }
 .vs-setup #vs-options-row button { font-size: 12px; padding: 6px 10px; }
-/* The game mode, and its target score or starting points: − TARGET 2,000 + (dimmed for CLASSIC) */
+/* The game mode, and its target score or starting points: − TARGET 2,000 + (NO TARGET for CLASSIC, as
+   bright as the rest) */
 .vs-goal-row { display: flex; align-items: center; gap: 8px; }
 .vs-goal-row button {
   width: 26px; height: 24px; padding: 0; font-family: inherit; font-size: 14px; line-height: 1; letter-spacing: 0;
   background: transparent; border: 1px solid var(--fg); border-radius: 4px; color: var(--fg); cursor: pointer;
 }
-@media (hover: hover) { .vs-goal-row button:hover:not(:disabled) { background: rgba(var(--fg-rgb), 0.15); } }
+@media (hover: hover) { .vs-goal-row button:hover { background: rgba(var(--fg-rgb), 0.15); } }
 .vs-goal { min-width: 13ch; font-size: 12px; letter-spacing: 1px; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
-.vs-goal-row.off { opacity: 0.35; }
-.vs-goal-row button:disabled { opacity: 0.35; cursor: default; }
 
 /* VS setup: a notice above the title (a locked bot or level), fading in and pulsing like the
    game's warnings, then bursting into pixels (script.js) */
@@ -4379,13 +4378,13 @@ header h1, .card-brand { font-size: 19.2px; letter-spacing: 0.1em; }
 .card-brand { display: none; }
 .records.puzzles .card-head { position: relative; flex-direction: column; justify-content: flex-start; gap: 8px; margin-bottom: 6px; }
 .records.puzzles .card-head .card-back { position: absolute; left: 0; top: 0; }
-.records.puzzles .card-brand { display: block; margin: calc((26px - 1em) / 2 + 2px) 0 0; line-height: 1; white-space: nowrap; } /* (its capitals level with the main menu's and every game's) */
+.records.puzzles .card-brand { display: block; margin: var(--head-nudge, 5.4px) 0 0; line-height: 1; white-space: nowrap; } /* (where every game's sits: script.js's alignHeader) */
 .records.puzzles #records-title { font-size: 11px; line-height: 1; letter-spacing: 2px; color: var(--fg-dim); text-shadow: none; }
 .card-head .card-brand span { font-size: inherit; letter-spacing: inherit; color: var(--accent); text-shadow: 0 0 8px var(--accent); } /* (FALL as the title's, not the card's heading) */
-/* DAILY's cards: one row that slides sideways under the panel's sides, a card at a time in the middle
-   (each snapping softly to the center), the cards beside it peeking in, smaller and dimmer the farther
-   out (script.js sets --dc-k and --dc-o as it slides); the one in the middle is the game PLAY plays,
-   and the pips under the row light the one it's on. The panel's body reaches the panel's sides (its
+/* DAILY's cards: one row that slides sideways under the panel's sides and loops, a card at a time in
+   the middle (each snapping softly to the center), the cards beside it peeking in, softly dimmed; the
+   one in the middle is in focus the moment it gets there (script.js's .focus), it's the game PLAY
+   plays, and the pips under the row light it. The panel's body reaches the panel's sides (its
    words kept 12px in) so the cards slide all the way out */
 .home-panel-body { width: calc(100% + 24px); margin: 0 -12px; padding: 0 12px; container-type: inline-size; }
 .home .daily-cards:not([hidden]) {
@@ -4394,8 +4393,16 @@ header h1, .card-brand { font-size: 19.2px; letter-spacing: 0.1em; }
   scrollbar-width: none; position: relative;
 }
 .home .daily-cards::-webkit-scrollbar { display: none; }
-.home .daily-cards button { flex: 0 0 72cqw; scroll-snap-align: center; scroll-snap-stop: always; transform: scale(var(--dc-k, 1)); opacity: var(--dc-o, 1); }
+.home .daily-cards button { flex: 0 0 72cqw; scroll-snap-align: center; scroll-snap-stop: always; opacity: 0.6; transition: opacity 0.25s ease-out, border-color 0.25s, background-color 0.25s, box-shadow 0.25s; }
+.home .daily-cards button.focus { opacity: 1; }
+.home .mode-info { white-space: pre-line; } /* (DAILY's: its streak and countdown on a line of their own) */
 .daily-pips[hidden] { display: none; }
 .daily-pips { display: flex; justify-content: center; gap: 8px; }
 .daily-pips i { width: 6px; height: 6px; border-radius: 1px; background: rgba(var(--fg-rgb), 0.25); cursor: pointer; transition: background 0.15s, box-shadow 0.15s; }
 .daily-pips i.on { background: var(--fg); box-shadow: 0 0 6px rgba(var(--fg-rgb), 0.7); }
+/* THE MAIN MENU's BYTEFALL exactly where every game's is: pinned 8px from the top in the same one-line
+   box, nudged as the games' is (script.js's alignHeader), and not scaled up with the menu on a bigger
+   screen, as its BACK isn't; the menu's rows start where they did under it */
+.home .home-head { position: absolute; top: 8px; left: 0; right: 0; height: auto; display: block; text-align: center; zoom: calc(1 / var(--home-zoom, 1)); }
+.home .home-head h1 { line-height: 1; margin-top: var(--head-nudge, 5.4px); }
+.home { padding-top: calc(8px + 26px + var(--gap)); }

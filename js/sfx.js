@@ -5,6 +5,9 @@ const SFX = (() => {
   const STORAGE_KEY = 'bytefall-sound';
   let ctx = null;
   let muted = false;
+  // (a pitch for the sound being played, 1 its own: SFX.play's second argument. The falling bit's
+  // ticks wander with it, as the tutorial BOT's voice does)
+  let P = 1;
   try { muted = localStorage.getItem(STORAGE_KEY) === 'off'; } catch (e) {}
 
   // Everything plays through SETTINGS → SOUND OUTPUT's chain (output.js), as the music does
@@ -54,7 +57,7 @@ const SFX = (() => {
     click(c) {
       const dur = 0.025, t = c.currentTime;
       const src = noiseBuffer(c, dur, (i, n) => 1 - i / n);
-      const flt = filter(c, 'bandpass', 3000 + Math.random() * 1000, 0.8);
+      const flt = filter(c, 'bandpass', (3000 + Math.random() * 1000) * P, 0.8);
       src.connect(flt); flt.connect(envelope(c, VOL, t, dur));
       src.start(); src.stop(t + dur);
     },
@@ -306,24 +309,24 @@ const SFX = (() => {
   function sq(c, t, m, dur, vol, duty = 50, to = null) { // (a pulse channel note; to: slid to that note)
     const o = c.createOscillator();
     o.setPeriodicWave(chipKit(c).duty[duty]);
-    o.frequency.setValueAtTime(midi(m), t);
-    if (to !== null) o.frequency.exponentialRampToValueAtTime(midi(to), t + dur);
+    o.frequency.setValueAtTime(midi(m) * P, t);
+    if (to !== null) o.frequency.exponentialRampToValueAtTime(midi(to) * P, t + dur);
     o.connect(steps(c, t, VOL * vol, dur));
     o.start(t); o.stop(t + dur + 0.01);
   }
   function wv(c, t, m, dur, vol, to = null) { // (the wave channel)
     const o = c.createOscillator();
     o.setPeriodicWave(chipKit(c).wave);
-    o.frequency.setValueAtTime(midi(m), t);
-    if (to !== null) o.frequency.exponentialRampToValueAtTime(midi(to), t + dur);
+    o.frequency.setValueAtTime(midi(m) * P, t);
+    if (to !== null) o.frequency.exponentialRampToValueAtTime(midi(to) * P, t + dur);
     o.connect(steps(c, t, VOL * vol, dur, 3));
     o.start(t); o.stop(t + dur + 0.01);
   }
   function nz(c, t, dur, vol, short = false, rate = 1, rateTo = null) { // (the noise channel; rate: its pitch)
     const src = c.createBufferSource();
     src.buffer = short ? chipKit(c).short : chipKit(c).long;
-    src.playbackRate.setValueAtTime(rate, t);
-    if (rateTo !== null) src.playbackRate.exponentialRampToValueAtTime(rateTo, t + dur);
+    src.playbackRate.setValueAtTime(rate * P, t);
+    if (rateTo !== null) src.playbackRate.exponentialRampToValueAtTime(rateTo * P, t + dur);
     src.connect(steps(c, t, VOL * vol, dur));
     src.start(t, Math.random() * 0.5); src.stop(t + dur + 0.01);
   }
@@ -367,8 +370,8 @@ const SFX = (() => {
   const tone = (c, t, f, type, vol, a, d, to = null) => {
     const o = c.createOscillator();
     o.type = type;
-    o.frequency.setValueAtTime(f, t);
-    if (to) o.frequency.exponentialRampToValueAtTime(to, t + a + d);
+    o.frequency.setValueAtTime(f * P, t);
+    if (to) o.frequency.exponentialRampToValueAtTime(to * P, t + a + d);
     const g = c.createGain();
     g.gain.setValueAtTime(0.0001, t);
     g.gain.linearRampToValueAtTime(VOL * vol, t + a);
@@ -379,8 +382,8 @@ const SFX = (() => {
   };
   const air = (c, t, dur, vol, type, f0, f1, q = 1) => { // (filtered noise, its pitch swept)
     const src = noiseBuffer(c, dur, (i, n) => Math.sin((Math.PI * i) / n));
-    const flt = filter(c, type, f0, q);
-    flt.frequency.exponentialRampToValueAtTime(f1, t + dur);
+    const flt = filter(c, type, f0 * P, q);
+    flt.frequency.exponentialRampToValueAtTime(f1 * P, t + dur);
     src.connect(flt); flt.connect(envelope(c, VOL * vol, t, dur));
     src.start(t); src.stop(t + dur);
   };
@@ -506,9 +509,12 @@ const SFX = (() => {
   const playIn = (set, name) => (set[name] || sounds[name])(getCtx());
 
   return {
-    play(name) {
+    // (pitch: 1 its own, 2 an octave up; every theme's take on the sound follows it)
+    play(name, pitch = 1) {
       if (muted) return;
+      P = pitch;
       try { playIn(current(), name); } catch (e) {}
+      P = 1;
     },
     // Plays even when muted (used by the dev audio compendium); theme: a sound theme's take on it
     preview(name, theme) {

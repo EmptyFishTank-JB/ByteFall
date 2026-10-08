@@ -804,10 +804,12 @@ function clearOfCorners(el, min) {
     el.style.letterSpacing = `${(ls0 * size / size0).toFixed(2)}px`;
   }
 }
+// (on the game card, so every BYTEFALL takes it: the games', the main menu's and the PUZZLES card's
+// titles all sit at the top in one line box, so they all land exactly here)
 function alignHeader() {
   titleEl.style.fontSize = '';
   titleEl.style.letterSpacing = '';
-  headerEl.style.removeProperty('--head-nudge');
+  crtEl.style.removeProperty('--head-nudge');
   if (!document.body.classList.contains('cards-in-settings')) return;
   const cs = getComputedStyle(titleEl);
   // (measured in COURIER: js/fonts.js puts every font's capitals where Courier's are, so the
@@ -819,9 +821,10 @@ function alignHeader() {
   const content = m.fontBoundingBoxAscent + m.fontBoundingBoxDescent;
   const baseline = box.top + (box.height - content) / 2 + m.fontBoundingBoxAscent;
   const inkMid = baseline - m.actualBoundingBoxAscent / 2; // (capitals: nothing below the line)
-  const btn = document.querySelector('.records-btn').getBoundingClientRect();
-  if (!btn.height) return;
-  headerEl.style.setProperty('--head-nudge', `${(btn.top + btn.height / 2 - inkMid).toFixed(1)}px`);
+  // (the corner buttons' middle: every one is 8px down and 26px tall, PAUSE, BACK and the main menu's
+  // BACK alike, so the title lands in one place whichever is up)
+  const btnMid = crtEl.getBoundingClientRect().top + 8 + 13;
+  crtEl.style.setProperty('--head-nudge', `${(btnMid - inkMid).toFixed(1)}px`);
   clearOfCorners(titleEl, 14);
 }
 
@@ -1499,7 +1502,7 @@ async function attemptDrop(col) {
   const landing = columns[col].length;
   for (let r = MAX_ROWS - 1; r > landing; r--) {
     render([], { row: r, col, cell: piece });
-    SFX.play('click');
+    SFX.play('click', fallPitch());
     await sleep(STEP_MS);
   }
   columns[col].push(piece);
@@ -1635,11 +1638,14 @@ async function collapse() {
     for (const col of columns) if (fallStep(col)) moved = true;
     if (!moved) break;
     render();
-    SFX.play('click');
+    SFX.play('click', fallPitch());
     await sleep(STEP_MS);
   }
   render();
 }
+// A falling bit's ticks wander up and down in pitch, a little, as the tutorial BOT's voice does
+// (its blips anywhere in about 17% either side)
+function fallPitch() { return 0.85 + Math.random() * 0.32; }
 
 function computeRunLength(grid, row, col, dRow, dCol) {
   let count = 1;
@@ -2309,12 +2315,14 @@ function armReset(btn, confirmText) {
   SFX.play('alert');
 }
 
+// (nothing to lose: before the first drop, or a puzzle, which restarts as it started)
+function freshRun() { return mode === 'puzzle' || (score === 0 && Progress.runDrops() === 0); }
 // apply() runs just before the new run starts (e.g. switching the difficulty).
 function requestReset(btn, confirmText, apply = () => {}) {
   // Nothing to lose once the run is over or before the first drop.
   // (PUZZLE boards are short and restart as they started, so they never ask)
   // (under way = a drop made: BREACH's firewall and a puzzle's board are there from the start)
-  const fresh = mode === 'puzzle' || (score === 0 && Progress.runDrops() === 0);
+  const fresh = freshRun();
   if (gameOver || fresh) {
     if (busy && !gameOver) return;
     apply();
@@ -2472,7 +2480,11 @@ document.querySelectorAll('#vs-modes button[data-vsmode]').forEach((btn) => {
 });
 // The target score (ATTRITION, DEATHMATCH) or starting points (TUG OF WAR): -/+ by 500
 function stepVsGoal(dir) {
-  if (vsStarted || vsMode === 'classic') return;
+  if (vsStarted) return;
+  if (vsMode === 'classic') { // (no target to set: the row stays lit, and says so)
+    SFX.play('denied');
+    return;
+  }
   const tug = vsMode === 'tug';
   const range = tug ? VS_POOL : VS_TARGET;
   const now = tug ? vsPool : vsTarget;
@@ -2501,15 +2513,9 @@ function vsGoalText() {
   if (vsMode === 'classic') return 'NO TARGET';
   return vsMode === 'tug' ? `START ${fmt(vsPool)}` : `TARGET ${fmt(vsTarget)}`;
 }
+// (never dimmed: − and + at the end of the range, or in CLASSIC, just answer DENIED)
 function showVsGoal() {
-  const tug = vsMode === 'tug';
-  const range = tug ? VS_POOL : VS_TARGET;
-  const now = tug ? vsPool : vsTarget;
-  const row = document.getElementById('vs-goal-row');
-  row.classList.toggle('off', vsMode === 'classic');
   document.getElementById('vs-goal').textContent = vsGoalText();
-  document.getElementById('vs-goal-down').disabled = vsMode === 'classic' || now <= range.min;
-  document.getElementById('vs-goal-up').disabled = vsMode === 'classic' || now >= range.max;
 }
 
 // DAILY's setup: today's date, the streak and the time to the next set over a card for each game,
@@ -2539,7 +2545,9 @@ function dailyTurnover() {
   const mins = Math.max(1, Math.ceil((next - now) / 60000));
   return mins >= 60 ? `${Math.floor(mins / 60)}H ${mins % 60}M` : `${mins}M`;
 }
-const dailyHeader = () => `${todayKey()} (UTC) // STREAK ${fmt(Progress.dailyStreak())} // NEW IN ${dailyTurnover()}. The first run of each is official; the rest are practice.`;
+// (the streak and the countdown on their own line, then what counts: the first play of each, or
+// PUZZLE's first tries)
+const dailyHeader = () => `STREAK ${fmt(Progress.dailyStreak())} // NEW GAMES IN ${dailyTurnover()}\nYour first play of each game today counts (PUZZLE gives you ${DAILY_PUZZLE_TRIES} tries). After that, it's practice.`;
 function renderDailyCards() {
   document.querySelectorAll('#daily-kinds button').forEach((btn) => {
     if (armed && armed.btn === btn) return; // (asking to confirm: left as it is)
@@ -2552,35 +2560,52 @@ function renderDailyCards() {
   });
 }
 setInterval(() => { if (homeOpen && daily) { renderDailyCards(); applyModeUi(); } }, 30000); // (the countdown)
-// DAILY's games: DECRYPT, PUZZLE, BLITZ, BREACH, in a row that slides sideways. The card in the
-// middle (each snaps softly to the center) is the pick, picked as a tap picked it (a game under way
-// asks first: CONFIRM? on the card, a tap on it to go; left unanswered, the row slides back to the
-// pick); a tap on a card beside it slides it in, a tap on a pip too. The cards beside the middle
-// shrink and dim the farther out they are, and the pips light the one in the middle
+// DAILY's games: DECRYPT, PUZZLE, BLITZ, BREACH, in a row that slides sideways and loops: a copy of
+// the four on each side, and once it settles on a copy it's swapped, unseen, for the same card in the
+// middle four. The card in the middle (each snaps softly to the center) is in focus at once, the rest
+// a little dimmer, and it's the pick: straight away when switching costs nothing, or, with a game under
+// way, once the row settles, asking first (CONFIRM? on the card, a tap on it to go; left unanswered,
+// the row slides back to the pick). A tap on a card beside the middle slides it in, a tap on a pip too
 const dailyRow = document.getElementById('daily-kinds');
+const dailyHome = [...dailyRow.querySelectorAll('button')]; // (the middle four)
+const DAILY_N = dailyHome.length;
+for (const before of [true, false]) { // (the copies either side, for the loop)
+  const copies = dailyHome.map((b) => { const c = b.cloneNode(true); c.setAttribute('aria-hidden', 'true'); c.tabIndex = -1; return c; });
+  if (before) dailyRow.prepend(...copies);
+  else dailyRow.append(...copies);
+}
 const dailyCards = [...dailyRow.querySelectorAll('button')];
 const dailyPips = [...document.querySelectorAll('#daily-pips i')];
-const dailyCardOf = (kind) => dailyCards.find((b) => b.dataset.daily === kind);
+const dailyCardOf = (kind) => dailyHome.find((b) => b.dataset.daily === kind);
 const dailyMid = (btn) => btn.offsetLeft + btn.offsetWidth / 2;
 function dailyNearest() {
   const mid = dailyRow.scrollLeft + dailyRow.clientWidth / 2;
   return dailyCards.reduce((a, b) => (Math.abs(dailyMid(b) - mid) < Math.abs(dailyMid(a) - mid) ? b : a));
 }
-function shadeDaily() {
+// (the card in focus: the rest dim softly, the pips light its game; a new one is the pick at once
+// when switching costs nothing)
+let dailyFocus = null;
+function focusDaily() {
   if (!dailyRow.clientWidth) return;
-  const mid = dailyRow.scrollLeft + dailyRow.clientWidth / 2;
-  for (const b of dailyCards) {
-    const d = Math.min(1, Math.abs(dailyMid(b) - mid) / (b.offsetWidth + 8)); // (0 in the middle, 1 a card out)
-    b.style.setProperty('--dc-k', (1 - 0.08 * d).toFixed(3));
-    b.style.setProperty('--dc-o', (1 - 0.5 * d).toFixed(3));
-  }
-  const near = dailyNearest().dataset.daily;
-  dailyPips.forEach((p) => p.classList.toggle('on', p.dataset.daily === near));
+  const near = dailyNearest();
+  if (near === dailyFocus) return;
+  dailyFocus = near;
+  dailyCards.forEach((b) => b.classList.toggle('focus', b === near));
+  dailyPips.forEach((p) => p.classList.toggle('on', p.dataset.daily === near.dataset.daily));
+  if (near.dataset.daily !== dailyKind && (gameOver || freshRun())) pickDaily(near);
 }
 function slideDaily(btn, smooth) {
   const slow = smooth && !matchMedia('(prefers-reduced-motion: reduce)').matches;
   dailyRow.scrollTo({ left: dailyMid(btn) - dailyRow.clientWidth / 2, behavior: slow ? 'smooth' : 'instant' });
-  shadeDaily();
+  focusDaily();
+}
+// (settled on a copy: the same card in the middle four, in its place)
+function homeDaily() {
+  const near = dailyNearest();
+  const i = dailyCards.indexOf(near);
+  if (i >= DAILY_N && i < 2 * DAILY_N) return;
+  dailyRow.scrollLeft += dailyMid(dailyCardOf(near.dataset.daily)) - dailyMid(near);
+  focusDaily();
 }
 function pickDaily(btn) {
   const next = btn.dataset.daily;
@@ -2597,19 +2622,23 @@ function pickDaily(btn) {
 // (the pick in the middle, as the row comes into view or the cards change: not while it's being
 // slid or a card in it asks CONFIRM?)
 let dailyHeld = false;
+let dailyMoving = false;
 function centerDaily() {
-  if (!dailyRow.clientWidth || dailyHeld || (armed && dailyCards.includes(armed.btn))) return;
-  if (dailyNearest() !== dailyCardOf(dailyKind)) slideDaily(dailyCardOf(dailyKind), false);
-  else shadeDaily();
+  if (!dailyRow.clientWidth || dailyHeld || dailyMoving || (armed && dailyCards.includes(armed.btn))) return;
+  if (dailyNearest().dataset.daily !== dailyKind) slideDaily(dailyCardOf(dailyKind), false);
+  else { homeDaily(); focusDaily(); }
 }
 let dailySettle = 0;
 function dailySettled() {
   clearTimeout(dailySettle);
   if (dailyHeld || !dailyRow.clientWidth) return;
-  pickDaily(dailyNearest());
+  dailyMoving = false;
+  homeDaily();
+  pickDaily(dailyNearest()); // (with a game under way: asks, now it's still)
 }
 dailyRow.addEventListener('scroll', () => {
-  requestAnimationFrame(shadeDaily);
+  dailyMoving = true;
+  requestAnimationFrame(focusDaily);
   clearTimeout(dailySettle);
   dailySettle = setTimeout(dailySettled, 160); // (where scrollend isn't: once it's still)
 }, { passive: true });
@@ -2619,11 +2648,16 @@ dailyRow.addEventListener('touchend', () => { dailyHeld = false; clearTimeout(da
 dailyRow.addEventListener('touchcancel', () => { dailyHeld = false; }, { passive: true });
 dailyCards.forEach((btn) => {
   btn.addEventListener('click', () => {
-    if (dailyNearest() !== btn) slideDaily(btn, true); // (beside the middle: in it slides, picked once it settles)
-    else pickDaily(btn);
+    if (dailyNearest() !== btn) slideDaily(btn, true); // (beside the middle: in it slides)
+    else pickDaily(dailyCardOf(btn.dataset.daily));
   });
 });
-dailyPips.forEach((p) => p.addEventListener('click', () => slideDaily(dailyCardOf(p.dataset.daily), true)));
+dailyPips.forEach((p) => p.addEventListener('click', () => {
+  // (the nearest copy of its card: the row slides the short way round)
+  const mid = dailyRow.scrollLeft + dailyRow.clientWidth / 2;
+  const copies = dailyCards.filter((b) => b.dataset.daily === p.dataset.daily);
+  slideDaily(copies.reduce((a, b) => (Math.abs(dailyMid(b) - mid) < Math.abs(dailyMid(a) - mid) ? b : a)), true);
+}));
 addEventListener('resize', () => requestAnimationFrame(centerDaily));
 
 // Shows what the current mode changes: the mode row, its note, the difficulty row (CLASSIC
@@ -4425,8 +4459,8 @@ const HAPTICS = { enter: 8, burst: 18, egg: [14, 30, 14], alert: 40, denied: [60
 const canVibrate = typeof navigator.vibrate === 'function';
 let vibrate = canVibrate && storage.get('bytefall-vibrate') !== 'off';
 const playSound = SFX.play;
-SFX.play = (name) => {
-  playSound(name);
+SFX.play = (name, pitch) => {
+  playSound(name, pitch);
   if (vibrate && HAPTICS[name]) {
     try { navigator.vibrate(HAPTICS[name]); } catch (e) {}
   }
