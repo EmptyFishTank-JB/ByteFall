@@ -19,8 +19,8 @@
       render(); updateHud();`);
   }
   function clearAll() {
-    run(`adware = null; spywareLeft = 0; malwareLeft = 0; jackLeft = 0; scareLeft = 0; demands = {};
-      columns.forEach((col) => col.forEach((cell) => { if (cell) { delete cell.locked; delete cell.lockAt; } }));
+    run(`adware = null; spywareLeft = 0; malwareLeft = 0; jackLeft = 0; scareLeft = 0; demands = {}; ransoms = {};
+      columns.forEach((col) => col.forEach((cell) => { if (cell) for (const k of ['locked', 'lockAt', 'lockLook', 'ransom', 'ransomOf']) delete cell[k]; }));
       Infections.clear(); render(); updateHud(); updateColumnButtons();`);
   }
   function strike(id) {
@@ -43,7 +43,7 @@
       <div class="inftest-row">${IDS.map((id) => `<button type="button" data-inf="${id}">${id === 'cryptojacker' ? 'CRYPTOJACK' : id.toUpperCase()}</button>`).join('')}</div>
       <div class="inftest-row"><span>LOOK</span>${['RANDOM', '1', '2', '3', '4', '5', '6', '7', '8'].map((l, i) => `<button type="button" data-look="${i - 1}"${i ? '' : ' class="on"'}>${l}</button>`).join('')}</div>
       <div class="inftest-row"><button type="button" data-act="drop">DROP (COUNT DOWN)</button><button type="button" data-act="fill">FILL GRID</button><button type="button" data-act="clear">CLEAR</button><button type="button" data-act="keys">+50 KEYS</button><button type="button" data-act="banners"></button><button type="button" data-act="banlook"></button><button type="button" data-act="bantest">TEST BANNER</button><a href="dev-tools/audio.html">DEV PAGE</a></div>
-      <p class="inftest-note">NOT SAVED: nothing played here touches your progress. Tap an ad, the CRYPTOJACKER's sign or a pop-up and it steals KEYS toward its (hidden) demand. Infections stack: tap more than one. ADWARE and MALWARE have 6 looks, RANSOMWARE 5, the CRYPTOJACKER 8, the rest 4 (a look past theirs picks at random). The column buttons still drop bits.</p>
+      <p class="inftest-note">NOT SAVED: nothing played here touches your progress. Tap an ad, the CRYPTOJACKER's sign or a pop-up and it steals KEYS toward its (hidden) demand; tap a RANSOMWARE-locked bit and it pays 1 to 8 KEYS of the ransom on it (paid off, the bit's free). Infections stack: tap more than one. ADWARE and MALWARE have 6 looks, RANSOMWARE 5, the CRYPTOJACKER 8, the rest 4 (a look past theirs picks at random). The column buttons still drop bits.</p>
     </div>`;
   document.body.appendChild(panel);
   const bannersBtn = panel.querySelector('[data-act="banners"]');

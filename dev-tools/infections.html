@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" class="sandbox">
 <head>
-<script src="../js/fonts.js?v=512"></script>
+<script src="../js/fonts.js?v=513"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#020403">
 <title>Infection Wall // BYTEFALL</title>
-<link rel="stylesheet" href="../css/style.css?v=512">
+<link rel="stylesheet" href="../css/style.css?v=513">
 <!-- INFECTION WALL: every INFECTION in every look, all playing at once, a row an infection. Each
      tile is its own copy of the game's infections.js on a little board of bits, so what plays here
      is what plays in the game. -->
@@ -55,8 +55,8 @@
     <div id="rows"></div>
   </div>
   <div class="wall-zoom" id="wall-zoom" hidden><div class="wall-zoom-hint">TAP OUTSIDE OR PRESS ESC TO CLOSE</div></div>
-<script src="../js/led-banner.js?v=512"></script>
-<script src="../js/infections.js?v=512"></script>
+<script src="../js/led-banner.js?v=513"></script>
+<script src="../js/infections.js?v=513"></script>
 <script>
 (() => {
   const COLS = 5;
@@ -65,7 +65,7 @@
   const KINDS = [
     ['adware', 'ad', 'ADWARE', 'Blocks a column with an ad'],
     ['spyware', 'spy', 'SPYWARE', 'Hides the next bits: eyes in CURRENT'],
-    ['ransomware', 'ransom', 'RANSOMWARE', 'Locks bits where they are'],
+    ['ransomware', 'ransom', 'RANSOMWARE', 'Locks bits where they are, each with a ransom'],
     ['malware', 'malware', 'MALWARE', 'Scrambles what the board shows'],
     ['cryptojacker', 'jack', 'CRYPTOJACKER', 'Steals resources: a sign through the overflow row'],
     ['scareware', 'scare', 'SCAREWARE', 'Fake alerts over the board'],
@@ -148,7 +148,7 @@
         let inner = '';
         if (r >= ROWS) cls += ' overflow';
         if (has) {
-          if (id === 'ransomware' && (r + c) % 3 === 0 && r < 3) { cls += ' disc ransom'; inner = inf.ransomHtml(val, 5, t.k); } else if (id === 'malware') { cls += ' disc corrupt'; inner = inf.glitch(3, r, c); } else { cls += ' disc'; inner = `[${val}]`; }
+          if (id === 'ransomware' && (r + c) % 3 === 0 && r < 3) { cls += ' disc ransom'; inner = inf.ransomHtml(val, 8 + ((r * 5 + c * 7) % 17), t.k); } // (its ransom: 8 to 24 KEYS, as in a game) else if (id === 'malware') { cls += ' disc corrupt'; inner = inf.glitch(3, r, c); } else { cls += ' disc'; inner = `[${val}]`; }
         } else if (id === 'malware' && inf.mosaicOn()) { cls += ' mosaic-empty'; inner = inf.glitch(3, r, c, true); }
         html += `<div class="${cls}" data-pos="${r},${c}">${inner}</div>`;
       }
