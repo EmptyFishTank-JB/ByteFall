@@ -1,8 +1,10 @@
 package com.emptyfishtank.bytefall;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.media.projection.MediaProjectionConfig;
 import android.media.projection.MediaProjectionManager;
 import android.os.Build;
@@ -30,7 +32,21 @@ import com.getcapacitor.BridgeActivity;
 // - the back button works the game (window.bytefallBack, in script.js): closes what's open, pauses
 //   or resumes a game, goes from the main menu to the start screen; on the start screen, the app
 //   goes to the background
+// - the game's own text sizes, whatever the phone's FONT SIZE and BOLD TEXT settings (as games do):
+//   the layout is built around them (buttons locked to their size, titles fitted), so the phone's
+//   bigger or bolder text only crowds and breaks it
 public class MainActivity extends BridgeActivity {
+    // (the phone's text settings left out of the app's own: font scale 1, no extra weight. Android
+    // starts the activity over when they change, so this holds; and the page's text zoom pinned to
+    // 100% as well, below, as the WebView otherwise takes it from the phone's FONT SIZE)
+    @Override
+    protected void attachBaseContext(Context base) {
+        Configuration own = new Configuration(base.getResources().getConfiguration());
+        own.fontScale = 1f;
+        if (Build.VERSION.SDK_INT >= 31) own.fontWeightAdjustment = 0;
+        super.attachBaseContext(base.createConfigurationContext(own));
+    }
+
     private volatile boolean playerOpen = false;
     // OTHER APPS (the music player's SOURCE): what the phone is playing, from any app (Pandora,
     // Spotify, ...). From Android 10 on, by audio playback capture (CaptureService: Android asks
@@ -178,6 +194,7 @@ public class MainActivity extends BridgeActivity {
         WebView web = bridge.getWebView();
         web.setBackgroundColor(Color.BLACK);
         web.getSettings().setMediaPlaybackRequiresUserGesture(false);
+        web.getSettings().setTextZoom(100); // (the game's text sizes, not the phone's FONT SIZE)
         web.addJavascriptInterface(new AppBridge(), "BytefallAndroid");
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override

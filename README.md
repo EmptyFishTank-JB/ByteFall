@@ -81,6 +81,9 @@ Android test APK → Run workflow** (pushes don't build it). When the run is
 done, its page has the APK under **Artifacts** (a zip; unzip it on the phone and open the
 `.apk`, allowing installs from that app if Android asks). It's the game as players
 would get it: no dev page or DEV link, dev switches cleared, full screen, portrait.
+Its text keeps the game's own sizes whatever the phone's FONT SIZE and BOLD TEXT settings
+(`tools/android/MainActivity.java`: the WebView's text zoom pinned to 100%, the activity's font
+scale to 1 and its extra weight to 0), as games do: the layout is built around them.
 Every test build is signed with the same test key (`tools/android/test.keystore`, not a
 secret and not for the Play Store), so a new one installs over the last and keeps the
 progress.
