@@ -196,14 +196,14 @@ STARTER EXPLOITS and BLACK BOXES cost KEYS and resources (a MASTER KEY buys any 
 | HINT | 10 | PUZZLE: lights the column the next bit goes in (worked out by js/puzzle-sim.js) |
 | UNDO | 8 | PUZZLE: takes back the last drop, even after running out of bits |
 
-The first five are switched on from the main menu's one BOOSTERS button (it says what's on: NONE ON or
-the booster's name; one booster per game), which opens a card of the ones owned for the
+The first five are switched on from the main menu's BOOSTERS button (laid out as VS's settings: BOOSTERS:
+NONE ON, or the booster's name, filled while one's on; one booster per game), which opens a card of the ones owned for the
 mode, each with its icon, how many and ON / OFF (switching one on switches the other off), and GET BOOSTERS (the STORE's); per mode, for the modes they fit and paid for at
 a game's first drop (SECOND CHANCE only when it saves you); HINT and UNDO sit under a
 puzzle's drop buttons, and with none owned a second tap buys one. Never in DAILY or VS. A
 boosted game says so on its result screen.
 
-**THE SIDE SLOTS**: one each side of the exploit button (CLASSIC, BLITZ and ZEN only), opened by level: the left at Lv 4, the right at Lv 12 (`SIDE_SLOT_LEVELS` in progress.js; before then the main menu's STARTERS show LV 4 / LV 12 and in a game the slot shows a padlock over its level, so the BLACK MARKET comes a slot at a time).
+**THE SIDE SLOTS**: one each side of the exploit button (CLASSIC, BLITZ and ZEN only), opened by level: the left at Lv 4, the right at Lv 12 (`SIDE_SLOT_LEVELS` in progress.js; before then the main menu's STARTER L / STARTER R show LV 4 / LV 12 behind a padlock, a tap saying so in the card's title and in a game the slot shows a padlock over its level, so the BLACK MARKET comes a slot at a time).
 **STARTER EXPLOITS** (STORE) are exploits of your own, any you've unlocked by level, by tier: tier 1
 (RNG, BITFLIP, BUFFER OVERFLOW, TROJAN, PIVOT) 10 KEYS and about 12 BUGS, CACHE or CRYPTO; tier 2
 (SWAP, WORM VIRUS, KEYLOGGER, PACKET SNIFFER, BACKDOOR) 20 KEYS, about 17 of those and a ROOTKIT;
@@ -214,7 +214,7 @@ sold; **BLACK BOXES** I, II and III are (5 KEYS and 3 CRYPTO; 12, 5 and a ROOTKI
 random pull each, their odds on them: an exploit of tier 1, 2 or 3 (any of the tier, unlocked or not)
 or an **INFECTION** (I: 65 / 20 / 3 / 12%; II: 35 / 45 / 12 / 8%; III: 10 / 45 / 42 / 3%).
 Pick 2 on the main menu to take into a game, one in each slot (marked S): two of one kind
-(if you have two) or one each of two. The menu shows the two slots (STARTERS), left and right, and what's in each (a long name trails off).
+(if you have two) or one each of two. The menu shows the two slots as VS's settings are laid out, two across under BOOSTERS: STARTER L and STARTER R and what's in each (EMPTY, or its name, trailing off when long), filled while one's in it.
 A tap on a slot opens its card: every starter and box you own and how many, to put in that slot, EMPTY
 THIS SLOT, and BUY EXPLOITS (the STORE's starters); each is used once in the game. In
 the game, a tap arms an exploit as your next drop, as an earned one, and it's used up (the ones not
@@ -322,8 +322,9 @@ for its result screen's EARNED list). **NOTICES**, RULES & RECORDS' third tab, k
 came, newest first (it says so under its head), the unread ones lit; while some are unread, a dot sits on RULES & RECORDS (the main
 menu's and the pause screen's) and on the tab. The DAILY DROP never pops up: a new day's is in NOTICES and
 lights the STORE buttons, and claimed, the STORE's DAILY DROP card shows what it gave right under CLAIM. A
-"can't do that" (HARD still locked, LOADOUT LOCKED, SLOTS FULL) shows beside what was tapped, in the notice
-line's style on a soft dark plate, then bursts. What a drop earns in RESOURCES shows in the SCORE box along
+"can't do that" shows in the title of the card it happened on, the title stepping aside while it pulses,
+then bursts, as VS's setup has it: HARD still locked or a starter slot not open yet where the main menu's
+// CLASSIC is, LOADOUT LOCKED or SLOTS FULL where the card's // EXPLOITS is. What a drop earns in RESOURCES shows in the SCORE box along
 its foot (as far up from its bottom border as SCORE is down from its top), every resource on one line at
 once, shrinking to fit if it must.
 
@@ -938,8 +939,8 @@ at the step it was on, BACK still working (`js/place.js`). Coming back to the ap
 or tab carries on where you were.
 
 **MAIN MENU** (`#home`, script.js's `showHome`): between the start screen and a game.
-The title and level bar, the six modes (CLASSIC, DAILY, BLITZ, ZEN, PUZZLE, VS) in a 3x2
-grid, and the picked mode's panel: its name, what it is, its options (CLASSIC's difficulty,
+The title and level bar, the six modes in a 3x2 grid (DAILY, CLASSIC, PUZZLE over BLITZ, VS, ZEN:
+CLASSIC top center), and the picked mode's panel: its name, what it is, its options (CLASSIC's difficulty,
 DAILY's game, PUZZLE's puzzle), your best (DAILY: today's official score once played) and
 PLAY. With a game of that mode under way (a drop made; paused) PLAY reads RESUME and carries
 on; picking another mode then asks first (CONFIRM?), as a restart does, and resets without the

@@ -2363,7 +2363,7 @@ document.querySelectorAll('#difficulty-row button').forEach((btn) => {
     if (next === classicDifficulty) return;
     if (next === 'hard' && !Progress.isUnlocked('mode-hard')) {
       SFX.play('denied');
-      noteAt(btn, `LOCKED // ${Progress.unlock('mode-hard').need.toUpperCase()}`);
+      homeNotice(`LOCKED // ${Progress.unlock('mode-hard').need.toUpperCase()}`);
       return;
     }
     requestReset(btn, 'CONFIRM?', () => {
@@ -2425,12 +2425,13 @@ document.querySelectorAll('#vs-levels button[data-vs]').forEach((btn) => {
   });
 });
 
-// A notice above the setup's title (a locked bot or level): it fades in and pulses like the
-// game's warnings, then bursts into pixels
-let vsNoticeTimer = 0;
-function vsNotice(text) {
-  const el = document.getElementById('vs-setup-msg');
-  clearTimeout(vsNoticeTimer);
+// A "can't do that" in the title of the card it happened on, the title stepping aside while it
+// shows: it fades in and pulses like the game's warnings, then bursts into pixels. VS's setup (a
+// locked bot or level), the main menu's mode card (HARD still locked, a starter slot not open yet),
+// the EXPLOITS card (LOADOUT LOCKED, SLOTS FULL)
+const titleNoticeTimers = new Map();
+function titleNotice(el, text) {
+  clearTimeout(titleNoticeTimers.get(el));
   el.classList.remove('show');
   void el.offsetWidth;
   el.textContent = text;
@@ -2438,13 +2439,16 @@ function vsNotice(text) {
   let size = parseFloat(getComputedStyle(el).fontSize);
   while (el.scrollWidth > el.clientWidth && size > 7) el.style.fontSize = `${(size -= 0.5)}px`; // one line
   el.classList.add('show');
-  vsNoticeTimer = setTimeout(() => {
+  titleNoticeTimers.set(el, setTimeout(() => {
     const range = document.createRange();
     range.selectNodeContents(el);
     FX.burst([{ rect: range.getBoundingClientRect(), type: 'warning' }]);
     el.classList.remove('show');
-  }, 2200);
+  }, 2200));
 }
+const vsNotice = (text) => titleNotice(document.getElementById('vs-setup-msg'), text);
+const homeNotice = (text) => titleNotice(document.getElementById('home-panel-msg'), text);
+const cardNotice = (text) => titleNotice(document.getElementById('records-title-msg'), text);
 
 // VS CPU's opponent: which bot (its look, lines and play style)
 document.querySelectorAll('#vs-bots button[data-bot]').forEach((btn) => {
@@ -3546,7 +3550,7 @@ function fitText(el, min = 7) {
 }
 function fitHome() {
   if (homeEl.hidden) return;
-  const FIT = '#level-bar, .home .modes button, .home-row button, #home-play, #difficulty-row button, .home .booster-one, #home-best, #home-mode-name, .home .booster-title';
+  const FIT = '#level-bar, .home .modes button, .home-row button, #home-play, #difficulty-row button, .home .home-opts button, #home-best, #home-mode-name';
   for (const el of homeEl.querySelectorAll(FIT)) fitText(el, 10); // (single lines; never under 10px)
   fitText(homeEl.querySelector('.home-head'), 10); // (the title, between BACK and the far edge)
   homePanelMore();
@@ -4385,8 +4389,7 @@ function updateSfxThemeBtn() {
   const all = SFX.themes();
   const cur = all.find((t) => t.id === SFX.theme() && t.open) || all[0];
   sfxThemeBtn.textContent = `SOUND EFFECTS: ${cur.name}`;
-  const locked = all.filter((t) => !t.open).map((t) => `${t.name} opens with the ${t.track} track (LV ${Progress.unlock(t.unlock).goal})`);
-  sfxThemeNote.textContent = `${cur.desc}${locked.length ? ` ${locked.join('; ')}.` : ''}`;
+  sfxThemeNote.textContent = `${cur.desc} More sound effects coming soon.`;
 }
 sfxThemeBtn.addEventListener('click', () => {
   const open = SFX.themes().filter((t) => t.open);
@@ -4788,20 +4791,21 @@ function refreshBoosterRow() {
   const ids = boosterIds();
   row.hidden = !ids.length || mode === 'tutorial';
   if (row.hidden) return;
-  row.innerHTML = '<span class="booster-title">BOOSTERS</span>';
+  row.innerHTML = '';
   const on = ids.filter((id) => armedBoosts.has(id) && Progress.boosters(id) > 0);
   const b = document.createElement('button');
   b.type = 'button';
-  b.className = `booster-chip booster-one${on.length ? ' on' : ''}`;
-  b.innerHTML = !on.length ? 'NONE ON' : on.length === 1 ? `${BOOSTER_SVG[on[0]] || ''} ${BOOSTERS[on[0]].name}` : `${on.map((id) => BOOSTER_SVG[id] || '').join('')} ${on.length} ON`;
+  b.className = on.length ? 'active' : ''; // (lit while one's on, as VS's LAYERS: ON)
+  b.innerHTML = `<span class="opt-text">BOOSTERS: ${!on.length ? 'NONE ON' : on.length === 1 ? `${BOOSTER_SVG[on[0]] || ''}${BOOSTERS[on[0]].name}` : `${on.map((id) => BOOSTER_SVG[id] || '').join('')}${on.length} ON`}</span>`;
   b.setAttribute('aria-label', `Boosters: ${on.length ? on.map((id) => BOOSTERS[id].name).join(', ') : 'none on'}. Tap to choose`);
   b.addEventListener('click', openBoosterPick);
   row.appendChild(b);
   refitHome(); // (new words in set boxes)
 }
 
-// The main menu's STARTERS: the two side slots, LEFT and RIGHT, what's in each (or EMPTY). A tap on a
-// slot opens its card (BUY EXPLOITS in it: the STORE's starters): every starter exploit
+// The main menu's STARTERS: the two side slots, STARTER L and STARTER R, what's in each (or EMPTY), as
+// VS's settings are: NAME: what's on it, lit while one's in it. A slot not open yet is locked (its
+// level; a tap says so in the card's title). A tap on an open slot opens its card (BUY EXPLOITS in it: the STORE's starters): every starter exploit
 // owned (and unlocked), how many, to put in that slot (two of one kind, if there are two; one each
 // of two), and EMPTY to take it out
 const starterPickEl = document.getElementById('starter-pick');
@@ -4869,21 +4873,23 @@ function refreshStarterRow() {
   if (!row) return;
   row.hidden = !starterFits() || mode === 'tutorial';
   if (row.hidden) return;
-  row.innerHTML = `<span class="booster-title">STARTERS</span>`; // (a long name trails off in its slot)
+  row.innerHTML = ''; // (a long name trails off in its slot)
   const taken = Progress.startersTaken();
   for (let i = 0; i < STARTER_MAX; i++) {
     const b = document.createElement('button');
     b.type = 'button';
-    if (i >= Progress.sideSlots()) { // (not open yet: the level it opens at)
-      b.className = 'booster-chip starter-slot locked';
-      b.disabled = true;
-      b.textContent = `LV ${Progress.sideSlotLevel(i)}`;
-      b.setAttribute('aria-label', `${i ? 'Right' : 'Left'} side slot: opens at level ${Progress.sideSlotLevel(i)}`);
+    const name = `STARTER ${i ? 'R' : 'L'}`;
+    if (i >= Progress.sideSlots()) { // (not open yet: the level it opens at, behind a lock)
+      const lv = Progress.sideSlotLevel(i);
+      b.className = 'locked';
+      b.innerHTML = `<span class="opt-text">${name}: LV ${lv}</span>`;
+      b.setAttribute('aria-label', `${i ? 'Right' : 'Left'} starter slot: opens at level ${lv}`);
+      b.addEventListener('click', () => { SFX.play('denied'); homeNotice(`LOCKED // ${name} OPENS AT LV ${lv}`); });
       row.appendChild(b);
       continue;
     }
-    b.className = `booster-chip starter-slot${taken[i] ? ' on' : ''}`;
-    b.innerHTML = taken[i] ? `${itemIcon(taken[i])} ${itemName(taken[i])}` : 'EMPTY'; // (which side: where it sits)
+    b.className = taken[i] ? 'active' : '';
+    b.innerHTML = `<span class="opt-text">${name}: ${taken[i] ? `${itemIcon(taken[i])}${itemName(taken[i])}` : 'EMPTY'}</span>`; // (which side: where it sits)
     b.setAttribute('aria-label', `${i ? 'Right' : 'Left'} starter slot: ${taken[i] ? itemName(taken[i]) : 'empty'}. Tap to choose`);
     b.addEventListener('click', () => openStarterPick(i));
     row.appendChild(b);
@@ -5654,36 +5660,6 @@ function renderNotices() {
 }
 updateNoticeDots();
 
-// A "can't do that" note beside what was tapped (LOADOUT LOCKED, SLOTS FULL, a locked level), in the
-// notice line's style: it fades in just over the button (under it at the top of the screen), holds,
-// and bursts into pixels
-let sideNoteTimer = 0;
-function noteAt(el, text) {
-  let note = document.getElementById('side-note');
-  if (!note) {
-    note = document.createElement('p');
-    note.id = 'side-note';
-    note.className = 'side-note';
-    note.setAttribute('role', 'status');
-    document.body.appendChild(note);
-  }
-  clearTimeout(sideNoteTimer);
-  note.textContent = text;
-  note.hidden = false;
-  note.classList.remove('show');
-  void note.offsetWidth;
-  note.classList.add('show');
-  const r = el.getBoundingClientRect();
-  const n = note.getBoundingClientRect();
-  const left = Math.min(innerWidth - 8 - n.width, Math.max(8, r.left + r.width / 2 - n.width / 2));
-  const top = r.top - n.height - 6 >= 8 ? r.top - n.height - 6 : r.bottom + 6;
-  note.style.left = `${left}px`;
-  note.style.top = `${top}px`;
-  sideNoteTimer = setTimeout(() => {
-    FX.burst([{ el: note, type: 'warning' }]);
-    note.hidden = true;
-  }, 2200);
-}
 
 
 // Track unlocks are named TRACK 03 etc.; add the title once the track exists.
@@ -6264,7 +6240,7 @@ hacksPanelEl.addEventListener('click', (e) => {
   if (!card || daily || !Progress.exploitInfo(card.dataset.hack).unlocked) return;
   if (!loadoutEditable()) {
     SFX.play('denied');
-    noteAt(card, 'LOADOUT LOCKED // FINISH OR RESTART TO CHANGE IT');
+    cardNotice('LOADOUT LOCKED // FINISH OR RESTART FIRST');
     return;
   }
   const id = card.dataset.hack;
@@ -6275,7 +6251,7 @@ hacksPanelEl.addEventListener('click', (e) => {
     SFX.play('enter');
   } else {
     SFX.play('denied');
-    noteAt(card, Progress.slotInfo().slots ? 'SLOTS FULL // REMOVE ONE TO SWAP' : 'NO EXPLOIT SLOTS YET');
+    cardNotice(Progress.slotInfo().slots ? 'SLOTS FULL // REMOVE ONE TO SWAP' : 'NO EXPLOIT SLOTS YET');
   }
   refreshExploitCards();
 });
