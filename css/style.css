@@ -4302,6 +4302,7 @@ html, body { overflow-x: clip; }
    not dashes */
 .settings .settings-title { font-size: 13px; }
 .settings .settings-title.settings-section { font-size: 15.5px; }
+#ad-privacy[hidden] { display: none; } /* (SETTINGS' ADS: only where the law asks for it, in the app: js/ads.js) */
 .settings .toggle-btn { font-size: 12px; }
 .settings .dev-unlock-btn { font-size: 11.5px; }
 .settings button .need { font-size: 10.5px; }

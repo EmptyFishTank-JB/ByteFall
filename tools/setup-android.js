@@ -5,6 +5,8 @@
 // - VIBRATE permission (the game's haptics); RECORD_AUDIO and MODIFY_AUDIO_SETTINGS for the music
 //   player's OTHER APPS source, and FOREGROUND_SERVICE(_MEDIA_PROJECTION) with CaptureService (what
 //   the other apps play, by Android's audio playback capture; tools/android/CaptureService.java)
+// - ADS: the AdMob app ID (js/ads-config.js) in the manifest, which Google's ads SDK needs before
+//   anything (the banner itself is js/ads.js, through @capacitor-community/admob)
 // - portrait only, as the web app's manifest asks
 // - the version: the game's build number (index.html's ?v=), so each build installs over the last
 // - TEST builds signed with the repo's own test key (tools/android/test.keystore, password
@@ -23,12 +25,18 @@ const edit = (file, fn) => {
   fs.writeFileSync(p, after);
 };
 
+// (the AdMob app ID, from the one place the game keeps its ad IDs)
+const adsCfg = fs.readFileSync(path.join(ROOT, 'js', 'ads-config.js'), 'utf8');
+const adAppId = (/appId:\s*'(ca-app-pub-\d+~\d+)'/.exec(adsCfg) || [])[1];
+if (!adAppId) throw new Error('setup-android: no AdMob appId (ca-app-pub-...~...) in js/ads-config.js');
+
 for (const f of ['MainActivity.java', 'CaptureService.java']) fs.copyFileSync(path.join(__dirname, 'android', f), path.join(APP, 'src/main/java/com/emptyfishtank/bytefall', f));
 
 edit('src/main/AndroidManifest.xml', (s) => s
   .replace('android:name=".MainActivity"', 'android:name=".MainActivity"\n            android:screenOrientation="portrait"')
   .replace('<uses-permission android:name="android.permission.INTERNET" />', '<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.VIBRATE" />\n    <uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />')
-  .replace('</activity>', '</activity>\n\n        <service android:name=".CaptureService" android:exported="false" android:foregroundServiceType="mediaProjection" />')); // (VIBRATION: navigator.vibrate needs it)
+  .replace('</activity>', '</activity>\n\n        <service android:name=".CaptureService" android:exported="false" android:foregroundServiceType="mediaProjection" />')
+  .replace('</application>', `    <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="${adAppId}" />\n    </application>`)); // (VIBRATION: navigator.vibrate needs it)
 // (black behind everything: the strip a system bar leaves, the notch, the splash's edges)
 edit('src/main/res/values/styles.xml', (s) => s.replace('<item name="android:background">@null</item>', '<item name="android:background">@null</item>\n        <item name="android:windowBackground">@android:color/black</item>\n        <item name="android:statusBarColor">@android:color/black</item>\n        <item name="android:navigationBarColor">@android:color/black</item>'));
 
@@ -48,4 +56,4 @@ edit('build.gradle', (s) => s
         debug {
             signingConfig signingConfigs.test
         }`));
-console.log(`android/ set up: version 0.${build} (code ${build}), portrait, full screen, test-signed`);
+console.log(`android/ set up: version 0.${build} (code ${build}), portrait, full screen, test-signed, AdMob app ${adAppId}`);

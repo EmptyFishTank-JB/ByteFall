@@ -355,6 +355,26 @@ other tabs and opens the STORE with REMOVE ADS lit up. Buying either one earns
 **INDIE SUPPORTER** (THANK YOU group): a real purchase only, not the dev page's
 previews (UNLOCK EVERYTHING owns FULL ACCESS; OWN REMOVE ADS owns REMOVE ADS).
 
+**ADS** (`js/ads.js`, the Android app only): the free version's banner, from
+Google AdMob through the Capacitor plugin `@capacitor-community/admob` (pinned to
+8.1.0). Never on the web, and never once REMOVE ADS or FULL ACCESS is owned. On
+launch it starts the ads SDK, shows Google's consent form where the law asks for
+one (the EU, the UK, Switzerland...), then puts an adaptive banner (the screen's
+width, its height to suit) at the TOP of the screen, well away from the drop
+buttons. Android draws it over the page, so its height, as it reports it, goes
+to the AD STRIP (`setAdStrip` in `js/script.js`, the same room the dev page's AD
+BANNER PREVIEW keeps), and the whole game fits below it; until a banner has
+loaded (or if one fails, tried again a minute later) the strip is 0, so there's
+never an empty gap. Buying either purchase takes the banner and the strip away
+at once. Where consent applies, SETTINGS gets an **// ADS** section with AD
+PRIVACY OPTIONS, to change the choice made (Google requires it there).
+The IDs live in `js/ads-config.js`: for now Google's own sample IDs with
+`testing: true`, which only ever show test ads. `tools/setup-android.js` writes
+the app ID from there into the Android manifest (the SDK won't start without
+it). For the release: put in ByteFall's own App ID and banner ad unit ID from
+the AdMob console and set `testing` to false. (The ByteFall Viz app leaves the
+plugin out: `includePlugins: []` in `visualizer/capacitor.config.json`.)
+
 `js/progress.js` holds the stats, levels, unlocks and achievements; `js/script.js`
 reports each drop, decrypt, peel, byte, exploit and point to it.
 

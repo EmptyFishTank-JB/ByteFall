@@ -970,35 +970,49 @@ function lockButtons() {
 // fires no resize when it settles), so the page sets its own height (--app-h, used instead of
 // 100dvh) from the smallest of the browser's measures, and re-checks it on every viewport event
 // plus a cheap poll, refitting the board whenever anything changed.
+// THE AD STRIP: room kept at the top of the screen for the Android app's banner ad (js/ads.js), which
+// Android draws over the page, not in it. The game's height leaves the strip out, so everything fits
+// below it (the body becomes the frame for fixed layers too). Its height is the banner's own, as it
+// reports it (0 till one has loaded, and once ads are removed).
 // Dev: AD BANNER PREVIEW (dev tools: OFF by default, then 50 / 60 / 90px; or ?adpreview=60) holds
-// a grey strip at the top (or bottom) where a phone's banner ad would go. The game's height leaves it out, so
-// everything fits above it as it would with a real banner (the body becomes the frame for fixed
-// layers too). Re-read on coming back from the dev page, so it changes without a reload.
+// a grey strip there on the web, at the top (or bottom), the size a phone's banner would be. Re-read
+// on coming back from the dev page, so it changes without a reload.
 // (its class names never say "ad": ad blockers hide anything named like .ad-top, and on the
 // root element that blanks the whole page)
-let adPreviewH = 0;
+let adPreviewH = 0; // (the strip's height, the banner's or the preview's)
+let adBannerH = 0; // (the real banner's: js/ads.js, through window.setAdStrip)
 let adPreviewBar = null;
 function applyAdPreview() {
   const param = new URLSearchParams(location.search).get('adpreview');
   const flag = storage.get('bytefall-dev-adpreview');
   const h = param !== null ? parseInt(param, 10) || 50 : flag === 'on' ? 50 : parseInt(flag, 10) || 0;
-  adPreviewH = [50, 60, 90].includes(h) ? h : 0;
+  const real = adBannerH > 0;
+  adPreviewH = real ? adBannerH : [50, 60, 90].includes(h) ? h : 0;
   document.documentElement.classList.toggle('strip-preview', adPreviewH > 0);
-  // (at the top of the screen by default; AD BANNER SPOT in dev tools, or ?adpos=bottom)
-  const pos = new URLSearchParams(location.search).get('adpos') || storage.get('bytefall-dev-adpos');
+  // (at the top of the screen by default; AD BANNER SPOT in dev tools, or ?adpos=bottom; a real
+  // banner's always at the top, well away from the drop buttons)
+  const pos = real ? 'top' : new URLSearchParams(location.search).get('adpos') || storage.get('bytefall-dev-adpos');
   document.documentElement.classList.toggle('strip-top', adPreviewH > 0 && pos !== 'bottom');
   document.documentElement.style.setProperty('--strip-h', `${adPreviewH}px`);
-  if (adPreviewH && !adPreviewBar) {
+  if (adPreviewH && !real && !adPreviewBar) {
     adPreviewBar = document.createElement('div');
     adPreviewBar.className = 'strip-preview-bar';
     adPreviewBar.setAttribute('aria-hidden', 'true');
     document.body.append(adPreviewBar);
   }
   if (adPreviewBar) {
-    adPreviewBar.hidden = !adPreviewH;
+    adPreviewBar.hidden = !adPreviewH || real; // (the grey stand-in: not under a real one)
     adPreviewBar.textContent = `AD BANNER // ${adPreviewH}PX`;
   }
 }
+// (the real banner's height, in CSS pixels: Android's dp, which the page's pixels are; 0 for none)
+window.setAdStrip = (h) => {
+  const next = Math.max(0, Math.round(Number(h) || 0));
+  if (next === adBannerH) return;
+  adBannerH = next;
+  applyAdPreview();
+  checkViewport(false);
+};
 applyAdPreview();
 window.addEventListener('pageshow', applyAdPreview);
 window.addEventListener('focus', () => { applyAdPreview(); checkViewport(false); });
