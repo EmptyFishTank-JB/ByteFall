@@ -807,12 +807,12 @@ function clearOfCorners(el, min) {
     el.style.letterSpacing = `${(ls0 * size / size0).toFixed(2)}px`;
   }
 }
-// (on the game card, so every BYTEFALL takes it: the games', the main menu's and the PUZZLES card's
-// titles all sit at the top in one line box, so they all land exactly here)
+// (on the page's root, so every BYTEFALL takes it: the games', the main menu's, the PUZZLES card's and
+// the music player's titles all sit at the top in one line box, so they all land exactly here)
 function alignHeader() {
   titleEl.style.fontSize = '';
   titleEl.style.letterSpacing = '';
-  crtEl.style.removeProperty('--head-nudge');
+  document.documentElement.style.removeProperty('--head-nudge');
   if (!document.body.classList.contains('cards-in-settings')) return;
   const cs = getComputedStyle(titleEl);
   // (measured in COURIER: js/fonts.js puts every font's capitals where Courier's are, so the
@@ -827,7 +827,7 @@ function alignHeader() {
   // (the corner buttons' middle: every one is 8px down and 26px tall, PAUSE, BACK and the main menu's
   // BACK alike, so the title lands in one place whichever is up)
   const btnMid = crtEl.getBoundingClientRect().top + 8 + 13;
-  crtEl.style.setProperty('--head-nudge', `${(btnMid - inkMid).toFixed(1)}px`);
+  document.documentElement.style.setProperty('--head-nudge', `${(btnMid - inkMid).toFixed(1)}px`);
   clearOfCorners(titleEl, 14);
 }
 

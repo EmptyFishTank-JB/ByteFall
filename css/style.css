@@ -2226,9 +2226,8 @@ body.player-open { overflow: hidden; }
 }
 /* (its head as the game's cards': BACK top left, the title beside it) */
 .mp-head { margin-bottom: 0; flex: none; }
-.mp-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 14px; padding-bottom: 20px; scrollbar-width: thin; scrollbar-color: var(--fg-dim) transparent; }
-.mp-scroll::-webkit-scrollbar { width: 6px; }
-.mp-scroll::-webkit-scrollbar-thumb { background: var(--fg-dim); border-radius: 3px; }
+.mp-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 14px; padding-bottom: 20px; scrollbar-width: none; } /* (it scrolls, with no bar) */
+.mp-scroll::-webkit-scrollbar { display: none; }
 .mp-title { font-size: 13px; letter-spacing: 2px; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
 @media (hover: hover) { .mp-close:hover { background: rgba(var(--fg-rgb), 0.12); } }
 .mp-viz {
@@ -3930,7 +3929,7 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
    REDUCED. December's are C9s of every color, October's orange, purple and green with jack o' lanterns
    and candy corn, Valentine's pinks, red and white with hearts */
 .card-lights { display: none; }
-:is([data-theme="season-winter"], [data-theme="season-halloween"], [data-theme="season-valentine"]) .card-lights { display: block; position: absolute; inset: 0; pointer-events: none; z-index: 300; }
+:is([data-theme="season-winter"], [data-theme="season-halloween"], [data-theme="season-valentine"]) .card-lights { display: block; position: absolute; inset: 0; pointer-events: none; z-index: 300; overflow: clip; } /* (the glows clipped at the screen's edges: past its foot they made the page scroll) */
 :root.low-fx .card-lights { display: none !important; }
 /* (the glows reach a little past the screen's sides: the page is clipped there, so it never scrolls or zooms out for them) */
 html, body { overflow-x: clip; }
@@ -4329,13 +4328,15 @@ body.vs-setup-up #vs-setup { position: relative; inset: auto; }
    menu's is 1.6em of its 12px line; script.js's clearOfCorners shrinks a game's only where it would
    touch a corner button) */
 header h1, .card-brand { font-size: 19.2px; letter-spacing: 0.1em; }
-/* THE PUZZLES card, as a game's top: BACK in its corner, BYTEFALL centered on it as on the main menu,
-   // PUZZLES under it as a game's mode line, the puzzles 8px under that */
+/* THE PUZZLES card and THE MUSIC PLAYER, as a game's top: BACK in its corner, BYTEFALL centered on it
+   as on the main menu, the card's name under it as a game's mode line (// PUZZLES, // MUSIC PLAYER),
+   what's under it 8px under that */
 .card-brand { display: none; }
-.records.puzzles .card-head { position: relative; flex-direction: column; justify-content: flex-start; gap: 8px; margin-bottom: 6px; }
-.records.puzzles .card-head .card-back { position: absolute; left: 0; top: 0; }
-.records.puzzles .card-brand { display: block; margin: var(--head-nudge, 5.4px) 0 0; line-height: 1; white-space: nowrap; } /* (where every game's sits: script.js's alignHeader) */
-.records.puzzles #records-title { font-size: 11px; line-height: 1; letter-spacing: 2px; color: var(--fg-dim); text-shadow: none; }
+:is(.records.puzzles, .music-player) .card-head { position: relative; flex-direction: column; justify-content: flex-start; gap: 8px; margin-bottom: 6px; }
+:is(.records.puzzles, .music-player) .card-head .card-back { position: absolute; left: 0; top: 0; }
+:is(.records.puzzles, .music-player) .card-brand { display: block; margin: var(--head-nudge, 4.9px) 0 0; line-height: 1; white-space: nowrap; } /* (where every game's sits: script.js's alignHeader) */
+:is(.records.puzzles #records-title, .music-player .mp-title) { font-size: 11px; line-height: 1; letter-spacing: 2px; color: var(--fg-dim); text-shadow: none; }
+.music-player .card-head.mp-head { margin-bottom: -4px; } /* (with the player's 12px gap: the visualizer 8px under its name) */
 .card-head .card-brand span { font-size: inherit; letter-spacing: inherit; color: var(--accent); text-shadow: 0 0 8px var(--accent); } /* (FALL as the title's, not the card's heading) */
 /* DAILY's cards: one row that slides sideways under the panel's sides and loops, a card at a time in
    the middle (each snapping softly to the center), the cards beside it peeking in, softly dimmed; the
@@ -4415,3 +4416,5 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 #score-stat .res-pop .key-ico { width: 1.15em; height: 1.15em; }
 @keyframes pickup { 0% { opacity: 0; transform: translateY(3px); } 12% { opacity: 1; transform: none; } 75% { opacity: 1; } 100% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { #score-stat .res-pop { animation-name: res-pop-still; } }
+/* (NOTICES: which end is newest, under its head) */
+.notices-note { margin: -4px 0 var(--gap); font-size: 13px; letter-spacing: 1px; color: var(--fg-dim); }

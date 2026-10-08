@@ -319,7 +319,7 @@ style (plain glowing words, nothing boxed), holds a few seconds and bursts into 
 the next waiting. Nothing covers the board or the menu. They wait while a card is open, while the title
 screen or the screen saver is up, and through a game (see the level meter below: what a game earns waits
 for its result screen's EARNED list). **NOTICES**, RULES & RECORDS' third tab, keeps every one with when it
-came, newest first, the unread ones lit; while some are unread, a dot sits on RULES & RECORDS (the main
+came, newest first (it says so under its head), the unread ones lit; while some are unread, a dot sits on RULES & RECORDS (the main
 menu's and the pause screen's) and on the tab. The DAILY DROP never pops up: a new day's is in NOTICES and
 lights the STORE buttons, and claimed, the STORE's DAILY DROP card shows what it gave right under CLAIM. A
 "can't do that" (HARD still locked, LOADOUT LOCKED, SLOTS FULL) shows beside what was tapped, in the notice
@@ -710,7 +710,7 @@ background grid into dimmed rainbow blocks; it holds still under reduced motion.
 full-width button under the other themes) follows the calendar: in OCTOBER the title flickers now and then like a failing light; in DECEMBER
 (to Jan 6) the background's blocks are bulbs of every filament color, twinkling, the board catches
 the lights' warm glow and the scroll bars are candy canes. **THE SEASON'S LIGHTS**: strings of old
-filament bulbs in fine pixel art (finer than the bots', each turned its own way: hanging, leaning, sideways, a few pointing up off the wire) run down both sides of the screen, top to bottom, a bulb at either end (js/lights.js builds them to the screen's height), the wire in the screen's 8px margin and every bulb turned in toward the middle, so none is cut off at the edge; over everything, but never in the way of a tap, glowing and twinkling in turn,
+filament bulbs in fine pixel art (finer than the bots', each turned its own way: hanging, leaning, sideways, a few pointing up off the wire) run down both sides of the screen, top to bottom, a bulb at either end (js/lights.js builds them to the screen's height), the wire in the screen's 8px margin and every bulb turned in toward the middle, so none is cut off at the edge; over everything, but never in the way of a tap (their glows end at the screen's edges, so the page never scrolls for them), glowing and twinkling in turn,
 the CHAIN METER's segments in their colors: December's C9s of every color, October's orange,
 purple and green with jack o' lanterns and candy corn among them, Valentine's pinks, red and white
 with hearts. EFFECTS: REDUCED takes them (and December's warm glow) away.
@@ -1190,6 +1190,10 @@ SURPRISED, LOVE (red heart eyes), DIZZY and LAUGH. The small faces come from
 `js/minibot.js`, a copy of the CPU's face for use anywhere.
 
 ## Music player
+
+Its top is a game's: **←** BACK in the corner, BYTEFALL in the same place and size as everywhere else,
+and // MUSIC PLAYER under it as a game's mode line; the visualizer, the controls and the tracks scroll
+under that, with no scroll bar.
 
 **GENERATED** (track 16, free all year, ahead of tracks 12-15; `js/music/music-generated.js`) writes
 itself. It's seeded: the SONG OF THE DAY is the date's, a new song each day that everyone hears the
