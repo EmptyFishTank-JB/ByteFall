@@ -229,7 +229,7 @@ a grinning CPU and typing gibberish, each showing its value in brackets and its 
 tap on it pays 1 to 8, at random, a -KEYS floating up off it; paid off, the bit's free at once, and if its lock runs out first
 what was paid on it is lost), **MALWARE** (the board's bits shown as flickering junk for 3 drops), a **CRYPTOJACKER**
 (5 drops' resources stolen, a CPU making off with them on a sign through the overflow row) or **SCAREWARE**
-(fake alerts over the board for 8 drops, popping up on their own clock with a cooldown between, now and then a burst of 2 to 4, up to 4 stacked at random spots in the grid, each closed only by its tiny X). Each has four looks, one picked at random each time. Infections stack (two infected boxes, two infections); ADWARE, the CRYPTOJACKER and SCAREWARE quietly demand KEYS (10 to 20, never shown; RANSOMWARE's are on its bits), stealing a few on every tap until paid off (then they go) or until their clock runs out, and the STORE's BLACK BOXES section warns of all six. While any's on, a little bot at its laptop types away at a virus in CURRENT's corner. The UNLOCKED / ACHIEVEMENT banners are LED signs of small lights in the game's font (js/led-banner.js; the dev page's BANNER LOOK: DOTS, PIXELS, MARQUEE, CHASE or the CLASSIC box), and ADWARE's AD tag is pixels in the game's font too. A menu over the board (pause, game over) hides the infections' displays. SETTINGS' CARD FRAME (being tried out; ON by default, `bytefall-frame`; not offered in the Google Play edition yet, which keeps the card): OFF takes the card away, the phone's own edges the frame, and the room the screen margin and border took goes to the game, a bigger board (style.css's FRAMELESS; the card layout before it: commit 318ba34). SETTINGS' CRT DISPLAY (OFF / SOFT / FULL, bytefall-crt) lays an old tube over the whole screen: scanlines and a vignette darkening toward rounded corners; FULL adds phosphor stripes, a faint flicker, a slow rolling band and a touch of glow (still on REDUCED effects or reduced motion). A slot taken in empty, or once its starter is used, is the **BLACK MARKET** (so it's there
+(fake alerts over the board for 8 drops, popping up on their own clock with a cooldown between, now and then a burst of 2 to 4, up to 4 stacked at random spots in the grid, each closed only by its tiny X). Each has four looks, one picked at random each time. Infections stack (two infected boxes, two infections); ADWARE, the CRYPTOJACKER and SCAREWARE quietly demand KEYS (10 to 20, never shown; RANSOMWARE's are on its bits), stealing a few on every tap until paid off (then they go) or until their clock runs out, and the STORE's BLACK BOXES section warns of all six. While any's on, a little bot at its laptop types away at a virus in CURRENT's corner. The UNLOCKED / ACHIEVEMENT banners are LED signs of small lights in the game's font (js/led-banner.js; the dev page's BANNER LOOK: DOTS, PIXELS, MARQUEE, CHASE or the CLASSIC box), and ADWARE's AD tag is pixels in the game's font too. A menu over the board (pause, game over) hides the infections' displays. SETTINGS' CRT DISPLAY (OFF / SOFT / FULL, bytefall-crt) lays an old tube over the whole screen: scanlines and a vignette darkening toward rounded corners; FULL adds phosphor stripes, a faint flicker, a slow rolling band and a touch of glow (still on REDUCED effects or reduced motion). A slot taken in empty, or once its starter is used, is the **BLACK MARKET** (so it's there
 whether you take starters in or not):
 a random exploit you've unlocked or, a quarter of the time, a BLACK BOX, marked for sale with the
 game's own currency sign in its corner (a 0 struck through twice, as a dollar sign is: no one
@@ -477,7 +477,7 @@ go back to the game, no reload needed.
 
 The game has one text size, set large enough to read on a phone (there's no TEXT SIZE setting):
 every piece of text has its own size written in, nothing scaled on top. The main menu holds still:
-its title is one line at the top (BYTEFALL // DECRYPTION TERMINAL, 8px under the card's border; just
+its title is one line at the top (BYTEFALL // DECRYPTION TERMINAL, 8px under the screen's top edge; just
 BYTEFALL where the whole line won't fit), with **←** in the top left corner back to the title screen,
 then the level, the resources and the six modes; the mode's panel is only as tall as what the mode
 puts in it, PLAY 8px under its last piece and the rows under the panel right after, and what the mode shows in it (its description,
@@ -608,6 +608,13 @@ on the website; the RELEASE edition's set from Google Play, `js/billing.js`). Ad
 
 ## Playing
 
+The game fills the screen with no card or frame around it (the phone's own edges are its frame):
+everything sits 8px in from the screen's edges, the room going to the board, the HUD and the main
+menu's panels (the DAILY cards included). VS sits its board a little narrower when the screen's
+height is what limits it. The title screen and the music player have no card either. (The game in
+a bordered card, as it was before: commit 318ba34.)
+
+
 Open `index.html` in a browser. Tap a numbered drop button (under the grid by
 default), or press `1`-`7` (`1`-`8` on Hard), to drop the current bit shown in the HUD.
 Or touch the grid itself: touch (or click) and hold, and the bit appears in the top
@@ -678,8 +685,7 @@ a teardrop pointing up, 2 a lens, 3 a triangle... 8 an octagon), with a small
 number in the corner. SPECTRUM gives every bit its own random hue speed,
 direction and phase, slowly hue-rotates the rest of the page, and turns the
 background grid into dimmed rainbow blocks; it holds still under reduced motion. SEASONAL (free, the
-full-width button under the other themes) follows the calendar: in OCTOBER the card's glow breathes
-between purple and orange and the title flickers now and then like a failing light; in DECEMBER
+full-width button under the other themes) follows the calendar: in OCTOBER the title flickers now and then like a failing light; in DECEMBER
 (to Jan 6) the background's blocks are bulbs of every filament color, twinkling, the board catches
 the lights' warm glow and the scroll bars are candy canes. **THE SEASON'S LIGHTS**: strings of old
 filament bulbs in fine pixel art (finer than the bots', each turned its own way: hanging, leaning, sideways, a few pointing up off the wire) run down both sides of the card from the top of its border to the bottom, a bulb at either end (js/lights.js builds them to the card's height), over everything, glowing and twinkling in turn,

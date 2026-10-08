@@ -3756,25 +3756,6 @@ crtBtn.addEventListener('click', () => {
 });
 updateCrtBtn();
 
-// CARD FRAME (being tried out): OFF takes away the card around the game, the phone's own edges its
-// frame (style.css's FRAMELESS; index.html sets it before the first paint). Not offered in the Google
-// Play edition yet, which keeps the card. The card layout as it was before: commit 318ba34
-const frameBtn = document.getElementById('frame-btn');
-const frameless = () => document.documentElement.classList.contains('frameless');
-function updateFrameBtn() {
-  frameBtn.textContent = `CARD FRAME: ${frameless() ? 'OFF' : 'ON'}`;
-  frameBtn.classList.toggle('on', !frameless());
-}
-document.getElementById('frame-setting').hidden = !!(window.BYTEFALL_APP && window.BYTEFALL_APP.release);
-frameBtn.addEventListener('click', () => {
-  document.documentElement.classList.toggle('frameless');
-  storage.set('bytefall-frame', frameless() ? 'off' : 'on');
-  updateFrameBtn();
-  SFX.play('punct');
-  window.dispatchEvent(new Event('resize')); // (everything fitted to the card fits itself again)
-});
-updateFrameBtn();
-
 // (SETTINGS' switch, and the same one in the MUSIC PLAYER)
 const outputBtn = document.getElementById('output-btn');
 const mpOutputBtn = document.getElementById('mp-output-btn');

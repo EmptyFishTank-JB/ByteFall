@@ -259,7 +259,6 @@ button, input, select, textarea { line-height: inherit; }
   text-shadow: -1.5px 0 var(--ana-l), 1.5px 0 var(--ana-r);
 }
 [data-theme="anaglyph"] .cell.disc { box-shadow: -1.5px 0 0 var(--ana-l), 1.5px 0 0 var(--ana-r); }
-[data-theme="anaglyph"] .crt { box-shadow: -3px 0 0 rgba(255, 40, 80, 0.55), 3px 0 0 rgba(0, 220, 255, 0.55), 0 0 30px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(0, 0, 0, 0.5); }
 [data-theme="anaglyph"] .cell .glyph { filter: drop-shadow(-1.5px 0 var(--ana-l)) drop-shadow(1.5px 0 var(--ana-r)); }
 
 /* SYNTHWAVE: pink bits, purple layers, orange cracks and a cyan trace */
@@ -469,7 +468,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 16px;
+  padding: 0;
   background: radial-gradient(ellipse at center, var(--bg-center) 0%, var(--bg-solid) 100%);
   /* Android Chrome samples the page's bottom edge for the system nav bar; a gradient reads as white */
   background-color: var(--bg-solid);
@@ -477,13 +476,11 @@ body {
   color: var(--fg);
 }
 
+/* THE GAME: no card around it (the phone's own edges are its frame); everything sits 8px in from the
+   screen's edges. (The game in a bordered card, as it was before: commit 318ba34) */
 .crt {
   position: relative;
-  padding: 24px clamp(12px, 4vw, 28px) 32px;
-  background: var(--panel);
-  border: 2px solid var(--fg-dim);
-  border-radius: 10px;
-  box-shadow: 0 0 30px rgba(var(--fg-rgb), 0.15), inset 0 0 40px rgba(0, 0, 0, 0.5);
+  padding: 8px 8px 32px;
   max-width: 480px;
   width: 100%;
 }
@@ -1462,8 +1459,8 @@ body.vs-mode header #mode-info { display: none; }
 /* Records: the trophy in the CRT's top-left corner, mirroring the settings icon */
 .records-btn {
   position: absolute;
-  top: 12px;
-  left: 12px;
+  top: 8px;
+  left: 8px;
   width: 56px;
   height: 28px;
   display: flex;
@@ -1639,8 +1636,8 @@ body.vs-mode header #mode-info { display: none; }
 
 .settings-btn {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 8px;
+  right: 8px;
   width: 56px;
   height: 28px;
   display: flex;
@@ -1900,8 +1897,7 @@ footer span { color: var(--fg); }
 /* Tight spacing around the board so the whole game panel fits the window with as big a board
    as possible (script.js's fitBoard sizes the board to what's left). The phone layout, used on
    every screen. */
-body { padding-top: 8px; padding-bottom: 8px; }
-.crt { padding-top: 12px; padding-bottom: 14px; }
+.crt { padding-top: 8px; padding-bottom: 14px; }
 h1 { font-size: 24px; }
 header { margin-bottom: 6px; }
 .level-bar { margin-top: 3px; }
@@ -1929,15 +1925,15 @@ header { margin-bottom: 6px; }
    RESTART (QUIT in VS) sits in the game card's lower-left corner during a session; the exploit
    button in the lower-right. */
 /* The corner buttons are 60x30 (2:1) with the bit cells' square corners, level with each other
-   and mirrored 12px in from each side. The message line sits centered between the column
+   and 8px in from the screen's edges. The message line sits centered between the column
    buttons and the corner buttons' tops: its 12px top gap matches the room left above them in the
-   52px bottom padding (52 - 10 below - 30 tall). */
-.crt { padding-bottom: 52px; }
+   50px bottom padding (50 - 8 below - 30 tall). */
+.crt { padding-bottom: 50px; }
 .message-slot { margin-top: 12px; }
 .message-slot .message { margin-top: 0; }
 .corner-btn {
   position: absolute;
-  bottom: 10px;
+  bottom: 8px;
   width: 60px;
   height: 30px;
   display: flex;
@@ -1956,7 +1952,7 @@ header { margin-bottom: 6px; }
 /* Nothing to restart yet (before the first drop, or once the run is over): grayed out */
 #restart-btn.corner-btn:disabled { color: var(--fg-dim); opacity: 0.4; cursor: default; background: rgba(255, 255, 255, 0.02); }
 .corner-btn svg { width: 20px; height: 20px; display: block; }
-.restart-icon, .quit-icon { left: 12px; }
+.restart-icon, .quit-icon { left: 8px; }
 /* QUIT: dim like the exploit button beside it; red while pressed and while it waits to confirm */
 .quit-icon { color: var(--fg-dim); opacity: 0.6; touch-action: none; }
 /* In a match the corner button is PAUSE (two bars); otherwise QUIT */
@@ -2034,9 +2030,8 @@ body.cards-in-settings .settings .dev-link { display: inline-flex; margin-top: 6
 .hud-bits.has-next { flex: 2 1 17px; }
 .hud-bits .stat-current { flex-grow: 1; }
 .hud .stat .label { font-size: 8px; letter-spacing: 0.5px; }
-/* Phones and the app: the game card fills the screen height with the same 16px gap at the top and
-   bottom as at the sides; its contents center vertically inside it */
-body.cards-in-settings { padding: 16px; height: 100vh; height: 100dvh; height: var(--app-h, 100dvh); min-height: 0; }
+/* Phones and the app: the game fills the screen's height; its contents center vertically in it */
+body.cards-in-settings { padding: 0; height: 100vh; height: 100dvh; height: var(--app-h, 100dvh); min-height: 0; }
 /* Tall screens (tablets, fullscreen) let the card grow wider with the height, so the extra
    room goes to a bigger board rather than empty space (phones stay limited by their width) */
 body.cards-in-settings .cabinet,
@@ -2049,7 +2044,7 @@ body.cards-in-settings.vs-mode .crt { justify-content: flex-start; }
 body.cards-in-settings .crt.measuring { height: auto; align-self: start; } /* script.js's fitBoard measures the contents */
 /* The header sits at the top of the card, its title level with PAUSE (as the main menu's is with
    its BACK arrow); the HUD, grid and message follow straight under it */
-body.cards-in-settings:not(.vs-mode):not(.vs-measure) .crt { justify-content: flex-start; padding-top: 12px; }
+body.cards-in-settings:not(.vs-mode):not(.vs-measure) .crt { justify-content: flex-start; padding-top: 8px; }
 body.cards-in-settings:not(.vs-mode):not(.vs-measure) header { margin-top: var(--head-nudge, 0px); }
 /* (the header's title, subtitle and the HUD's panels 8px apart, all at the top: any height to
    spare goes under the message, at the bottom) */
@@ -2279,15 +2274,13 @@ html { touch-action: manipulation; }
 }
 .music-player[hidden] { display: none; }
 body.player-open { overflow: hidden; }
-/* (a card like the game's: its border and glow, laid exactly over the game card (player.js's fitCard),
-   the head staying put and what's under it scrolling inside the card, as the game's own cards do) */
-.music-player { overflow: hidden; padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom)); box-sizing: border-box; }
+/* (laid exactly over the game (player.js's fitCard), 8px in from the screen's edges like it, the head
+   staying put and what's under it scrolling, as the game's own cards do) */
+.music-player { overflow: hidden; padding: 0; box-sizing: border-box; }
 .mp-inner {
   display: flex; flex-direction: column; align-items: stretch; gap: 12px; overflow: hidden;
   width: 100%; max-width: 480px; height: 100%; box-sizing: border-box;
-  padding: 14px clamp(12px, 4vw, 24px) 0;
-  background: var(--panel); border: 2px solid var(--fg-dim); border-radius: 10px;
-  box-shadow: 0 0 30px rgba(var(--fg-rgb), 0.15), inset 0 0 40px rgba(0, 0, 0, 0.5);
+  padding: 8px 8px 0;
 }
 /* (its head as the game's cards': BACK top left, the title beside it) */
 .mp-head { margin-bottom: 0; flex: none; }
@@ -2519,7 +2512,7 @@ body:not(.vs-mode) .hud .stat:not(.cpu-stat):not(.cpu-face) > .label {
    middle and TAP TO START blinking below. Tapping fades everything to black (.start-black), then
    the black fades away off the game. (Hidden before first paint on a refresh: html.no-start.) */
 .start-screen {
-  position: fixed; inset: 0; z-index: 200; display: flex; padding: 16px;
+  position: fixed; inset: 0; z-index: 200; display: flex; padding: 0;
   background: radial-gradient(ellipse at center, var(--bg-center) 0%, var(--bg-solid) 100%);
   -webkit-tap-highlight-color: transparent; outline: none;
 }
@@ -2527,8 +2520,7 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
 .start-card {
   position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
   overflow: hidden; isolation: isolate;
-  background: var(--board-bg); border: 2px solid var(--fg-dim); border-radius: 10px;
-  box-shadow: 0 0 30px rgba(var(--fg-rgb), 0.15), inset 0 0 40px rgba(0, 0, 0, 0.5);
+  background: var(--board-bg);
 }
 .start-bg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
 .start-title { text-align: center; }
@@ -2975,15 +2967,15 @@ html.page-twinkle .page-bg { display: block; }
 .home {
   position: absolute; inset: 0; z-index: 15; pointer-events: none;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
-  padding: 52px clamp(12px, 4vw, 28px) 64px; text-align: center; overflow-y: auto;
+  padding: 52px 8px 64px; text-align: center; overflow-y: auto;
 }
 .home > * { pointer-events: auto; }
 .home-head h1 { font-size: 34px; letter-spacing: 6px; }
 .home .level-bar { margin-top: 0; }
-.home .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; max-width: 340px; margin-top: 0; }
+.home .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; margin-top: 0; }
 .home .modes button { padding: 10px 4px; font-size: 13px; letter-spacing: 1px; }
 .home-panel {
-  width: 100%; max-width: 340px; display: flex; flex-direction: column; align-items: center; gap: 10px;
+  width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px;
   padding: 14px 12px; border: 1px solid var(--grid-line); border-radius: 6px; background: rgba(var(--fg-rgb), 0.03);
   animation: pause-in 0.18s ease-out;
 }
@@ -3027,7 +3019,7 @@ body.in-game .settings-btn:not([aria-expanded="true"]) { visibility: hidden; }
 .home #daily-kinds button { padding-left: 7px; padding-right: 7px; }
 /* The main menu's RULES & RECORDS and SETTINGS: buttons, as on the pause screen (the corner
    icons only show there while their panel is open, to close it) */
-.home-row { display: flex; justify-content: center; gap: 8px; width: 100%; max-width: 340px; margin-top: 0; }
+.home-row { display: flex; justify-content: center; gap: 8px; width: 100%; margin-top: 0; }
 .home-row button { flex: 1; font-size: 12px; padding: 8px 6px; }
 body.at-home :is(.records-btn, .settings-btn):not([aria-expanded="true"]) { visibility: hidden; }
 
@@ -3035,7 +3027,7 @@ body.at-home :is(.records-btn, .settings-btn):not([aria-expanded="true"]) { visi
    corner icons hide while one is open) */
 .records, .settings {
   top: 0; left: 0; right: 0; bottom: 0; width: auto; max-width: none; max-height: none;
-  padding: 14px clamp(12px, 4vw, 24px) 20px; border: none; border-radius: 8px; box-shadow: none;
+  padding: 8px 8px 20px; border: none; border-radius: 0; box-shadow: none;
   background: var(--panel);
 }
 .card-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
@@ -3074,7 +3066,7 @@ body:not(.vs-mode) .hud-bits #next-stat .bit-sq { width: 20px; height: 20px; mar
    four tabs, and RECORDS' own tabs just under them) */
 .records, .settings { padding-top: 0; }
 .records .card-top, .settings .card-head {
-  position: sticky; top: 0; z-index: 5; padding-top: 14px; background: var(--panel);
+  position: sticky; top: 0; z-index: 5; padding-top: 8px; background: var(--panel);
 }
 .records .card-top { padding-bottom: 2px; }
 .settings .card-head { padding-bottom: 10px; margin-bottom: 4px; }
@@ -3561,7 +3553,7 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 .daily-cards button.danger { border-color: var(--danger); color: var(--danger); justify-content: center; align-items: center; letter-spacing: 2px; }
 /* In a game, PAUSE sits in the top-right corner (SETTINGS' spot, empty in a game); ← BACK, when there's
    nothing to pause, stays top left like the cards' BACK */
-body.in-game.can-pause .records-btn { left: auto; right: 12px; }
+body.in-game.can-pause .records-btn { left: auto; right: 8px; }
 /* (PAUSE: a fingertip-sized target round its two small bars, reaching past the button on every side;
    lit the moment it's pressed, even when it waits for a drop to finish) */
 body.in-game.can-pause .records-btn::before { content: ""; position: absolute; inset: -12px -10px -14px -16px; }
@@ -3638,7 +3630,7 @@ body.in-game.can-pause .records-btn svg { left: auto; right: 4px; } /* (hugging 
 /* (the STORE's sign hangs over the card's sticky BACK bar, painted above it so the bar can't clip
    it or its glow, and sits in from the card's right edge; the STORE card itself doesn't scroll, its
    .store-scroll does, so the sign never rides up over BACK) */
-.store-sign { right: -6px; z-index: 6; }
+.store-sign { right: 1px; z-index: 6; } /* (its tilted corner 8px clear of the screen's edge, like everything) */
 /* ONE GAP: the space between the main menu's RULES & RECORDS and SETTINGS, between every set of
    buttons and every set of cards across the game (the main menu, PAUSE, the STORE's and EXPLOITS'
    cards, SETTINGS' buttons) */
@@ -3676,7 +3668,7 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
 .home .home-panel { max-height: 420px; }
 .home-panel-body { flex: 1 1 auto; min-height: 0; width: 100%; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; align-items: center; gap: var(--gap); }
 .home-panel-body > * { flex-shrink: 0; }
-.home .mode-info { flex: none; overflow: visible; }
+.home .mode-info { flex: none; overflow: visible; max-width: none; }
 .home .daily-cards button { height: auto; min-height: 64px; }
 .home .home-best { height: auto; overflow: visible; }
 .home-panel .home-play { margin-top: 0; }
@@ -4045,16 +4037,10 @@ html, body { overflow-x: clip; }
 [data-theme="season-winter"] *::-webkit-scrollbar, [data-theme="season-winter"]::-webkit-scrollbar { width: 8px; height: 8px; }
 [data-theme="season-winter"] *::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.04); border-radius: 4px; }
 [data-theme="season-winter"] *::-webkit-scrollbar-thumb { border-radius: 4px; background: repeating-linear-gradient(45deg, #e8423a 0 5px, #fff6f0 5px 10px); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15); }
-/* OCTOBER's spooky touches: the card's glow breathing between purple and orange, the title flickering now and then */
-[data-theme="season-halloween"] .crt { animation: spooky-glow 7s ease-in-out infinite; }
-@keyframes spooky-glow {
-  0%, 100% { box-shadow: 0 0 18px rgba(179, 107, 255, 0.28), inset 0 0 28px rgba(179, 107, 255, 0.08); }
-  50% { box-shadow: 0 0 26px rgba(255, 140, 26, 0.32), inset 0 0 36px rgba(255, 140, 26, 0.08); }
-}
+/* OCTOBER's spooky touch: the title flickering now and then */
 [data-theme="season-halloween"] :is(header h1, .home-head h1) { animation: spooky-flicker 9s steps(1) infinite; }
 @keyframes spooky-flicker { 0%, 90% { opacity: 1; } 91% { opacity: 0.35; } 92% { opacity: 1; } 95% { opacity: 0.6; } 96%, 100% { opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { [data-theme="season-halloween"] :is(.crt, header h1, .home-head h1) { animation: none; } }
-:root.low-fx [data-theme="season-halloween"] .crt, :root.low-fx[data-theme="season-halloween"] .crt { animation: none; }
+@media (prefers-reduced-motion: reduce) { [data-theme="season-halloween"] :is(header h1, .home-head h1) { animation: none; } }
 /* SEASONAL's button: the full width, under the two columns of themes */
 .theme-list .theme-seasonal { grid-column: 1 / -1; }
 /* THE OVERCAST (visitors.js): three cloud layers over the game card's lane, the sky dimmed under
@@ -4380,13 +4366,3 @@ body.in-game.can-pause .records-btn.pause-queued { background: rgba(var(--fg-rgb
 /* (the AD tag a touch see-through: 92%, as the board and the buttons on the card) */
 .inf-ad-tag { opacity: 0.92; }
 
-/* FRAMELESS (SETTINGS' CARD FRAME: OFF; being tried out, not in the Google Play edition yet): the game
-   with no card around it. The phone's own edges are its frame: the screen's margin, the card's border,
-   rounded corners and glow all go, and the room they took goes to the game (script.js's fitBoard gives
-   it to the board). The start card and the music player's card go the same way. The card layout as it
-   was before: commit 318ba34 */
-:root.frameless body.cards-in-settings { padding: 0; }
-:root.frameless .crt { border: none; border-radius: 0; box-shadow: none !important; animation: none !important; background: none; padding-left: 10px; padding-right: 10px; }
-:root.frameless .start-card { border: none; border-radius: 0; box-shadow: none; }
-:root.frameless .music-player { padding: 0; }
-:root.frameless .mp-inner { border: none; border-radius: 0; box-shadow: none; background: none; }
