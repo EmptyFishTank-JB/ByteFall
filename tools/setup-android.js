@@ -5,9 +5,10 @@
 // - VIBRATE permission (the game's haptics); RECORD_AUDIO and MODIFY_AUDIO_SETTINGS for the music
 //   player's MICROPHONE and OTHER APPS sources, and FOREGROUND_SERVICE(_MEDIA_PROJECTION) with
 //   CaptureService (what the other apps play, by Android's audio playback capture;
-//   tools/android/CaptureService.java). OTHER APPS is the TEST edition's only: the RELEASE one's own
-//   manifest (src/release/) takes the service and its permissions out, so Google Play's foreground
-//   service declaration isn't needed
+//   tools/android/CaptureService.java). Those are the TEST edition's only: the RELEASE one's own
+//   manifest (src/release/) takes the service and all those permissions out (its music player shows
+//   ByteFall's own music only), so Google Play's foreground service declaration isn't needed and
+//   the app never asks for the microphone
 // - ADS: the AdMob app ID (js/ads-config.js) in the manifest, which Google's ads SDK needs before
 //   anything (the banner itself is js/ads.js, through @capacitor-community/admob)
 // - portrait only, as the web app's manifest asks
@@ -48,12 +49,15 @@ edit('src/main/AndroidManifest.xml', (s) => s
   .replace('<uses-permission android:name="android.permission.INTERNET" />', '<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.VIBRATE" />\n    <uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />')
   .replace('</activity>', '</activity>\n\n        <service android:name=".CaptureService" android:exported="false" android:foregroundServiceType="mediaProjection" />')
   .replace('</application>', `    <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="${adAppId}" />\n    </application>`)); // (VIBRATION: navigator.vibrate needs it)
-// (the RELEASE edition without OTHER APPS: the capture service and its foreground service
-// permissions removed from its manifest, merged over the main one)
+// (the RELEASE edition without OTHER APPS or the MICROPHONE: the capture service, its foreground
+// service permissions and the microphone's removed from its manifest, merged over the main one)
 fs.mkdirSync(path.join(APP, 'src', 'release'), { recursive: true });
 fs.writeFileSync(path.join(APP, 'src', 'release', 'AndroidManifest.xml'), `<?xml version="1.0" encoding="utf-8"?>
-<!-- (the RELEASE edition, Google Play: no OTHER APPS, so no capture service: tools/setup-android.js) -->
+<!-- (the RELEASE edition, Google Play: no OTHER APPS or MICROPHONE source, so no capture service and
+     no microphone: tools/setup-android.js) -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.RECORD_AUDIO" tools:node="remove" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" tools:node="remove" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" tools:node="remove" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" tools:node="remove" />
     <application>

@@ -2340,6 +2340,7 @@ body.player-open { overflow: hidden; }
 .mp-drawer-btn svg { transition: transform 0.2s ease; }
 .mp-source-btn::before { content: 'SOURCE: '; color: var(--fg-dim); }
 .mp-source-btn.other { color: var(--accent); }
+.mp-source-btn[hidden] { display: none; } /* (no other source: the Google Play RELEASE app) */
 .mp-drawer-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
 .mp-viz-drawer {
   position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 6; /* (over the controls below, not pushing them down) */

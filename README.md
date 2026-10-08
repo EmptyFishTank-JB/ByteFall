@@ -113,11 +113,13 @@ an Android App Bundle (`.aab`, under the run's Artifacts) to upload in the Play 
 Internal testing, or another track → Create new release). It's the game with every dev piece out
 (`tools/build-app.js release`): no UNLOCK EVERYTHING padlock (nor the dev unlocks, whatever's in
 storage or the URL: `js/unlocks.js`), every dev switch cleared, no infection tester or archived
-tracks. Nor the music player's OTHER APPS source: its SOURCE is BYTEFALL or MICROPHONE
-(`js/extsource.js`), and its own manifest (`android/app/src/release/`, written by
-`tools/setup-android.js`) takes out the capture service and its foreground service permissions,
-so the Play Console's foreground service declaration isn't needed (MainActivity refuses OTHER
-APPS without the service, too). The TEST edition and ByteFall Viz keep it. Its privacy policy, for
+tracks. Nor the music player's other sources, OTHER APPS and MICROPHONE: its visualizer shows
+ByteFall's own music only, with no SOURCE button (`js/extsource.js`), and its own manifest
+(`android/app/src/release/`, written by `tools/setup-android.js`) takes out the capture service,
+its foreground service permissions and the microphone's (RECORD_AUDIO, MODIFY_AUDIO_SETTINGS), so
+the Play Console's foreground service declaration isn't needed and the app never asks for the
+microphone (MainActivity refuses OTHER APPS without the service, too). The TEST edition, the web
+and ByteFall Viz keep them. Its privacy policy, for
 the Play listing, is on the studio's site: https://emptyfishtank-jb.github.io/bytefall/privacy.html
 (the `EmptyFishTank-JB.github.io` repo, with `app-ads.txt`; this repo's `privacy.html` sends the
 old address there). Its version code is the build number (`?v=`), so each upload needs a push after the last.

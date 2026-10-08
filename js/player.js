@@ -312,6 +312,7 @@
   // MICROPHONE, or (the web) MICROPHONE; a tap moves on to the next. Another source pauses
   // ByteFall's music, so the two don't mix; while one listens, the corner shows what's coming in
   const sourceBtn = document.getElementById('mp-viz-source-btn');
+  sourceBtn.hidden = !ExtSource.kinds().length; // (ByteFall's own music the only source: the RELEASE app)
   const hintEl = document.querySelector('#mp-viz-btn .mp-viz-hint');
   let want = null; // (the source picked: kept for when the player opens again)
   function showSource(note) {

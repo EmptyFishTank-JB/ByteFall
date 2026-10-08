@@ -9,10 +9,12 @@
 // analyser like the game's own (the same calls viz.js makes). info(): what's coming in, shown in
 // the visualizer's corner while it listens
 const ExtSource = (() => {
-  // (OTHER APPS: the app's capture, but not in ByteFall's Google Play RELEASE edition, which leaves it
-  // out, CaptureService and all: there the microphone's the only other source. ByteFall Viz keeps it)
-  const app = () => !!(window.BytefallAndroid && window.BytefallAndroid.extStart) && !(window.BYTEFALL_APP && window.BYTEFALL_APP.release);
-  const kinds = () => (app() ? ['apps', 'mic'] : ['mic']); // (the sources besides ByteFall's own)
+  // (none in ByteFall's Google Play RELEASE edition, which leaves out OTHER APPS (CaptureService and
+  // all) and the MICROPHONE (its permissions too): there the visualizer shows ByteFall's own music
+  // only, and the SOURCE button's hidden. The TEST edition, the web and ByteFall Viz keep them)
+  const release = () => !!(window.BYTEFALL_APP && window.BYTEFALL_APP.release);
+  const app = () => !!(window.BytefallAndroid && window.BytefallAndroid.extStart) && !release();
+  const kinds = () => (release() ? [] : app() ? ['apps', 'mic'] : ['mic']); // (the sources besides ByteFall's own)
   const NAMES = { apps: 'OTHER APPS', mic: 'MICROPHONE' };
   let kind = 'apps';
   const label = () => NAMES[kind];
