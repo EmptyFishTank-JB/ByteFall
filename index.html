@@ -38,12 +38,15 @@
     if (sessionStorage.getItem('bytefall-started')) document.documentElement.classList.add('no-start');
     if (localStorage.getItem('bytefall-effects') === 'reduced') document.documentElement.classList.add('low-fx');
     var crt = localStorage.getItem('bytefall-crt'); // (CRT DISPLAY: the whole screen a tube)
+    // (CARD FRAME: OFF, being tried out: no card around the game, the phone's edges its frame. Not in
+    // the Google Play edition yet, which keeps the card whatever's saved)
+    if (localStorage.getItem('bytefall-frame') === 'off' && !(window.BYTEFALL_APP && window.BYTEFALL_APP.release)) document.documentElement.classList.add('frameless');
     if (crt === 'soft' || crt === 'full') document.documentElement.classList.add('crt-' + crt);
   } catch (e) {}
 </script>
 <title>BYTEFALL // decryption terminal</title>
-<script src="js/fonts.js?v=513"></script>
-<link rel="stylesheet" href="css/style.css?v=513">
+<script src="js/fonts.js?v=514"></script>
+<link rel="stylesheet" href="css/style.css?v=514">
 </head>
 <body>
   <!-- Dev: TWINKLE BACKGROUND (grid-bg.js): the starlight behind the whole game, off by default -->
@@ -375,6 +378,11 @@
         <p class="settings-note">REDUCED, for slower phones: the backgrounds hold still, the glows go, and exploded bits break into fewer, bigger pieces.</p>
         <button type="button" id="crt-btn" class="toggle-btn">CRT DISPLAY: OFF</button>
         <p class="settings-note">The whole screen as an old tube: scanlines, the glass darker toward its rounded corners. FULL adds the phosphor stripes, a faint flicker and a slow rolling band.</p>
+        <!-- (being tried out: the game without its card; the Google Play edition keeps the card for now) -->
+        <div id="frame-setting">
+          <button type="button" id="frame-btn" class="toggle-btn on">CARD FRAME: ON</button>
+          <p class="settings-note">OFF takes away the card around the game: the phone's own edges are the frame, and the room the border took goes to the game.</p>
+        </div>
         <p class="settings-title settings-section">// EXTRAS</p>
         <button type="button" id="wanderers-btn" class="toggle-btn on">WANDERING BOTS: ON</button>
         <p class="settings-note">The CPUs strolling along the bottom of the game card. Tap one to poke it.</p>
@@ -796,55 +804,55 @@
     </div>
   </div>
 
-  <script src="js/bot-svg.js?v=513"></script>
-  <script src="js/unlocks.js?v=513"></script>
-  <script src="js/progress.js?v=513"></script>
-  <script src="js/music/output.js?v=513"></script>
-  <script src="js/music/mixes.js?v=513"></script>
-  <script src="js/sfx.js?v=513"></script>
-  <script src="js/music/music-bytefall-theme.js?v=513"></script>
-  <script src="js/music/music-sleep-mode.js?v=513"></script>
-  <script src="js/music/music-brute-force.js?v=513"></script>
-  <script src="js/music/music-deep-web.js?v=513"></script>
-  <script src="js/music/music-zero-day.js?v=513"></script>
-  <script src="js/music/music-system-restore.js?v=513"></script>
-  <script src="js/music/music-night-drive.js?v=513"></script>
-  <script src="js/music/music-standby-mode.js?v=513"></script>
-  <script src="js/music/music-core-dump.js?v=513"></script>
-  <script src="js/music/music-handshake.js?v=513"></script>
-  <script src="js/music/music-stack-overflow.js?v=513"></script>
-  <script src="js/music/music-generated.js?v=513"></script>
-  <script src="js/music/music.js?v=513"></script>
-  <script src="js/data/puzzles.js?v=513"></script>
-  <script src="js/data/daily-puzzles.js?v=513"></script>
-  <script src="js/cpu.js?v=513"></script>
-  <script src="js/fx.js?v=513"></script>
-  <script src="js/viz.js?v=513"></script>
-  <script src="js/pixel.js?v=513"></script>
-  <script src="js/minibot.js?v=513"></script>
-  <script src="js/seasons.js?v=513"></script>
-  <script src="js/bigart.js?v=513"></script>
-  <script src="js/scenes.js?v=513"></script>
-  <script src="js/weather.js?v=513"></script>
-  <script src="js/visitors.js?v=513"></script>
-  <script src="js/data/bot-anims.js?v=513"></script>
-<script src="js/wanderers.js?v=513"></script>
-  <script src="js/tutorial.js?v=513"></script>
-  <script src="js/puzzle-sim.js?v=513"></script>
-  <script src="js/led-banner.js?v=513"></script>
-  <script src="js/infections.js?v=513"></script>
-  <script src="js/script.js?v=513"></script>
-  <script src="js/grid-bg.js?v=513"></script>
-  <script src="js/lights.js?v=513"></script>
-  <script src="js/inf-test.js?v=513"></script>
-  <script src="js/extsource.js?v=513"></script>
-  <script src="js/player.js?v=513"></script>
-  <script src="js/billing.js?v=513"></script>
-  <script src="js/store.js?v=513"></script>
-  <script src="js/ads-config.js?v=513"></script>
-  <script src="js/ads.js?v=513"></script>
-  <script src="js/start.js?v=513"></script>
-  <script src="js/place.js?v=513"></script>
-  <script src="js/saver.js?v=513"></script>
+  <script src="js/bot-svg.js?v=514"></script>
+  <script src="js/unlocks.js?v=514"></script>
+  <script src="js/progress.js?v=514"></script>
+  <script src="js/music/output.js?v=514"></script>
+  <script src="js/music/mixes.js?v=514"></script>
+  <script src="js/sfx.js?v=514"></script>
+  <script src="js/music/music-bytefall-theme.js?v=514"></script>
+  <script src="js/music/music-sleep-mode.js?v=514"></script>
+  <script src="js/music/music-brute-force.js?v=514"></script>
+  <script src="js/music/music-deep-web.js?v=514"></script>
+  <script src="js/music/music-zero-day.js?v=514"></script>
+  <script src="js/music/music-system-restore.js?v=514"></script>
+  <script src="js/music/music-night-drive.js?v=514"></script>
+  <script src="js/music/music-standby-mode.js?v=514"></script>
+  <script src="js/music/music-core-dump.js?v=514"></script>
+  <script src="js/music/music-handshake.js?v=514"></script>
+  <script src="js/music/music-stack-overflow.js?v=514"></script>
+  <script src="js/music/music-generated.js?v=514"></script>
+  <script src="js/music/music.js?v=514"></script>
+  <script src="js/data/puzzles.js?v=514"></script>
+  <script src="js/data/daily-puzzles.js?v=514"></script>
+  <script src="js/cpu.js?v=514"></script>
+  <script src="js/fx.js?v=514"></script>
+  <script src="js/viz.js?v=514"></script>
+  <script src="js/pixel.js?v=514"></script>
+  <script src="js/minibot.js?v=514"></script>
+  <script src="js/seasons.js?v=514"></script>
+  <script src="js/bigart.js?v=514"></script>
+  <script src="js/scenes.js?v=514"></script>
+  <script src="js/weather.js?v=514"></script>
+  <script src="js/visitors.js?v=514"></script>
+  <script src="js/data/bot-anims.js?v=514"></script>
+<script src="js/wanderers.js?v=514"></script>
+  <script src="js/tutorial.js?v=514"></script>
+  <script src="js/puzzle-sim.js?v=514"></script>
+  <script src="js/led-banner.js?v=514"></script>
+  <script src="js/infections.js?v=514"></script>
+  <script src="js/script.js?v=514"></script>
+  <script src="js/grid-bg.js?v=514"></script>
+  <script src="js/lights.js?v=514"></script>
+  <script src="js/inf-test.js?v=514"></script>
+  <script src="js/extsource.js?v=514"></script>
+  <script src="js/player.js?v=514"></script>
+  <script src="js/billing.js?v=514"></script>
+  <script src="js/store.js?v=514"></script>
+  <script src="js/ads-config.js?v=514"></script>
+  <script src="js/ads.js?v=514"></script>
+  <script src="js/start.js?v=514"></script>
+  <script src="js/place.js?v=514"></script>
+  <script src="js/saver.js?v=514"></script>
 </body>
 </html>

@@ -4379,3 +4379,14 @@ body.in-game.can-pause .records-btn.pause-queued { background: rgba(var(--fg-rgb
 .cell.ransom .inf-screen { inset: 0; border-radius: inherit; box-shadow: none; }
 /* (the AD tag a touch see-through: 92%, as the board and the buttons on the card) */
 .inf-ad-tag { opacity: 0.92; }
+
+/* FRAMELESS (SETTINGS' CARD FRAME: OFF; being tried out, not in the Google Play edition yet): the game
+   with no card around it. The phone's own edges are its frame: the screen's margin, the card's border,
+   rounded corners and glow all go, and the room they took goes to the game (script.js's fitBoard gives
+   it to the board). The start card and the music player's card go the same way. The card layout as it
+   was before: commit 318ba34 */
+:root.frameless body.cards-in-settings { padding: 0; }
+:root.frameless .crt { border: none; border-radius: 0; box-shadow: none !important; animation: none !important; background: none; padding-left: 10px; padding-right: 10px; }
+:root.frameless .start-card { border: none; border-radius: 0; box-shadow: none; }
+:root.frameless .music-player { padding: 0; }
+:root.frameless .mp-inner { border: none; border-radius: 0; box-shadow: none; background: none; }
