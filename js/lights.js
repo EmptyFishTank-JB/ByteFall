@@ -1,16 +1,17 @@
 // THE SEASON'S LIGHTS (the SEASONAL theme in December, October and Valentine's): a string of old
-// filament bulbs down each side of the game card, from the top of its border to the bottom, a bulb at
-// either end. Fine pixel art (a 1px grid, finer than the bots'), built here to the card's height: the
-// bulbs about 48px apart, each turned its own way about its socket (hanging, leaning, sideways, a few
-// pointing up off the wire; turned pixel by pixel so they stay crisp), a stepped 1-pixel wire between
-// them, and a soft glow on each (style.css twinkles the glows in turn and hides it all on EFFECTS:
-// REDUCED).
+// filament bulbs down each side of the screen, top to bottom, a bulb at either end. Fine pixel art (a
+// 1px grid, finer than the bots'), built here to the screen's height: the wire in the screen's 8px
+// margin, the bulbs about 48px apart, each turned its own way about its socket but always in toward the
+// middle of the screen, never off its edge (hanging, leaning in, sideways, a few pointing up off the
+// wire; turned pixel by pixel so they stay crisp), a stepped 1-pixel wire between them, and a soft glow
+// on each. Over everything, but never in the way of a tap (style.css: no pointer events; it twinkles
+// the glows in turn and hides it all on EFFECTS: REDUCED).
 (() => {
   const box = document.querySelector('.card-lights');
   if (!box) return;
   const strings = [...box.querySelectorAll('i')];
-  const W = 40; // (the string's strip: room for a bulb turned sideways)
-  const XS = [14, 26]; // (where the wire swings to, bulb by bulb)
+  const W = 40; // (the string's strip: room for a bulb turned sideways, in toward the middle)
+  const XS = [5, 10]; // (where the wire swings to, bulb by bulb: in the screen's margin)
   const GAP = 48; // (about this far between bulbs)
   const SPR = {
     c9: ['..ssss..', '..sSSs..', '..ssss..', '..cccc..', '.cchccc.', 'cchhcccc', 'chhccccc', 'chcccccc', 'cccccccC',
@@ -30,7 +31,9 @@
     'season-halloween': { wire: '#1a1a1a', bulbs: [c9('#ff8a1f', '255, 138, 31'), c9('#b36bff', '179, 107, 255'), { kind: 'jack', glow: '255, 138, 31' }, c9('#7dff5a', '125, 255, 90'), { kind: 'corn', glow: '255, 190, 60' }] },
     'season-valentine': { wire: '#3a1424', bulbs: [c9('#ff8ac0', '255, 138, 192'), { kind: 'heart', c: '#ff3b5c', glow: '255, 59, 92' }, c9('#fff0f5', '255, 230, 240'), { kind: 'heart', c: '#ff8ac0', glow: '255, 138, 192' }, c9('#ff3b5c', '255, 59, 92')] },
   };
-  const ANGLES = [-18, 42, 8, -75, 95, -30, 165, 20, -52, 130, -8, 60, -40]; // (degrees from hanging straight down)
+  // (degrees from hanging straight down, every one turned in toward the middle: a negative angle swings
+  // the bulb away from the screen's edge on both sides, the right string being the left one mirrored)
+  const ANGLES = [-18, -42, -8, -75, -95, -30, -150, -20, -52, -120, -10, -60, -38];
   const shade = (hex, k) => `#${[1, 3, 5].map((i) => Math.floor(parseInt(hex.slice(i, i + 2), 16) * k).toString(16).padStart(2, '0')).join('')}`;
   // A sprite turned about its socket's top middle, pixel by pixel: [dx, dy, letter] from that point
   const turned = new Map();
@@ -61,9 +64,10 @@
   }
   // One string, `len` px long, its pattern started `from` bulbs in (the two sides differ)
   function build(set, len, from) {
-    const n = Math.max(2, Math.round((len - 14) / GAP) + 1);
-    const sp = (len - 14) / (n - 1);
-    const pts = Array.from({ length: n }, (_, k) => [XS[k % 2], Math.round(k * sp)]);
+    const n = Math.max(2, Math.round((len - 16) / GAP) + 1);
+    const sp = (len - 16) / (n - 1);
+    // (the top socket 2px under the screen's top edge, the bottom bulb's tip at its foot)
+    const pts = Array.from({ length: n }, (_, k) => [XS[k % 2], 2 + Math.round(k * sp)]);
     const cells = new Set();
     for (let k = 0; k < n - 1; k++) { // (the wire: a sagging curve from socket to socket, stepped)
       const [x0, y0] = pts[k];
@@ -83,8 +87,8 @@
     pts.forEach(([x, y], k) => {
       const b = set.bulbs[(k + from) % set.bulbs.length];
       const pal = { ...BASE, ...(b.kind === 'jack' ? { y: '#ffe68a' } : {}), ...(b.c ? { c: b.c, C: shade(b.c, 0.72) } : {}) };
-      const end = k === 0 || k === n - 1; // (the end bulbs hang, more or less: one pointing up would leave the card)
-      const t = turn(b.kind, end ? (k ? 14 : -16) * (from ? -1 : 1) : ANGLES[(k + from * 3) % ANGLES.length]);
+      const end = k === 0 || k === n - 1; // (the end bulbs hang, leaning in a little: one pointing up would leave the screen)
+      const t = turn(b.kind, end ? (k ? (from ? -10 : -14) : (from ? -22 : -16)) : ANGLES[(k + from * 3) % ANGLES.length]);
       for (const [dx, dy, ch] of t.px) rects += `<rect x="${x + dx}" y="${y + dy}" width="1" height="1" fill="${pal[ch]}"/>`;
       glows[k % 2].push(`radial-gradient(circle at ${(x + t.gx + 14).toFixed(1)}px ${(y + t.gy + 14).toFixed(1)}px, rgba(${b.glow}, 0.8) 0, rgba(${b.glow}, 0.32) 6px, transparent 14px)`);
     });

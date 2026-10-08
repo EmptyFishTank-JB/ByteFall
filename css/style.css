@@ -1275,6 +1275,9 @@ body.vs-mode .hud-bits .stat.keylogger .bit-row .bit-sq { width: 16px; height: 1
 /* ENCRYPT IN stays on one line (it shrinks to fit instead: script.js's fitStatValues) */
 #pulse-label { white-space: nowrap; }
 body.vs-mode .cpu-grid { flex: none; width: 100%; max-width: none; margin: auto 0; }
+/* (one box for the 7x7 board and the 8x8 one: the 7x7's shape, the 8x8's smaller squares centered in
+   it, so changing the CPU's level never moves or resizes a thing) */
+body.vs-mode .cpu-grid { aspect-ratio: 7 / 8; min-height: 0; align-content: center; }
 body.vs-mode .cpu-grid { grid-template-columns: repeat(var(--cpu-cols, 7), minmax(0, 1fr)); gap: 1px; }
 body.vs-mode .cpu-grid i { aspect-ratio: 1; min-width: 0; overflow: hidden; font-size: clamp(7px, 1.1vh, 11px); line-height: 1; }
 body.vs-mode .hud-bits { flex: none; }
@@ -2044,15 +2047,15 @@ body.cards-in-settings.vs-mode .crt { justify-content: flex-start; }
 body.cards-in-settings .crt.measuring { height: auto; align-self: start; } /* script.js's fitBoard measures the contents */
 /* The header sits at the top of the card, its title level with PAUSE (as the main menu's is with
    its BACK arrow); the HUD, grid and message follow straight under it */
-body.cards-in-settings:not(.vs-mode):not(.vs-measure) .crt { justify-content: flex-start; padding-top: 8px; }
-body.cards-in-settings:not(.vs-mode):not(.vs-measure) header { margin-top: var(--head-nudge, 0px); }
+body.cards-in-settings:not(.vs-mode) .crt { justify-content: flex-start; padding-top: 8px; }
+body.cards-in-settings:not(.vs-mode) header { margin-top: var(--head-nudge, 0px); }
 /* (the header's title, subtitle and the HUD's panels 8px apart, all at the top: any height to
    spare goes under the message, at the bottom) */
-body.cards-in-settings:not(.vs-mode):not(.vs-measure) header { margin-bottom: 0; }
-body.cards-in-settings:not(.vs-mode):not(.vs-measure) header h1 { line-height: 1; }
-body.cards-in-settings:not(.vs-mode):not(.vs-measure) header .tagline { margin-top: 8px; line-height: 1; }
-body.cards-in-settings:not(.vs-mode):not(.vs-measure) .crt > .hud { margin-top: 8px; }
-body.cards-in-settings:not(.vs-mode):not(.vs-measure) .crt > .message-slot { margin-bottom: auto; }
+body.cards-in-settings:not(.vs-mode) header { margin-bottom: 0; }
+body.cards-in-settings:not(.vs-mode) header h1 { line-height: 1; }
+body.cards-in-settings:not(.vs-mode) header .tagline { margin-top: 8px; line-height: 1; }
+body.cards-in-settings:not(.vs-mode) .crt > .hud { margin-top: 8px; }
+body.cards-in-settings:not(.vs-mode) .crt > .message-slot { margin-bottom: auto; }
 body.cards-in-settings .crt.measuring::after { display: none; }
 
 /* Every confirm (and QUIT while pressed) (RESTART, QUIT, mode / difficulty / DAILY / VS switches mid-run, DECRYPTOR,
@@ -3602,7 +3605,7 @@ body.in-game.can-pause .records-btn svg { left: auto; right: 4px; } /* (hugging 
    scale (and shrink to fit: script.js's fitText); BACK and TUTORIAL are wide enough for the widest
    font */
 .message-slot .message { height: 18px; min-height: 0; line-height: 18px; white-space: nowrap; font-size: 18px; }
-#vs-setup-note { height: 50px; overflow: hidden; font-size: 14.5px; }
+#vs-setup-note { overflow: hidden; font-size: 14.5px; } /* (as tall as the longest game mode's: script.js's fitVsSetup) */
 #pause-note { height: 17px; line-height: 17px; overflow: hidden; white-space: nowrap; font-size: 14.5px; }
 /* (BACK everywhere, the main menu's and the cards': as wide as its words, 26px tall) */
 .card-back, :is(.records, .settings) .card-back { width: auto; height: 26px; padding: 0 10px; align-items: center; justify-content: center; }
@@ -3994,19 +3997,21 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
   --heat-peak-bg: #54461a;
 }
 /* THE SEASON'S LIGHTS (the SEASONAL theme in December, October and Valentine's): strings of old filament
-   bulbs in fine pixel art down the game card's left and right borders, top to bottom, a bulb at either
-   end, over everything, the glows twinkling in turn (the strings themselves: lights.js); off with
-   EFFECTS: REDUCED. December's are C9s of every color, October's orange, purple and green with jack o'
-   lanterns and candy corn, Valentine's pinks, red and white with hearts */
+   bulbs in fine pixel art down the screen's left and right sides, top to bottom, a bulb at either end,
+   the wire in the screen's 8px margin and every bulb turned in toward the middle, so none is cut off by
+   the screen's edge; over everything, but they never take a tap (no pointer events: what's under them
+   works as ever); the glows twinkling in turn (the strings themselves: lights.js); off with EFFECTS:
+   REDUCED. December's are C9s of every color, October's orange, purple and green with jack o' lanterns
+   and candy corn, Valentine's pinks, red and white with hearts */
 .card-lights { display: none; }
-:is([data-theme="season-winter"], [data-theme="season-halloween"], [data-theme="season-valentine"]) .card-lights { display: block; position: absolute; inset: -2px -15px; pointer-events: none; z-index: 300; }
+:is([data-theme="season-winter"], [data-theme="season-halloween"], [data-theme="season-valentine"]) .card-lights { display: block; position: absolute; inset: 0; pointer-events: none; z-index: 300; }
 :root.low-fx .card-lights { display: none !important; }
-/* (they reach a little past the screen's sides: the page is clipped there, so it never scrolls or zooms out for them) */
+/* (the glows reach a little past the screen's sides: the page is clipped there, so it never scrolls or zooms out for them) */
 html, body { overflow-x: clip; }
 .card-lights i { position: absolute; top: 0; bottom: 0; width: 40px; }
 .card-lights i svg { position: absolute; left: 0; top: 0; display: block; }
-.card-lights i.l { left: -6px; }
-.card-lights i.r { right: -6px; transform: scaleX(-1); }
+.card-lights i.l { left: 0; }
+.card-lights i.r { right: 0; transform: scaleX(-1); }
 .card-lights i::before, .card-lights i::after { content: ""; position: absolute; top: -14px; bottom: -14px; left: -14px; right: -14px; background-repeat: no-repeat; mix-blend-mode: screen; } /* (bigger than the string: the glows fade out round) */
 .card-lights i::before { background-image: var(--glow-a, none); animation: card-twinkle 2.6s ease-in-out infinite; }
 .card-lights i::after { background-image: var(--glow-b, none); animation: card-twinkle 2.6s ease-in-out -1.3s infinite; }
@@ -4366,3 +4371,31 @@ body.in-game.can-pause .records-btn.pause-queued { background: rgba(var(--fg-rgb
 /* (the AD tag a touch see-through: 92%, as the board and the buttons on the card) */
 .inf-ad-tag { opacity: 0.92; }
 
+/* VS's SETUP, laid out as the main menu's mode card: in the board's place and at its width, only as
+   tall as what it holds (the board, its drop buttons and EXPLOIT step in on START), its words at the
+   menu's sizes and its buttons at the menu's set heights, every row the one gap apart. On a short
+   screen its options scroll inside it (fading at its foot while there's more), START staying under
+   them (script.js's fitVsSetup sets how tall it may get) */
+body.vs-setup-up .board-frame > :not(#vs-setup),
+body.vs-setup-up .board-wrap > :not(.board-frame) { display: none; }
+body.vs-setup-up #vs-setup { position: relative; inset: auto; }
+#vs-setup { justify-content: flex-start; gap: var(--gap); padding: 10px 12px; }
+#vs-setup > :not(.vs-setup-body) { flex-shrink: 0; }
+.vs-setup-body { flex: 0 1 auto; min-height: 0; width: 100%; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; align-items: center; gap: var(--gap); }
+.vs-setup-body > * { flex-shrink: 0; }
+.vs-setup-body.more { -webkit-mask-image: linear-gradient(#000 calc(100% - 22px), transparent); mask-image: linear-gradient(#000 calc(100% - 22px), transparent); }
+#vs-setup .vs-setup-title { height: 18px; line-height: 18px; font-size: 15px; white-space: nowrap; overflow: hidden; }
+/* (a locked bot's or level's notice over the title, in its place, while it shows) */
+#vs-setup .vs-setup-msg { position: absolute; top: 10px; left: 12px; right: 12px; height: 18px; line-height: 18px; min-height: 0; font-size: 13px; }
+#vs-setup .vs-setup-msg.show + .vs-setup-title { visibility: hidden; }
+#vs-setup .vs-setup-note { width: 100%; max-width: none; font-size: 14.5px; letter-spacing: 1px; line-height: 1.5; }
+/* (the pickers in even columns: the game modes two by two, the bots and levels four across, the
+   switches two across as the menu's rows under its card) */
+#vs-setup .difficulty { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--gap); width: 100%; max-width: none; margin: 0; }
+#vs-setup :is(.vs-modes, #vs-options-row) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+#vs-setup .difficulty button { display: flex; align-items: center; justify-content: center; min-width: 0; height: 26px; padding: 0 4px; font-size: 13px; letter-spacing: 1px; white-space: nowrap; overflow: hidden; }
+#vs-setup #vs-options-row button { height: 32px; padding: 0 6px; font-size: 12px; }
+#vs-setup .vs-goal-row { gap: var(--gap); }
+#vs-setup .vs-goal-row button { width: 32px; height: 26px; }
+#vs-setup .vs-goal { font-size: 13px; }
+#vs-setup .vs-start { display: flex; align-items: center; justify-content: center; height: 36px; padding: 0 34px; }

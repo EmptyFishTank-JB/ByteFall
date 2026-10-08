@@ -827,6 +827,11 @@ function alignHeader() {
 
 const HUD_MIN_W = 300;
 function fitBoard() {
+  // (VS's setup card stands in the board's place until START: everything's fitted as the match will
+  // have it, so the HUD over the card is the height it keeps, then the card set out at the screen's
+  // width, below)
+  const setupUp = document.body.classList.contains('vs-setup-up');
+  document.body.classList.remove('vs-setup-up');
   layoutVsTop();
   fitStatValues(true);
   alignHeader();
@@ -851,36 +856,60 @@ function fitBoard() {
   const hudEl = document.querySelector('.hud');
   hudEl.style.width = `${Math.max(frame.getBoundingClientRect().width, HUD_MIN_W)}px`;
   if (mode === 'vs') layoutVsTop();
+  // VS's setup card: the screen's width (8px in from its edges, as the main menu's card), the HUD
+  // over it too, at the height it has in the match; the board's fitted again when it comes in
+  if (setupUp) {
+    document.body.classList.add('vs-setup-up');
+    boardWrapEl.style.maxWidth = '';
+    hudEl.style.width = `${Math.max(boardWrapEl.getBoundingClientRect().width, HUD_MIN_W)}px`;
+    layoutVsSquares();
+    fitVsStatus();
+  }
   lockButtons(); // (fits the VS setup too)
 }
 
-// The VS setup's button rows shrink to fit across the board, and its gaps close up when it
-// runs short of height (small phones, big fonts)
+// VS's setup card up (style.css: body.vs-setup-up): in the board's place until START, when the
+// board, its drop buttons and EXPLOIT take it back
+function syncVsSetup() {
+  const up = mode === 'vs' && !document.getElementById('vs-setup').hidden;
+  if (document.body.classList.contains('vs-setup-up') === up) return;
+  document.body.classList.toggle('vs-setup-up', up);
+  fitBoard();
+}
+// The VS setup's card: its description as tall as the longest game mode's (so picking one never moves
+// the buttons under it), and the card no taller than the screen has room for under the HUD (its
+// options scroll inside it then, START staying under them). Run by lockButtons, in COURIER, so it's
+// the same in every font
+const vsSetupBody = document.getElementById('vs-setup-body');
+function vsSetupMore() {
+  const b = vsSetupBody;
+  b.classList.toggle('more', b.scrollHeight - b.scrollTop - b.clientHeight > 2);
+}
+vsSetupBody.addEventListener('scroll', vsSetupMore, { passive: true });
 function fitVsSetup() {
   const el = document.getElementById('vs-setup');
   if (el.hidden) return;
-  const room = el.clientWidth - 24;
-  const min = 7; // (decided in COURIER, lockButtons: the same rows in every font)
-  el.querySelectorAll('.difficulty').forEach((row) => {
-    const btns = [...row.querySelectorAll('button')];
-    const shrink = (size, pad = '') => btns.forEach((b) => {
-      b.style.fontSize = size ? `${size}px` : '';
-      b.style.letterSpacing = size ? '0px' : '';
-      b.style.paddingLeft = b.style.paddingRight = pad;
-    });
-    row.classList.remove('two-rows');
-    shrink(0);
-    let size = parseFloat(getComputedStyle(btns[0]).fontSize);
-    while (row.scrollWidth > room && size > min) shrink((size -= 0.5));
-    if (row.scrollWidth > room) shrink(size, '3px'); // then tighter buttons
-    if (row.scrollWidth > room) { // still too wide at a readable size: two rows of two
-      row.classList.add('two-rows');
-      shrink(0);
-    }
-  });
-  el.style.gap = '';
-  let gap = parseFloat(getComputedStyle(el).rowGap);
-  while (el.scrollHeight > el.clientHeight && gap > 2) el.style.gap = `${(gap -= 1)}px`;  showCpuDesc(); // (the play style card over the CPU's board: fitted to the new layout too)
+  // (each note measured in a stand-in at the note's width, so the note itself never changes)
+  const note = document.getElementById('vs-setup-note');
+  const probe = document.createElement('p');
+  probe.className = note.className;
+  probe.style.cssText = `position: absolute; visibility: hidden; height: auto; width: ${note.clientWidth}px`;
+  el.appendChild(probe);
+  let tallest = 0;
+  for (const m of Object.values(VS_MODES)) {
+    probe.textContent = m.note;
+    tallest = Math.max(tallest, probe.offsetHeight);
+  }
+  probe.remove();
+  note.style.height = `${tallest}px`;
+  note.style.fontSize = ''; // (its own size, then lockButtons shrinks it if a font needs that)
+  el.style.maxHeight = '';
+  const frame = document.querySelector('.board-frame');
+  const room = crtEl.getBoundingClientRect().bottom - parseFloat(getComputedStyle(crtEl).paddingBottom)
+    - document.querySelector('.message-slot').offsetHeight - frame.getBoundingClientRect().top - 2; // (the frame's borders)
+  el.style.maxHeight = `${Math.max(160, Math.floor(room))}px`;
+  vsSetupMore();
+  showCpuDesc(); // (the play style card over the CPU's board: fitted to the new layout too)
 }
 
 // FIXED BUTTONS: the buttons sized by their text keep the size they have in COURIER whatever the
@@ -2548,8 +2577,7 @@ function refreshVsPicks() {
   document.querySelectorAll('#vs-modes button[data-vsmode]').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.vsmode === vsMode);
   });
-  document.getElementById('vs-setup-note').textContent = VS_MODES[vsMode].note;
-  fitText(document.getElementById('vs-setup-note'));
+  document.getElementById('vs-setup-note').textContent = VS_MODES[vsMode].note; // (fitted by lockButtons)
   showVsGoal();
   lockButtons();
 }
@@ -3247,6 +3275,7 @@ function startMatch() {
   showVs(); // (the play style card goes, PAUSE takes the corner)
   FX.burst([{ el: vsSetupEl, type: 'warning' }]);
   vsSetupEl.hidden = true;
+  syncVsSetup(); // (the board takes the card's place)
   SFX.play('static');
   updateHud(); // the first bit shows
 }
@@ -3431,7 +3460,7 @@ function homePanelMore() {
   b.classList.toggle('more', b.scrollHeight - b.scrollTop - b.clientHeight > 2);
 }
 homePanelBody.addEventListener('scroll', homePanelMore, { passive: true });
-function refitHome() { requestAnimationFrame(() => { fitHome(); for (const id of ['message', 'vs-setup-note', 'pause-note']) fitText(document.getElementById(id)); }); }
+function refitHome() { requestAnimationFrame(() => { fitHome(); for (const id of ['message', 'pause-note']) fitText(document.getElementById(id)); }); }
 window.addEventListener('resize', refitHome);
 if (document.fonts) document.fonts.addEventListener('loadingdone', refitHome);
 // The MAIN MENU is laid out for the phone the game's designed on (its card 352 x 791); on a bigger card
@@ -3525,7 +3554,7 @@ function layoutVsTop() {
   const info = document.getElementById('mode-info');
   const wasHidden = [diffRow.hidden, info.hidden];
   document.body.classList.remove('vs-mode');
-  document.body.classList.add('vs-measure'); // (with Classic's header unpinned, all centered)
+  document.body.classList.add('vs-measure'); // (Classic's header pinned to the top, as Classic has it: nothing under the HUD, the board's 7x7 or 8x8 say, moves where it ends)
   cpuStatEl.hidden = true;
   cpuFaceEl.hidden = true;
   diffRow.hidden = false;
@@ -3547,13 +3576,19 @@ function layoutVsTop() {
   const vsTop = hud.getBoundingClientRect().top - cardTop();
   hud.style.marginTop = `${top - vsTop}px`;
   hud.style.height = `${bottom - top}px`;
-  // The 2x2 info squares: exactly as tall as the strip allows under the status line (6px gaps),
-  // BOT's box and the CPU's board sharing the width left; unless that would squeeze those two
-  // below 80px wide, when the squares give way
+  layoutVsSquares();
+  fitVsStatus();
+  alignVsTitle();
+}
+// The 2x2 info squares: exactly as tall as the strip allows under the status line (6px gaps),
+// BOT's box and the CPU's board sharing the width left; unless that would squeeze those two
+// below 80px wide, when the squares give way
+function layoutVsSquares() {
+  const hud = document.querySelector('.hud');
   const GAP = 6;
   const statusH = document.getElementById('vs-status').offsetHeight;
   const W = hud.clientWidth;
-  let sq = (bottom - top - statusH - 2 * GAP) / 2;
+  let sq = (parseFloat(hud.style.height) - statusH - 2 * GAP) / 2;
   let cpuW = (W - 3 * GAP - 2 * sq) / 2;
   if (cpuW < 80) {
     cpuW = 80;
@@ -3561,8 +3596,6 @@ function layoutVsTop() {
   }
   hud.style.setProperty('--vs-cpu-w', `${Math.floor(cpuW)}px`);
   hud.style.setProperty('--vs-sq', `${Math.floor(sq)}px`);
-  fitVsStatus();
-  alignVsTitle();
 }
 // The VS title's letters centered on the top icons (each font sits differently in its line)
 function alignVsTitle() {
@@ -3637,6 +3670,7 @@ function showVs() {
   showDropClock();
   showCpuDesc();
   updatePauseBtn();
+  syncVsSetup();
   if (!vs) return;
   // ▼ 14 INCOMING, then a pip for each block (up to 32, in groups of 8)
   // (and the CPU's charging attack as hollow pips, +n)
