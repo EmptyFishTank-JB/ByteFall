@@ -465,7 +465,14 @@ BANNER PREVIEW keeps), and the whole game fits below it; until a banner has
 loaded (or if one fails, tried again a minute later) the strip is 0, so there's
 never an empty gap. Buying either purchase takes the banner and the strip away
 at once. Where consent applies, SETTINGS gets an **// ADS** section with AD
-PRIVACY OPTIONS, to change the choice made (Google requires it there).
+PRIVACY OPTIONS, to change the choice made (Google requires it there). While
+`testing` is on, SETTINGS also gets **// TEST ADS**: a line on what the ads are
+doing (started or not, the consent answer, a banner showing, or Google's error
+code and reason there's none, or off because a purchase or UNLOCK EVERYTHING
+counts as owned), to see on a phone why a banner isn't there; and a consent
+check that fails outright (an AdMob account or its privacy message still being
+set up) doesn't hold the test banner back. With `testing: false` a failed check
+holds the ads till it works.
 The IDs live in `js/ads-config.js`: ByteFall's own App ID, and for now Google's
 sample banner with `testing: true`, which only ever shows test ads.
 `tools/setup-android.js` writes the app ID from there into the Android manifest
