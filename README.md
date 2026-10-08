@@ -371,11 +371,11 @@ loaded (or if one fails, tried again a minute later) the strip is 0, so there's
 never an empty gap. Buying either purchase takes the banner and the strip away
 at once. Where consent applies, SETTINGS gets an **// ADS** section with AD
 PRIVACY OPTIONS, to change the choice made (Google requires it there).
-The IDs live in `js/ads-config.js`: for now Google's own sample IDs with
-`testing: true`, which only ever show test ads. `tools/setup-android.js` writes
-the app ID from there into the Android manifest (the SDK won't start without
-it). For the release: put in ByteFall's own App ID and banner ad unit ID from
-the AdMob console and set `testing` to false. (The ByteFall Viz app leaves the
+The IDs live in `js/ads-config.js`: ByteFall's own App ID, and for now Google's
+sample banner with `testing: true`, which only ever shows test ads.
+`tools/setup-android.js` writes the app ID from there into the Android manifest
+(the SDK won't start without it). For the release: put in ByteFall's banner ad
+unit ID from the AdMob console and set `testing` to false. (The ByteFall Viz app leaves the
 plugin out: `includePlugins: []` in `visualizer/capacitor.config.json`.)
 
 `js/progress.js` holds the stats, levels, unlocks and achievements; `js/script.js`
