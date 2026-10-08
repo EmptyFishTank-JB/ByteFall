@@ -4351,11 +4351,6 @@ let freeExploit = { day: '', ready: false, claimable: false };
 try { freeExploit = { ...freeExploit, ...JSON.parse(storage.get(FREE_KEY)) }; } catch (e) {}
 const saveFree = () => storage.set(FREE_KEY, JSON.stringify(freeExploit));
 let freeGrantedNow = false;
-if (freeExploit.day !== localDay()) {
-  freeExploit = { day: localDay(), ready: false, claimable: true };
-  saveFree();
-  freeGrantedNow = true;
-}
 const DAILY_DROP_KEYS = 25; // (about a game's worth)
 const DAILY_DROP_RES = { bugs: 3, cache: 3, crypto: 3 };
 // LOGIN STREAK: days in a row the game's been opened (the player's own date). Every 7th day in a
@@ -4366,13 +4361,31 @@ const STREAK_MASTERS = 3;
 let loginStreak = { last: '', days: 0, paid: '' };
 try { loginStreak = { ...loginStreak, ...JSON.parse(storage.get(LOGIN_KEY)) }; } catch (e) {}
 const saveStreak = () => storage.set(LOGIN_KEY, JSON.stringify(loginStreak));
-if (loginStreak.last !== localDay()) {
-  const y = new Date();
-  y.setDate(y.getDate() - 1);
-  loginStreak.days = loginStreak.last === y.toLocaleDateString('en-CA') ? loginStreak.days + 1 : 1;
-  loginStreak.last = localDay();
-  saveStreak();
+// A NEW DAY: the DAILY DROP renewed and the LOGIN STREAK counted. At launch, and again whenever the
+// date has turned while the game was open (the app's often kept in the background for days and
+// brought back without starting over): when it comes back to the front, and once a minute.
+// True when the drop was renewed.
+function newDay() {
+  const today = localDay();
+  let renewed = false;
+  if (freeExploit.day !== today) {
+    // (yesterday's, claimed and still unused, doesn't stack; but one waiting in a game under way
+    // stays for that game)
+    const keep = freeExploit.ready && started && !gameOver && !homeOpen;
+    freeExploit = { day: today, ready: keep, claimable: true, ...(keep ? { id: freeExploit.id } : {}) };
+    saveFree();
+    renewed = true;
+  }
+  if (loginStreak.last !== today) {
+    const y = new Date();
+    y.setDate(y.getDate() - 1);
+    loginStreak.days = loginStreak.last === y.toLocaleDateString('en-CA') ? loginStreak.days + 1 : 1;
+    loginStreak.last = today;
+    saveStreak();
+  }
+  return renewed;
 }
+freeGrantedNow = newDay();
 const streakPays = () => loginStreak.days % STREAK_EVERY === 0 && loginStreak.paid !== localDay();
 window.dailyDrop = {
   claimable: () => !!freeExploit.claimable,
@@ -5753,8 +5766,9 @@ function renderRecords() {
       dl.append(line);
     }
     recordsBodyEl.appendChild(dl);
-    // RESET PROGRESS: two presses, like RESTART. Clears stats, unlocks, achievements, puzzles and
-    // best scores; settings (sound, music, theme choice...) stay.
+    // RESET PROGRESS: two presses, like RESTART. Clears stats, unlocks, achievements, puzzles, best
+    // scores, the LOGIN STREAK and the DAILY DROP (today's comes back to claim); settings (sound,
+    // music, theme choice...) stay.
     const reset = document.createElement('button');
     reset.type = 'button';
     reset.className = 'rec-reset';
@@ -5770,6 +5784,7 @@ function renderRecords() {
           // (the puzzle each tier was on: NORMAL's bytefall-puzzle, EASY's and HARD's bytefall-puzzle-easy
           // and -hard; the tier picked, bytefall-puzzle-tier, is a setting and stays)
           .filter((k) => k === 'bytefall-progress' || k === 'bytefall-puzzle' || (k.startsWith('bytefall-puzzle-') && k !== 'bytefall-puzzle-tier')
+            || k === LOGIN_KEY || k === FREE_KEY
             || k.startsWith('bytefall-best-') || (k.startsWith('bytefall-daily-') && k !== 'bytefall-daily-kind')) // (the daily game picked: a setting too)
           .forEach((k) => localStorage.removeItem(k));
       } catch (e) {}
@@ -6022,6 +6037,16 @@ initGame();
 updateFreeBtn();
 if (freeGrantedNow) showToast('DAILY DROP // CLAIM IT IN THE STORE');
 showKeys();
+// (the date turned while the game was open: the new day's drop lit in the STORE, and said)
+function checkNewDay() {
+  if (!newDay()) return;
+  updateFreeBtn();
+  showKeys();
+  if (typeof Store !== 'undefined') Store.render();
+  showToast('DAILY DROP // CLAIM IT IN THE STORE');
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) checkNewDay(); });
+setInterval(() => document.hidden || checkNewDay(), 60000);
 
 function formatCentral(isoDate) {
   const d = new Date(isoDate);

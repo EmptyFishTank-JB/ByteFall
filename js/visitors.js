@@ -281,8 +281,6 @@ function createVisitors(api) {
     // and bare furred feet; c, its howl (eyes shut, mouth wide)
     werewolf: {
       pal: { F: '#4a3426', f: '#8a6a4e', e: '#ffd23f', n: '#111111', t: '#f2f2f2', s: '#3b4560', S: '#2a3146', p: '#4a3d30', c: '#e3dccb' },
-      a: ['..........F.F...', '.........FfFf...', '........Fffffff.', '........ffeffffn', '........ffffffff', '.......Fffffftft', '......FFfffff...', '....FFFfffffF...', '...FfffffffffF..', '..Fffff.ffffff..', '..ff.ff.Fffffcc.', '.cc..ff.Ffff....', '.....pppppp.....', '.....pPpppPp....', '.....pp..pp.....', '.....ff..ff.....', '....fff..fff....', '...cff..cff.....'],
-      b: { 14: '.....pp..pp.....', 15: '....ff....ff....', 16: '...fff....fff...', 17: '..cff....cff....' },
       a: ['.F........F.', '.FF......FF.', '.FFFFFFFFFF.', '.FFFffffFFF.', '.FFffffffFF.', '.FfeffffefF.', '.FffffffffF.', '.FFffnnffFF.', '..FftfftfF..', '...FFFFFF...', '..sssSSsss..', '.ssssSSssss.', '.ssssssssss.', '.ssssssssss.', '.f.ssssss.f.', '.c.pppppp.c.', '...pp..pp...', '...pp..pp...', '..FFF..FFF..'],
       b: { 16: '..pp....pp..', 17: '..pp....pp..', 18: '.FFF....FFF.' },
       c: ['............', '.F........F.', '.FF......FF.', '.FFFFFFFFFF.', '.FFFffffFFF.', '.FnnffffnnF.', '.FffffffffF.', '.FFftnntfFF.', '..FfnnnnfF..', '...FnnnnF...', '..sssSSsss..', '.ssssSSssss.', '.ssssssssss.', '.ssssssssss.', '.f.ssssss.f.', '.c.pppppp.c.', '...pp..pp...', '...pp..pp...', '..FFF..FFF..'],

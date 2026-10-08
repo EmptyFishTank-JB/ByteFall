@@ -327,11 +327,12 @@ levels, COUNTERSTRIKE, DDOS, FLAWLESS, and the hidden TILTED and AFK), VS BOTS
 KNOCKOUT, BARE METAL, ARMS RACE, ZERO MERCY). Bits, chains, nibbles, layers and
 exploits run in VS still count toward everything else.
 
-**Streaks follow your local clock.** DAILY DRIVER, STREAK and CENTURY show your
-current daily streak, not your best: it lasts through the next local day and
-drops to 0 once a whole day passes with no Daily game (after midnight on the
-day you missed). DAILY SWEEP shows today's daily games and starts over at local
-midnight. Achievements for a run in a row (SURGICAL, PICKPOCKET) show your best
+**Daily streaks follow the dailies' own clock (UTC).** DAILY DRIVER, STREAK and
+CENTURY show your current daily streak, not your best: each new set of dailies
+(at 00:00 UTC, the same moment everywhere) is a day, and the streak drops to 0
+once a whole set passes with no Daily game played. DAILY SWEEP shows the current
+set's daily games and starts over when they change. (The LOGIN STREAK and the
+DAILY DROP go by your own date.) Achievements for a run in a row (SURGICAL, PICKPOCKET) show your best
 run so far. Unearned rows in RECORDS say which kind of count they show.
 
 RULES & RECORDS (main menu and pause screen) opens a card with two tabs, **RULES** and
@@ -479,8 +480,12 @@ button's size or moves the HUD, the board or its buttons.
 
 ## Daily bonus, vibration and resetting
 
-- **Daily bonus:** the first time the game opens each day (local date), one
-  free exploit (claimed in the STORE's DAILY DROP) waits loaded in the exploit button.
+- **Daily bonus:** each day (local date), one free exploit (claimed in the
+  STORE's DAILY DROP) waits loaded in the exploit button. The new day's drop
+  (and the LOGIN STREAK's count) comes when the game opens, or when it's brought
+  back from the background after the date has turned, or within a minute of
+  midnight while it's open; a claimed one waiting in a game under way stays for
+  that game.
   Arming it makes one of the first five exploits (RNG, BITFLIP, BUFFER OVERFLOW, TROJAN, WORM VIRUS) your next drop, even if you haven't unlocked it yet, so new players get to try them. It doesn't stack
   if unused, and it's hidden in DAILY and PUZZLE so those stay equal for
   everyone. Its notice (like every notification but achievements) waits until
@@ -489,8 +494,11 @@ button's size or moves the HUD, the board or its buttons.
   exploits, new layers and game over give a short buzz. VIBRATION in
   settings turns it off; the option only appears where it works.
 - **Reset progress:** at the bottom of RECORDS → STATS, with a two-press
-  confirm. It clears stats, unlocks, achievements, puzzles and best scores;
-  settings stay.
+  confirm. It clears stats, unlocks, achievements, puzzles, best scores, the
+  LOGIN STREAK and the DAILY DROP (today's comes back to claim); settings stay.
+- **A save that can't be read** (cut off mid-write, say) starts the game fresh,
+  but it's kept aside first as `bytefall-progress-unreadable`, so nothing more
+  can overwrite it and it can still be recovered by hand.
 
 ## Full Access
 
