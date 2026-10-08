@@ -6025,10 +6025,11 @@ function applyUnlocks() {
 Unlocks.onChange(applyUnlocks);
 applyUnlocks();
 document.getElementById('dev-badge').hidden = !Unlocks.isDevUnlock();
-// UNLOCK EVERYTHING in the Android test app, where the web's DEV link is (the dev page's switch,
-// the same flag): the padlock lit while it's on; the game starts over with it
-if (window.BYTEFALL_APP) {
-  const unlockBtn = document.getElementById('dev-unlock-btn');
+// UNLOCK EVERYTHING in the Android TEST app, where the web's DEV link is (the dev page's switch,
+// the same flag): the padlock lit while it's on; the game starts over with it. (The RELEASE app
+// has no padlock: tools/build-app.js takes it out)
+const unlockBtn = document.getElementById('dev-unlock-btn');
+if (window.BYTEFALL_APP && !window.BYTEFALL_APP.release && unlockBtn) {
   const devLink = document.querySelector('a.dev-link');
   if (devLink) devLink.hidden = true;
   unlockBtn.hidden = false;

@@ -77,7 +77,9 @@ tools/android/          its MainActivity, icon and splash images, and the test s
 ## Android test APK
 
 GitHub builds the game as an Android app (Capacitor) when you ask it to: **Actions →
-Android test APK → Run workflow** (pushes don't build it). When the run is
+Android test APK → Run workflow** (pushes don't build it). It's the TEST edition, **ByteFall
+Test** (`com.emptyfishtank.bytefall.test`): its own app, so it installs beside the Google Play
+version and keeps its own progress. When the run is
 done, its page has the APK under **Artifacts** (a zip; unzip it on the phone and open the
 `.apk`, allowing installs from that app if Android asks). It's the game as players
 would get it: no dev page or DEV link, dev switches cleared, full screen, portrait.
@@ -95,12 +97,41 @@ has the DEV link, as the site does. **bundled** has its own copy, as players wou
 what the Play Store builds will be (updated through the store). Either one installs over the other;
 only a change to the Android side itself (`tools/android/`, the Capacitor setup) needs a new APK.
 The game knows it's in the app from its user agent (`ByteFallApp`, `capacitor.config.json`).
-In the app, SETTINGS' footer has a padlock where the web has the DEV link: **UNLOCK EVERYTHING**
+In the TEST app, SETTINGS' footer has a padlock where the web has the DEV link: **UNLOCK EVERYTHING**
 (the dev page's switch, the same `bytefall-dev-unlockall` flag; the game reloads with it). It's
-for testing, kept through launches; take it out before the Play Store build.
+for testing, kept through launches. The RELEASE edition (below) has no padlock.
 
 To build it locally instead: `npm ci && node tools/build-app.js && npx cap add
-android && node tools/setup-android.js`, then open `android/` in Android Studio.
+android && node tools/setup-android.js`, then open `android/` in Android Studio (the debug build
+is ByteFall Test; `node tools/build-app.js release` for the release edition's copy).
+
+### Releasing to Google Play
+
+The Play Store gets the **RELEASE edition**: **ByteFall** (`com.emptyfishtank.bytefall`, the
+package name in the Play Console), built by **Actions → Android release bundle → Run workflow** as
+an Android App Bundle (`.aab`, under the run's Artifacts) to upload in the Play Console (Testing →
+Internal testing, or another track → Create new release). It's the game with every dev piece out
+(`tools/build-app.js release`): no UNLOCK EVERYTHING padlock (nor the dev unlocks, whatever's in
+storage or the URL: `js/unlocks.js`), every dev switch cleared, no infection tester or archived
+tracks. Its version code is the build number (`?v=`), so each upload needs a push after the last.
+While `js/ads-config.js` says `testing: true` the run warns that the bundle shows test ads (fine
+for a testing track, not for production).
+
+It's signed with ByteFall's **upload key**, kept out of the repo in four repository secrets
+(GitHub: the repo's Settings → Secrets and variables → Actions → New repository secret). Made
+once, on your own computer:
+
+1. Make the key (keytool comes with any Java JDK, and with Android Studio, in its `jbr\bin`):
+   `keytool -genkeypair -v -keystore bytefall-upload.jks -alias upload -keyalg RSA -keysize 2048 -validity 10000`
+   (it asks for a password and your name; the key's password can be the same one).
+2. The file as text: on Windows (PowerShell)
+   `[Convert]::ToBase64String([IO.File]::ReadAllBytes("bytefall-upload.jks")) | Set-Clipboard`;
+   on a Mac `base64 -i bytefall-upload.jks | pbcopy`.
+3. The secrets: `UPLOAD_KEYSTORE_BASE64` (that text), `UPLOAD_KEYSTORE_PASSWORD`,
+   `UPLOAD_KEY_ALIAS` (`upload`) and `UPLOAD_KEY_PASSWORD`.
+4. Keep `bytefall-upload.jks` and its password somewhere safe (a password manager), never in the
+   repo. Google Play keeps the app's real signing key (Play App Signing) and re-signs each upload,
+   so a lost upload key can be replaced through the Play Console, but it takes a few days.
 
 ## Keys, resources and boosters
 

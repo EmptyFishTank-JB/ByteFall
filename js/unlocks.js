@@ -10,10 +10,14 @@ const Unlocks = (() => {
   let dev = false;
   let noAds = false;
   let purchased = false; // (a real purchase this session, reported by the app: not a dev preview)
+  // (the Google Play release, tools/build-app.js: none of the dev previews, whatever's in storage)
+  const release = !!(window.BYTEFALL_APP && window.BYTEFALL_APP.release);
   try {
-    dev = new URLSearchParams(location.search).has('unlockall') || localStorage.getItem('bytefall-dev-unlockall') === 'on';
-    full = dev;
-    noAds = localStorage.getItem('bytefall-dev-noads') === 'on';
+    if (!release) {
+      dev = new URLSearchParams(location.search).has('unlockall') || localStorage.getItem('bytefall-dev-unlockall') === 'on';
+      full = dev;
+      noAds = localStorage.getItem('bytefall-dev-noads') === 'on';
+    }
   } catch (e) {}
   const listeners = [];
 

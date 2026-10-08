@@ -9,9 +9,15 @@
 //   anything (the banner itself is js/ads.js, through @capacitor-community/admob)
 // - portrait only, as the web app's manifest asks
 // - the version: the game's build number (index.html's ?v=), so each build installs over the last
-// - TEST builds signed with the repo's own test key (tools/android/test.keystore, password
-//   "android": not a secret, and not for the Play Store), so a new test APK installs over the
-//   old one and keeps your progress, where a fresh debug key each build would make you uninstall
+// - two editions from the one project, by build type:
+//   TEST (debug, Actions → Android test APK): ByteFall Test, its own app (com.emptyfishtank.bytefall
+//   .test) beside the Play one, signed with the repo's own test key (tools/android/test.keystore,
+//   password "android": not a secret, and not for the Play Store), so a new test APK installs over
+//   the old one and keeps your progress, where a fresh debug key each build would make you uninstall
+//   RELEASE (Actions → Android release bundle): ByteFall (com.emptyfishtank.bytefall), for Google
+//   Play, signed with the upload key from the environment (BYTEFALL_UPLOAD_KEYSTORE, the keystore
+//   file, and BYTEFALL_UPLOAD_STORE_PASSWORD, _KEY_ALIAS, _KEY_PASSWORD: the release workflow's
+//   secrets); without them it isn't signed
 const fs = require('fs');
 const path = require('path');
 
@@ -33,6 +39,8 @@ if (!adAppId) throw new Error('setup-android: no AdMob appId (ca-app-pub-...~...
 for (const f of ['MainActivity.java', 'CaptureService.java']) fs.copyFileSync(path.join(__dirname, 'android', f), path.join(APP, 'src/main/java/com/emptyfishtank/bytefall', f));
 
 edit('src/main/AndroidManifest.xml', (s) => s
+  .replace('android:label="@string/app_name"', 'android:label="${appLabel}"') // (ByteFall, or ByteFall Test: build.gradle, below)
+  .replace('android:label="@string/title_activity_main"', 'android:label="${appLabel}"')
   .replace('android:name=".MainActivity"', 'android:name=".MainActivity"\n            android:screenOrientation="portrait"')
   .replace('<uses-permission android:name="android.permission.INTERNET" />', '<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.VIBRATE" />\n    <uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />')
   .replace('</activity>', '</activity>\n\n        <service android:name=".CaptureService" android:exported="false" android:foregroundServiceType="mediaProjection" />')
@@ -43,7 +51,7 @@ edit('src/main/res/values/styles.xml', (s) => s.replace('<item name="android:bac
 const build = Number((/\?v=(\d+)/.exec(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')) || [])[1] || 1);
 edit('build.gradle', (s) => s
   .replace(/versionCode \d+/, `versionCode ${build}`)
-  .replace(/versionName "[^"]*"/, `versionName "0.${build}"`)
+  .replace(/versionName "[^"]*"/, `versionName "0.${build}"\n        manifestPlaceholders = [appLabel: "ByteFall"]`)
   .replace('    buildTypes {', `    signingConfigs {
         test {
             storeFile file('../../tools/android/test.keystore')
@@ -51,9 +59,21 @@ edit('build.gradle', (s) => s
             keyAlias 'bytefall-test'
             keyPassword 'android'
         }
+        release {
+            if (System.getenv('BYTEFALL_UPLOAD_KEYSTORE')) {
+                storeFile file(System.getenv('BYTEFALL_UPLOAD_KEYSTORE'))
+                storePassword System.getenv('BYTEFALL_UPLOAD_STORE_PASSWORD')
+                keyAlias System.getenv('BYTEFALL_UPLOAD_KEY_ALIAS')
+                keyPassword System.getenv('BYTEFALL_UPLOAD_KEY_PASSWORD')
+            }
+        }
     }
     buildTypes {
         debug {
             signingConfig signingConfigs.test
-        }`));
-console.log(`android/ set up: version 0.${build} (code ${build}), portrait, full screen, test-signed, AdMob app ${adAppId}`);
+            applicationIdSuffix ".test"
+            manifestPlaceholders = [appLabel: "ByteFall Test"]
+        }`)
+  .replace('            minifyEnabled false', `            minifyEnabled false
+            if (System.getenv('BYTEFALL_UPLOAD_KEYSTORE')) signingConfig signingConfigs.release`));
+console.log(`android/ set up: version 0.${build} (code ${build}), portrait, full screen; TEST (debug) as ByteFall Test, test-signed; RELEASE signed when BYTEFALL_UPLOAD_KEYSTORE is set at build time; AdMob app ${adAppId}`);

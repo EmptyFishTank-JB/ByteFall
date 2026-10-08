@@ -1,7 +1,8 @@
-# ANDROID TEST APK: the game built as an Android app (Capacitor). Runs only by hand: Actions →
-# Android test APK → Run workflow. The APK is on the run's page under Artifacts (a zip: unzip it
-# and install the .apk on the phone). Test-signed (tools/android/test.keystore): each one installs
-# over the last. SOURCE: live (the default) loads the game from GitHub Pages each time it opens,
+# ANDROID TEST APK: the game built as an Android app (Capacitor), the TEST edition: BYTEFALL TEST
+# (com.emptyfishtank.bytefall.test), its own app beside the Google Play one, with UNLOCK EVERYTHING
+# (the Play build is Actions → Android release bundle). Runs only by hand: Actions → Android test
+# APK → Run workflow. The APK is on the run's page under Artifacts (a zip: unzip it and install the
+# .apk on the phone). Test-signed (tools/android/test.keystore): each one installs over the last. SOURCE: live (the default) loads the game from GitHub Pages each time it opens,
 # so pushes show up without a new APK (tools/live-app.js); bundled has its own copy, as players
 # would get it (no dev page).
 name: Android test APK
@@ -39,8 +40,8 @@ jobs:
       - name: Install Capacitor
         run: npm ci
 
-      - name: Build the app's copy of the game (www/)
-        run: node tools/build-app.js
+      - name: Build the TEST edition of the game (www/)
+        run: node tools/build-app.js test
 
       - name: LIVE - load the game from GitHub Pages
         if: inputs.source != 'bundled'
