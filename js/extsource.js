@@ -9,7 +9,9 @@
 // analyser like the game's own (the same calls viz.js makes). info(): what's coming in, shown in
 // the visualizer's corner while it listens
 const ExtSource = (() => {
-  const app = () => !!(window.BytefallAndroid && window.BytefallAndroid.extStart);
+  // (OTHER APPS: the app's capture, but not in ByteFall's Google Play RELEASE edition, which leaves it
+  // out, CaptureService and all: there the microphone's the only other source. ByteFall Viz keeps it)
+  const app = () => !!(window.BytefallAndroid && window.BytefallAndroid.extStart) && !(window.BYTEFALL_APP && window.BYTEFALL_APP.release);
   const kinds = () => (app() ? ['apps', 'mic'] : ['mic']); // (the sources besides ByteFall's own)
   const NAMES = { apps: 'OTHER APPS', mic: 'MICROPHONE' };
   let kind = 'apps';

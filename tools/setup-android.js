@@ -3,8 +3,11 @@
 // - MainActivity: full screen on black, the music on at launch, everything resting in the
 //   background, and the back button working the game (tools/android/MainActivity.java)
 // - VIBRATE permission (the game's haptics); RECORD_AUDIO and MODIFY_AUDIO_SETTINGS for the music
-//   player's OTHER APPS source, and FOREGROUND_SERVICE(_MEDIA_PROJECTION) with CaptureService (what
-//   the other apps play, by Android's audio playback capture; tools/android/CaptureService.java)
+//   player's MICROPHONE and OTHER APPS sources, and FOREGROUND_SERVICE(_MEDIA_PROJECTION) with
+//   CaptureService (what the other apps play, by Android's audio playback capture;
+//   tools/android/CaptureService.java). OTHER APPS is the TEST edition's only: the RELEASE one's own
+//   manifest (src/release/) takes the service and its permissions out, so Google Play's foreground
+//   service declaration isn't needed
 // - ADS: the AdMob app ID (js/ads-config.js) in the manifest, which Google's ads SDK needs before
 //   anything (the banner itself is js/ads.js, through @capacitor-community/admob)
 // - portrait only, as the web app's manifest asks
@@ -45,6 +48,19 @@ edit('src/main/AndroidManifest.xml', (s) => s
   .replace('<uses-permission android:name="android.permission.INTERNET" />', '<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.VIBRATE" />\n    <uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />')
   .replace('</activity>', '</activity>\n\n        <service android:name=".CaptureService" android:exported="false" android:foregroundServiceType="mediaProjection" />')
   .replace('</application>', `    <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="${adAppId}" />\n    </application>`)); // (VIBRATION: navigator.vibrate needs it)
+// (the RELEASE edition without OTHER APPS: the capture service and its foreground service
+// permissions removed from its manifest, merged over the main one)
+fs.mkdirSync(path.join(APP, 'src', 'release'), { recursive: true });
+fs.writeFileSync(path.join(APP, 'src', 'release', 'AndroidManifest.xml'), `<?xml version="1.0" encoding="utf-8"?>
+<!-- (the RELEASE edition, Google Play: no OTHER APPS, so no capture service: tools/setup-android.js) -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" tools:node="remove" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" tools:node="remove" />
+    <application>
+        <service android:name="com.emptyfishtank.bytefall.CaptureService" tools:node="remove" />
+    </application>
+</manifest>
+`);
 // (black behind everything: the strip a system bar leaves, the notch, the splash's edges)
 edit('src/main/res/values/styles.xml', (s) => s.replace('<item name="android:background">@null</item>', '<item name="android:background">@null</item>\n        <item name="android:windowBackground">@android:color/black</item>\n        <item name="android:statusBarColor">@android:color/black</item>\n        <item name="android:navigationBarColor">@android:color/black</item>'));
 

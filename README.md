@@ -113,7 +113,14 @@ an Android App Bundle (`.aab`, under the run's Artifacts) to upload in the Play 
 Internal testing, or another track → Create new release). It's the game with every dev piece out
 (`tools/build-app.js release`): no UNLOCK EVERYTHING padlock (nor the dev unlocks, whatever's in
 storage or the URL: `js/unlocks.js`), every dev switch cleared, no infection tester or archived
-tracks. Its version code is the build number (`?v=`), so each upload needs a push after the last.
+tracks. Nor the music player's OTHER APPS source: its SOURCE is BYTEFALL or MICROPHONE
+(`js/extsource.js`), and its own manifest (`android/app/src/release/`, written by
+`tools/setup-android.js`) takes out the capture service and its foreground service permissions,
+so the Play Console's foreground service declaration isn't needed (MainActivity refuses OTHER
+APPS without the service, too). The TEST edition and ByteFall Viz keep it. Its privacy policy, for
+the Play listing, is on the studio's site: https://emptyfishtank-jb.github.io/bytefall/privacy.html
+(the `EmptyFishTank-JB.github.io` repo, with `app-ads.txt`; this repo's `privacy.html` sends the
+old address there). Its version code is the build number (`?v=`), so each upload needs a push after the last.
 While `js/ads-config.js` says `testing: true` the run warns that the bundle shows test ads (fine
 for a testing track, not for production).
 

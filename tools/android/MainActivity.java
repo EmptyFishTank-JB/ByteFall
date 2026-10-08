@@ -1,6 +1,7 @@
 package com.emptyfishtank.bytefall;
 
 import android.Manifest;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -56,6 +57,16 @@ public class MainActivity extends BridgeActivity {
     private static final int ASK_AUDIO = 7301;
     private static final int ASK_CAPTURE = 7302;
     private static boolean capture() { return Build.VERSION.SDK_INT >= 29; }
+    // (OTHER APPS only where the app declares CaptureService: the TEST edition. The RELEASE edition, for
+    // Google Play, leaves it out (its own manifest, tools/setup-android.js), and so refuses here too)
+    private boolean otherAppsOn() {
+        try {
+            getPackageManager().getServiceInfo(new ComponentName(this, CaptureService.class), 0);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
 
     // (Android's "start recording or casting?" question; the answer goes to CaptureService. The
     // whole screen's sound, not one app's: from Android 14 the question can offer just one app)
@@ -141,6 +152,7 @@ public class MainActivity extends BridgeActivity {
         // the wave as unsigned bytes))
         @JavascriptInterface
         public String extStart() {
+            if (!otherAppsOn()) { extState = "error"; return extState; }
             extState = "asking";
             runOnUiThread(() -> {
                 if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED)
