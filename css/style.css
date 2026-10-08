@@ -2734,6 +2734,7 @@ html.page-twinkle .page-bg { display: block; }
 .store-item h3 { margin: 0; display: flex; align-items: baseline; font-size: 17px; letter-spacing: 1px; color: var(--fg); }
 .store-item p { margin: 0; font-size: 14.5px; }
 .store-price { margin-left: auto; font-size: 15.5px; color: var(--accent); }
+.store-item .store-upgrade { color: var(--accent); } /* (FULL ACCESS for a REMOVE ADS owner: the upgrade) */
 .store-buy, .store-restore {
   font-family: inherit; font-size: 12px; letter-spacing: 2px; padding: 6px 16px; cursor: pointer;
   background: rgba(var(--accent-rgb), 0.08); color: var(--accent); border: 1px solid var(--accent); border-radius: 4px;

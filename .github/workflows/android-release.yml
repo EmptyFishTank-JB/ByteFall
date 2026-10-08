@@ -94,16 +94,18 @@ jobs:
           echo "file=ByteFall-release-v${BUILD}-${GITHUB_SHA::7}.aab" >> "$GITHUB_OUTPUT"
           cp "$AAB" "ByteFall-release-v${BUILD}-${GITHUB_SHA::7}.aab"
 
-      - name: Release checks (the Play package, no OTHER APPS or microphone, no dev padlock)
+      - name: Release checks (the Play package, billing, no OTHER APPS or microphone, no dev padlock)
         run: |
           AAB=android/app/build/outputs/bundle/release/app-release.aab
           M=$(unzip -p "$AAB" base/manifest/AndroidManifest.xml | tr -c '[:print:]' '\n')
           echo "$M" | grep -q "com.emptyfishtank.bytefall" || { echo "::error::The package name isn't in the manifest"; exit 1; }
+          # (Google Play's billing: Play Console only lets products be made once a bundle with it is uploaded)
+          echo "$M" | grep -q "com.android.vending.BILLING" || { echo "::error::The BILLING permission isn't in the manifest (Google Play's billing library missing?)"; exit 1; }
           for bad in bytefall.test CaptureService RECORD_AUDIO MODIFY_AUDIO_SETTINGS FOREGROUND_SERVICE; do
             if echo "$M" | grep -q "$bad"; then echo "::error::The release manifest has $bad"; exit 1; fi
           done
           if unzip -p "$AAB" base/assets/public/index.html | grep -q "dev-unlock-btn"; then echo "::error::The UNLOCK EVERYTHING padlock is in the release page"; exit 1; fi
-          echo "Permissions the app asks for: $(echo "$M" | grep -o 'android\.permission\.[A-Z_]*\|com\.google\.android\.gms\.permission\.[A-Z_]*' | sort -u | tr '\n' ' ')"
+          echo "Permissions the app asks for: $(echo "$M" | grep -o 'android\.permission\.[A-Z_]*\|com\.google\.android\.gms\.permission\.[A-Z_]*\|com\.android\.vending\.BILLING' | sort -u | tr '\n' ' ')"
 
       - name: The upload key, gone
         if: always()

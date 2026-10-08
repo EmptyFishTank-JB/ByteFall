@@ -21,7 +21,24 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
+import com.android.billingclient.api.AcknowledgePurchaseParams;
+import com.android.billingclient.api.BillingClient;
+import com.android.billingclient.api.BillingClientStateListener;
+import com.android.billingclient.api.BillingFlowParams;
+import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.PendingPurchasesParams;
+import com.android.billingclient.api.ProductDetails;
+import com.android.billingclient.api.Purchase;
+import com.android.billingclient.api.QueryProductDetailsParams;
+import com.android.billingclient.api.QueryPurchasesParams;
 import com.getcapacitor.BridgeActivity;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.json.JSONObject;
 
 // ByteFall's Android app (copied over Capacitor's own by tools/setup-android.js):
 // - full screen, as the installed web app is (the system bars come back with a swipe, then hide),
@@ -36,6 +53,7 @@ import com.getcapacitor.BridgeActivity;
 // - the game's own text sizes, whatever the phone's FONT SIZE and BOLD TEXT settings (as games do):
 //   the layout is built around them (buttons locked to their size, titles fitted), so the phone's
 //   bigger or bolder text only crowds and breaks it
+// - the STORE's purchases, by Google Play's billing (the RELEASE edition's: js/billing.js)
 public class MainActivity extends BridgeActivity {
     // (the phone's text settings left out of the app's own: font scale 1, no extra weight. Android
     // starts the activity over when they change, so this holds; and the page's text zoom pinned to
@@ -124,10 +142,148 @@ public class MainActivity extends BridgeActivity {
         extState = "off";
     }
 
+    // PURCHASES (the STORE's REMOVE ADS and FULL ACCESS, js/billing.js): Google Play's billing. The
+    // page asks through window.BytefallAndroid (billingStart, billingBuy, billingRestore; only the
+    // RELEASE edition's page does) and hears back through window.bytefallBilling(event): the prices,
+    // what the account owns, how a purchase went. Each purchase is acknowledged (Google Play refunds
+    // one that isn't, after 3 days); a pending one (paid later, as with cash) unlocks nothing till
+    // it's paid; and what's owned is asked again whenever the app comes back to the front, so a
+    // pending purchase paid meanwhile unlocks, and a refunded one is taken back. All on the UI thread
+    private static final List<String> PRODUCTS = Arrays.asList("remove_ads", "full_access", "full_access_upgrade");
+    private BillingClient billing = null;
+    private boolean billingSetUp = false; // (connected once: the library reconnects by itself after)
+    private boolean billingConnecting = false;
+    private final List<Runnable> billingWaiting = new ArrayList<>();
+    private final Map<String, ProductDetails> products = new HashMap<>();
+
+    // (an event for the page, as JSON)
+    private void tellPage(String json) {
+        runOnUiThread(() -> bridge.getWebView().evaluateJavascript("window.bytefallBilling && window.bytefallBilling(" + json + ")", null));
+    }
+    private void tellFailed(String reason) {
+        tellPage("{\"type\":\"failed\",\"reason\":" + JSONObject.quote(reason) + "}");
+    }
+    private static String jsonList(List<String> ids) {
+        StringBuilder s = new StringBuilder("[");
+        for (int i = 0; i < ids.size(); i++) s.append(i > 0 ? "," : "").append(JSONObject.quote(ids.get(i)));
+        return s.append("]").toString();
+    }
+
+    // (runs then once connected to Google Play, connecting first if it hasn't yet)
+    private void withBilling(Runnable then) {
+        if (billing == null) {
+            billing = BillingClient.newBuilder(this)
+                .setListener(this::onPurchasesUpdated)
+                .enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build())
+                .enableAutoServiceReconnection()
+                .build();
+        }
+        if (billingSetUp) { then.run(); return; }
+        billingWaiting.add(then);
+        if (billingConnecting) return;
+        billingConnecting = true;
+        billing.startConnection(new BillingClientStateListener() {
+            @Override
+            public void onBillingSetupFinished(BillingResult result) {
+                runOnUiThread(() -> connected(result.getResponseCode() == BillingClient.BillingResponseCode.OK));
+            }
+            @Override
+            public void onBillingServiceDisconnected() {
+                runOnUiThread(() -> { if (billingConnecting) connected(false); });
+            }
+        });
+    }
+    private void connected(boolean ok) {
+        billingConnecting = false;
+        billingSetUp = ok;
+        List<Runnable> waiting = new ArrayList<>(billingWaiting);
+        billingWaiting.clear();
+        if (ok) for (Runnable r : waiting) r.run();
+        else if (!waiting.isEmpty()) tellFailed("unavailable"); // (no Play Store, or not signed in)
+    }
+
+    // (the one-time product's offer: there's one, its price set in Play Console)
+    private static ProductDetails.OneTimePurchaseOfferDetails offerOf(ProductDetails d) {
+        ProductDetails.OneTimePurchaseOfferDetails offer = d.getOneTimePurchaseOfferDetails();
+        List<ProductDetails.OneTimePurchaseOfferDetails> all = d.getOneTimePurchaseOfferDetailsList();
+        if (offer == null && all != null && !all.isEmpty()) offer = all.get(0);
+        return offer;
+    }
+
+    // (the products and their prices, in the player's currency)
+    private void queryProducts(Runnable then) {
+        List<QueryProductDetailsParams.Product> list = new ArrayList<>();
+        for (String id : PRODUCTS) list.add(QueryProductDetailsParams.Product.newBuilder().setProductId(id).setProductType(BillingClient.ProductType.INAPP).build());
+        billing.queryProductDetailsAsync(QueryProductDetailsParams.newBuilder().setProductList(list).build(), (result, found) -> runOnUiThread(() -> {
+            if (result.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                StringBuilder prices = new StringBuilder();
+                for (ProductDetails d : found.getProductDetailsList()) {
+                    ProductDetails.OneTimePurchaseOfferDetails offer = offerOf(d);
+                    if (offer == null) continue;
+                    products.put(d.getProductId(), d);
+                    prices.append(prices.length() > 0 ? "," : "").append(JSONObject.quote(d.getProductId())).append(':').append(JSONObject.quote(offer.getFormattedPrice()));
+                }
+                tellPage("{\"type\":\"products\",\"prices\":{" + prices + "}}");
+            }
+            if (then != null) then.run();
+        }));
+    }
+
+    // (everything the account owns; restore: for RESTORE PURCHASES, which says how it went)
+    private void queryOwned(boolean restore) {
+        billing.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build(), (result, purchases) -> runOnUiThread(() -> {
+            if (result.getResponseCode() == BillingClient.BillingResponseCode.OK) tellPurchases("owned", purchases, restore);
+            else if (restore) tellFailed("unavailable");
+        }));
+    }
+
+    // (what's paid for, acknowledged if it wasn't yet, and what's still pending)
+    private void tellPurchases(String type, List<Purchase> purchases, boolean restore) {
+        List<String> owned = new ArrayList<>();
+        List<String> pending = new ArrayList<>();
+        for (Purchase p : purchases) {
+            if (p.getPurchaseState() == Purchase.PurchaseState.PURCHASED) {
+                owned.addAll(p.getProducts());
+                if (!p.isAcknowledged()) {
+                    billing.acknowledgePurchase(AcknowledgePurchaseParams.newBuilder().setPurchaseToken(p.getPurchaseToken()).build(), (r) -> {}); // (one that fails is acknowledged at the next check)
+                }
+            } else if (p.getPurchaseState() == Purchase.PurchaseState.PENDING) {
+                pending.addAll(p.getProducts());
+            }
+        }
+        tellPage("{\"type\":" + JSONObject.quote(type) + ",\"owned\":" + jsonList(owned) + ",\"pending\":" + jsonList(pending) + ",\"restore\":" + restore + "}");
+    }
+
+    // (a purchase made, or paid at last; or canceled, or failed)
+    private void onPurchasesUpdated(BillingResult result, List<Purchase> purchases) {
+        runOnUiThread(() -> {
+            int code = result.getResponseCode();
+            if (code == BillingClient.BillingResponseCode.OK && purchases != null) tellPurchases("bought", purchases, false);
+            else if (code == BillingClient.BillingResponseCode.USER_CANCELED) tellFailed("canceled");
+            else if (code == BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED) queryOwned(true);
+            else tellFailed("error");
+        });
+    }
+
+    // (Google Play's purchase sheet, over the game)
+    private void launchPurchase(String id) {
+        ProductDetails d = products.get(id);
+        if (d == null) { tellFailed("unavailable"); return; } // (not set up in Play Console, or not active)
+        BillingFlowParams.ProductDetailsParams.Builder item = BillingFlowParams.ProductDetailsParams.newBuilder().setProductDetails(d);
+        ProductDetails.OneTimePurchaseOfferDetails offer = offerOf(d);
+        if (offer != null && offer.getOfferToken() != null && !offer.getOfferToken().isEmpty()) item.setOfferToken(offer.getOfferToken());
+        BillingResult r = billing.launchBillingFlow(this, BillingFlowParams.newBuilder().setProductDetailsParamsList(Collections.singletonList(item.build())).build());
+        int code = r.getResponseCode();
+        if (code == BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED) queryOwned(true);
+        else if (code == BillingClient.BillingResponseCode.USER_CANCELED) tellFailed("canceled");
+        else if (code != BillingClient.BillingResponseCode.OK) tellFailed("error");
+    }
+
     @Override
     public void onDestroy() {
         stopOutputViz();
         stopCapture();
+        if (billing != null) billing.endConnection();
         super.onDestroy();
     }
 
@@ -197,6 +353,18 @@ public class MainActivity extends BridgeActivity {
                 else getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             });
         }
+        // (PURCHASES, above: the prices and what's owned, as the game opens; BUY; RESTORE PURCHASES)
+        @JavascriptInterface
+        public void billingStart() { runOnUiThread(() -> withBilling(() -> queryProducts(() -> queryOwned(false)))); }
+        @JavascriptInterface
+        public void billingBuy(String id) {
+            runOnUiThread(() -> withBilling(() -> {
+                if (products.containsKey(id)) launchPurchase(id);
+                else queryProducts(() -> launchPurchase(id)); // (the prices didn't come at the start: once more)
+            }));
+        }
+        @JavascriptInterface
+        public void billingRestore() { runOnUiThread(() -> withBilling(() -> queryOwned(true))); }
     }
 
     @Override
@@ -233,6 +401,7 @@ public class MainActivity extends BridgeActivity {
         WebView web = bridge.getWebView();
         web.resumeTimers();
         web.onResume();
+        if (billingSetUp) queryOwned(false); // (a purchase paid, or refunded, while away)
     }
 
     @Override

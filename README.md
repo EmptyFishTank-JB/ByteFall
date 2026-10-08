@@ -142,6 +142,30 @@ once, on your own computer:
    repo. Google Play keeps the app's real signing key (Play App Signing) and re-signs each upload,
    so a lost upload key can be replaced through the Play Console, but it takes a few days.
 
+**The STORE's purchases** (`js/billing.js`, MainActivity's PURCHASES; Google Play's billing
+library, added by `tools/setup-android.js`, which brings the BILLING permission the release
+checks look for). Set up once in the Play Console:
+
+1. A **payments profile** (Monetize with Play → Products asks for it: bank account and tax
+   details). Google verifies it, which can take a few days.
+2. A bundle with billing uploaded to a testing track (the Play Console only lets products be made
+   after one is).
+3. **Monetize with Play → Products → One-time products**, three, each made active. The IDs are for
+   good (never changed or reused) and must be exactly these:
+
+   | Product ID | Name | Price (US) |
+   |---|---|---|
+   | `remove_ads` | REMOVE ADS | $1.99 |
+   | `full_access` | FULL ACCESS | $4.99 |
+   | `full_access_upgrade` | FULL ACCESS (upgrade) | $2.99 |
+
+   The upgrade is offered only to those who own REMOVE ADS (the STORE picks it), at the
+   difference, so nobody pays more than $4.99 in all. Google Play sets each country's price from
+   the US one.
+4. **Settings → License testing**: your Google account (the one on the phone's Play Store), so
+   your purchases go through Google's test cards and charge nothing. Refund one from **Order
+   management** to see the game take it back at the next launch.
+
 ## Keys, resources and boosters
 
 **[ECONOMY.md](ECONOMY.md) has the whole economy in tables**: every resource, how and where it's
@@ -389,10 +413,19 @@ and achievements pop up as they happen (achievements stay up about 5.5 seconds, 
 **STORE** (`js/store.js`, the cart tab): two purchases, **REMOVE ADS** (no ads,
 nothing unlocked) and **FULL ACCESS** (everything that unlocks by level, and no
 ads), each with its price and BUY (OWNED once bought), and **RESTORE PURCHASES**
-for another device or a reinstall. It's a preview for now: BUY and RESTORE say
-the store isn't open and charge nothing, at placeholder prices ($2.99 and $4.99;
-the store will set the real ones). The app will swap `buy()` and `restore()` for
-Google Play's billing and tell `Unlocks` what's owned (`set` / `setNoAds`). While
+for another device or a reinstall. For a REMOVE ADS owner, FULL ACCESS is the
+**upgrade** at the difference (UPGRADE, and a line saying so), so nobody pays
+more than FULL ACCESS's price. In the app's RELEASE edition they're Google
+Play's (`js/billing.js`, with MainActivity's PURCHASES): its prices, in the
+player's currency; its purchase sheet; what the account owns checked as the game
+opens, whenever the app comes back to the front, and with RESTORE PURCHASES (a
+refund takes it back; a pending payment unlocks once it's paid); each purchase
+acknowledged, or Google Play refunds it after 3 days. What Google Play last said
+is kept (`bytefall-purchases`, not erased by RESET PROGRESS) so an owner's game
+opens without a banner flashing up first. Everywhere else (the website, ByteFall
+Test) it's a preview: BUY and RESTORE say the store isn't open and charge
+nothing, at the preview prices ($1.99 REMOVE ADS, $4.99 FULL ACCESS, $2.99 the
+upgrade; set the same in Play Console). While
 there are ads, a **REMOVE ADS** link (cart icon) sits at the foot of the menu's
 other tabs and opens the STORE with REMOVE ADS lit up. Buying either one earns
 **INDIE SUPPORTER** (THANK YOU group): a real purchase only, not the dev page's
@@ -565,11 +598,11 @@ button's size or moves the HUD, the board or its buttons.
 
 ## Full Access
 
-The Android app is planned as free with a banner ad, plus one purchase,
-**Full Access**: no ads, and every unlock straight away. Nothing needs it;
-everything can also be earned. `js/unlocks.js` holds that check (never owned on
-the website; the app will set it from Google Play). Add `?unlockall` to the
-URL to preview everything unlocked.
+The Android app is free with a banner ad, plus two purchases (the STORE): **REMOVE
+ADS**, and **Full Access**: no ads, and every unlock straight away. Nothing needs
+it; everything can also be earned. `js/unlocks.js` holds that check (never owned
+on the website; the RELEASE edition's set from Google Play, `js/billing.js`). Add
+`?unlockall` to the URL to preview everything unlocked.
 
 ## Playing
 

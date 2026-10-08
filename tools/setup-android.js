@@ -11,6 +11,8 @@
 //   the app never asks for the microphone
 // - ADS: the AdMob app ID (js/ads-config.js) in the manifest, which Google's ads SDK needs before
 //   anything (the banner itself is js/ads.js, through @capacitor-community/admob)
+// - PURCHASES: Google Play's billing library (MainActivity's PURCHASES, js/billing.js); it brings
+//   its own BILLING permission
 // - portrait only, as the web app's manifest asks
 // - the version: the game's build number (index.html's ?v=), so each build installs over the last
 // - two editions from the one project, by build type:
@@ -96,4 +98,7 @@ edit('build.gradle', (s) => s
         }`)
   .replace('            minifyEnabled false', `            minifyEnabled false
             if (System.getenv('BYTEFALL_UPLOAD_KEYSTORE')) signingConfig signingConfigs.release`));
-console.log(`android/ set up: version 0.${build} (code ${build}), portrait, full screen; TEST (debug) as ByteFall Test, test-signed; RELEASE signed when BYTEFALL_UPLOAD_KEYSTORE is set at build time; AdMob app ${adAppId}`);
+// (Google Play's billing: version 8 or later is what Play takes from August 2026)
+const BILLING = 'com.android.billingclient:billing:9.1.0';
+edit('build.gradle', (s) => s.replace("implementation project(':capacitor-android')", `implementation project(':capacitor-android')\n    implementation '${BILLING}'`));
+console.log(`android/ set up: version 0.${build} (code ${build}), portrait, full screen; TEST (debug) as ByteFall Test, test-signed; RELEASE signed when BYTEFALL_UPLOAD_KEYSTORE is set at build time; AdMob app ${adAppId}; ${BILLING}`);

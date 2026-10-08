@@ -1,16 +1,22 @@
 // STORE: the MENU's fourth tab. The DAILY DROP to claim (script.js's dailyDrop), the BOOSTERS
 // bought with KEYS (script.js's BOOSTERS, Progress's wallet), STARTER EXPLOITS and BLACK BOXES
 // bought with KEYS and RESOURCES (ECONOMY.md), and two purchases: REMOVE ADS (no ads, nothing unlocked) and FULL
-// ACCESS (everything that unlocks by level, and no ads), plus RESTORE PURCHASES. A preview for
-// now: BUY and RESTORE say the store isn't open and charge nothing. The app will swap buy() and
-// restore() for Google Play's billing, then tell Unlocks what's owned (Unlocks.set / setNoAds).
+// ACCESS (everything that unlocks by level, and no ads; for a REMOVE ADS owner, the upgrade at the
+// difference), plus RESTORE PURCHASES. In the app's RELEASE edition they're Google Play's
+// (billing.js), at its prices; elsewhere (the website, ByteFall Test) a preview: BUY and RESTORE
+// say the store isn't open and charge nothing.
 // A REMOVE ADS link sits at the foot of the menu's other tabs while there are ads.
 const Store = (() => {
-  // (placeholder prices: the store sets the real ones, in the player's currency)
+  // (the preview's prices; the RELEASE edition shows Google Play's, in the player's currency)
   const ITEMS = {
-    'remove-ads': { price: '$2.99', owned: () => Unlocks.hasNoAds() },
-    'full-access': { price: '$4.99', owned: () => Unlocks.hasFullAccess() },
+    'remove-ads': { price: '$1.99', product: Billing.REMOVE_ADS, owned: () => Unlocks.hasNoAds() },
+    'full-access': { price: '$4.99', product: Billing.FULL, owned: () => Unlocks.hasFullAccess() },
   };
+  const UPGRADE = { price: '$2.99', product: Billing.UPGRADE };
+  // (FULL ACCESS for a REMOVE ADS owner: the upgrade, so nobody pays more than FULL ACCESS's price)
+  const deal = (id) => (id === 'full-access' && Unlocks.hasNoAds() && !Unlocks.hasFullAccess() ? UPGRADE : ITEMS[id]);
+  const priceOf = (d) => (Billing.on ? Billing.price(d.product) : d.price);
+  const NAMES = { [Billing.REMOVE_ADS]: 'REMOVE ADS', [Billing.FULL]: 'FULL ACCESS', [Billing.UPGRADE]: 'FULL ACCESS' };
   const menu = document.getElementById('records');
   const msgEl = document.getElementById('store-msg');
   const link = document.getElementById('store-shortcut');
@@ -128,23 +134,29 @@ const Store = (() => {
     document.getElementById('store-key-count').innerHTML = `${KEY_SVG} ${keys.toLocaleString()}`;
     for (const [id, item] of Object.entries(ITEMS)) {
       const owned = item.owned();
+      const d = deal(id);
       menu.querySelector(`.store-item[data-item="${id}"]`).classList.toggle('owned', owned);
-      menu.querySelector(`[data-price="${id}"]`).textContent = owned ? 'OWNED' : item.price;
+      menu.querySelector(`[data-price="${id}"]`).textContent = owned ? 'OWNED' : priceOf(d);
       const btn = menu.querySelector(`[data-buy="${id}"]`);
-      btn.textContent = owned ? 'OWNED ✓' : 'BUY';
+      btn.textContent = owned ? 'OWNED ✓' : d === UPGRADE ? 'UPGRADE' : 'BUY';
       btn.disabled = owned;
     }
+    upgradeNote.hidden = deal('full-access') !== UPGRADE;
     link.hidden = Unlocks.hasNoAds() || menuPane === 'store';
   }
-  // (the preview: the store opens with the app)
+  const upgradeNote = document.getElementById('store-upgrade');
+  menu.querySelector('.store-preview').hidden = Billing.on;
+  let asked = false; // (a BUY or RESTORE waiting on Google Play: only those hear it failed)
   function buy(id) {
     if (ITEMS[id].owned()) return;
+    if (Billing.on) { asked = true; Billing.buy(deal(id).product); return; } // (Google Play's sheet; how it went: below)
     SFX.play('denied');
-    say('PURCHASES OPEN WITH THE APP // NOTHING WAS CHARGED');
+    say(window.BYTEFALL_APP ? 'PURCHASES ARE IN THE GOOGLE PLAY EDITION // NOTHING WAS CHARGED' : 'PURCHASES OPEN WITH THE APP // NOTHING WAS CHARGED');
   }
   function restore() {
     say('CHECKING YOUR PURCHASES...');
     SFX.play('dialup'); // (dialing in)
+    if (Billing.on) { asked = true; Billing.restore(); return; } // (Google Play answers: below)
     setTimeout(() => {
       render();
       say(Unlocks.hasNoAds() || Unlocks.hasFullAccess()
@@ -167,6 +179,30 @@ const Store = (() => {
   Unlocks.onChange(() => {
     render();
     announce(Progress.check());
+  });
+  // Google Play's answers (billing.js): the prices, and how a purchase or a restore went
+  Billing.onEvent((e) => {
+    if (e.type === 'products') render();
+    else if (e.type === 'bought') {
+      asked = false;
+      if (e.owned.length) {
+        SFX.play('egg');
+        say(`THANK YOU // ${NAMES[e.owned[0]] || 'YOUR PURCHASE'} IS YOURS`);
+      } else if (e.pending.length) say('PAYMENT PENDING // IT UNLOCKS ONCE GOOGLE PLAY HAS THE PAYMENT');
+    } else if (e.type === 'owned' && e.restore) {
+      asked = false;
+      render();
+      say(e.owned.length ? 'RESTORED // YOUR PURCHASES ARE BACK'
+        : e.pending.length ? 'A PAYMENT IS STILL PENDING // IT UNLOCKS ONCE GOOGLE PLAY HAS IT'
+          : 'NOTHING TO RESTORE // THIS GOOGLE ACCOUNT HASN\'T BOUGHT ANYTHING YET');
+    } else if (e.type === 'failed' && asked) {
+      asked = false;
+      if (e.reason === 'canceled') say('CANCELED // NOTHING WAS CHARGED');
+      else {
+        SFX.play('denied');
+        say('GOOGLE PLAY ISN\'T ANSWERING // TRY AGAIN IN A LITTLE WHILE');
+      }
+    }
   });
   render();
   return { render };
