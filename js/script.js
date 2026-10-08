@@ -2552,18 +2552,79 @@ function renderDailyCards() {
   });
 }
 setInterval(() => { if (homeOpen && daily) { renderDailyCards(); applyModeUi(); } }, 30000); // (the countdown)
-// DAILY's games: DECRYPT, PUZZLE, BLITZ, BREACH
-document.querySelectorAll('#daily-kinds button').forEach((btn) => {
+// DAILY's games: DECRYPT, PUZZLE, BLITZ, BREACH, in a row that slides sideways. The card in the
+// middle (each snaps softly to the center) is the pick, picked as a tap picked it (a game under way
+// asks first: CONFIRM? on the card, a tap on it to go; left unanswered, the row slides back to the
+// pick); a tap on a card beside it slides it in, a tap on a pip too. The cards beside the middle
+// shrink and dim the farther out they are, and the pips light the one in the middle
+const dailyRow = document.getElementById('daily-kinds');
+const dailyCards = [...dailyRow.querySelectorAll('button')];
+const dailyPips = [...document.querySelectorAll('#daily-pips i')];
+const dailyCardOf = (kind) => dailyCards.find((b) => b.dataset.daily === kind);
+const dailyMid = (btn) => btn.offsetLeft + btn.offsetWidth / 2;
+function dailyNearest() {
+  const mid = dailyRow.scrollLeft + dailyRow.clientWidth / 2;
+  return dailyCards.reduce((a, b) => (Math.abs(dailyMid(b) - mid) < Math.abs(dailyMid(a) - mid) ? b : a));
+}
+function shadeDaily() {
+  if (!dailyRow.clientWidth) return;
+  const mid = dailyRow.scrollLeft + dailyRow.clientWidth / 2;
+  for (const b of dailyCards) {
+    const d = Math.min(1, Math.abs(dailyMid(b) - mid) / (b.offsetWidth + 8)); // (0 in the middle, 1 a card out)
+    b.style.setProperty('--dc-k', (1 - 0.08 * d).toFixed(3));
+    b.style.setProperty('--dc-o', (1 - 0.5 * d).toFixed(3));
+  }
+  const near = dailyNearest().dataset.daily;
+  dailyPips.forEach((p) => p.classList.toggle('on', p.dataset.daily === near));
+}
+function slideDaily(btn, smooth) {
+  const slow = smooth && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  dailyRow.scrollTo({ left: dailyMid(btn) - dailyRow.clientWidth / 2, behavior: slow ? 'smooth' : 'instant' });
+  shadeDaily();
+}
+function pickDaily(btn) {
+  const next = btn.dataset.daily;
+  if (next === dailyKind) return;
+  requestReset(btn, 'CONFIRM?', () => {
+    dailyKind = next;
+    storage.set('bytefall-daily-kind', next);
+    setModeFromChoice();
+  });
+  if (dailyKind !== next) { // (asking first: unanswered, back to the pick)
+    setTimeout(() => { if ((!armed || armed.btn !== btn) && dailyKind !== next && dailyNearest() === btn) slideDaily(dailyCardOf(dailyKind), true); }, RESET_CONFIRM_MS + 100);
+  }
+}
+// (the pick in the middle, as the row comes into view or the cards change: not while it's being
+// slid or a card in it asks CONFIRM?)
+let dailyHeld = false;
+function centerDaily() {
+  if (!dailyRow.clientWidth || dailyHeld || (armed && dailyCards.includes(armed.btn))) return;
+  if (dailyNearest() !== dailyCardOf(dailyKind)) slideDaily(dailyCardOf(dailyKind), false);
+  else shadeDaily();
+}
+let dailySettle = 0;
+function dailySettled() {
+  clearTimeout(dailySettle);
+  if (dailyHeld || !dailyRow.clientWidth) return;
+  pickDaily(dailyNearest());
+}
+dailyRow.addEventListener('scroll', () => {
+  requestAnimationFrame(shadeDaily);
+  clearTimeout(dailySettle);
+  dailySettle = setTimeout(dailySettled, 160); // (where scrollend isn't: once it's still)
+}, { passive: true });
+dailyRow.addEventListener('scrollend', dailySettled);
+dailyRow.addEventListener('touchstart', () => { dailyHeld = true; }, { passive: true });
+dailyRow.addEventListener('touchend', () => { dailyHeld = false; clearTimeout(dailySettle); dailySettle = setTimeout(dailySettled, 160); }, { passive: true });
+dailyRow.addEventListener('touchcancel', () => { dailyHeld = false; }, { passive: true });
+dailyCards.forEach((btn) => {
   btn.addEventListener('click', () => {
-    const next = btn.dataset.daily;
-    if (next === dailyKind) return;
-    requestReset(btn, 'CONFIRM?', () => {
-      dailyKind = next;
-      storage.set('bytefall-daily-kind', next);
-      setModeFromChoice();
-    });
+    if (dailyNearest() !== btn) slideDaily(btn, true); // (beside the middle: in it slides, picked once it settles)
+    else pickDaily(btn);
   });
 });
+dailyPips.forEach((p) => p.addEventListener('click', () => slideDaily(dailyCardOf(p.dataset.daily), true)));
+addEventListener('resize', () => requestAnimationFrame(centerDaily));
 
 // Shows what the current mode changes: the mode row, its note, the difficulty row (CLASSIC
 // only), the layer countdown (not in ZEN) and the BLITZ clock.
@@ -2601,6 +2662,8 @@ function applyModeUi() {
   document.getElementById('game-mode-label').textContent = mode === 'vs' ? `VS. CPU // ${VS_MODES[vsMode].label}` : `// ${modeLine()}`;
   document.getElementById('difficulty-row').hidden = mode !== 'classic';
   document.getElementById('daily-kinds').hidden = !daily;
+  document.getElementById('daily-pips').hidden = !daily;
+  centerDaily(); // (the pick in the middle of its row)
   document.querySelectorAll('#vs-levels button[data-vs]').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.vs === vsLevel);
   });

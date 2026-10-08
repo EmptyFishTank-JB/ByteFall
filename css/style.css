@@ -4382,3 +4382,20 @@ header h1, .card-brand { font-size: 19.2px; letter-spacing: 0.1em; }
 .records.puzzles .card-brand { display: block; margin: calc((26px - 1em) / 2 + 2px) 0 0; line-height: 1; white-space: nowrap; } /* (its capitals level with the main menu's and every game's) */
 .records.puzzles #records-title { font-size: 11px; line-height: 1; letter-spacing: 2px; color: var(--fg-dim); text-shadow: none; }
 .card-head .card-brand span { font-size: inherit; letter-spacing: inherit; color: var(--accent); text-shadow: 0 0 8px var(--accent); } /* (FALL as the title's, not the card's heading) */
+/* DAILY's cards: one row that slides sideways under the panel's sides, a card at a time in the middle
+   (each snapping softly to the center), the cards beside it peeking in, smaller and dimmer the farther
+   out (script.js sets --dc-k and --dc-o as it slides); the one in the middle is the game PLAY plays,
+   and the pips under the row light the one it's on. The panel's body reaches the panel's sides (its
+   words kept 12px in) so the cards slide all the way out */
+.home-panel-body { width: calc(100% + 24px); margin: 0 -12px; padding: 0 12px; container-type: inline-size; }
+.home .daily-cards:not([hidden]) {
+  display: flex; gap: 8px; width: calc(100% + 24px); margin: -6px -12px; padding: 6px calc(14cqw + 12px);
+  overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; overscroll-behavior-x: contain;
+  scrollbar-width: none; position: relative;
+}
+.home .daily-cards::-webkit-scrollbar { display: none; }
+.home .daily-cards button { flex: 0 0 72cqw; scroll-snap-align: center; scroll-snap-stop: always; transform: scale(var(--dc-k, 1)); opacity: var(--dc-o, 1); }
+.daily-pips[hidden] { display: none; }
+.daily-pips { display: flex; justify-content: center; gap: 8px; }
+.daily-pips i { width: 6px; height: 6px; border-radius: 1px; background: rgba(var(--fg-rgb), 0.25); cursor: pointer; transition: background 0.15s, box-shadow 0.15s; }
+.daily-pips i.on { background: var(--fg); box-shadow: 0 0 6px rgba(var(--fg-rgb), 0.7); }
