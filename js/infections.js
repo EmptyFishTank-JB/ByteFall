@@ -479,7 +479,7 @@ const makeInfections = () => {
   const tickOn = () => { if (!ticker) ticker = setInterval(tick, 110); };
 
   // RANSOMWARE: a locked bit's insides: its little screen (a grinning CPU in LED, gibberish typing),
-  // a padlock, the drops left
+  // a padlock, its value and its ransom
   const LOCK = '<svg class="inf-lock" viewBox="0 0 10 12" shape-rendering="crispEdges"><path d="M3 1h4v1h1v3H7V2H3v3H2V2h1zM1 5h8v6H1zM4 7v2h2V7z" fill="currentColor" fill-rule="evenodd"/></svg>';
   function ledSvg(rows) { // (a face as LED dots: an SVG, so it survives the board's redraws)
     let dots = '';
@@ -496,10 +496,13 @@ const makeInfections = () => {
     () => Array.from({ length: 4 }, () => Array.from({ length: 4 }, () => '0123456789ABCDEF'[Math.floor(Math.random() * 16)]).join('')), // (hex, streaming)
   ];
   const TERM = (k) => TERMS[k]().map((l) => `<span>${l}</span>`).join('');
-  function ransomHtml(val, left, k = style.ransom) {
-    const face = k === 4 ? `<pre class="inf-mini">${binFill(MINIS[(val + left) % MINIS.length])}</pre>` : RANSOM_LED[k]; // (the ASCII ART: a tiny picture in binary)
+  // (over its screen: the bit's value in its brackets, top left; its ransom, bottom right: the key, then
+  // the KEYS it wants, a tap paying it)
+  const RANSOM_KEY = '<svg class="inf-ransom-key" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 4h6v8H1zM3 6v4h2V6zM7 7h8v2H7zM11 9h1.5v2H11zM13.5 9H15v3h-1.5z" fill="currentColor" fill-rule="evenodd"/></svg>';
+  function ransomHtml(val, price, k = style.ransom) {
+    const face = k === 4 ? `<pre class="inf-mini">${binFill(MINIS[(val + price) % MINIS.length])}</pre>` : RANSOM_LED[k]; // (the ASCII ART: a tiny picture in binary)
     return `<span class="inf-screen"><span class="inf-face">${face}</span><span class="inf-term">${TERM(k)}</span></span>`
-      + `${LOCK}<span class="inf-ransom-val">${val}</span><span class="inf-ransom-left">${left}</span>`;
+      + `${LOCK}<span class="inf-ransom-val">[${val}]</span><span class="inf-ransom-price">${RANSOM_KEY}${price}</span>`;
   }
 
   // SCAREWARE: the fake alert, its scan crawling, its tiny X the only way out

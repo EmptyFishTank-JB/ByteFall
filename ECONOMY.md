@@ -133,8 +133,11 @@ A BLACK BOX's bad luck: it comes up INFECTED. Mild and short; none can end a gam
 ADWARE, the CRYPTOJACKER and SCAREWARE each DEMAND KEYS: 10 to 20 a strike (added on if it strikes
 again), never shown, nor what it takes. Every tap on the ad, the sign or a pop-up (anywhere but its X)
 steals 1 to 3 KEYS, toward that one's demand only; paid in full, it leaves the terminal at once (the ad
-goes, the sign goes, the pop-ups all close). Or run out its clock: nothing more's taken. (RANSOMWARE
-just runs its clock.) ADWARE has six looks: the CPU's claims, a SALE, a slot machine (its reels rolling
+goes, the sign goes, the pop-ups all close). Or run out its clock: nothing more's taken. RANSOMWARE puts
+a ransom on each bit it locks instead, shown on the bit by a key: 8 to 24 KEYS. Every tap on a locked bit
+pays 1 to 8 of it, at random (a -KEYS floating up off it); paid off, that bit's free at once. Its lock still
+runs out after 5 drops, and what was paid on it is lost. Every bit of a strike paid off counts as a demand
+paid in full; not a key paid on any, it was outlasted. ADWARE has six looks: the CPU's claims, a SALE, a slot machine (its reels rolling
 sideways, stopping on 7s, WIN under them), the CPU bouncing, DOWNLOAD (a bar stuck at 99%), and the
 1,000,000TH VISITOR (a trophy, the counter rolling up to it). MALWARE's looks: JUNK + MELT (each bit junk or a melting shade, at random), BINARY WALLS (each bit a
 block of flickering binary), ERRORS, ROOMS (each bit a room drawn in characters, doors to the bits beside
@@ -172,7 +175,7 @@ mining pickaxe, a getaway rocket; SCAREWARE a crash screen, files deleting, a pr
 |---|---|---|---|
 | **ADWARE** | an ad in its own frame over one column, below the overflow line: nothing drops there by the button, the grid or the number keys (it gives way if every other column is full); its drop button reads `AD` | 3 drops | LED: chasing bulbs round the frame, a CPU pulling faces, its claims (FREE KEYS, DOWNLOAD RAM...) marching up the sign |
 | **SPYWARE** | CURRENT, the NEXT preview and the bit over the grid are hidden until each lands | the next 3 bits | ASCII: a pair of eyes watching from CURRENT |
-| **RANSOMWARE** | up to 3 bits on the board are padlocked where they are: they can't decrypt or fall (they still count in lines; bits dropped on them rest on them, gaps stay open under them), and settle once it lifts | 5 drops | LED and ASCII: each locked bit's little screen fading between a grinning CPU and typing gibberish, a padlock, its value and the drops left |
+| **RANSOMWARE** | up to 3 bits on the board are padlocked where they are: they can't decrypt or fall (they still count in lines; bits dropped on them rest on them, gaps stay open under them), and settle once it lifts | 5 drops, or till paid | LED and ASCII: each locked bit's little screen fading between a grinning CPU and typing gibberish, a padlock, its value in brackets and its ransom (a key and the KEYS left to pay; a tap pays 1 to 8) |
 | **MALWARE** | every bit on the board shows as junk | 3 drops | ASCII: flickering characters in each bit |
 | **CRYPTOJACKER** | the resources each drop earns are taken back | 5 drops | LED: a CPU stealing them, on a sign through the overflow row's own cells: a pan with its sack, a close-up of its eyes, MINING YOUR CRYPTO, and a gloat (+N MINE!) when it takes some |
 | **SCAREWARE** | fake system alerts over the board, coming on their own clock (not the drops'): each time 1 (3 in 4) or a burst of 2 to 4 (1 in 4), never past 4 at once, each at its own random spot in the grid, stacked; never two close together (6 to 11 s after one appears, 3 s after one's closed; none while paused). Only each one's tiny X closes it (its big button dodges) | 8 drops (the ones up stay till closed) | ASCII: a blinking skull and a scan crawling to 100% |

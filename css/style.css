@@ -3302,7 +3302,7 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 .overlay-keys .haul .res-chip { margin: 0 4px; }
 .res-pop { position: absolute; left: 50%; top: 18%; transform: translateX(-50%); z-index: 6; pointer-events: none; display: flex; gap: 10px; font-size: 13px; letter-spacing: 1px; color: var(--fg); text-shadow: 0 0 6px var(--bg-solid), 0 0 2px var(--bg-solid); animation: res-pop 1.6s ease-out forwards; white-space: nowrap; }
 @keyframes res-pop { 0% { opacity: 0; translate: 0 8px; } 15% { opacity: 1; translate: 0 0; } 75% { opacity: 1; } 100% { opacity: 0; translate: 0 -18px; } }
-@media (prefers-reduced-motion: reduce) { .res-pop { animation-name: res-pop-still; } @keyframes res-pop-still { 0%, 80% { opacity: 1; } 100% { opacity: 0; } } }
+@media (prefers-reduced-motion: reduce) { .res-pop, .ransom-pop { animation-name: res-pop-still; } @keyframes res-pop-still { 0%, 80% { opacity: 1; } 100% { opacity: 0; } } }
 
 /* The STORE's exploits and boxes: the icon left of the name, the price in chips, what's short */
 .starter-item h3 { display: flex; align-items: center; gap: 8px; }
@@ -4188,8 +4188,15 @@ html, body { overflow-x: clip; }
 .inf-term span:nth-child(2) { animation-delay: 0.3s; } .inf-term span:nth-child(3) { animation-delay: 0.6s; } .inf-term span:nth-child(4) { display: none; }
 @keyframes inf-type { 0% { width: 0; } 40%, 100% { width: 5ch; } }
 .inf-lock { position: absolute; top: 1px; right: 1px; width: 8px; height: 10px; color: var(--accent); filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.9)); z-index: 1; }
-.inf-ransom-val { position: absolute; left: 2px; top: 0; font-size: 9px; line-height: 11px; color: var(--fg); text-shadow: 0 0 3px #000; z-index: 1; }
-.inf-ransom-left { position: absolute; right: 2px; bottom: 0; font-size: 8px; line-height: 11px; color: var(--danger); text-shadow: 0 0 3px #000; z-index: 1; }
+/* (the bit's value in its brackets, top left; its ransom, bottom right: the key, then the KEYS left to pay, in
+   the KEYS' color. Sized by the bit itself, so a small one (a small phone, HARD's 8x8) isn't crowded) */
+.cell.ransom { container-type: inline-size; }
+.inf-ransom-val { position: absolute; left: 1px; top: 0; font-size: 11px; font-size: clamp(8px, 31cqw, 12px); line-height: 1.1; letter-spacing: -0.5px; color: var(--fg); text-shadow: 0 0 3px #000, 0 0 2px #000; z-index: 1; }
+.inf-ransom-price { position: absolute; right: 2px; bottom: 0; display: flex; align-items: center; gap: 1px; font-size: 10.5px; font-size: clamp(7.5px, 29cqw, 11px); line-height: 1.15; color: var(--accent); text-shadow: 0 0 3px #000, 0 0 2px #000; z-index: 1; }
+.inf-ransom-key { width: 0.85em; height: 0.85em; filter: drop-shadow(0 0 1.5px #000); }
+/* A tap paying toward it: what it took, floating up off the bit */
+.ransom-pop { position: absolute; z-index: 6; pointer-events: none; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 1px; font-size: 15px; letter-spacing: 1px; color: var(--accent); text-shadow: 0 0 6px var(--bg-solid), 0 0 2px var(--bg-solid); animation: res-pop 1.6s ease-out forwards; white-space: nowrap; }
+.ransom-pop .key-ico { width: 14px; height: 14px; }
 /* MALWARE: the bits a jumble of flickering characters */
 .cell.corrupt { color: var(--danger); border-color: rgba(var(--danger-rgb), 0.7); }
 /* (MALWARE's blocks of characters, each bit a little CRT: kept inside the bit's border with a sliver of

@@ -94,6 +94,10 @@ let demands = {};
 const PAYABLE = ['adware', 'cryptojacker', 'scareware'];
 const DEMAND = [10, 20]; // (KEYS asked, each strike: somewhere in this range)
 const TAKE = [1, 3]; // (KEYS a tap takes: a few, at random) // (SCAREWARE's drops left: its pop-ups keep coming on their own clock till then)
+// RANSOMWARE's strikes: each the bits it locked, how many were paid off and the KEYS it got. Every bit
+// paid off: its demand paid in full; not a key paid, and every lock ran out: outlasted
+let ransoms = {};
+let ransomSeq = 0;
 let jackLeft = 0; // ...and the CRYPTOJACKER's drops left stealing (RANSOMWARE's locks are on the bits: cell.locked)
 let marketOpen = false; // THE BLACK MARKET sells once the game's first encryption layer rises (ZEN: after as many drops) // PAUSE (any mode): the board covered, the CPU's clock stopped, the drop buttons off
 let keyloggerDrops = 0; // drops left with the keylogger's preview showing
@@ -289,7 +293,7 @@ const BOX_TIERS = { 'box-1': 'I', 'box-2': 'II', 'box-3': 'III' };
 const ANTI = {
   adware: { name: 'ADWARE', does: 'A COLUMN BLOCKED FOR 3 DROPS' },
   spyware: { name: 'SPYWARE', does: 'NEXT 3 BITS HIDDEN' },
-  ransomware: { name: 'RANSOMWARE', does: '3 BITS LOCKED FOR 5 DROPS' },
+  ransomware: { name: 'RANSOMWARE', does: '3 BITS LOCKED FOR 5 DROPS (TAP TO PAY)' },
   malware: { name: 'MALWARE', does: 'BOARD CORRUPTED FOR 3 DROPS' },
   cryptojacker: { name: 'CRYPTOJACKER', does: 'RESOURCES STOLEN FOR 5 DROPS' },
   scareware: { name: 'SCAREWARE', does: 'POP-UPS FOR 8 DROPS' },
@@ -572,6 +576,7 @@ function initGame() {
   jackLeft = 0;
   scareLeft = 0;
   demands = {};
+  ransoms = {};
   Infections.clear();
   marketOpen = false;
   const taken = Progress.startersTaken();
@@ -1189,8 +1194,8 @@ function render(popped = [], falling = null) {
         const lockShows = cell.locked && !(malwareLeft > 0 && malwareAt > (cell.lockAt || 0)); // (MALWARE after the lock: its spoiling covers it)
         if (cell.type === 'number' && cell.locked && lockShows) { // (RANSOMWARE: locked where it is, its little screen and padlock)
           div.classList.add('disc', 'ransom');
-          div.innerHTML = Infections.ransomHtml(cell.val, cell.locked, cell.lockLook || 0);
-          div.title = `RANSOMWARE: locked for ${cell.locked} more drop${cell.locked === 1 ? '' : 's'}`;
+          div.innerHTML = Infections.ransomHtml(cell.val, cell.ransom || 0, cell.lockLook || 0);
+          div.title = `RANSOMWARE: ${cell.ransom || 0} KEYS to free it (tap to pay), or locked ${cell.locked} more drop${cell.locked === 1 ? '' : 's'}`;
         } else if (cell.type === 'number' && malwareLeft > 0) { // (MALWARE: the bits shown as junk)
           div.classList.add('disc', 'corrupt');
           div.innerHTML = Infections.glitch(3, r, c);
@@ -2076,6 +2081,7 @@ async function runHack(id, row, col) {
       if (id === 'bitflip') stack.reverse();
       stack.forEach((cell, r) => {
         if (!cell || cell.type !== 'number') return;
+        if (cell.locked) return; // (RANSOMWARE's locked bits sit out BUFFER OVERFLOW and RNG: same number, still locked)
         if (id === 'buffer-overflow') {
           stack[r] = cell.val === COLS ? newFirewall(2) : { type: 'number', val: cell.val + 1 };
         } else if (id === 'rng') {
@@ -2098,7 +2104,8 @@ const SCRAMBLE_STEPS = [45, 45, 50, 55, 60, 70, 80, 95, 110];
 async function scrambleBits() {
   const els = [];
   columns.forEach((stack, c) => stack.forEach((cell, r) => {
-    const el = cell && cell.type === 'number' && boardEl.querySelector(`.cell[data-pos="${r},${c}"]`);
+    // (RANSOMWARE's locked bits sit it out: no flicker, and they keep their numbers)
+    const el = cell && cell.type === 'number' && !cell.locked && boardEl.querySelector(`.cell[data-pos="${r},${c}"]`);
     if (el) els.push(el);
   }));
   if (!els.length) return;
@@ -3876,6 +3883,14 @@ function pickSwapBit(e) {
   const col = columns[first].length < MAX_ROWS ? first : columns.findIndex((s) => s.length < MAX_ROWS);
   if (col >= 0) attemptDrop(col);
 }
+// (RANSOMWARE: a tap that starts and ends on a locked bit pays toward its ransom instead of dropping;
+// pressed there and dragged off, it aims and drops as usual)
+let ransomTap = null;
+const lockedPos = (x, y) => {
+  const el = document.elementFromPoint(x, y);
+  const cell = el && el.closest('.cell.ransom[data-pos]');
+  return cell && boardEl.contains(cell) ? cell.dataset.pos : null;
+};
 boardEl.addEventListener('pointerdown', (e) => {
   if (swapArmed() && !busy && !gameOver && !vsPaused && !homeOpen && (e.pointerType !== 'mouse' || e.button === 0)) {
     e.preventDefault();
@@ -3884,6 +3899,7 @@ boardEl.addEventListener('pointerdown', (e) => {
   }
   if (!columnsTouchable() || aimPointer !== null || (e.pointerType === 'mouse' && e.button !== 0)) return;
   if (gameOver || busy || !queue.length) return;
+  ransomTap = pivotFrom === null ? lockedPos(e.clientX, e.clientY) : null;
   aimPointer = e.pointerId;
   if (pivotFrom !== null) return; // (PIVOT's second pick: a tap on a neighbor column, no bit shown)
   try { boardEl.setPointerCapture(e.pointerId); } catch (err) { /* (not capturable) */ }
@@ -3899,7 +3915,14 @@ boardEl.addEventListener('pointerup', (e) => {
   const r = boardEl.getBoundingClientRect();
   const off = e.clientX < r.left - 40 || e.clientX > r.right + 40 || e.clientY < r.top - 40 || e.clientY > r.bottom + 40;
   const c = aim !== null ? aim : columnAt(e.clientX);
+  const tapped = ransomTap;
+  ransomTap = null;
   endAim();
+  if (tapped && lockedPos(e.clientX, e.clientY) === tapped) {
+    const [lr, lc] = tapped.split(',').map(Number);
+    payRansom(lr, lc);
+    return;
+  }
   if (!off) attemptDrop(c);
 });
 boardEl.addEventListener('pointercancel', (e) => { if (e.pointerId === aimPointer) endAim(); });
@@ -4556,7 +4579,7 @@ const SECTION_INFO = {
   boxes: ['// BLACK BOXES', [
     'A sealed box with a random exploit inside, for less than it usually holds.',
     'Bring it into a game in a side slot, then tap it to open it. Most of the time you get an exploit of the box\'s tier, to use when you like.',
-    'Sometimes it\'s INFECTED, and the infection hits right away: ADWARE blocks a column with an ad, SPYWARE hides your next bits, RANSOMWARE locks bits so they can\'t decrypt, MALWARE scrambles what your board shows, a CRYPTOJACKER steals the resources you earn, or SCAREWARE throws up fake alerts over your board for 8 drops, up to 4 at once, each closed only by its little X.',
+    'Sometimes it\'s INFECTED, and the infection hits right away: ADWARE blocks a column with an ad, SPYWARE hides your next bits, RANSOMWARE locks bits so they can\'t decrypt (tap one to pay its ransom, a few KEYS a tap), MALWARE scrambles what your board shows, a CRYPTOJACKER steals the resources you earn, or SCAREWARE throws up fake alerts over your board for 8 drops, up to 4 at once, each closed only by its little X.',
     'Infections stack: open two infected boxes and both hit. The same infection twice starts its count over, a second RANSOMWARE locks more bits, and a second SCAREWARE stacks another pop-up over the first.',
     'The higher the tier, the better the odds. Each box shows its own.']],
 };
@@ -5138,6 +5161,10 @@ function marketTick() {
 const ANTI_DROPS = 3;
 const SCARE_DROPS = 8; // (SCAREWARE: pop-ups for up to eight drops)
 const RANSOM_DROPS = 5; // (RANSOMWARE's locks and the CRYPTOJACKER: five drops)
+// (RANSOMWARE: each locked bit's own ransom in KEYS, shown on it going down; every tap on it pays 1 to 8
+// of it, at random. Paid off, the bit's free at once; its lock running out first, what was paid on it is lost)
+const RANSOM_PRICE = [8, 24];
+const RANSOM_TAKE = [1, 8];
 const spyHides = (n) => spywareLeft > n; // (the bit n places down the queue: 0 is CURRENT)
 // (after each drop: RANSOMWARE's locks and MALWARE's corruption a drop nearer gone; a lock lifting,
 // the bit falls into any gap under it and the board settles)
@@ -5151,7 +5178,8 @@ function infectionOn(kind) {
   if (kind === 'ransomware') return columns.some((col) => col.some((c) => c && c.locked));
   return false;
 }
-// Ran out its clock: its demand gone (never a key paid: one outlasted)
+// Ran out its clock: its demand gone (never a key paid: one outlasted). A RANSOMWARE strike, once none
+// of its bits is locked: every one paid off, its demand paid in full; not a key paid, outlasted
 function settleDemands() {
   for (const kind of Object.keys(demands)) {
     if (infectionOn(kind)) continue;
@@ -5159,7 +5187,69 @@ function settleDemands() {
     delete demands[kind];
     showDue(kind);
   }
+  for (const [id, s] of Object.entries(ransoms)) {
+    if (columns.some((col) => col.some((x) => x && x.locked && x.ransomOf === Number(id)))) continue;
+    if (s.freed === s.locked) Progress.ransomPaid();
+    else if (!s.keys) Progress.outlasted();
+    delete ransoms[id];
+  }
   announce(Progress.check());
+}
+// RANSOMWARE: a tap on a locked bit pays 1 to 8 KEYS toward its own ransom (a -KEYS floating up off it);
+// paid off, the bit's free at once and the board settles. Its lock still runs out after its drops, and
+// whatever was paid on it is gone with it
+function ransomPop(r, c, n) {
+  const cellEl = boardEl.querySelector(`.cell[data-pos="${r},${c}"]`);
+  if (!cellEl) return;
+  const a = cellEl.getBoundingClientRect();
+  const b = boardWrapEl.getBoundingClientRect();
+  const el = document.createElement('div');
+  el.className = 'ransom-pop';
+  el.innerHTML = `-${KEY_SVG}${n}`;
+  Object.assign(el.style, { left: `${a.left - b.left + a.width / 2}px`, top: `${a.top - b.top + a.height / 2}px` });
+  boardWrapEl.appendChild(el); // (on the board's frame: the board itself is redrawn under it)
+  setTimeout(() => el.remove(), 1700);
+}
+async function payRansom(r, c) {
+  const cell = columns[c] && columns[c][r];
+  if (!cell || !cell.locked || gameOver || busy || vsPaused || paying) return;
+  const ask = Math.min(cell.ransom, RANSOM_TAKE[0] + Math.floor(Math.random() * (RANSOM_TAKE[1] - RANSOM_TAKE[0] + 1)));
+  const got = Progress.extort(ask);
+  if (!got) {
+    setMessage('RANSOMWARE // NO KEYS LEFT TO TAKE', 'alarm');
+    SFX.play('denied');
+    return;
+  }
+  cell.ransom -= got;
+  const strike = ransoms[cell.ransomOf];
+  if (strike) strike.keys += got;
+  ransomPop(r, c, got);
+  SFX.play('burst');
+  if (cell.ransom > 0) {
+    setMessage('RANSOMWARE // KEYS STOLEN', 'alarm');
+    render();
+    announce(Progress.check());
+    return;
+  }
+  // Paid off: the bit's free, and falls into any gap under it
+  if (strike) strike.freed++;
+  for (const k of ['locked', 'lockLook', 'lockAt', 'ransom', 'ransomOf']) delete cell[k];
+  setMessage('RANSOMWARE // PAID OFF: THE BIT IS FREE', 'alarm');
+  SFX.play('egg');
+  paying = true;
+  busy = true;
+  try {
+    await collapse();
+    await resolveChains();
+  } finally {
+    busy = false;
+    paying = false;
+  }
+  render();
+  updateHud();
+  updateColumnButtons();
+  updateInfBadge();
+  settleDemands();
 }
 // A tap on an infection: it takes a few KEYS toward its demand, and paid in full, it goes
 let paying = false;
@@ -5248,15 +5338,21 @@ function runAnti(id) {
   } else if (id === 'spyware') {
     spywareLeft = ANTI_DROPS;
     Infections.pick('spy');
-  } else if (id === 'ransomware') { // (up to 3 more bits locked where they are, never ones already locked: they can't decrypt, nor fall, till it lifts)
+  } else if (id === 'ransomware') { // (up to 3 more bits locked where they are, never ones already locked: they can't decrypt, nor fall, till it lifts or it's paid)
     const cells = numberCells();
     const look = Infections.pick('ransom');
+    const strike = ++ransomSeq;
+    let locked = 0;
     for (let n = 0; n < ANTI_DROPS && cells.length; n++) {
       const { r, c } = cells.splice(Math.floor(Math.random() * cells.length), 1)[0];
       columns[c][r].locked = RANSOM_DROPS;
       columns[c][r].lockLook = look;
       columns[c][r].lockAt = ++infSeq;
+      columns[c][r].ransom = RANSOM_PRICE[0] + Math.floor(Math.random() * (RANSOM_PRICE[1] - RANSOM_PRICE[0] + 1));
+      columns[c][r].ransomOf = strike;
+      locked++;
     }
+    if (locked) ransoms[strike] = { locked, freed: 0, keys: 0 };
   } else if (id === 'malware') {
     malwareLeft = ANTI_DROPS;
     malwareAt = ++infSeq;
