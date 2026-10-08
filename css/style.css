@@ -4401,3 +4401,24 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 .card-head .title-wrap { position: relative; flex: 1 1 auto; min-width: 0; display: flex; align-items: center; font-size: inherit; letter-spacing: inherit; color: inherit; text-shadow: none; } /* (as tall as the title in it: PUZZLES' // PUZZLES stays where a game's mode line is) */
 .card-head .title-msg { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); min-height: 0; font-size: 13px; letter-spacing: 1px; color: var(--accent); }
 .title-wrap:has(.title-msg.show) #records-title { visibility: hidden; }
+
+/* PIXEL STYLE (SETTINGS; html.px-ui, pixel-ui.js): every rounded corner a pixel step. corner-shape:
+   notch cuts each corner as a square, and the border, the background, the clip and the neon glow
+   (box-shadow) all follow the step: the STORE stays a lit sign, a neon pixel one. Round buttons
+   go to a stepped circle; the scenery and the tube's glass stay round. The icons are redrawn in
+   pixels by pixel-ui.js; the two drawn here (the lock, the play arrow) are pixel art. (A browser
+   without corner-shape gets square corners, the glow kept all the same) */
+@supports (corner-shape: notch) {
+  html.px-ui *, html.px-ui *::before, html.px-ui *::after { corner-shape: notch; }
+  html.px-ui :is(.mp-viz-flash, .mp-transport button, .slot-sale) { border-radius: 25%; }
+  html.px-ui .fish-splash, html.px-ui .crt-fx::after { corner-shape: round; }
+  html.px-ui :is(.panel.panel-store, .shop-box) { border-radius: 6px; } /* (a pixel step, not a ticket's corner) */
+  html.px-ui :is(.panel.panel-store, .shop-box)::before { border-radius: 4px; }
+}
+@supports not (corner-shape: notch) {
+  html.px-ui *:not(.fish-splash, .crt-fx), html.px-ui *::before, html.px-ui *:not(.crt-fx)::after { border-radius: 0 !important; }
+}
+html.px-ui {
+  --icon-lock: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 12' shape-rendering='crispEdges'><path d='M3 1h4v1h1v3H7V2H3v3H2V2h1zM1 5h8v6H1zM4 7v2h2V7z' fill='black' fill-rule='evenodd'/></svg>");
+  --icon-play: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 9' shape-rendering='crispEdges'><path d='M1 0h1v1h1v1h1v1h1v1h1v1h-1v1h-1v1h-1v1h-1v1H1z' fill='black'/></svg>");
+}
