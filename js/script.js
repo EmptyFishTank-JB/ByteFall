@@ -163,7 +163,7 @@ const dailyNote = (date, what) => (dailyOfficial
 // `mode` is the game being played. The mode row picks CLASSIC, DAILY, BLITZ, ZEN or PUZZLE; under
 // DAILY (`daily`) the second row picks DECRYPT, PUZZLE, BLITZ or BREACH (BREACH is daily only).
 const MODES = {
-  classic: { label: 'CLASSIC', info: () => 'CLASSIC // No clock and no bit limit: keep your columns under the line as long as you can.' },
+  classic: { label: 'CLASSIC', info: () => 'CLASSIC // No clock and no bit limit: keep your columns under the line as long as you can. Each game has a key to crack: reach its ENCRYPTION STRENGTH for KEYS, then go deeper or disconnect.' },
   decrypt: {
     label: 'DAILY DECRYPT',
     info: (date) => dailyNote(date, `the same ${DAILY_BITS} bits for everyone.`),
@@ -277,7 +277,7 @@ let marketDrops = 0;
 let usedStarters = []; // (for the result screen)
 let marketBought = [];
 // THE PATCH SLOTS, the row's two ends (PATCH 1 left of the BLACK MARKET's left slot, PATCH 2 right of
-// its right one), open at Lv 8 and Lv 20 (Progress.patchSlotLevel): each sells a patch that fits the
+// its right one), open by level (Progress.patchSlotLevel): each sells a patch that fits the
 // mode and would do something now, for KEYS and resources (Progress, 'patch:<id>'; ECONOMY.md),
 // turning over with the BLACK MARKET and opening with it. Bought, it's applied at once and that slot's
 // done for the game: with the one switched on before it, three patches a game at most
@@ -538,6 +538,70 @@ function refillQueue() {
 // DECRYPT, BREACH: bits still to drop (dealt-but-waiting plus not yet dealt)
 const dailyBitsLeft = () => dealLimit() - dealt + queue.filter((p) => p.type === 'number').length;
 
+// ENCRYPTION STRENGTH (CLASSIC, not its daily): every game has a key to crack, a score to reach,
+// GOAL_BASE's on its difficulty. Reach it and the game holds on a card: KEYS for the crack, then GO
+// DEEPER (the next key, stronger: half the first's points again, and more KEYS) or DISCONNECT (the
+// game ends there, cracked). Traced after a crack, the KEYS it paid are kept
+const GOAL_BASE = { easy: 1000, normal: 1500, hard: 2000 };
+const GOAL_BITS = [128, 192, 256, 384, 512, 1024, 2048, 4096];
+const goalBits = (k) => (k < GOAL_BITS.length ? GOAL_BITS[k] : 4096 * 2 ** (k - GOAL_BITS.length + 1));
+const goalTarget = (k) => Math.round((GOAL_BASE[difficulty] || 1500) * (1 + 0.5 * k) / 50) * 50;
+const goalKeys = (k) => Math.round(goalTarget(k) / 150);
+let goal = null; // this game's: k, the key being cracked now (0: 128-BIT); cracked, how many so far
+let goalOpen = false;
+const goalCardEl = document.getElementById('goal-card');
+const goalBarEl = document.getElementById('goal-bar');
+const goalLine = () => (goal ? ` // ${goalBits(goal.k)}-BIT: ${fmt(goalTarget(goal.k))}` : '');
+function updateGoal() {
+  goalBarEl.hidden = !goal;
+  if (!goal) return;
+  const t = goalTarget(goal.k);
+  goalBarEl.firstElementChild.style.width = `${Math.min(100, (score / t) * 100).toFixed(1)}%`;
+  goalBarEl.classList.toggle('near', score >= t * 0.8);
+}
+function openGoal() {
+  const k = goal.k;
+  const keys = goalKeys(k);
+  goal.cracked = k + 1;
+  goalOpen = true;
+  busy = true;
+  Progress.claimKeys(keys);
+  showKeys();
+  SFX.play('egg');
+  document.getElementById('goal-title').textContent = `// ${goalBits(k)}-BIT CRACKED`;
+  document.getElementById('goal-keys').innerHTML = `+${keys} ${KEY_SVG}`;
+  document.getElementById('goal-note').textContent = `Next: ${goalBits(k + 1)}-BIT at ${fmt(goalTarget(k + 1))}, for +${goalKeys(k + 1)} KEYS. Or disconnect now and end the game cracked.`;
+  requestAnimationFrame(() => fitText(document.getElementById('goal-note')));
+  goalCardEl.classList.remove('closing');
+  goalCardEl.hidden = false;
+  document.querySelector('.board-frame').classList.add('paused');
+  Music.setIntensity(0);
+  updateColumnButtons();
+}
+function closeGoal(then) {
+  goalOpen = false;
+  goalCardEl.classList.add('closing');
+  setTimeout(() => { goalCardEl.hidden = true; goalCardEl.classList.remove('closing'); }, 150);
+  then();
+}
+document.getElementById('goal-deeper').addEventListener('click', () => {
+  if (!goalOpen) return;
+  SFX.play('click');
+  closeGoal(() => {
+    goal.k++;
+    document.querySelector('.board-frame').classList.remove('paused');
+    document.getElementById('game-mode-label').textContent = `// ${modeLine()}${goalLine()}`;
+    updateGoal();
+    busy = false;
+    updateColumnButtons();
+    setMessage(`ENCRYPTION // ${goalBits(goal.k)}-BIT // CRACK IT AT ${fmt(goalTarget(goal.k))}`, 'warn');
+  });
+});
+document.getElementById('goal-out').addEventListener('click', () => {
+  if (!goalOpen) return;
+  closeGoal(() => endGame('cracked'));
+});
+
 function initGame() {
   if (pendingEarned.length) flushEarned(); // (a game left before its meter finished)
   runXp = Progress.levelInfo();
@@ -547,6 +611,9 @@ function initGame() {
   difficulty = mode === 'classic' ? classicDifficulty : mode === 'puzzle' && !daily ? puzzleTier
     : mode === 'vs' && CpuBoard.sizeFor(vsLevel) === 8 ? 'hard' : 'normal';
   dailyOfficial = daily && (mode === 'puzzle' ? dailyPuzzleOfficial() : !storage.get(dailyPlayedKey()));
+  goal = mode === 'classic' && !daily ? { k: 0, cracked: 0 } : null; // (ENCRYPTION STRENGTH: CLASSIC's key to crack)
+  if (goalOpen || !goalCardEl.hidden) { goalOpen = false; goalCardEl.hidden = true; }
+  if (!vsPaused) document.querySelector('.board-frame').classList.remove('paused'); // (a game that ended cracked faded its bits)
   setupDice();
   Progress.startRun(difficulty, mode, mode === 'puzzle' && !daily ? puzzleKey(puzzleIndex) : null, daily);
   timeLeft = daily ? DAILY_BLITZ_SECONDS : BLITZ_SECONDS;
@@ -615,7 +682,7 @@ function initGame() {
   Infections.clear();
   marketOpen = false;
   const taken = Progress.startersTaken();
-  const open = Progress.sideSlots(); // (by level: the left at Lv 4, the right at Lv 12; one still shut shows its padlock and level)
+  const open = Progress.sideSlots(); // (by level, Progress.sideSlotLevel; one still shut shows its padlock and level)
   sideSlots = starterFits() && mode !== 'tutorial'
     ? [0, 1].map((i) => (i >= open ? { state: 'locked', id: null } : taken[i] ? { state: 'starter', id: taken[i] } : { state: 'market', id: null })) : [];
   for (const sl of sideSlots) { // (a slot taken in empty is the BLACK MARKET from the start)
@@ -1142,8 +1209,8 @@ function buildColumnButtons() {
 function updateColumnButtons() {
   updateFreeBtn();
   // (paused: the exploits, the BLACK MARKET and the patches dim and wait, as the drop buttons do)
-  document.querySelector('.exploit-row').classList.toggle('paused-row', vsPaused);
-  document.getElementById('puzzle-tools').classList.toggle('paused-row', vsPaused);
+  document.querySelector('.exploit-row').classList.toggle('paused-row', vsPaused || goalOpen);
+  document.getElementById('puzzle-tools').classList.toggle('paused-row', vsPaused || goalOpen);
   // (PIVOT's choice: the picked column and the two it can swap with light up the grid too, not only their buttons)
   boardEl.querySelectorAll('.cell[data-pos]').forEach((cell) => {
     const c = Number(cell.dataset.pos.split(',')[1]);
@@ -1391,6 +1458,7 @@ function updateHud() {
   // (VS modes on points: the match points, with this drop's points counting up as they come)
   scoreEl.textContent = mode === 'vs' && vsMode !== 'classic' && cpu
     ? matchPoints(vsMe, vsThem, score - vsCounted, 0)[0] : score;
+  updateGoal();
   bestEl.textContent = best;
   // VS before START: the first bit stays hidden, so a refresh or an option change can't be
   // used to fish for a good one
@@ -1641,6 +1709,7 @@ function finishTurn() {
   else if (breached) endGame('breached');
   else if (dealLimit() < Infinity && !queue.length) endGame('daily');
   else if (mode === 'puzzle') checkPuzzle();
+  else if (goal && score >= goalTarget(goal.k)) openGoal(); // (the key's cracked: GO DEEPER or DISCONNECT)
   // One drop until a firewall row: warn until the player drops (unless a hack message is showing)
   else if (!MODES[mode].noLayers && pulseInterval - dropsSinceLastPulse === 1 && messageEl.classList.contains('hidden')) {
     setMessage('ENCRYPTION // NEW LAYER NEXT DROP', 'warn');
@@ -2229,7 +2298,7 @@ function endGame(reason = 'trace') {
   refreshExploitCards(); // the loadout can change again
   busy = true;
   clockRunning = false;
-  SFX.play('denied');
+  SFX.play(reason === 'cracked' ? 'dialup' : 'denied'); // (DISCONNECT: the line hung up)
   render();
   Music.setIntensity(0);
   setMessage('');
@@ -2242,6 +2311,7 @@ function endGame(reason = 'trace') {
     breached: ['FIREWALL BREACHED', `Every block cleared. +${BREACH_CLEAR_BONUS}`],
     win: ['YOU WIN', vsWhy || `The ${vsName()} overflowed first.`],
     'vs-lose': [`${CpuBoard.BOTS[vsBot].label} WINS`, vsWhy],
+    cracked: ['ENCRYPTION CRACKED', `${goal ? goalBits(goal.cracked - 1) : 128}-BIT broken. You got out clean.`],
   };
   if (mode === 'vs') {
     if (reason === 'trace') endings.trace = [`${CpuBoard.BOTS[vsBot].label} WINS`, `The ${vsName()} traced you first.`];
@@ -2253,6 +2323,7 @@ function endGame(reason = 'trace') {
     stopVs();
     holdCpu(false);
   }
+  document.querySelector('.overlay-box').classList.toggle('win', reason === 'cracked'); // (cracked: the terminal color, not the trace red)
   document.getElementById('overlay-title').textContent = endings[reason][0];
   document.getElementById('overlay-sub').textContent = endings[reason][1];
   const note = document.getElementById('overlay-note');
@@ -2261,6 +2332,10 @@ function endGame(reason = 'trace') {
     ? (dailyOfficial ? `${DAILY_KINDS[mode]} // OFFICIAL SCORE // ${todayKey()}` : `${DAILY_KINDS[mode]} PRACTICE // OFFICIAL SCORE TODAY ${fmt(best)}`)
     : `${MODES[mode].label} // BEST ${best}`;
   if (daily) newBestEl.hidden = true;
+  if (goal && goal.cracked) { // (a key cracked: how strong, on the result too)
+    note.hidden = false;
+    note.textContent += ` // CRACKED: ${goalBits(goal.cracked - 1)}-BIT`;
+  }
   const patched = [...new Set([...runBoosts, ...patchesBought, ...(secondChanceUsed ? ['second-chance'] : [])])];
   if (patched.length) { // (a patched game says so)
     note.hidden = false;
@@ -2289,13 +2364,15 @@ function endGame(reason = 'trace') {
   Progress.logGame({
     label: daily ? DAILY_KINDS[mode] : mode === 'vs' ? `VS // ${CpuBoard.BOTS[vsBot].label}` : MODES[mode].label,
     score,
-    result: { trace: 'TRACED', time: "TIME'S UP", daily: 'DONE', breached: 'BREACHED', win: 'WON', 'vs-lose': 'LOST' }[reason] || '',
+    result: { trace: 'TRACED', time: "TIME'S UP", daily: 'DONE', breached: 'BREACHED', win: 'WON', 'vs-lose': 'LOST', cracked: 'CRACKED' }[reason] || '',
     patches: patched,
+    goal: goal && goal.cracked ? `${goalBits(goal.cracked - 1)}-BIT` : '',
   });
   announce(Progress.check());
 
   const run = runId;
-  meltBoard(run);
+  if (reason === 'cracked') document.querySelector('.board-frame').classList.add('paused'); // (a clean exit: the bits fade, nothing burns)
+  else meltBoard(run);
   setTimeout(() => {
     if (run !== runId) return;
     overlayEl.classList.remove('hidden');
@@ -2752,7 +2829,7 @@ function applyModeUi() {
   // the streak and the turnover, over its cards)
   document.getElementById('mode-info').textContent = daily ? dailyHeader() : MODES[mode].info(todayKey()).replace(/^[A-Z ]+ \/\/ (.)/, (_, c) => c.toUpperCase());
   // (VS: VS. CPU // its game mode, under BYTEFALL as in every game)
-  document.getElementById('game-mode-label').textContent = mode === 'vs' ? `VS. CPU // ${VS_MODES[vsMode].label}` : `// ${modeLine()}`;
+  document.getElementById('game-mode-label').textContent = mode === 'vs' ? `VS. CPU // ${VS_MODES[vsMode].label}` : `// ${modeLine()}${goalLine()}`;
   document.getElementById('difficulty-row').hidden = mode !== 'classic';
   document.getElementById('daily-kinds').hidden = !daily;
   document.getElementById('daily-pips').hidden = !daily;
@@ -3474,7 +3551,7 @@ function requestPause() {
 function openPause() {
   pauseQueued = false;
   recordsBtn.classList.remove('pause-queued');
-  if (!canPause() || vsPaused) return;
+  if (!canPause() || vsPaused || goalOpen) return; // (the ENCRYPTION STRENGTH card holds the game already)
   vsPaused = true;
   vsPausedAt = performance.now();
   document.getElementById('pause-note').textContent = mode === 'vs' ? 'The CPU is waiting for you.' : 'The game is waiting for you.';
@@ -4694,10 +4771,10 @@ const priceText = (price) => ['keys', ...Progress.resIds()].filter((id) => price
 // The wallet: the main menu's line under the level bar, and the STORE's
 function showWallet() {
   const html = Progress.resIds().map((id) => resChip(id, fmt(Progress.res(id)))).join('');
-  for (const id of ['wallet', 'store-wallet']) {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = html;
-  }
+  const home = document.getElementById('wallet');
+  if (home) home.innerHTML = html;
+  const store = document.getElementById('store-wallet'); // (the STORE's YOUR RESOURCES: KEYS first, on the one line)
+  if (store) store.innerHTML = resChip('keys', fmt(Progress.keys())) + html;
 }
 // What a drop earned, in the SCORE box along its foot (as far up from its bottom border as SCORE is down
 // from its top), every resource on the one line at once (a long line shrinks to fit), for a moment
@@ -4721,8 +4798,6 @@ function showKeys() {
   showWallet();
   const n = fmt(Progress.keys());
   document.getElementById('key-label').innerHTML = `${KEY_SVG} ${n}`;
-  const inStore = document.getElementById('store-key-count');
-  if (inStore) inStore.innerHTML = `${KEY_SVG} ${n}`;
   // (the STORE buttons' sign: the currency sign, always there, lit like a HOT NOW sign while the DAILY DROP waits)
   for (const id of ['home-store', 'pause-store']) {
     const b = document.getElementById(id);
@@ -4770,11 +4845,11 @@ const SECTION_INFO = {
     'A patch gives your next game an edge.',
     'Buy them with KEYS. Before a game, tap PATCHES on the main menu and switch one on.',
     'One per game. It\'s used up when the game starts (RESTORE POINT only when it saves you).',
-    'In the game, the PATCH SLOTS at the two ends of the exploit row sell one more each (the left opens at Lv 8, the right at Lv 20): KEYS and resources, applied the moment you buy it.',
+    `In the game, the PATCH SLOTS at the two ends of the exploit row sell one more each (the left opens at Lv ${Progress.patchSlotLevel(0)}, the right at Lv ${Progress.patchSlotLevel(1)}): KEYS and resources, applied the moment you buy it.`,
     'Not in DAILY or VS.']],
   starters: ['// STARTER EXPLOITS', [
     'An exploit you own and bring into a game, instead of waiting for the CHAIN METER to earn one.',
-    'Pick up to two under STARTERS on the main menu. Each sits in a side slot next to the exploit button: the left slot opens at Lv 4, the right at Lv 12.',
+    `Pick up to two under STARTERS on the main menu. Each sits in a side slot next to the exploit button: the left slot opens at Lv ${Progress.sideSlotLevel(0)}, the right at Lv ${Progress.sideSlotLevel(1)}.`,
     'In the game, tap one to use it as your next drop. Any you don\'t use stay yours.',
     'Short on resources? A MASTER KEY buys any exploit.',
     'An empty side slot turns into the BLACK MARKET once the first encryption layer rises: something for sale that changes every 4 drops. The pips under it count the drops left.',
@@ -4820,7 +4895,7 @@ function openBoosterStore() {
   closeBoosterPick();
   closeStarterPick();
   setRecordsOpen(true, 'store');
-  Store.showTab('patches');
+  Store.show('patches');
 }
 function closeBoosterPick() { boosterPickEl.classList.add('hidden'); }
 function openBoosterPick() {
@@ -4893,7 +4968,7 @@ function setStarters(ids) {
 function openStarterStore() {
   closeStarterPick();
   setRecordsOpen(true, 'store');
-  Store.showTab('starters');
+  Store.show('starters');
 }
 function closeStarterPick() { starterPickEl.classList.add('hidden'); }
 function openStarterPick(slot) {
@@ -6250,7 +6325,7 @@ function renderRecords() {
         .map((id) => resChip(id, `+${fmt(id === 'keys' ? g.keys : g.res[id])}`)).join('');
       li.innerHTML = `<div class="hist-top"><span class="hist-name">${g.label}${diff}</span><span class="hist-result">${g.result}</span></div>`
         + `<div class="hist-when">${noticeWhen(g.t)}</div>`
-        + `<div class="hist-stats"><span>SCORE <em>${fmt(g.score)}</em></span><span><em>${fmt(g.drops)}</em> DROPS</span><span><em>${time}</em></span><span>CHAIN <em>${g.chain}x</em></span></div>`
+        + `<div class="hist-stats"><span>SCORE <em>${fmt(g.score)}</em></span><span><em>${fmt(g.drops)}</em> DROPS</span><span><em>${time}</em></span><span>CHAIN <em>${g.chain}x</em></span>${g.goal ? `<span>CRACKED <em>${g.goal}</em></span>` : ''}</div>`
         + (earned ? `<div class="hist-earned">${earned}</div>` : '')
         + (g.patches.length ? `<div class="hist-patched">PATCHED: ${g.patches.map((id) => (BOOSTERS[id] ? BOOSTERS[id].name : id)).join(', ')}</div>` : '');
       list.appendChild(li);
@@ -6380,7 +6455,6 @@ function showMenuPane(pane) {
   if (pane === 'records') renderRecords();
   if (pane === 'notices') { renderNotices(); markNoticesRead(); } // (seen: the dots go)
   if (pane === 'puzzles') { puzzleListTier = puzzleTier; renderPuzzleSelect(); }
-  if (pane === 'store' && typeof Store !== 'undefined') Store.opened(); // (its tab: the DAILY DROP's while one waits)
   if (typeof Store !== 'undefined') Store.render(); // (and the REMOVE ADS link, off on its own tab)
   const box = menuScroller();
   if (box) box.scrollTop = 0;

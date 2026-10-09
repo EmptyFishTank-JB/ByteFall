@@ -43,8 +43,8 @@
   } catch (e) {}
 </script>
 <title>BYTEFALL // decryption terminal</title>
-<script src="js/fonts.js?v=533"></script>
-<link rel="stylesheet" href="css/style.css?v=533">
+<script src="js/fonts.js?v=534"></script>
+<link rel="stylesheet" href="css/style.css?v=534">
 </head>
 <body>
   <!-- Dev: TWINKLE BACKGROUND (grid-bg.js): the starlight behind the whole game, off by default -->
@@ -258,78 +258,65 @@
             <div class="store-top">
               <!-- (i: how each resource is earned; the resources' line opens it too) -->
               <h2>STORE <button type="button" class="store-info" id="store-info" aria-label="How resources are earned" aria-haspopup="dialog" aria-controls="res-info"><span class="ico-br">[</span><svg viewBox="0 0 8 10" aria-hidden="true" shape-rendering="crispEdges"><path d="M3 0h2v2H3zM2 3h3v1H2zM3 4h2v4H3zM2 8h4v2H2z" fill="currentColor"/></svg><span class="ico-br">]</span></button></h2>
-              <p class="store-keys">YOUR KEYS <b id="store-key-count">0</b></p>
+              <!-- YOUR RESOURCES: KEYS first, then the rest, on one line (script.js's showWallet) -->
+              <p class="store-keys">YOUR RESOURCES</p>
               <div class="wallet store-wallet-btn" id="store-wallet" role="button" tabindex="0" aria-label="Resources: how each is earned" aria-haspopup="dialog" aria-controls="res-info"></div>
               <!-- PRICES TODAY (progress.js's pricing, store.js): a gauge from LOW to HIGH, and why -->
               <div class="price-gauge" id="price-gauge"></div>
-              <!-- (one section at a time, as RECORDS' tabs: store.js) -->
-              <div class="records-tabs store-tabs" role="tablist" id="store-tabs">
-                <button type="button" role="tab" data-stab="daily">DAILY</button>
-                <button type="button" role="tab" data-stab="patches">PATCHES</button>
-                <button type="button" role="tab" data-stab="starters">STARTERS</button>
-                <button type="button" role="tab" data-stab="boxes">BOXES</button>
-                <button type="button" role="tab" data-stab="support">SUPPORT</button>
-              </div>
               <p class="store-msg" id="store-msg" aria-live="polite"></p>
             </div>
             <div class="store-scroll">
-            <div class="store-tab" data-stab="daily">
-              <!-- DAILY DROP (script.js): once a day, a free exploit and some KEYS, claimed here -->
-              <div class="store-item store-daily" data-item="daily-drop">
-                <h3>DAILY DROP <span class="store-price" id="daily-drop-state">FREE</span></h3>
-                <p>Once a day: a free exploit for your next game (not in DAILY, PUZZLE or VS), 25 KEYS, and 3 each of BUGS, CACHE and CRYPTO. Every 7th day in a row you play, 3 MASTER KEYS too.</p>
-                <p class="store-streak" id="login-streak"></p>
-                <button type="button" class="store-buy" id="daily-claim">CLAIM</button>
-                <!-- (what today's drop gave, once it's claimed: here, not as a pop-up) -->
-                <p class="daily-got" id="daily-got" hidden></p>
-              </div>
+            <!-- DAILY DROP (script.js): once a day, a free exploit and some KEYS, claimed here -->
+            <div class="store-item store-daily" data-item="daily-drop">
+              <h3>DAILY DROP <span class="store-price" id="daily-drop-state">FREE</span></h3>
+              <p>Once a day: a free exploit for your next game (not in DAILY, PUZZLE or VS), 25 KEYS, and 3 each of BUGS, CACHE and CRYPTO. Every 7th day in a row you play, 3 MASTER KEYS too.</p>
+              <p class="store-streak" id="login-streak"></p>
+              <button type="button" class="store-buy" id="daily-claim">CLAIM</button>
+              <!-- (what today's drop gave, once it's claimed: here, not as a pop-up) -->
+              <p class="daily-got" id="daily-got" hidden></p>
             </div>
-            <div class="store-tab" data-stab="patches" hidden>
-              <!-- PATCHES (script.js's BOOSTERS, store.js): bought with KEYS -->
-              <h3 class="store-sub">PATCHES <button type="button" class="store-info sub-info" data-info="boosters" aria-label="What patches are" aria-haspopup="dialog" aria-controls="res-info"><span class="ico-br">[</span><svg viewBox="0 0 8 10" aria-hidden="true" shape-rendering="crispEdges"><path d="M3 0h2v2H3zM2 3h3v1H2zM3 4h2v4H3zM2 8h4v2H2z" fill="currentColor"/></svg><span class="ico-br">]</span></button></h3>
-              <p class="store-sub-note">Switch one on from the main menu before a game.</p>
-              <div class="booster-shop" id="booster-shop"></div>
+            <!-- PATCHES (script.js's BOOSTERS, store.js): bought with KEYS -->
+            <div class="store-rule" aria-hidden="true">================================================================================</div>
+            <h3 class="store-sub" data-kind="patch" data-sec="patches">PATCHES <button type="button" class="store-info sub-info" data-info="boosters" aria-label="What patches are" aria-haspopup="dialog" aria-controls="res-info"><span class="ico-br">[</span><svg viewBox="0 0 8 10" aria-hidden="true" shape-rendering="crispEdges"><path d="M3 0h2v2H3zM2 3h3v1H2zM3 4h2v4H3zM2 8h4v2H2z" fill="currentColor"/></svg><span class="ico-br">]</span></button></h3>
+            <p class="store-sub-note">Switch one on from the main menu before a game.</p>
+            <div class="booster-shop" id="booster-shop"></div>
+            <div class="store-rule" aria-hidden="true">================================================================================</div>
+            <h3 class="store-sub" data-kind="exploit" data-sec="starters">STARTER EXPLOITS <button type="button" class="store-info sub-info" data-info="starters" aria-label="What starter exploits are" aria-haspopup="dialog" aria-controls="res-info"><span class="ico-br">[</span><svg viewBox="0 0 8 10" aria-hidden="true" shape-rendering="crispEdges"><path d="M3 0h2v2H3zM2 3h3v1H2zM3 4h2v4H3zM2 8h4v2H2z" fill="currentColor"/></svg><span class="ico-br">]</span></button></h3>
+            <p class="store-sub-note">Exploits of your own to bring into a game.</p>
+            <div class="booster-shop" id="starter-shop"></div>
+            <div class="store-rule" aria-hidden="true">================================================================================</div>
+            <h3 class="store-sub" data-kind="box" data-sec="boxes">BLACK BOXES <button type="button" class="store-info sub-info" data-info="boxes" aria-label="What black boxes are" aria-haspopup="dialog" aria-controls="res-info"><span class="ico-br">[</span><svg viewBox="0 0 8 10" aria-hidden="true" shape-rendering="crispEdges"><path d="M3 0h2v2H3zM2 3h3v1H2zM3 4h2v4H3zM2 8h4v2H2z" fill="currentColor"/></svg><span class="ico-br">]</span></button></h3>
+            <p class="store-sub-note">A random exploit for less. Open it in a game.</p>
+            <div class="booster-shop" id="box-shop"></div>
+            <div class="box-warn" role="note" aria-label="Warning: black boxes can be infected">
+              <p class="box-warn-head">&#9888; BUYER BEWARE // NO REFUNDS</p>
+              <p>These come off the black market, and nobody checks what's inside. Some boxes are INFECTED, and it hits the moment you open one. Two infected boxes, two infections at once. Some want KEYS: tap them and they help themselves, and once they've got what they're after, they go. Or wait them out.</p>
+              <ul class="box-warn-list">
+                <li><b>ADWARE</b> blocks a column with an ad for 3 drops.</li>
+                <li><b>SPYWARE</b> hides your next 3 bits.</li>
+                <li><b>RANSOMWARE</b> locks 3 bits for 5 drops. They won't decrypt or fall.</li>
+                <li><b>MALWARE</b> scrambles what your board shows for 3 drops.</li>
+                <li><b>CRYPTOJACKER</b> steals the resources you earn for 5 drops.</li>
+                <li><b>SCAREWARE</b> throws up fake alerts for 8 drops, up to 4 at once. Find the little X.</li>
+              </ul>
             </div>
-            <div class="store-tab" data-stab="starters" hidden>
-              <h3 class="store-sub">STARTER EXPLOITS <button type="button" class="store-info sub-info" data-info="starters" aria-label="What starter exploits are" aria-haspopup="dialog" aria-controls="res-info"><span class="ico-br">[</span><svg viewBox="0 0 8 10" aria-hidden="true" shape-rendering="crispEdges"><path d="M3 0h2v2H3zM2 3h3v1H2zM3 4h2v4H3zM2 8h4v2H2z" fill="currentColor"/></svg><span class="ico-br">]</span></button></h3>
-              <p class="store-sub-note">Exploits of your own to bring into a game.</p>
-              <div class="booster-shop" id="starter-shop"></div>
+            <div class="store-rule" aria-hidden="true">================================================================================</div>
+            <h3 class="store-sub">SUPPORT THE GAME</h3>
+            <p>Everything in BYTEFALL can be earned by playing. These are for playing without ads, or having it all now.</p>
+            <p class="store-preview">PREVIEW // PURCHASES AREN'T OPEN YET</p>
+            <div class="store-item" data-item="remove-ads">
+              <h3>REMOVE ADS <span class="store-price" data-price="remove-ads"></span></h3>
+              <p>No more banner ads, for good. Everything else stays as it is: exploits, themes and tracks are still earned by playing.</p>
+              <button type="button" class="store-buy" data-buy="remove-ads">BUY</button>
             </div>
-            <div class="store-tab" data-stab="boxes" hidden>
-              <h3 class="store-sub">BLACK BOXES <button type="button" class="store-info sub-info" data-info="boxes" aria-label="What black boxes are" aria-haspopup="dialog" aria-controls="res-info"><span class="ico-br">[</span><svg viewBox="0 0 8 10" aria-hidden="true" shape-rendering="crispEdges"><path d="M3 0h2v2H3zM2 3h3v1H2zM3 4h2v4H3zM2 8h4v2H2z" fill="currentColor"/></svg><span class="ico-br">]</span></button></h3>
-              <p class="store-sub-note">A random exploit for less. Open it in a game.</p>
-              <div class="booster-shop" id="box-shop"></div>
-              <div class="box-warn" role="note" aria-label="Warning: black boxes can be infected">
-                <p class="box-warn-head">&#9888; BUYER BEWARE // NO REFUNDS</p>
-                <p>These come off the black market, and nobody checks what's inside. Some boxes are INFECTED, and it hits the moment you open one. Two infected boxes, two infections at once. Some want KEYS: tap them and they help themselves, and once they've got what they're after, they go. Or wait them out.</p>
-                <ul class="box-warn-list">
-                  <li><b>ADWARE</b> blocks a column with an ad for 3 drops.</li>
-                  <li><b>SPYWARE</b> hides your next 3 bits.</li>
-                  <li><b>RANSOMWARE</b> locks 3 bits for 5 drops. They won't decrypt or fall.</li>
-                  <li><b>MALWARE</b> scrambles what your board shows for 3 drops.</li>
-                  <li><b>CRYPTOJACKER</b> steals the resources you earn for 5 drops.</li>
-                  <li><b>SCAREWARE</b> throws up fake alerts for 8 drops, up to 4 at once. Find the little X.</li>
-                </ul>
-              </div>
+            <div class="store-item" data-item="full-access">
+              <h3>FULL ACCESS <span class="store-price" data-price="full-access"></span></h3>
+              <p>Everything that unlocks by level, unlocked now: HARD and INSANE, every CPU, exploit, theme, font and track. No ads either. Your levels, ranks and achievements still count what you play.</p>
+              <p class="store-upgrade" id="store-upgrade" hidden>You own REMOVE ADS, so FULL ACCESS is yours for the difference.</p>
+              <button type="button" class="store-buy" data-buy="full-access">BUY</button>
             </div>
-            <div class="store-tab" data-stab="support" hidden>
-              <h3 class="store-sub">SUPPORT THE GAME</h3>
-              <p>Everything in BYTEFALL can be earned by playing. These are for playing without ads, or having it all now.</p>
-              <p class="store-preview">PREVIEW // PURCHASES AREN'T OPEN YET</p>
-              <div class="store-item" data-item="remove-ads">
-                <h3>REMOVE ADS <span class="store-price" data-price="remove-ads"></span></h3>
-                <p>No more banner ads, for good. Everything else stays as it is: exploits, themes and tracks are still earned by playing.</p>
-                <button type="button" class="store-buy" data-buy="remove-ads">BUY</button>
-              </div>
-              <div class="store-item" data-item="full-access">
-                <h3>FULL ACCESS <span class="store-price" data-price="full-access"></span></h3>
-                <p>Everything that unlocks by level, unlocked now: HARD and INSANE, every CPU, exploit, theme, font and track. No ads either. Your levels, ranks and achievements still count what you play.</p>
-                <p class="store-upgrade" id="store-upgrade" hidden>You own REMOVE ADS, so FULL ACCESS is yours for the difference.</p>
-                <button type="button" class="store-buy" data-buy="full-access">BUY</button>
-              </div>
-              <button type="button" class="store-restore" id="store-restore">RESTORE PURCHASES</button>
-              <p class="store-note">Bought something on another device, or reinstalled the game? RESTORE PURCHASES brings back what your account owns.</p>
-            </div>
+            <button type="button" class="store-restore" id="store-restore">RESTORE PURCHASES</button>
+            <p class="store-note">Bought something on another device, or reinstalled the game? RESTORE PURCHASES brings back what your account owns.</p>
             </div>
           </section>
         </div>
@@ -511,6 +498,8 @@
         <div class="stat" id="score-stat">
           <span class="label">SCORE</span>
           <span class="value" id="score">0</span>
+          <!-- CLASSIC's ENCRYPTION STRENGTH: how far the score is toward cracking this game's key -->
+          <i class="goal-bar" id="goal-bar" hidden aria-hidden="true"><b></b></i>
         </div>
         <div class="stat stat-best" id="best-stat">
           <span class="label">BEST</span>
@@ -627,6 +616,15 @@
               <button type="button" id="pause-store">STORE</button>
             </div>
             <button type="button" class="pause-menu" id="pause-menu">MAIN MENU</button>
+          </div>
+          <!-- CLASSIC's ENCRYPTION STRENGTH (script.js): the key's cracked, the game holds here: GO DEEPER
+               (a stronger key) or DISCONNECT (end the game, cracked) -->
+          <div class="vs-setup vs-pause goal-card" id="goal-card" hidden>
+            <p class="vs-setup-title" id="goal-title">// 128-BIT CRACKED</p>
+            <p class="goal-keys" id="goal-keys"></p>
+            <p class="vs-setup-note" id="goal-note"></p>
+            <button type="button" class="vs-start" id="goal-deeper">GO DEEPER</button>
+            <button type="button" class="pause-menu" id="goal-out">DISCONNECT</button>
           </div>
         </div>
         <div id="column-buttons" class="column-buttons"></div>
@@ -847,56 +845,56 @@
     </div>
   </div>
 
-  <script src="js/bot-svg.js?v=533"></script>
-  <script src="js/unlocks.js?v=533"></script>
-  <script src="js/progress.js?v=533"></script>
-  <script src="js/music/output.js?v=533"></script>
-  <script src="js/music/mixes.js?v=533"></script>
-  <script src="js/sfx.js?v=533"></script>
-  <script src="js/music/music-bytefall-theme.js?v=533"></script>
-  <script src="js/music/music-sleep-mode.js?v=533"></script>
-  <script src="js/music/music-brute-force.js?v=533"></script>
-  <script src="js/music/music-deep-web.js?v=533"></script>
-  <script src="js/music/music-zero-day.js?v=533"></script>
-  <script src="js/music/music-system-restore.js?v=533"></script>
-  <script src="js/music/music-night-drive.js?v=533"></script>
-  <script src="js/music/music-standby-mode.js?v=533"></script>
-  <script src="js/music/music-core-dump.js?v=533"></script>
-  <script src="js/music/music-handshake.js?v=533"></script>
-  <script src="js/music/music-stack-overflow.js?v=533"></script>
-  <script src="js/music/music-generated.js?v=533"></script>
-  <script src="js/music/music.js?v=533"></script>
-  <script src="js/data/puzzles.js?v=533"></script>
-  <script src="js/data/daily-puzzles.js?v=533"></script>
-  <script src="js/cpu.js?v=533"></script>
-  <script src="js/fx.js?v=533"></script>
-  <script src="js/viz.js?v=533"></script>
-  <script src="js/pixel.js?v=533"></script>
-  <script src="js/minibot.js?v=533"></script>
-  <script src="js/seasons.js?v=533"></script>
-  <script src="js/bigart.js?v=533"></script>
-  <script src="js/scenes.js?v=533"></script>
-  <script src="js/weather.js?v=533"></script>
-  <script src="js/visitors.js?v=533"></script>
-  <script src="js/data/bot-anims.js?v=533"></script>
-<script src="js/wanderers.js?v=533"></script>
-  <script src="js/tutorial.js?v=533"></script>
-  <script src="js/puzzle-sim.js?v=533"></script>
-  <script src="js/led-banner.js?v=533"></script>
-  <script src="js/infections.js?v=533"></script>
-  <script src="js/pixel-ui.js?v=533"></script>
-  <script src="js/script.js?v=533"></script>
-  <script src="js/grid-bg.js?v=533"></script>
-  <script src="js/lights.js?v=533"></script>
-  <script src="js/inf-test.js?v=533"></script>
-  <script src="js/extsource.js?v=533"></script>
-  <script src="js/player.js?v=533"></script>
-  <script src="js/billing.js?v=533"></script>
-  <script src="js/store.js?v=533"></script>
-  <script src="js/ads-config.js?v=533"></script>
-  <script src="js/ads.js?v=533"></script>
-  <script src="js/start.js?v=533"></script>
-  <script src="js/place.js?v=533"></script>
-  <script src="js/saver.js?v=533"></script>
+  <script src="js/bot-svg.js?v=534"></script>
+  <script src="js/unlocks.js?v=534"></script>
+  <script src="js/progress.js?v=534"></script>
+  <script src="js/music/output.js?v=534"></script>
+  <script src="js/music/mixes.js?v=534"></script>
+  <script src="js/sfx.js?v=534"></script>
+  <script src="js/music/music-bytefall-theme.js?v=534"></script>
+  <script src="js/music/music-sleep-mode.js?v=534"></script>
+  <script src="js/music/music-brute-force.js?v=534"></script>
+  <script src="js/music/music-deep-web.js?v=534"></script>
+  <script src="js/music/music-zero-day.js?v=534"></script>
+  <script src="js/music/music-system-restore.js?v=534"></script>
+  <script src="js/music/music-night-drive.js?v=534"></script>
+  <script src="js/music/music-standby-mode.js?v=534"></script>
+  <script src="js/music/music-core-dump.js?v=534"></script>
+  <script src="js/music/music-handshake.js?v=534"></script>
+  <script src="js/music/music-stack-overflow.js?v=534"></script>
+  <script src="js/music/music-generated.js?v=534"></script>
+  <script src="js/music/music.js?v=534"></script>
+  <script src="js/data/puzzles.js?v=534"></script>
+  <script src="js/data/daily-puzzles.js?v=534"></script>
+  <script src="js/cpu.js?v=534"></script>
+  <script src="js/fx.js?v=534"></script>
+  <script src="js/viz.js?v=534"></script>
+  <script src="js/pixel.js?v=534"></script>
+  <script src="js/minibot.js?v=534"></script>
+  <script src="js/seasons.js?v=534"></script>
+  <script src="js/bigart.js?v=534"></script>
+  <script src="js/scenes.js?v=534"></script>
+  <script src="js/weather.js?v=534"></script>
+  <script src="js/visitors.js?v=534"></script>
+  <script src="js/data/bot-anims.js?v=534"></script>
+<script src="js/wanderers.js?v=534"></script>
+  <script src="js/tutorial.js?v=534"></script>
+  <script src="js/puzzle-sim.js?v=534"></script>
+  <script src="js/led-banner.js?v=534"></script>
+  <script src="js/infections.js?v=534"></script>
+  <script src="js/pixel-ui.js?v=534"></script>
+  <script src="js/script.js?v=534"></script>
+  <script src="js/grid-bg.js?v=534"></script>
+  <script src="js/lights.js?v=534"></script>
+  <script src="js/inf-test.js?v=534"></script>
+  <script src="js/extsource.js?v=534"></script>
+  <script src="js/player.js?v=534"></script>
+  <script src="js/billing.js?v=534"></script>
+  <script src="js/store.js?v=534"></script>
+  <script src="js/ads-config.js?v=534"></script>
+  <script src="js/ads.js?v=534"></script>
+  <script src="js/start.js?v=534"></script>
+  <script src="js/place.js?v=534"></script>
+  <script src="js/saver.js?v=534"></script>
 </body>
 </html>

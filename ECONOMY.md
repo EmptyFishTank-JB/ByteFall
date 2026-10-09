@@ -9,7 +9,7 @@ together.
 
 | Resource | Icon | Rarity | Earned by | Rate |
 |---|---|---|---|---|
-| **KEYS** | key, the theme's accent | money | bits decrypted (any way), chains of 5 and 7, levels, achievements, first puzzle solves, the day's first daily game, the DAILY DROP | 1 per 10 bits; +2 at a 5-link chain, +5 at 7; 10 a level; 10 an achievement; 5 the first daily game; 25 the DAILY DROP; first puzzle solves 2 / 4 / 6 (EASY / NORMAL / HARD) |
+| **KEYS** | key, the theme's accent | money | bits decrypted (any way), chains of 5 and 7, levels, achievements, first puzzle solves, the day's first daily game, the DAILY DROP, CLASSIC's ENCRYPTION STRENGTH cracks | 1 per 10 bits; +2 at a 5-link chain, +5 at 7; 10 a level; 10 an achievement; 5 the first daily game; 25 the DAILY DROP; first puzzle solves 2 / 4 / 6 (EASY / NORMAL / HARD); a crack pays its target / 150 (NORMAL: 128-BIT at 1,500 pays 10, 192-BIT at 2,250 pays 15, 256-BIT at 3,000 pays 20, and on) |
 | **BUGS** | bug with two antennae, roach brown `#b5824a` | common | bits decrypted **down a column** | 1 per 5 |
 | **CACHE** | stacked disks, light gray `#c8ccd0` | common | bits decrypted **across a row** | 1 per 5 |
 | **CRYPTO** | the game's coin: a hexagon with a C struck through twice, Bitcoin orange `#f7931a` | common | **chain links** from the 3rd on | 1 per link |
@@ -65,7 +65,7 @@ So a game pays for about two tier 1 exploits, or one tier 2, and a tier 3 takes 
 | STORE, STARTER EXPLOITS | an exploit to take into a game (below) | KEYS + resources, or 1 MASTER KEY |
 | STORE, BLACK BOXES | a random pull to take into a game (below) | KEYS + resources (no MASTER KEYS) |
 | BLACK MARKET (in a game) | an exploit or BLACK BOX, the STORE's price | the same |
-| PATCH SLOTS (in a game, Lv 8 and Lv 20) | HEAD START 8 KEYS + 4 CRYPTO, FIREWALL DELAY 10 + 5 CACHE, LOOKAHEAD 8 + 5 BUGS, OVERTIME 10 + 3 BUGS + 3 CACHE, ANTIVIRUS 10 + 4 CACHE + 1 ROOTKIT, RESTORE POINT 20 + 5 CRYPTO + 2 ROOTKITS (`PATCH_PRICES`) | KEYS + resources, applied at once |
+| PATCH SLOTS (in a game, Lv 5 and Lv 12) | HEAD START 8 KEYS + 4 CRYPTO, FIREWALL DELAY 10 + 5 CACHE, LOOKAHEAD 8 + 5 BUGS, OVERTIME 10 + 3 BUGS + 3 CACHE, ANTIVIRUS 10 + 4 CACHE + 1 ROOTKIT, RESTORE POINT 20 + 5 CRYPTO + 2 ROOTKITS (`PATCH_PRICES`) | KEYS + resources, applied at once |
 | EXPLOITS, to keep | an exploit from TROJAN on, once unlocked: three times its STARTER price in resources, no KEYS (BLACK BOX the exploit: 30 CRYPTO + 6 ROOTKITS); RNG, BITFLIP and BUFFER OVERFLOW are free (`ownPrice`, `OWN_TIMES`, `FREE_EXPLOITS`); kept till the next RANK UP | resources, once a rank |
 
 ## DECRYPTOR ranks
@@ -111,21 +111,21 @@ never an infection.
 
 | Tier | Exploit | Unlocks | KEYS | BUGS | CACHE | CRYPTO | ROOTKITS |
 |---|---|---|---|---|---|---|---|
-| 1 | RNG | Lv 3 | 10 | 6 | 6 | | |
-| 1 | BITFLIP | Lv 8 | 10 | | 8 | 4 | |
-| 1 | BUFFER OVERFLOW | Lv 13 | 10 | 8 | | 4 | |
-| 1 | TROJAN | Lv 18 | 10 | 7 | | 5 | |
-| 1 | PIVOT | Lv 23 | 10 | 5 | 7 | | |
-| 2 | SWAP | Lv 26 | 20 | | 10 | 6 | 1 |
-| 2 | WORM VIRUS | Lv 29 | 20 | 12 | | 5 | 1 |
-| 2 | KEYLOGGER | Lv 35 | 20 | | 9 | 8 | 1 |
-| 2 | PACKET SNIFFER | Lv 41 | 20 | 8 | 8 | | 1 |
-| 2 | BACKDOOR | Lv 47 | 20 | 10 | | 6 | 1 |
-| 3 | LOGIC BOMB | Lv 53 | 30 | 14 | | 8 | 2 |
-| 3 | HONEYPOT | Lv 59 | 30 | | 12 | 10 | 2 |
-| 3 | DICTIONARY ATTACK | Lv 65 | 30 | 6 | 12 | | 3 |
-| 3 | RAINBOW TABLE | Lv 70 | 30 | | 8 | 12 | 2 |
-| — | BLACK BOX | Lv 76 | not sold | | | | |
+| 1 | RNG | Lv 1 | 10 | 6 | 6 | | |
+| 1 | BITFLIP | Lv 2 | 10 | | 8 | 4 | |
+| 1 | BUFFER OVERFLOW | Lv 4 | 10 | 8 | | 4 | |
+| 1 | TROJAN | Lv 7 | 10 | 7 | | 5 | |
+| 1 | PIVOT | Lv 10 | 10 | 5 | 7 | | |
+| 2 | SWAP | Lv 13 | 20 | | 10 | 6 | 1 |
+| 2 | WORM VIRUS | Lv 16 | 20 | 12 | | 5 | 1 |
+| 2 | KEYLOGGER | Lv 19 | 20 | | 9 | 8 | 1 |
+| 2 | PACKET SNIFFER | Lv 22 | 20 | 8 | 8 | | 1 |
+| 2 | BACKDOOR | Lv 26 | 20 | 10 | | 6 | 1 |
+| 3 | LOGIC BOMB | Lv 30 | 30 | 14 | | 8 | 2 |
+| 3 | HONEYPOT | Lv 34 | 30 | | 12 | 10 | 2 |
+| 3 | DICTIONARY ATTACK | Lv 38 | 30 | 6 | 12 | | 3 |
+| 3 | RAINBOW TABLE | Lv 43 | 30 | | 8 | 12 | 2 |
+| — | BLACK BOX | Lv 50 | not sold | | | | |
 
 Only exploits unlocked by level can be bought (in the STORE and on the BLACK MARKET).
 

@@ -22,25 +22,17 @@ const Store = (() => {
   const link = document.getElementById('store-shortcut');
   let msgTimer = 0;
 
-  // TABS: one section at a time (DAILY, PATCHES, STARTERS, BOXES, SUPPORT), as RECORDS' tabs. The
-  // last one picked opens next time, unless the DAILY DROP waits
-  const STAB_KEY = 'bytefall-store-tab';
-  const tabs = [...document.querySelectorAll('#store-tabs [data-stab]')];
-  let stab = 'daily';
-  try { stab = localStorage.getItem(STAB_KEY) || 'daily'; } catch (e) {}
-  function showTab(name, keep = true) {
-    if (!tabs.some((t) => t.dataset.stab === name)) name = 'daily';
-    stab = name;
-    if (keep) try { localStorage.setItem(STAB_KEY, name); } catch (e) {}
-    tabs.forEach((t) => t.setAttribute('aria-selected', String(t.dataset.stab === name)));
-    menu.querySelectorAll('.store-tab').forEach((pane) => { pane.hidden = pane.dataset.stab !== name; });
+  // (a section brought into view at the top of the STORE's list: patches, starters, boxes)
+  function show(sec) {
     const scroll = menu.querySelector('.store-scroll');
-    if (scroll) scroll.scrollTop = 0;
+    const head = sec && menu.querySelector(`.store-sub[data-sec="${sec}"]`);
+    if (!scroll) return;
+    requestAnimationFrame(() => {
+      scroll.scrollTop = head ? Math.max(0, scroll.scrollTop + head.getBoundingClientRect().top - scroll.getBoundingClientRect().top - 8) : 0;
+    });
   }
-  tabs.forEach((t) => t.addEventListener('click', () => { SFX.play('click'); showTab(t.dataset.stab); }));
   // PRICES TODAY: a gauge from LOW to HIGH and why (the day's sale or HIGH DEMAND, YOUR DEAL), and
-  // each tab its kind's change
-  const TAB_KIND = { patches: 'patch', starters: 'exploit', boxes: 'box' };
+  // each section's head its kind's change
   function renderPrices() {
     const p = Progress.pricing();
     const el = document.getElementById('price-gauge');
@@ -50,12 +42,11 @@ const Store = (() => {
     el.className = `price-gauge pos-${pos}`;
     el.innerHTML = `<span class="pg-row"><span class="pg-label">PRICES</span><span class="pg-end">LOW</span><span class="pg-bar">${[0, 1, 2, 3, 4].map((i) => `<i${i === pos ? ' class="on"' : ''}></i>`).join('')}</span><span class="pg-end">HIGH</span></span><span class="pg-why">${why}${rank}</span>`;
     el.setAttribute('aria-label', `Prices today: ${why}`);
-    for (const t of tabs) {
-      const kind = TAB_KIND[t.dataset.stab];
-      let tag = t.querySelector('.tab-tag');
-      const pct = kind ? Math.round((p.mults[kind] - 1) * 100) : 0;
+    for (const h of menu.querySelectorAll('.store-sub[data-kind]')) {
+      let tag = h.querySelector('.sub-tag');
+      const pct = Math.round((p.mults[h.dataset.kind] - 1) * 100);
       if (!pct) { if (tag) tag.remove(); continue; }
-      if (!tag) { tag = document.createElement('b'); tag.className = 'tab-tag'; t.appendChild(tag); }
+      if (!tag) { tag = document.createElement('b'); tag.className = 'sub-tag'; h.appendChild(tag); }
       tag.textContent = `${pct > 0 ? '+' : ''}${pct}%`;
       tag.classList.toggle('up', pct > 0);
     }
@@ -226,7 +217,6 @@ const Store = (() => {
       const pips = Array.from({ length: s.every }, (_, i) => `<i class="${i < s.into ? 'on' : ''}"></i>`).join('');
       document.getElementById('login-streak').innerHTML = `LOGIN STREAK <b>${s.days}</b> ${s.days === 1 ? 'DAY' : 'DAYS'} <span class="streak-pips">${pips}</span> ${s.paysToday ? `+${s.masters} MASTER KEYS TODAY` : s.into === s.every ? `+${s.masters} MASTER KEYS CLAIMED` : `${s.every - s.into} TO +${s.masters} MASTER KEYS`}`;
     }
-    document.getElementById('store-key-count').innerHTML = `${KEY_SVG} ${keys.toLocaleString()}`;
     for (const [id, item] of Object.entries(ITEMS)) {
       const owned = item.owned();
       const d = deal(id);
@@ -265,8 +255,8 @@ const Store = (() => {
   // REMOVE ADS (the other tabs): over to the STORE, the item lit up for a moment
   link.addEventListener('click', () => {
     showMenuPane('store');
-    showTab('support', false);
     const item = menu.querySelector('.store-item[data-item="remove-ads"]');
+    requestAnimationFrame(() => item.scrollIntoView({ block: 'center' }));
     item.classList.remove('flash');
     void item.offsetWidth;
     item.classList.add('flash');
@@ -301,7 +291,5 @@ const Store = (() => {
     }
   });
   render();
-  // (the STORE opened: the DAILY DROP's tab while one waits, else the last one picked)
-  const opened = () => showTab(window.dailyDrop && window.dailyDrop.claimable() ? 'daily' : stab, false);
-  return { render, showTab, opened };
+  return { render, show };
 })();

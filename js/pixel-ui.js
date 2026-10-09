@@ -276,15 +276,58 @@ const PixelUi = (() => {
   // TWO-STEP CORNERS: every rounded box's corners stepped twice, 2px a step (style.css keeps
   // corner-shape: notch at 4px on them, which clips the background and the glow to the steps' outer
   // edge). A box with a border has it drawn as a small picture (border-image) of the stepped outline
-  // in its own border color, width and style (dashes on a dashed one); one with a solid fill gets
-  // the step's inner pixel filled too. A box with no border is clipped to the steps (px-clip).
-  // Round things (a % radius: the play buttons, the sale badge) keep their own shape. Boxes are done
-  // as they come, and again when a class changes on them or around them (a lit button, a new theme)
+  // in its own border color, width and style (dashes on a dashed one), with its fill's color in each
+  // step's inner corner (the notch cuts the fill square there; the steps don't). A box with no border
+  // is clipped to the steps (px-clip). Round things (a % radius: the play buttons, the sale badge)
+  // keep their own shape. Boxes are done as they come, and again when a class or a state changes on
+  // them or around them (a lit button, a press, a new theme), and when their colors finish fading
   const STEP = 2; // (px a step; two steps)
   const FRAME_SKIP = '.start-walkers, .game-walkers, .page-bg, .crt-fx, .card-lights, svg, canvas, .walker, .visitor';
   const frameCache = new Map();
   const framed = new Set();
-  const alphaOf = (c) => { const m = c.match(/rgba?\(([^)]+)\)/); if (!m) return c === 'transparent' ? 0 : 1; const p = m[1].split(/[\s,/]+/).filter(Boolean); return p.length > 3 ? parseFloat(p[3]) : 1; };
+  // (any CSS color as [r, g, b, a]: drawn on a pixel and read back)
+  const colorCache = new Map();
+  let colorCtx = null;
+  function rgbaOf(c) {
+    if (colorCache.has(c)) return colorCache.get(c);
+    if (!colorCtx) { const cv = document.createElement('canvas'); cv.width = cv.height = 1; colorCtx = cv.getContext('2d', { willReadFrequently: true }); }
+    colorCtx.clearRect(0, 0, 1, 1);
+    colorCtx.fillStyle = '#000';
+    colorCtx.fillStyle = c;
+    colorCtx.fillRect(0, 0, 1, 1);
+    const d = colorCtx.getImageData(0, 0, 1, 1).data;
+    const v = [d[0], d[1], d[2], d[3] / 255];
+    colorCache.set(c, v);
+    return v;
+  }
+  const alphaOf = (c) => rgbaOf(c)[3];
+  // (one color over another)
+  const over = (a, b) => {
+    const o = a[3] + b[3] * (1 - a[3]);
+    if (!o) return [0, 0, 0, 0];
+    return [0, 1, 2].map((i) => (a[i] * a[3] + b[i] * b[3] * (1 - a[3])) / o).concat(o);
+  };
+  const css = (v) => `rgba(${v.slice(0, 3).map(Math.round).join(',')},${+v[3].toFixed(3)})`;
+  const COLOR_RE = /(?:rgba?|color|hsla?|oklch|oklab|lab|lch)\([^()]*\)|#[0-9a-f]{3,8}\b|\btransparent\b/gi;
+  // (a box's fill at its top corners and at its bottom ones: its color, and its gradients' first and
+  // last colors over it (a gradient running across or round: its last); '' where it has none)
+  function fillColors(cs) {
+    let top = rgbaOf(cs.backgroundColor);
+    let bottom = top;
+    const layers = cs.backgroundImage === 'none' ? [] : cs.backgroundImage.split(/,(?![^(]*\))(?=\s*(?:none|url|[a-z-]*gradient))/i);
+    for (const layer of layers.reverse()) {
+      if (!/gradient\(/.test(layer)) continue;
+      const cols = layer.match(COLOR_RE);
+      if (!cols || !cols.length) continue;
+      const first = rgbaOf(cols[0]);
+      const last = rgbaOf(cols[cols.length - 1]);
+      const down = /^\s*linear-gradient\(\s*(?:rgb|color|hsl|okl|lab|lch|#|transparent|to bottom\b|180deg)/i.test(layer);
+      const up = /^\s*linear-gradient\(\s*(?:to top\b|0deg)/i.test(layer);
+      top = over(down ? first : last, top);
+      bottom = over(up ? first : last, bottom);
+    }
+    return { top: top[3] > 0.01 ? css(top) : '', bottom: bottom[3] > 0.01 ? css(bottom) : '' };
+  }
   // (a W x H box's outline with stepped corners: row r (STEP high) of each corner set in by ins[r]
   // steps, o in from the edge for a stroke's half)
   function steppedPath(W, H, p, ins, o) {
@@ -305,14 +348,20 @@ const PixelUi = (() => {
     return `M${pts.filter((q, i) => !i || q[0] !== pts[i - 1][0] || q[1] !== pts[i - 1][1]).map((q) => q.join(' ')).join('L')}Z`;
   }
   function frameImage(w, color, dashed, fill) {
-    const key = `${w}|${color}|${dashed}|${fill}`;
+    const key = `${w}|${color}|${dashed}|${fill.top}|${fill.bottom}`;
     if (frameCache.has(key)) return frameCache.get(key);
     const S = 2 * STEP + w + 2; // (a corner's slice: the steps and the line, with room)
     const N = 3 * S;
     const d = steppedPath(N, N, STEP, [2, 1], w / 2);
     const dash = dashed ? ` stroke-dasharray="3 3"` : '';
+    // (each step's inner corner, where the notch has cut the fill away: the fill's color, under the line)
+    // (a pixel more, into the fill, so the two meet with no seam however the screen's pixels fall)
+    const a = STEP;
+    const z = N - 2 * STEP - 1;
+    const k = STEP + 1;
+    const corner = (c, ys) => (c ? ys.map((y) => `<rect x="${a}" y="${y}" width="${k}" height="${k}" fill="${c}"/><rect x="${z}" y="${y}" width="${k}" height="${k}" fill="${c}"/>`).join('') : '');
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${N}" height="${N}" viewBox="0 0 ${N} ${N}" shape-rendering="crispEdges">`
-      + (fill ? `<path d="${d}" fill="${fill}"/>` : '')
+      + corner(fill.top, [a]) + corner(fill.bottom, [z])
       + `<path d="${d}" fill="none" stroke="${color}" stroke-width="${w}"${dash}/></svg>`;
     const out = { url: `url("data:image/svg+xml,${encodeURIComponent(svg)}")`, S };
     frameCache.set(key, out);
@@ -342,9 +391,7 @@ const PixelUi = (() => {
       else framed.delete(el);
       return;
     }
-    const bg = cs.backgroundColor;
-    const fill = w === 1 && alphaOf(bg) === 1 && cs.backgroundImage === 'none' ? bg : ''; // (a solid fill: the step's inner pixel too)
-    const img = frameImage(Math.round(w), color, cs.borderTopStyle === 'dashed' || cs.borderTopStyle === 'dotted', fill);
+    const img = frameImage(Math.max(1, Math.round(w)), color, cs.borderTopStyle === 'dashed' || cs.borderTopStyle === 'dotted', fillColors(cs));
     el.style.setProperty('border-image', `${img.url} ${img.S} / ${img.S}px / 0 ${cs.borderTopStyle === 'solid' ? 'stretch' : 'round'}`);
     el.classList.add('px-frame');
     el.dataset.pxFrame = '1';
@@ -376,12 +423,30 @@ const PixelUi = (() => {
     for (const m of list) {
       if (m.type === 'attributes') {
         const el = m.target;
-        if (ourOnly(m.oldValue) === ourOnly(el.getAttribute('class'))) continue;
+        if (m.attributeName === 'class' && ourOnly(m.oldValue) === ourOnly(el.getAttribute('class'))) continue;
         if (el === document.body || el === root || el.getElementsByTagName('*').length > 200) { frame(el); continue; }
         frameLater(el);
       } else m.addedNodes.forEach((n) => { if (n.nodeType === 1) frameLater(n); });
     }
   });
+  // (a state the class doesn't show: hovered, pressed, focused, or colors done fading; the boxes it's
+  // in done again, next frame)
+  const STATE_EVENTS = ['pointerover', 'pointerout', 'pointerdown', 'pointerup', 'pointercancel', 'focusin', 'focusout'];
+  const stateQueue = new Set();
+  let stateQueued = false;
+  const stateFlush = () => {
+    stateQueued = false;
+    const els = [...stateQueue];
+    stateQueue.clear();
+    if (on()) els.forEach((el) => el.isConnected && frame(el));
+  };
+  function stateChanged(t) {
+    if (!on() || !framed.size) return;
+    for (let el = t instanceof Element ? t : null, n = 0; el && n < 6; el = el.parentElement, n++) if (framed.has(el)) stateQueue.add(el);
+    if (stateQueue.size && !stateQueued) { stateQueued = true; requestAnimationFrame(stateFlush); }
+  }
+  STATE_EVENTS.forEach((ev) => document.addEventListener(ev, (e) => stateChanged(e.target), { passive: true, capture: true }));
+  document.addEventListener('transitionend', (e) => { if (/color|background|border|^all$/.test(e.propertyName) && framed.has(e.target)) stateChanged(e.target); }, { passive: true });
   function frameAll() {
     framed.forEach((el) => unframe(el));
     if (on()) frameLater(document.body);
@@ -400,7 +465,7 @@ const PixelUi = (() => {
     frameAll();
   }
   watcher.observe(document.body, { childList: true, subtree: true });
-  frameWatcher.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'], attributeOldValue: true });
+  frameWatcher.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'disabled', 'aria-pressed', 'aria-selected', 'aria-checked', 'aria-disabled'], attributeOldValue: true });
   if (on()) refresh();
   return { on, set, refresh };
 })();

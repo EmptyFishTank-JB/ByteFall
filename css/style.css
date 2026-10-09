@@ -19,6 +19,9 @@
 /* FONTS: COURIER (the default) and five unlockable fonts, bundled in assets/fonts/ (SIL OFL) and
    set up by js/fonts.js, which fits each to Courier's line height and capital height so switching
    fonts moves and resizes nothing. [data-font] on <html> picks one; everything reads var(--font). */
+/* NO SCROLLBARS anywhere: menus, cards and lists still scroll (touch, wheel, keys), with no bar showing */
+* { scrollbar-width: none; }
+*::-webkit-scrollbar { display: none; }
 /* The smallest a HUD label may shrink to and stay readable (script.js's fitStatValues; past it,
    labels wrap) */
 :root { --label-min: 9; }
@@ -1463,8 +1466,6 @@ body.vs-mode header #mode-info { display: none; }
   z-index: 20;
   max-height: calc(100% - 56px); /* stays inside the game panel (it's absolute within .crt) */
   overscroll-behavior: contain;
-  scrollbar-width: thin;
-  scrollbar-color: var(--fg-dim) transparent;
   overflow-x: hidden;
   overflow-y: auto;
   padding: 10px 12px;
@@ -1614,8 +1615,6 @@ body.vs-mode header #mode-info { display: none; }
   max-width: calc(100% - 24px);
   max-height: calc(100% - 56px); /* stays inside the game panel (it's absolute within .crt) */
   overscroll-behavior: contain;
-  scrollbar-width: thin;
-  scrollbar-color: var(--fg-dim) transparent;
   overflow-x: hidden;
   overflow-y: auto;
   padding: 10px 12px;
@@ -1852,11 +1851,6 @@ header { margin-bottom: 6px; }
 .message { margin-top: 4px; }
 .controls { margin-top: 6px; }
 .free-exploit-btn { padding-top: 6px; padding-bottom: 6px; }
-/* Themed scrollbars for the settings and RECORDS panels (the side columns get theirs on desktop) */
-.settings::-webkit-scrollbar,
-.records::-webkit-scrollbar { width: 6px; }
-.settings::-webkit-scrollbar-thumb,
-.records::-webkit-scrollbar-thumb { background: var(--fg-dim); border-radius: 3px; }
 
 /* Inline SVG icons (lock, bolt, arrows) sized to the text around them */
 .ico { display: inline-block; width: 1em; height: 1em; vertical-align: -0.14em; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
@@ -2226,8 +2220,7 @@ body.player-open { overflow: hidden; }
 }
 /* (its head as the game's cards': BACK top left, the title beside it) */
 .mp-head { margin-bottom: 0; flex: none; }
-.mp-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 14px; padding-bottom: 20px; scrollbar-width: none; } /* (it scrolls, with no bar) */
-.mp-scroll::-webkit-scrollbar { display: none; }
+.mp-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 14px; padding-bottom: 20px; }
 .mp-title { font-size: 13px; letter-spacing: 2px; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
 @media (hover: hover) { .mp-close:hover { background: rgba(var(--fg-rgb), 0.12); } }
 .mp-viz {
@@ -3014,17 +3007,14 @@ body:not(.vs-mode) .hud-bits #next-stat .bit-sq { width: 20px; height: 20px; mar
 .card-back, :is(.records, .settings) .card-back { display: inline-flex; width: auto; flex: none; white-space: nowrap; text-align: center; }
 /* The dividers between the settings' sections: dashed in the accent color, like the ===== over the footer */
 .settings-section, .settings-options { border-top-color: rgba(var(--accent-rgb), 0.7); }
-/* RULES & RECORDS: the card stays put and each tab's dashed box scrolls inside its border (its
-   scrollbar inside it too); RECORDS' own tabs stick to the box's top */
+/* RULES & RECORDS: the card stays put and each tab's dashed box scrolls inside its border;
+   RECORDS' own tabs stick to the box's top */
 .records:not([hidden]) { display: flex; flex-direction: column; overflow: hidden; padding-bottom: 14px; }
 .records .card-top, .records .store-shortcut { flex: none; }
 .records .menu-pane:not([hidden]) { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
 .records .menu-pane > .panel {
   flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
-  scrollbar-width: thin; scrollbar-color: var(--fg-dim) transparent;
 }
-.records .menu-pane > .panel::-webkit-scrollbar { width: 6px; }
-.records .menu-pane > .panel::-webkit-scrollbar-thumb { background: var(--fg-dim); border-radius: 3px; }
 .records .records-tabs { top: -14px; }
 /* Section titles in the accent color, like the cards' titles (// SETTINGS) and the RECORDS categories */
 .panel h2, .settings-title { color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
@@ -3359,7 +3349,7 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 .store-terms .shop-cost { min-width: 0; font-size: 14.5px; letter-spacing: 0.5px; gap: 2px; }
 .store-terms .shop-cost .key-ico { width: 15px; height: 15px; }
 .store-btns .store-buy { padding: 6px 10px; letter-spacing: 1px; }
-/* THE STORE: its top (title, KEYS, resources) stays put, its body scrolls under it, the scrollbar inside the
+/* THE STORE: its top (title, KEYS, resources) stays put, its body scrolls under it inside the
    neon border. The border's glow is kept within the card's padding (the card clips what spills past it) */
 .records .menu-pane > .panel.panel-store { display: flex; flex-direction: column; overflow: hidden; padding-bottom: 0;
   box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.6), 0 0 12px rgba(var(--accent-rgb), 0.25), inset 0 0 12px rgba(var(--accent-rgb), 0.18); animation: none; }
@@ -3392,10 +3382,7 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 .res-info-body p:first-child { color: var(--fg); }
 .store-sub .store-info { font-size: 14px; margin-left: 4px; }
 .store-sub .store-info svg { width: 8px; height: 13px; }
-.store-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; margin-right: -8px; padding: 0 8px 14px 0;
-  scrollbar-width: thin; scrollbar-color: var(--fg-dim) transparent; }
-.store-scroll::-webkit-scrollbar { width: 6px; }
-.store-scroll::-webkit-scrollbar-thumb { background: var(--fg-dim); border-radius: 3px; }
+.store-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; padding: 0 0 14px; }
 .records .menu-pane[data-pane="store"]:not([hidden]) { padding: 12px 0 4px; }
 
 /* BUY with its KEYS cost under it (the STORE): the word over the cost, red when you're short */
@@ -3952,13 +3939,6 @@ html, body { overflow-x: clip; }
 /* (December's board in their warm light: a glow off the sides, the empty cells catching it) */
 [data-theme="season-winter"]:not(.low-fx) .board { box-shadow: inset 14px 0 22px -12px rgba(255, 176, 90, 0.28), inset -14px 0 22px -12px rgba(255, 176, 90, 0.28), inset 0 0 30px rgba(255, 190, 120, 0.06); }
 [data-theme="season-winter"]:not(.low-fx) .board .cell:empty:not(.overflow) { box-shadow: inset 0 0 5px rgba(255, 190, 110, 0.14); border-color: rgba(255, 196, 130, 0.16); }
-/* (December's scroll bars: candy canes) */
-/* (the standard scrollbar-color would switch off the striped ::-webkit-scrollbar in Chrome: auto there; Firefox gets a red bar) */
-[data-theme="season-winter"] * { scrollbar-color: auto !important; scrollbar-width: auto !important; }
-@supports not selector(::-webkit-scrollbar) { [data-theme="season-winter"] * { scrollbar-color: #e8423a rgba(255, 255, 255, 0.06) !important; scrollbar-width: thin !important; } }
-[data-theme="season-winter"] *::-webkit-scrollbar, [data-theme="season-winter"]::-webkit-scrollbar { width: 8px; height: 8px; }
-[data-theme="season-winter"] *::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.04); border-radius: 4px; }
-[data-theme="season-winter"] *::-webkit-scrollbar-thumb { border-radius: 4px; background: repeating-linear-gradient(45deg, #e8423a 0 5px, #fff6f0 5px 10px); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15); }
 /* OCTOBER's spooky touch: the title flickering now and then */
 [data-theme="season-halloween"] :is(header h1, .home-head h1, .card-brand) { animation: spooky-flicker 9s steps(1) infinite; }
 @keyframes spooky-flicker { 0%, 90% { opacity: 1; } 91% { opacity: 0.35; } 92% { opacity: 1; } 95% { opacity: 0.6; } 96%, 100% { opacity: 1; } }
@@ -4192,10 +4172,7 @@ html, body { overflow-x: clip; }
 .hacks-top h2 { margin-top: 0; }
 .hacks-top .slot-info { margin-bottom: 0; }
 .hacks-top::after { content: "================================================================================"; display: block; margin-top: 8px; overflow: hidden; white-space: nowrap; font-size: 14.5px; line-height: 15px; letter-spacing: 2px; color: var(--accent); opacity: 0.7; }
-.hacks-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; margin-right: -8px; padding: 10px 8px 14px 0;
-  scrollbar-width: thin; scrollbar-color: var(--fg-dim) transparent; }
-.hacks-scroll::-webkit-scrollbar { width: 6px; }
-.hacks-scroll::-webkit-scrollbar-thumb { background: var(--fg-dim); border-radius: 3px; }
+.hacks-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; padding: 10px 0 14px; }
 .hacks-scroll .store-rule { margin: 12px 0 2px; }
 .hack-item.equipped { background: linear-gradient(rgba(var(--fg-rgb), 0.13), rgba(var(--fg-rgb), 0.05)), var(--panel); box-shadow: inset 0 0 10px rgba(var(--fg-rgb), 0.12), 0 0 6px rgba(var(--fg-rgb), 0.25); }
 .hack-item.equipped.held { box-shadow: inset 0 0 10px rgba(var(--fg-rgb), 0.12), 0 0 10px rgba(var(--accent-rgb), 0.3); }
@@ -4206,13 +4183,11 @@ html, body { overflow-x: clip; }
 .tier-note { margin: 0 0 4px; font-size: 13px; color: var(--fg-dim); }
 
 /* SETTINGS, as RULES & RECORDS, EXPLOITS and the STORE: the card stays put (BACK and its title), its
-   options in a dashed box that scrolls inside its border, the scrollbar inside it too */
+   options in a dashed box that scrolls inside its border */
 .settings:not([hidden]) { display: flex; flex-direction: column; overflow: hidden; padding-bottom: 14px; }
 .settings .card-head { flex: none; position: static; }
 .settings-panel { flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
-  font-size: inherit; line-height: inherit; color: inherit; padding: 4px 12px 14px; scrollbar-width: thin; scrollbar-color: var(--fg-dim) transparent; }
-.settings-panel::-webkit-scrollbar { width: 6px; }
-.settings-panel::-webkit-scrollbar-thumb { background: var(--fg-dim); border-radius: 3px; }
+  font-size: inherit; line-height: inherit; color: inherit; padding: 4px 12px 14px; }
 
 /* SETTINGS on the menus' type scale (as the STORE, EXPLOITS and RULES): section heads 15.5px, their
    sub-heads and notes 13px, buttons 12px, small tags 11.5px; and its sections parted by ===== lines,
@@ -4340,9 +4315,8 @@ header h1, .card-brand { font-size: 19.2px; letter-spacing: 0.1em; }
 .home .daily-cards:not([hidden]) {
   display: flex; gap: 8px; width: calc(100% + 24px); margin: -6px -12px; padding: 6px calc(14cqw + 12px);
   overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; overscroll-behavior-x: contain;
-  scrollbar-width: none; position: relative;
+  position: relative;
 }
-.home .daily-cards::-webkit-scrollbar { display: none; }
 .home .daily-cards button { flex: 0 0 72cqw; scroll-snap-align: center; scroll-snap-stop: always; opacity: 0.6; transition: opacity 0.25s ease-out, border-color 0.25s, background-color 0.25s, box-shadow 0.25s; }
 .home .daily-cards button.focus { opacity: 1; }
 .home .mode-info { white-space: pre-line; } /* (DAILY's: its streak and countdown on a line of their own) */
@@ -4438,6 +4412,8 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 /* (two-step corners, pixel-ui.js: a framed box's corners notched to the steps' outer edge, its border
    drawn stepped as a picture; a borderless one clipped to the steps) */
 html.px-ui .px-frame { border-radius: 4px !important; corner-shape: notch; }
+/* (the overlays laid over a whole framed box, its scanlines or hatching: clipped to the same steps) */
+html.px-ui :is(.panel.panel-store, .shop-box, .side-slot, #exploit-btn).px-frame::before { border-radius: 0 !important; clip-path: polygon(4px 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px), 0 4px, 2px 4px, 2px 2px, 4px 2px); }
 html.px-ui .px-clip { clip-path: polygon(4px 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px), 0 4px, 2px 4px, 2px 2px, 4px 2px); }
 html.px-ui {
   --icon-lock: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 12' shape-rendering='crispEdges'><path d='M3 1h4v1h1v3H7V2H3v3H2V2h1zM1 5h8v6H1zM4 7v2h2V7z' fill='black' fill-rule='evenodd'/></svg>");
@@ -4463,24 +4439,34 @@ html.px-ui {
 .hist-earned { display: flex; flex-wrap: wrap; gap: 2px 10px; margin-top: 4px; font-size: 13px; }
 .hist-patched { margin-top: 4px; font-size: 11.5px; color: var(--fg-dim); letter-spacing: 1px; }
 
-/* THE STORE's top: KEYS, the resources (tighter), PRICES TODAY and the tabs; the message line takes
-   room only while it says something */
-.store-top .wallet { gap: 2px 9px; margin: 0; font-size: 12px; letter-spacing: 0.5px; }
-.panel-store .store-keys { margin-bottom: 4px; }
-.price-gauge { display: flex; flex-direction: column; align-items: center; gap: 2px; margin: 6px 0 8px; }
-.pg-row { display: flex; align-items: center; gap: 6px; font-size: 10.5px; letter-spacing: 1px; color: var(--fg-dim); }
+/* THE STORE's top, 8px between each: the title, YOUR RESOURCES, the resources on one line (KEYS
+   first), PRICES TODAY, then the ===== line; the message line takes room only while it says something */
+.store-top h2 { margin: 0; }
+.panel-store .store-keys { display: block; margin: var(--gap) 0 0; font-size: 13px; text-align: center; }
+.store-top .wallet { flex-wrap: nowrap; gap: 0 9px; margin: var(--gap) 0 0; font-size: 13px; letter-spacing: 0.5px; white-space: nowrap; }
+.store-top .wallet .key-ico { color: var(--accent); }
+.price-gauge { display: flex; flex-direction: column; align-items: center; gap: 2px; margin: var(--gap) 0 0; }
+.pg-row { display: flex; align-items: center; gap: 6px; font-size: 11.5px; letter-spacing: 1px; color: var(--fg-dim); }
 .pg-label { color: var(--fg); margin-right: 2px; }
 .pg-bar { display: flex; gap: 2px; }
 .pg-bar i { width: 14px; height: 6px; background: rgba(var(--fg-rgb), 0.15); }
 .price-gauge.pos-0 .pg-bar i.on, .price-gauge.pos-1 .pg-bar i.on { background: var(--fg); box-shadow: 0 0 5px rgba(var(--fg-rgb), 0.8); }
 .price-gauge.pos-2 .pg-bar i.on { background: var(--fg-dim); }
 .price-gauge.pos-3 .pg-bar i.on, .price-gauge.pos-4 .pg-bar i.on { background: var(--danger); box-shadow: 0 0 5px var(--danger); }
-.pg-why { font-size: 10.5px; letter-spacing: 1px; color: var(--accent); text-align: center; }
+.pg-why { font-size: 11.5px; letter-spacing: 1px; color: var(--accent); text-align: center; }
 .price-gauge.pos-2 .pg-why { color: var(--fg-dim); }
-.store-tabs { margin-bottom: 0; }
-.store-tabs button { position: relative; padding: 6px 1px; font-size: 10.5px; letter-spacing: 0.5px; }
-.store-tabs .tab-tag { position: absolute; top: -7px; right: -3px; padding: 0 3px; font-size: 9px; font-weight: bold; letter-spacing: 0; line-height: 12px; color: var(--bg-solid); background: var(--fg); border-radius: 3px; }
-.store-tabs .tab-tag.up { background: var(--danger); }
-.store-top .store-msg { min-height: 0; margin: 6px 0 0 !important; font-size: 13px; }
+.store-top .store-msg { min-height: 0; margin: var(--gap) 0 0 !important; font-size: 13px; }
 .store-top .store-msg:empty { display: none; }
-.store-tab > .store-sub:first-child, .store-tab > :first-child + .store-sub { margin-top: 4px; }
+/* (a section's sale or markup today, by its head: green off, red up) */
+.store-sub .sub-tag { display: inline-block; vertical-align: middle; margin-left: 8px; padding: 0 4px; font-size: 11.5px; font-weight: normal; letter-spacing: 0; line-height: 15px; color: var(--bg-solid); background: var(--fg); border-radius: 3px; text-shadow: none; }
+.store-sub .sub-tag.up { background: var(--danger); }
+
+/* CLASSIC's ENCRYPTION STRENGTH: a thin bar along the SCORE box's foot, filling toward this game's key
+   (lit near it), and the card the game holds on once it's cracked, laid out as PAUSE's */
+.goal-bar { position: absolute; left: 6px; right: 6px; bottom: 3px; height: 2px; background: rgba(var(--fg-rgb), 0.15); pointer-events: none; }
+.goal-bar[hidden] { display: none; }
+.goal-bar b { display: block; height: 100%; width: 0; background: var(--fg-dim); transition: width 0.3s ease-out; }
+.goal-bar.near b { background: var(--accent); box-shadow: 0 0 5px rgba(var(--accent-rgb), 0.8); }
+.goal-card .goal-keys { margin: 0; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: 17px; letter-spacing: 2px; color: var(--accent); text-shadow: 0 0 8px rgba(var(--accent-rgb), 0.6); }
+.goal-card .goal-keys .key-ico { width: 17px; height: 17px; }
+.goal-card #goal-out { margin-top: 0; }

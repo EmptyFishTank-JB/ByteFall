@@ -141,12 +141,14 @@ const Progress = (() => {
     try { return Number(localStorage.getItem(key)) || 0; } catch (e) { return 0; }
   };
 
-  // The levels (within a rank) where everything unlocks, spread so each level or two brings
-  // something: exploits at EXPLOIT_LEVELS and slots at SLOT_LEVELS (below), and around them
-  // tracks 02-16, themes, fonts, Hard mode, and the VS CPU's levels and bots
+  // The levels (within a rank) where everything unlocks, by level alone (nothing here is bought):
+  // every exploit and every slot by Lv 50 (EXPLOIT_LEVELS, SLOT_LEVELS, SIDE_SLOT_LEVELS,
+  // PATCH_SLOT_LEVELS below), everything else by Lv 60: tracks 02-16, themes, fonts, Hard mode,
+  // and the VS CPU's levels and bots. Thick at first (something nearly every level to Lv 20), a
+  // few may share a level; Lv 61-80 is the run to RANK UP
   // Bots to play in VS (BOT is free): [id, name, level]
-  const BOT_ORDER = [['grifter', 'GRIFTER', 6], ['bunker', 'BUNKER', 17], ['glitch', 'GLITCH', 33]];
-  const TRACK_LEVELS = [2, 7, 11, 16, 20, 25, 31, 36, 40, 44, 50, 55, 62, 68, 77]; // tracks 02-16
+  const BOT_ORDER = [['grifter', 'GRIFTER', 5], ['bunker', 'BUNKER', 15], ['glitch', 'GLITCH', 28]];
+  const TRACK_LEVELS = [2, 5, 8, 11, 14, 18, 21, 25, 29, 33, 37, 42, 47, 53, 60]; // tracks 02-16
 
   const MAX_LEVEL = 80;
   // 100 bits (12.5 bytes) per level, from Lv 0. Lv 80 comes at 8,000 bits, when RANK UP opens:
@@ -162,16 +164,16 @@ const Progress = (() => {
   // Weakest first, each at its level in EXPLOIT_LEVELS
   const EXPLOIT_ORDER = ['rng', 'bitflip', 'buffer-overflow', 'trojan', 'pivot', 'swap', 'worm-virus', 'keylogger', 'packet-sniffer',
     'backdoor', 'logic-bomb', 'honeypot', 'dictionary-attack', 'rainbow-table', 'black-box'];
-  const EXPLOIT_LEVELS = [3, 8, 13, 18, 23, 26, 29, 35, 41, 47, 53, 59, 65, 70, 76];
+  const EXPLOIT_LEVELS = [1, 2, 4, 7, 10, 13, 16, 19, 22, 26, 30, 34, 38, 43, 50]; // (tier 1 by Lv 10, tier 2 by 26, tier 3 by 43)
   // Loadout slots: DECRYPTOR N keeps N (up to MAX_SLOTS); the rest unlock at SLOT_LEVELS in turn
   const MAX_SLOTS = 6;
-  const SLOT_LEVELS = [5, 15, 30, 45, 60, 75];
+  const SLOT_LEVELS = [1, 6, 14, 24, 36, 48];
   // The SIDE SLOTS either side of the exploit button (STARTER EXPLOITS and the BLACK MARKET): the
   // left one early, the right one a little later, so the market's prices are met a step at a time
-  const SIDE_SLOT_LEVELS = [4, 12];
+  const SIDE_SLOT_LEVELS = [3, 9];
   const sideSlots = () => (Unlocks.hasFullAccess() ? 2 : SIDE_SLOT_LEVELS.filter((l) => levelInfo().level >= l).length);
-  // The PATCH SLOTS at the row's two ends (patches bought in a game): the left at Lv 8, the right at Lv 20
-  const PATCH_SLOT_LEVELS = [8, 20];
+  // The PATCH SLOTS at the row's two ends (patches bought in a game): the left at Lv 5, the right at Lv 12
+  const PATCH_SLOT_LEVELS = [5, 12];
   const patchSlots = () => (Unlocks.hasFullAccess() ? 2 : PATCH_SLOT_LEVELS.filter((l) => levelInfo().level >= l).length);
   let exploitNames = {}; // id -> name, from script.js
 
@@ -208,19 +210,19 @@ const Progress = (() => {
   }
 
   // Themes: [id, name, level]
-  const THEME_ORDER = [['cipher', 'CIPHER', 4], ['amber-crt', 'AMBER CRT', 12], ['monochrome', 'MONOCHROME', 19], ['anaglyph', 'ANAGLYPH', 27],
-    ['synthwave', 'SYNTHWAVE', 34], ['dot-matrix', 'DOT MATRIX', 43], ['paper', 'PAPER', 52], ['glyph', 'GLYPH', 63], ['spectrum', 'SPECTRUM', 72]];
+  const THEME_ORDER = [['cipher', 'CIPHER', 3], ['amber-crt', 'AMBER CRT', 7], ['monochrome', 'MONOCHROME', 12], ['anaglyph', 'ANAGLYPH', 17],
+    ['synthwave', 'SYNTHWAVE', 23], ['dot-matrix', 'DOT MATRIX', 31], ['paper', 'PAPER', 39], ['glyph', 'GLYPH', 48], ['spectrum', 'SPECTRUM', 57]];
 
   // Pixel fonts (COURIER is free): [id, name, level]
-  const FONT_ORDER = [['share-tech', 'SHARE TECH MONO', 9], ['press-start', 'PRESS START', 21], ['bitcount', 'BITCOUNT', 39], ['bytesized', 'BYTESIZED', 57], ['orbitron', 'ORBITRON', 66]];
+  const FONT_ORDER = [['share-tech', 'SHARE TECH MONO', 6], ['press-start', 'PRESS START', 16], ['bitcount', 'BITCOUNT', 27], ['bytesized', 'BYTESIZED', 44], ['orbitron', 'ORBITRON', 55]];
 
   // group: where it shows in the UNLOCKS list; level: the level (within a rank) it unlocks at
   const atLevel = (level) => ({ need: `Reach Lv ${level}`, value: () => levelInfo().level, goal: level, level });
   const UNLOCKS = [
-    { id: 'mode-hard', group: 'MODE', name: 'HARD MODE', ...atLevel(10) },
+    { id: 'mode-hard', group: 'MODE', name: 'HARD MODE', ...atLevel(8) },
     // VS CPU: the harder CPU levels and more bots
-    { id: 'vs-hard', group: 'VS CPU', name: 'HARD CPU', ...atLevel(14) },
-    { id: 'vs-insane', group: 'VS CPU', name: 'INSANE CPU', ...atLevel(46) },
+    { id: 'vs-hard', group: 'VS CPU', name: 'HARD CPU', ...atLevel(11) },
+    { id: 'vs-insane', group: 'VS CPU', name: 'INSANE CPU', ...atLevel(40) },
     ...BOT_ORDER.map(([id, name, level]) => ({ id: `bot-${id}`, group: 'VS CPU', name: `BOT: ${name}`, ...atLevel(level) })),
     ...TRACK_LEVELS.map((level, i) => ({ id: `track-${i + 2}`, group: 'TRACKS', name: `TRACK ${String(i + 2).padStart(2, '0')}`, ...atLevel(level) })),
     ...SIDE_SLOT_LEVELS.map((level, i) => ({ id: `side-slot-${i + 1}`, group: 'SIDE SLOTS', name: `SIDE SLOT: ${i ? 'RIGHT' : 'LEFT'}`, ...atLevel(level) })),
@@ -1095,12 +1097,12 @@ const Progress = (() => {
     // GAME HISTORY (RECORDS' HISTORY): a finished game (not PUZZLE or the tutorial). legit: played
     // for real, not bits thrown in to lose fast (LEGIT: long enough, not dropped faster than a person
     // reads the board, some bits decrypted); only those count toward the prices (Pricing)
-    logGame({ label, score, result, patches = [] }) {
+    logGame({ label, score, result, patches = [], goal = '' }) {
       if (run.mode === 'tutorial' || run.mode === 'puzzle' || !run.started) return;
       const secs = Math.max(1, Math.round((Date.now() - (run.t0 || Date.now())) / 1000));
       const g = {
         t: Date.now(), mode: run.mode, label, diff: run.difficulty, daily: !!run.daily, score, drops: run.drops, secs,
-        bits: run.bits, chain: run.chain, keys: run.keys || 0, res: { ...(run.res || {}) }, patches, result,
+        bits: run.bits, chain: run.chain, keys: run.keys || 0, res: { ...(run.res || {}) }, patches, result, goal,
       };
       g.legit = g.drops >= LEGIT.drops && g.secs >= LEGIT.secs && g.drops / (g.secs / 60) <= LEGIT.perMin && g.bits >= g.drops * LEGIT.bitsPerDrop;
       d.history = [g, ...(d.history || [])].slice(0, HISTORY_MAX);
