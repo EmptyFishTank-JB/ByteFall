@@ -15,6 +15,8 @@ import android.util.Base64;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.webkit.JavascriptInterface;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.webkit.WebView;
 import androidx.activity.OnBackPressedCallback;
@@ -376,6 +378,7 @@ public class MainActivity extends BridgeActivity {
         web.getSettings().setMediaPlaybackRequiresUserGesture(false);
         web.getSettings().setTextZoom(100); // (the game's text sizes, not the phone's FONT SIZE)
         web.addJavascriptInterface(new AppBridge(), "BytefallAndroid");
+        getWindow().getDecorView().getViewTreeObserver().addOnGlobalLayoutListener(this::pinAdToPage);
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -384,6 +387,48 @@ public class MainActivity extends BridgeActivity {
                     (handled) -> { if (!"true".equals(handled)) moveTaskToBack(true); });
             }
         });
+    }
+
+    // THE BANNER AD, pinned level with the top of the page: on Android 15 and later the ads plugin
+    // moves it down by the status bar's room (though the game hides the bars, and the page already
+    // starts below that room), which put it over the game's title. After each layout its top is
+    // put back level with the page's, where the AD STRIP (js/ads.js, script.js) keeps room for it.
+    private int pinnedMargin = Integer.MIN_VALUE; // (the margin last set: still off after it, the layout's not one this can move, so it's left be)
+    private void pinAdToPage() {
+        View content = findViewById(android.R.id.content);
+        if (!(content instanceof ViewGroup)) return;
+        View box = adBox((ViewGroup) content);
+        if (box == null || !(box.getLayoutParams() instanceof ViewGroup.MarginLayoutParams)) return;
+        int[] at = new int[2];
+        int[] page = new int[2];
+        box.getLocationOnScreen(at);
+        bridge.getWebView().getLocationOnScreen(page);
+        int off = page[1] - at[1];
+        if (off == 0) return;
+        ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) box.getLayoutParams();
+        if (lp.topMargin == pinnedMargin) return;
+        lp.topMargin += off;
+        pinnedMargin = lp.topMargin;
+        box.setLayoutParams(lp); // (laid out again: level then, so this stops)
+    }
+    // (the layout the plugin puts the banner in: the parent of Google's AdView, found by its class
+    // name, as the ads library is the plugin's and not on this file's path)
+    private View adBox(ViewGroup group) {
+        for (int i = 0; i < group.getChildCount(); i++) {
+            View v = group.getChildAt(i);
+            if (isAdView(v)) return v.getParent() instanceof View ? (View) v.getParent() : null;
+            if (v instanceof ViewGroup && !(v instanceof WebView)) {
+                View found = adBox((ViewGroup) v);
+                if (found != null) return found;
+            }
+        }
+        return null;
+    }
+    private static boolean isAdView(View v) {
+        for (Class<?> c = v.getClass(); c != null; c = c.getSuperclass()) {
+            if ("com.google.android.gms.ads.BaseAdView".equals(c.getName())) return true;
+        }
+        return false;
     }
 
     @Override

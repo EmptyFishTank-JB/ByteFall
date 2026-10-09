@@ -463,8 +463,11 @@ buttons. Android draws it over the page, so its height, as it reports it, goes
 to the AD STRIP (`setAdStrip` in `js/script.js`, the same room the dev page's AD
 BANNER PREVIEW keeps), and the whole game fits below it; until a banner has
 loaded (or if one fails, tried again a minute later) the strip is 0, so there's
-never an empty gap. Buying either purchase takes the banner and the strip away
-at once. Where consent applies, SETTINGS gets an **// ADS** section with AD
+never an empty gap. On Android 15 and later the ads plugin moves the banner down
+by the status bar's room (though the game hides the bars and the page already
+starts below that room), which put it over the title; `MainActivity` puts its top
+back level with the page's after every layout, so it sits in the strip. Buying
+either purchase takes the banner and the strip away at once. Where consent applies, SETTINGS gets an **// ADS** section with AD
 PRIVACY OPTIONS, to change the choice made (Google requires it there). While
 `testing` is on, SETTINGS also gets **// TEST ADS**: a line on what the ads are
 doing (started or not, the consent answer, a banner showing, or Google's error
