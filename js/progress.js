@@ -697,6 +697,34 @@ const Progress = (() => {
     }
     return picks;
   }
+  // HOLIDAY SALES: the year's sale days, by the UTC date as every price day is, over whatever the
+  // day would be otherwise (a weekend's sale, HIGH DEMAND, a FLASH SALE). off: how much off; kind:
+  // one kind only (BLACK BOXES on Halloween), else everything
+  function holiday(day) {
+    const [y, m, n] = day.split('-').map(Number);
+    const md = `${m}-${n}`;
+    // (US Thanksgiving: November's 4th Thursday; BLACK FRIDAY the day after, its weekend, CYBER MONDAY)
+    const nov1 = new Date(Date.UTC(y, 10, 1)).getUTCDay();
+    const thanks = 1 + ((4 - nov1 + 7) % 7) + 21;
+    const fromFriday = Math.round((Date.UTC(y, m - 1, n) - Date.UTC(y, 10, thanks + 1)) / 86400000);
+    if (fromFriday === 0) return { label: 'BLACK FRIDAY', off: 0.35 };
+    if (fromFriday === 1 || fromFriday === 2) return { label: 'BLACK FRIDAY WEEKEND', off: 0.25 };
+    if (fromFriday === 3) return { label: 'CYBER MONDAY', off: 0.3 }; // (into December some years)
+    // (the 256th day of the year: September 13th, the 12th in a leap year)
+    const leap = (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+    if (m === 9 && n === (leap ? 12 : 13)) return { label: "PROGRAMMERS' DAY", off: 0.256 };
+    return {
+      '1-1': { label: 'NEW YEAR SALE', off: 0.25 },
+      '2-14': { label: "VALENTINE'S SALE", off: 0.2 },
+      '3-14': { label: 'PI DAY', off: 0.314 },
+      '10-31': { label: 'HALLOWEEN', off: 0.3, kind: 'box' },
+      '12-24': { label: 'HOLIDAY SALE', off: 0.25 },
+      '12-25': { label: 'HOLIDAY SALE', off: 0.25 },
+      '12-26': { label: 'HOLIDAY SALE', off: 0.25 },
+      '12-31': { label: 'NEW YEAR SALE', off: 0.25 },
+    }[md] || null;
+  }
+  const pct = (off) => `${+(off * 100).toFixed(1)}%`;
   let dayCache = null;
   function dayPricing() {
     const day = priceDay();
@@ -707,7 +735,13 @@ const Progress = (() => {
     let label = '';
     let note = '';
     let mood = 'normal';
-    if (w === 0 || w === 6) {
+    const hol = holiday(day);
+    if (hol) {
+      (hol.kind ? [hol.kind] : PRICE_KINDS).forEach((k) => { kinds[k] = 1 - hol.off; });
+      label = hol.label;
+      note = `${pct(hol.off)} OFF ${hol.kind ? KIND_NAMES[hol.kind] : 'EVERYTHING'}`;
+      mood = 'sale';
+    } else if (w === 0 || w === 6) {
       PRICE_KINDS.forEach((k) => { kinds[k] = 1 - WEEKEND_OFF; });
       label = 'WEEKEND SALE';
       note = `${Math.round(WEEKEND_OFF * 100)}% OFF EVERYTHING`;

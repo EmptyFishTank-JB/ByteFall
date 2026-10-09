@@ -90,6 +90,23 @@ from the UTC date as the dailies:
 | HIGH DEMAND | 3 weekdays a month, scattered, never within 3 days of each other (`HIGH_DAYS`) | 10 to 20% up on everything (`HIGH_UP`) |
 | any other day | | the base price |
 
+**HOLIDAY SALES** (`holiday` in `js/progress.js`) come first, over whatever the day would be otherwise
+(a weekend, HIGH DEMAND, a FLASH SALE):
+
+| Date (UTC) | Sale | Prices |
+|---|---|---|
+| Jan 1 and Dec 31 | NEW YEAR SALE | 25% off everything |
+| Feb 14 | VALENTINE'S SALE | 20% off everything |
+| Mar 14 | PI DAY | 31.4% off everything |
+| the year's 256th day (Sep 13, Sep 12 in a leap year) | PROGRAMMERS' DAY | 25.6% off everything |
+| Oct 31 | HALLOWEEN | 30% off BLACK BOXES |
+| the day after US Thanksgiving (November's 4th Thursday) | BLACK FRIDAY | 35% off everything |
+| the Saturday and Sunday after | BLACK FRIDAY WEEKEND | 25% off everything |
+| the Monday after | CYBER MONDAY | 30% off everything |
+| Dec 24, 25 and 26 | HOLIDAY SALE | 25% off everything |
+
+With YOUR DEAL on top, a price never goes under 60% of its base (or over 125%), before the rank's rise.
+
 **YOUR DEAL** only ever lowers prices: once 3 or more of the last 10 games (RECORDS' HISTORY) are
 real ones (`LEGIT`: 20+ drops, 45+ seconds, at most 40 drops a minute, a bit decrypted for every 4
 drops or better, so bits thrown in fast to lose don't count), what they earned on average (KEYS plus

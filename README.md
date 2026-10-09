@@ -207,7 +207,8 @@ patched game says so on its result screen (PATCHED: and their names).
 
 **THE STORE's top** (store.js), fixed over its list, 8px between each line: STORE [i], YOUR RESOURCES,
 the resources on one line with KEYS first, then **PRICES TODAY** (ECONOMY.md's Prices that move): a
-five-step gauge from LOW to HIGH (green when low, red when high) and why (WEEKEND SALE // 15% OFF
+five-step gauge from LOW to HIGH (green when low, red when high) and why (the year's sale days first: BLACK FRIDAY // 35% OFF EVERYTHING, CYBER MONDAY, the HOLIDAY SALE,
+NEW YEAR, PI DAY, PROGRAMMERS' DAY, HALLOWEEN's BLACK BOXES, ECONOMY.md; else WEEKEND SALE // 15% OFF
 EVERYTHING, FLASH SALE // 25% OFF BLACK BOXES, HIGH DEMAND // 10% UP ON EVERYTHING, YOUR DEAL // 10% OFF,
 or NORMAL PRICES TODAY; a DECRYPTOR rank adds (DECRYPTOR +10%): each rank earns 5% more XP, KEYS and
 resources and prices rise 5% to match, ECONOMY.md). What a buy says (BOUGHT // ...) shows under the gauge,
