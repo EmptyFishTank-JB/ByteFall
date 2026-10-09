@@ -1,66 +1,70 @@
-# ByteFall tutorial: every card, for review
+# ByteFall tutorial: the revised script, for review
 
-Every card of the TUTORIAL as the game shows it today (v537), in order: what it says (word for word),
-what it asks the player to do, what lights up, the board and bits it sets up, and after a drop what it
-says next and the points it shows. Recorded by playing the tutorial through, so the boards and points
-are the game's own. Revise anything in place (the words, the order, cards to add or cut) and hand it
-back; the **Notes** line on each card is yours.
+The TUTORIAL as I propose it, card by card. Each card is marked:
 
-The tutorial lives in `js/tutorial.js` (`STEPS`). It's reached from the main menu's TUTORIAL button and
-from RULES → TUTORIAL.
+- **KEPT**: as it is in the game today (v538), word for word.
+- **REWORDED**: the same card with new words; *Was* shows what changed.
+- **NEW**: a card the tutorial doesn't have yet; *To build* says what the game needs for it.
 
-## How every card works
+Nothing here is in the game yet: once you've gone over it (change anything: words, order, cards to add
+or cut, in place, using each card's **Notes** line), I'll make the tutorial match. The tutorial lives in
+`js/tutorial.js` (`STEPS`).
 
-- **The card**: a framed banner with `// TUTORIAL n / 26` (the welcome has no number) and **EXIT** in its
+## What changed, in short
+
+- **32 steps**, up from 26.
+- **New**: THE BOTTOM ROW (PATCH SLOTS and SIDE SLOTS), THE BLACK MARKET, the STORE (three cards:
+  open it, what's in it, close it) and ENCRYPTION STRENGTH.
+- **Reworded**: the welcome (the count), PAUSE (top right, not top left), RECORDS (HISTORY, levels,
+  RANK UP, NOTICES), EXPLOITS (the STORE aside dropped), the loadout (buying exploits to keep),
+  SETTINGS (PIXEL STYLE, CRT DISPLAY) and the last card (PATCHES and STARTERS on the main menu).
+- **Left to RULES on purpose** (too much for a first run): the other modes (DAILY, PUZZLE, BLITZ, VS,
+  ZEN), HARD's 8x8 board and BYTES, each INFECTION, the LOGIN STREAK, RESTORE POINT's free ad and the
+  STORE's price details.
+
+## How every card works (unchanged)
+
+- **The card**: a framed banner with `// TUTORIAL n / 32` (the welcome has no number) and **EXIT** in its
   top row, BOT's face beside the words, and its buttons under the frame.
-- **The words** type out quickly with a little blip of BOT's voice every other letter, pausing at
-  punctuation. A tap on the card shows the rest at once. The lesson never waits on the typing.
-- **EXIT** (every card): leaves the tutorial for the main menu.
-- **BACK** (every card after the welcome): after a drop, the same card again from its start; otherwise
-  the card before. The board, bits, score and chain go back to how they were.
-- **NEXT / BEGIN**: on cards that only explain. Cards that ask for a tap or a drop have no NEXT until
-  it's done; a drop's card shows NEXT once its explanation is up.
-- **A tap card** dims the whole screen a little except what to tap (and the card). What it's about pulses.
-- **A drop card** dims the columns that aren't the lesson's. A drop anywhere else gets a denied sound,
-  BOT's -_- face for a moment and a nudge of the card.
-- **After a drop** the card's words change to what happened; once said, the points line(s) show under them.
-- **The game around it**: set boards and set bits, no rising layers, nothing earned (no XP, KEYS or
-  resources). The CHAIN METER keeps its charge from card 6 to card 13 (the chain lesson, the layer peels
-  filling it, and the exploit it earns). The PATCH and BLACK MARKET slots are hidden.
-- **Where the card sits**: at the top of the board unless noted (under the board's middle; or floating at
-  the bottom or the middle of the screen over an open menu).
-- A refresh mid-tutorial picks up on the same card.
+- **The words** type out quickly with a blip of BOT's voice every other letter; a tap on the card shows
+  the rest at once. The lesson never waits on the typing.
+- **EXIT** (every card) leaves for the main menu. **BACK** (every card after the welcome): after a drop,
+  the same card again; otherwise the card before, the board and score put back as they were.
+- **NEXT / BEGIN** on cards that only explain. A tap card dims the screen but for what to tap; a drop
+  card dims the other columns, and a wrong drop gets a denied sound, BOT's -_- and a nudge.
+- **After a drop** the words change to what happened, then the points show under them.
+- Set boards and bits, no rising layers, nothing earned. The CHAIN METER keeps its charge from card 6 to
+  card 13.
 
-Columns are numbered 1 to 7 from the left, as on the drop buttons. Boards are drawn top row first;
-`[=]` is an ENCRYPTION LAYER, `[-]` a cracked one.
+Columns are numbered 1 to 7 from the left. Boards are drawn top row first; `[=]` is an ENCRYPTION LAYER,
+`[-]` a cracked one.
 
 
 ---
 
-## 0. Welcome
+## 0. Welcome (REWORDED)
 
 - **Heading**: `// TUTORIAL`
-- **Card sits**: under the board's middle
-- **BOT**: happy
-- **Buttons**: EXIT, BEGIN
+- **Card sits**: under the board's middle; **BOT**: happy
 
 **Says:**
 
-> Welcome to BYTEFALL! This tutorial will help you understand how the game is played, along with some other useful information. There are 26 steps! Don’t worry, they’re not too long, and despite all of the numbers, there’s really no math required as long as you can count to 7! Let’s begin!
+> Welcome to BYTEFALL! This tutorial walks you through how the game is played, and where everything is. There are 32 steps! Don’t worry, they’re short, and despite all of the numbers, there’s no math required as long as you can count to 7! Let’s begin!
+
+*Was:* Welcome to BYTEFALL! This tutorial will help you understand how the game is played, along with some other useful information. There are 26 steps! Don’t worry, they’re not too long, and despite all of the numbers, there’s really no math required as long as you can count to 7! Let’s begin!
+
+*Why:* The step count (26 → 32).
 
 - **Asks you to**: Tap BEGIN.
 - **Lights up**: Nothing.
-- **Check**: Says there are 26 steps; that stays true only if the count doesn't change.
 - **Notes**: 
 
 ---
 
-## 1. The TERMINAL and encrypted bits
+## 1. The TERMINAL and encrypted bits (KEPT)
 
-- **Heading**: `// TUTORIAL 1 / 26`
-- **Card sits**: under the board's middle
-- **BOT**: resting
-- **Buttons**: EXIT, BACK, NEXT
+- **Heading**: `// TUTORIAL 1 / 32`
+- **Card sits**: under the board's middle; **BOT**: resting
 
 **Says:**
 
@@ -72,14 +76,12 @@ Columns are numbered 1 to 7 from the left, as on the drop buttons. Boards are dr
 
 ---
 
-## 2. CURRENT
+## 2. CURRENT (KEPT)
 
-- **Heading**: `// TUTORIAL 2 / 26`
-- **Card sits**: top of the board
-- **BOT**: resting
-- **Buttons**: EXIT, BACK
-- **Bits**: CURRENT [3], then [2].
-- **Board as it starts**:
+- **Heading**: `// TUTORIAL 2 / 32`
+- **Card sits**: top of the board; **BOT**: resting
+- **Bits**: CURRENT [3], then [2]
+- **Board**:
 
 ```
  .  .  .  . [3][5] . 
@@ -89,20 +91,18 @@ Columns are numbered 1 to 7 from the left, as on the drop buttons. Boards are dr
 
 > This flashing display panel in the middle, with the bright border, shows your CURRENT bit, [3], which is the one that will be dropped into a column on your next tap. Go ahead and tap the CURRENT display panel!
 
-- **Asks you to**: Tap the CURRENT panel (anything else is dimmed).
+- **Asks you to**: Tap the CURRENT panel.
 - **Lights up**: The CURRENT panel.
 - **Notes**: 
 
 ---
 
-## 3. Decrypting: a row
+## 3. Decrypting: a row (KEPT)
 
-- **Heading**: `// TUTORIAL 3 / 26`
-- **Card sits**: top of the board
-- **BOT**: resting; after the drop: resting
-- **Buttons**: EXIT, BACK
-- **Bits**: CURRENT [3], then [2].
-- **Board as it starts**:
+- **Heading**: `// TUTORIAL 3 / 32`
+- **Card sits**: top of the board; **BOT**: resting
+- **Bits**: CURRENT [3], then [2]
+- **Board**:
 
 ```
  .  .  .  . [3][5] . 
@@ -112,8 +112,8 @@ Columns are numbered 1 to 7 from the left, as on the drop buttons. Boards are dr
 
 > A bit clears only when its value matches the exact number of bits in the row or column that it sits in. Clearing bits is called DECRYPTING. Any bit can be dropped into any column by tapping a number button below or by tapping the column itself. Go ahead and drop the CURRENT bit, [3], into either column 4 or 7, next to the [3] and [5] bits.
 
-- **Asks you to**: Drop the [3] into column 4 or column 7 (by its button or the column). Other columns are dimmed; a wrong one gets a denied sound, BOT's -_- face and a nudge of the card.
-- **Lights up**: The [3] and [5] at the bottom, and the buttons for columns 4 and 7.
+- **Asks you to**: Drop the [3] into column 4 or 7.
+- **Lights up**: The [3] and [5], and the buttons for columns 4 and 7.
 
 **After the drop, says:**
 
@@ -124,25 +124,17 @@ Columns are numbered 1 to 7 from the left, as on the drop buttons. Boards are dr
 ```
 [3] [3]  (13 + 13) ×1 = 26
 ```
-
-- **Board after**:
-
-```
- .  .  .  .  . [5] . 
-```
-- **Score after**: 26, CHAIN 1x
+- **Score after**: 26
 - **Notes**: 
 
 ---
 
-## 4. Decrypting: a column
+## 4. Decrypting: a column (KEPT)
 
-- **Heading**: `// TUTORIAL 4 / 26`
-- **Card sits**: top of the board
-- **BOT**: resting; after the drop: resting
-- **Buttons**: EXIT, BACK
-- **Bits**: CURRENT [2].
-- **Board as it starts**:
+- **Heading**: `// TUTORIAL 4 / 32`
+- **Card sits**: top of the board; **BOT**: resting
+- **Bits**: CURRENT [2]
+- **Board**:
 
 ```
  .  .  .  .  . [5] . 
@@ -153,7 +145,7 @@ Columns are numbered 1 to 7 from the left, as on the drop buttons. Boards are dr
 > Let’s try a column. Drop the CURRENT bit, [2], on top of the [5] bit in column 6.
 
 - **Asks you to**: Drop the [2] into column 6.
-- **Lights up**: The [5] in column 6 and column 6's button.
+- **Lights up**: The [5] in column 6 and its button.
 
 **After the drop, says:**
 
@@ -164,25 +156,17 @@ Columns are numbered 1 to 7 from the left, as on the drop buttons. Boards are dr
 ```
 [2]  (12) ×1 = 12
 ```
-
-- **Board after**:
-
-```
- .  .  .  .  . [5] . 
-```
-- **Score after**: 38, CHAIN 1x
+- **Score after**: 38
 - **Notes**: 
 
 ---
 
-## 5. SCORE
+## 5. SCORE (KEPT)
 
-- **Heading**: `// TUTORIAL 5 / 26`
-- **Card sits**: top of the board
-- **BOT**: resting
-- **Buttons**: EXIT, BACK
-- **Bits**: none.
-- **Board as it starts**:
+- **Heading**: `// TUTORIAL 5 / 32`
+- **Card sits**: top of the board; **BOT**: resting
+- **Bits**: CURRENT none
+- **Board**:
 
 ```
  .  .  .  .  . [5] . 
@@ -194,19 +178,16 @@ Columns are numbered 1 to 7 from the left, as on the drop buttons. Boards are dr
 
 - **Asks you to**: Tap the SCORE panel.
 - **Lights up**: SCORE.
-- **Check**: Says SCORE is 'under your BEST': true in the current HUD (BEST top left, SCORE under it).
 - **Notes**: 
 
 ---
 
-## 6. CHAINS
+## 6. CHAINS (KEPT)
 
-- **Heading**: `// TUTORIAL 6 / 26`
-- **Card sits**: top of the board
-- **BOT**: resting; after the drop: happy
-- **Buttons**: EXIT, BACK
-- **Bits**: CURRENT [2].
-- **Board as it starts**:
+- **Heading**: `// TUTORIAL 6 / 32`
+- **Card sits**: top of the board; **BOT**: resting
+- **Bits**: CURRENT [2]
+- **Board**:
 
 ```
  .  .  . [7] .  .  . 
@@ -220,7 +201,7 @@ Columns are numbered 1 to 7 from the left, as on the drop buttons. Boards are dr
 > Any time a bit decrypts, any bits that were above it will fall, and they can cause more bits to DECRYPT. This is called a CHAIN, and each wave of bits that clears is a link. The first link scores normal points, the second link’s points are doubled (2x), the third link’s are tripled (3x), and so on. Let’s drop the [2] into column 6.
 
 - **Asks you to**: Drop the [2] into column 6.
-- **Lights up**: The [2] at the foot of column 6, the [5] in column 4's second row and the [5] in column 7's second row, and column 6's button.
+- **Lights up**: The [2] at the foot of column 6, the [5]s in the second row of columns 4 and 7, and column 6's button.
 
 **After the drop, says:**
 
@@ -240,26 +221,17 @@ Columns are numbered 1 to 7 from the left, as on the drop buttons. Boards are dr
 NIBBLE +16
 TOTAL +132
 ```
-
-- **Board after**:
-
-```
- .  . [6][7] .  .  . 
- .  . [6][7][4] . [6]
-```
-- **Score after**: 170, CHAIN 3x
+- **Score after**: 170
 - **Notes**: 
 
 ---
 
-## 7. CHAIN and the CHAIN METER
+## 7. CHAIN and the CHAIN METER (KEPT)
 
-- **Heading**: `// TUTORIAL 7 / 26`
-- **Card sits**: top of the board
-- **BOT**: resting
-- **Buttons**: EXIT, BACK
-- **Bits**: none.
-- **Board as it starts**:
+- **Heading**: `// TUTORIAL 7 / 32`
+- **Card sits**: top of the board; **BOT**: resting
+- **Bits**: CURRENT none
+- **Board**:
 
 ```
  .  . [6][7] .  .  . 
@@ -271,19 +243,17 @@ TOTAL +132
 > CHAIN, at the right of the panels up top, shows you how long your last decrypted bit chain was. The bars on each side of the grid are the CHAIN METER. Each decrypted link lights up a bar on the meter, and the meter stays charged from one drop to the next. Fill all 5 bars to earn an EXPLOIT. A drop that clears nothing ends the streak, and the meter resets. Tap CHAIN.
 
 - **Asks you to**: Tap the CHAIN panel.
-- **Lights up**: CHAIN, and the CHAIN METER bars on both sides of the grid.
+- **Lights up**: CHAIN and the CHAIN METER.
 - **Notes**: 
 
 ---
 
-## 8. ENCRYPTION LAYERS: the first peel
+## 8. ENCRYPTION LAYERS: the first peel (KEPT)
 
-- **Heading**: `// TUTORIAL 8 / 26`
-- **Card sits**: top of the board
-- **BOT**: resting; after the drop: resting
-- **Buttons**: EXIT, BACK
-- **Bits**: CURRENT [2], then [2].
-- **Board as it starts**:
+- **Heading**: `// TUTORIAL 8 / 32`
+- **Card sits**: top of the board; **BOT**: resting
+- **Bits**: CURRENT [2], then [2]
+- **Board**:
 
 ```
  .  .  . [=] .  .  . 
@@ -305,25 +275,17 @@ TOTAL +132
 ```
 [2]  (12) ×1 = 12
 ```
-
-- **Board after**:
-
-```
- .  .  . [-] .  .  . 
-```
-- **Score after**: 182, CHAIN 1x
+- **Score after**: 182
 - **Notes**: 
 
 ---
 
-## 9. ENCRYPTION LAYERS: the second peel
+## 9. ENCRYPTION LAYERS: the second peel (KEPT)
 
-- **Heading**: `// TUTORIAL 9 / 26`
-- **Card sits**: top of the board
-- **BOT**: resting; after the drop: happy
-- **Buttons**: EXIT, BACK
-- **Bits**: CURRENT [2].
-- **Board as it starts**:
+- **Heading**: `// TUTORIAL 9 / 32`
+- **Card sits**: top of the board; **BOT**: resting
+- **Bits**: CURRENT [2]
+- **Board**:
 
 ```
  .  .  . [-] .  .  . 
@@ -347,40 +309,30 @@ TOTAL +132
 [1]  (11) ×2 = 22
 TOTAL +34
 ```
-
-- **Board after**:
-
-```
-(empty)
-```
-- **Score after**: 216, CHAIN 2x
+- **Score after**: 216
 - **Notes**: 
 
 ---
 
-## 10. The ======== line
+## 10. The ======== line (KEPT)
 
-- **Heading**: `// TUTORIAL 10 / 26`
-- **Card sits**: under the board's middle
-- **BOT**: worried
-- **Buttons**: EXIT, BACK, NEXT
+- **Heading**: `// TUTORIAL 10 / 32`
+- **Card sits**: under the board's middle; **BOT**: worried
 
 **Says:**
 
 > Keep every column below this ======== line. If anything is still above it once the decrypting stops, the trace completes and the game is over.
 
 - **Asks you to**: Tap NEXT.
-- **Lights up**: The ======== line over the grid.
+- **Lights up**: The ======== line.
 - **Notes**: 
 
 ---
 
-## 11. ENCRYPT IN
+## 11. ENCRYPT IN (KEPT)
 
-- **Heading**: `// TUTORIAL 11 / 26`
-- **Card sits**: top of the board
-- **BOT**: resting
-- **Buttons**: EXIT, BACK
+- **Heading**: `// TUTORIAL 11 / 32`
+- **Card sits**: top of the board; **BOT**: resting
 
 **Says:**
 
@@ -388,19 +340,16 @@ TOTAL +34
 
 - **Asks you to**: Tap the ENCRYPT IN panel.
 - **Lights up**: ENCRYPT IN.
-- **Check**: Layers don't actually rise in the tutorial; it's only described.
 - **Notes**: 
 
 ---
 
-## 12. EXPLOITS: arming one
+## 12. EXPLOITS: arming one (KEPT)
 
-- **Heading**: `// TUTORIAL 12 / 26`
-- **Card sits**: top of the board
-- **BOT**: devious grin
-- **Buttons**: EXIT, BACK
-- **Bits**: none. Held in the EXPLOIT button: WORM VIRUS.
-- **Board as it starts**:
+- **Heading**: `// TUTORIAL 12 / 32`
+- **Card sits**: top of the board; **BOT**: devious grin
+- **Bits**: CURRENT none; held in EXPLOIT: WORM VIRUS
+- **Board**:
 
 ```
  .  . [3] .  .  .  . 
@@ -413,21 +362,18 @@ TOTAL +34
 
 > When the CHAIN METER fills up, you earn an EXPLOIT. Different exploits change the board depending on where you drop them. When you earn an exploit, the CHAIN METER will pulse until you decide to use it. Tap the EXPLOIT button to use the one you have available. It’s a WORM VIRUS!
 
-- **Asks you to**: Tap the EXPLOIT button (it really arms the WORM VIRUS).
+- **Asks you to**: Tap the EXPLOIT button (it arms the WORM VIRUS).
 - **Lights up**: The EXPLOIT button.
-- **Check**: The bottom row now also has PATCH and BLACK MARKET slots either side of EXPLOIT; the tutorial hides them and doesn't mention them.
 - **Notes**: 
 
 ---
 
-## 13. EXPLOITS: the WORM VIRUS
+## 13. EXPLOITS: the WORM VIRUS (KEPT)
 
-- **Heading**: `// TUTORIAL 13 / 26`
-- **Card sits**: top of the board
-- **BOT**: devious grin; after the drop: happy
-- **Buttons**: EXIT, BACK
-- **Bits**: CURRENT is the armed WORM VIRUS.
-- **Board as it starts**:
+- **Heading**: `// TUTORIAL 13 / 32`
+- **Card sits**: top of the board; **BOT**: devious grin
+- **Bits**: CURRENT the armed WORM VIRUS
+- **Board**:
 
 ```
  .  . [3] .  .  .  . 
@@ -440,8 +386,8 @@ TOTAL +34
 
 > The WORM VIRUS is armed and is now your CURRENT. It drops like a bit. Drop it into column 3, the tall one: it wipes out every block in that column.
 
-- **Asks you to**: Drop the armed WORM VIRUS into column 3.
-- **Lights up**: Every block in column 3 and column 3's button.
+- **Asks you to**: Drop the WORM VIRUS into column 3.
+- **Lights up**: Every block in column 3 and its button.
 
 **After the drop, says:**
 
@@ -452,59 +398,81 @@ TOTAL +34
 ```
 +40
 ```
-
-- **Board after**:
-
-```
-(empty)
-```
-- **Score after**: 256, CHAIN 0x
+- **Score after**: 256
 - **Notes**: 
 
 ---
 
-## 14. PAUSE
+## 14. THE BOTTOM ROW (NEW)
 
-- **Heading**: `// TUTORIAL 14 / 26`
-- **Card sits**: top of the board
-- **BOT**: resting
-- **Buttons**: EXIT, BACK
+- **Heading**: `// TUTORIAL 14 / 32`
+- **Card sits**: top of the board; **BOT**: resting
 
 **Says:**
 
-> The button at the top left PAUSES the game. Tap it now!
+> The row under the drop buttons holds more than the EXPLOIT button. Beside it are the two SIDE SLOTS, and at each end a PATCH SLOT. They open as you level up: until then each one shows a padlock and the level it opens at. A PATCH SLOT sells a patch during a game, for KEYS and resources, and the patch works the moment you buy it.
 
-- **Asks you to**: Tap the PAUSE button (it really opens the pause screen).
-- **Lights up**: The PAUSE button.
-- **Check**: OUT OF DATE: says 'the button at the top left'; PAUSE sits at the top RIGHT now.
+- **Asks you to**: Tap NEXT.
+- **Lights up**: The two PATCH SLOTS and the two SIDE SLOTS.
+- **To build**: The tutorial hides these slots today: show them, locked (padlock and level), for this card and the next.
 - **Notes**: 
 
 ---
 
-## 15. The pause screen
+## 15. THE BLACK MARKET (NEW)
 
-- **Heading**: `// TUTORIAL 15 / 26`
-- **Card sits**: bottom of the screen
-- **BOT**: resting
-- **Buttons**: EXIT, BACK
+- **Heading**: `// TUTORIAL 15 / 32`
+- **Card sits**: top of the board; **BOT**: devious grin
+
+**Says:**
+
+> The SIDE SLOTS hold STARTER EXPLOITS that you bring into a game. An empty one becomes the BLACK MARKET once the first layer rises: an exploit or a BLACK BOX for sale, swapped for another every 4 drops. The pips under it count the drops left, and the last one blinks. BLACK BOXES are cheap, but some of them are INFECTED!
+
+- **Asks you to**: Tap NEXT.
+- **Lights up**: The two SIDE SLOTS.
+- **To build**: Show a sample BLACK MARKET slot (an item, its price and the 4 pips) in one side slot for this card.
+- **Notes**: 
+
+---
+
+## 16. PAUSE (REWORDED)
+
+- **Heading**: `// TUTORIAL 16 / 32`
+- **Card sits**: top of the board; **BOT**: resting
+
+**Says:**
+
+> The button at the top right PAUSES the game. Tap it now!
+
+*Was:* The button at the top left PAUSES the game. Tap it now!
+
+*Why:* It said top left; PAUSE is at the top right.
+
+- **Asks you to**: Tap PAUSE (it opens the pause screen).
+- **Lights up**: The PAUSE button.
+- **Notes**: 
+
+---
+
+## 17. The pause screen (KEPT)
+
+- **Heading**: `// TUTORIAL 17 / 32`
+- **Card sits**: bottom of the screen; **BOT**: resting
 
 **Says:**
 
 > The pause screen has RESUME, RESTART, RULES & RECORDS, SETTINGS, EXPLOITS, the STORE and the MAIN MENU (and EXIT, in VS). All but RESUME and RESTART are on the MAIN MENU too. Tap RULES & RECORDS.
 
-- **Asks you to**: Tap RULES & RECORDS on the pause screen.
+- **Asks you to**: Tap RULES & RECORDS.
 - **Lights up**: RULES & RECORDS.
-- **Check**: The card floats at the bottom of the screen, over the pause screen.
 - **Notes**: 
 
 ---
 
-## 16. RULES
+## 18. RULES (KEPT)
 
-- **Heading**: `// TUTORIAL 16 / 26`
-- **Card sits**: middle of the screen
-- **BOT**: resting
-- **Buttons**: EXIT, BACK, NEXT
+- **Heading**: `// TUTORIAL 18 / 32`
+- **Card sits**: middle of the screen; **BOT**: resting
 
 **Says:**
 
@@ -512,88 +480,86 @@ TOTAL +34
 
 - **Asks you to**: Tap NEXT.
 - **Lights up**: The RULES tab.
-- **Check**: The card floats in the middle of the screen, over RULES & RECORDS. The menu also has NOTICES, EXPLOITS and STORE tabs now; none are named here.
 - **Notes**: 
 
 ---
 
-## 17. RECORDS
+## 19. RECORDS (REWORDED)
 
-- **Heading**: `// TUTORIAL 17 / 26`
-- **Card sits**: middle of the screen
-- **BOT**: resting
-- **Buttons**: EXIT, BACK, NEXT
+- **Heading**: `// TUTORIAL 19 / 32`
+- **Card sits**: middle of the screen; **BOT**: resting
 
 **Says:**
 
-> The RECORDS tab shows your level and DECRYPTOR rank, every unlock with the level it opens at, every achievement with its progress, and your lifetime stats.
+> The RECORDS tab shows your level and DECRYPTOR rank, every unlock with the level it opens at, your achievements, HISTORY (your last 10 games) and your lifetime stats. Every bit you decrypt is XP, 100 bits a level. At Lv 80 you can RANK UP: everything locks again to unlock once more, and each rank earns a little more. NOTICES, the next tab, keeps every notice the game has shown you.
+
+*Was:* The RECORDS tab shows your level and DECRYPTOR rank, every unlock with the level it opens at, every achievement with its progress, and your lifetime stats.
+
+*Why:* Adds HISTORY, how levels and RANK UP work, and NOTICES.
 
 - **Asks you to**: Tap NEXT.
 - **Lights up**: The RECORDS tab.
-- **Check**: RECORDS has more now (HISTORY of the last 10 games, among others); not mentioned.
 - **Notes**: 
 
 ---
 
-## 18. Closing a card
+## 20. Closing a card (KEPT)
 
-- **Heading**: `// TUTORIAL 18 / 26`
-- **Card sits**: middle of the screen
-- **BOT**: resting
-- **Buttons**: EXIT, BACK
+- **Heading**: `// TUTORIAL 20 / 32`
+- **Card sits**: middle of the screen; **BOT**: resting
 
 **Says:**
 
 > Tapping outside a card won’t close it: tap ← BACK, at the top left of the card.
 
-- **Asks you to**: Tap ← BACK at the top left of the card.
+- **Asks you to**: Tap ← BACK.
 - **Lights up**: ← BACK.
 - **Notes**: 
 
 ---
 
-## 19. EXPLOITS (the menu)
+## 21. EXPLOITS (the button) (REWORDED)
 
-- **Heading**: `// TUTORIAL 19 / 26`
-- **Card sits**: bottom of the screen
-- **BOT**: resting
-- **Buttons**: EXIT, BACK
+- **Heading**: `// TUTORIAL 21 / 32`
+- **Card sits**: bottom of the screen; **BOT**: resting
 
 **Says:**
 
-> Now tap EXPLOITS. (The STORE beside it has REMOVE ADS and FULL ACCESS.)
+> Now tap EXPLOITS.
+
+*Was:* Now tap EXPLOITS. (The STORE beside it has REMOVE ADS and FULL ACCESS.)
+
+*Why:* The STORE gets its own cards (below), so the note about it is gone.
 
 - **Asks you to**: Tap EXPLOITS on the pause screen.
 - **Lights up**: EXPLOITS.
-- **Check**: OUT OF DATE: '(The STORE beside it has REMOVE ADS and FULL ACCESS.)' The STORE now has the DAILY DROP, PATCHES, STARTER EXPLOITS, BLACK BOXES and SUPPORT THE GAME.
 - **Notes**: 
 
 ---
 
-## 20. The loadout
+## 22. The loadout (REWORDED)
 
-- **Heading**: `// TUTORIAL 20 / 26`
-- **Card sits**: bottom of the screen
-- **BOT**: resting
-- **Buttons**: EXIT, BACK, NEXT
+- **Heading**: `// TUTORIAL 22 / 32`
+- **Card sits**: bottom of the screen; **BOT**: resting
 
 **Says:**
 
-> EXPLOITS is your loadout. You can only earn exploits that are in a slot: SLOTS, at the top, counts the slots you’ve filled and the ones you have. Tap an unlocked card to put it in a free slot, or tap it again to take it out. More slots and exploits unlock as you level up, and the loadout is locked from a session’s first drop until it ends.
+> EXPLOITS is your loadout. You can only earn exploits that are in a slot: SLOTS, at the top, counts the slots you’ve filled and the ones you have. Tap a card to put it in a free slot, or tap it again to take it out. The first three exploits are yours as they unlock; the rest are bought once with resources and kept until you RANK UP. The loadout locks from a game’s first drop until it ends.
+
+*Was:* EXPLOITS is your loadout. You can only earn exploits that are in a slot: SLOTS, at the top, counts the slots you’ve filled and the ones you have. Tap an unlocked card to put it in a free slot, or tap it again to take it out. More slots and exploits unlock as you level up, and the loadout is locked from a session’s first drop until it ends.
+
+*Why:* Adds buying exploits to keep them.
 
 - **Asks you to**: Tap NEXT.
-- **Lights up**: SLOTS at the top, and every exploit card.
-- **Check**: OUT OF DATE: doesn't say that exploits past the first three are bought once with resources to keep (until RANK UP).
+- **Lights up**: SLOTS and every exploit card.
 - **Notes**: 
 
 ---
 
-## 21. Closing EXPLOITS
+## 23. Closing EXPLOITS (KEPT)
 
-- **Heading**: `// TUTORIAL 21 / 26`
-- **Card sits**: middle of the screen
-- **BOT**: resting
-- **Buttons**: EXIT, BACK
+- **Heading**: `// TUTORIAL 23 / 32`
+- **Card sits**: middle of the screen; **BOT**: resting
 
 **Says:**
 
@@ -605,47 +571,89 @@ TOTAL +34
 
 ---
 
-## 22. SETTINGS
+## 24. STORE (the button) (NEW)
 
-- **Heading**: `// TUTORIAL 22 / 26`
-- **Card sits**: bottom of the screen
-- **BOT**: resting
-- **Buttons**: EXIT, BACK
+- **Heading**: `// TUTORIAL 24 / 32`
+- **Card sits**: bottom of the screen; **BOT**: resting
+
+**Says:**
+
+> Now tap the STORE.
+
+- **Asks you to**: Tap STORE on the pause screen.
+- **Lights up**: STORE.
+- **Notes**: 
+
+---
+
+## 25. STORE (what’s in it) (NEW)
+
+- **Heading**: `// TUTORIAL 25 / 32`
+- **Card sits**: bottom of the screen; **BOT**: happy
+
+**Says:**
+
+> The STORE shows YOUR RESOURCES at the top: KEYS, BUGS, CACHE, CRYPTO, ROOTKITS and MASTER KEYS, all earned by playing (tap the [i] to see how). Under them, PRICES TODAY: sales, holidays and busy days move prices up and down. Below that: the DAILY DROP (free once a day), PATCHES, STARTER EXPLOITS, BLACK BOXES, and REMOVE ADS and FULL ACCESS.
+
+- **Asks you to**: Tap NEXT.
+- **Lights up**: YOUR RESOURCES and the PRICES TODAY gauge.
+- **Notes**: 
+
+---
+
+## 26. Closing the STORE (NEW)
+
+- **Heading**: `// TUTORIAL 26 / 32`
+- **Card sits**: middle of the screen; **BOT**: resting
+
+**Says:**
+
+> Tap ← BACK to close the STORE.
+
+- **Asks you to**: Tap ← BACK.
+- **Lights up**: ← BACK.
+- **Notes**: 
+
+---
+
+## 27. SETTINGS (the button) (KEPT)
+
+- **Heading**: `// TUTORIAL 27 / 32`
+- **Card sits**: bottom of the screen; **BOT**: resting
 
 **Says:**
 
 > Now tap SETTINGS.
 
-- **Asks you to**: Tap SETTINGS on the pause screen.
+- **Asks you to**: Tap SETTINGS.
 - **Lights up**: SETTINGS.
 - **Notes**: 
 
 ---
 
-## 23. What's in SETTINGS
+## 28. What's in SETTINGS (REWORDED)
 
-- **Heading**: `// TUTORIAL 23 / 26`
-- **Card sits**: middle of the screen
-- **BOT**: resting
-- **Buttons**: EXIT, BACK, NEXT
+- **Heading**: `// TUTORIAL 28 / 32`
+- **Card sits**: middle of the screen; **BOT**: resting
 
 **Says:**
 
-> SETTINGS has SOUND (sound and music, the sound effects, SOUND OUTPUT for what you’re listening on), the PLAYLIST to change tracks (with the MUSIC PLAYER for listening on its own), CONTROLS (where the drop buttons sit, vibration on phones), DISPLAY (color THEMES and FONTS, more unlocking as you level up; text size; REDUCED EFFECTS for slower phones) and EXTRAS (the wandering bots, the screen saver).
+> SETTINGS has SOUND (sound and music, the sound effects, SOUND OUTPUT for what you’re listening on), the PLAYLIST and the MUSIC PLAYER, CONTROLS (where the drop buttons sit, vibration on phones), DISPLAY (THEMES and FONTS, which unlock as you level up; PIXEL STYLE; the CRT DISPLAY; text size; REDUCED EFFECTS for slower phones) and EXTRAS (the wandering bots, the screen saver).
+
+*Was:* SETTINGS has SOUND (sound and music, the sound effects, SOUND OUTPUT for what you’re listening on), the PLAYLIST to change tracks (with the MUSIC PLAYER for listening on its own), CONTROLS (where the drop buttons sit, vibration on phones), DISPLAY (color THEMES and FONTS, more unlocking as you level up; text size; REDUCED EFFECTS for slower phones) and EXTRAS (the wandering bots, the screen saver).
+
+*Why:* Adds PIXEL STYLE and the CRT DISPLAY.
 
 - **Asks you to**: Tap NEXT.
 - **Lights up**: Nothing (SETTINGS is open behind the card).
-- **Check**: Missing: PIXEL STYLE and CRT DISPLAY (DISPLAY), GAME MUSIC: LAYERED, BACKGROUND PLAY, AD PRIVACY OPTIONS.
 - **Notes**: 
 
 ---
 
-## 24. Closing SETTINGS
+## 29. Closing SETTINGS (KEPT)
 
-- **Heading**: `// TUTORIAL 24 / 26`
-- **Card sits**: middle of the screen
-- **BOT**: resting
-- **Buttons**: EXIT, BACK
+- **Heading**: `// TUTORIAL 29 / 32`
+- **Card sits**: middle of the screen; **BOT**: resting
 
 **Says:**
 
@@ -657,63 +665,50 @@ TOTAL +34
 
 ---
 
-## 25. RESUME
+## 30. RESUME (KEPT)
 
-- **Heading**: `// TUTORIAL 25 / 26`
-- **Card sits**: bottom of the screen
-- **BOT**: resting
-- **Buttons**: EXIT, BACK
+- **Heading**: `// TUTORIAL 30 / 32`
+- **Card sits**: bottom of the screen; **BOT**: resting
 
 **Says:**
 
 > And RESUME to get back to the game.
 
-- **Asks you to**: Tap RESUME on the pause screen.
+- **Asks you to**: Tap RESUME.
 - **Lights up**: RESUME.
 - **Notes**: 
 
 ---
 
-## 26. The end
+## 31. ENCRYPTION STRENGTH (NEW)
 
-- **Heading**: `// TUTORIAL 26 / 26`
-- **Card sits**: top of the board
-- **BOT**: happy
-- **Buttons**: EXIT, BACK, PLAY CLASSIC, RULES
+- **Heading**: `// TUTORIAL 31 / 32`
+- **Card sits**: top of the board; **BOT**: happy
 
 **Says:**
 
-> That’s everything you need to know. Good luck, decryptor.
+> In CLASSIC, every game has a key to crack: its ENCRYPTION STRENGTH, shown under BYTEFALL. It starts at 128-BIT, cracked at 1,500 points on NORMAL, and the bar along the bottom of SCORE fills toward it. Crack it for KEYS, then GO DEEPER for a stronger key and more KEYS, or DISCONNECT and end the game on a win.
 
-- **Asks you to**: Tap PLAY CLASSIC (out to the main menu on CLASSIC) or RULES (out to the main menu with RULES & RECORDS open on RULES).
-- **Lights up**: Nothing.
-- **Check**: Doesn't mention ENCRYPTION STRENGTH, patches, the BLACK MARKET, the STORE or levels and unlocks.
+- **Asks you to**: Tap NEXT.
+- **Lights up**: The line under BYTEFALL and the bar along SCORE.
+- **To build**: The tutorial isn't CLASSIC, so show a sample line (// CLASSIC // NORMAL // 128-BIT: 1,500) and a part-filled SCORE bar for this card.
 - **Notes**: 
 
 ---
 
-## Not in the tutorial yet
+## 32. The end (REWORDED)
 
-What the game has now that no card covers (for deciding what to add, cut or point to RULES instead):
+- **Heading**: `// TUTORIAL 32 / 32`
+- **Card sits**: top of the board; **BOT**: happy
 
-- **ENCRYPTION STRENGTH** (CLASSIC's goal): the key to crack (128-BIT at 1,500 on NORMAL), the bar on
-  SCORE, the CRACKED card, GO DEEPER and DISCONNECT. (And the endless toggle to come.)
-- **The bottom row**: PATCH 1, BLACK MARKET L, EXPLOIT, BLACK MARKET R, PATCH 2. The PATCH SLOTS (Lv 5 and
-  Lv 12) sell a patch mid-game; the BLACK MARKET opens with the first layer and turns over every 4 drops
-  (the pips count it down, the last drop warns).
-- **PATCHES** before a game (the main menu's PATCHES button), RESTORE POINT (also free for a rewarded ad
-  once a day) and ANTIVIRUS.
-- **STARTER EXPLOITS** in the side slots (Lv 3 and Lv 9) and **BLACK BOXES** (a random exploit, maybe an
-  infection), and the **INFECTIONS** themselves.
-- **Owning exploits**: the first three are free; the rest are bought once with resources and kept until
-  RANK UP.
-- **Resources and KEYS**: what each is earned by (the STORE's [i] explains them), the DAILY DROP and the
-  LOGIN STREAK.
-- **The STORE**: prices that move (sales, HIGH DEMAND, holiday sales, YOUR DEAL) and the gauge.
-- **Levels, unlocks and DECRYPTOR ranks**: everything unlocks by level within a rank (exploits and slots by
-  Lv 50, the rest by Lv 60); RANK UP at Lv 80.
-- **The other modes**: DAILY, PUZZLE, BLITZ, VS and ZEN (only CLASSIC is played here).
-- **HARD**: the 8x8 board, BYTES, layers speeding up.
-- **NOTICES** and **HISTORY** in RULES & RECORDS.
-- **PIXEL STYLE** and **CRT DISPLAY** in SETTINGS.
+**Says:**
 
+> That’s everything you need to know! Before a game, the main menu’s PATCHES and STARTERS let you bring an edge in, once you have some. Good luck, decryptor.
+
+*Was:* That’s everything you need to know. Good luck, decryptor.
+
+*Why:* Adds PATCHES and STARTERS on the main menu.
+
+- **Asks you to**: Tap PLAY CLASSIC or RULES.
+- **Lights up**: Nothing.
+- **Notes**: 
