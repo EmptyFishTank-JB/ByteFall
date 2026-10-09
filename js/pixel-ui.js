@@ -20,7 +20,7 @@ const PixelUi = (() => {
   const SENTINEL = 'rgb(255, 0, 255)'; // (the text color, drawn as this to know it again)
   const SHAPES = 'path, circle, ellipse, rect, line, polyline, polygon';
   const PROPS = ['fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'stroke-miterlimit', 'fill-rule', 'opacity', 'fill-opacity', 'stroke-opacity', 'stroke-dasharray', 'display', 'visibility'];
-  const SKIP = '.svg-defs, .glyph, .px-icon, .slot-timer, .cpu-bot, [shape-rendering="crispEdges"], .walker svg, .cpu-face svg';
+  const SKIP = '.svg-defs, .glyph, .px-icon, .cpu-bot, [shape-rendering="crispEdges"], .walker svg, .cpu-face svg';
   // Drawn by hand where the redraw doesn't read (too thin and slanted for the grid): rows of the
   // 12 x 12 grid, keyed by the icon's own path
   const DRAWN = {

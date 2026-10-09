@@ -40,6 +40,8 @@ const Progress = (() => {
     xp: 0, // bits decrypted this rank
     decryptorPoints: 0, // points earned this rank
     equipped: [], // exploit ids in the loadout slots
+    ownedExploits: {}, // exploit id -> true once bought to keep (tier 1 needs no buying)
+    ownedSeeded: false, // (the exploits unlocked before buying came in, kept: done once)
     lastLevel: 0, // for LEVEL UP announcements
     exploitsSeen: {}, // exploit id -> true once announced this rank
     slotsSeen: 0, // slots announced this rank
@@ -167,11 +169,14 @@ const Progress = (() => {
   // left one early, the right one a little later, so the market's prices are met a step at a time
   const SIDE_SLOT_LEVELS = [4, 12];
   const sideSlots = () => (Unlocks.hasFullAccess() ? 2 : SIDE_SLOT_LEVELS.filter((l) => levelInfo().level >= l).length);
+  // The PATCH SLOTS at the row's two ends (patches bought in a game): the left at Lv 8, the right at Lv 20
+  const PATCH_SLOT_LEVELS = [8, 20];
+  const patchSlots = () => (Unlocks.hasFullAccess() ? 2 : PATCH_SLOT_LEVELS.filter((l) => levelInfo().level >= l).length);
   let exploitNames = {}; // id -> name, from script.js
 
   function exploitInfo(id) {
     const level = EXPLOIT_LEVELS[EXPLOIT_ORDER.indexOf(id)];
-    return { unlocked: Unlocks.hasFullAccess() || levelInfo().level >= level, kept: false, level };
+    return { unlocked: Unlocks.hasFullAccess() || levelInfo().level >= level, kept: false, level, owned: isOwned(id) };
   }
   function slotInfo() {
     if (Unlocks.hasFullAccess()) return { slots: MAX_SLOTS, max: MAX_SLOTS, kept: MAX_SLOTS, nextLevel: 0 };
@@ -187,7 +192,7 @@ const Progress = (() => {
   // Keep the loadout valid: only unlocked exploits, no more than the slots.
   function tidyLoadout() {
     const { slots } = slotInfo();
-    d.equipped = d.equipped.filter((id, i, all) => exploitInfo(id).unlocked && all.indexOf(id) === i).slice(0, slots);
+    d.equipped = d.equipped.filter((id, i, all) => exploitInfo(id).unlocked && isOwned(id) && all.indexOf(id) === i).slice(0, slots);
   }
   // When an exploit or slot unlocks, fill free slots with unlocked exploits in order, so new
   // unlocks are ready to use. (Not on every change, or unequipping to swap would refill.)
@@ -196,6 +201,7 @@ const Progress = (() => {
     const { slots } = slotInfo();
     for (const id of unlockedExploits()) {
       if (d.equipped.length >= slots) break;
+      if (!isOwned(id)) continue; // (unlocked, but not bought yet)
       if (!d.equipped.includes(id)) d.equipped.push(id);
     }
   }
@@ -217,6 +223,7 @@ const Progress = (() => {
     ...BOT_ORDER.map(([id, name, level]) => ({ id: `bot-${id}`, group: 'VS CPU', name: `BOT: ${name}`, ...atLevel(level) })),
     ...TRACK_LEVELS.map((level, i) => ({ id: `track-${i + 2}`, group: 'TRACKS', name: `TRACK ${String(i + 2).padStart(2, '0')}`, ...atLevel(level) })),
     ...SIDE_SLOT_LEVELS.map((level, i) => ({ id: `side-slot-${i + 1}`, group: 'SIDE SLOTS', name: `SIDE SLOT: ${i ? 'RIGHT' : 'LEFT'}`, ...atLevel(level) })),
+    ...PATCH_SLOT_LEVELS.map((level, i) => ({ id: `patch-slot-${i + 1}`, group: 'PATCH SLOTS', name: `PATCH SLOT: ${i ? 'RIGHT' : 'LEFT'}`, ...atLevel(level) })),
     ...THEME_ORDER.map(([id, name, level]) => ({ id: `theme-${id}`, group: 'THEMES', name, ...atLevel(level) })),
     ...FONT_ORDER.map(([id, name, level]) => ({ id: `font-${id}`, group: 'FONTS', name, ...atLevel(level) })),
   ];
@@ -612,6 +619,16 @@ const Progress = (() => {
     'box-2': { keys: 12, crypto: 5, rootkits: 1 },
     'box-3': { keys: 20, crypto: 8, rootkits: 2 },
   };
+  // PATCHES bought in a game (the PATCH SLOTS, as 'patch:<id>'): some KEYS and a resource or two,
+  // applied at once (the STORE sells them for KEYS alone, to switch on before a game)
+  const PATCH_PRICES = {
+    'head-start': { keys: 8, crypto: 4 },
+    'firewall-delay': { keys: 10, cache: 5 },
+    lookahead: { keys: 8, bugs: 5 },
+    overtime: { keys: 10, bugs: 3, cache: 3 },
+    'second-chance': { keys: 20, crypto: 5, rootkits: 2 },
+  };
+  const priceTable = (id) => (String(id).startsWith('patch:') ? PATCH_PRICES[String(id).slice(6)] : PRICES[id]);
   const BOX_IDS = ['box-1', 'box-2', 'box-3'];
   const ANTI_IDS = ['adware', 'spyware', 'ransomware', 'malware', 'cryptojacker', 'scareware']; // (the INFECTIONS)
   // Each BLACK BOX's odds, in percent: a tier 1, 2 or 3 exploit, or an INFECTION (any of the six alike)
@@ -620,15 +637,15 @@ const Progress = (() => {
   const sellable = (id) => !!PRICES[id];
   const have = (res) => (res === 'keys' ? d.keys : d.res[res] || 0);
   // What's short of a price: [[resource, how many more]]
-  const missing = (id) => Object.entries(PRICES[id] || {}).filter(([res, n]) => have(res) < n).map(([res, n]) => [res, n - have(res)]);
+  const missing = (id) => Object.entries(priceTable(id) || {}).filter(([res, n]) => have(res) < n).map(([res, n]) => [res, n - have(res)]);
   function payFor(id, master = false) {
-    if (!PRICES[id]) return false;
+    if (!priceTable(id)) return false;
     if (master) {
-      if (BOX_IDS.includes(id) || !d.res.master) return false; // (a MASTER KEY buys an exploit, not a box)
+      if (BOX_IDS.includes(id) || !PRICES[id] || !d.res.master) return false; // (a MASTER KEY buys an exploit, not a box or a patch)
       d.res.master--;
     } else {
       if (missing(id).length) return false;
-      for (const [res, n] of Object.entries(PRICES[id])) {
+      for (const [res, n] of Object.entries(priceTable(id))) {
         if (res === 'keys') d.keys -= n;
         else d.res[res] -= n;
       }
@@ -646,6 +663,26 @@ const Progress = (() => {
     if (tier === 3) return ANTI_IDS[Math.floor(rnd() * ANTI_IDS.length)];
     const pool = EXPLOIT_ORDER.filter((id) => id !== 'black-box' && tierOf(id) === tier);
     return pool[Math.floor(rnd() * pool.length)];
+  }
+
+  // EXPLOITS TO KEEP: unlocked by level, a tier 2 or 3 exploit is then bought once with resources to
+  // equip it for good (the CHAIN METER only gives equipped ones). Tier 1 needs no buying, and FULL
+  // ACCESS owns them all. The price: three times its STARTER price in resources, no KEYS (ECONOMY.md)
+  const OWN_TIMES = 3;
+  function ownPrice(id) {
+    if (id === 'black-box') return { crypto: 30, rootkits: 6 };
+    return Object.fromEntries(Object.entries(PRICES[id] || {}).filter(([res]) => res !== 'keys').map(([res, n]) => [res, n * OWN_TIMES]));
+  }
+  function isOwned(id) { return Unlocks.hasFullAccess() || tierOf(id) === 0 || !!d.ownedExploits[id]; }
+  const ownMissing = (id) => Object.entries(ownPrice(id)).filter(([res, n]) => have(res) < n).map(([res, n]) => [res, n - have(res)]);
+  // (equip: into a free loadout slot as well, when the loadout can change)
+  function buyToOwn(id, equip = true) {
+    if (isOwned(id) || !exploitInfo(id).unlocked || ownMissing(id).length) return false;
+    for (const [res, n] of Object.entries(ownPrice(id))) d.res[res] -= n;
+    d.ownedExploits[id] = true;
+    if (equip && !d.equipped.includes(id) && d.equipped.length < slotInfo().slots) d.equipped.push(id);
+    save();
+    return true;
   }
 
   // Marks newly met unlocks and achievements; returns them as [{ type, name }] (quiet: just record).
@@ -675,7 +712,7 @@ const Progress = (() => {
     for (const id of EXPLOIT_ORDER) {
       if (!d.exploitsSeen[id] && exploitInfo(id).unlocked) {
         d.exploitsSeen[id] = true;
-        earned.push({ type: 'UNLOCKED', name: exploitNames[id] || id });
+        earned.push({ type: 'UNLOCKED', name: `${exploitNames[id] || id}${isOwned(id) ? '' : ' // BUY IT IN EXPLOITS'}` });
         opened = true;
       }
     }
@@ -703,6 +740,16 @@ const Progress = (() => {
     d.slotsSeen = Math.max(d.slotsSeen, Math.min(d.decryptor, MAX_SLOTS));
   };
   markKept();
+  // (the exploits a player could already use when buying came in are theirs: the ones their level
+  // reached, the ones equipped, and all of them after a RANK UP; not FULL ACCESS's or a dev unlock's,
+  // which own them only while they last)
+  if (!d.ownedSeeded) {
+    EXPLOIT_ORDER.forEach((id, i) => {
+      if (d.decryptor > 0 || levelInfo().level >= EXPLOIT_LEVELS[i] || d.equipped.includes(id)) d.ownedExploits[id] = true;
+    });
+    d.ownedSeeded = true;
+    save();
+  }
   if (!d.equipped.length) fillLoadout(); // first load, or a new Full Access / dev unlock
   check(true); // seed from existing best scores without announcing anything
 
@@ -716,15 +763,21 @@ const Progress = (() => {
     setExploitNames(names) { exploitNames = names; },
     exploitInfo,
     exploitOrder: () => [...EXPLOIT_ORDER],
+    isOwned,
+    ownPrice: (id) => ({ ...ownPrice(id) }),
+    ownMissing,
+    buyToOwn,
     slotInfo,
     sideSlots, // (how many side slots are open: 0, 1 (the left) or 2)
     sideSlotLevel: (i) => SIDE_SLOT_LEVELS[i],
+    patchSlots,
+    patchSlotLevel: (i) => PATCH_SLOT_LEVELS[i],
     equipped: () => (tidyLoadout(), [...d.equipped]),
     isEquipped: (id) => (tidyLoadout(), d.equipped.includes(id)),
     // Returns false when it can't (locked, or every slot is taken)
     equip(id) {
       tidyLoadout();
-      if (d.equipped.includes(id) || !exploitInfo(id).unlocked || d.equipped.length >= slotInfo().slots) return false;
+      if (d.equipped.includes(id) || !exploitInfo(id).unlocked || !isOwned(id) || d.equipped.length >= slotInfo().slots) return false;
       d.equipped.push(id);
       save();
       return true;
@@ -1035,7 +1088,7 @@ const Progress = (() => {
       events('cross', cross);
       events('link', links);
     },
-    price: (id) => ({ ...(PRICES[id] || {}) }),
+    price: (id) => ({ ...(priceTable(id) || {}) }),
     sellable,
     missing,
     payFor,

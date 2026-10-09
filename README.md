@@ -214,6 +214,19 @@ banner. Its ad unit is `rewardedId` in `js/ads-config.js` (Google's sample rewar
 ByteFall's is made).
 
 **THE SIDE SLOTS**: one each side of the exploit button (CLASSIC, BLITZ and ZEN only), opened by level: the left at Lv 4, the right at Lv 12 (`SIDE_SLOT_LEVELS` in progress.js; before then the main menu's STARTER L / STARTER R show LV 4 / LV 12 behind a padlock, a tap saying so in the card's title and in a game the slot shows a padlock over its level, so the BLACK MARKET comes a slot at a time).
+**THE PATCH SLOTS** (script.js `patchSlots`; `PATCH_SLOT_LEVELS` in progress.js): the exploit row's
+two ends, so the row reads PATCH 1, BLACK MARKET L, the earned EXPLOIT, BLACK MARKET R, PATCH 2. The
+left opens at Lv 8, the right at Lv 20 (a padlock over the level till then; FULL ACCESS both). Each
+sells a patch that fits the mode and would do something now (no HEAD START while an exploit waits or
+the meter's half full, no LOOKAHEAD while one runs or on EASY, no RESTORE POINT while one's waiting),
+at KEYS and a resource or two (`PATCH_PRICES`, ECONOMY.md), shown as the BLACK MARKET's are (dashed,
+the currency sign in its corner, the pips), opening and turning over with it. A tap opens the BLACK
+MARKET's window for it (PATCH // APPLIED AT ONCE and what it does now; no MASTER KEYS; NOT NEEDED NOW
+if it would do nothing); bought, it's applied at once (HEAD START: the meter to half; FIREWALL DELAY:
+the next layer 4 drops later; LOOKAHEAD: the next 60 seconds; OVERTIME: +15 seconds; RESTORE POINT:
+waiting, pulsing, till it saves you) and the slot's done for the game, lit with a tick. With the one
+switched on before the game, three patches a game at most; the result screen's PATCHED: lists them.
+Paused, the whole row (and PUZZLE's HINT and UNDO) dims to the drop buttons' 25% and takes no taps.
 **STARTER EXPLOITS** (STORE) are exploits of your own, any you've unlocked by level, by tier: tier 1
 (RNG, BITFLIP, BUFFER OVERFLOW, TROJAN, PIVOT) 10 KEYS and about 12 BUGS, CACHE or CRYPTO; tier 2
 (SWAP, WORM VIRUS, KEYLOGGER, PACKET SNIFFER, BACKDOOR) 20 KEYS, about 17 of those and a ROOTKIT;
@@ -243,7 +256,7 @@ what was paid on it is lost), **MALWARE** (the board's bits shown as flickering 
 whether you take starters in or not):
 a random exploit you've unlocked or, a quarter of the time, a BLACK BOX, marked for sale with the
 game's own currency sign in its corner (a 0 struck through twice, as a dollar sign is: no one
-country's), changing every 4 drops (its frame, once the market's open, is four lit sides that go dark one a drop, clockwise from the top, and all light up again as it changes). A tap opens the BLACK MARKET's window: a neon sign of a border in
+country's), changing every 4 drops (once the market's open, 4 pips under its icon count the drops left, going dark one a drop; on the last drop what's left of them and the icon blink, and at the turnover the icon rolls through a few others like a reel, ticking once for the whole row, and lands on the new offer; REDUCED effects: it just changes). A tap opens the BLACK MARKET's window: a neon sign of a border in
 the accent, a tilted, flickering sign-sign-sign in its corner and scan lines over it; the item's icon
 in brackets and its name (a box's odds under it), then each part of its price as the resource's icon
 over what you have / what it costs (red and pulsing where you're short), and BUY in the middle
@@ -391,7 +404,19 @@ difficulty picked but locked again falls back to the default until it reopens.
 
 **Exploit slots (loadout).** Only exploits equipped in a slot are awarded. A new
 unlock drops into a free slot by itself; tap an exploit card to remove or equip
-it. The loadout is locked during a session: change it before the first drop or
+it. **Exploits to keep** (`Progress.isOwned` / `buyToOwn`): tier 1 (the first five)
+is yours to equip as soon as it unlocks; from tier 2 on, an unlocked exploit is
+bought once with resources (three times its STARTER price in resources, no KEYS;
+BLACK BOX the exploit 30 CRYPTO + 6 ROOTKITS) and is then yours for good, RANK UP
+included (the level still has to reach it again). Its EXPLOITS card shows the
+price as have / cost (red where short); a first tap lights it, a second buys it
+(into a free slot when the loadout can change); short, what's short pulses red
+and the card's title says NOT ENOUGH. Its UNLOCKED notice adds // BUY IT IN
+EXPLOITS. FULL ACCESS (and the dev page's UNLOCK EVERYTHING) owns them all while
+it lasts. Saves from before this kept what they could already use: every exploit
+their level had reached or that was equipped, and all of them after a RANK UP
+(`ownedSeeded`). The BLACK MARKET, STARTERS and BLACK BOXES still deal in any
+unlocked exploit (or any at all, a box), owned or not: a one-off taste. The loadout is locked during a session: change it before the first drop or
 after the game ends. The daily games always use the five standard exploits, so
 they're the same for everyone.
 

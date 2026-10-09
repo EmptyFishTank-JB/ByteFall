@@ -3295,12 +3295,23 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 .slot-lock { width: 12px; height: 14px; }
 .slot-lv { font-size: 9px; letter-spacing: 1px; line-height: 1; }
 /* (the BLACK MARKET's countdown: its frame in four sides, lit, one going dark a drop till it turns over) */
-.exploit-icon.side-slot.market:has(.slot-timer) { border-color: transparent; }
-.slot-timer { position: absolute; inset: -1px; width: calc(100% + 2px); height: calc(100% + 2px); overflow: visible; pointer-events: none; }
-.slot-timer path { fill: none; stroke: rgba(var(--accent-rgb), 0.18); stroke-width: 2; stroke-linecap: square; vector-effect: non-scaling-stroke; transition: stroke 0.3s; }
-.slot-timer path.on { stroke: var(--accent); filter: drop-shadow(0 0 2px rgba(var(--accent-rgb), 0.8)); }
-.exploit-icon.side-slot.turned .slot-timer path.on { animation: slot-relit 0.5s steps(3); }
-@keyframes slot-relit { 0% { stroke: rgba(var(--accent-rgb), 0.18); } 50% { stroke: #fff; } }
+/* THE COUNTDOWN: a pip under the icon for each drop till the offer turns over; on the last drop
+   what's left blinks, and at the turnover the icon rolls like a reel (script.js, turnSlot) */
+.exploit-icon:has(> .slot-pips) > .exploit-glyph { transform: translateY(-4px); }
+.exploit-icon > .slot-pips { position: absolute; left: 0; right: 0; bottom: 4px; display: flex; justify-content: center; gap: 3px; pointer-events: none; filter: none; }
+.slot-pips i { width: 5px; height: 3px; background: rgba(var(--accent-rgb), 0.2); }
+.slot-pips i.on { background: var(--accent); box-shadow: 0 0 3px rgba(var(--accent-rgb), 0.8); }
+.exploit-icon.side-slot.last-drop .slot-pips i.on, .exploit-icon.side-slot.last-drop:not(.turning) > .exploit-glyph { animation: last-drop 0.5s steps(1) infinite; }
+@keyframes last-drop { 50% { opacity: 0.2; } }
+.exploit-icon.side-slot.turning { color: var(--accent); }
+:root.low-fx .exploit-icon.side-slot.last-drop :is(.slot-pips i.on, .exploit-glyph) { animation: none; }
+@media (prefers-reduced-motion: reduce) { .exploit-icon.side-slot.last-drop :is(.slot-pips i.on, .exploit-glyph) { animation: none; } }
+/* THE PATCH SLOTS at the row's ends: a patch for sale, as the BLACK MARKET's (applied: lit, a tick) */
+.exploit-icon.patch-slot .exploit-glyph .ico { width: 22px; height: 22px; }
+/* Paused: the exploits, the BLACK MARKET and the patches dim and wait, as the drop buttons do */
+.exploit-row, .puzzle-tools { transition: opacity 0.15s; }
+:is(.exploit-row, .puzzle-tools).paused-row { opacity: 0.25; pointer-events: none; }
+:is(.exploit-row, .puzzle-tools).paused-row * { animation-play-state: paused !important; }
 .exploit-icon.side-slot.market.locked .slot-sale { border-color: var(--fg-dim); color: var(--fg-dim); box-shadow: none; }
 
 /* The description in the BLACK MARKET's window */
@@ -4427,3 +4438,11 @@ html.px-ui {
   --icon-lock: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 12' shape-rendering='crispEdges'><path d='M3 1h4v1h1v3H7V2H3v3H2V2h1zM1 5h8v6H1zM4 7v2h2V7z' fill='black' fill-rule='evenodd'/></svg>");
   --icon-play: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 9' shape-rendering='crispEdges'><path d='M1 0h1v1h1v1h1v1h1v1h1v1h-1v1h-1v1h-1v1h-1v1H1z' fill='black'/></svg>");
 }
+
+/* EXPLOITS TO KEEP (EXPLOITS): unlocked, not bought yet: its price in resources (have / cost, red
+   where short) and a tap to buy it for good; a first tap lights it, pulsing, for the second */
+.hack-item.to-buy { cursor: pointer; border-color: rgba(var(--accent-rgb), 0.55); }
+.hack-item.to-buy .lock-tag { color: var(--accent); }
+.hack-item.to-buy.confirm { border-style: solid; border-color: var(--accent); animation: amber-pulse 0.9s ease-in-out infinite; }
+.hack-item .own-cost { padding: 4px 0 2px; gap: 4px 14px; }
+.hack-item .own-cost[hidden] { display: none; }

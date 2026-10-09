@@ -1,7 +1,7 @@
 # ByteFall economy
 
 What the player earns, where and how, what it buys, and the BLACK BOX odds. The numbers live in
-`js/progress.js` (`RES_PER`, `resRate`, `PRICES`, `BOX_ODDS`, `KEY_PAY`, `KEY_BITS`) and
+`js/progress.js` (`RES_PER`, `resRate`, `PRICES`, `PATCH_PRICES`, `OWN_TIMES`, `BOX_ODDS`, `KEY_PAY`, `KEY_BITS`) and
 `js/script.js` (`MARKET_EVERY`, `MARKET_BOX_ODDS`, `ANTI`, `ANTI_DROPS`). Change them there and here
 together.
 
@@ -65,6 +65,8 @@ So a game pays for about two tier 1 exploits, or one tier 2, and a tier 3 takes 
 | STORE, STARTER EXPLOITS | an exploit to take into a game (below) | KEYS + resources, or 1 MASTER KEY |
 | STORE, BLACK BOXES | a random pull to take into a game (below) | KEYS + resources (no MASTER KEYS) |
 | BLACK MARKET (in a game) | an exploit or BLACK BOX, the STORE's price | the same |
+| PATCH SLOTS (in a game, Lv 8 and Lv 20) | HEAD START 8 KEYS + 4 CRYPTO, FIREWALL DELAY 10 + 5 CACHE, LOOKAHEAD 8 + 5 BUGS, OVERTIME 10 + 3 BUGS + 3 CACHE, RESTORE POINT 20 + 5 CRYPTO + 2 ROOTKITS (`PATCH_PRICES`) | KEYS + resources, applied at once |
+| EXPLOITS, to keep | a tier 2 or 3 exploit, once unlocked: three times its STARTER price in resources, no KEYS (BLACK BOX the exploit: 30 CRYPTO + 6 ROOTKITS); tier 1 is free (`ownPrice`, `OWN_TIMES`) | resources, once |
 
 Starter exploits and boxes go into the two STARTER slots on the main menu (two of one kind, or one
 each of two) and are used once in a game. A slot left empty is the BLACK MARKET from the start, and

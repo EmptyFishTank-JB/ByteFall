@@ -274,6 +274,35 @@ let sideSlots = []; // this game's: [{ state: 'starter' | 'bought' | 'opened' | 
 let marketDrops = 0;
 let usedStarters = []; // (for the result screen)
 let marketBought = [];
+// THE PATCH SLOTS, the row's two ends (PATCH 1 left of the BLACK MARKET's left slot, PATCH 2 right of
+// its right one), open at Lv 8 and Lv 20 (Progress.patchSlotLevel): each sells a patch that fits the
+// mode and would do something now, for KEYS and resources (Progress, 'patch:<id>'; ECONOMY.md),
+// turning over with the BLACK MARKET and opening with it. Bought, it's applied at once and that slot's
+// done for the game: with the one switched on before it, three patches a game at most
+let patchSlots = []; // this game's: [{ state: 'locked' | 'market' | 'applied' | 'closed', id }]
+let patchesBought = [];
+let restoreBought = false; // (a RESTORE POINT bought in the game: waiting to save you)
+// (what each does when it's bought in a game)
+const PATCH_NOW = {
+  'head-start': 'The CHAIN METER jumps to half full.',
+  'firewall-delay': 'The next encryption layer rises 4 drops later.',
+  lookahead: 'See your next bit for the next 60 seconds.',
+  overtime: '+15 seconds on the clock.',
+  'second-chance': 'If the trace completes, the system rolls back: everything above the bottom 3 rows is wiped and you keep playing.',
+};
+function patchUseful(id) {
+  const b = BOOSTERS[id];
+  if (!b || b.inGame || !boosterFits(id)) return false;
+  if (id === 'head-start') return !exploitWaiting() && streak < Math.floor(streakCap() / 2);
+  if (id === 'lookahead') return lookaheadLeft <= 0 && !DIFFICULTIES[difficulty].showNext;
+  if (id === 'firewall-delay') return !MODES[mode].noLayers;
+  if (id === 'second-chance') return !secondChanceUsed && !restoreBought && !(armedBoosts.has(id) && Progress.boosters(id) > 0);
+  return true;
+}
+function patchPick(not = []) {
+  const pool = Object.keys(BOOSTERS).filter((id) => patchUseful(id) && !not.includes(id));
+  return pool[Math.floor(Math.random() * pool.length)] || null;
+}
 const marketPool = () => Progress.exploitOrder().filter((id) => Progress.sellable(id) && Progress.exploitInfo(id).unlocked);
 // (a quarter of the time a BLACK BOX: I most often, III least)
 const MARKET_BOX_ODDS = 0.25;
@@ -594,6 +623,15 @@ function initGame() {
   if (runBoosts.has('firewall-delay')) dropsSinceLastPulse = -4;
   if (runBoosts.has('overtime')) timeLeft += 15;
   lookaheadLeft = runBoosts.has('lookahead') ? LOOKAHEAD_MS : 0;
+  patchesBought = [];
+  restoreBought = false;
+  const patchOpen = Progress.patchSlots();
+  patchSlots = sideSlots.length ? [0, 1].map((i) => ({ state: i >= patchOpen ? 'locked' : 'market', id: null })) : [];
+  for (const ps of patchSlots) {
+    if (ps.state !== 'market') continue;
+    ps.id = patchPick(patchSlots.map((x) => x.id));
+    if (!ps.id) ps.state = 'closed';
+  }
   updateHud();
   buildColumnButtons();
   render();
@@ -1095,6 +1133,9 @@ function buildColumnButtons() {
 
 function updateColumnButtons() {
   updateFreeBtn();
+  // (paused: the exploits, the BLACK MARKET and the patches dim and wait, as the drop buttons do)
+  document.querySelector('.exploit-row').classList.toggle('paused-row', vsPaused);
+  document.getElementById('puzzle-tools').classList.toggle('paused-row', vsPaused);
   // (PIVOT's choice: the picked column and the two it can swap with light up the grid too, not only their buttons)
   boardEl.querySelectorAll('.cell[data-pos]').forEach((cell) => {
     const c = Number(cell.dataset.pos.split(',')[1]);
@@ -1427,7 +1468,7 @@ function clearPivotChoice() {
 }
 
 async function attemptDrop(col) {
-  if (gameOver || busy || !queue.length || vsPaused || homeOpen || shopSlot !== null) return;
+  if (gameOver || busy || !queue.length || vsPaused || homeOpen || shopSlot !== null || shopPatch !== null) return;
   if (mode === 'tutorial' && !Tutorial.canDrop(col)) return; // (only where the lesson says)
   // ADWARE: its column takes nothing till the pop-up goes, from the button, the grid or the keys
   // (with every other column full, the pop-up gives way)
@@ -2212,9 +2253,10 @@ function endGame(reason = 'trace') {
     ? (dailyOfficial ? `${DAILY_KINDS[mode]} // OFFICIAL SCORE // ${todayKey()}` : `${DAILY_KINDS[mode]} PRACTICE // OFFICIAL SCORE TODAY ${fmt(best)}`)
     : `${MODES[mode].label} // BEST ${best}`;
   if (daily) newBestEl.hidden = true;
-  if (runBoosts.size || secondChanceUsed) { // (a boosted game says so)
+  const patched = [...new Set([...runBoosts, ...patchesBought, ...(secondChanceUsed ? ['second-chance'] : [])])];
+  if (patched.length) { // (a patched game says so)
     note.hidden = false;
-    note.textContent += ` // PATCHED: ${[...runBoosts, ...(secondChanceUsed ? ['second-chance'] : [])].map((id) => BOOSTERS[id].name).join(', ')}`;
+    note.textContent += ` // PATCHED: ${patched.map((id) => BOOSTERS[id].name).join(', ')}`;
   }
   if (usedStarters.length) note.textContent += ` // STARTERS: ${usedStarters.map(itemName).join(', ')}`; // (and one that used side slots)
   if (marketBought.length) {
@@ -4707,18 +4749,20 @@ const SECTION_INFO = {
       ? `Make chains to fill the CHAIN METER beside the grid. On HARD, the ${HACK_COMBO} links have to come from one chain. Fill it and you get a random exploit from the ones you've equipped.`
       : `Make chains to fill the CHAIN METER beside the grid: ${HACK_COMBO} links, and they carry over from drop to drop. Fill it and you get a random exploit from the ones you've equipped.`,
     'It waits in the EXPLOIT button under the grid. Tap the button when you want it, and it becomes your next drop. Once it\'s armed, there\'s no taking it back.',
-    'Tap an exploit below to equip it, or tap an equipped one to take it off. You get more slots as you level up.']],
+    'Tap an exploit below to equip it, or tap an equipped one to take it off. You get more slots as you level up.',
+    'The first five are yours as soon as they unlock. Past those, an unlocked exploit is bought once with resources, then it\'s yours to equip for good.']],
   boosters: ['// PATCHES', [
     'A patch gives your next game an edge.',
     'Buy them with KEYS. Before a game, tap PATCHES on the main menu and switch one on.',
     'One per game. It\'s used up when the game starts (RESTORE POINT only when it saves you).',
+    'In the game, the PATCH SLOTS at the two ends of the exploit row sell one more each (the left opens at Lv 8, the right at Lv 20): KEYS and resources, applied the moment you buy it.',
     'Not in DAILY or VS.']],
   starters: ['// STARTER EXPLOITS', [
     'An exploit you own and bring into a game, instead of waiting for the CHAIN METER to earn one.',
     'Pick up to two under STARTERS on the main menu. Each sits in a side slot next to the exploit button: the left slot opens at Lv 4, the right at Lv 12.',
     'In the game, tap one to use it as your next drop. Any you don\'t use stay yours.',
     'Short on resources? A MASTER KEY buys any exploit.',
-    'An empty side slot turns into the BLACK MARKET once the first encryption layer rises: something for sale that changes every 4 drops.',
+    'An empty side slot turns into the BLACK MARKET once the first encryption layer rises: something for sale that changes every 4 drops. The pips under it count the drops left.',
     'CLASSIC, BLITZ and ZEN only.']],
   boxes: ['// BLACK BOXES', [
     'A sealed box with a random exploit inside, for less than it usually holds.',
@@ -4917,9 +4961,11 @@ function refreshStarterRow() {
 // goes on (once a game, when it's switched on and there's one left)
 const SECOND_CHANCE_KEEP = 3;
 function secondChance() {
-  if (secondChanceUsed || !armedBoosts.has('second-chance') || !boosterFits('second-chance')) return false;
-  if (!Progress.useBooster('second-chance')) return false;
+  if (secondChanceUsed) return false;
+  if (restoreBought) restoreBought = false; // (bought in this game, from a PATCH SLOT)
+  else if (!armedBoosts.has('second-chance') || !boosterFits('second-chance') || !Progress.useBooster('second-chance')) return false;
   secondChanceUsed = true;
+  renderStarters();
   FX.burst(cellsAt(columns.flatMap((c, col) => c.slice(SECOND_CHANCE_KEEP).map((_, k) => ({ row: SECOND_CHANCE_KEEP + k, col })))));
   columns = columns.map((c) => c.slice(0, SECOND_CHANCE_KEEP)); // (the bottom rows stay)
   render();
@@ -5063,8 +5109,41 @@ function updateFreeBtn() {
   countEl.textContent = `x${count}`;
   renderStarters();
 }
-// (the frame's four sides, top, right, bottom, left: MARKET_EVERY of them)
-const MARKET_SIDES = ['M9 1H31', 'M39 9V31', 'M31 39H9', 'M1 31V9'];
+// THE COUNTDOWN: a pip under the icon for each drop till the offer turns over (MARKET_EVERY of them),
+// going dark one a drop; on the last, what's left blinks, and at the turnover the icon rolls through a
+// few others like a reel, ticking, and lands on the new one
+const PIPS_HTML = `<span class="slot-pips" aria-hidden="true">${'<i></i>'.repeat(MARKET_EVERY)}</span>`;
+const marketLeft = () => MARKET_EVERY - (marketDrops % MARKET_EVERY);
+function setPips(b, on) {
+  const left = marketLeft();
+  b.querySelectorAll('.slot-pips i').forEach((pip, k) => pip.classList.toggle('on', k < left));
+  b.classList.toggle('last-drop', on && left === 1);
+}
+const TURN_STEPS = [45, 50, 60, 75, 95];
+function turnSlot(b, sl, faces, tick) {
+  if (document.documentElement.classList.contains('low-fx')) { b.dataset.key = ''; return; } // (REDUCED effects: it just changes)
+  sl.turning = true;
+  b.classList.add('turning');
+  let step = 0;
+  const spin = () => {
+    if (!sl.turning || gameOver) return;
+    if (step < TURN_STEPS.length) {
+      const glyph = b.querySelector('.exploit-glyph');
+      if (glyph) glyph.innerHTML = faces[Math.floor(Math.random() * faces.length)];
+      if (tick) SFX.play('click');
+      setTimeout(spin, TURN_STEPS[step++]);
+      return;
+    }
+    sl.turning = false;
+    b.classList.remove('turning');
+    b.dataset.key = '';
+    renderStarters();
+    b.classList.remove('turned');
+    void b.offsetWidth;
+    b.classList.add('turned');
+  };
+  spin();
+}
 // (a side slot not open yet: a pixel padlock)
 const SLOT_LOCK_SVG = '<svg class="slot-lock" viewBox="0 0 10 12" aria-hidden="true" shape-rendering="crispEdges"><path d="M3 1h4v1h1v3H7V2H3v3H2V2h1zM1 5h8v6H1zM4 7v2h2V7z" fill="currentColor" fill-rule="evenodd"/></svg>';
 // The side slots: built once, either side of the exploit button, redrawn as they change
@@ -5098,6 +5177,7 @@ function renderStarters() {
       return;
     }
     if (sl.state === 'rolling') { b.dataset.key = ''; return; } // (the reel draws itself)
+    if (sl.turning) { setPips(b, true); return; } // (turning over: the reel's, till it lands)
     const market = sl.state === 'market';
     const price = Progress.price(sl.id);
     const sealed = Progress.isBox(sl.id);
@@ -5110,18 +5190,17 @@ function renderStarters() {
     b.classList.toggle('armed', sl.state === 'armed');
     b.classList.toggle('locked', market && !marketOpen); // (not open yet: the first layer hasn't risen)
     b.classList.toggle('short', short);
-    // (the BLACK MARKET's frame: a side for each drop till it turns over, going dark one a drop, clockwise from the top)
-    const left = MARKET_EVERY - (marketDrops % MARKET_EVERY);
+    const left = marketLeft();
     // (drawn afresh only when what it holds changes: a new item, bought, opened, the market opening; a
-    // drop only darkens a side of the frame, so its icon's animation runs on unbroken)
+    // drop only darkens a pip, so its icon's animation runs on unbroken)
     const key = `${sl.id}|${sl.state}|${market && marketOpen}`;
     if (b.dataset.key !== key) {
       b.dataset.key = key;
       b.innerHTML = `<span class="exploit-glyph">${itemIcon(sl.id)}</span>`
-        + (market && marketOpen ? `<svg class="slot-timer" viewBox="0 0 40 40" preserveAspectRatio="none" aria-hidden="true">${MARKET_SIDES.map((d) => `<path d="${d}"/>`).join('')}</svg>` : '')
+        + (market && marketOpen ? PIPS_HTML : '')
         + (market ? `<span class="slot-sale" aria-hidden="true">${CURRENCY_SVG}</span>` : sl.state === 'armed' ? '' : `<span class="starter-tag">${sl.state === 'starter' ? 'S' : '✓'}</span>`);
     }
-    b.querySelectorAll('.slot-timer path').forEach((path, k) => path.classList.toggle('on', k >= MARKET_EVERY - left));
+    setPips(b, market && marketOpen);
     const name = itemName(sl.id);
     b.title = sl.state === 'armed' ? `${itemName(sl.id)} // ARMED: drop it` : market ? `BLACK MARKET // ${name}: ${priceText(price)} (${marketOpen ? `tap to see it; a new one in ${left} drop${left === 1 ? '' : 's'}` : `opens in ${marketOpensIn()} drops`})`
       : sealed ? `${sl.state === 'starter' ? 'STARTER' : 'BOUGHT'} // ${name}: tap to open it`
@@ -5129,6 +5208,68 @@ function renderStarters() {
     b.setAttribute('aria-label', b.title);
     if (!market && !sealed && armedHack) b.disabled = true;
   });
+  renderPatches();
+}
+// The PATCH SLOTS: built once, at the row's two ends, redrawn as they change
+let patchEls = null;
+const patchSlotEls = () => patchEls || (patchEls = [0, 1].map((i) => {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'exploit-icon side-slot patch-slot';
+  b.hidden = true;
+  b.addEventListener('click', () => patchTap(i));
+  const ends = sideSlotEls();
+  if (i === 0) ends[0].before(b);
+  else ends[1].after(b);
+  return b;
+}));
+const patchIcon = (id) => `<span class="exploit-glyph">${BOOSTER_SVG[id] || ''}</span>`;
+function renderPatches() {
+  patchSlotEls().forEach((b, i) => {
+    const ps = patchSlots[i];
+    const show = !!ps && !gameOver && mode !== 'tutorial';
+    b.hidden = !patchSlots.length || gameOver || mode === 'tutorial';
+    if (!show || ps.state === 'closed') { b.className = 'exploit-icon side-slot patch-slot closed'; b.innerHTML = ''; b.dataset.key = ''; b.disabled = true; return; }
+    if (ps.state === 'locked') { // (not open yet: a padlock and the level it opens at)
+      b.className = 'exploit-icon side-slot patch-slot locked-slot';
+      b.disabled = true;
+      b.innerHTML = `${SLOT_LOCK_SVG}<span class="slot-lv">LV ${Progress.patchSlotLevel(i)}</span>`;
+      b.dataset.key = '';
+      b.title = `PATCH SLOT ${i + 1} // opens at Lv ${Progress.patchSlotLevel(i)}`;
+      b.setAttribute('aria-label', b.title);
+      return;
+    }
+    if (ps.turning) { setPips(b, true); return; }
+    const market = ps.state === 'market';
+    const waiting = ps.state === 'applied' && ps.id === 'second-chance' && restoreBought; // (a RESTORE POINT bought, not used yet)
+    const short = market && Progress.missing(`patch:${ps.id}`).length > 0;
+    b.className = 'exploit-icon side-slot patch-slot';
+    b.classList.toggle('market', market);
+    b.classList.toggle('owned', !market);
+    b.classList.toggle('armed', waiting);
+    b.classList.toggle('confirm', market && shopPatch === i);
+    b.classList.toggle('locked', market && !marketOpen);
+    b.classList.toggle('short', short);
+    b.disabled = !market;
+    const key = `${ps.id}|${ps.state}|${market && marketOpen}|${waiting}`;
+    if (b.dataset.key !== key) {
+      b.dataset.key = key;
+      b.innerHTML = patchIcon(ps.id)
+        + (market && marketOpen ? PIPS_HTML : '')
+        + (market ? `<span class="slot-sale" aria-hidden="true">${CURRENCY_SVG}</span>` : waiting ? '' : '<span class="starter-tag">\u2713</span>');
+    }
+    setPips(b, market && marketOpen);
+    const name = BOOSTERS[ps.id].name;
+    const left = marketLeft();
+    b.title = market ? `PATCH // ${name}: ${priceText(Progress.price(`patch:${ps.id}`))} (${marketOpen ? `tap to see it; a new one in ${left} drop${left === 1 ? '' : 's'}` : `opens in ${marketOpensIn()} drops`})`
+      : waiting ? `PATCH // ${name}: ready to roll the trace back` : `PATCH // ${name}: applied`;
+    b.setAttribute('aria-label', b.title);
+  });
+}
+function patchTap(i) {
+  const ps = patchSlots[i];
+  if (!ps || gameOver || ps.state !== 'market' || ps.turning) return;
+  openPatchShop(i);
 }
 // The slot's next life once what was in it is used: the BLACK MARKET, again
 function slotSpent(sl, used) {
@@ -5139,7 +5280,7 @@ function slotSpent(sl, used) {
 // Drops till the BLACK MARKET opens: till the first layer rises (ZEN: BASE_INTERVAL drops)
 const marketOpensIn = () => (MODES[mode].noLayers ? Math.max(1, BASE_INTERVAL - marketDrops) : Math.max(1, pulseInterval - dropsSinceLastPulse));
 function openMarket() {
-  if (marketOpen || !sideSlots.some((sl) => sl.state === 'market')) { marketOpen = true; return; }
+  if (marketOpen || ![...sideSlots, ...patchSlots].some((sl) => sl.state === 'market')) { marketOpen = true; return; }
   marketOpen = true;
   setMessage('BLACK MARKET // OPEN FOR BUSINESS');
   SFX.play('egg');
@@ -5161,10 +5302,12 @@ function slotTap(i) {
 // a tilted, flickering $$$ in the corner. Drops wait while it's open
 const shopEl = document.getElementById('market-shop');
 let shopSlot = null;
+let shopPatch = null; // (a PATCH SLOT's offer in the window, not a side slot's)
 function openShop(i) {
   const sl = sideSlots[i];
   if (!sl || sl.state !== 'market') return;
   shopSlot = i;
+  shopPatch = null;
   const id = sl.id;
   const box = Progress.isBox(id);
   const price = Progress.price(id);
@@ -5192,13 +5335,69 @@ function openShop(i) {
   renderStarters();
   (buy.disabled ? (master ? mk : document.getElementById('shop-close')) : buy).focus();
 }
-function closeShop() {
-  if (shopSlot === null) return;
+// A PATCH SLOT's offer in the same window: what it does now, its price, BUY (no MASTER KEYS: they
+// buy exploits); one that would do nothing now can't be bought
+function openPatchShop(i) {
+  const ps = patchSlots[i];
+  if (!ps || ps.state !== 'market') return;
+  shopPatch = i;
   shopSlot = null;
+  const id = ps.id;
+  const useful = patchUseful(id);
+  const missing = Progress.missing(`patch:${id}`);
+  document.getElementById('shop-item').innerHTML = `<span class="shop-ico"><span class="ico-br">[</span>${BOOSTER_SVG[id] || ''}<span class="ico-br">]</span></span><span class="shop-name">${BOOSTERS[id].name}</span>`
+    + '<span class="shop-tier">PATCH // APPLIED AT ONCE</span>'
+    + `<span class="shop-desc">${PATCH_NOW[id]}</span>`;
+  document.getElementById('shop-costs').innerHTML = costHtml(Progress.price(`patch:${id}`));
+  const buy = document.getElementById('shop-buy');
+  const opensIn = marketOpen ? 0 : marketOpensIn();
+  buy.disabled = missing.length > 0 || !marketOpen || !useful;
+  if (!marketOpen) buy.textContent = `OPENS IN ${opensIn} DROP${opensIn === 1 ? '' : 'S'}`;
+  else if (!useful) buy.textContent = 'NOT NEEDED NOW';
+  else if (missing.length) buy.textContent = 'NOT ENOUGH';
+  else buy.innerHTML = BUY_HTML();
+  document.getElementById('shop-master').hidden = true;
+  document.getElementById('shop-note').textContent = !marketOpen
+    ? `THE BLACK MARKET OPENS WHEN THE FIRST ENCRYPTION ${MODES[mode].noLayers ? 'LAYER WOULD RISE' : 'LAYER RISES'}`
+    : !useful ? 'IT WOULD DO NOTHING RIGHT NOW: A NEW ONE COMES IN A FEW DROPS' : '';
+  document.getElementById('shop-sign').innerHTML = CURRENCY_SVG.repeat(3);
+  shopEl.classList.remove('hidden');
+  SFX.play('click');
+  renderStarters();
+  (buy.disabled ? document.getElementById('shop-close') : buy).focus();
+}
+function closeShop() {
+  if (shopSlot === null && shopPatch === null) return;
+  shopSlot = null;
+  shopPatch = null;
   shopEl.classList.add('hidden');
   renderStarters();
 }
+// A patch bought in the game: applied at once
+function applyPatch(id) {
+  if (id === 'head-start') { streak = Math.max(streak, Math.floor(streakCap() / 2)); showChainMeter(); }
+  if (id === 'firewall-delay') dropsSinceLastPulse -= 4;
+  if (id === 'overtime') { timeLeft += 15; showClock(); }
+  if (id === 'lookahead') lookaheadLeft = LOOKAHEAD_MS;
+  if (id === 'second-chance') restoreBought = true;
+  updateHud();
+  render();
+}
+function patchBuy() {
+  const ps = patchSlots[shopPatch];
+  if (!ps || ps.state !== 'market' || gameOver || !marketOpen || !patchUseful(ps.id)) { closeShop(); return; }
+  if (!Progress.payFor(`patch:${ps.id}`)) { SFX.play('denied'); flashShort(shopEl); return; }
+  closeShop();
+  ps.state = 'applied';
+  patchesBought.push(ps.id);
+  applyPatch(ps.id);
+  SFX.play('egg');
+  setMessage(`PATCH // ${BOOSTERS[ps.id].name}${ps.id === 'second-chance' ? ': READY IF THE TRACE COMPLETES' : ' APPLIED'}`);
+  showKeys();
+  renderStarters();
+}
 function shopBuy(master) {
+  if (shopPatch !== null) { patchBuy(); return; }
   const sl = sideSlots[shopSlot];
   if (!sl || sl.state !== 'market' || gameOver || !marketOpen) { closeShop(); return; }
   const name = itemName(sl.id);
@@ -5215,7 +5414,7 @@ document.getElementById('shop-buy').addEventListener('click', () => shopBuy(fals
 document.getElementById('shop-master').addEventListener('click', () => shopBuy(true));
 document.getElementById('shop-close').addEventListener('click', closeShop);
 shopEl.addEventListener('click', (e) => { if (e.target === shopEl) closeShop(); }); // (a tap off the window)
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && shopSlot !== null) { e.stopImmediatePropagation(); closeShop(); } }, true);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && (shopSlot !== null || shopPatch !== null)) { e.stopImmediatePropagation(); closeShop(); } }, true);
 // A BLACK BOX opened in its slot: the reel spins through the icons, slowing, and lands on what
 // Progress rolled. An exploit waits there to be armed; an INFECTION goes off
 // (the dev page's INFECTION switch: every box opens as that infection, or a random one on ANY)
@@ -5272,13 +5471,21 @@ function marketTick() {
   if (!sideSlots.length) return;
   if (++marketDrops >= BASE_INTERVAL && MODES[mode].noLayers) openMarket(); // (ZEN: no layers rise)
   if (marketDrops % MARKET_EVERY) { renderStarters(); return; }
+  // (the turnover: each offer rolls into the next one; one set of ticks for them all)
+  let tick = marketOpen;
+  const exploitFaces = [...marketPool(), ...Progress.boxIds()].map(itemIcon);
   sideSlots.forEach((sl, i) => {
     if (sl.state !== 'market') return;
     sl.id = marketPick(sideSlots.map((x) => x.id)) || sl.id;
-    const b = sideSlotEls()[i];
-    b.classList.remove('turned');
-    void b.offsetWidth;
-    b.classList.add('turned');
+    turnSlot(sideSlotEls()[i], sl, exploitFaces, tick);
+    tick = false;
+  });
+  const patchFaces = Object.keys(BOOSTERS).filter((id) => !BOOSTERS[id].inGame).map((id) => BOOSTER_SVG[id]);
+  patchSlots.forEach((ps, i) => {
+    if (ps.state !== 'market') return;
+    ps.id = patchPick(patchSlots.map((x, k) => (k === i ? null : x.id))) || ps.id;
+    turnSlot(patchSlotEls()[i], ps, patchFaces, tick);
+    tick = false;
   });
   renderStarters();
 }
@@ -6163,10 +6370,10 @@ const loadoutEditable = () => gameOver || Progress.runDrops() === 0;
 const slotInfoEl = document.getElementById('slot-info');
 // The list's sections, by tier (as priced in the STORE and the BLACK MARKET), each under a ===== line
 const EXPLOIT_TIERS = [
-  ['TIER 1 // THE BASICS', 'Quick fixes that shake up the board. The first you unlock, and the cheapest to buy.'],
-  ['TIER 2 // PRECISION TOOLS', 'Aim these where they do the most. Their price takes ROOTKITS too.'],
-  ['TIER 3 // HEAVY HITTERS', 'Big plays that change the whole board. The last to unlock, and the dearest.'],
-  ['SPECIAL // UNKNOWN', 'Never sold. Nobody knows what\'s inside until it opens.'],
+  ['TIER 1 // THE BASICS', 'Quick fixes that shake up the board. The first you unlock, and yours to equip as soon as they do.'],
+  ['TIER 2 // PRECISION TOOLS', 'Aim these where they do the most. Unlocked, each is bought once with resources to keep (ROOTKITS too).'],
+  ['TIER 3 // HEAVY HITTERS', 'Big plays that change the whole board. The last to unlock, and the dearest to keep.'],
+  ['SPECIAL // UNKNOWN', 'Never sold in the STORE. Unlocked, it\'s bought once to keep, like the tiers above.'],
 ];
 const tierHeads = EXPLOIT_TIERS.map(([title, note], t) => {
   const el = document.createElement('div');
@@ -6195,13 +6402,27 @@ function refreshExploitCards() {
     hacksListEl.appendChild(el); // keep the cards in unlock order (in the list that scrolls)
     const info = Progress.exploitInfo(id);
     const on = daily ? DAILY_EXPLOITS.includes(id) : equipped.includes(id);
+    const toBuy = !daily && info.unlocked && !info.owned; // (unlocked, not bought yet: its price, BUY)
     el.classList.toggle('locked', !daily && !info.unlocked);
     el.classList.toggle('unused', daily && !on); // not one of the Daily's five (not locked)
-    el.classList.toggle('unlocked', !daily && info.unlocked && editable);
+    el.classList.toggle('unlocked', !daily && info.unlocked && info.owned && editable);
+    el.classList.toggle('to-buy', toBuy);
+    el.classList.toggle('confirm', toBuy && ownConfirm === id);
     el.classList.toggle('equipped', on);
+    let cost = el.querySelector('.own-cost');
+    if (toBuy && !cost) {
+      cost = document.createElement('div');
+      cost.className = 'own-cost store-costs';
+      el.querySelector('.lock-tag').before(cost);
+    }
+    if (cost) {
+      cost.hidden = !toBuy;
+      if (toBuy) cost.innerHTML = costHtml(Progress.ownPrice(id), false);
+    }
     let tag;
     if (daily) tag = on ? '' : 'NOT USED IN THE DAILY';
     else if (!info.unlocked) tag = `UNLOCKS AT LV ${info.level} THIS RANK`;
+    else if (toBuy) tag = ownConfirm === id ? 'TAP AGAIN TO BUY IT FOR GOOD' : Progress.ownMissing(id).length ? 'BUY IT TO EQUIP // EARN MORE TO AFFORD IT' : 'TAP TO BUY IT FOR GOOD';
     else if (!editable) tag = on ? '' : 'NOT EQUIPPED THIS SESSION';
     else if (on) tag = 'TAP TO REMOVE';
     else tag = equipped.length < slots ? 'TAP TO EQUIP' : 'SLOTS FULL // REMOVE ONE TO SWAP';
@@ -6254,6 +6475,8 @@ hacksPanelEl.addEventListener('click', (e) => {
   }
   const card = e.target.closest('.hack-item');
   if (!card || daily || !Progress.exploitInfo(card.dataset.hack).unlocked) return;
+  if (!Progress.isOwned(card.dataset.hack)) { buyExploitTap(card); return; }
+  ownConfirm = null;
   if (!loadoutEditable()) {
     SFX.play('denied');
     cardNotice('LOADOUT LOCKED // FINISH OR RESTART FIRST');
@@ -6271,6 +6494,35 @@ hacksPanelEl.addEventListener('click', (e) => {
   }
   refreshExploitCards();
 });
+
+// An exploit unlocked but not owned: a first tap lights it for a second to buy it (with resources,
+// for good); short of the price, what's short pulses red
+let ownConfirm = null;
+function buyExploitTap(card) {
+  const id = card.dataset.hack;
+  if (Progress.ownMissing(id).length) {
+    ownConfirm = null;
+    SFX.play('denied');
+    refreshExploitCards();
+    flashShort(card);
+    cardNotice('NOT ENOUGH // PLAY TO EARN MORE');
+    return;
+  }
+  if (ownConfirm !== id) {
+    ownConfirm = id;
+    SFX.play('click');
+    refreshExploitCards();
+    return;
+  }
+  ownConfirm = null;
+  if (!Progress.buyToOwn(id, loadoutEditable())) { SFX.play('denied'); refreshExploitCards(); return; }
+  SFX.play('egg');
+  cardNotice(`BOUGHT // ${HACKS[id].name} IS YOURS`);
+  logNotice(`EXPLOIT BOUGHT // ${HACKS[id].name}`, true);
+  showWallet();
+  refreshExploitCards();
+  updateNoticeDots();
+}
 
 // Refreshes everything that can be locked, after progress or Full Access changes.
 function applyUnlocks() {
@@ -6378,7 +6630,7 @@ document.getElementById('home-back').addEventListener('click', () => { if (windo
 window.bytefallBack = () => {
   if (!starterPickEl.classList.contains('hidden')) { closeStarterPick(); return true; } // (a starter slot's card)
   if (!boosterPickEl.classList.contains('hidden')) { closeBoosterPick(); return true; } // (the BOOSTERS card)
-  if (shopSlot !== null) { closeShop(); return true; } // (the BLACK MARKET's window)
+  if (shopSlot !== null || shopPatch !== null) { closeShop(); return true; } // (the BLACK MARKET's window)
   const start = document.getElementById('start-screen');
   if (start && !start.hidden) return false;
   if (homeOpen && !panelOpen() && window.showStartScreen) {
