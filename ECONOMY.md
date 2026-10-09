@@ -61,7 +61,7 @@ So a game pays for about two tier 1 exploits, or one tier 2, and a tier 3 takes 
 
 | Where | What | Paid with |
 |---|---|---|
-| STORE, BOOSTERS | HEAD START 15, FIREWALL DELAY 20, LOOKAHEAD 15, OVERTIME 20, SECOND CHANCE 40, HINT 10, UNDO 8 | KEYS only |
+| STORE, PATCHES | HEAD START 15, FIREWALL DELAY 20, LOOKAHEAD 15, OVERTIME 20, RESTORE POINT 40, HINT 10, UNDO 8 | KEYS only (RESTORE POINT also free for a rewarded ad, once a day, in the app) |
 | STORE, STARTER EXPLOITS | an exploit to take into a game (below) | KEYS + resources, or 1 MASTER KEY |
 | STORE, BLACK BOXES | a random pull to take into a game (below) | KEYS + resources (no MASTER KEYS) |
 | BLACK MARKET (in a game) | an exploit or BLACK BOX, the STORE's price | the same |

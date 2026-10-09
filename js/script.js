@@ -229,16 +229,16 @@ const savedPuzzle = (t = puzzleTier) => {
 let puzzleIndex = savedPuzzle();
 let overlayNext = null; // what the overlay button does in PUZZLE: 'next' or 'retry'
 
-// BOOSTERS: bought with KEYS in the STORE (store.js). The ones for before a game are switched on
+// PATCHES (BOOSTERS in the code): bought with KEYS in the STORE (store.js). The ones for before a game are switched on
 // from the main menu (and stay on while there are any left), each used up at that game's first
-// drop; SECOND CHANCE only when it saves you; HINT and UNDO (PUZZLE) when they're pressed. Never
-// in DAILY or VS (or the tutorial): those stay the same for everyone. A boosted game says so.
+// drop; RESTORE POINT only when it saves you; HINT and UNDO (PUZZLE) when they're pressed. Never
+// in DAILY or VS (or the tutorial): those stay the same for everyone. A patched game says so.
 const BOOSTERS = {
   'head-start': { name: 'HEAD START', cost: 15, desc: 'The CHAIN METER starts half full.', modes: ['classic', 'blitz', 'zen'] },
   'firewall-delay': { name: 'FIREWALL DELAY', cost: 20, desc: 'The first encryption layer rises 4 drops later.', modes: ['classic', 'blitz'] },
   lookahead: { name: 'LOOKAHEAD', cost: 15, desc: 'See your next bit for the first 60 seconds (EASY always shows it).', modes: ['classic', 'blitz', 'zen'] },
   overtime: { name: 'OVERTIME', cost: 20, desc: '+15 seconds on the BLITZ clock.', modes: ['blitz'] },
-  'second-chance': { name: 'SECOND CHANCE', cost: 40, desc: 'If the trace completes, everything above the bottom 3 rows is wiped and you keep playing. Once a game.', modes: ['classic', 'blitz', 'zen'] },
+  'second-chance': { name: 'RESTORE POINT', cost: 40, desc: 'If the trace completes, the system rolls back: everything above the bottom 3 rows is wiped and you keep playing. Once a game.', modes: ['classic', 'blitz', 'zen'], adPerDay: 1 }, // (adPerDay: free for a rewarded ad that many times a day, the STORE's WATCH AD)
   hint: { name: 'HINT', cost: 10, desc: 'PUZZLE: lights up the column your next bit should go in.', modes: ['puzzle'], inGame: true },
   undo: { name: 'UNDO', cost: 8, desc: 'PUZZLE: takes back your last drop, even after your bits run out.', modes: ['puzzle'], inGame: true },
 };
@@ -248,7 +248,7 @@ const BOOSTER_SVG = {
   'firewall-delay': '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3zM3 9.7h18M3 14.3h18M9 5v4.7M15 5v4.7M6 9.7v4.6M12 9.7v4.6M18 9.7v4.6M9 14.3V19M15 14.3V19"/></svg>', // (the wall, held back)
   lookahead: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>', // (an eye)
   overtime: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="13.5" r="7.5"/><path d="M9 3h4M11 3v3M11 10v3.5l2.2 2.2M19.5 3.5v5M17 6h5"/></svg>', // (a stopwatch, plus)
-  'second-chance': '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S3.5 15 3.5 9.2A4.4 4.4 0 0 1 12 7a4.4 4.4 0 0 1 8.5 2.2c0 1.6-.6 3.1-1.6 4.5"/><path d="M14 13.5a3.5 3.5 0 1 0 1-2.5M14.6 9.6V12H17"/></svg>', // (a heart, going round again)
+  'second-chance': '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6M3.5 4v4.5H8M12 7.5V12l3 2"/></svg>', // (RESTORE POINT: a clock wound back)
   hint: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/></svg>', // (a light bulb)
   undo: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>', // (back a step)
 };
@@ -2214,7 +2214,7 @@ function endGame(reason = 'trace') {
   if (daily) newBestEl.hidden = true;
   if (runBoosts.size || secondChanceUsed) { // (a boosted game says so)
     note.hidden = false;
-    note.textContent += ` // BOOSTED: ${[...runBoosts, ...(secondChanceUsed ? ['second-chance'] : [])].map((id) => BOOSTERS[id].name).join(', ')}`;
+    note.textContent += ` // PATCHED: ${[...runBoosts, ...(secondChanceUsed ? ['second-chance'] : [])].map((id) => BOOSTERS[id].name).join(', ')}`;
   }
   if (usedStarters.length) note.textContent += ` // STARTERS: ${usedStarters.map(itemName).join(', ')}`; // (and one that used side slots)
   if (marketBought.length) {
@@ -4679,9 +4679,9 @@ function showKeys() {
   refreshPuzzleTools();
 }
 
-// The main menu's BOOSTERS: one button, saying what's on (none or its name); a tap opens its card:
+// The main menu's PATCHES: one button, saying what's on (none or its name); a tap opens its card:
 // the ones owned for this mode, one of them switched on at a time (on: used up in the next game, at
-// its first drop), and GET BOOSTERS (the STORE's)
+// its first drop), and GET PATCHES (the STORE's)
 // THE STORE'S i: each resource, its icon, and how it's earned (ECONOMY.md has the numbers in full)
 const RES_HOW = {
   keys: 'The STORE\'s money. +1 for every 10 bits you decrypt. +2 when a chain reaches 5 links, +5 at 7. +10 for each level and achievement. +5 for your first daily game of the day. +2 / 4 / 6 the first time you solve an EASY / NORMAL / HARD puzzle. +25 in the DAILY DROP.',
@@ -4708,10 +4708,10 @@ const SECTION_INFO = {
       : `Make chains to fill the CHAIN METER beside the grid: ${HACK_COMBO} links, and they carry over from drop to drop. Fill it and you get a random exploit from the ones you've equipped.`,
     'It waits in the EXPLOIT button under the grid. Tap the button when you want it, and it becomes your next drop. Once it\'s armed, there\'s no taking it back.',
     'Tap an exploit below to equip it, or tap an equipped one to take it off. You get more slots as you level up.']],
-  boosters: ['// BOOSTERS', [
-    'A booster gives your next game an edge.',
-    'Buy them with KEYS. Before a game, tap BOOSTERS on the main menu and switch one on.',
-    'One per game. It\'s used up when the game starts (SECOND CHANCE only when it saves you).',
+  boosters: ['// PATCHES', [
+    'A patch gives your next game an edge.',
+    'Buy them with KEYS. Before a game, tap PATCHES on the main menu and switch one on.',
+    'One per game. It\'s used up when the game starts (RESTORE POINT only when it saves you).',
     'Not in DAILY or VS.']],
   starters: ['// STARTER EXPLOITS', [
     'An exploit you own and bring into a game, instead of waiting for the CHAIN METER to earn one.',
@@ -4769,8 +4769,8 @@ function openBoosterPick() {
   loadArmed();
   const owned = boosterIds().filter((id) => Progress.boosters(id) > 0);
   document.getElementById('booster-pick-note').textContent = owned.length
-    ? `Switch on one to use in your next ${MODES[mode].label} game (one per game). It's used up at its first drop (SECOND CHANCE only if it saves you).`
-    : 'You don\'t have any boosters for this mode yet.';
+    ? `Switch on one to use in your next ${MODES[mode].label} game (one per game). It's used up at its first drop (RESTORE POINT only if it saves you).`
+    : 'You don\'t have any patches for this mode yet.';
   const list = document.getElementById('booster-pick-list');
   list.textContent = '';
   for (const id of owned) {
@@ -4812,8 +4812,8 @@ function refreshBoosterRow() {
   const b = document.createElement('button');
   b.type = 'button';
   b.className = on.length ? 'active' : ''; // (lit while one's on, as VS's LAYERS: ON)
-  b.innerHTML = `<span class="opt-text">BOOSTERS: ${!on.length ? 'NONE ON' : on.length === 1 ? `${BOOSTER_SVG[on[0]] || ''}${BOOSTERS[on[0]].name}` : `${on.map((id) => BOOSTER_SVG[id] || '').join('')}${on.length} ON`}</span>`;
-  b.setAttribute('aria-label', `Boosters: ${on.length ? on.map((id) => BOOSTERS[id].name).join(', ') : 'none on'}. Tap to choose`);
+  b.innerHTML = `<span class="opt-text">PATCHES: ${!on.length ? 'NONE ON' : on.length === 1 ? `${BOOSTER_SVG[on[0]] || ''}${BOOSTERS[on[0]].name}` : `${on.map((id) => BOOSTER_SVG[id] || '').join('')}${on.length} ON`}</span>`;
+  b.setAttribute('aria-label', `Patches: ${on.length ? on.map((id) => BOOSTERS[id].name).join(', ') : 'none on'}. Tap to choose`);
   b.addEventListener('click', openBoosterPick);
   row.appendChild(b);
   refitHome(); // (new words in set boxes)
@@ -4913,7 +4913,7 @@ function refreshStarterRow() {
   refitHome(); // (new words in set boxes)
 }
 
-// SECOND CHANCE: the trace completes, but everything above the bottom 3 rows is wiped and the game
+// RESTORE POINT (id second-chance): the trace completes, but everything above the bottom 3 rows is wiped and the game
 // goes on (once a game, when it's switched on and there's one left)
 const SECOND_CHANCE_KEEP = 3;
 function secondChance() {
@@ -4924,7 +4924,7 @@ function secondChance() {
   columns = columns.map((c) => c.slice(0, SECOND_CHANCE_KEEP)); // (the bottom rows stay)
   render();
   SFX.play('egg');
-  setMessage('SECOND CHANCE // TRACE BLOCKED', 'warn');
+  setMessage('RESTORE POINT // TRACE ROLLED BACK', 'warn');
   return true;
 }
 

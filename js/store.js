@@ -1,4 +1,4 @@
-// STORE: the MENU's fourth tab. The DAILY DROP to claim (script.js's dailyDrop), the BOOSTERS
+// STORE: the MENU's fourth tab. The DAILY DROP to claim (script.js's dailyDrop), the PATCHES
 // bought with KEYS (script.js's BOOSTERS, Progress's wallet), STARTER EXPLOITS and BLACK BOXES
 // bought with KEYS and RESOURCES (ECONOMY.md), and two purchases: REMOVE ADS (no ads, nothing unlocked) and FULL
 // ACCESS (everything that unlocks by level, and no ads; for a REMOVE ADS owner, the upgrade at the
@@ -27,7 +27,28 @@ const Store = (() => {
     clearTimeout(msgTimer);
     msgTimer = setTimeout(() => { msgEl.textContent = ''; }, 5000);
   }
-  // BOOSTERS: each with what it does, how many are owned, and BUY for its price in KEYS
+  // WATCH AD (the Android app: ads.js's RewardAd): a patch with adPerDay (RESTORE POINT) is free for
+  // a rewarded ad, that many a day (the UTC day, as the dailies), so its KEYS price still means
+  // something. Given only once the ad's watched through
+  const AD_KEY = 'bytefall-ad-rewards';
+  const adsOn = () => !!(window.RewardAd && window.RewardAd.available());
+  const adCounts = () => {
+    try {
+      const v = JSON.parse(localStorage.getItem(AD_KEY) || '{}');
+      return v.day === todayKey() ? v.n || {} : {};
+    } catch (e) { return {}; }
+  };
+  const adLeft = (id) => Math.max(0, (boosters[id].adPerDay || 0) - (adCounts()[id] || 0));
+  const adUsed = (id) => {
+    const n = adCounts();
+    n[id] = (n[id] || 0) + 1;
+    try { localStorage.setItem(AD_KEY, JSON.stringify({ day: todayKey(), n })); } catch (e) {}
+  };
+  let adLoading = false;
+  const PLAY_SVG = '<svg class="key-ico" viewBox="0 0 7 9" aria-hidden="true"><path d="M1 0h1v1h1v1h1v1h1v1h1v1h-1v1h-1v1h-1v1h-1v1H1z" fill="currentColor"/></svg>';
+  const AD_HTML = (left) => `<span class="buy-word">${PLAY_SVG} WATCH AD</span><span class="buy-keys ad-left">${adLoading ? 'LOADING...' : left ? `FREE // ${left} TODAY` : 'TOMORROW'}</span>`;
+
+  // PATCHES (BOOSTERS in the code): each with what it does, how many are owned, and BUY for its price in KEYS
   const shop = document.getElementById('booster-shop');
   const boosters = window.BOOSTERS || {};
   for (const [id, b] of Object.entries(boosters)) {
@@ -35,8 +56,25 @@ const Store = (() => {
     item.className = 'store-item booster-item';
     item.dataset.booster = id;
     item.innerHTML = `<h3><span class="store-ico bracketed"><span class="ico-br">[</span>${BOOSTER_SVG[id] || ''}<span class="ico-br">]</span></span><span class="store-name">${b.name}</span></h3><p class="store-desc">${b.desc}</p>`
-      + `<div class="store-deal"><div class="store-terms"><div class="store-costs"></div><span class="booster-owned"></span></div><div class="store-btns"><button type="button" class="store-buy">${BUY_HTML(b.cost)}</button></div></div>`;
-    item.querySelector('.store-buy').addEventListener('click', () => {
+      + `<div class="store-deal"><div class="store-terms"><div class="store-costs"></div><span class="booster-owned"></span></div><div class="store-btns">${b.adPerDay ? '<button type="button" class="store-buy store-ad" hidden></button>' : ''}<button type="button" class="store-buy store-pay">${BUY_HTML(b.cost)}</button></div></div>`;
+    const adBtn = item.querySelector('.store-ad');
+    if (adBtn) {
+      adBtn.addEventListener('click', async () => {
+        if (adLoading || adLeft(id) <= 0) { SFX.play('denied'); return; }
+        adLoading = true;
+        render();
+        const r = await window.RewardAd.watch();
+        adLoading = false;
+        if (r.earned) {
+          adUsed(id);
+          Progress.addBooster(id);
+          SFX.play('egg');
+          say(`EARNED // ${b.name}`);
+        } else say(r.error ? 'NO AD RIGHT NOW // TRY AGAIN LATER' : 'AD CLOSED EARLY // NO REWARD');
+        render();
+      });
+    }
+    item.querySelector('.store-pay').addEventListener('click', () => {
       if (!Progress.spendKeys(b.cost)) {
         SFX.play('denied');
         flashShort(item);
@@ -109,8 +147,15 @@ const Store = (() => {
       const b = boosters[item.dataset.booster];
       const n = Progress.boosters(item.dataset.booster);
       item.querySelector('.booster-owned').textContent = n ? `OWNED \u00d7${n}` : '';
-      item.querySelector('.store-buy').innerHTML = BUY_HTML(b.cost); // (KEYS on BUY)
-      item.querySelector('.store-buy').classList.toggle('short', keys < b.cost);
+      item.querySelector('.store-pay').innerHTML = BUY_HTML(b.cost); // (KEYS on BUY)
+      item.querySelector('.store-pay').classList.toggle('short', keys < b.cost);
+      const ad = item.querySelector('.store-ad');
+      if (ad) { // (only in the app, where ads.js, loaded after this, has made RewardAd)
+        const left = adLeft(item.dataset.booster);
+        ad.hidden = !adsOn();
+        ad.innerHTML = AD_HTML(left);
+        ad.disabled = adLoading || !left;
+      }
     });
     menu.querySelectorAll('.starter-item').forEach((item) => {
       const id = item.dataset.starter;

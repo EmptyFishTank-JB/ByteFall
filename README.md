@@ -167,7 +167,7 @@ checks look for). Set up once in the Play Console:
    your purchases go through Google's test cards and charge nothing. Refund one from **Order
    management** to see the game take it back at the next launch.
 
-## Keys, resources and boosters
+## Keys, resources and patches
 
 **[ECONOMY.md](ECONOMY.md) has the whole economy in tables**: every resource, how and where it's
 earned, every price, the BLACK BOX odds and the infections.
@@ -183,26 +183,35 @@ and **MASTER KEYS** (every 5th level, the day's first daily game, the day's firs
 DAILY earn them all, BLITZ and ZEN at half the rate, VS only CRYPTO, ROOTKITS and MASTER KEYS, PUZZLE
 none. Each holds at most 999 (KEYS have no cap). Each has its own color in every theme (BUGS roach brown, CACHE light gray, CRYPTO Bitcoin orange,
 ROOTKITS red, MASTER KEYS gold with a glow; KEYS the theme's accent; PAPER darker, MONOCHROME in grays).
-The main menu shows them in a line under the level bar, the STORE too (its **[i]** by the title, or a tap on that line, opens a card of each resource and how it's earned; each STORE section, BOOSTERS, STARTER EXPLOITS and BLACK BOXES, has its own [i] saying what that kind of thing is, its note kept to a line); a drop that earns some
-floats them up off the board, and the result screen lists the game's haul. BOOSTERS cost KEYS;
+The main menu shows them in a line under the level bar, the STORE too (its **[i]** by the title, or a tap on that line, opens a card of each resource and how it's earned; each STORE section, PATCHES, STARTER EXPLOITS and BLACK BOXES, has its own [i] saying what that kind of thing is, its note kept to a line); a drop that earns some
+floats them up off the board, and the result screen lists the game's haul. PATCHES (boosters, `BOOSTERS` in the code) cost KEYS;
 STARTER EXPLOITS and BLACK BOXES cost KEYS and resources (a MASTER KEY buys any exploit outright):
 
-| Booster | Keys | Does |
+| Patch | Keys | Does |
 |---|---|---|
 | HEAD START | 15 | the CHAIN METER starts half full |
 | FIREWALL DELAY | 20 | the first encryption layer rises 4 drops later |
 | LOOKAHEAD | 15 | the next bit shown for the first 60 seconds of play |
 | OVERTIME | 20 | +15 seconds in BLITZ |
-| SECOND CHANCE | 40 | when the trace completes, everything above the bottom 3 rows is wiped and the game goes on (once a game) |
+| RESTORE POINT | 40 | when the trace completes, the system rolls back: everything above the bottom 3 rows is wiped and the game goes on (once a game); also free for a rewarded ad, once a day (below) |
 | HINT | 10 | PUZZLE: lights the column the next bit goes in (worked out by js/puzzle-sim.js) |
 | UNDO | 8 | PUZZLE: takes back the last drop, even after running out of bits |
 
-The first five are switched on from the main menu's BOOSTERS button (laid out as VS's settings: BOOSTERS:
-NONE ON, or the booster's name, filled while one's on; one booster per game), which opens a card of the ones owned for the
-mode, each with its icon, how many and ON / OFF (switching one on switches the other off), and GET BOOSTERS (the STORE's); per mode, for the modes they fit and paid for at
-a game's first drop (SECOND CHANCE only when it saves you); HINT and UNDO sit under a
+The first five are switched on from the main menu's PATCHES button (laid out as VS's settings: PATCHES:
+NONE ON, or the patch's name, filled while one's on; one patch per game), which opens a card of the ones owned for the
+mode, each with its icon, how many and ON / OFF (switching one on switches the other off), and GET PATCHES (the STORE's); per mode, for the modes they fit and paid for at
+a game's first drop (RESTORE POINT only when it saves you); HINT and UNDO sit under a
 puzzle's drop buttons, and with none owned a second tap buys one. Never in DAILY or VS. A
-boosted game says so on its result screen.
+patched game says so on its result screen (PATCHED: and their names).
+
+**WATCH AD** (the Android app only; `adPerDay` on a patch, store.js, ads.js's `RewardAd`): RESTORE
+POINT's STORE card has a WATCH AD button over BUY: a rewarded ad, the player's choice, that gives one
+RESTORE POINT once it's watched through (closed early, nothing; Google's word decides), once a day
+(the UTC day, as the dailies; `bytefall-ad-rewards`), so its 40 KEYS still mean something. It says
+FREE // 1 TODAY, LOADING... while the ad's fetched, then TOMORROW. Offered with or without REMOVE
+ADS (that takes the banner away; nobody has to watch one), behind the same consent check as the
+banner. Its ad unit is `rewardedId` in `js/ads-config.js` (Google's sample rewarded unit till
+ByteFall's is made).
 
 **THE SIDE SLOTS**: one each side of the exploit button (CLASSIC, BLITZ and ZEN only), opened by level: the left at Lv 4, the right at Lv 12 (`SIDE_SLOT_LEVELS` in progress.js; before then the main menu's STARTER L / STARTER R show LV 4 / LV 12 behind a padlock, a tap saying so in the card's title and in a game the slot shows a padlock over its level, so the BLACK MARKET comes a slot at a time).
 **STARTER EXPLOITS** (STORE) are exploits of your own, any you've unlocked by level, by tier: tier 1
@@ -215,7 +224,7 @@ sold; **BLACK BOXES** I, II and III are (5 KEYS and 3 CRYPTO; 12, 5 and a ROOTKI
 random pull each, their odds on them: an exploit of tier 1, 2 or 3 (any of the tier, unlocked or not)
 or an **INFECTION** (I: 65 / 20 / 3 / 12%; II: 35 / 45 / 12 / 8%; III: 10 / 45 / 42 / 3%).
 Pick 2 on the main menu to take into a game, one in each slot (marked S): two of one kind
-(if you have two) or one each of two. The menu shows the two slots as VS's settings are laid out, two across under BOOSTERS: STARTER L and STARTER R and what's in each (EMPTY, or its name, trailing off when long), filled while one's in it.
+(if you have two) or one each of two. The menu shows the two slots as VS's settings are laid out, two across under PATCHES: STARTER L and STARTER R and what's in each (EMPTY, or its name, trailing off when long), filled while one's in it.
 A tap on a slot opens its card: every starter and box you own and how many, to put in that slot, EMPTY
 THIS SLOT, and BUY EXPLOITS (the STORE's starters); each is used once in the game. In
 the game, a tap arms an exploit as your next drop, as an earned one, and it's used up (the ones not
@@ -246,7 +255,7 @@ dimmed, and the window shows OPENS IN n DROPS in place of BUY. A game that used 
 
 How far KEYS go (a simulation of CLASSIC games on the CPU's own board code: node tools/keysim.js): a game
 decrypts about 90 to 110 bits, so it earns about 14 to 18 KEYS, or 20 to 23 all in with the levels,
-achievements, first puzzle solves and the daily 10. That's about one booster, or with the resources a game also earns (ECONOMY.md), two tier 1
+achievements, first puzzle solves and the daily 10. That's about one patch, or with the resources a game also earns (ECONOMY.md), two tier 1
 exploits or one tier 2, or a few saved up for a game with everything on.
 
 ## Exploits

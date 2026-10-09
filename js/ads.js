@@ -10,9 +10,13 @@
 // - bought off (REMOVE ADS, FULL ACCESS): gone at once, and the strip with it
 // - SETTINGS' AD PRIVACY OPTIONS (shown where the law asks for it): the consent form again, to change
 //   the choice made
+// - REWARDED ADS (window.RewardAd, the STORE's WATCH AD): a full-screen ad the player chooses to
+//   watch, the reward given only once it's watched through (Google's word: closed early, nothing).
+//   Offered with or without REMOVE ADS (that takes the banner away; nobody has to watch one), behind
+//   the same consent check as the banner
 // - builds with TEST ads (js/ads-config.js's testing): SETTINGS' TEST ADS says what the ads are doing
-//   (started, the consent answer, a banner showing, or Google's reason there's none), and a consent
-//   check that fails outright doesn't hold the test banner back
+//   (started, the consent answer, a banner showing, or Google's reason there's none; the rewarded
+//   ads too), and a consent check that fails outright doesn't hold the test ads back
 (() => {
   const cap = window.Capacitor;
   const cfg = window.BYTEFALL_ADS;
@@ -20,7 +24,6 @@
   const AdMob = cap.Plugins.AdMob;
   const RETRY_MS = 60000; // (a banner that failed to load tries again a minute later)
   let shown = false;
-  let started = false;
   let allowed = false; // (consent settled: ads may be asked for)
   let retry = null;
   const owned = () => Unlocks.hasNoAds();
@@ -29,7 +32,7 @@
   const statusEl = document.getElementById('ad-status');
   if (testBox) testBox.hidden = !cfg.testing;
   // (a line each for starting, the consent check and the banner, kept together)
-  const notes = { ads: '', consent: '', banner: '' };
+  const notes = { ads: '', consent: '', banner: '', reward: '' };
   const say = (key, text) => {
     notes[key] = text;
     if (statusEl) statusEl.textContent = Object.values(notes).filter(Boolean).join(' ');
@@ -84,39 +87,85 @@
     });
   }
 
-  async function start() {
-    if (started) return;
-    if (owned()) { say('ads', OFF); return; }
-    started = true;
-    say('ads', "Google's ads started.");
-    try {
-      await AdMob.initialize({ initializeForTesting: !!cfg.testing });
-    } catch (e) {
-      started = false; // (tried again the next time the game comes back to the front)
-      say('ads', `Google's ads didn't start: ${why(e)}.`);
-      return;
-    }
-    try {
-      let info = await AdMob.requestConsentInfo();
-      if (info.isConsentFormAvailable && info.status === 'REQUIRED') info = await AdMob.showConsentForm();
-      if (privacy) privacy.hidden = info.privacyOptionsRequirementStatus !== 'REQUIRED';
-      allowed = info.canRequestAds !== false; // (false: the form not answered yet; asked again next launch)
-      say('consent', `Consent: ${info.status}. ${allowed ? 'Ads allowed.' : 'No ads till the consent form is answered.'}`);
-    } catch (e) {
-      // (the consent check itself failed: an AdMob account or its privacy message still being set
-      // up, say. TEST ads go ahead all the same, so the banner can be tested; real ones wait for a
-      // check that works, tried again the next time the game comes back to the front)
-      if (!cfg.testing) { started = false; return; }
-      allowed = true;
-      say('consent', `The consent check failed (${why(e)}). TEST ads go ahead anyway.`);
-    }
-    showBanner();
+  // Google's ads started and the consent check done, once, for the banner and WATCH AD alike:
+  // whether ads may be asked for. One that fails is tried again the next time it's needed (the game
+  // back at the front, or WATCH AD); an unanswered form waits for the next launch
+  let readying = null;
+  function ready() {
+    if (readying) return readying;
+    readying = (async () => {
+      try {
+        await AdMob.initialize({ initializeForTesting: !!cfg.testing });
+        say('ads', "Google's ads started.");
+      } catch (e) {
+        readying = null;
+        say('ads', `Google's ads didn't start: ${why(e)}.`);
+        return false;
+      }
+      try {
+        let info = await AdMob.requestConsentInfo();
+        if (info.isConsentFormAvailable && info.status === 'REQUIRED') info = await AdMob.showConsentForm();
+        if (privacy) privacy.hidden = info.privacyOptionsRequirementStatus !== 'REQUIRED';
+        allowed = info.canRequestAds !== false;
+        say('consent', `Consent: ${info.status}. ${allowed ? 'Ads allowed.' : 'No ads till the consent form is answered.'}`);
+      } catch (e) {
+        // (the consent check itself failed: an AdMob account or its privacy message still being set
+        // up, say. TEST ads go ahead all the same, so they can be tested; real ones wait for a check
+        // that works)
+        if (!cfg.testing) {
+          readying = null;
+          say('consent', `The consent check failed (${why(e)}). No ads till it works.`);
+          return false;
+        }
+        allowed = true;
+        say('consent', `The consent check failed (${why(e)}). TEST ads go ahead anyway.`);
+      }
+      return allowed;
+    })();
+    return readying;
   }
+  async function start() {
+    if (owned()) { say('ads', OFF); return; }
+    if (await ready()) showBanner();
+  }
+
+  // WATCH AD: resolves { earned, error } once the ad's closed (error: it couldn't be had or shown)
+  let watching = null; // (the one up: { earned, done })
+  const endWatch = (error) => {
+    const w = watching;
+    if (!w) return;
+    watching = null;
+    w.done({ earned: w.earned, error });
+  };
+  AdMob.addListener('onRewardedVideoAdReward', () => { if (watching) watching.earned = true; });
+  // (closed: a moment's grace for the reward's word, should it come after the ad's gone)
+  AdMob.addListener('onRewardedVideoAdDismissed', () => setTimeout(() => endWatch(null), 400));
+  AdMob.addListener('onRewardedVideoAdFailedToShow', (e) => endWatch(why(e)));
+  window.RewardAd = {
+    available: () => !!cfg.rewardedId,
+    busy: () => !!watching,
+    async watch() {
+      if (watching) return { earned: false, error: 'busy' };
+      if (!(await ready())) return { earned: false, error: 'not allowed' };
+      say('reward', 'Loading a rewarded ad...');
+      try {
+        await AdMob.prepareRewardVideoAd({ adId: cfg.rewardedId, isTesting: !!cfg.testing });
+      } catch (e) {
+        say('reward', `No rewarded ad from Google: ${why(e)}.`);
+        return { earned: false, error: why(e) };
+      }
+      const r = await new Promise((done) => {
+        watching = { earned: false, done };
+        AdMob.showRewardVideoAd().then(() => { if (watching) watching.earned = true; }, (e) => endWatch(why(e)));
+      });
+      say('reward', r.earned ? 'Rewarded ad watched through: reward given.' : r.error ? `The rewarded ad didn't show: ${r.error}.` : 'Rewarded ad closed early: no reward.');
+      return r;
+    },
+  };
 
   // A purchase (or RESTORE PURCHASES) takes them off; the dev page's switches can put them back
   Unlocks.onChange(() => {
-    if (owned()) { removeBanner(); say('ads', OFF); say('consent', ''); say('banner', ''); }
-    else if (started) showBanner();
+    if (owned()) { removeBanner(); say('ads', OFF); say('banner', ''); }
     else start();
   });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) start(); });
