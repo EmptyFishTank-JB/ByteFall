@@ -3909,7 +3909,7 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
    REDUCED. December's are C9s of every color, October's orange, purple and green with jack o' lanterns
    and candy corn, Valentine's pinks, red and white with hearts */
 .card-lights { display: none; }
-:is([data-theme="season-winter"], [data-theme="season-halloween"], [data-theme="season-valentine"]) .card-lights { display: block; position: absolute; inset: 0; pointer-events: none; z-index: 300; overflow: clip; } /* (the glows clipped at the screen's edges: past its foot they made the page scroll) */
+:is([data-theme="season-winter"], [data-theme="season-halloween"], [data-theme="season-valentine"], [data-theme="season-frost"]) .card-lights { display: block; position: absolute; inset: 0; pointer-events: none; z-index: 300; overflow: clip; } /* (the glows clipped at the screen's edges: past its foot they made the page scroll) */
 :root.low-fx .card-lights { display: none !important; }
 /* (the glows reach a little past the screen's sides: the page is clipped there, so it never scrolls or zooms out for them) */
 html, body { overflow-x: clip; }
@@ -3920,6 +3920,9 @@ html, body { overflow-x: clip; }
 .card-lights i::before, .card-lights i::after { content: ""; position: absolute; top: -14px; bottom: -14px; left: -14px; right: -14px; background-repeat: no-repeat; mix-blend-mode: screen; } /* (bigger than the string: the glows fade out round) */
 .card-lights i::before { background-image: var(--glow-a, none); animation: card-twinkle 2.6s ease-in-out infinite; }
 .card-lights i::after { background-image: var(--glow-b, none); animation: card-twinkle 2.6s ease-in-out -1.3s infinite; }
+/* (FROST's ice glints: slower, as light catching it) */
+[data-theme="season-frost"] .card-lights i::before { animation-duration: 4.2s; }
+[data-theme="season-frost"] .card-lights i::after { animation-duration: 4.2s; animation-delay: -2.1s; }
 @keyframes card-twinkle { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
 @media (prefers-reduced-motion: reduce) { .card-lights i::before, .card-lights i::after { animation: none; } }
 [data-theme="season-winter"] .chain-meter i:nth-child(5n+1)::after { background: #ffd696; box-shadow: 0 0 6px #ffd696; }

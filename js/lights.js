@@ -6,6 +6,9 @@
 // wire; turned pixel by pixel so they stay crisp), a stepped 1-pixel wire between them, and a soft glow
 // on each. Over everything, but never in the way of a tap (style.css: no pointer events; it twinkles
 // the glows in turn and hides it all on EFFECTS: REDUCED).
+// FROST (January and February) has no lights: ice instead, in the same strips, a crust along each
+// side of the screen (thicker toward the corners, where frost gathers), frost ferns branching in off
+// it and a few glints catching the light in turn.
 (() => {
   const box = document.querySelector('.card-lights');
   if (!box) return;
@@ -94,8 +97,99 @@
     });
     return { svg: `<svg width="${W}" height="${len}" viewBox="0 0 ${W} ${len}" shape-rendering="crispEdges" aria-hidden="true">${rects}</svg>`, glows };
   }
+  // FROST's ice: the same strip, `len` high, the screen's edge at x = 0. seed: the side, so the two differ
+  const ICE = { crust: '#b4e2ff', rim: '#f4fbff', fern: '#e8f8ff' };
+  function rng(seed) {
+    let h = 2166136261;
+    for (const c of seed) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
+    return () => {
+      h = (h + 0x6d2b79f5) | 0;
+      let t = Math.imul(h ^ (h >>> 15), 1 | h);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function buildFrost(len, seed) {
+    const r = rng(`frost:${seed}:${len}`);
+    const px = new Map(); // ("x,y" -> [color, opacity]; the strongest kept)
+    const put = (x, y, c, o) => {
+      if (x < 0 || x >= W || y < 0 || y >= len) return;
+      const k = `${x},${y}`;
+      const was = px.get(k);
+      if (!was || was[1] < o) px.set(k, [c, o]);
+    };
+    // (the crust: 2-4px along the edge, swelling to 9 or so at either corner, its inner edge a bright rim)
+    const corner = (y) => Math.max(0, 1 - Math.min(y, len - 1 - y) / 70);
+    let wob = 0;
+    const edge = [];
+    for (let y = 0; y < len; y++) {
+      if (y % 3 === 0) wob = Math.max(-1, Math.min(1, wob + (r() < 0.5 ? -1 : 1)));
+      edge[y] = Math.round(3 + wob + corner(y) ** 1.6 * 8);
+    }
+    let rects = '';
+    for (let y = 0; y < len; y++) {
+      rects += `<rect x="0" y="${y}" width="${edge[y]}" height="1" fill="${ICE.crust}" fill-opacity="0.5"/>`;
+      put(edge[y], y, ICE.rim, 1);
+    }
+    // (a frost fern: a stem in off the crust, side branches every couple of pixels, fading out)
+    const glints = [[], []];
+    const line = (x0, y0, ang, n, o, fade) => {
+      let x = x0;
+      let y = y0;
+      const dx = Math.cos(ang);
+      const dy = Math.sin(ang);
+      for (let i = 0; i < n; i++) {
+        put(Math.round(x), Math.round(y), ICE.fern, o * (1 - (fade * i) / n));
+        x += dx;
+        y += dy;
+      }
+      return [Math.round(x), Math.round(y)];
+    };
+    const fern = (y, ang, n) => {
+      const x0 = edge[Math.max(0, Math.min(len - 1, y))];
+      const [tx, ty] = line(x0, y, ang, n, 1, 0.55);
+      for (let i = 2; i < n - 1; i += 2) {
+        const bx = x0 + Math.cos(ang) * i;
+        const by = y + Math.sin(ang) * i;
+        const m = Math.max(1, Math.round((n - i) * 0.45));
+        line(bx, by, ang - 1.05, m, 0.9 * (1 - (0.6 * i) / n), 0.5);
+        line(bx, by, ang + 1.05, m, 0.9 * (1 - (0.6 * i) / n), 0.5);
+      }
+      return [tx, ty];
+    };
+    // (along the side, every 30-55px; bigger toward the corners; a fan of them at each corner)
+    let k = 0;
+    for (let y = 18 + Math.floor(r() * 20); y < len - 18; y += 30 + Math.floor(r() * 26)) {
+      const n = Math.round(8 + r() * 8 + corner(y) * 12);
+      const tip = fern(y, (r() - 0.5) * 0.9, n);
+      if (r() < 0.6) glints[k++ % 2].push(tip);
+    }
+    for (const [y, dir] of [[4, 1], [len - 5, -1]]) {
+      [0.25, 0.75, 1.2].forEach((a, i) => {
+        const tip = fern(y + dir * i * 6, dir * a, 12 + Math.round(r() * 6) - i * 2);
+        glints[i % 2].push(tip);
+      });
+    }
+    for (const [k2, [c, o]] of px) { const [x, y] = k2.split(','); rects += `<rect x="${x}" y="${y}" width="1" height="1" fill="${c}" fill-opacity="${o.toFixed(2)}"/>`; }
+    const glow = ([x, y]) => `radial-gradient(circle at ${x + 14.5}px ${y + 14.5}px, rgba(240, 250, 255, 0.95) 0, rgba(170, 220, 255, 0.35) 2px, transparent 6px)`;
+    return { svg: `<svg width="${W}" height="${len}" viewBox="0 0 ${W} ${len}" shape-rendering="crispEdges" aria-hidden="true">${rects}</svg>`, glows: glints.map((g) => g.map(glow)) };
+  }
   let last = '';
   function draw() {
+    if (document.documentElement.dataset.theme === 'season-frost') {
+      if (!box.offsetParent) { last = ''; return; }
+      const len = Math.round(box.getBoundingClientRect().height);
+      const key = `season-frost/${len}`;
+      if (key === last || len < 40) return;
+      last = key;
+      strings.forEach((el, side) => {
+        const { svg, glows } = buildFrost(len, side);
+        el.innerHTML = svg;
+        el.style.setProperty('--glow-a', glows[0].join(', ') || 'none');
+        el.style.setProperty('--glow-b', glows[1].join(', ') || 'none');
+      });
+      return;
+    }
     const set = SETS[document.documentElement.dataset.theme];
     if (!set || !box.offsetParent) { last = ''; return; }
     const len = Math.round(box.getBoundingClientRect().height);

@@ -56,7 +56,10 @@
     if (screen.hidden || !crt) return;
     const r = crt.getBoundingClientRect();
     if (r.width < 60 || r.height < 60) return;
-    Object.assign(card.style, { position: 'absolute', flex: 'none', left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px` });
+    // (from the screen's own corner, not the window's: with the ad banner at the top, the screen
+    // already starts under it, and the window's numbers would count the banner twice)
+    const o = screen.getBoundingClientRect();
+    Object.assign(card.style, { position: 'absolute', flex: 'none', left: `${r.left - o.left}px`, top: `${r.top - o.top}px`, width: `${r.width}px`, height: `${r.height}px` });
     placeStart();
   }
 

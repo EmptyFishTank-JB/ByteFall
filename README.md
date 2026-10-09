@@ -775,7 +775,7 @@ direction and phase, slowly hue-rotates the rest of the page, and turns the
 background grid into dimmed rainbow blocks; it holds still under reduced motion. SEASONAL (free, the
 full-width button under the other themes) follows the calendar: in OCTOBER the title flickers now and then like a failing light; in DECEMBER
 (to Jan 6) the background's blocks are bulbs of every filament color, twinkling, the board catches
-the lights' warm glow. **THE SEASON'S LIGHTS**: strings of old
+the lights' warm glow. **FROST's ICE** (January 7 through February, js/lights.js): no lights; the same strips down both sides of the screen hold ice instead, a pale crust along the edge, thicker toward the corners where frost gathers, pixel frost ferns branching in off it and a few glints catching the light in turn (hidden on EFFECTS: REDUCED, as the lights are). **THE SEASON'S LIGHTS**: strings of old
 filament bulbs in fine pixel art (finer than the bots', each turned its own way: hanging, leaning, sideways, a few pointing up off the wire) run down both sides of the screen, top to bottom, a bulb at either end (js/lights.js builds them to the screen's height), the wire in the screen's 8px margin and every bulb turned in toward the middle, so none is cut off at the edge; over everything, but never in the way of a tap (their glows end at the screen's edges, so the page never scrolls for them), glowing and twinkling in turn,
 the CHAIN METER's segments in their colors: December's C9s of every color, October's orange,
 purple and green with jack o' lanterns and candy corn among them, Valentine's pinks, red and white
