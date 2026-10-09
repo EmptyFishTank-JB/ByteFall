@@ -2674,6 +2674,7 @@ html.page-twinkle .page-bg { display: block; }
 /* (room for a message, so RESTORE PURCHASES never moves) */
 .store-msg { min-height: 2lh; margin: 10px 0 6px !important; font-size: 14.5px; letter-spacing: 1px; color: var(--accent); text-align: center; }
 .store-restore { display: block; width: 100%; color: var(--fg); border-color: var(--fg-dim); background: none; }
+.panel-store .store-restore { margin: var(--gap) 0; } /* (the one gap above and below it, as between the cards) */
 .panel-store .store-note { margin: 8px 0 0; font-size: 13px; color: var(--fg-dim); }
 /* REMOVE ADS: a quiet link at the foot of the menu's other tabs */
 .store-shortcut {
