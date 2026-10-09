@@ -173,9 +173,16 @@ function createWeather(api) {
     Object.values(layers).forEach((e) => e.remove());
     layers = null;
   }
+  // (the layer's size, kept as it changes: read every frame, the browser had to work the whole page's
+  // layout out again each time first)
+  let dims = null;
+  const sizer = window.ResizeObserver ? new ResizeObserver(() => { dims = null; }) : null;
+  let sized = null;
   const size = () => {
     const c = layers.back;
-    return { W: c.clientWidth, H: c.clientHeight };
+    if (sizer && sized !== c) { if (sized) sizer.unobserve(sized); sizer.observe(c); sized = c; dims = null; }
+    if (!dims || !sizer) dims = { W: c.clientWidth, H: c.clientHeight };
+    return dims;
   };
   const areaK = () => { const { W, H } = size(); return Math.max(0.4, Math.min(3, (W * H) / (360 * 240))); };
 

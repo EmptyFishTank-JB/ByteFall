@@ -993,6 +993,28 @@ BACK (from step 2 on) redoes the step just played, or before a drop goes to the 
 the board, bits, score, chain and exploit back as they were. EXIT leaves at any
 point. It counts toward nothing (no XP, stats, achievements or best score). Notices (a poke's achievement, say) show on the notice line under BYTEFALL, clear of the banner.
 
+## Only what shows is drawn
+
+Each screen gets the device to itself; what's under it is held in memory, not drawn or moved, and carries
+on from where it was when it shows again (nothing restarts):
+
+- **The MAIN MENU** covers the game: the grid isn't drawn (`render` waits, `renderStale`) and the game's
+  layout isn't worked out (`fitBoard` waits, `boardStale`) until PLAY closes the menu, once. Picking a
+  mode (VS above all) no longer lays out a screen no one sees.
+- **RULES & RECORDS, EXPLOITS, the STORE and SETTINGS** (`body.panel-open`) cover the menu, the game and
+  the wanderers' lane: those aren't drawn, and the background starlight canvases (grid-bg.js) rest.
+  **The MUSIC PLAYER** (`body.player-open`) covers the whole game card the same way.
+- **The wanderers** (wanderers.js's `suspended`) hold where they stand under a card, the music player,
+  the start screen or the screen saver (their steps and blinks paused too) and walk on after; only
+  WANDERING BOTS: OFF clears them.
+- Each background canvas runs only while it can be seen (the board's and HUD boxes' under the game, the
+  menu panel's under the menu, the VS setup's while it's up, the start screen's while it's up), and one
+  with no size isn't touched at all.
+- **Lists**: STORE and EXPLOITS items and RECORDS' rows scrolled out of sight hold their animations still
+  (`.off-view`). The STORE's "short" pulses and its sign fade only (the glow held steady), which the
+  graphics chip draws, instead of a glow redrawn every frame.
+- The weather keeps its layer's size as it changes rather than measuring it every frame.
+
 ## Startup
 
 A fresh launch (the app or tab opened anew) opens on the START SCREEN (the studio,

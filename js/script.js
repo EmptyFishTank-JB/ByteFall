@@ -1332,7 +1332,37 @@ function layerLine(next) {
   return line;
 }
 
+// OFF VIEW: the STORE's and EXPLOITS' items, RECORDS' rows and the like scrolled out of sight hold their
+// animations still (style.css's .off-view) until they scroll back in
+const offView = window.IntersectionObserver ? new IntersectionObserver((entries) => {
+  for (const e of entries) e.target.classList.toggle('off-view', !e.isIntersecting);
+}) : null;
+const OFF_VIEW = '.store-item, .hack-item, .rec-group, .hist-game';
+function watchOffView(root = document) {
+  if (!offView) return;
+  root.querySelectorAll(OFF_VIEW).forEach((el) => { if (!el.dataset.ov) { el.dataset.ov = '1'; offView.observe(el); } });
+}
+// (new items watched as they come; ones taken out let go, so a list redrawn over and over keeps none)
+if (offView) {
+  new MutationObserver((list) => {
+    let added = false;
+    for (const m of list) {
+      if (m.addedNodes.length) added = true;
+      m.removedNodes.forEach((n) => {
+        if (n.nodeType !== 1) return;
+        if (n.dataset.ov) offView.unobserve(n);
+        n.querySelectorAll('[data-ov]').forEach((x) => offView.unobserve(x));
+      });
+    }
+    if (added) watchOffView();
+  }).observe(document.getElementById('records'), { childList: true, subtree: true });
+}
+watchOffView();
+let renderStale = false; // (the grid not drawn while the main menu covers it: drawn as it closes)
 function render(popped = [], falling = null) {
+  // (behind the MAIN MENU the grid isn't drawn at all: only once the game shows)
+  if (homeOpen && !homeEl.hidden && mode !== 'tutorial') { renderStale = true; return; }
+  renderStale = false;
   boardEl.innerHTML = '';
   const grid = buildGrid();
   if (falling) grid[falling.row][falling.col] = falling.cell;
@@ -3759,6 +3789,7 @@ function hideHome() {
   homeOpen = false;
   homeEl.hidden = true;
   updateTopIcons();
+  if (renderStale) render(); // (the grid, drawn now it shows)
   fitBoard();
 }
 window.showHome = showHome;
@@ -4228,7 +4259,11 @@ function fitGameLane() {}
 if (window.ResizeObserver) new ResizeObserver(() => fitGameLane()).observe(boardEl);
 window.addEventListener('resize', () => requestAnimationFrame(fitGameLane));
 requestAnimationFrame(fitGameLane);
-const gameWalkers = createWanderers(document.getElementById('game-walkers'), () => wanderersOn && !startScreenUp() && !document.documentElement.classList.contains('saver-on'));
+// (held where they are, not cleared, while a card (RULES & RECORDS, EXPLOITS, the STORE, SETTINGS),
+// the MUSIC PLAYER, the start screen or the screen saver covers their lane: they carry on after)
+const lanesCovered = () => startScreenUp() || document.documentElement.classList.contains('saver-on')
+  || document.body.classList.contains('panel-open') || document.body.classList.contains('player-open');
+const gameWalkers = createWanderers(document.getElementById('game-walkers'), () => wanderersOn, lanesCovered);
 // A game under way (for BACK, start.js, and the screen saver, saver.js): a session with drops in
 // it, the tutorial, or a VS match; a timed one: a BLITZ clock or a VS match running (not paused)
 const inAGame = () => !gameOver && (mode === 'tutorial' || (mode === 'vs' ? vsStarted : Progress.runDrops() > 0));

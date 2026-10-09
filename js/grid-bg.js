@@ -251,6 +251,8 @@ function startGridBackground(canvas, { defrag = true, active } = {}) {
 
   let last = 0;
   function frame(now) {
+    // (nothing to draw while it has no size, hidden: not even cleared again, tick after tick)
+    if (!size) return;
     if (now - last >= TICK_MS && (!active || active())) {
       last = now;
       tick(now);
@@ -262,17 +264,22 @@ function startGridBackground(canvas, { defrag = true, active } = {}) {
   if (!reduceMotion && gridLoops.push(frame) === 1) requestAnimationFrame(gridFrame);
 }
 
-// (the board's and the HUD boxes' rest while the main menu covers them)
-// (REDUCED EFFECTS: they all hold still)
+// Each runs only while it can be seen: the board's and the HUD boxes' rest while the main menu, a card
+// (RULES & RECORDS, EXPLOITS, the STORE, SETTINGS), the MUSIC PLAYER or the start screen covers them
+// (REDUCED EFFECTS: they all hold still; the screen saver rests them all, gridFrame)
 const lowFx = () => document.documentElement.classList.contains('low-fx');
-const gameShown = () => !document.body.classList.contains('at-home') && !lowFx();
+const bodyHas = (c) => document.body.classList.contains(c);
+const startUp = () => { const el = document.getElementById('start-screen'); return !!el && !el.hidden && !document.documentElement.classList.contains('no-start'); };
+const covered = () => bodyHas('panel-open') || bodyHas('player-open') || startUp();
+const gameShown = () => !bodyHas('at-home') && !covered() && !lowFx();
 if (document.getElementById('board-bg')) startGridBackground(document.getElementById('board-bg'), { active: gameShown });
-// VS setup: the defrag behind its options (the board's cells are covered)
-if (document.getElementById('vs-setup-bg')) startGridBackground(document.getElementById('vs-setup-bg'), { active: () => !lowFx() });
-// MAIN MENU: the mode's panel (// CLASSIC ...), the VS setup's defrag behind it, while the menu's up
-if (document.getElementById('home-panel-bg')) startGridBackground(document.getElementById('home-panel-bg'), { active: () => !lowFx() && document.body.classList.contains('at-home') });
-// START SCREEN: the starlight only, twinkling across the whole card
-if (document.getElementById('start-bg')) startGridBackground(document.getElementById('start-bg'), { defrag: false, active: () => !lowFx() });
+// VS setup: the defrag behind its options (the board's cells are covered), while it's up
+const vsSetupCard = document.getElementById('vs-setup');
+if (document.getElementById('vs-setup-bg')) startGridBackground(document.getElementById('vs-setup-bg'), { active: () => gameShown() && !!vsSetupCard && !vsSetupCard.hidden });
+// MAIN MENU: the mode's panel (// CLASSIC ...), the VS setup's defrag behind it, while the menu shows
+if (document.getElementById('home-panel-bg')) startGridBackground(document.getElementById('home-panel-bg'), { active: () => !lowFx() && bodyHas('at-home') && !covered() });
+// START SCREEN: the starlight only, twinkling across the whole card, while it's up
+if (document.getElementById('start-bg')) startGridBackground(document.getElementById('start-bg'), { defrag: false, active: () => !lowFx() && startUp() });
 // The HUD boxes (SCORE, CHAIN, NEW LAYER IN, CURRENT...): the starlight only
 document.querySelectorAll('.hud .stat:not(.cpu-stat):not(.cpu-face)').forEach((stat) => {
   const canvas = document.createElement('canvas');

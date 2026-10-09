@@ -2933,6 +2933,12 @@ html.page-twinkle .page-bg { display: block; }
 .home-play { margin-top: 2px; }
 /* The game under the menu: hidden (still laid out, so nothing jumps when PLAY shows it) */
 body.at-home .crt > :is(header, .hud, .board-wrap, .message-slot, .corner-btn, .dev-badge) { visibility: hidden; }
+/* (nothing under a card is drawn: RULES & RECORDS, EXPLOITS, the STORE and SETTINGS cover the main
+   menu, the game and the wanderers' lane; the MUSIC PLAYER covers the whole game card) */
+body.panel-open .crt > :is(#home, #game-walkers, header, .hud, .board-wrap, .message-slot, .corner-btn, .dev-badge) { visibility: hidden; }
+body.player-open :is(.cabinet, body > footer) { visibility: hidden; }
+/* (the wanderers held still where they stand while their lane is covered: their steps and blinks too) */
+:is(body.panel-open, body.player-open, html.saver-on body) #game-walkers * { animation-play-state: paused !important; }
 
 /* In a game (not the tutorial): the top-left icon is PAUSE (← BACK to the main menu, like the
    cards' BACK, when there's nothing to pause: VS's setup, a finished run), and SETTINGS waits on
@@ -3270,7 +3276,7 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
   box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.7); }
 /* (the sign itself stays solid, so nothing shows through it: only its marks dim and flare, like a neon tube) */
 .shop-sign .cur-ico { animation: sign-pulse 1.4s ease-in-out infinite; filter: drop-shadow(0 0 3px rgba(var(--accent-rgb), 0.9)); }
-@keyframes sign-pulse { 0%, 100% { color: var(--accent); filter: drop-shadow(0 0 3px rgba(var(--accent-rgb), 0.9)); } 50% { color: color-mix(in srgb, var(--accent) 55%, var(--bg-solid)); filter: drop-shadow(0 0 1px rgba(var(--accent-rgb), 0.3)); } 52% { color: var(--accent); } }
+@keyframes sign-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } 52% { opacity: 1; } } /* (a fade, as the costs' pulse) */
 .shop-item { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-bottom: 12px; }
 .shop-ico { display: inline-flex; align-items: center; gap: 2px; font-size: 26px; color: var(--accent); }
 .shop-ico svg { width: 26px; height: 26px; }
@@ -3425,9 +3431,11 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 
 /* What's short of a price pulses red (the STORE and the BLACK MARKET's window), in place of a NEED line;
    a BUY tapped without enough flashes it harder for a moment */
-.shop-cost.short, .buy-keys.short { animation: short-pulse 1.2s ease-in-out infinite; }
+/* (a fade only, the glow held steady: a fade's drawn by the graphics chip, a glow redrawn every frame
+   wasn't, and the STORE can have dozens of them going) */
+.shop-cost.short, .buy-keys.short { filter: drop-shadow(0 0 3px rgba(var(--danger-rgb), 0.75)); animation: short-pulse 1.2s ease-in-out infinite; }
 .shop-cost.short span, .buy-keys.short { color: var(--danger); }
-@keyframes short-pulse { 0%, 100% { opacity: 1; filter: drop-shadow(0 0 3px rgba(var(--danger-rgb), 0.75)); } 50% { opacity: 0.45; filter: none; } }
+@keyframes short-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
 .shop-cost.short.nudge, .buy-keys.short.nudge { animation: short-nudge 0.5s steps(2) 2, short-pulse 1.2s ease-in-out 1s infinite; }
 @keyframes short-nudge { 0% { transform: translateX(-2px) scale(1.12); filter: drop-shadow(0 0 6px rgba(var(--danger-rgb), 1)); } 100% { transform: translateX(2px) scale(1.12); filter: drop-shadow(0 0 6px rgba(var(--danger-rgb), 1)); } }
 @media (prefers-reduced-motion: reduce) { .shop-cost.short, .buy-keys.short { animation: none; } }
@@ -4462,3 +4470,7 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 .goal-card .goal-keys { margin: 0; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: 17px; letter-spacing: 2px; color: var(--accent); text-shadow: 0 0 8px rgba(var(--accent-rgb), 0.6); }
 .goal-card .goal-keys .key-ico { width: 17px; height: 17px; }
 .goal-card #goal-out { margin-top: 0; }
+
+/* (a card's items scrolled out of sight hold their animations still till they come back: script.js's
+   offView watcher) */
+.off-view, .off-view * { animation-play-state: paused !important; }

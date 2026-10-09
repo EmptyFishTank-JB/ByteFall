@@ -9,7 +9,9 @@ function keepBotMind(bot, m) {
   BOT_MINDS[bot] = { energy: m.energy, social: m.social, fun: m.fun, temper: m.temper, at: Date.now() };
   try { localStorage.setItem('bytefall-bot-minds', JSON.stringify(BOT_MINDS)); } catch (e) {}
 }
-function createWanderers(lane, active = () => true) {
+// suspended: while it's true the lane is covered (a card, the music player, the screen saver): every
+// bot and visitor stays just as it is, nothing moves, and it all carries on from there once it shows
+function createWanderers(lane, active = () => true, suspended = () => false) {
   // One to four of the CPUs (never the same one twice at once) stroll along the bottom
   // of the card, in from either side and back out again, looking the way they go. Now and then
   // one stops to idle; two that meet may stop a body's width apart (arms may overlap, nothing
@@ -1068,6 +1070,11 @@ function createWanderers(lane, active = () => true) {
       walkers.forEach((w) => w.el.remove());
       walkers = [];
       if (visitors) visitors.clear();
+      return;
+    }
+    if (suspended()) { // (held as it is, not cleared: on again from here)
+      last = now;
+      requestAnimationFrame(frame);
       return;
     }
     const dt = Math.min(0.05, (now - last) / 1000);
