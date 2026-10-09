@@ -3,8 +3,8 @@
 // bought with KEYS and RESOURCES (ECONOMY.md), and two purchases: REMOVE ADS (no ads, nothing unlocked) and FULL
 // ACCESS (everything that unlocks by level, and no ads; for a REMOVE ADS owner, the upgrade at the
 // difference), plus RESTORE PURCHASES. In the app's RELEASE edition they're Google Play's
-// (billing.js), at its prices; elsewhere (the website, ByteFall Test) a preview: BUY and RESTORE
-// say the store isn't open and charge nothing.
+// (billing.js), at its prices; on the website a preview: BUY and RESTORE say the store isn't open
+// and charge nothing. In ByteFall Test (with test ads) BUY pretends: TEST PURCHASES, below.
 // A REMOVE ADS link sits at the foot of the menu's other tabs while there are ads.
 const Store = (() => {
   // (the preview's prices; the RELEASE edition shows Google Play's, in the player's currency)
@@ -228,14 +228,54 @@ const Store = (() => {
       btn.disabled = owned;
     }
     upgradeNote.hidden = deal('full-access') !== UPGRADE;
+    renderBuyTest();
     link.hidden = Unlocks.hasNoAds() || menuPane === 'store';
   }
   const upgradeNote = document.getElementById('store-upgrade');
-  menu.querySelector('.store-preview').hidden = Billing.on;
+  const preview = menu.querySelector('.store-preview');
+  preview.hidden = Billing.on;
   let asked = false; // (a BUY or RESTORE waiting on Google Play: only those hear it failed)
+  // TEST PURCHASES (SETTINGS' // TEST PURCHASES, builds with test ads only, js/ads-config.js's testing):
+  // in the Google Play build, BUY is Google Play's (a license tester pays with the test card, nothing
+  // charged) and RESET TEST PURCHASES uses up what's owned so it can be bought again; in ByteFall
+  // Test, BUY pretends (owned at once, nothing charged) and RESET takes it back. Never in a release
+  // with real ads, nor on the website
+  const testing = () => !!(window.BYTEFALL_APP && window.BYTEFALL_ADS && window.BYTEFALL_ADS.testing);
+  const pretending = () => testing() && !Billing.on;
+  let resetting = false;
+  function renderBuyTest() {
+    const box = document.getElementById('buy-test');
+    if (!box) return;
+    box.hidden = !testing();
+    if (pretending()) preview.textContent = 'TEST // BUY PRETENDS: NOTHING IS CHARGED';
+    if (box.hidden) return;
+    const has = (yes, name) => `${name}: ${yes ? 'OWNED' : 'NOT OWNED'}`;
+    document.getElementById('buy-test-status').textContent = resetting ? 'Using up the test purchases...'
+      : `${Billing.on ? 'Google Play says' : 'Pretend purchases'}: ${has(Unlocks.hasFullAccess(), 'FULL ACCESS')}, ${has(Unlocks.owned().noAds || Unlocks.hasFullAccess(), 'REMOVE ADS')}.`;
+    document.getElementById('buy-test-note').textContent = Billing.on
+      ? 'BUY in the STORE is Google Play\'s: on a license tester\'s account, pay with the test card and nothing is charged. RESET uses up what\'s owned so it can be bought again (REMOVE ADS, then FULL ACCESS as the UPGRADE).'
+      : 'BUY in the STORE owns it at once here, nothing charged. RESET takes it back, ads and all.';
+  }
+  document.getElementById('buy-test-reset').addEventListener('click', () => {
+    if (!testing()) return;
+    SFX.play('click');
+    if (Billing.on) {
+      if (!Billing.reset()) { say('TEST // THIS BUILD CAN\'T RESET PURCHASES'); return; }
+      resetting = true;
+      asked = true;
+    } else Unlocks.pretend(false, false);
+    renderBuyTest();
+  });
   function buy(id) {
     if (ITEMS[id].owned()) return;
     if (Billing.on) { asked = true; Billing.buy(deal(id).product); return; } // (Google Play's sheet; how it went: below)
+    if (pretending()) { // (ByteFall Test: owned at once, nothing charged; the UPGRADE as FULL ACCESS)
+      const name = id === 'full-access' ? (deal(id) === UPGRADE ? 'FULL ACCESS (UPGRADE)' : 'FULL ACCESS') : 'REMOVE ADS';
+      Unlocks.pretend(id === 'full-access' || Unlocks.hasFullAccess(), id === 'remove-ads' || Unlocks.owned().noAds);
+      SFX.play('egg');
+      say(`TEST // ${name} IS YOURS // NOTHING WAS CHARGED`);
+      return;
+    }
     SFX.play('denied');
     say(window.BYTEFALL_APP ? 'PURCHASES ARE IN THE GOOGLE PLAY EDITION // NOTHING WAS CHARGED' : 'PURCHASES OPEN WITH THE APP // NOTHING WAS CHARGED');
   }
@@ -278,13 +318,24 @@ const Store = (() => {
       } else if (e.pending.length) say('PAYMENT PENDING // IT UNLOCKS ONCE GOOGLE PLAY HAS THE PAYMENT');
     } else if (e.type === 'owned' && e.restore) {
       asked = false;
+      if (resetting) { // (TEST PURCHASES: used up, so they can be bought again)
+        resetting = false;
+        render();
+        say(e.owned.length ? 'TEST // SOME PURCHASES ARE STILL OWNED' : 'TEST // PURCHASES RESET: BUY THEM AGAIN');
+        return;
+      }
       render();
       say(e.owned.length ? 'RESTORED // YOUR PURCHASES ARE BACK'
         : e.pending.length ? 'A PAYMENT IS STILL PENDING // IT UNLOCKS ONCE GOOGLE PLAY HAS IT'
           : 'NOTHING TO RESTORE // THIS GOOGLE ACCOUNT HASN\'T BOUGHT ANYTHING YET');
     } else if (e.type === 'failed' && asked) {
       asked = false;
+      if (resetting) { resetting = false; renderBuyTest(); }
       if (e.reason === 'canceled') say('CANCELED // NOTHING WAS CHARGED');
+      else if (e.reason === 'missing') { // (the product isn't made, or isn't active, in Play Console)
+        SFX.play('denied');
+        say(testing() ? 'TEST // NOT SET UP IN PLAY CONSOLE YET (OR NOT ACTIVE)' : 'NOT FOR SALE RIGHT NOW // NOTHING WAS CHARGED');
+      }
       else {
         SFX.play('denied');
         say('GOOGLE PLAY ISN\'T ANSWERING // TRY AGAIN IN A LITTLE WHILE');
@@ -292,5 +343,7 @@ const Store = (() => {
     }
   });
   render();
+  // (js/ads-config.js, which says whether this build has test ads, loads after this)
+  document.addEventListener('DOMContentLoaded', renderBuyTest);
   return { render, show };
 })();

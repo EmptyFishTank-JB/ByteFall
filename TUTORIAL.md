@@ -26,6 +26,8 @@ The tutorial lives in `js/tutorial.js` (`STEPS`).
   (a sample line and SCORE bar) and PATCHES / STARTERS on the main menu.
 - **PAUSE** is named at the top right now.
 - **The last card**: MAIN MENU only.
+- **No STORE on the pause screen** (it's on the main menu): card 32 names QUIT in its place, and card
+  44 opens the STORE itself instead of asking for a tap.
 - **RULES** (in RULES & RECORDS) is in sections now, each under a ===== line: SCORING, LAYERS AND THE
   LINE, EXPLOITS, THE BOTTOM ROW, CLASSIC'S GOAL, DIFFICULTY, RESOURCES AND LEVELS.
 
@@ -712,7 +714,7 @@ TOTAL +34
 
 **Says:**
 
-> The pause screen has RESUME, RESTART, RULES & RECORDS, SETTINGS, EXPLOITS, the STORE and the MAIN MENU. Tap RULES & RECORDS.
+> The pause screen has RESUME, RESTART, RULES & RECORDS, SETTINGS, EXPLOITS and QUIT. Tap RULES & RECORDS.
 
 - **Asks you to**: Tap RULES & RECORDS on the pause screen.
 - **Lights up**: RULES & RECORDS on the pause screen
@@ -900,14 +902,14 @@ TOTAL +34
 
 - **Heading**: `// TUTORIAL 44 / 57`
 - **Card sits**: bottom of the screen; **BOT**: resting
-- **Buttons**: EXIT, BACK
+- **Buttons**: EXIT, BACK, NEXT
 
 **Says:**
 
-> Now tap the STORE.
+> The STORE isn’t on the pause screen: it’s on the MAIN MENU. Here’s a look inside.
 
-- **Asks you to**: Tap STORE on the pause screen.
-- **Lights up**: STORE on the pause screen
+- **Asks you to**: Tap NEXT.
+- **Opens**: the STORE, on its own (the pause screen has no STORE button)
 - **Notes**: 
 
 ---

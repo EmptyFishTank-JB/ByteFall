@@ -165,6 +165,12 @@ checks look for). Set up once in the Play Console:
 4. **Settings → License testing**: your Google account (the one on the phone's Play Store), so
    your purchases go through Google's test cards and charge nothing. Refund one from **Order
    management** to see the game take it back at the next launch.
+5. **To buy them again**: SETTINGS → `// TEST PURCHASES` (only while `js/ads-config.js` says
+   `testing: true`) shows what Google Play says is owned, and **RESET TEST PURCHASES** uses up
+   everything the account owns (MainActivity's `billingReset`, Google Play's consume), so REMOVE
+   ADS, then the UPGRADE, or FULL ACCESS straight away, can be bought again with the test card. A
+   product not made (or not active) in the Play Console answers `TEST // NOT SET UP IN PLAY
+   CONSOLE YET`. Gone with `testing: false`: a release's purchases are never used up.
 
 ## Keys, resources and patches
 
@@ -175,7 +181,7 @@ KEYS are the game's currency, earned by playing and kept on the device
 (progress.js): 1 for every 10 bits decrypted, +2 when a chain reaches 5 links and +5 at 7,
 a first puzzle solve (EASY 2, NORMAL 4, HARD 6), 10 for each achievement and each level,
 5 for the day's first daily game, and 25 with the DAILY DROP (plus 3 each of BUGS, CACHE and CRYPTO, and every 7th day in a row you open the game, 3 MASTER KEYS: the LOGIN STREAK, its days and a pip for each day of the run of 7 shown under the DAILY DROP; a day missed starts it over) (claimed once a day in the
-STORE, with a free exploit for the next game) (the STORE buttons, on the main menu and the pause screen, carry the game's currency sign in their corner: unlit, a dark tube, and lit like a HOT NOW sign, glowing with a slow hum and a flicker now and then, while the DAILY DROP waits). Beside them, the RESOURCES, earned by how bits are
+STORE, with a free exploit for the next game) (the STORE button on the main menu carries the game's currency sign in their corner: unlit, a dark tube, and lit like a HOT NOW sign, glowing with a slow hum and a flicker now and then, while the DAILY DROP waits). Beside them, the RESOURCES, earned by how bits are
 decrypted: **BUGS** (down a column, 1 per 5), **CACHE** (across a row, 1 per 5), **CRYPTO** (each chain
 link from the 3rd on), **ROOTKITS** (a bit decrypted across and down at once, layers broken, BYTES)
 and **MASTER KEYS** (every 5th level, the day's first daily game, the day's first VS win). CLASSIC and
@@ -325,7 +331,7 @@ A drop earns at most one exploit, picked from the longest chain it set off.
 | BLITZ | Normal rules against a 2-minute clock that starts on your first drop (paused while the tab is hidden) |
 | ZEN | Normal rules with no encryption layers and no clock |
 | VS | VS CPU (`js/cpu.js`): you against a computer opponent at EASY / NORMAL / HARD / INSANE (faster and smarter up the levels; HARD unlocks at Lv 11, INSANE at Lv 40), played by one of four bots with their own look, lines and play style: BOT (balanced), GRIFTER (greedy: chases big chains, takes risks; Lv 5), BUNKER (defensive: low and flat, a little slower; Lv 15) and GLITCH (fast and erratic; Lv 28). The level sets the bot's resting face (EASY happy, NORMAL confident, HARD angry, INSANE red-eyed with bared teeth); switching bots pixelates one out and the next in. EXPLOITS: ON / OFF (setup screen) lets both sides use exploits: yours as in the other modes, and the CPU earns one by filling its own chain meter, a streak on its level's rules (WORM VIRUS on its tallest column, DICTIONARY ATTACK peeling every layer), wearing a devious grin while it holds one. Before START, a see-through card over the CPU's board describes the picked bot's play style. Toggling a setting gets a -_- from the bot; a locked bot or level shows a notice in the setup title's place. Both sides get the same bits in the same order: on NORMAL's 7x7 board against EASY and NORMAL, and on HARD's 8x8 board (bits up to 8, 8 decrypted in one drop making a BYTE and 4 more a NIBBLE) against HARD and INSANE, the CPU's board matching yours (its little board keeps one box either way, the 8x8's squares a little smaller, so changing the level never moves or resizes a thing). Layers rise every 8 drops on both boards whatever the size. A setup card in your board's place, laid out as the main menu's mode card (the screen's width, 8px in from its edges, only as tall as what it holds, its words and buttons at the menu's sizes, START under them; on a short screen its options scroll inside it), picks the game mode (two by two), the target, the bot and the level (four across) and LAYERS: ON / OFF (the usual layer row every 8 drops, on both boards) beside EXPLOITS: ON / OFF. The game mode's description keeps the room of the longest one's, so picking a mode never moves the buttons under it. The drop buttons and EXPLOIT wait until START, which bursts the card apart, brings in your board, its buttons and EXPLOIT, and starts the CPU's clock; the card comes back after the win / loss screen. A drop clock runs under CURRENT (9 / 7 / 5.5 / 4.5 seconds on EASY / NORMAL / HARD / INSANE, red for the last 2): a bit left too long drops by itself into a random column that won't overflow, so waiting out the CPU is no way to win. Attacks charge before they cross: the blocks a chain sends (after canceling what's headed your way, landing or still charging) build up while the chains keep coming and go over once 1.5 seconds pass with nothing added (shown as +n by the CPU's score; the CPU's charging attack shows as hollow pips and +n in the INCOMING banner). CURRENT shows the whole bit in its box, as in the other modes. The CPU's face reacts on the setup screen: a new level shows just that level's own face (no reaction), a new game mode or target a raised eyebrow or grin, a new bot its hello (BOT happy, GRIFTER smug, BUNKER skeptical, GLITCH devious). Tap its face and it reacts as the start screen's bots do: EEK!, or HEY! with a shake-off and a raised eyebrow; on HARD it shakes its head and growls, and on INSANE it shakes its head, snarls and SNAPs at you. The waiting faces (ZZZ, YOUR MOVE) come only on the setup screen, 8 seconds after the last setting was touched, and only for BOT, GRIFTER and BUNKER on EASY or NORMAL; HARD says HURRY UP... instead, and GLITCH and INSANE just wait. INSANE's resting line is MAX CPU. Your board is the same size in all four game types (the score bar's room is kept in CLASSIC too, and the level and layers line has one fixed height), so switching between them never moves or resizes anything. In ATTRITION and DEATHMATCH a score bar runs above your grid, two halves filling from the middle outward toward the target (yours to the left in your color, the CPU's to the right in amber); in TUG OF WAR it's one bar split where the points stand, a | marker sliding left or right as they change hands. Every 30 points a drop scores sends one encrypted block (a one-peel layer hiding a random bit) onto the other board, falling from the top into random columns, one at a time, after its next move; your chains cancel blocks headed your way first, and only the rest go to the other side. At most 8 / 16 / 24 / 32 blocks (EASY / NORMAL / HARD / INSANE) can wait to land on either board; any sent past that are lost. Four game modes (setup screen, top row): CLASSIC (the first to overflow loses); ATTRITION (both start at 0, and the points from chain links 2x and up and NIBBLE bonuses also come off the other side's score; first to the target wins); DEATHMATCH (a straight race to the target score); TUG OF WAR (both start with the same points, and every point scored is taken from the other side; whoever runs out loses). The target (500 to 10,000, default 2,000) or starting points (500 to 5,000, default 1,000) are set with − / + in steps of 500 (in CLASSIC the row reads NO TARGET, as bright as the rest, and − / + just answer DENIED, as they do at either end of the range). Blocks fly and overflowing loses in every mode. The incoming banner shows a small pip per block (groups of 8). In VS the header is every game's: BYTEFALL level with the top icons and VS. CPU // the game mode under it; under that the target line (TARGET 2,000, START 1,000 in TUG OF WAR, NO TARGET in CLASSIC) over your stats in a 2x2 grid of squares (SCORE, CHAIN / ENCRYPT IN, CURRENT, each value centered with its label centered above; a KEYLOGGER's preview splits the CURRENT square) and BOT (the CPU's face: a pixel chip with legs that idles, blinks and glances to the sides and up now and then, looks around before each move (waiting and planning each have two variants now and then: BORED / TAPPING, SCAN / PONDER), grins when it scores, flinches when your blocks land, sweats with a tall stack, and ends on X eyes or a smug GG), the CPU's board (with its numbers, playing each move back: bits falling, decrypting and layers peeling; press and hold it to see it full size over yours with all your board's effects), laid out so your board keeps its regular size and place; PAUSE (the top-right icon, or Esc / P; see PAUSE below) in a match covers your board as the setup screen does and stops the CPU's clock (the bot waits, -_-, tapping a foot), with EXIT (back to the setup screen) beside RESTART. On the setup screen the top-left icon is ← BACK (like the cards' BACK), to the main menu. CURRENT shows [?] until START. The CPU pauses while a panel is open. RECORDS → STATS keeps wins and losses per level |
-| PUZZLE | 60 set boards (in `js/data/puzzles.js`): decrypt every block using exactly the bits given, in order. Solving one opens the next; the arrow buttons move between them. No new layers rise and no exploits drop; puzzle layers hide a fixed bit |
+| PUZZLE | 60 set boards (in `js/data/puzzles.js`): decrypt every block using exactly the bits given, in order. Solving one opens the next; the arrow buttons move between them. The DECRYPTED card has NEXT PUZZLE and, beside it, REPLAY (the same puzzle again; the last of a set has REPLAY alone). No new layers rise and no exploits drop; puzzle layers hide a fixed bit |
 
 Switching modes mid-run asks to confirm, like RESTART. Each mode keeps its
 own best score.
@@ -693,6 +699,13 @@ it; everything can also be earned. `js/unlocks.js` holds that check (never owned
 on the website; the RELEASE edition's set from Google Play, `js/billing.js`). Add
 `?unlockall` to the URL to preview everything unlocked.
 
+**TEST PURCHASES** (app builds with test ads only, SETTINGS): in ByteFall Test (no Google Play
+billing) BUY in the STORE pretends: owned at once, nothing charged, the STORE's preview line saying
+so, kept across launches (`bytefall-test-purchases`), and the UPGRADE offered after REMOVE ADS as
+it would be; **RESET TEST PURCHASES** takes them back, ads and all. In the Google Play build BUY is
+Google Play's own sheet (a license tester's test card) and RESET uses the purchases up so they can
+be bought again (see Releasing to Google Play).
+
 ## Playing
 
 The game fills the screen with no card or frame around it (the phone's own edges are its frame):
@@ -712,7 +725,7 @@ too, and the button over the aimed column lights up. Both ways always work.
 RESTART (two taps) is on the pause screen; there's no corner button for it.
 
 The HUD (not VS): BEST over SCORE on the left, CURRENT large in the middle (on Easy, NEXT in a
-short dim panel under it; TIME or BITS LEFT under it in the timed and counted modes), ENCRYPT IN
+short panel under it, its bit in full color as CURRENT's; TIME or BITS LEFT under it in the timed and counted modes), ENCRYPT IN
 over CHAIN on the right (CHAIN the whole column in ZEN).
 
 THE CHAIN METER, a streak: a 5-segment bar up each side of the grid, exactly as tall as
@@ -1047,8 +1060,8 @@ nothing to pause: VS's setup screen), and SETTINGS waits on the pause screen.
 **PAUSE** (every mode but the tutorial; the top-right icon, or Esc / P): the board is covered
 as on VS's setup screen and the clocks stop (BLITZ's, the CPU's): RESUME, RESTART (VS: a new
 match with the same options) and, in VS, EXIT (back to its setup screen), the last two taking
-a second tap; RULES & RECORDS, SETTINGS, EXPLOITS and STORE open over it (every button under RESUME one size, two to a row, as on the main menu); MAIN MENU goes to the menu with the
-game still paused. A pause pressed mid-drop opens once the drop finishes. The game over box
+a second tap; RULES & RECORDS, SETTINGS and EXPLOITS open over it (every button under RESUME one size, two to a row, as on the main menu; no STORE in a game, it's on the main menu); QUIT (a second tap
+to confirm, CONFIRM?) ends the game, nothing kept, as RESTART, and goes to the main menu. A pause pressed mid-drop opens once the drop finishes. The game over box
 has MAIN MENU under NEW SESSION.
 
 **BACK** (the phone's back button, or the browser's): an open panel (MENU, SETTINGS, the

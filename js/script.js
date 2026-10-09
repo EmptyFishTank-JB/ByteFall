@@ -820,7 +820,8 @@ function showPuzzleResult(solved, firstTime = false) {
   shareBtn.hidden = !daily; // every daily shares, win or lose
   shareBtn.textContent = 'SHARE';
   document.getElementById('overlay-restart-btn').textContent = overlayNext === 'next' ? 'NEXT PUZZLE'
-    : daily && dailyOfficial && !solved && triesLeft > 0 ? 'NEXT TRY' : daily && dailyOfficial ? 'PRACTICE' : 'RETRY';
+    : daily && dailyOfficial && !solved && triesLeft > 0 ? 'NEXT TRY' : daily && dailyOfficial ? 'PRACTICE' : solved ? 'REPLAY' : 'RETRY';
+  replayBtn.hidden = overlayNext !== 'next'; // (solved: the same puzzle again, beside NEXT PUZZLE)
   if (!daily && !Progress.runPays()) note.textContent += ' // A REPLAY: XP AND KEYS ONCE A DAY, AGAIN TOMORROW';
   if (!daily) updatePuzzleNav();
   showRunKeys();
@@ -1045,7 +1046,7 @@ function fitVsSetup() {
 // the lines of text above buttons (notes, descriptions): each keeps the height it has in
 // Courier, so a wider font wrapping onto another line can't push the buttons below it down.
 // Re-measured when the layout changes (fitBoard), a text changes, or one comes into view.
-const LOCKED_BUTTONS = '.card-back, #records-btn, .modes button, .difficulty button, #vs-layers-btn, #vs-exploits-btn, #vs-start, #pause-resume, #pause-menu, #home-play, #overlay-restart-btn, #overlay-menu-btn, #overlay-share-btn, .records-tabs button, #vs-goal, .menu-tabs button, .store-buy, .store-restore, .store-shortcut';
+const LOCKED_BUTTONS = '.card-back, #records-btn, .modes button, .difficulty button, #vs-layers-btn, #vs-exploits-btn, #vs-start, #pause-resume, #pause-menu, #home-play, #overlay-restart-btn, #overlay-replay-btn, #overlay-menu-btn, #overlay-share-btn, .records-tabs button, #vs-goal, .menu-tabs button, .store-buy, .store-restore, .store-shortcut';
 const LOCKED_TEXT = '#mode-info, .settings-note, .vs-setup-note, .vs-setup-msg, #overlay-note, footer p, .panel-store p';
 function unfitButton(b) {
   if (!('fitLs' in b.dataset)) return;
@@ -2385,6 +2386,7 @@ function endGame(reason = 'trace') {
   showRunKeys();
   shareBtn.hidden = !daily || mode === 'puzzle';
   shareBtn.textContent = 'SHARE';
+  replayBtn.hidden = true;
 
   if (mode === 'puzzle') {
     if (!daily) Progress.puzzleFailed();
@@ -2916,6 +2918,7 @@ function applyModeUi() {
   hudEl.classList.toggle('has-time', !document.getElementById('time-stat').hidden);
   hudEl.classList.toggle('no-pulse', document.getElementById('pulse-stat').hidden);
   shareBtn.hidden = true;
+  replayBtn.hidden = true;
   showClock();
   updateHome();
 }
@@ -3593,8 +3596,9 @@ vsQuitBtn.addEventListener('click', quitVs);
 
 // PAUSE (the top-left icon in a game, and the lower-left corner in a VS match): the board is
 // covered as on the VS setup screen and the clocks (BLITZ's, the CPU's) stop. RESUME carries on;
-// RESTART (VS: a new match, same options) and EXIT (VS: back to its setup screen) each take a
-// second tap to confirm. RULES & RECORDS and SETTINGS open over it; MAIN MENU leaves it paused.
+// RESTART (VS: a new match, same options), EXIT (VS: back to its setup screen) and QUIT (the game
+// ended, back to the main menu) each take a second tap to confirm. RULES & RECORDS, SETTINGS and
+// EXPLOITS open over it; the STORE isn't there (it's on the main menu).
 // (Not in the tutorial, which keeps the top icons for its lessons.)
 const vsPauseEl = document.getElementById('vs-pause');
 const canPause = () => !gameOver && (mode !== 'vs' || vsStarted);
@@ -3612,7 +3616,7 @@ function openPause() {
   document.getElementById('pause-note').textContent = mode === 'vs' ? 'The CPU is waiting for you.' : 'The game is waiting for you.';
   requestAnimationFrame(() => { for (const el of document.querySelectorAll('#pause-note, .vs-pause .pause-row button, #pause-menu')) fitText(el); });
   document.getElementById('pause-exit').hidden = mode !== 'vs';
-  // (the tutorial: no RESTART or MAIN MENU; its banner's EXIT leaves)
+  // (the tutorial: no RESTART or QUIT; its banner's EXIT leaves)
   for (const id of ['pause-restart', 'pause-menu']) document.getElementById(id).hidden = mode === 'tutorial';
   vsPauseEl.classList.remove('closing');
   vsPauseEl.hidden = false;
@@ -3657,9 +3661,19 @@ document.getElementById('pause-restart').addEventListener('click', (e) => pauseC
 document.getElementById('pause-exit').addEventListener('click', (e) => pauseConfirm(e.currentTarget));
 document.getElementById('pause-records').addEventListener('click', () => setRecordsOpen(true, rulesPane));
 document.getElementById('pause-exploits').addEventListener('click', () => setRecordsOpen(true, 'exploits'));
-document.getElementById('pause-store').addEventListener('click', () => setRecordsOpen(true, 'store'));
 document.getElementById('pause-settings').addEventListener('click', () => setSettingsOpen(true));
-document.getElementById('pause-menu').addEventListener('click', () => showHome());
+// QUIT: the first tap arms it (CONFIRM?), the second ends the game (nothing kept, as RESTART) and
+// goes back to the main menu
+document.getElementById('pause-menu').addEventListener('click', (e) => {
+  const btn = e.currentTarget;
+  if (!armed || armed.btn !== btn) { armReset(btn, 'CONFIRM?'); return; }
+  if (busy && !gameOver) return; // (stays armed till the drop lands)
+  disarmReset();
+  if (Progress.runDrops() > 0) Progress.restarted();
+  resumeMatch();
+  resetNow();
+  showHome();
+});
 document.getElementById('home-records').addEventListener('click', () => setRecordsOpen(true, rulesPane));
 document.getElementById('home-exploits').addEventListener('click', () => setRecordsOpen(true, 'exploits'));
 document.getElementById('home-store').addEventListener('click', () => setRecordsOpen(true, 'store'));
@@ -3958,6 +3972,7 @@ function showVs() {
 
 // SHARE (DAILY): the phone's share sheet where there is one, otherwise copy to the clipboard.
 const shareBtn = document.getElementById('overlay-share-btn');
+const replayBtn = document.getElementById('overlay-replay-btn');
 function dailyShareText() {
   const run = Progress.runStats();
   const bar = (part, whole) => {
@@ -4016,6 +4031,7 @@ document.getElementById('overlay-restart-btn').addEventListener('click', () => {
   if (mode === 'puzzle' && !daily && overlayNext === 'next') setPuzzle(Math.min(puzzleIndex + 1, tierPuzzles().length - 1));
   else restart();
 });
+replayBtn.addEventListener('click', () => restart()); // (the puzzle just solved, from the top)
 
 const soundBtn = document.getElementById('sound-btn');
 function updateSoundBtn() {
@@ -4844,7 +4860,7 @@ function showKeys() {
   const n = fmt(Progress.keys());
   document.getElementById('key-label').innerHTML = `${KEY_SVG} ${n}`;
   // (the STORE buttons' sign: the currency sign, always there, lit like a HOT NOW sign while the DAILY DROP waits)
-  for (const id of ['home-store', 'pause-store']) {
+  for (const id of ['home-store']) {
     const b = document.getElementById(id);
     if (!b) continue;
     if (!b.querySelector('.store-lamp')) b.insertAdjacentHTML('beforeend', `<span class="store-lamp" aria-hidden="true">${CURRENCY_SVG}</span>`);

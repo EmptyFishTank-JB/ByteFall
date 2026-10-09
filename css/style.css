@@ -573,7 +573,7 @@ h1 span { color: var(--accent); text-shadow: 0 0 8px var(--accent); }
   font-size: 16px;
 }
 .bit-row { display: flex; justify-content: center; gap: 4px; }
-.bit-row .bit-sq { margin: 4px 0 0; color: var(--layer-text); border-color: var(--layer-border); box-shadow: none; text-shadow: none; } /* NEXT: dimmer, in the [=] layer colors */
+.bit-row .bit-sq { margin: 4px 0 0; } /* NEXT: in full color, as CURRENT */
 .stat.keylogger .bit-row .bit-sq { width: 30px; height: 30px; font-size: 13px; }
 
 .board-wrap {
@@ -924,7 +924,7 @@ body.vs-mode .hud #pulse-stat > .layer-mark { top: auto; bottom: 7px; } /* (VS: 
 
 .controls { text-align: center; margin-top: 14px; }
 
-#restart-btn, #overlay-restart-btn {
+#restart-btn, #overlay-restart-btn, .overlay-replay-btn {
   background: transparent;
   border: 1px solid var(--fg);
   color: var(--fg);
@@ -953,7 +953,9 @@ body.vs-mode .hud #pulse-stat > .layer-mark { top: auto; bottom: 7px; } /* (VS: 
 #vibrate-btn { margin-top: 6px; }
 .rec-reset { margin-top: 14px; width: 100%; padding: 6px; background: none; border: 1px solid var(--grid-line); border-radius: 4px; color: var(--fg-dim); font-family: inherit; font-size: 14.5px; letter-spacing: 1px; cursor: pointer; }
 
-@media (hover: hover) { #restart-btn:hover, #overlay-restart-btn:hover {
+.overlay-replay-btn { margin-left: 18px; } /* (as SHARE) */
+.overlay-replay-btn[hidden] { display: none; }
+@media (hover: hover) { #restart-btn:hover, #overlay-restart-btn:hover, .overlay-replay-btn:hover {
   background: rgba(var(--fg-rgb), 0.15);
 } }
 
@@ -2656,7 +2658,7 @@ html.page-twinkle .page-bg { display: block; }
    font; their labels stay on one line */
 .ref-font, .ref-font * { font-family: 'Courier New', Courier, monospace !important; }
 :is(.modes, .difficulty, .records-tabs) button, #vs-layers-btn, #vs-exploits-btn, #vs-start, #pause-resume,
-#overlay-restart-btn, #overlay-share-btn { white-space: nowrap; }
+#overlay-restart-btn, #overlay-replay-btn, #overlay-share-btn { white-space: nowrap; }
 /* The FONT and THEME notes change with the pick: each keeps room for its longest (3 and 4 lines in
    Courier), so picking one never moves what's below */
 #font-note { min-height: 3lh; }
@@ -3009,7 +3011,8 @@ body:not(.vs-mode) .hud > .hud-bits { grid-area: cur; display: flex; flex-direct
 body:not(.vs-mode) .hud-bits .stat-current { flex: 1 1 auto; }
 body:not(.vs-mode) .hud-bits .stat-current .bit-sq { width: 42px; height: 42px; font-size: 20px; margin: auto auto 2px; }
 /* NEXT (and BLITZ's TIME): a short, dim panel under CURRENT */
-body:not(.vs-mode) .hud-bits :is(#next-stat, #time-stat) { flex: 0 0 28px; height: 28px; min-height: 0; flex-direction: row !important; align-items: center; justify-content: center; gap: 8px; padding: 0 4px; opacity: 0.7; }
+body:not(.vs-mode) .hud-bits :is(#next-stat, #time-stat) { flex: 0 0 28px; height: 28px; min-height: 0; flex-direction: row !important; align-items: center; justify-content: center; gap: 8px; padding: 0 4px; }
+body:not(.vs-mode) .hud-bits #time-stat { opacity: 0.7; } /* (NEXT's bits at full brightness, as CURRENT's) */
 body:not(.vs-mode) .hud-bits :is(#next-stat, #time-stat) .label { width: auto; margin: 0; }
 body:not(.vs-mode) .hud-bits #next-stat .bit-row { margin: 0; }
 body:not(.vs-mode) .hud-bits #next-stat .bit-sq { width: 20px; height: 20px; margin: 0; font-size: 10px; }
@@ -3116,7 +3119,7 @@ html.pixel-mode .walker.skater.walking[data-look="left"] .bot { transform: none;
 .key-label { margin-left: 4px; color: var(--accent); letter-spacing: 1px; white-space: nowrap; }
 /* The STORE buttons' sign: the currency sign in its corner, always there. Unlit, a dark tube; while the
    DAILY DROP waits it lights up like a HOT NOW sign: the accent, a glow, a slow hum and a flicker now and then */
-#home-store, #pause-store { position: relative; }
+#home-store { position: relative; }
 .store-lamp { position: absolute; top: 50%; right: 9px; translate: 0 -50%; display: flex; color: var(--fg-dim); opacity: 0.45; transition: color 0.3s, opacity 0.3s; pointer-events: none; }
 .store-lamp .cur-ico { width: 13px; height: 13px; }
 .has-drop .store-lamp { color: var(--accent); opacity: 1; filter: drop-shadow(0 0 3px rgba(var(--accent-rgb), 0.95)) drop-shadow(0 0 7px rgba(var(--accent-rgb), 0.6)); animation: lamp-hum 4.2s ease-in-out infinite; }
@@ -3545,8 +3548,8 @@ body.in-game.can-pause .records-btn svg { left: auto; right: 4px; } /* (hugging 
 .streak-pips { display: inline-flex; gap: 2px; vertical-align: -1px; margin: 0 4px; }
 .streak-pips i { width: 7px; height: 9px; border: 1px solid rgba(var(--accent-rgb), 0.6); border-radius: 1px; }
 .streak-pips i.on { background: var(--accent); box-shadow: 0 0 4px rgba(var(--accent-rgb), 0.7); }
-/* PAUSE: its buttons one size, two to a row as the main menu's (one alone sits centered), MAIN MENU
-   as bright as the rest; the STORE's sign clear of its word */
+/* PAUSE: its buttons one size, two to a row as the main menu's (one alone sits centered), QUIT
+   as bright as the rest */
 .vs-pause .pause-row { gap: 8px; flex-wrap: nowrap; }
 .vs-pause .pause-row button, .vs-pause .pause-menu {
   width: 136px; min-width: 0; height: 32px; padding: 0 22px; display: flex; align-items: center; justify-content: center;
@@ -3557,7 +3560,6 @@ body.in-game.can-pause .records-btn svg { left: auto; right: 4px; } /* (hugging 
    .store-scroll does the scrolling) */
 .records .menu-pane > .panel.panel-store { overflow: visible; }
 .vs-pause .pause-row button, .vs-pause .pause-menu { width: 140px; padding: 0 6px; }
-.vs-pause #pause-store { padding: 0 24px; } /* (room for its sign) */
 /* (the STORE's sign hangs over the card's sticky BACK bar, painted above it so the bar can't clip
    it or its glow, and sits in from the card's right edge; the STORE card itself doesn't scroll, its
    .store-scroll does, so the sign never rides up over BACK) */
