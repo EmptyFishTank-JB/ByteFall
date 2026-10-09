@@ -554,6 +554,14 @@ const Progress = (() => {
   // decrypted, a bonus for long chains, and some for firsts: a puzzle solved for the first time (by
   // its set), each achievement, each level, the day's first daily game, the DAILY DROP
   const KEY_BITS = 10;
+  // DECRYPTOR RANKS pay: RANK_EARN more per rank (up to RANK_CAP ranks) on what play earns (XP toward
+  // levels, the KEYS bits earn and the resources), with STORE and BLACK MARKET prices up RANK_PRICE
+  // per rank (Pricing's cost) to match
+  const RANK_EARN = 0.05;
+  const RANK_PRICE = 0.05;
+  const RANK_CAP = 10;
+  const rankBoost = () => 1 + RANK_EARN * Math.min(RANK_CAP, d.decryptor || 0);
+  const rankPrice = () => 1 + RANK_PRICE * Math.min(RANK_CAP, d.decryptor || 0);
   const KEY_PAY = { chain5: 2, chain7: 5, achievement: 10, level: 10, daily: 5, puzzle: { e: 2, n: 4, h: 6 } };
   function earn(n) {
     if (!(n > 0)) return;
@@ -596,7 +604,7 @@ const Progress = (() => {
     for (const res of RES_IDS) {
       const per = RES_PER[res] && RES_PER[res][kind];
       if (!per) continue;
-      const part = (d.resPart[res] || 0) + (n * rate) / per;
+      const part = (d.resPart[res] || 0) + (n * rate * rankBoost()) / per;
       gain(res, Math.floor(part + 1e-9));
       d.resPart[res] = part - Math.floor(part + 1e-9);
     }
@@ -732,14 +740,14 @@ const Progress = (() => {
     return Math.round(Math.min(DEAL_MAX, Math.max(0, (PAR - avg) / PAR) * 0.5) * 20) / 20;
   }
   const priceMult = (kind) => Math.min(1.25, Math.max(0.6, (dayPricing().kinds[kind] || 1) * (1 - dealOff())));
-  function cost(kind, n) { return Math.max(1, Math.round(n * priceMult(kind))); }
+  function cost(kind, n) { return Math.max(1, Math.round(n * priceMult(kind) * rankPrice())); }
   // (what the STORE's gauge and its tabs show)
   function pricing() {
     const day = dayPricing();
     const deal = dealOff();
     const mults = Object.fromEntries(PRICE_KINDS.map((k) => [k, priceMult(k)]));
     const overall = PRICE_KINDS.reduce((n, k) => n + mults[k], 0) / PRICE_KINDS.length;
-    return { day: day.day, label: day.label, note: day.note, mood: day.mood, deal, mults, overall };
+    return { day: day.day, label: day.label, note: day.note, mood: day.mood, deal, mults, overall, rankUp: Math.round((rankPrice() - 1) * 100) };
   }
   const BOX_IDS = ['box-1', 'box-2', 'box-3'];
   const ANTI_IDS = ['adware', 'spyware', 'ransomware', 'malware', 'cryptojacker', 'scareware']; // (the INFECTIONS)
@@ -904,6 +912,8 @@ const Progress = (() => {
       save();
     },
     levelInfo,
+    // (a DECRYPTOR rank's pay: how much more play earns, and prices cost, in percent)
+    rankBonus: () => ({ earn: Math.round((rankBoost() - 1) * 100), price: Math.round((rankPrice() - 1) * 100) }),
     dailyStreak: currentStreak, // (as it stands today, back to 0 after a missed day)
     // Lv 80 only: back to Lv 0 with everything locked again but one more kept exploit slot
     rankUp() {
@@ -1108,8 +1118,10 @@ const Progress = (() => {
       run.dropSevens += values.filter((v) => v === 7).length;
       run.chain = Math.max(run.chain, chain);
       if (!run.noPay) { // (XP and KEYS: not on a replay already paid for today)
-        d.xp += values.length;
-        d.keyBits += values.length;
+        const xp = values.length * rankBoost() + (d.xpPart || 0); // (a rank's more, its parts kept)
+        d.xp += Math.floor(xp + 1e-9);
+        d.xpPart = xp - Math.floor(xp + 1e-9);
+        d.keyBits += values.length * rankBoost();
         earn(Math.floor(d.keyBits / KEY_BITS));
         d.keyBits %= KEY_BITS;
         if (chain === 5) earn(KEY_PAY.chain5); // (a chain reaching 5 links, and 7)

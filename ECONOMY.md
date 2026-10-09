@@ -68,11 +68,19 @@ So a game pays for about two tier 1 exploits, or one tier 2, and a tier 3 takes 
 | PATCH SLOTS (in a game, Lv 8 and Lv 20) | HEAD START 8 KEYS + 4 CRYPTO, FIREWALL DELAY 10 + 5 CACHE, LOOKAHEAD 8 + 5 BUGS, OVERTIME 10 + 3 BUGS + 3 CACHE, ANTIVIRUS 10 + 4 CACHE + 1 ROOTKIT, RESTORE POINT 20 + 5 CRYPTO + 2 ROOTKITS (`PATCH_PRICES`) | KEYS + resources, applied at once |
 | EXPLOITS, to keep | an exploit from TROJAN on, once unlocked: three times its STARTER price in resources, no KEYS (BLACK BOX the exploit: 30 CRYPTO + 6 ROOTKITS); RNG, BITFLIP and BUFFER OVERFLOW are free (`ownPrice`, `OWN_TIMES`, `FREE_EXPLOITS`); kept till the next RANK UP | resources, once a rank |
 
+## DECRYPTOR ranks
+
+Each DECRYPTOR rank (up to 10) earns 5% more of what play earns: XP toward levels, the KEYS bits
+earn (1 per 10 bits) and every resource (`RANK_EARN`, `RANK_CAP` in `js/progress.js`; the parts are
+kept toward the next one). Prices rise 5% a rank to match (`RANK_PRICE`), so a rank's real gain is
+faster levels; the two rates are separate to tune. Flat rewards (chain, level, achievement, daily and
+DAILY DROP KEYS) don't change.
+
 ## Prices that move
 
 Every KEYS-and-resource price above (the STORE, the BLACK MARKET, the PATCH SLOTS, EXPLOITS to keep;
 never real money) is today's: the base price times the day's multiplier and YOUR DEAL, each part
-rounded, at least 1 (`pricing`, `cost` in `js/progress.js`). The day's is the same for everyone,
+rounded, at least 1, then the DECRYPTOR rank's rise (`pricing`, `cost` in `js/progress.js`). The day's is the same for everyone,
 from the UTC date as the dailies:
 
 | Day | How often | Prices |

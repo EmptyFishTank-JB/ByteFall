@@ -6147,8 +6147,8 @@ function renderRecords() {
     const row = recordRow({
       name: `LV ${lv.level} // DECRYPTOR ${lv.decryptor}`,
       desc: lv.maxed
-        ? 'A kilobyte decrypted. Rank up to the next DECRYPTOR rank to start again at Lv 0: everything locks again (exploits, slots, Hard mode, VS, tracks, themes and fonts) and unlocks again by level, the exploits you bought are given up to buy again, but you keep one more exploit slot for good.'
-        : `100 bits per level. Reach Lv 80 (${fmt(lv.xp)} / ${fmt(lv.rankBits)} bits, a kilobyte) to rank up to DECRYPTOR ${lv.decryptor + 1}.`,
+        ? 'A kilobyte decrypted. Rank up to the next DECRYPTOR rank to start again at Lv 0: everything locks again (exploits, slots, Hard mode, VS, tracks, themes and fonts) and unlocks again by level, the exploits you bought are given up to buy again, but you keep one more exploit slot for good, and each rank earns 5% more XP, KEYS and resources (STORE and BLACK MARKET prices rise 5% to match).'
+        : `100 bits per level. Reach Lv 80 (${fmt(lv.xp)} / ${fmt(lv.rankBits)} bits, a kilobyte) to rank up to DECRYPTOR ${lv.decryptor + 1}.${Progress.rankBonus().earn ? ` DECRYPTOR ${lv.decryptor} earns +${Progress.rankBonus().earn}% XP, KEYS and resources; prices are +${Progress.rankBonus().price}%.` : ''}`,
       current: lv.maxed ? 1 : lv.into,
       goal: lv.maxed ? 1 : lv.need,
       done: lv.maxed,

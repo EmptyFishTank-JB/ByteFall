@@ -46,8 +46,9 @@ const Store = (() => {
     const el = document.getElementById('price-gauge');
     const pos = p.overall < 0.8 ? 0 : p.overall < 0.95 ? 1 : p.overall <= 1.05 ? 2 : p.overall <= 1.15 ? 3 : 4;
     const why = [p.label && `${p.label} // ${p.note}`, p.deal && `YOUR DEAL // ${Math.round(p.deal * 100)}% OFF`].filter(Boolean).join(' + ') || 'NORMAL PRICES TODAY';
+    const rank = p.rankUp ? ` (DECRYPTOR +${p.rankUp}%)` : ''; // (a rank's prices: up to match what it earns)
     el.className = `price-gauge pos-${pos}`;
-    el.innerHTML = `<span class="pg-row"><span class="pg-label">PRICES</span><span class="pg-end">LOW</span><span class="pg-bar">${[0, 1, 2, 3, 4].map((i) => `<i${i === pos ? ' class="on"' : ''}></i>`).join('')}</span><span class="pg-end">HIGH</span></span><span class="pg-why">${why}</span>`;
+    el.innerHTML = `<span class="pg-row"><span class="pg-label">PRICES</span><span class="pg-end">LOW</span><span class="pg-bar">${[0, 1, 2, 3, 4].map((i) => `<i${i === pos ? ' class="on"' : ''}></i>`).join('')}</span><span class="pg-end">HIGH</span></span><span class="pg-why">${why}${rank}</span>`;
     el.setAttribute('aria-label', `Prices today: ${why}`);
     for (const t of tabs) {
       const kind = TAB_KIND[t.dataset.stab];
