@@ -193,11 +193,12 @@ STARTER EXPLOITS and BLACK BOXES cost KEYS and resources (a MASTER KEY buys any 
 | FIREWALL DELAY | 20 | the first encryption layer rises 4 drops later |
 | LOOKAHEAD | 15 | the next bit shown for the first 60 seconds of play |
 | OVERTIME | 20 | +15 seconds in BLITZ |
+| ANTIVIRUS | 25 | the next infection a BLACK BOX lets out is quarantined (the box's slot shows the virus, grayed, and passes); bought in a game with infections running, it clears them all at once instead (RANSOMWARE's freed bits settle at the next drop; KEYS demanded, dropped) |
 | RESTORE POINT | 40 | when the trace completes, the system rolls back: everything above the bottom 3 rows is wiped and the game goes on (once a game); also free for a rewarded ad, once a day (below) |
 | HINT | 10 | PUZZLE: lights the column the next bit goes in (worked out by js/puzzle-sim.js) |
 | UNDO | 8 | PUZZLE: takes back the last drop, even after running out of bits |
 
-The first five are switched on from the main menu's PATCHES button (laid out as VS's settings: PATCHES:
+The first six are switched on from the main menu's PATCHES button (laid out as VS's settings: PATCHES:
 NONE ON, or the patch's name, filled while one's on; one patch per game), which opens a card of the ones owned for the
 mode, each with its icon, how many and ON / OFF (switching one on switches the other off), and GET PATCHES (the STORE's); per mode, for the modes they fit and paid for at
 a game's first drop (RESTORE POINT only when it saves you); HINT and UNDO sit under a
@@ -223,7 +224,8 @@ at KEYS and a resource or two (`PATCH_PRICES`, ECONOMY.md), shown as the BLACK M
 the currency sign in its corner, the pips), opening and turning over with it. A tap opens the BLACK
 MARKET's window for it (PATCH // APPLIED AT ONCE and what it does now; no MASTER KEYS; NOT NEEDED NOW
 if it would do nothing); bought, it's applied at once (HEAD START: the meter to half; FIREWALL DELAY:
-the next layer 4 drops later; LOOKAHEAD: the next 60 seconds; OVERTIME: +15 seconds; RESTORE POINT:
+the next layer 4 drops later; LOOKAHEAD: the next 60 seconds; OVERTIME: +15 seconds; ANTIVIRUS:
+every infection running cleared, or with none, waiting, pulsing, for the next one; RESTORE POINT:
 waiting, pulsing, till it saves you) and the slot's done for the game, lit with a tick. With the one
 switched on before the game, three patches a game at most; the result screen's PATCHED: lists them.
 Paused, the whole row (and PUZZLE's HINT and UNDO) dims to the drop buttons' 25% and takes no taps.
@@ -404,18 +406,19 @@ difficulty picked but locked again falls back to the default until it reopens.
 
 **Exploit slots (loadout).** Only exploits equipped in a slot are awarded. A new
 unlock drops into a free slot by itself; tap an exploit card to remove or equip
-it. **Exploits to keep** (`Progress.isOwned` / `buyToOwn`): tier 1 (the first five)
-is yours to equip as soon as it unlocks; from tier 2 on, an unlocked exploit is
-bought once with resources (three times its STARTER price in resources, no KEYS;
-BLACK BOX the exploit 30 CRYPTO + 6 ROOTKITS) and is then yours for good, RANK UP
-included (the level still has to reach it again). Its EXPLOITS card shows the
+it. **Exploits to keep** (`Progress.isOwned` / `buyToOwn`): the first three (RNG,
+BITFLIP, BUFFER OVERFLOW; `FREE_EXPLOITS`) are yours to equip as soon as they
+unlock; from TROJAN on, an unlocked exploit is bought once with resources (three
+times its STARTER price in resources, no KEYS; BLACK BOX the exploit 30 CRYPTO + 6
+ROOTKITS) and is then yours until the next RANK UP, which gives the bought ones up
+(its warnings say so: BOUGHT EXPLOITS ARE LOST). The EXPLOITS list splits its tiers
+with a ----- line (one section: ===== lines split sections). Its EXPLOITS card shows the
 price as have / cost (red where short); a first tap lights it, a second buys it
 (into a free slot when the loadout can change); short, what's short pulses red
 and the card's title says NOT ENOUGH. Its UNLOCKED notice adds // BUY IT IN
 EXPLOITS. FULL ACCESS (and the dev page's UNLOCK EVERYTHING) owns them all while
 it lasts. Saves from before this kept what they could already use: every exploit
-their level had reached or that was equipped, and all of them after a RANK UP
-(`ownedSeeded`). The BLACK MARKET, STARTERS and BLACK BOXES still deal in any
+their level had reached or that was equipped (`ownedSeed`, `OWN_SEED`). The BLACK MARKET, STARTERS and BLACK BOXES still deal in any
 unlocked exploit (or any at all, a box), owned or not: a one-off taste. The loadout is locked during a session: change it before the first drop or
 after the game ends. The daily games always use the five standard exploits, so
 they're the same for everyone.

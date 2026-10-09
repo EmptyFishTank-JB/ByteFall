@@ -41,7 +41,7 @@ const Progress = (() => {
     decryptorPoints: 0, // points earned this rank
     equipped: [], // exploit ids in the loadout slots
     ownedExploits: {}, // exploit id -> true once bought to keep (tier 1 needs no buying)
-    ownedSeeded: false, // (the exploits unlocked before buying came in, kept: done once)
+    ownedSeed: 0, // (the exploits a save could already use when buying came in, kept: OWN_SEED's round done)
     lastLevel: 0, // for LEVEL UP announcements
     exploitsSeen: {}, // exploit id -> true once announced this rank
     slotsSeen: 0, // slots announced this rank
@@ -627,6 +627,7 @@ const Progress = (() => {
     lookahead: { keys: 8, bugs: 5 },
     overtime: { keys: 10, bugs: 3, cache: 3 },
     'second-chance': { keys: 20, crypto: 5, rootkits: 2 },
+    antivirus: { keys: 10, cache: 4, rootkits: 1 },
   };
   const priceTable = (id) => (String(id).startsWith('patch:') ? PATCH_PRICES[String(id).slice(6)] : PRICES[id]);
   const BOX_IDS = ['box-1', 'box-2', 'box-3'];
@@ -665,15 +666,17 @@ const Progress = (() => {
     return pool[Math.floor(rnd() * pool.length)];
   }
 
-  // EXPLOITS TO KEEP: unlocked by level, a tier 2 or 3 exploit is then bought once with resources to
-  // equip it for good (the CHAIN METER only gives equipped ones). Tier 1 needs no buying, and FULL
-  // ACCESS owns them all. The price: three times its STARTER price in resources, no KEYS (ECONOMY.md)
+  // EXPLOITS TO KEEP: unlocked by level, an exploit past the first FREE_EXPLOITS is then bought once
+  // with resources to equip it (the CHAIN METER only gives equipped ones), and it's kept until the
+  // next RANK UP. FULL ACCESS owns them all. The price: three times its STARTER price in resources,
+  // no KEYS (ECONOMY.md)
   const OWN_TIMES = 3;
+  const FREE_EXPLOITS = 3; // (RNG, BITFLIP, BUFFER OVERFLOW)
   function ownPrice(id) {
     if (id === 'black-box') return { crypto: 30, rootkits: 6 };
     return Object.fromEntries(Object.entries(PRICES[id] || {}).filter(([res]) => res !== 'keys').map(([res, n]) => [res, n * OWN_TIMES]));
   }
-  function isOwned(id) { return Unlocks.hasFullAccess() || tierOf(id) === 0 || !!d.ownedExploits[id]; }
+  function isOwned(id) { return Unlocks.hasFullAccess() || EXPLOIT_ORDER.indexOf(id) < FREE_EXPLOITS || !!d.ownedExploits[id]; }
   const ownMissing = (id) => Object.entries(ownPrice(id)).filter(([res, n]) => have(res) < n).map(([res, n]) => [res, n - have(res)]);
   // (equip: into a free loadout slot as well, when the loadout can change)
   function buyToOwn(id, equip = true) {
@@ -740,14 +743,16 @@ const Progress = (() => {
     d.slotsSeen = Math.max(d.slotsSeen, Math.min(d.decryptor, MAX_SLOTS));
   };
   markKept();
-  // (the exploits a player could already use when buying came in are theirs: the ones their level
-  // reached, the ones equipped, and all of them after a RANK UP; not FULL ACCESS's or a dev unlock's,
-  // which own them only while they last)
-  if (!d.ownedSeeded) {
+  // (the exploits a player could already use when buying came in are theirs, till their next RANK
+  // UP: the ones their level reached and the ones equipped; not FULL ACCESS's or a dev unlock's, which
+  // own them only while they last. OWN_SEED goes up when what's free changes, to keep them again)
+  const OWN_SEED = 2;
+  if ((d.ownedSeed || 0) < OWN_SEED) {
     EXPLOIT_ORDER.forEach((id, i) => {
-      if (d.decryptor > 0 || levelInfo().level >= EXPLOIT_LEVELS[i] || d.equipped.includes(id)) d.ownedExploits[id] = true;
+      if (levelInfo().level >= EXPLOIT_LEVELS[i] || d.equipped.includes(id)) d.ownedExploits[id] = true;
     });
-    d.ownedSeeded = true;
+    d.ownedSeed = OWN_SEED;
+    delete d.ownedSeeded;
     save();
   }
   if (!d.equipped.length) fillLoadout(); // first load, or a new Full Access / dev unlock
@@ -799,6 +804,7 @@ const Progress = (() => {
       d.unlocksSeen = {};
       d.slotsSeen = 0;
       d.equipped = [];
+      d.ownedExploits = {}; // (the exploits bought to keep: bought again, in the new rank)
       markKept();
       fillLoadout();
       save();

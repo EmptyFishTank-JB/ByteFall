@@ -3227,6 +3227,7 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 /* A side slot: a sealed BLACK BOX, its reel spinning, an ANTI-EXPLOIT's glitch */
 .exploit-icon.side-slot.sealed { animation: amber-pulse 1.6s ease-in-out infinite; }
 .exploit-icon.side-slot.rolling { color: var(--accent); border-color: var(--accent); }
+.exploit-icon.side-slot.quarantined { color: var(--fg); border-color: var(--fg); --dim: 0.5; filter: grayscale(1); }
 .exploit-icon.side-slot.glitched { color: var(--danger); border-color: var(--danger); animation: slot-glitch 0.12s steps(2) 5; }
 @keyframes slot-glitch { 0% { transform: translate(-2px, 1px); } 50% { transform: translate(2px, -1px); } 100% { transform: none; } }
 /* ADWARE's pop-up over a drop button */

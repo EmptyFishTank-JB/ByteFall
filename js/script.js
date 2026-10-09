@@ -238,6 +238,7 @@ const BOOSTERS = {
   'firewall-delay': { name: 'FIREWALL DELAY', cost: 20, desc: 'The first encryption layer rises 4 drops later.', modes: ['classic', 'blitz'] },
   lookahead: { name: 'LOOKAHEAD', cost: 15, desc: 'See your next bit for the first 60 seconds (EASY always shows it).', modes: ['classic', 'blitz', 'zen'] },
   overtime: { name: 'OVERTIME', cost: 20, desc: '+15 seconds on the BLITZ clock.', modes: ['blitz'] },
+  antivirus: { name: 'ANTIVIRUS', cost: 25, desc: 'The next infection a BLACK BOX lets out is quarantined. Bought in a game, it clears any infection already running instead. Once a game.', modes: ['classic', 'blitz', 'zen'] },
   'second-chance': { name: 'RESTORE POINT', cost: 40, desc: 'If the trace completes, the system rolls back: everything above the bottom 3 rows is wiped and you keep playing. Once a game.', modes: ['classic', 'blitz', 'zen'], adPerDay: 1 }, // (adPerDay: free for a rewarded ad that many times a day, the STORE's WATCH AD)
   hint: { name: 'HINT', cost: 10, desc: 'PUZZLE: lights up the column your next bit should go in.', modes: ['puzzle'], inGame: true },
   undo: { name: 'UNDO', cost: 8, desc: 'PUZZLE: takes back your last drop, even after your bits run out.', modes: ['puzzle'], inGame: true },
@@ -248,6 +249,7 @@ const BOOSTER_SVG = {
   'firewall-delay': '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3zM3 9.7h18M3 14.3h18M9 5v4.7M15 5v4.7M6 9.7v4.6M12 9.7v4.6M18 9.7v4.6M9 14.3V19M15 14.3V19"/></svg>', // (the wall, held back)
   lookahead: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>', // (an eye)
   overtime: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="13.5" r="7.5"/><path d="M9 3h4M11 3v3M11 10v3.5l2.2 2.2M19.5 3.5v5M17 6h5"/></svg>', // (a stopwatch, plus)
+  antivirus: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>', // (a shield, checked)
   'second-chance': '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6M3.5 4v4.5H8M12 7.5V12l3 2"/></svg>', // (RESTORE POINT: a clock wound back)
   hint: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/></svg>', // (a light bulb)
   undo: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>', // (back a step)
@@ -282,6 +284,8 @@ let marketBought = [];
 let patchSlots = []; // this game's: [{ state: 'locked' | 'market' | 'applied' | 'closed', id }]
 let patchesBought = [];
 let restoreBought = false; // (a RESTORE POINT bought in the game: waiting to save you)
+let antivirusArmed = false; // (ANTIVIRUS waiting: the next infection a BLACK BOX lets out is quarantined)
+let cureLift = false; // (ANTIVIRUS freed RANSOMWARE's bits: they settle at the next drop)
 // (what each does when it's bought in a game)
 const PATCH_NOW = {
   'head-start': 'The CHAIN METER jumps to half full.',
@@ -289,6 +293,7 @@ const PATCH_NOW = {
   lookahead: 'See your next bit for the next 60 seconds.',
   overtime: '+15 seconds on the clock.',
   'second-chance': 'If the trace completes, the system rolls back: everything above the bottom 3 rows is wiped and you keep playing.',
+  antivirus: 'Clears every infection running now. With none, the next one a BLACK BOX lets out is quarantined.',
 };
 function patchUseful(id) {
   const b = BOOSTERS[id];
@@ -297,6 +302,7 @@ function patchUseful(id) {
   if (id === 'lookahead') return lookaheadLeft <= 0 && !DIFFICULTIES[difficulty].showNext;
   if (id === 'firewall-delay') return !MODES[mode].noLayers;
   if (id === 'second-chance') return !secondChanceUsed && !restoreBought && !(armedBoosts.has(id) && Progress.boosters(id) > 0);
+  if (id === 'antivirus') return !antivirusArmed;
   return true;
 }
 function patchPick(not = []) {
@@ -625,6 +631,8 @@ function initGame() {
   lookaheadLeft = runBoosts.has('lookahead') ? LOOKAHEAD_MS : 0;
   patchesBought = [];
   restoreBought = false;
+  antivirusArmed = runBoosts.has('antivirus'); // (switched on before the game: waiting from the start)
+  cureLift = false;
   const patchOpen = Progress.patchSlots();
   patchSlots = sideSlots.length ? [0, 1].map((i) => ({ state: i >= patchOpen ? 'locked' : 'market', id: null })) : [];
   for (const ps of patchSlots) {
@@ -4750,7 +4758,7 @@ const SECTION_INFO = {
       : `Make chains to fill the CHAIN METER beside the grid: ${HACK_COMBO} links, and they carry over from drop to drop. Fill it and you get a random exploit from the ones you've equipped.`,
     'It waits in the EXPLOIT button under the grid. Tap the button when you want it, and it becomes your next drop. Once it\'s armed, there\'s no taking it back.',
     'Tap an exploit below to equip it, or tap an equipped one to take it off. You get more slots as you level up.',
-    'The first five are yours as soon as they unlock. Past those, an unlocked exploit is bought once with resources, then it\'s yours to equip for good.']],
+    'The first three are yours as soon as they unlock. Past those, an unlocked exploit is bought once with resources, then it\'s yours to equip until your next RANK UP.']],
   boosters: ['// PATCHES', [
     'A patch gives your next game an edge.',
     'Buy them with KEYS. Before a game, tap PATCHES on the main menu and switch one on.',
@@ -5241,7 +5249,7 @@ function renderPatches() {
     }
     if (ps.turning) { setPips(b, true); return; }
     const market = ps.state === 'market';
-    const waiting = ps.state === 'applied' && ps.id === 'second-chance' && restoreBought; // (a RESTORE POINT bought, not used yet)
+    const waiting = ps.state === 'applied' && ((ps.id === 'second-chance' && restoreBought) || (ps.id === 'antivirus' && antivirusArmed)); // (bought, waiting for its moment)
     const short = market && Progress.missing(`patch:${ps.id}`).length > 0;
     b.className = 'exploit-icon side-slot patch-slot';
     b.classList.toggle('market', market);
@@ -5262,7 +5270,7 @@ function renderPatches() {
     const name = BOOSTERS[ps.id].name;
     const left = marketLeft();
     b.title = market ? `PATCH // ${name}: ${priceText(Progress.price(`patch:${ps.id}`))} (${marketOpen ? `tap to see it; a new one in ${left} drop${left === 1 ? '' : 's'}` : `opens in ${marketOpensIn()} drops`})`
-      : waiting ? `PATCH // ${name}: ready to roll the trace back` : `PATCH // ${name}: applied`;
+      : waiting ? `PATCH // ${name}: ${ps.id === 'antivirus' ? 'waiting for the next infection' : 'ready to roll the trace back'}` : `PATCH // ${name}: applied`;
     b.setAttribute('aria-label', b.title);
   });
 }
@@ -5380,8 +5388,36 @@ function applyPatch(id) {
   if (id === 'overtime') { timeLeft += 15; showClock(); }
   if (id === 'lookahead') lookaheadLeft = LOOKAHEAD_MS;
   if (id === 'second-chance') restoreBought = true;
+  if (id === 'antivirus') {
+    if (activeInfections().length) cureInfections();
+    else antivirusArmed = true;
+  }
   updateHud();
   render();
+}
+// ANTIVIRUS, on what's running: every infection gone at once (RANSOMWARE's locks lifted, their bits
+// settling at the next drop; the KEYS demanded, dropped)
+function cureInfections() {
+  adware = null;
+  spywareLeft = 0;
+  malwareLeft = 0;
+  jackLeft = 0;
+  scareLeft = 0;
+  demands = {};
+  ransoms = {};
+  for (const col of columns) {
+    for (const cell of col) {
+      if (!cell || !cell.locked) continue;
+      delete cell.locked;
+      delete cell.lockLook;
+      delete cell.ransom;
+      delete cell.ransomOf;
+      cureLift = true;
+    }
+  }
+  Infections.clear();
+  updateInfBadge();
+  updateColumnButtons();
 }
 function patchBuy() {
   const ps = patchSlots[shopPatch];
@@ -5392,7 +5428,8 @@ function patchBuy() {
   patchesBought.push(ps.id);
   applyPatch(ps.id);
   SFX.play('egg');
-  setMessage(`PATCH // ${BOOSTERS[ps.id].name}${ps.id === 'second-chance' ? ': READY IF THE TRACE COMPLETES' : ' APPLIED'}`);
+  const cured = ps.id === 'antivirus' && !antivirusArmed;
+  setMessage(`PATCH // ${BOOSTERS[ps.id].name}${ps.id === 'second-chance' ? ': READY IF THE TRACE COMPLETES' : cured ? ': INFECTIONS CLEARED' : ps.id === 'antivirus' ? ': THE NEXT INFECTION IS QUARANTINED' : ' APPLIED'}`);
   showKeys();
   renderStarters();
 }
@@ -5450,6 +5487,17 @@ function openBox(i) {
       return;
     }
     b.classList.remove('rolling');
+    if (Progress.isAnti(result) && antivirusArmed) { // (ANTIVIRUS waiting: caught, it does nothing)
+      antivirusArmed = false;
+      b.innerHTML = `<span class="exploit-glyph">${VIRUS_SVG}</span>`;
+      b.classList.add('quarantined');
+      setTimeout(() => { b.classList.remove('quarantined'); slotSpent(sl, box); renderStarters(); }, 900);
+      setMessage(`ANTIVIRUS // ${ANTI[result].name} QUARANTINED`);
+      burstMessage('warning');
+      SFX.play('egg');
+      renderPatches();
+      return;
+    }
     if (Progress.isAnti(result)) {
       b.innerHTML = `<span class="exploit-glyph">${VIRUS_SVG}</span>`;
       b.classList.add('glitched');
@@ -5629,7 +5677,8 @@ async function payInfection(kind) {
 async function tickInfections() {
   if (malwareLeft > 0) malwareLeft--;
   if (scareLeft > 0 && --scareLeft === 0) Infections.scareEnd(); // (no more come; the ones up stay till closed)
-  let lifted = false;
+  let lifted = cureLift;
+  cureLift = false;
   for (const col of columns) for (const cell of col) if (cell && cell.locked && --cell.locked <= 0) { delete cell.locked; lifted = true; }
   if (lifted) {
     await collapse();
@@ -6093,7 +6142,7 @@ function renderRecords() {
     const row = recordRow({
       name: `LV ${lv.level} // DECRYPTOR ${lv.decryptor}`,
       desc: lv.maxed
-        ? 'A kilobyte decrypted. Rank up to the next DECRYPTOR rank to start again at Lv 0: everything locks again (exploits, slots, Hard mode, VS, tracks, themes and fonts) and unlocks again by level, but you keep one more exploit slot for good.'
+        ? 'A kilobyte decrypted. Rank up to the next DECRYPTOR rank to start again at Lv 0: everything locks again (exploits, slots, Hard mode, VS, tracks, themes and fonts) and unlocks again by level, the exploits you bought are given up to buy again, but you keep one more exploit slot for good.'
         : `100 bits per level. Reach Lv 80 (${fmt(lv.xp)} / ${fmt(lv.rankBits)} bits, a kilobyte) to rank up to DECRYPTOR ${lv.decryptor + 1}.`,
       current: lv.maxed ? 1 : lv.into,
       goal: lv.maxed ? 1 : lv.need,
@@ -6113,7 +6162,7 @@ function renderRecords() {
       btn.className = 'rec-rankup';
       btn.textContent = `RANK UP TO DECRYPTOR ${lv.decryptor + 1}?`;
       // Each press arms the next warning (for a few seconds); the fourth one ranks up
-      const warnings = ['CONFIRM? EVERYTHING LOCKS AGAIN', 'NO GOING BACK. ARE YOU SURE?', 'YES, ENCRYPT MY PROGRESS!!'];
+      const warnings = ['CONFIRM? EVERYTHING LOCKS AGAIN', 'BOUGHT EXPLOITS ARE LOST. SURE?', 'YES, ENCRYPT MY PROGRESS!!'];
       let stage = 0;
       btn.addEventListener('click', () => {
         if (!armed || armed.btn !== btn) stage = 0;
@@ -6370,7 +6419,7 @@ const loadoutEditable = () => gameOver || Progress.runDrops() === 0;
 const slotInfoEl = document.getElementById('slot-info');
 // The list's sections, by tier (as priced in the STORE and the BLACK MARKET), each under a ===== line
 const EXPLOIT_TIERS = [
-  ['TIER 1 // THE BASICS', 'Quick fixes that shake up the board. The first you unlock, and yours to equip as soon as they do.'],
+  ['TIER 1 // THE BASICS', 'Quick fixes that shake up the board. The first three are yours as they unlock; the other two are bought once with resources to keep.'],
   ['TIER 2 // PRECISION TOOLS', 'Aim these where they do the most. Unlocked, each is bought once with resources to keep (ROOTKITS too).'],
   ['TIER 3 // HEAVY HITTERS', 'Big plays that change the whole board. The last to unlock, and the dearest to keep.'],
   ['SPECIAL // UNKNOWN', 'Never sold in the STORE. Unlocked, it\'s bought once to keep, like the tiers above.'],
@@ -6378,7 +6427,8 @@ const EXPLOIT_TIERS = [
 const tierHeads = EXPLOIT_TIERS.map(([title, note], t) => {
   const el = document.createElement('div');
   el.className = 'tier-head';
-  el.innerHTML = `${t ? '<div class="store-rule" aria-hidden="true">================================================================================</div>' : ''}<h3 class="tier-sub">${title}</h3><p class="tier-note">${note}</p>`;
+  // (the tiers split by a ----- line: all exploits, one section; ===== lines split the sections)
+  el.innerHTML = `${t ? '<div class="store-rule tier-rule" aria-hidden="true">--------------------------------------------------------------------------------</div>' : ''}<h3 class="tier-sub">${title}</h3><p class="tier-note">${note}</p>`;
   return el;
 });
 const tierOfCard = (id) => (id === 'black-box' ? 3 : Progress.tierOf(id));

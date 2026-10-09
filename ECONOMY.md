@@ -61,12 +61,12 @@ So a game pays for about two tier 1 exploits, or one tier 2, and a tier 3 takes 
 
 | Where | What | Paid with |
 |---|---|---|
-| STORE, PATCHES | HEAD START 15, FIREWALL DELAY 20, LOOKAHEAD 15, OVERTIME 20, RESTORE POINT 40, HINT 10, UNDO 8 | KEYS only (RESTORE POINT also free for a rewarded ad, once a day, in the app) |
+| STORE, PATCHES | HEAD START 15, FIREWALL DELAY 20, LOOKAHEAD 15, OVERTIME 20, ANTIVIRUS 25, RESTORE POINT 40, HINT 10, UNDO 8 | KEYS only (RESTORE POINT also free for a rewarded ad, once a day, in the app) |
 | STORE, STARTER EXPLOITS | an exploit to take into a game (below) | KEYS + resources, or 1 MASTER KEY |
 | STORE, BLACK BOXES | a random pull to take into a game (below) | KEYS + resources (no MASTER KEYS) |
 | BLACK MARKET (in a game) | an exploit or BLACK BOX, the STORE's price | the same |
-| PATCH SLOTS (in a game, Lv 8 and Lv 20) | HEAD START 8 KEYS + 4 CRYPTO, FIREWALL DELAY 10 + 5 CACHE, LOOKAHEAD 8 + 5 BUGS, OVERTIME 10 + 3 BUGS + 3 CACHE, RESTORE POINT 20 + 5 CRYPTO + 2 ROOTKITS (`PATCH_PRICES`) | KEYS + resources, applied at once |
-| EXPLOITS, to keep | a tier 2 or 3 exploit, once unlocked: three times its STARTER price in resources, no KEYS (BLACK BOX the exploit: 30 CRYPTO + 6 ROOTKITS); tier 1 is free (`ownPrice`, `OWN_TIMES`) | resources, once |
+| PATCH SLOTS (in a game, Lv 8 and Lv 20) | HEAD START 8 KEYS + 4 CRYPTO, FIREWALL DELAY 10 + 5 CACHE, LOOKAHEAD 8 + 5 BUGS, OVERTIME 10 + 3 BUGS + 3 CACHE, ANTIVIRUS 10 + 4 CACHE + 1 ROOTKIT, RESTORE POINT 20 + 5 CRYPTO + 2 ROOTKITS (`PATCH_PRICES`) | KEYS + resources, applied at once |
+| EXPLOITS, to keep | an exploit from TROJAN on, once unlocked: three times its STARTER price in resources, no KEYS (BLACK BOX the exploit: 30 CRYPTO + 6 ROOTKITS); RNG, BITFLIP and BUFFER OVERFLOW are free (`ownPrice`, `OWN_TIMES`, `FREE_EXPLOITS`); kept till the next RANK UP | resources, once a rank |
 
 Starter exploits and boxes go into the two STARTER slots on the main menu (two of one kind, or one
 each of two) and are used once in a game. A slot left empty is the BLACK MARKET from the start, and
