@@ -945,7 +945,12 @@ function alignHeader() {
 }
 
 const HUD_MIN_W = 300;
+let boardStale = false; // (a layout put off while the main menu covers the game: done as it closes)
 function fitBoard() {
+  // (behind the MAIN MENU nothing of the game shows: picking a mode there, VS above all, would lay out
+  // a whole screen no one sees, twice over. It's done once, as the menu closes)
+  if (homeOpen && !homeEl.hidden) { boardStale = true; return; }
+  boardStale = false;
   // (VS's setup card stands in the board's place until START: everything's fitted as the match will
   // have it, so the HUD over the card is the height it keeps, then the card set out at the screen's
   // width, below)
@@ -4009,19 +4014,6 @@ crtBtn.addEventListener('click', () => {
 });
 updateCrtBtn();
 
-// PIXEL STYLE: OFF / ON: stepped pixel corners on every box and button, the neon glows kept,
-// and the icons redrawn in pixels (pixel-ui.js; style.css, html.px-ui)
-const pixelUiBtn = document.getElementById('pixel-ui-btn');
-function updatePixelUiBtn() {
-  pixelUiBtn.textContent = `PIXEL STYLE: ${PixelUi.on() ? 'ON' : 'OFF'}`;
-  pixelUiBtn.classList.toggle('on', PixelUi.on());
-}
-pixelUiBtn.addEventListener('click', () => {
-  PixelUi.set(!PixelUi.on());
-  updatePixelUiBtn();
-  SFX.play('punct');
-});
-updatePixelUiBtn();
 
 // (SETTINGS' switch, and the same one in the MUSIC PLAYER)
 const outputBtn = document.getElementById('output-btn');
@@ -4298,11 +4290,9 @@ function applyTheme() {
   const shown = themeAvailable(theme) ? theme : THEMES[0];
   const season = seasonTheme();
   const applied = shown.id === 'seasonal' ? season.theme : shown.id === 'terminal' ? null : shown.id;
-  const themeBefore = document.documentElement.dataset.theme;
   if (!applied) delete document.documentElement.dataset.theme;
   else document.documentElement.dataset.theme = applied;
   themeMeta.content = getComputedStyle(document.documentElement).getPropertyValue('--bg-solid').trim();
-  if (typeof PixelUi !== 'undefined' && PixelUi.on() && themeBefore !== document.documentElement.dataset.theme) PixelUi.refresh(); // (pixel icons in the new theme's colors)
   // GLYPH swaps the bits' markup, so redraw the board and HUD (once the game exists)
   if (columns.length) {
     render();
@@ -6768,7 +6758,7 @@ if (window.BYTEFALL_APP && !window.BYTEFALL_APP.release && unlockBtn) {
 document.body.classList.toggle('dev-unlock', Unlocks.isDevUnlock());
 
 // (the old layout editor's saved edits, locks and panel: gone with it, so the layout is the game's own)
-for (const k of ['bytefall-layout-edits', 'bytefall-layout-locks', 'bytefall-layout-editor', 'bytefall-layout-editor-panel']) {
+for (const k of ['bytefall-layout-edits', 'bytefall-layout-locks', 'bytefall-layout-editor', 'bytefall-layout-editor-panel', 'bytefall-pixel-ui', 'bytefall-pixel-icons-2']) {
   try { localStorage.removeItem(k); } catch (e) {}
 }
 initGame();

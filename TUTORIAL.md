@@ -1016,7 +1016,7 @@ TOTAL +34
 
 **Says:**
 
-> DISPLAY has THEMES and FONTS (more unlock as you level up), PIXEL STYLE, the CRT DISPLAY, text size and REDUCED EFFECTS. EXTRAS has the wandering bots and the screen saver.
+> DISPLAY has THEMES and FONTS (more unlock as you level up), the CRT DISPLAY, text size and REDUCED EFFECTS. EXTRAS has the wandering bots and the screen saver.
 
 - **Asks you to**: Tap NEXT.
 - **Lights up**: nothing

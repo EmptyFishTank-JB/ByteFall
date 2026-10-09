@@ -122,7 +122,7 @@ const Tutorial = (() => {
     { text: 'Tap ← BACK to close the STORE.', paused: true, pane: 'store', tap: '.card-back[data-close="records"]', pass: true, float: 'middle' },
     { text: 'Now tap SETTINGS.', paused: true, closeMenus: true, tap: '#pause-settings', pass: true, float: true },
     { text: 'SETTINGS has SOUND (sound and music, the sound effects, what you’re listening on), the PLAYLIST and MUSIC PLAYER, and CONTROLS (where the drop buttons sit, vibration).', paused: true, settings: true, float: 'middle', next: true },
-    { text: 'DISPLAY has THEMES and FONTS (more unlock as you level up), PIXEL STYLE, the CRT DISPLAY, text size and REDUCED EFFECTS. EXTRAS has the wandering bots and the screen saver.', paused: true, settings: true, float: 'middle', next: true },
+    { text: 'DISPLAY has THEMES and FONTS (more unlock as you level up), the CRT DISPLAY, text size and REDUCED EFFECTS. EXTRAS has the wandering bots and the screen saver.', paused: true, settings: true, float: 'middle', next: true },
     { text: 'Tap ← BACK to close SETTINGS.', paused: true, settings: true, tap: '.card-back[data-close="settings"]', pass: true, float: 'middle' },
     { text: 'And RESUME to get back to the game.', paused: true, closeMenus: true, tap: '#pause-resume', pass: true, float: true },
     // CLASSIC'S GOAL
