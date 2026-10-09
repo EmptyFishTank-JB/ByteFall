@@ -4435,6 +4435,10 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 @supports not (corner-shape: notch) {
   html.px-ui *:not(.fish-splash, .crt-fx), html.px-ui *::before, html.px-ui *:not(.crt-fx)::after { border-radius: 0 !important; }
 }
+/* (two-step corners, pixel-ui.js: a framed box's corners notched to the steps' outer edge, its border
+   drawn stepped as a picture; a borderless one clipped to the steps) */
+html.px-ui .px-frame { border-radius: 4px !important; corner-shape: notch; }
+html.px-ui .px-clip { clip-path: polygon(4px 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px), 0 4px, 2px 4px, 2px 2px, 4px 2px); }
 html.px-ui {
   --icon-lock: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 12' shape-rendering='crispEdges'><path d='M3 1h4v1h1v3H7V2H3v3H2V2h1zM1 5h8v6H1zM4 7v2h2V7z' fill='black' fill-rule='evenodd'/></svg>");
   --icon-play: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 9' shape-rendering='crispEdges'><path d='M1 0h1v1h1v1h1v1h1v1h1v1h-1v1h-1v1h-1v1h-1v1H1z' fill='black'/></svg>");

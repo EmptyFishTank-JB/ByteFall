@@ -44,7 +44,8 @@ const PixelUi = (() => {
   const cache = new Map(); // (an icon's drawing and colors → its pixels, or the promise of them)
   // (and kept between launches, so the icons are pixels from the first frame: a short hash of the
   // drawing and colors → its pixels; the name's number goes up when the redraw changes)
-  const SAVED = 'bytefall-pixel-icons-1';
+  const SAVED = 'bytefall-pixel-icons-2';
+  try { localStorage.removeItem('bytefall-pixel-icons-1'); } catch (e) {} // (an older round's, some drawn blank)
   let saved = {};
   try { saved = JSON.parse(localStorage.getItem(SAVED)) || {}; } catch (e) {}
   let saveTimer = 0;
@@ -80,14 +81,17 @@ const PixelUi = (() => {
   // The icon as a picture to read back: its shapes with their computed looks written in (the
   // page's CSS isn't there when it's drawn on its own), the text color as the SENTINEL
   function snapshot(svg) {
-    const cur = getComputedStyle(svg).color;
+    const own = getComputedStyle(svg);
+    const cur = own.color;
     const clone = svg.cloneNode(true);
     const from = svg.querySelectorAll(SHAPES);
     const to = clone.querySelectorAll(SHAPES);
     const looks = [];
     from.forEach((s, i) => {
       const cs = getComputedStyle(s);
-      const style = PROPS.map((p) => {
+      const style = PROPS.filter((p) => !(p === 'visibility' && cs.visibility === own.visibility)).map((p) => {
+        // (hidden only when the shape is, not because the whole icon is hidden just now: a game's
+        // PAUSE icon, say, on the main menu)
         let v = cs.getPropertyValue(p);
         if ((p === 'fill' || p === 'stroke') && v === cur) v = SENTINEL;
         return `${p}:${v}`;
@@ -205,7 +209,7 @@ const PixelUi = (() => {
       return [...paths].map(([col, dd]) => `<path class="px-ink" d="${dd}" style="fill:${col};stroke:none"/>`).join('');
     })();
     cache.set(key, job);
-    job.then((html) => { cache.set(key, html); keep(h, html); }, () => cache.delete(key));
+    job.then((html) => { cache.set(key, html); if (html) keep(h, html); }, () => cache.delete(key));
     return job;
   }
 
@@ -213,7 +217,7 @@ const PixelUi = (() => {
     if (!on() || orig.has(svg) || !svg.isConnected || !wanted(svg)) return;
     const own = { html: svg.innerHTML, sr: svg.getAttribute('shape-rendering') };
     const put = (html) => {
-      if (!on() || orig.has(svg) || svg.innerHTML !== own.html) return; // (changed meanwhile: it comes round again)
+      if (!html || !on() || orig.has(svg) || svg.innerHTML !== own.html) return; // (changed meanwhile: it comes round again; nothing drawn: left as it is)
       orig.set(svg, own);
       svg.innerHTML = html;
       svg.setAttribute('shape-rendering', 'crispEdges');
@@ -269,17 +273,134 @@ const PixelUi = (() => {
     }
   });
 
+  // TWO-STEP CORNERS: every rounded box's corners stepped twice, 2px a step (style.css keeps
+  // corner-shape: notch at 4px on them, which clips the background and the glow to the steps' outer
+  // edge). A box with a border has it drawn as a small picture (border-image) of the stepped outline
+  // in its own border color, width and style (dashes on a dashed one); one with a solid fill gets
+  // the step's inner pixel filled too. A box with no border is clipped to the steps (px-clip).
+  // Round things (a % radius: the play buttons, the sale badge) keep their own shape. Boxes are done
+  // as they come, and again when a class changes on them or around them (a lit button, a new theme)
+  const STEP = 2; // (px a step; two steps)
+  const FRAME_SKIP = '.start-walkers, .game-walkers, .page-bg, .crt-fx, .card-lights, svg, canvas, .walker, .visitor';
+  const frameCache = new Map();
+  const framed = new Set();
+  const alphaOf = (c) => { const m = c.match(/rgba?\(([^)]+)\)/); if (!m) return c === 'transparent' ? 0 : 1; const p = m[1].split(/[\s,/]+/).filter(Boolean); return p.length > 3 ? parseFloat(p[3]) : 1; };
+  // (a W x H box's outline with stepped corners: row r (STEP high) of each corner set in by ins[r]
+  // steps, o in from the edge for a stroke's half)
+  function steppedPath(W, H, p, ins, o) {
+    const n = ins.length;
+    const pts = [];
+    const L = o;
+    const T = o;
+    const R = W - o;
+    const B = H - o;
+    pts.push([L + ins[0] * p, T], [R - ins[0] * p, T]);
+    for (let r = 0; r < n; r++) { pts.push([R - ins[r] * p, T + (r + 1) * p]); if (r + 1 < n) pts.push([R - ins[r + 1] * p, T + (r + 1) * p]); }
+    pts.push([R, T + n * p], [R, B - n * p]);
+    for (let r = n - 1; r >= 0; r--) pts.push([R - ins[r] * p, B - (r + 1) * p], [R - ins[r] * p, B - r * p]);
+    pts.push([L + ins[0] * p, B]);
+    for (let r = 0; r < n; r++) { pts.push([L + ins[r] * p, B - (r + 1) * p]); if (r + 1 < n) pts.push([L + ins[r + 1] * p, B - (r + 1) * p]); }
+    pts.push([L, B - n * p], [L, T + n * p]);
+    for (let r = n - 1; r >= 0; r--) pts.push([L + ins[r] * p, T + (r + 1) * p], [L + ins[r] * p, T + r * p]);
+    return `M${pts.filter((q, i) => !i || q[0] !== pts[i - 1][0] || q[1] !== pts[i - 1][1]).map((q) => q.join(' ')).join('L')}Z`;
+  }
+  function frameImage(w, color, dashed, fill) {
+    const key = `${w}|${color}|${dashed}|${fill}`;
+    if (frameCache.has(key)) return frameCache.get(key);
+    const S = 2 * STEP + w + 2; // (a corner's slice: the steps and the line, with room)
+    const N = 3 * S;
+    const d = steppedPath(N, N, STEP, [2, 1], w / 2);
+    const dash = dashed ? ` stroke-dasharray="3 3"` : '';
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${N}" height="${N}" viewBox="0 0 ${N} ${N}" shape-rendering="crispEdges">`
+      + (fill ? `<path d="${d}" fill="${fill}"/>` : '')
+      + `<path d="${d}" fill="none" stroke="${color}" stroke-width="${w}"${dash}/></svg>`;
+    const out = { url: `url("data:image/svg+xml,${encodeURIComponent(svg)}")`, S };
+    frameCache.set(key, out);
+    return out;
+  }
+  function unframe(el) {
+    if (!framed.has(el)) return;
+    framed.delete(el);
+    el.classList.remove('px-frame', 'px-clip');
+    el.style.removeProperty('border-image');
+    delete el.dataset.pxFrame;
+  }
+  function frame(el) {
+    if (!(el instanceof HTMLElement) || el.closest(FRAME_SKIP)) return;
+    const had = framed.has(el);
+    // (read as it is without our frame: its own radius and border)
+    if (had) { el.classList.remove('px-frame', 'px-clip'); el.style.removeProperty('border-image'); }
+    const cs = getComputedStyle(el);
+    const rad = cs.borderTopLeftRadius;
+    if (!rad || rad === '0px' || rad.includes('%') || cs.display === 'inline') { if (had) { framed.delete(el); delete el.dataset.pxFrame; } return; }
+    const w = parseFloat(cs.borderTopWidth) || 0;
+    const color = cs.borderTopColor;
+    framed.add(el);
+    if (!w || cs.borderTopStyle === 'none' || alphaOf(color) === 0) {
+      const bg = cs.backgroundColor;
+      if (alphaOf(bg) > 0 || cs.backgroundImage !== 'none') el.classList.add('px-clip');
+      else framed.delete(el);
+      return;
+    }
+    const bg = cs.backgroundColor;
+    const fill = w === 1 && alphaOf(bg) === 1 && cs.backgroundImage === 'none' ? bg : ''; // (a solid fill: the step's inner pixel too)
+    const img = frameImage(Math.round(w), color, cs.borderTopStyle === 'dashed' || cs.borderTopStyle === 'dotted', fill);
+    el.style.setProperty('border-image', `${img.url} ${img.S} / ${img.S}px / 0 ${cs.borderTopStyle === 'solid' ? 'stretch' : 'round'}`);
+    el.classList.add('px-frame');
+    el.dataset.pxFrame = '1';
+  }
+  const frameRoots = new Set();
+  let frameQueued = false;
+  const frameFlush = () => {
+    frameQueued = false;
+    const roots = [...frameRoots];
+    frameRoots.clear();
+    if (!on()) return;
+    for (const r of roots) {
+      if (!r.isConnected) continue;
+      frame(r);
+      r.querySelectorAll('*').forEach(frame);
+    }
+  };
+  const frameLater = (el) => {
+    if (!on() || !(el instanceof HTMLElement)) return;
+    frameRoots.add(el);
+    if (!frameQueued) { frameQueued = true; requestAnimationFrame(frameFlush); }
+  };
+  // (a class change: its box done again, and the boxes inside it unless there are a great many, as
+  // the page's own classes (a theme changing is a refresh of its own); changes that are only ours,
+  // px-frame and px-clip, pass)
+  const ourOnly = (v) => (v || '').split(/\s+/).filter((c) => c && c !== 'px-frame' && c !== 'px-clip').sort().join(' ');
+  const frameWatcher = new MutationObserver((list) => {
+    if (!on()) return;
+    for (const m of list) {
+      if (m.type === 'attributes') {
+        const el = m.target;
+        if (ourOnly(m.oldValue) === ourOnly(el.getAttribute('class'))) continue;
+        if (el === document.body || el === root || el.getElementsByTagName('*').length > 200) { frame(el); continue; }
+        frameLater(el);
+      } else m.addedNodes.forEach((n) => { if (n.nodeType === 1) frameLater(n); });
+    }
+  });
+  function frameAll() {
+    framed.forEach((el) => unframe(el));
+    if (on()) frameLater(document.body);
+  }
+
   function set(v) {
     root.classList.toggle('px-ui', v);
     try { localStorage.setItem(KEY, v ? 'on' : 'off'); } catch (e) {}
     refresh();
   }
-  // Every icon done again (after a theme change: the colors that aren't the text color are read in)
+  // Every icon done again (after a theme change: the colors that aren't the text color are read in),
+  // and every box's corners
   function refresh() {
     document.querySelectorAll('svg.px-drawn-ui').forEach((svg) => restore(svg));
     if (on()) document.querySelectorAll('svg').forEach(add);
+    frameAll();
   }
   watcher.observe(document.body, { childList: true, subtree: true });
+  frameWatcher.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'], attributeOldValue: true });
   if (on()) refresh();
   return { on, set, refresh };
 })();
