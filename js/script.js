@@ -163,7 +163,7 @@ const dailyNote = (date, what) => (dailyOfficial
 // `mode` is the game being played. The mode row picks CLASSIC, DAILY, BLITZ, ZEN or PUZZLE; under
 // DAILY (`daily`) the second row picks DECRYPT, PUZZLE, BLITZ or BREACH (BREACH is daily only).
 const MODES = {
-  classic: { label: 'CLASSIC', info: () => 'CLASSIC // No clock and no bit limit: keep your columns under the line as long as you can. Each game has a key to crack: reach its ENCRYPTION STRENGTH for KEYS, then go deeper or disconnect.' },
+  classic: { label: 'CLASSIC', info: () => `CLASSIC // No clock and no bit limit: keep your columns under the line as long as you can.${goalWanted ? ' Each game has a key to crack: reach its ENCRYPTION STRENGTH for KEYS, then go deeper or disconnect.' : ' GOAL: OFF plays it endless, no key to crack.'}` },
   decrypt: {
     label: 'DAILY DECRYPT',
     info: (date) => dailyNote(date, `the same ${DAILY_BITS} bits for everyone.`),
@@ -548,6 +548,8 @@ const goalBits = (k) => (k < GOAL_BITS.length ? GOAL_BITS[k] : 4096 * 2 ** (k - 
 const goalTarget = (k) => Math.round((GOAL_BASE[difficulty] || 1500) * (1 + 0.5 * k) / 50) * 50;
 const goalKeys = (k) => Math.round(goalTarget(k) / 150);
 let goal = null; // this game's: k, the key being cracked now (0: 128-BIT); cracked, how many so far
+// GOAL: ON / OFF on the main menu (CLASSIC): OFF plays CLASSIC endless, as it was, no key to crack
+let goalWanted = storage.get('bytefall-goal') !== 'off';
 let goalOpen = false;
 const goalCardEl = document.getElementById('goal-card');
 const goalBarEl = document.getElementById('goal-bar');
@@ -611,7 +613,7 @@ function initGame() {
   difficulty = mode === 'classic' ? classicDifficulty : mode === 'puzzle' && !daily ? puzzleTier
     : mode === 'vs' && CpuBoard.sizeFor(vsLevel) === 8 ? 'hard' : 'normal';
   dailyOfficial = daily && (mode === 'puzzle' ? dailyPuzzleOfficial() : !storage.get(dailyPlayedKey()));
-  goal = mode === 'classic' && !daily ? { k: 0, cracked: 0 } : null; // (ENCRYPTION STRENGTH: CLASSIC's key to crack)
+  goal = mode === 'classic' && !daily && goalWanted ? { k: 0, cracked: 0 } : null; // (ENCRYPTION STRENGTH: CLASSIC's key to crack, unless GOAL: OFF)
   if (goalOpen || !goalCardEl.hidden) { goalOpen = false; goalCardEl.hidden = true; }
   if (!vsPaused) document.querySelector('.board-frame').classList.remove('paused'); // (a game that ended cracked faded its bits)
   setupDice();
@@ -2496,6 +2498,21 @@ restartBtn.addEventListener('click', () => {
   requestReset(restartBtn, 'TAP AGAIN TO RESTART');
 });
 
+// GOAL: ON / OFF (CLASSIC): mid-game it asks first, as a new difficulty does, and starts a new game
+const goalBtn = document.getElementById('goal-btn');
+function updateGoalBtn() {
+  goalBtn.querySelector('.opt-text').textContent = `GOAL: ${goalWanted ? 'ON' : 'OFF'}`;
+  goalBtn.classList.toggle('active', goalWanted); // (lit while it's on, as VS's LAYERS: ON)
+  goalBtn.setAttribute('aria-label', goalWanted ? 'Goal on: each game has a key to crack. Tap for endless' : 'Goal off: endless. Tap for a key to crack each game');
+}
+goalBtn.addEventListener('click', () => {
+  requestReset(goalBtn, 'CONFIRM?', () => {
+    goalWanted = !goalWanted;
+    storage.set('bytefall-goal', goalWanted ? 'on' : 'off');
+    updateGoalBtn();
+    SFX.play('punct');
+  });
+});
 document.querySelectorAll('#difficulty-row button').forEach((btn) => {
   btn.addEventListener('click', () => {
     const next = btn.dataset.difficulty;
@@ -2836,6 +2853,8 @@ function applyModeUi() {
   // (VS: VS. CPU // its game mode, under BYTEFALL as in every game)
   document.getElementById('game-mode-label').textContent = mode === 'vs' ? `VS. CPU // ${VS_MODES[vsMode].label}` : `// ${modeLine()}${goalLine()}`;
   document.getElementById('difficulty-row').hidden = mode !== 'classic';
+  document.getElementById('goal-row').hidden = mode !== 'classic' || daily;
+  updateGoalBtn();
   document.getElementById('daily-kinds').hidden = !daily;
   document.getElementById('daily-pips').hidden = !daily;
   centerDaily(); // (the pick in the middle of its row)
