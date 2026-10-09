@@ -22,6 +22,43 @@ const Store = (() => {
   const link = document.getElementById('store-shortcut');
   let msgTimer = 0;
 
+  // TABS: one section at a time (DAILY, PATCHES, STARTERS, BOXES, SUPPORT), as RECORDS' tabs. The
+  // last one picked opens next time, unless the DAILY DROP waits
+  const STAB_KEY = 'bytefall-store-tab';
+  const tabs = [...document.querySelectorAll('#store-tabs [data-stab]')];
+  let stab = 'daily';
+  try { stab = localStorage.getItem(STAB_KEY) || 'daily'; } catch (e) {}
+  function showTab(name, keep = true) {
+    if (!tabs.some((t) => t.dataset.stab === name)) name = 'daily';
+    stab = name;
+    if (keep) try { localStorage.setItem(STAB_KEY, name); } catch (e) {}
+    tabs.forEach((t) => t.setAttribute('aria-selected', String(t.dataset.stab === name)));
+    menu.querySelectorAll('.store-tab').forEach((pane) => { pane.hidden = pane.dataset.stab !== name; });
+    const scroll = menu.querySelector('.store-scroll');
+    if (scroll) scroll.scrollTop = 0;
+  }
+  tabs.forEach((t) => t.addEventListener('click', () => { SFX.play('click'); showTab(t.dataset.stab); }));
+  // PRICES TODAY: a gauge from LOW to HIGH and why (the day's sale or HIGH DEMAND, YOUR DEAL), and
+  // each tab its kind's change
+  const TAB_KIND = { patches: 'patch', starters: 'exploit', boxes: 'box' };
+  function renderPrices() {
+    const p = Progress.pricing();
+    const el = document.getElementById('price-gauge');
+    const pos = p.overall < 0.8 ? 0 : p.overall < 0.95 ? 1 : p.overall <= 1.05 ? 2 : p.overall <= 1.15 ? 3 : 4;
+    const why = [p.label && `${p.label} // ${p.note}`, p.deal && `YOUR DEAL // ${Math.round(p.deal * 100)}% OFF`].filter(Boolean).join(' + ') || 'NORMAL PRICES TODAY';
+    el.className = `price-gauge pos-${pos}`;
+    el.innerHTML = `<span class="pg-row"><span class="pg-label">PRICES</span><span class="pg-end">LOW</span><span class="pg-bar">${[0, 1, 2, 3, 4].map((i) => `<i${i === pos ? ' class="on"' : ''}></i>`).join('')}</span><span class="pg-end">HIGH</span></span><span class="pg-why">${why}</span>`;
+    el.setAttribute('aria-label', `Prices today: ${why}`);
+    for (const t of tabs) {
+      const kind = TAB_KIND[t.dataset.stab];
+      let tag = t.querySelector('.tab-tag');
+      const pct = kind ? Math.round((p.mults[kind] - 1) * 100) : 0;
+      if (!pct) { if (tag) tag.remove(); continue; }
+      if (!tag) { tag = document.createElement('b'); tag.className = 'tab-tag'; t.appendChild(tag); }
+      tag.textContent = `${pct > 0 ? '+' : ''}${pct}%`;
+      tag.classList.toggle('up', pct > 0);
+    }
+  }
   function say(text) {
     msgEl.textContent = text;
     clearTimeout(msgTimer);
@@ -56,7 +93,7 @@ const Store = (() => {
     item.className = 'store-item booster-item';
     item.dataset.booster = id;
     item.innerHTML = `<h3><span class="store-ico bracketed"><span class="ico-br">[</span>${BOOSTER_SVG[id] || ''}<span class="ico-br">]</span></span><span class="store-name">${b.name}</span></h3><p class="store-desc">${b.desc}</p>`
-      + `<div class="store-deal"><div class="store-terms"><div class="store-costs"></div><span class="booster-owned"></span></div><div class="store-btns">${b.adPerDay ? '<button type="button" class="store-buy store-ad" hidden></button>' : ''}<button type="button" class="store-buy store-pay">${BUY_HTML(b.cost)}</button></div></div>`;
+      + `<div class="store-deal"><div class="store-terms"><div class="store-costs"></div><span class="booster-owned"></span></div><div class="store-btns">${b.adPerDay ? '<button type="button" class="store-buy store-ad" hidden></button>' : ''}<button type="button" class="store-buy store-pay">${BUY_HTML(Progress.cost('patch', b.cost))}</button></div></div>`;
     const adBtn = item.querySelector('.store-ad');
     if (adBtn) {
       adBtn.addEventListener('click', async () => {
@@ -75,7 +112,7 @@ const Store = (() => {
       });
     }
     item.querySelector('.store-pay').addEventListener('click', () => {
-      if (!Progress.spendKeys(b.cost)) {
+      if (!Progress.spendKeys(Progress.cost('patch', b.cost))) {
         SFX.play('denied');
         flashShort(item);
         return;
@@ -142,13 +179,15 @@ const Store = (() => {
   });
 
   function render() {
+    renderPrices();
     const keys = Progress.keys();
     menu.querySelectorAll('.booster-item:not(.starter-item)').forEach((item) => {
       const b = boosters[item.dataset.booster];
       const n = Progress.boosters(item.dataset.booster);
       item.querySelector('.booster-owned').textContent = n ? `OWNED \u00d7${n}` : '';
-      item.querySelector('.store-pay').innerHTML = BUY_HTML(b.cost); // (KEYS on BUY)
-      item.querySelector('.store-pay').classList.toggle('short', keys < b.cost);
+      const cost = Progress.cost('patch', b.cost); // (today's price)
+      item.querySelector('.store-pay').innerHTML = BUY_HTML(cost); // (KEYS on BUY)
+      item.querySelector('.store-pay').classList.toggle('short', keys < cost);
       const ad = item.querySelector('.store-ad');
       if (ad) { // (only in the app, where ads.js, loaded after this, has made RewardAd)
         const left = adLeft(item.dataset.booster);
@@ -225,6 +264,7 @@ const Store = (() => {
   // REMOVE ADS (the other tabs): over to the STORE, the item lit up for a moment
   link.addEventListener('click', () => {
     showMenuPane('store');
+    showTab('support', false);
     const item = menu.querySelector('.store-item[data-item="remove-ads"]');
     item.classList.remove('flash');
     void item.offsetWidth;
@@ -260,5 +300,7 @@ const Store = (() => {
     }
   });
   render();
-  return { render };
+  // (the STORE opened: the DAILY DROP's tab while one waits, else the last one picked)
+  const opened = () => showTab(window.dailyDrop && window.dailyDrop.claimable() ? 'daily' : stab, false);
+  return { render, showTab, opened };
 })();

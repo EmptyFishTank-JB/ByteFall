@@ -68,6 +68,29 @@ So a game pays for about two tier 1 exploits, or one tier 2, and a tier 3 takes 
 | PATCH SLOTS (in a game, Lv 8 and Lv 20) | HEAD START 8 KEYS + 4 CRYPTO, FIREWALL DELAY 10 + 5 CACHE, LOOKAHEAD 8 + 5 BUGS, OVERTIME 10 + 3 BUGS + 3 CACHE, ANTIVIRUS 10 + 4 CACHE + 1 ROOTKIT, RESTORE POINT 20 + 5 CRYPTO + 2 ROOTKITS (`PATCH_PRICES`) | KEYS + resources, applied at once |
 | EXPLOITS, to keep | an exploit from TROJAN on, once unlocked: three times its STARTER price in resources, no KEYS (BLACK BOX the exploit: 30 CRYPTO + 6 ROOTKITS); RNG, BITFLIP and BUFFER OVERFLOW are free (`ownPrice`, `OWN_TIMES`, `FREE_EXPLOITS`); kept till the next RANK UP | resources, once a rank |
 
+## Prices that move
+
+Every KEYS-and-resource price above (the STORE, the BLACK MARKET, the PATCH SLOTS, EXPLOITS to keep;
+never real money) is today's: the base price times the day's multiplier and YOUR DEAL, each part
+rounded, at least 1 (`pricing`, `cost` in `js/progress.js`). The day's is the same for everyone,
+from the UTC date as the dailies:
+
+| Day | How often | Prices |
+|---|---|---|
+| WEEKEND SALE | every Saturday and Sunday | 15% off everything (`WEEKEND_OFF`) |
+| FLASH SALE | about 1 weekday in 4 (`FLASH_ODDS`) | 20 to 35% off one kind: PATCHES, EXPLOITS or BLACK BOXES (`FLASH_OFF`) |
+| HIGH DEMAND | 3 weekdays a month, scattered, never within 3 days of each other (`HIGH_DAYS`) | 10 to 20% up on everything (`HIGH_UP`) |
+| any other day | | the base price |
+
+**YOUR DEAL** only ever lowers prices: once 3 or more of the last 10 games (RECORDS' HISTORY) are
+real ones (`LEGIT`: 20+ drops, 45+ seconds, at most 40 drops a minute, a bit decrypted for every 4
+drops or better, so bits thrown in fast to lose don't count), what they earned on average (KEYS plus
+resources, ROOTKITS counting 3, MASTER KEYS 10) under `PAR` (45; a typical CLASSIC game earns about
+57) takes off half the shortfall, up to 25% (`DEAL_MAX`), in 5% steps. All told a price is never
+under 60% or over 125% of its base. The STORE shows a gauge (LOW to HIGH) and why, and a tag on each
+tab whose prices are off; a sale or HIGH DEMAND is said once a day on the notice line (kept in
+NOTICES). `?pricedate=YYYY-MM-DD` shows another day's prices (testing).
+
 Starter exploits and boxes go into the two STARTER slots on the main menu (two of one kind, or one
 each of two) and are used once in a game. A slot left empty is the BLACK MARKET from the start, and
 a slot whose starter is used becomes one.

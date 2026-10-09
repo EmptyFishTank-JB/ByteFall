@@ -632,7 +632,115 @@ const Progress = (() => {
     'second-chance': { keys: 20, crypto: 5, rootkits: 2 },
     antivirus: { keys: 10, cache: 4, rootkits: 1 },
   };
-  const priceTable = (id) => (String(id).startsWith('patch:') ? PATCH_PRICES[String(id).slice(6)] : PRICES[id]);
+  const basePrice = (id) => (String(id).startsWith('patch:') ? PATCH_PRICES[String(id).slice(6)] : PRICES[id]);
+  const kindOf = (id) => (String(id).startsWith('patch:') ? 'patch' : BOX_IDS.includes(id) ? 'box' : 'exploit');
+  // (a price as it stands today: the day's and your own (Pricing, below), each part rounded, at least 1)
+  const priceTable = (id) => {
+    const base = basePrice(id);
+    return base && Object.fromEntries(Object.entries(base).map(([res, n]) => [res, cost(kindOf(id), n)]));
+  };
+
+  // PRICES THAT MOVE: the STORE's, the BLACK MARKET's, the PATCH SLOTS' and EXPLOITS to keep (never
+  // real money). The day's (the same for everyone, from the UTC date as the dailies, so a sale is
+  // everyone's sale): a WEEKEND SALE on Saturday and Sunday (WEEKEND_OFF off everything); a FLASH
+  // SALE on about 1 weekday in 4, FLASH_OFF off one kind (PATCHES, EXPLOITS or BLACK BOXES); HIGH
+  // DEMAND on HIGH_DAYS scattered weekdays a month, HIGH_UP on everything. Times YOUR DEAL: real
+  // games (history, legit) earning under PAR take off up to DEAL_MAX, never on; with fewer than
+  // DEAL_GAMES of them, none. ?pricedate=YYYY-MM-DD shows another day's
+  const WEEKEND_OFF = 0.15;
+  const FLASH_OFF = [0.2, 0.35];
+  const FLASH_ODDS = 0.25;
+  const HIGH_DAYS = 3;
+  const HIGH_UP = [0.1, 0.2];
+  const PAR = 45; // (KEYS and resources a real game earns, ROOTKITS at 3 each, MASTER KEYS at 10: a typical CLASSIC game is about 57)
+  const DEAL_MAX = 0.25;
+  const DEAL_GAMES = 3;
+  const PRICE_KINDS = ['patch', 'exploit', 'box'];
+  const KIND_NAMES = { patch: 'PATCHES', exploit: 'EXPLOITS', box: 'BLACK BOXES' };
+  const seeded = (str) => { // (mulberry32 from the string's FNV hash)
+    let h = 0x811c9dc5;
+    for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+    return () => {
+      h = (h + 0x6d2b79f5) | 0;
+      let t = Math.imul(h ^ (h >>> 15), 1 | h);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  };
+  const priceDay = () => {
+    try {
+      const q = new URLSearchParams(location.search).get('pricedate');
+      if (q && /^\d{4}-\d{2}-\d{2}$/.test(q)) return q;
+    } catch (e) {}
+    return utcDay();
+  };
+  // (the month's HIGH DEMAND days: HIGH_DAYS weekdays, apart)
+  function highDays(month) {
+    const rnd = seeded(`bytefall:high:${month}`);
+    const [y, m] = month.split('-').map(Number);
+    const days = new Date(Date.UTC(y, m, 0)).getUTCDate();
+    const weekday = (n) => { const w = new Date(Date.UTC(y, m - 1, n)).getUTCDay(); return w > 0 && w < 6; };
+    const picks = [];
+    for (let tries = 0; picks.length < HIGH_DAYS && tries < 200; tries++) {
+      const n = 1 + Math.floor(rnd() * days);
+      if (weekday(n) && picks.every((x) => Math.abs(x - n) > 3)) picks.push(n);
+    }
+    return picks;
+  }
+  let dayCache = null;
+  function dayPricing() {
+    const day = priceDay();
+    if (dayCache && dayCache.day === day) return dayCache;
+    const date = new Date(`${day}T00:00:00Z`);
+    const w = date.getUTCDay();
+    const kinds = { patch: 1, exploit: 1, box: 1 };
+    let label = '';
+    let note = '';
+    let mood = 'normal';
+    if (w === 0 || w === 6) {
+      PRICE_KINDS.forEach((k) => { kinds[k] = 1 - WEEKEND_OFF; });
+      label = 'WEEKEND SALE';
+      note = `${Math.round(WEEKEND_OFF * 100)}% OFF EVERYTHING`;
+      mood = 'sale';
+    } else if (highDays(day.slice(0, 7)).includes(date.getUTCDate())) {
+      const rnd = seeded(`bytefall:up:${day}`);
+      const up = Math.round((HIGH_UP[0] + rnd() * (HIGH_UP[1] - HIGH_UP[0])) * 20) / 20;
+      PRICE_KINDS.forEach((k) => { kinds[k] = 1 + up; });
+      label = 'HIGH DEMAND';
+      note = `${Math.round(up * 100)}% UP ON EVERYTHING`;
+      mood = 'high';
+    } else {
+      const rnd = seeded(`bytefall:flash:${day}`);
+      if (rnd() < FLASH_ODDS) {
+        const kind = PRICE_KINDS[Math.floor(rnd() * PRICE_KINDS.length)];
+        const off = Math.round((FLASH_OFF[0] + rnd() * (FLASH_OFF[1] - FLASH_OFF[0])) * 20) / 20;
+        kinds[kind] = 1 - off;
+        label = 'FLASH SALE';
+        note = `${Math.round(off * 100)}% OFF ${KIND_NAMES[kind]}`;
+        mood = 'sale';
+      }
+    }
+    dayCache = { day, kinds, label, note, mood };
+    return dayCache;
+  }
+  // YOUR DEAL: real games averaging under PAR earned, in 5% steps
+  function dealOff() {
+    const real = (d.history || []).filter((g) => g.legit);
+    if (real.length < DEAL_GAMES) return 0;
+    const value = (g) => (g.keys || 0) + Object.entries(g.res || {}).reduce((n, [res, k]) => n + k * (res === 'rootkits' ? 3 : res === 'master' ? 10 : 1), 0);
+    const avg = real.reduce((n, g) => n + value(g), 0) / real.length;
+    return Math.round(Math.min(DEAL_MAX, Math.max(0, (PAR - avg) / PAR) * 0.5) * 20) / 20;
+  }
+  const priceMult = (kind) => Math.min(1.25, Math.max(0.6, (dayPricing().kinds[kind] || 1) * (1 - dealOff())));
+  function cost(kind, n) { return Math.max(1, Math.round(n * priceMult(kind))); }
+  // (what the STORE's gauge and its tabs show)
+  function pricing() {
+    const day = dayPricing();
+    const deal = dealOff();
+    const mults = Object.fromEntries(PRICE_KINDS.map((k) => [k, priceMult(k)]));
+    const overall = PRICE_KINDS.reduce((n, k) => n + mults[k], 0) / PRICE_KINDS.length;
+    return { day: day.day, label: day.label, note: day.note, mood: day.mood, deal, mults, overall };
+  }
   const BOX_IDS = ['box-1', 'box-2', 'box-3'];
   const ANTI_IDS = ['adware', 'spyware', 'ransomware', 'malware', 'cryptojacker', 'scareware']; // (the INFECTIONS)
   // Each BLACK BOX's odds, in percent: a tier 1, 2 or 3 exploit, or an INFECTION (any of the six alike)
@@ -676,8 +784,9 @@ const Progress = (() => {
   const OWN_TIMES = 3;
   const FREE_EXPLOITS = 3; // (RNG, BITFLIP, BUFFER OVERFLOW)
   function ownPrice(id) {
-    if (id === 'black-box') return { crypto: 30, rootkits: 6 };
-    return Object.fromEntries(Object.entries(PRICES[id] || {}).filter(([res]) => res !== 'keys').map(([res, n]) => [res, n * OWN_TIMES]));
+    const base = id === 'black-box' ? { crypto: 30, rootkits: 6 }
+      : Object.fromEntries(Object.entries(PRICES[id] || {}).filter(([res]) => res !== 'keys').map(([res, n]) => [res, n * OWN_TIMES]));
+    return Object.fromEntries(Object.entries(base).map(([res, n]) => [res, cost('exploit', n)]));
   }
   function isOwned(id) { return Unlocks.hasFullAccess() || EXPLOIT_ORDER.indexOf(id) < FREE_EXPLOITS || !!d.ownedExploits[id]; }
   const ownMissing = (id) => Object.entries(ownPrice(id)).filter(([res, n]) => have(res) < n).map(([res, n]) => [res, n - have(res)]);
@@ -1114,6 +1223,8 @@ const Progress = (() => {
       events('link', links);
     },
     price: (id) => ({ ...(priceTable(id) || {}) }),
+    pricing,
+    cost, // (a KEYS price of a kind as it stands today: 'patch', 'exploit', 'box')
     sellable,
     missing,
     payFor,

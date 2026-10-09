@@ -4820,8 +4820,7 @@ function openBoosterStore() {
   closeBoosterPick();
   closeStarterPick();
   setRecordsOpen(true, 'store');
-  const shop = document.getElementById('booster-shop');
-  if (shop) requestAnimationFrame(() => shop.previousElementSibling.previousElementSibling.scrollIntoView({ block: 'start' }));
+  Store.showTab('patches');
 }
 function closeBoosterPick() { boosterPickEl.classList.add('hidden'); }
 function openBoosterPick() {
@@ -4894,8 +4893,7 @@ function setStarters(ids) {
 function openStarterStore() {
   closeStarterPick();
   setRecordsOpen(true, 'store');
-  const shop = document.getElementById('starter-shop');
-  if (shop) requestAnimationFrame(() => shop.previousElementSibling.previousElementSibling.scrollIntoView({ block: 'start' }));
+  Store.showTab('starters');
 }
 function closeStarterPick() { starterPickEl.classList.add('hidden'); }
 function openStarterPick(slot) {
@@ -4997,7 +4995,7 @@ function useTool(id, btn, action) {
     refreshPuzzleTools();
     return;
   }
-  const cost = BOOSTERS[id].cost;
+  const cost = Progress.cost('patch', BOOSTERS[id].cost); // (today's price)
   if (Progress.keys() < cost) {
     SFX.play('denied');
     setMessage(`${BOOSTERS[id].name} // ${cost} KEYS (YOU HAVE ${Progress.keys()})`);
@@ -6382,6 +6380,7 @@ function showMenuPane(pane) {
   if (pane === 'records') renderRecords();
   if (pane === 'notices') { renderNotices(); markNoticesRead(); } // (seen: the dots go)
   if (pane === 'puzzles') { puzzleListTier = puzzleTier; renderPuzzleSelect(); }
+  if (pane === 'store' && typeof Store !== 'undefined') Store.opened(); // (its tab: the DAILY DROP's while one waits)
   if (typeof Store !== 'undefined') Store.render(); // (and the REMOVE ADS link, off on its own tab)
   const box = menuScroller();
   if (box) box.scrollTop = 0;
@@ -6656,6 +6655,15 @@ for (const k of ['bytefall-layout-edits', 'bytefall-layout-locks', 'bytefall-lay
 initGame();
 updateFreeBtn();
 if (freeGrantedNow) logNotice('DAILY DROP // READY TO CLAIM IN THE STORE'); // (no pop-up: the STORE buttons light up, and NOTICES has it)
+// THE DAY'S PRICES (progress.js's pricing): a sale or HIGH DEMAND said once a day on the notice line
+// (and kept in NOTICES)
+function priceNotice() {
+  const p = Progress.pricing();
+  if (!p.label || storage.get('bytefall-price-notice') === p.day) return;
+  storage.set('bytefall-price-notice', p.day);
+  showToast(`STORE // ${p.label}: ${p.note}`);
+}
+priceNotice();
 showKeys();
 // (the date turned while the game was open: the new day's drop lit in the STORE, and said)
 function checkNewDay() {
@@ -6664,6 +6672,7 @@ function checkNewDay() {
   showKeys();
   if (typeof Store !== 'undefined') Store.render();
   logNotice('DAILY DROP // READY TO CLAIM IN THE STORE');
+  priceNotice();
 }
 document.addEventListener('visibilitychange', () => { if (!document.hidden) checkNewDay(); });
 setInterval(() => document.hidden || checkNewDay(), 60000);

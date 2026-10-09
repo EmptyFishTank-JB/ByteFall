@@ -205,6 +205,17 @@ a game's first drop (RESTORE POINT only when it saves you); HINT and UNDO sit un
 puzzle's drop buttons, and with none owned a second tap buys one. Never in DAILY or VS. A
 patched game says so on its result screen (PATCHED: and their names).
 
+**THE STORE's tabs** (store.js): under its fixed top (STORE, YOUR KEYS, the resources on one tight
+line, PRICES TODAY), five tabs as RECORDS' are: DAILY (the DAILY DROP), PATCHES, STARTERS, BOXES (with
+BUYER BEWARE) and SUPPORT (REMOVE ADS, FULL ACCESS, RESTORE PURCHASES), one section at a time. It
+opens on DAILY while a drop waits, else on the tab last picked; GET PATCHES and GET STARTERS open
+theirs, the REMOVE ADS link SUPPORT. What a buy says (BOUGHT // ...) shows under the tabs, on every
+tab, and takes no room till then. **PRICES TODAY** (ECONOMY.md's Prices that move): a five-step gauge
+from LOW to HIGH (green when low, red when high) and why (WEEKEND SALE // 15% OFF EVERYTHING, FLASH
+SALE // 25% OFF BLACK BOXES, HIGH DEMAND // 10% UP ON EVERYTHING, YOUR DEAL // 10% OFF, or NORMAL
+PRICES TODAY), and a -15% / +10% tag on each tab whose prices are off; a sale or HIGH DEMAND is also
+said once a day on the notice line.
+
 **WATCH AD** (the Android app only; `adPerDay` on a patch, store.js, ads.js's `RewardAd`): RESTORE
 POINT's STORE card has a WATCH AD button over BUY: a rewarded ad, the player's choice, that gives one
 RESTORE POINT once it's watched through (closed early, nothing; Google's word decides), once a day
