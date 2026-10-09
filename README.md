@@ -465,7 +465,14 @@ RULES & RECORDS (main menu and pause screen) opens a card with two tabs, **RULES
 **RECORDS**; **EXPLOITS** and **STORE** have buttons of their own beside it (main menu and pause
 screen), each opening the same card on its own, under its own title and with no tabs. RECORDS has level and DECRYPTOR rank,
 every unlock and achievement with a progress tracker, and lifetime stats
-(UNLOCKS / ACHIEVEMENTS / STATS). New unlocks, level-ups
+(UNLOCKS / ACHIEVEMENTS / STATS / HISTORY). HISTORY (`Progress.logGame`, `history`) lists the
+last 10 games, newest first (not PUZZLE or the tutorial; VS matches too): the game (mode and
+difficulty, or the daily, or VS and the bot), how it ended (TRACED, TIME'S UP, DONE, BREACHED, WON,
+LOST), when, its score, drops, time (from the first drop), best chain, the KEYS and resources it
+earned as chips and the patches it used, under a line of the average and the best. Each is also
+marked, unseen, as a real game or not (`LEGIT`: 20 drops or more, 45 seconds or more, no more than
+40 drops a minute, and at least a bit decrypted for every 4 drops): only real ones count toward
+the STORE's prices for you (below), so bits thrown in fast to lose don't. New unlocks, level-ups
 and achievements pop up as they happen (achievements stay up about 5.5 seconds, like a console's, before crumbling; the rest about 2). Progress is saved in the browser
 (`bytefall-progress`).
 

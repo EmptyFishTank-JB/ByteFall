@@ -2285,6 +2285,13 @@ function endGame(reason = 'trace') {
     });
     if (mode === 'breach' && layersLeft() === 1) Progress.secret('so-close');
   }
+  // (RECORDS' HISTORY: the game, what it earned and how it ended)
+  Progress.logGame({
+    label: daily ? DAILY_KINDS[mode] : mode === 'vs' ? `VS // ${CpuBoard.BOTS[vsBot].label}` : MODES[mode].label,
+    score,
+    result: { trace: 'TRACED', time: "TIME'S UP", daily: 'DONE', breached: 'BREACHED', win: 'WON', 'vs-lose': 'LOST' }[reason] || '',
+    patches: patched,
+  });
   announce(Progress.check());
 
   const run = runId;
@@ -6224,6 +6231,33 @@ function renderRecords() {
       const name = m ? `${u.name} · ${track ? track.title : 'COMING SOON'}` : u.name;
       list.appendChild(recordRow({ name, desc: u.need, current: u.current, goal: u.goal, done: u.done }));
     }
+  } else if (recordsTab === 'history') {
+    // HISTORY: the last games, newest first: what each was, how it went, what it earned and the
+    // patches it used
+    const games = Progress.history();
+    const summary = document.createElement('p');
+    summary.className = 'rec-summary';
+    summary.textContent = games.length
+      ? `LAST ${games.length} GAME${games.length === 1 ? '' : 'S'} // AVERAGE ${fmt(Math.round(games.reduce((n, g) => n + g.score, 0) / games.length))} // BEST ${fmt(Math.max(...games.map((g) => g.score)))}`
+      : 'NO GAMES YET // PLAY ONE AND IT SHOWS HERE';
+    recordsBodyEl.appendChild(summary);
+    const list = document.createElement('ul');
+    list.className = 'rec-list hist-list';
+    for (const g of games) {
+      const li = document.createElement('li');
+      li.className = 'hist-game';
+      const time = `${Math.floor(g.secs / 60)}:${String(g.secs % 60).padStart(2, '0')}`;
+      const diff = g.mode === 'zen' || g.mode === 'vs' || g.daily ? '' : ` // ${String(g.diff).toUpperCase()}`;
+      const earned = ['keys', ...Progress.resIds()].filter((id) => (id === 'keys' ? g.keys : g.res[id]) > 0)
+        .map((id) => resChip(id, `+${fmt(id === 'keys' ? g.keys : g.res[id])}`)).join('');
+      li.innerHTML = `<div class="hist-top"><span class="hist-name">${g.label}${diff}</span><span class="hist-result">${g.result}</span></div>`
+        + `<div class="hist-when">${noticeWhen(g.t)}</div>`
+        + `<div class="hist-stats"><span>SCORE <em>${fmt(g.score)}</em></span><span><em>${fmt(g.drops)}</em> DROPS</span><span><em>${time}</em></span><span>CHAIN <em>${g.chain}x</em></span></div>`
+        + (earned ? `<div class="hist-earned">${earned}</div>` : '')
+        + (g.patches.length ? `<div class="hist-patched">PATCHED: ${g.patches.map((id) => (BOOSTERS[id] ? BOOSTERS[id].name : id)).join(', ')}</div>` : '');
+      list.appendChild(li);
+    }
+    recordsBodyEl.appendChild(list);
   } else if (recordsTab === 'achievements') {
     // HIDDEN and IMPOSSIBLE ones get their own sections at the bottom; hidden ones count toward
     // EARNED, impossible ones don't

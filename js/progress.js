@@ -41,6 +41,7 @@ const Progress = (() => {
     decryptorPoints: 0, // points earned this rank
     equipped: [], // exploit ids in the loadout slots
     ownedExploits: {}, // exploit id -> true once bought to keep (tier 1 needs no buying)
+    history: [], // the last HISTORY_MAX games, newest first (logGame): what each was and earned, and whether it was a real one
     ownedSeed: 0, // (the exploits a save could already use when buying came in, kept: OWN_SEED's round done)
     lastLevel: 0, // for LEVEL UP announcements
     exploitsSeen: {}, // exploit id -> true once announced this rank
@@ -532,6 +533,8 @@ const Progress = (() => {
     return Unlocks.hasFullAccess() || (!!u && levelInfo().level >= u.level);
   }
 
+  const HISTORY_MAX = 10;
+  const LEGIT = { drops: 20, secs: 45, perMin: 40, bitsPerDrop: 0.25 };
   // The current run, reset by startRun()
   let run = { difficulty: 'normal', mode: 'classic', drops: 0, started: false, bits: 0, chain: 0, bytes: 0 };
 
@@ -845,6 +848,7 @@ const Progress = (() => {
       if (run.mode === 'tutorial') return; // (the tutorial counts toward nothing)
       if (!run.started) {
         run.started = true;
+        run.t0 = Date.now();
         if (run.mode !== 'puzzle' && run.mode !== 'vs' && run.mode !== 'tutorial') d.games++; // puzzle retries, VS matches and the tutorial aren't sessions
         if (run.daily) {
           playedDaily();
@@ -969,6 +973,21 @@ const Progress = (() => {
       sittingRestarts++;
       if (sittingRestarts >= 10) d.rageQuit = 1;
     },
+    // GAME HISTORY (RECORDS' HISTORY): a finished game (not PUZZLE or the tutorial). legit: played
+    // for real, not bits thrown in to lose fast (LEGIT: long enough, not dropped faster than a person
+    // reads the board, some bits decrypted); only those count toward the prices (Pricing)
+    logGame({ label, score, result, patches = [] }) {
+      if (run.mode === 'tutorial' || run.mode === 'puzzle' || !run.started) return;
+      const secs = Math.max(1, Math.round((Date.now() - (run.t0 || Date.now())) / 1000));
+      const g = {
+        t: Date.now(), mode: run.mode, label, diff: run.difficulty, daily: !!run.daily, score, drops: run.drops, secs,
+        bits: run.bits, chain: run.chain, keys: run.keys || 0, res: { ...(run.res || {}) }, patches, result,
+      };
+      g.legit = g.drops >= LEGIT.drops && g.secs >= LEGIT.secs && g.drops / (g.secs / 60) <= LEGIT.perMin && g.bits >= g.drops * LEGIT.bitsPerDrop;
+      d.history = [g, ...(d.history || [])].slice(0, HISTORY_MAX);
+      save();
+    },
+    history: () => (d.history || []).map((g) => ({ ...g, res: { ...g.res } })),
     runDrops: () => run.drops,
     runStats: () => ({ ...run }),
     // values: the numbers of the bits decrypted
