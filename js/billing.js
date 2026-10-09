@@ -50,6 +50,13 @@ const Billing = (() => {
     price: (id) => prices[id] || '',
     buy(id) { if (on) app.billingBuy(id); },
     restore() { if (on) app.billingRestore(); },
+    // (TEST PURCHASES, builds with test ads only: what's owned used up, to buy again with the test card)
+    reset() {
+      if (!on || !app.billingReset) return false;
+      boughtNow.clear();
+      app.billingReset();
+      return true;
+    },
     onEvent(fn) { listeners.push(fn); },
   };
 })();

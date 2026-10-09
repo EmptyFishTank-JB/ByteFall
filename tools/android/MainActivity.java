@@ -28,6 +28,7 @@ import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingFlowParams;
 import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.ConsumeParams;
 import com.android.billingclient.api.PendingPurchasesParams;
 import com.android.billingclient.api.ProductDetails;
 import com.android.billingclient.api.Purchase;
@@ -256,6 +257,22 @@ public class MainActivity extends BridgeActivity {
         tellPage("{\"type\":" + JSONObject.quote(type) + ",\"owned\":" + jsonList(owned) + ",\"pending\":" + jsonList(pending) + ",\"restore\":" + restore + "}");
     }
 
+    // TEST PURCHASES (SETTINGS, builds with test ads only: js/store.js): everything the account owns
+    // used up, so Google Play forgets it and a license tester can buy it again with the test card;
+    // then what's owned (nothing) told to the page as RESTORE PURCHASES would
+    private void consumeOwned() {
+        billing.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build(), (result, purchases) -> runOnUiThread(() -> {
+            if (result.getResponseCode() != BillingClient.BillingResponseCode.OK) { tellFailed("unavailable"); return; }
+            if (purchases.isEmpty()) { queryOwned(true); return; }
+            final int[] left = { purchases.size() };
+            for (Purchase p : purchases) {
+                billing.consumeAsync(ConsumeParams.newBuilder().setPurchaseToken(p.getPurchaseToken()).build(), (r, token) -> runOnUiThread(() -> {
+                    if (--left[0] == 0) queryOwned(true);
+                }));
+            }
+        }));
+    }
+
     // (a purchase made, or paid at last; or canceled, or failed)
     private void onPurchasesUpdated(BillingResult result, List<Purchase> purchases) {
         runOnUiThread(() -> {
@@ -270,7 +287,7 @@ public class MainActivity extends BridgeActivity {
     // (Google Play's purchase sheet, over the game)
     private void launchPurchase(String id) {
         ProductDetails d = products.get(id);
-        if (d == null) { tellFailed("unavailable"); return; } // (not set up in Play Console, or not active)
+        if (d == null) { tellFailed("missing"); return; } // (not set up in Play Console, or not active)
         BillingFlowParams.ProductDetailsParams.Builder item = BillingFlowParams.ProductDetailsParams.newBuilder().setProductDetails(d);
         ProductDetails.OneTimePurchaseOfferDetails offer = offerOf(d);
         if (offer != null && offer.getOfferToken() != null && !offer.getOfferToken().isEmpty()) item.setOfferToken(offer.getOfferToken());
@@ -367,6 +384,8 @@ public class MainActivity extends BridgeActivity {
         }
         @JavascriptInterface
         public void billingRestore() { runOnUiThread(() -> withBilling(() -> queryOwned(true))); }
+        @JavascriptInterface
+        public void billingReset() { runOnUiThread(() -> withBilling(() -> consumeOwned())); }
     }
 
     @Override

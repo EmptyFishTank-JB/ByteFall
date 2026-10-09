@@ -103,7 +103,7 @@ const Tutorial = (() => {
     { text: 'BLACK BOXES are cheap, but some of them are INFECTED!', demo: 'market', mood: 'devious', next: true },
     // THE MENUS
     { text: 'The button at the top right PAUSES the game. Tap it now!', closeMenus: true, tap: '#records-btn', pass: true },
-    { text: 'The pause screen has RESUME, RESTART, RULES & RECORDS, SETTINGS, EXPLOITS, the STORE and the MAIN MENU. Tap RULES & RECORDS.', paused: true, closeMenus: true, tap: '#pause-records', pass: true, float: true },
+    { text: 'The pause screen has RESUME, RESTART, RULES & RECORDS, SETTINGS, EXPLOITS and QUIT. Tap RULES & RECORDS.', paused: true, closeMenus: true, tap: '#pause-records', pass: true, float: true },
     { text: 'RULES & RECORDS opens as a card over the game, with its tabs along the top.', paused: true, pane: 'rules', float: 'middle', next: true },
     { text: 'The RULES tab has everything you’re learning here, written down, with the TUTORIAL button to come back any time.', paused: true, pane: 'rules', pulse: ['.menu-tabs [data-pane="rules"]'], float: 'middle', next: true },
     { text: 'The RECORDS tab shows your level and DECRYPTOR rank, every unlock and its level, your achievements, HISTORY (your last 10 games) and your lifetime stats.', paused: true, pane: 'records', pulse: ['.menu-tabs [data-pane="records"]'], float: 'middle', next: true },
@@ -115,7 +115,7 @@ const Tutorial = (() => {
     { text: 'Tap a card to put it in a free slot, or tap it again to take it out. The loadout locks from a game’s first drop until it ends.', paused: true, pane: 'exploits', pulse: ['.hack-item'], float: true, next: true },
     { text: 'The first three exploits are yours as they unlock. The rest are bought once with resources and kept until you RANK UP.', paused: true, pane: 'exploits', float: true, next: true },
     { text: 'Tap ← BACK to close it.', paused: true, pane: 'exploits', tap: '.card-back[data-close="records"]', pass: true, float: 'middle' },
-    { text: 'Now tap the STORE.', paused: true, closeMenus: true, tap: '#pause-store', pass: true, float: true },
+    { text: 'The STORE isn’t on the pause screen: it’s on the MAIN MENU. Here’s a look inside.', paused: true, pane: 'store', float: true, next: true },
     { text: 'YOUR RESOURCES are at the top: KEYS, BUGS, CACHE, CRYPTO, ROOTKITS and MASTER KEYS, all earned by playing. The [i] shows how.', paused: true, pane: 'store', pulse: ['#store-wallet'], float: true, next: true },
     { text: 'Under them, PRICES TODAY: sales, holidays and busy days move the prices up and down.', paused: true, pane: 'store', pulse: ['#price-gauge'], float: true, next: true },
     { text: 'Below that: the DAILY DROP (free once a day), PATCHES, STARTER EXPLOITS, BLACK BOXES, and REMOVE ADS and FULL ACCESS.', paused: true, pane: 'store', float: true, next: true },

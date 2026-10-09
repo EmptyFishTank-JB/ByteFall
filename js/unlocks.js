@@ -7,20 +7,26 @@
 // ?unlockall in the URL or the dev page's UNLOCK EVERYTHING switch (a flag in this
 // browser) preview everything unlocked. REMOVE ADS is the other purchase (the STORE,
 // store.js): no ads, nothing unlocked; Full Access includes it. The dev page's OWN
-// REMOVE ADS switch previews owning it.
+// REMOVE ADS switch previews owning it. In ByteFall Test with test ads, the STORE's BUY
+// pretends (pretend(), kept in bytefall-test-purchases) and SETTINGS' TEST PURCHASES resets it.
 const Unlocks = (() => {
   let full = false;
   let dev = false;
   let noAds = false;
+  let devNoAds = false; // (the dev page's OWN REMOVE ADS switch)
   let purchased = false; // (a real purchase, reported by Google Play: not a dev preview)
   const OWNED_KEY = 'bytefall-purchases';
+  // (ByteFall Test with test ads: the STORE's BUY pretends, nothing charged, kept here; js/store.js)
+  const PRETEND_KEY = 'bytefall-test-purchases';
   // (the Google Play release, tools/build-app.js: none of the dev previews, whatever's in storage)
   const release = !!(window.BYTEFALL_APP && window.BYTEFALL_APP.release);
   try {
     if (!release) {
       dev = new URLSearchParams(location.search).has('unlockall') || localStorage.getItem('bytefall-dev-unlockall') === 'on';
-      full = dev;
-      noAds = localStorage.getItem('bytefall-dev-noads') === 'on';
+      const pretend = window.BYTEFALL_APP ? JSON.parse(localStorage.getItem(PRETEND_KEY) || '{}') : {};
+      full = dev || !!pretend.full;
+      devNoAds = localStorage.getItem('bytefall-dev-noads') === 'on';
+      noAds = devNoAds || !!pretend.noAds;
     } else {
       const owned = JSON.parse(localStorage.getItem(OWNED_KEY) || '{}');
       full = !!owned.full;
@@ -47,6 +53,15 @@ const Unlocks = (() => {
     },
     onChange(fn) {
       listeners.push(fn);
+    },
+    // (ByteFall Test's pretend purchases: owned or not, nothing charged, kept for the next launch)
+    pretend(nowFull, nowNoAds) {
+      if (release) return;
+      const changed = full !== (!!nowFull || dev) || noAds !== (!!nowNoAds || devNoAds);
+      full = !!nowFull || dev;
+      noAds = !!nowNoAds || devNoAds;
+      try { localStorage.setItem(PRETEND_KEY, JSON.stringify({ full: !!nowFull, noAds: !!nowNoAds })); } catch (e) {}
+      if (changed) listeners.forEach((fn) => fn(full));
     },
   };
 })();
