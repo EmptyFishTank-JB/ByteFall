@@ -43,8 +43,8 @@
   } catch (e) {}
 </script>
 <title>BYTEFALL // decryption terminal</title>
-<script src="js/fonts.js?v=539"></script>
-<link rel="stylesheet" href="css/style.css?v=539">
+<script src="js/fonts.js?v=540"></script>
+<link rel="stylesheet" href="css/style.css?v=540">
 </head>
 <body>
   <!-- Dev: TWINKLE BACKGROUND (grid-bg.js): the starlight behind the whole game, off by default -->
@@ -133,12 +133,35 @@
             <h2 class="rules-head">RULES <button type="button" class="tut-open" id="tutorial-btn">TUTORIAL</button></h2>
             <p>Encrypted bits fall into the terminal. Drop each one into a column.</p>
             <p>A bit decrypts when its number matches the length of the unbroken line it sits in, across or down. Decrypting can bring more bits down into new matches for a chain.</p>
-            <p>A decrypted bit scores 10 plus its number (a <b>[4]</b> is 14), multiplied by the chain. Blocks wiped out by exploits score a flat 10.</p>
+            <div class="store-rule" aria-hidden="true">================================================================================</div>
+            <h3 class="rules-sub">// SCORING</h3>
+            <p>A decrypted bit scores 10 plus its number (a <b>[4]</b> is 14), multiplied by the chain: the second link doubles, the third triples, and so on. Blocks wiped out by exploits score a flat 10.</p>
+            <p>On <b>Easy</b> and <b>Normal</b>, every 4 bits a single drop decrypts make a <b>NIBBLE</b>, worth 16 bonus points.</p>
+            <div class="store-rule" aria-hidden="true">================================================================================</div>
+            <h3 class="rules-sub">// LAYERS AND THE LINE</h3>
             <p>Encryption layers <b>[=]</b> rise from below <span id="rules-pulse">every 8 drops</span>. Decrypt a bit beside one to peel a layer off; the second peel (<b>[-]</b>) reveals the bit hidden underneath.</p>
             <p>Keep your columns below the <b>========</b> line. If anything is still above it once the decrypting stops, the trace completes and you're caught.</p>
-            <p>On <b>Easy</b> and <b>Normal</b>, every 4 bits a single drop decrypts make a <b>NIBBLE</b>, worth 16 bonus points.</p>
+            <div class="store-rule" aria-hidden="true">================================================================================</div>
+            <h3 class="rules-sub">// EXPLOITS</h3>
+            <p>Each chain link lights a bar of the <b>CHAIN METER</b> beside the grid; fill all 5 for an <b>EXPLOIT</b> from your loadout. Tap the EXPLOIT button and it becomes your next drop.</p>
+            <p>The first three exploits are yours as they unlock; the rest are bought once with resources in EXPLOITS and kept until you <b>RANK UP</b>.</p>
+            <div class="store-rule" aria-hidden="true">================================================================================</div>
+            <h3 class="rules-sub">// THE BOTTOM ROW</h3>
+            <p>Either side of the EXPLOIT button, a <b>SIDE SLOT</b> holds a <b>STARTER EXPLOIT</b> you bring in from the main menu. An empty one is the <b>BLACK MARKET</b> once the first layer rises: something for sale, a new one every 4 drops (the pips count them).</p>
+            <p>At each end, a <b>PATCH SLOT</b> sells a patch mid-game, applied the moment you buy it. The slots open as you level up.</p>
+            <p><b>BLACK BOXES</b> open into a random exploit, but some are <b>INFECTED</b>.</p>
+            <div class="store-rule" aria-hidden="true">================================================================================</div>
+            <h3 class="rules-sub">// CLASSIC'S GOAL</h3>
+            <p>Every CLASSIC game has a key to crack, its <b>ENCRYPTION STRENGTH</b> (128-BIT at 1,500 points on Normal). Crack it for KEYS, then <b>GO DEEPER</b> for a stronger key or <b>DISCONNECT</b> to end the game on a win.</p>
+            <div class="store-rule" aria-hidden="true">================================================================================</div>
+            <h3 class="rules-sub">// DIFFICULTY</h3>
             <p><b>Easy</b> shows the next bit, and a drop that clears nothing only takes one bar off the CHAIN METER (on <b>Normal</b> it empties it).</p>
             <p><b>Hard</b> is a full byte: an 8&times;8 terminal with bits up to 8, and new layers come faster as your score climbs. Every 8 bits a single drop decrypts make a <b>BYTE</b>, worth 256 bonus points, and 4 more a <b>NIBBLE</b>, worth 16. Its CHAIN METER empties after every chain: the 5 links have to come in one.</p>
+            <div class="store-rule" aria-hidden="true">================================================================================</div>
+            <h3 class="rules-sub">// RESOURCES AND LEVELS</h3>
+            <p>Decrypting earns <b>KEYS</b> and resources (the STORE's [i] says how), spent in the STORE, the BLACK MARKET and the PATCH SLOTS. <b>PATCHES</b> bought there are switched on from the main menu before a game.</p>
+            <p>Every bit you decrypt is XP, 100 bits a level. Exploits, slots, themes, fonts and tracks unlock by level; at Lv 80 you can <b>RANK UP</b> to start again, earning a little more each rank.</p>
+            <div class="store-rule" aria-hidden="true">================================================================================</div>
             <p class="keys" id="rules-keys">Tap a column or its button, or press 1&ndash;7, to drop</p>
           </aside>
         </div>
@@ -845,56 +868,56 @@
     </div>
   </div>
 
-  <script src="js/bot-svg.js?v=539"></script>
-  <script src="js/unlocks.js?v=539"></script>
-  <script src="js/progress.js?v=539"></script>
-  <script src="js/music/output.js?v=539"></script>
-  <script src="js/music/mixes.js?v=539"></script>
-  <script src="js/sfx.js?v=539"></script>
-  <script src="js/music/music-bytefall-theme.js?v=539"></script>
-  <script src="js/music/music-sleep-mode.js?v=539"></script>
-  <script src="js/music/music-brute-force.js?v=539"></script>
-  <script src="js/music/music-deep-web.js?v=539"></script>
-  <script src="js/music/music-zero-day.js?v=539"></script>
-  <script src="js/music/music-system-restore.js?v=539"></script>
-  <script src="js/music/music-night-drive.js?v=539"></script>
-  <script src="js/music/music-standby-mode.js?v=539"></script>
-  <script src="js/music/music-core-dump.js?v=539"></script>
-  <script src="js/music/music-handshake.js?v=539"></script>
-  <script src="js/music/music-stack-overflow.js?v=539"></script>
-  <script src="js/music/music-generated.js?v=539"></script>
-  <script src="js/music/music.js?v=539"></script>
-  <script src="js/data/puzzles.js?v=539"></script>
-  <script src="js/data/daily-puzzles.js?v=539"></script>
-  <script src="js/cpu.js?v=539"></script>
-  <script src="js/fx.js?v=539"></script>
-  <script src="js/viz.js?v=539"></script>
-  <script src="js/pixel.js?v=539"></script>
-  <script src="js/minibot.js?v=539"></script>
-  <script src="js/seasons.js?v=539"></script>
-  <script src="js/bigart.js?v=539"></script>
-  <script src="js/scenes.js?v=539"></script>
-  <script src="js/weather.js?v=539"></script>
-  <script src="js/visitors.js?v=539"></script>
-  <script src="js/data/bot-anims.js?v=539"></script>
-<script src="js/wanderers.js?v=539"></script>
-  <script src="js/tutorial.js?v=539"></script>
-  <script src="js/puzzle-sim.js?v=539"></script>
-  <script src="js/led-banner.js?v=539"></script>
-  <script src="js/infections.js?v=539"></script>
-  <script src="js/pixel-ui.js?v=539"></script>
-  <script src="js/script.js?v=539"></script>
-  <script src="js/grid-bg.js?v=539"></script>
-  <script src="js/lights.js?v=539"></script>
-  <script src="js/inf-test.js?v=539"></script>
-  <script src="js/extsource.js?v=539"></script>
-  <script src="js/player.js?v=539"></script>
-  <script src="js/billing.js?v=539"></script>
-  <script src="js/store.js?v=539"></script>
-  <script src="js/ads-config.js?v=539"></script>
-  <script src="js/ads.js?v=539"></script>
-  <script src="js/start.js?v=539"></script>
-  <script src="js/place.js?v=539"></script>
-  <script src="js/saver.js?v=539"></script>
+  <script src="js/bot-svg.js?v=540"></script>
+  <script src="js/unlocks.js?v=540"></script>
+  <script src="js/progress.js?v=540"></script>
+  <script src="js/music/output.js?v=540"></script>
+  <script src="js/music/mixes.js?v=540"></script>
+  <script src="js/sfx.js?v=540"></script>
+  <script src="js/music/music-bytefall-theme.js?v=540"></script>
+  <script src="js/music/music-sleep-mode.js?v=540"></script>
+  <script src="js/music/music-brute-force.js?v=540"></script>
+  <script src="js/music/music-deep-web.js?v=540"></script>
+  <script src="js/music/music-zero-day.js?v=540"></script>
+  <script src="js/music/music-system-restore.js?v=540"></script>
+  <script src="js/music/music-night-drive.js?v=540"></script>
+  <script src="js/music/music-standby-mode.js?v=540"></script>
+  <script src="js/music/music-core-dump.js?v=540"></script>
+  <script src="js/music/music-handshake.js?v=540"></script>
+  <script src="js/music/music-stack-overflow.js?v=540"></script>
+  <script src="js/music/music-generated.js?v=540"></script>
+  <script src="js/music/music.js?v=540"></script>
+  <script src="js/data/puzzles.js?v=540"></script>
+  <script src="js/data/daily-puzzles.js?v=540"></script>
+  <script src="js/cpu.js?v=540"></script>
+  <script src="js/fx.js?v=540"></script>
+  <script src="js/viz.js?v=540"></script>
+  <script src="js/pixel.js?v=540"></script>
+  <script src="js/minibot.js?v=540"></script>
+  <script src="js/seasons.js?v=540"></script>
+  <script src="js/bigart.js?v=540"></script>
+  <script src="js/scenes.js?v=540"></script>
+  <script src="js/weather.js?v=540"></script>
+  <script src="js/visitors.js?v=540"></script>
+  <script src="js/data/bot-anims.js?v=540"></script>
+<script src="js/wanderers.js?v=540"></script>
+  <script src="js/tutorial.js?v=540"></script>
+  <script src="js/puzzle-sim.js?v=540"></script>
+  <script src="js/led-banner.js?v=540"></script>
+  <script src="js/infections.js?v=540"></script>
+  <script src="js/pixel-ui.js?v=540"></script>
+  <script src="js/script.js?v=540"></script>
+  <script src="js/grid-bg.js?v=540"></script>
+  <script src="js/lights.js?v=540"></script>
+  <script src="js/inf-test.js?v=540"></script>
+  <script src="js/extsource.js?v=540"></script>
+  <script src="js/player.js?v=540"></script>
+  <script src="js/billing.js?v=540"></script>
+  <script src="js/store.js?v=540"></script>
+  <script src="js/ads-config.js?v=540"></script>
+  <script src="js/ads.js?v=540"></script>
+  <script src="js/start.js?v=540"></script>
+  <script src="js/place.js?v=540"></script>
+  <script src="js/saver.js?v=540"></script>
 </body>
 </html>

@@ -85,7 +85,8 @@ const Store = (() => {
     item.className = 'store-item booster-item';
     item.dataset.booster = id;
     item.innerHTML = `<h3><span class="store-ico bracketed"><span class="ico-br">[</span>${BOOSTER_SVG[id] || ''}<span class="ico-br">]</span></span><span class="store-name">${b.name}</span></h3><p class="store-desc">${b.desc}</p>`
-      + `<div class="store-deal"><div class="store-terms"><div class="store-costs"></div><span class="booster-owned"></span></div><div class="store-btns">${b.adPerDay ? '<button type="button" class="store-buy store-ad" hidden></button>' : ''}<button type="button" class="store-buy store-pay">${BUY_HTML(Progress.cost('patch', b.cost))}</button></div></div>`;
+      // (no resources in a patch's price: WATCH AD, where there is one, takes that room on the left, level with BUY)
+      + `<div class="store-deal"><div class="store-terms${b.adPerDay ? ' with-ad' : ''}">${b.adPerDay ? '<button type="button" class="store-buy store-ad" hidden></button>' : ''}<span class="booster-owned"></span></div><div class="store-btns"><button type="button" class="store-buy store-pay">${BUY_HTML(Progress.cost('patch', b.cost))}</button></div></div>`;
     const adBtn = item.querySelector('.store-ad');
     if (adBtn) {
       adBtn.addEventListener('click', async () => {

@@ -2386,6 +2386,9 @@ body:not(.vs-mode) .hud .stat:not(.cpu-stat):not(.cpu-face) > .label {
 /* TUTORIAL: the button beside the RULES title, the banner over the board, and whatever the
    banner is talking about pulsing */
 .panel h2.rules-head { display: flex; align-items: center; gap: 12px; }
+/* RULES' sections, each under a ===== line, a head as EXPLOITS' tiers have */
+.panel-rules .rules-sub { margin: 0 0 4px; font-size: 15.5px; letter-spacing: 2px; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+.panel-rules .store-rule + .rules-sub { margin-top: 0; }
 .tut-open {
   font-family: inherit; font-size: 11px; letter-spacing: 1px; padding: 4px 10px; cursor: pointer; text-shadow: none;
   background: transparent; color: var(--accent); border: 1px solid var(--accent); border-radius: 4px;
@@ -2422,8 +2425,16 @@ body:not(.vs-mode) .hud .stat:not(.cpu-stat):not(.cpu-face) > .label {
 @keyframes tut-nudge { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 .tut-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; font-size: 10px; letter-spacing: 2px; color: var(--accent); }
 .tut-exit { font-family: inherit; font-size: 10px; letter-spacing: 1px; padding: 2px 8px; cursor: pointer; background: transparent; color: var(--fg-dim); border: 1px solid var(--grid-line); border-radius: 3px; }
-.tut-text { margin: 0; }
-.tut-points { margin: 6px 0 0; font-family: inherit; font-size: 14.5px; line-height: 1.5; color: var(--accent); white-space: pre-wrap; }
+.tut-text { margin: 0; line-height: calc(0.62em + 8px); } /* (8px between one line's letters and the next's) */
+/* The points a drop made, line by line: the bits, what each is worth, the multiplier, the result,
+   each its own color */
+.tut-points { margin: 8px 0 0; font-family: inherit; font-size: 14.5px; line-height: calc(0.62em + 8px); color: var(--fg-dim); letter-spacing: 0; }
+.tut-points > div { white-space: nowrap; }
+.tut-points .tp-bits { color: var(--fg); }
+.tut-points .tp-sum { color: var(--fg-dim); }
+.tut-points .tp-x { color: var(--accent); }
+.tut-points .tp-eq { color: var(--panel-text); }
+.tut-points :is(.tp-bonus, .tp-total) { color: var(--accent); }
 .tut-actions { flex: none; display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
 .tut-actions button {
   font-family: inherit; font-size: 12px; letter-spacing: 1px; padding: 5px 14px; cursor: pointer;
@@ -2507,6 +2518,7 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
    width: no scroll bar flickering on as it goes; open above and below, for what they say) */
 :is(.start-walkers, .game-walkers, .saver-lane) { overflow-x: clip; overflow-y: visible; }
 .start-title { position: relative; z-index: 1; } /* (the spider drops behind the title) */
+.start-btn { z-index: 2; } /* (START over October's forest too: the trees' own layer, the HOLLOW's, sits under it) */
 :is(.start-walkers, .game-walkers) .walker { position: absolute; left: 0; bottom: 0; width: 34px; will-change: transform; }
 .walker.walking .bot { animation: bot-hop 0.28s steps(2) infinite; }
 .walker.walking .leg-a { animation: bot-step 0.28s steps(1) infinite; }
@@ -3397,11 +3409,14 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 .store-terms .store-costs { gap: 2px 10px; }
 .store-terms .shop-cost { min-width: 46px; }
 
-/* WATCH AD (the app: a free RESTORE POINT for a rewarded ad), over BUY: the pixel play arrow, what's left today */
-.store-btns .store-ad .key-ico { width: 0.7em; height: 0.9em; vertical-align: -0.05em; }
-.store-btns .store-ad .ad-left { color: var(--accent); }
-.store-btns .store-ad:disabled .ad-left { color: var(--fg-dim); }
-.store-btns [hidden] { display: none !important; }
+/* WATCH AD (the app: a free RESTORE POINT for a rewarded ad), on the card's left, level with BUY on its
+   right (a patch's price has no resources to show there): the pixel play arrow, what's left today */
+.store-terms.with-ad { flex-direction: row; align-items: center; gap: 10px; }
+.store-terms .store-ad { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 5px 10px; min-width: 64px; }
+.store-ad .key-ico { width: 0.7em; height: 0.9em; vertical-align: -0.05em; }
+.store-ad .ad-left { color: var(--accent); }
+.store-ad:disabled .ad-left { color: var(--fg-dim); }
+:is(.store-btns, .store-terms) [hidden] { display: none !important; }
 /* (USE + the MASTER KEY's icon: as narrow as BUY, in the MASTER KEYS' gold) */
 .store-btns .store-master { flex-direction: row; justify-content: center; gap: 5px; color: var(--res-master); border-color: var(--res-master); font-size: 11px; padding: 5px 10px; }
 .store-btns .store-master .key-ico { width: 15px; height: 15px; filter: drop-shadow(0 0 2px var(--res-master-glow)); }

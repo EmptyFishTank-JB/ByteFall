@@ -218,7 +218,7 @@ prices are off today carries a -15% / +10% tag by its name. GET PATCHES and GET 
 theirs, the REMOVE ADS link to it. A sale or HIGH DEMAND is also said once a day on the notice line.
 
 **WATCH AD** (the Android app only; `adPerDay` on a patch, store.js, ads.js's `RewardAd`): RESTORE
-POINT's STORE card has a WATCH AD button over BUY: a rewarded ad, the player's choice, that gives one
+POINT's STORE card has a WATCH AD button on its left, level with BUY on its right (a patch's price has no resources to show there): a rewarded ad, the player's choice, that gives one
 RESTORE POINT once it's watched through (closed early, nothing; Google's word decides), once a day
 (the UTC day, as the dailies; `bytefall-ad-rewards`), so its 40 KEYS still mean something. It says
 FREE // 1 TODAY, LOADING... while the ad's fetched, then TOMORROW. Offered with or without REMOVE
@@ -732,16 +732,11 @@ EXPLOIT READY // its name on the notice line for a few seconds. ENCRYPT IN has a
 (the layer it counts down to, as a bit is [n]), flashing with the line under the
 board when the next drop brings one.
 
-The tutorial opens on a welcome (no step number, BEGIN), then 26 steps; on a step that asks
-for a tap, the screen dims a little but for what to tap and the banner (a 0.25s fade); a step can take its
-drop in more than one column (step 3: column 4 or 7). The tutorial's banner: BOT sits in the top-left corner of its frame with its words
-wrapping around it and on under it; BACK and NEXT sit under the frame, outside it. The
-chain lesson (steps 6 and 7) explains the meter, and it keeps its charge on through
-step 13: step 6's 3 links, step 8's 1 and step 9's 2 fill it (3 + 1 + 2 = 6), earning the
-WORM VIRUS the exploit steps then use. While an exploit
-waits, the meter pulses amber. The MENU and SETTINGS buttons light up full while pulsing;
-the EXPLOITS step pulses SLOTS and the cards; the menu steps' banners sit mid-screen
-(the EXPLOITS one low, clear of what it points at).
+The tutorial opens on a welcome (no step number, BEGIN), then 57 short steps, every card listed in
+TUTORIAL.md; on a step that asks for a tap, the screen dims a little but for what to tap and the banner
+(a 0.25s fade, its openings measured from the dim's own corner, so the ad banner never shifts them); a
+step can take its drop in more than one column (column 4 or 7; the layer peels: 3, 4 or 5). The
+chain meter keeps its charge from the chain lesson through the WORM VIRUS.
 
 THE EXPLOIT BUTTON: under the grid in its own row, below the drop buttons with a gap
 between (it's not one of them), a square the size of a grid square with the exploit's
@@ -967,24 +962,35 @@ is placed the way each style would be mixed:
 Panned sounds get +3 dB ahead of the panner (it halves a mono sound's power), so
 each track kept its loudness (within about 0.3 dB of its mono mix).
 
+## Rules
+
+RULES & RECORDS → **RULES**: how the game plays, in sections, each under a ===== line: the basics (drop,
+decrypt), SCORING, LAYERS AND THE LINE, EXPLOITS, THE BOTTOM ROW (side slots, the BLACK MARKET, patch slots,
+BLACK BOXES), CLASSIC'S GOAL (ENCRYPTION STRENGTH), DIFFICULTY and RESOURCES AND LEVELS; the TUTORIAL button
+beside the title.
+
 ## Tutorial
 
 MAIN MENU → **TUTORIAL**, or RULES → **TUTORIAL** (beside the title), starts a guided lesson on set boards
 with set bits (`js/tutorial.js`). BOT narrates it: its face sits in the banner's corner, and each line types out fast with a blip of square-wave "voice" every other letter (Animalese-style, following SOUND), pausing at punctuation; a tap on the text finishes the line, and the lesson never waits on the typing. BOT's mood follows along (happy at the welcome and the chain, worried at the ======== line, devious with the WORM VIRUS, -_- at a wrong column). A banner over the board explains each rule
 and asks you to tap what it names; whatever it's talking about pulses, and only
 the lesson's drop column can be pressed (the others dim). No lesson drops a bit
-into the column of its own number, so it never looks like it has to. After each
-drop it says what happened and shows the points: each link's bits, (10 +
-number) × the chain, NIBBLE bonuses and the total. Twenty-six steps: the terminal,
-CURRENT (the bordered middle panel), a line across, a line down, SCORE, a chain with a NIBBLE, CHAIN,
-peeling a layer twice until it reveals its bit, the ======== line, ENCRYPT IN (the HUD: BEST over SCORE left, CURRENT middle, ENCRYPT IN over CHAIN right),
-an exploit (arm the WORM VIRUS waiting in the EXPLOIT button, then drop it on a
-tall column), PAUSE (the top-left button, as in a game) and the pause screen (in the tutorial: RESUME, RULES &
-RECORDS, SETTINGS, EXPLOITS and STORE; no RESTART or MAIN MENU, the banner's EXIT leaves), RULES &
-RECORDS with its RULES and RECORDS tabs, closing the card with ← BACK (a tap outside does
-nothing), EXPLOITS (the loadout) and ← BACK, SETTINGS and what's in it, ← BACK and RESUME, then PLAY CLASSIC or RULES. Over an
-open menu the banner moves to the bottom of the screen. BACK (from step 2 on)
-redoes the step just played, or before a drop goes to the step before, putting
+into the column of its own number, so it never looks like it has to. Taps follow the card: one before
+BOT has finished talking shows the rest of the words at once and gets -_- (the next does its job);
+once it's said, anything the card didn't ask for (PAUSE, other buttons, the menus) gets -_- and does
+nothing; EXIT always works. PAUSE (its button, Esc, P) only works on the card that asks for it. After
+each drop it says what happened and shows the points, a line a link, each part its own color:
+`[2][5][2][5] 12+15+12+15 ×1 = 54` (the bits, what each is worth, the chain's multiplier, the result),
+NIBBLE bonuses and the total; the words and points 8px apart line to line. The steps: the terminal and
+its bits, CURRENT, a line across, a line down, scoring, SCORE, chains, a NIBBLE, CHAIN and the CHAIN
+METER, peeling a layer twice until it reveals its bit, the ======== line, ENCRYPT IN, an exploit (arm
+the WORM VIRUS waiting in the EXPLOIT button, then drop it on a tall column), the bottom row (its slots
+shown locked, then one as a BLACK MARKET with a TROJAN for sale and its pips), PAUSE (top right) and
+the pause screen, RULES & RECORDS (RULES, RECORDS with HISTORY, levels and RANK UP, NOTICES), ← BACK,
+EXPLOITS (the loadout, buying exploits), the STORE (resources, PRICES TODAY, what's sold), SETTINGS,
+RESUME, ENCRYPTION STRENGTH (a sample line under BYTEFALL and SCORE bar), PATCHES and STARTERS on the
+main menu, then MAIN MENU. Over an open menu the banner moves to the bottom or middle of the screen.
+BACK (from step 2 on) redoes the step just played, or before a drop goes to the step before, putting
 the board, bits, score, chain and exploit back as they were. EXIT leaves at any
 point. It counts toward nothing (no XP, stats, achievements or best score). Notices (a poke's achievement, say) show on the notice line under BYTEFALL, clear of the banner.
 

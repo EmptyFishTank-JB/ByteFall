@@ -3552,6 +3552,7 @@ function openPause() {
   pauseQueued = false;
   recordsBtn.classList.remove('pause-queued');
   if (!canPause() || vsPaused || goalOpen) return; // (the ENCRYPTION STRENGTH card holds the game already)
+  if (mode === 'tutorial' && Tutorial.active() && !Tutorial.allowsPause()) return; // (only where a card asks for it)
   vsPaused = true;
   vsPausedAt = performance.now();
   document.getElementById('pause-note').textContent = mode === 'vs' ? 'The CPU is waiting for you.' : 'The game is waiting for you.';
@@ -5248,6 +5249,7 @@ const sideSlotEls = () => slotEls || (slotEls = [0, 1].map((i) => {
   return b;
 }));
 function renderStarters() {
+  if (demoSlots && mode === 'tutorial') return; // (the tutorial's look at them, up)
   sideSlotEls().forEach((b, i) => {
     const sl = sideSlots[i];
     const show = !!sl && !gameOver && mode !== 'tutorial';
@@ -5298,6 +5300,48 @@ function renderStarters() {
   });
   renderPatches();
 }
+// THE TUTORIAL's look at the bottom row (tutorial.js, a card's demo): 'slots', the four slots shut,
+// each with its padlock and level; 'market', the left side slot a BLACK MARKET (a TROJAN for sale,
+// three drops left); 'goal', CLASSIC's ENCRYPTION STRENGTH line and a part-filled SCORE bar; null, back
+// as the tutorial has them (hidden)
+let demoLine = null;
+let demoSlots = null; // (the slots' demo while it's up: their usual drawing leaves them be)
+function tutorialDemo(kind) {
+  demoSlots = kind === 'slots' || kind === 'market' ? kind : null;
+  const sides = sideSlotEls();
+  const ends = patchSlotEls();
+  if (kind === 'slots' || kind === 'market') {
+    [...ends, ...sides].forEach((b, k) => {
+      const patch = k < 2;
+      const i = k % 2;
+      b.hidden = false;
+      b.disabled = true;
+      b.dataset.key = '';
+      b.className = `exploit-icon side-slot${patch ? ' patch-slot' : ''} locked-slot`;
+      b.innerHTML = `${SLOT_LOCK_SVG}<span class="slot-lv">LV ${patch ? Progress.patchSlotLevel(i) : Progress.sideSlotLevel(i)}</span>`;
+    });
+    if (kind === 'market') {
+      const b = sides[0];
+      b.className = 'exploit-icon side-slot market';
+      b.innerHTML = `<span class="exploit-glyph">${itemIcon('trojan')}</span>${PIPS_HTML}<span class="slot-sale" aria-hidden="true">${CURRENCY_SVG}</span>`;
+      b.querySelectorAll('.slot-pips i').forEach((pip, k) => pip.classList.toggle('on', k < 3));
+    }
+  } else if (mode === 'tutorial' || !kind) {
+    [...ends, ...sides].forEach((b) => { if (mode === 'tutorial') { b.hidden = true; b.dataset.key = ''; } });
+  }
+  const label = document.getElementById('game-mode-label');
+  if (kind === 'goal') {
+    if (demoLine === null) demoLine = label.textContent;
+    label.textContent = '// CLASSIC // NORMAL // 128-BIT: 1,500';
+    goalBarEl.hidden = false;
+    goalBarEl.firstElementChild.style.width = '40%';
+    goalBarEl.classList.remove('near');
+  } else if (demoLine !== null) {
+    label.textContent = demoLine;
+    demoLine = null;
+    updateGoal();
+  }
+}
 // The PATCH SLOTS: built once, at the row's two ends, redrawn as they change
 let patchEls = null;
 const patchSlotEls = () => patchEls || (patchEls = [0, 1].map((i) => {
@@ -5313,6 +5357,7 @@ const patchSlotEls = () => patchEls || (patchEls = [0, 1].map((i) => {
 }));
 const patchIcon = (id) => `<span class="exploit-glyph">${BOOSTER_SVG[id] || ''}</span>`;
 function renderPatches() {
+  if (demoSlots && mode === 'tutorial') return;
   patchSlotEls().forEach((b, i) => {
     const ps = patchSlots[i];
     const show = !!ps && !gameOver && mode !== 'tutorial';
