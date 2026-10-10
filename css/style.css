@@ -1938,7 +1938,18 @@ header { margin-bottom: 6px; }
 @keyframes slot-turn { 0% { opacity: 0; transform: translateY(6px); } 100% { opacity: 1; transform: none; } }
 .slot-price { position: absolute; bottom: -15px; left: 0; right: 0; text-align: center; font-size: 10px; line-height: 1; color: var(--accent); }
 .starter-tag { position: absolute; top: 1px; right: 3px; font-size: 8px; line-height: 1; color: var(--accent); }
-.store-item.starter-item.locked { opacity: 0.45; }
+/* A locked exploit: dimmed under a padlock centered on it, as the menus' locked buttons; its
+   UNLOCKS AT LV n bright, pulsing a moment when it's tapped (as the main menu's can't-do line) */
+.store-item.starter-item.locked { position: relative; }
+.store-item.starter-item.locked > :not(.store-deal),
+.store-item.starter-item.locked .store-costs,
+.store-item.starter-item.locked .store-btns { opacity: 0.3; }
+.store-item.starter-item.locked::after {
+  content: ''; position: absolute; top: 50%; left: 50%; width: 14px; height: 16px; transform: translate(-50%, -50%);
+  background: var(--fg); -webkit-mask: var(--icon-lock) center / contain no-repeat; mask: var(--icon-lock) center / contain no-repeat; pointer-events: none;
+}
+.store-item.starter-item.locked .booster-owned { color: var(--accent); }
+.booster-owned.pulse { text-shadow: 0 0 6px var(--accent); animation: alarm-in 0.25s ease-out, warn-pulse 1s ease-in-out 0.25s infinite; }
 @keyframes amber-pulse {
   0%, 100% { box-shadow: 0 0 4px rgba(var(--accent-rgb), 0.4); }
   50% { box-shadow: 0 0 18px rgba(var(--accent-rgb), 0.95); }
@@ -3116,7 +3127,6 @@ html.pixel-mode .walker.skater.walking[data-look="left"] .bot { transform: none;
 .pz-note { margin: 10px 0 0; font-size: 13px; color: var(--fg-dim); text-align: center; }
 
 /* KEYS: beside the level bar, in the accent color, after a key */
-.key-label { margin-left: 4px; color: var(--accent); letter-spacing: 1px; white-space: nowrap; }
 /* The STORE buttons' sign: the currency sign in its corner, always there. Unlit, a dark tube; while the
    DAILY DROP waits it lights up like a HOT NOW sign: the accent, a glow, a slow hum and a flicker now and then */
 #home-store { position: relative; }
@@ -3613,8 +3623,9 @@ body.cards-in-settings .settings footer::before { margin-bottom: var(--gap); }
 .home-panel-body.more { -webkit-mask-image: linear-gradient(#000 calc(100% - 22px), transparent); mask-image: linear-gradient(#000 calc(100% - 22px), transparent); }
 .home .home-panel { max-height: none; } /* (all the room there is: the more a mode shows before scrolling, the better) */
 /* (the menu's level bar and resources big enough to read) */
-.home .level-bar { font-size: 12px; height: 18px; }
-.home .wallet { font-size: 12px; height: 16px; }
+.home .level-bar { font-size: 12px; height: 14px; }
+/* (KEYS and the resources on the one line, 8px under the level's: each line as tall as its words) */
+.home .wallet { font-size: 12px; height: 14px; flex-wrap: nowrap; white-space: nowrap; margin: 0; }
 /* (the STORE's resources, box tiers and sign at the game's text size; the BLACK MARKET window's
    costs and note, and the main menu's, as they were) */
 .panel-store .wallet { font-size: 15.5px; }
@@ -4378,6 +4389,7 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 .notice-item { display: flex; flex-direction: column; gap: 3px; padding: 8px 10px; border: 1px solid var(--grid-line); border-radius: 4px; }
 .notice-item .notice-when { font-size: 11.5px; letter-spacing: 1px; color: var(--fg-dim); }
 .notice-item .notice-text { font-size: 13px; letter-spacing: 1px; line-height: 1.35; color: var(--panel-text); }
+.notice-item .notice-desc { font-size: 13px; line-height: 1.35; color: var(--fg-dim); } /* (an ACHIEVEMENT's: what it was for) */
 .notice-item.unread { border-color: var(--accent); }
 .notice-item.unread .notice-text { color: var(--accent); }
 .notices-empty { font-size: 13px; color: var(--fg-dim); }
@@ -4460,8 +4472,10 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 .store-top .store-msg { min-height: 0; margin: var(--gap) 0 0 !important; font-size: 13px; }
 .store-top .store-msg:empty { display: none; }
 /* (a section's sale or markup today, by its head: green off, red up) */
-.store-sub .sub-tag { display: inline-block; vertical-align: middle; margin-left: 8px; padding: 0 4px; font-size: 11.5px; font-weight: normal; letter-spacing: 0; line-height: 15px; color: var(--bg-solid); background: var(--fg); border-radius: 3px; text-shadow: none; }
-.store-sub .sub-tag.up { background: var(--danger); }
+/* (each STORE item's sale badge: its kind's change today, -n% in the terminal color, +n% in red) */
+.store-item .sale-tag { flex: none; margin-left: 8px; padding: 0 4px; font-size: 11.5px; font-weight: normal; letter-spacing: 0; line-height: 15px; color: var(--bg-solid); background: var(--fg); border-radius: 3px; text-shadow: none; }
+.store-item .sale-tag.up { background: var(--danger); }
+.store-item .sale-tag[hidden] { display: none; }
 
 /* CLASSIC's ENCRYPTION STRENGTH: a thin bar along the SCORE box's foot, filling toward this game's key
    (lit near it), and the card the game holds on once it's cracked, laid out as PAUSE's */
@@ -4476,3 +4490,30 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 /* (a card's items scrolled out of sight hold their animations still till they come back: script.js's
    offView watcher) */
 .off-view, .off-view * { animation-play-state: paused !important; }
+
+/* RULES & RECORDS: 8px between everything, as the game's other cards. The card's head, its tabs and
+   the pane under them; in RULES, RECORDS and NOTICES each heading, paragraph, ===== line, group,
+   row and stat line; RECORDS' own tabs (UNLOCKS, ACHIEVEMENTS, STATS, HISTORY) 8px apart, each as
+   wide as its word, at the game's smallest text size */
+.records .card-head { margin-bottom: var(--gap); }
+.records .menu-tabs { margin-bottom: 0; }
+.records .card-top { padding-bottom: var(--gap); }
+.records :is(.panel-rules, .panel-records, .panel-notices) h2 { margin: 0 0 var(--gap); }
+.records :is(.panel-rules, .panel-records, .panel-notices) p { margin: 0 0 var(--gap); }
+.records .panel-rules .rules-sub { margin: 0 0 var(--gap); }
+.records .records-tabs { gap: var(--gap); margin: 0; padding: 0 0 var(--gap); top: -1px; }
+.records .records-tabs button { flex: 1 1 auto; padding: 5px 6px; font-size: 11.5px; }
+.records .rec-level, .records .rec-summary, .records .rec-group { margin: 0 0 var(--gap); }
+.records .rec-sep + .rec-group, .records .rec-group:first-child { margin-top: 0; }
+.records .rec-row { padding: var(--gap) 0; }
+.records .rec-row:first-child { padding-top: 0; }
+.records .rec-desc { margin: var(--gap) 0 0; }
+.records .rec-bar { margin-top: var(--gap); }
+.records .rec-stats div { margin-bottom: var(--gap); }
+.records .rec-reset { margin-top: 0; }
+.records .notices-note { margin: 0 0 var(--gap); }
+.records .notice-item { gap: var(--gap); }
+.records .notices-body { gap: var(--gap); }
+.records .hist-game { padding: var(--gap) 0; }
+.records .hist-game:first-child { padding-top: 0; }
+.records :is(.hist-when, .hist-stats, .hist-earned, .hist-patched) { margin-top: var(--gap); }

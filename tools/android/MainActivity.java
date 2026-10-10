@@ -34,6 +34,7 @@ import com.android.billingclient.api.ProductDetails;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.QueryProductDetailsParams;
 import com.android.billingclient.api.QueryPurchasesParams;
+import com.android.billingclient.api.UnfetchedProduct;
 import com.getcapacitor.BridgeActivity;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -213,20 +214,30 @@ public class MainActivity extends BridgeActivity {
         return offer;
     }
 
+    // (why products didn't come back, Google Play's own word for each: TEST PURCHASES shows it, js/store.js)
+    private String productsWhy = "";
+
     // (the products and their prices, in the player's currency)
     private void queryProducts(Runnable then) {
         List<QueryProductDetailsParams.Product> list = new ArrayList<>();
         for (String id : PRODUCTS) list.add(QueryProductDetailsParams.Product.newBuilder().setProductId(id).setProductType(BillingClient.ProductType.INAPP).build());
         billing.queryProductDetailsAsync(QueryProductDetailsParams.newBuilder().setProductList(list).build(), (result, found) -> runOnUiThread(() -> {
+            StringBuilder why = new StringBuilder();
             if (result.getResponseCode() == BillingClient.BillingResponseCode.OK) {
                 StringBuilder prices = new StringBuilder();
                 for (ProductDetails d : found.getProductDetailsList()) {
                     ProductDetails.OneTimePurchaseOfferDetails offer = offerOf(d);
-                    if (offer == null) continue;
+                    if (offer == null) { why.append(why.length() > 0 ? ", " : "").append(d.getProductId()).append(": no price (purchase option)"); continue; }
                     products.put(d.getProductId(), d);
                     prices.append(prices.length() > 0 ? "," : "").append(JSONObject.quote(d.getProductId())).append(':').append(JSONObject.quote(offer.getFormattedPrice()));
                 }
-                tellPage("{\"type\":\"products\",\"prices\":{" + prices + "}}");
+                for (UnfetchedProduct u : found.getUnfetchedProductList()) why.append(why.length() > 0 ? ", " : "").append(u.getProductId()).append(": status ").append(u.getStatusCode());
+                for (String id : PRODUCTS) if (!products.containsKey(id) && why.indexOf(id) < 0) why.append(why.length() > 0 ? ", " : "").append(id).append(": not returned");
+                productsWhy = why.toString();
+                tellPage("{\"type\":\"products\",\"prices\":{" + prices + "},\"why\":" + JSONObject.quote(productsWhy) + "}");
+            } else {
+                productsWhy = "query failed: code " + result.getResponseCode() + (result.getDebugMessage().isEmpty() ? "" : " (" + result.getDebugMessage() + ")");
+                tellPage("{\"type\":\"products\",\"prices\":{},\"why\":" + JSONObject.quote(productsWhy) + "}");
             }
             if (then != null) then.run();
         }));
@@ -287,7 +298,7 @@ public class MainActivity extends BridgeActivity {
     // (Google Play's purchase sheet, over the game)
     private void launchPurchase(String id) {
         ProductDetails d = products.get(id);
-        if (d == null) { tellFailed("missing"); return; } // (not set up in Play Console, or not active)
+        if (d == null) { tellPage("{\"type\":\"failed\",\"reason\":\"missing\",\"why\":" + JSONObject.quote(productsWhy) + "}"); return; } // (not set up in Play Console, or not active)
         BillingFlowParams.ProductDetailsParams.Builder item = BillingFlowParams.ProductDetailsParams.newBuilder().setProductDetails(d);
         ProductDetails.OneTimePurchaseOfferDetails offer = offerOf(d);
         if (offer != null && offer.getOfferToken() != null && !offer.getOfferToken().isEmpty()) item.setOfferToken(offer.getOfferToken());

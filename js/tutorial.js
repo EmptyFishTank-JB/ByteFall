@@ -98,7 +98,7 @@ const Tutorial = (() => {
     { text: 'The row under the drop buttons holds more than the EXPLOIT button: a SIDE SLOT on each side of it, and a PATCH SLOT at each end.', board: EMPTY, bits: [], demo: 'slots', pulse: ['.side-slot'], next: true },
     { text: 'They open as you level up. Until then, each one shows a padlock and the level it opens at.', demo: 'slots', pulse: ['.side-slot'], next: true },
     { text: 'A PATCH SLOT sells a patch during a game, for KEYS and resources, and the patch works the moment you buy it.', demo: 'slots', pulse: ['.patch-slot'], next: true },
-    { text: 'The SIDE SLOTS hold STARTER EXPLOITS that you bring into a game. An empty one becomes the BLACK MARKET once the first layer rises.', demo: 'market', pulse: ['.side-slot:not(.patch-slot)'], next: true },
+    { text: 'The SIDE SLOTS, EXPLOIT L and EXPLOIT R, hold exploits you bring into a game. An empty one becomes the BLACK MARKET once the first layer rises.', demo: 'market', pulse: ['.side-slot:not(.patch-slot)'], next: true },
     { text: 'It sells an exploit or a BLACK BOX, swapped for another every 4 drops. The pips under it count the drops left, and the last one blinks.', demo: 'market', pulse: ['.side-slot.market'], next: true },
     { text: 'BLACK BOXES are cheap, but some of them are INFECTED!', demo: 'market', mood: 'devious', next: true },
     // THE MENUS
@@ -118,7 +118,7 @@ const Tutorial = (() => {
     { text: 'The STORE isn’t on the pause screen: it’s on the MAIN MENU. Here’s a look inside.', paused: true, pane: 'store', float: true, next: true },
     { text: 'YOUR RESOURCES are at the top: KEYS, BUGS, CACHE, CRYPTO, ROOTKITS and MASTER KEYS, all earned by playing. The [i] shows how.', paused: true, pane: 'store', pulse: ['#store-wallet'], float: true, next: true },
     { text: 'Under them, PRICES TODAY: sales, holidays and busy days move the prices up and down.', paused: true, pane: 'store', pulse: ['#price-gauge'], float: true, next: true },
-    { text: 'Below that: the DAILY DROP (free once a day), PATCHES, STARTER EXPLOITS, BLACK BOXES, and REMOVE ADS and FULL ACCESS.', paused: true, pane: 'store', float: true, next: true },
+    { text: 'Below that: the DAILY DROP (free once a day), PATCHES, EXPLOITS (TIER I, II and III), BLACK BOXES, and REMOVE ADS and FULL ACCESS.', paused: true, pane: 'store', float: true, next: true },
     { text: 'Tap ← BACK to close the STORE.', paused: true, pane: 'store', tap: '.card-back[data-close="records"]', pass: true, float: 'middle' },
     { text: 'Now tap SETTINGS.', paused: true, closeMenus: true, tap: '#pause-settings', pass: true, float: true },
     { text: 'SETTINGS has SOUND (sound and music, the sound effects, what you’re listening on), the PLAYLIST and MUSIC PLAYER, and CONTROLS (where the drop buttons sit, vibration).', paused: true, settings: true, float: 'middle', next: true },
@@ -128,7 +128,7 @@ const Tutorial = (() => {
     // CLASSIC'S GOAL
     { text: 'In CLASSIC, every game has a key to crack: its ENCRYPTION STRENGTH, shown under BYTEFALL. It starts at 128-BIT, cracked at 1,500 points on NORMAL.', closeMenus: true, demo: 'goal', pulse: ['#game-mode-label'], next: true },
     { text: 'The bar along the bottom of SCORE fills toward it. Crack it for KEYS, then GO DEEPER for a stronger key and more KEYS, or DISCONNECT and end the game on a win.', demo: 'goal', pulse: ['#goal-bar'], next: true, mood: 'happy' },
-    { text: 'Before a game, PATCHES and STARTERS on the main menu let you bring an edge in, once you have some.', next: true },
+    { text: 'Before a game, PATCHES and EXPLOIT L / R on the main menu let you bring an edge in, once you have some.', next: true },
     { text: 'That’s everything you need to know. Good luck, decryptor.', closeMenus: true, done: true, mood: 'happy' },
   ];
 
@@ -357,8 +357,8 @@ const Tutorial = (() => {
     el.appendChild(card);
     const head = document.createElement('div');
     head.className = 'tut-head';
-    // (the welcome isn't a step: no number; the steps count from the one after it)
-    head.innerHTML = `<span>// TUTORIAL${s.intro ? '' : ` ${step} / ${STEPS.length - 1}`}</span>`;
+    // (no card number or count: the lesson's to learn, not to count down)
+    head.innerHTML = '<span>// TUTORIAL</span>';
     const exit = document.createElement('button');
     exit.type = 'button';
     exit.className = 'tut-exit';

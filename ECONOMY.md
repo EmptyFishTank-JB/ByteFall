@@ -62,11 +62,11 @@ So a game pays for about two tier 1 exploits, or one tier 2, and a tier 3 takes 
 | Where | What | Paid with |
 |---|---|---|
 | STORE, PATCHES | HEAD START 15, FIREWALL DELAY 20, LOOKAHEAD 15, OVERTIME 20, ANTIVIRUS 25, RESTORE POINT 40, HINT 10, UNDO 8 | KEYS only (RESTORE POINT also free for a rewarded ad, once a day, in the app) |
-| STORE, STARTER EXPLOITS | an exploit to take into a game (below) | KEYS + resources, or 1 MASTER KEY |
+| STORE, EXPLOITS (TIER I, II, III) | an exploit to take into a game, from EXPLOIT L or R (below) | KEYS + resources, or 1 MASTER KEY |
 | STORE, BLACK BOXES | a random pull to take into a game (below) | KEYS + resources (no MASTER KEYS) |
 | BLACK MARKET (in a game) | an exploit or BLACK BOX, the STORE's price | the same |
-| PATCH SLOTS (in a game, Lv 5 and Lv 12) | HEAD START 8 KEYS + 4 CRYPTO, FIREWALL DELAY 10 + 5 CACHE, LOOKAHEAD 8 + 5 BUGS, OVERTIME 10 + 3 BUGS + 3 CACHE, ANTIVIRUS 10 + 4 CACHE + 1 ROOTKIT, RESTORE POINT 20 + 5 CRYPTO + 2 ROOTKITS (`PATCH_PRICES`) | KEYS + resources, applied at once |
-| EXPLOITS, to keep | an exploit from TROJAN on, once unlocked: three times its STARTER price in resources, no KEYS (BLACK BOX the exploit: 30 CRYPTO + 6 ROOTKITS); RNG, BITFLIP and BUFFER OVERFLOW are free (`ownPrice`, `OWN_TIMES`, `FREE_EXPLOITS`); kept till the next RANK UP | resources, once a rank |
+| PATCH SLOTS (in a game, Lv 5 and Lv 12; a slot sells again once its patch is used) | HEAD START 8 KEYS + 4 CRYPTO, FIREWALL DELAY 10 + 5 CACHE, LOOKAHEAD 8 + 5 BUGS, OVERTIME 10 + 3 BUGS + 3 CACHE, ANTIVIRUS 10 + 4 CACHE + 1 ROOTKIT, RESTORE POINT 20 + 5 CRYPTO + 2 ROOTKITS (`PATCH_PRICES`) | KEYS + resources, applied at once |
+| EXPLOITS, to keep | an exploit from TROJAN on, once unlocked: four times its one-game price in resources, no KEYS (BLACK BOX the exploit: 40 CRYPTO + 8 ROOTKITS), always full price (no sale but a HOLIDAY's, no YOUR DEAL; the rank's rise as everything); RNG, BITFLIP and BUFFER OVERFLOW are free (`ownPrice`, `OWN_TIMES`, `FREE_EXPLOITS`); kept till the next RANK UP | resources, once a rank |
 
 ## DECRYPTOR ranks
 
@@ -112,13 +112,13 @@ real ones (`LEGIT`: 20+ drops, 45+ seconds, at most 40 drops a minute, a bit dec
 drops or better, so bits thrown in fast to lose don't count), what they earned on average (KEYS plus
 resources, ROOTKITS counting 3, MASTER KEYS 10) under `PAR` (45; a typical CLASSIC game earns about
 57) takes off half the shortfall, up to 25% (`DEAL_MAX`), in 5% steps. All told a price is never
-under 60% or over 125% of its base. The STORE shows a gauge (LOW to HIGH) and why, and a tag on each
+under 60% or over 125% of its base. The STORE shows a gauge (LOW to HIGH) and why, and a badge on each item
 tab whose prices are off; a sale or HIGH DEMAND is said once a day on the notice line (kept in
 NOTICES). `?pricedate=YYYY-MM-DD` shows another day's prices (testing).
 
-Starter exploits and boxes go into the two STARTER slots on the main menu (two of one kind, or one
+Exploits and boxes to bring in go into EXPLOIT L and EXPLOIT R on the main menu (two of one kind, or one
 each of two) and are used once in a game. A slot left empty is the BLACK MARKET from the start, and
-a slot whose starter is used becomes one.
+a slot whose exploit is used becomes one.
 
 ## Exploit prices
 
@@ -234,7 +234,7 @@ mining pickaxe, a getaway rocket; SCAREWARE a crash screen, files deleting, a pr
 
 | Rule | |
 |---|---|
-| Where | a side slot taken in empty (from the start), or one whose starter has been used |
+| Where | a side slot taken in empty (from the start), or one whose exploit has been used |
 | Modes | CLASSIC, BLITZ and ZEN (not DAILY, PUZZLE, VS or the tutorial) |
 | What's offered | a random unlocked exploit, or (a quarter of the time) a BLACK BOX: I 60%, II 30%, III 10% |
 | Turnover | a new offer every 4 drops (a price shown and not taken goes too) |

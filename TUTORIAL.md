@@ -9,6 +9,7 @@ The tutorial lives in `js/tutorial.js` (`STEPS`).
 
 ## What changed this round
 
+- **No card counter**: the heading is just `// TUTORIAL`, so the count isn't what a player watches.
 - **Long cards split** into short ones: 26 steps became 57, each a sentence or two.
 - **Taps follow the card**: a tap before BOT has finished talking shows the rest of the words at once and
   gets BOT's -_- (the next tap does its job). Once it's said, anything the card didn't ask for (PAUSE,
@@ -23,7 +24,7 @@ The tutorial lives in `js/tutorial.js` (`STEPS`).
 - **New cards**: the bottom row (the slots, shown locked), the BLACK MARKET (a sample slot with a TROJAN
   for sale and its pips), more on CHAINS and the CHAIN METER, RECORDS (HISTORY, levels, RANK UP,
   NOTICES), the loadout (buying exploits), the STORE (three cards), SETTINGS (two), ENCRYPTION STRENGTH
-  (a sample line and SCORE bar) and PATCHES / STARTERS on the main menu.
+  (a sample line and SCORE bar) and PATCHES / EXPLOIT L / R on the main menu.
 - **PAUSE** is named at the top right now.
 - **The last card**: MAIN MENU only.
 - **No STORE on the pause screen** (it's on the main menu): card 32 names QUIT in its place, and card
@@ -33,7 +34,7 @@ The tutorial lives in `js/tutorial.js` (`STEPS`).
 
 ## How every card works
 
-- **The card**: `// TUTORIAL n / 57` (the welcome has no number) and **EXIT** in its top row, BOT's face
+- **The card**: `// TUTORIAL` (no card number or count in the game: the numbers here are for review only) and **EXIT** in its top row, BOT's face
   beside the words, its buttons under the frame. The words type out with a blip of BOT's voice.
 - **BACK** (every card after the welcome): after a drop, the same card again; otherwise the card before,
   the board and score put back as they were. **NEXT / BEGIN** on cards that only explain.
@@ -67,7 +68,7 @@ Columns are numbered 1 to 7 from the left. Boards are drawn top row first; `[=]`
 
 ## Card 1
 
-- **Heading**: `// TUTORIAL 1 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: under the board's middle; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 
@@ -83,7 +84,7 @@ Columns are numbered 1 to 7 from the left. Boards are drawn top row first; `[=]`
 
 ## Card 2
 
-- **Heading**: `// TUTORIAL 2 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: under the board's middle; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 
@@ -99,7 +100,7 @@ Columns are numbered 1 to 7 from the left. Boards are drawn top row first; `[=]`
 
 ## Card 3
 
-- **Heading**: `// TUTORIAL 3 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: resting
 - **Buttons**: EXIT, BACK
 - **Bits**: CURRENT [3], then [2]
@@ -121,7 +122,7 @@ Columns are numbered 1 to 7 from the left. Boards are drawn top row first; `[=]`
 
 ## Card 4
 
-- **Heading**: `// TUTORIAL 4 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 
@@ -137,7 +138,7 @@ Columns are numbered 1 to 7 from the left. Boards are drawn top row first; `[=]`
 
 ## Card 5
 
-- **Heading**: `// TUTORIAL 5 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: resting, then resting after the drop
 - **Buttons**: EXIT, BACK
 
@@ -164,7 +165,7 @@ Columns are numbered 1 to 7 from the left. Boards are drawn top row first; `[=]`
 
 ## Card 6
 
-- **Heading**: `// TUTORIAL 6 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: resting, then resting after the drop
 - **Buttons**: EXIT, BACK
 - **Bits**: CURRENT [2]
@@ -197,7 +198,7 @@ Columns are numbered 1 to 7 from the left. Boards are drawn top row first; `[=]`
 
 ## Card 7
 
-- **Heading**: `// TUTORIAL 7 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 - **Bits**: CURRENT none
@@ -219,7 +220,7 @@ Columns are numbered 1 to 7 from the left. Boards are drawn top row first; `[=]`
 
 ## Card 8
 
-- **Heading**: `// TUTORIAL 8 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: resting
 - **Buttons**: EXIT, BACK
 
@@ -235,7 +236,7 @@ Columns are numbered 1 to 7 from the left. Boards are drawn top row first; `[=]`
 
 ## Card 9
 
-- **Heading**: `// TUTORIAL 9 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 - **Bits**: CURRENT [2]
@@ -260,7 +261,7 @@ Columns are numbered 1 to 7 from the left. Boards are drawn top row first; `[=]`
 
 ## Card 10
 
-- **Heading**: `// TUTORIAL 10 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: resting, then happy after the drop
 - **Buttons**: EXIT, BACK
 
@@ -294,7 +295,7 @@ TOTAL +132
 
 ## Card 11
 
-- **Heading**: `// TUTORIAL 11 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: happy
 - **Buttons**: EXIT, BACK, NEXT
 - **Bits**: CURRENT none
@@ -317,7 +318,7 @@ TOTAL +132
 
 ## Card 12
 
-- **Heading**: `// TUTORIAL 12 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: resting
 - **Buttons**: EXIT, BACK
 
@@ -333,7 +334,7 @@ TOTAL +132
 
 ## Card 13
 
-- **Heading**: `// TUTORIAL 13 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 
@@ -349,7 +350,7 @@ TOTAL +132
 
 ## Card 14
 
-- **Heading**: `// TUTORIAL 14 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 
@@ -365,7 +366,7 @@ TOTAL +132
 
 ## Card 15
 
-- **Heading**: `// TUTORIAL 15 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 - **Bits**: CURRENT [2], then [2]
@@ -387,7 +388,7 @@ TOTAL +132
 
 ## Card 16
 
-- **Heading**: `// TUTORIAL 16 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: resting, then resting after the drop
 - **Buttons**: EXIT, BACK
 
@@ -414,7 +415,7 @@ TOTAL +132
 
 ## Card 17
 
-- **Heading**: `// TUTORIAL 17 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: resting, then happy after the drop
 - **Buttons**: EXIT, BACK
 - **Bits**: CURRENT [2]
@@ -449,7 +450,7 @@ TOTAL +34
 
 ## Card 18
 
-- **Heading**: `// TUTORIAL 18 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: happy
 - **Buttons**: EXIT, BACK, NEXT
 
@@ -465,7 +466,7 @@ TOTAL +34
 
 ## Card 19
 
-- **Heading**: `// TUTORIAL 19 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: under the board's middle; **BOT**: worried
 - **Buttons**: EXIT, BACK, NEXT
 
@@ -481,7 +482,7 @@ TOTAL +34
 
 ## Card 20
 
-- **Heading**: `// TUTORIAL 20 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: resting
 - **Buttons**: EXIT, BACK
 
@@ -497,7 +498,7 @@ TOTAL +34
 
 ## Card 21
 
-- **Heading**: `// TUTORIAL 21 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: devious grin
 - **Buttons**: EXIT, BACK, NEXT
 - **Bits**: CURRENT none; held in EXPLOIT: WORM VIRUS
@@ -522,7 +523,7 @@ TOTAL +34
 
 ## Card 22
 
-- **Heading**: `// TUTORIAL 22 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: devious grin
 - **Buttons**: EXIT, BACK
 
@@ -538,7 +539,7 @@ TOTAL +34
 
 ## Card 23
 
-- **Heading**: `// TUTORIAL 23 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: devious grin, then happy after the drop
 - **Buttons**: EXIT, BACK
 - **Bits**: CURRENT the armed WORM VIRUS
@@ -574,7 +575,7 @@ TOTAL +34
 
 ## Card 24
 
-- **Heading**: `// TUTORIAL 24 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 
@@ -590,7 +591,7 @@ TOTAL +34
 
 ## Card 25
 
-- **Heading**: `// TUTORIAL 25 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 - **Shows for the lesson**: the bottom row's slots (locked: padlock and level)
@@ -607,7 +608,7 @@ TOTAL +34
 
 ## Card 26
 
-- **Heading**: `// TUTORIAL 26 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 - **Shows for the lesson**: the bottom row's slots (locked: padlock and level)
@@ -624,7 +625,7 @@ TOTAL +34
 
 ## Card 27
 
-- **Heading**: `// TUTORIAL 27 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 - **Shows for the lesson**: the bottom row's slots (locked: padlock and level)
@@ -641,14 +642,14 @@ TOTAL +34
 
 ## Card 28
 
-- **Heading**: `// TUTORIAL 28 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 - **Shows for the lesson**: the bottom row's slots (the left SIDE SLOT a BLACK MARKET selling a TROJAN, 3 pips left)
 
 **Says:**
 
-> The SIDE SLOTS hold STARTER EXPLOITS that you bring into a game. An empty one becomes the BLACK MARKET once the first layer rises.
+> The SIDE SLOTS, EXPLOIT L and EXPLOIT R, hold exploits you bring into a game. An empty one becomes the BLACK MARKET once the first layer rises.
 
 - **Asks you to**: Tap NEXT.
 - **Lights up**: nothing
@@ -658,7 +659,7 @@ TOTAL +34
 
 ## Card 29
 
-- **Heading**: `// TUTORIAL 29 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 - **Shows for the lesson**: the bottom row's slots (the left SIDE SLOT a BLACK MARKET selling a TROJAN, 3 pips left)
@@ -675,7 +676,7 @@ TOTAL +34
 
 ## Card 30
 
-- **Heading**: `// TUTORIAL 30 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: devious grin
 - **Buttons**: EXIT, BACK, NEXT
 - **Shows for the lesson**: the bottom row's slots (the left SIDE SLOT a BLACK MARKET selling a TROJAN, 3 pips left)
@@ -692,7 +693,7 @@ TOTAL +34
 
 ## Card 31
 
-- **Heading**: `// TUTORIAL 31 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: resting
 - **Buttons**: EXIT, BACK
 
@@ -708,7 +709,7 @@ TOTAL +34
 
 ## Card 32
 
-- **Heading**: `// TUTORIAL 32 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: bottom of the screen; **BOT**: resting
 - **Buttons**: EXIT, BACK
 
@@ -724,7 +725,7 @@ TOTAL +34
 
 ## Card 33
 
-- **Heading**: `// TUTORIAL 33 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: middle of the screen; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 
@@ -740,7 +741,7 @@ TOTAL +34
 
 ## Card 34
 
-- **Heading**: `// TUTORIAL 34 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: middle of the screen; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 
@@ -756,7 +757,7 @@ TOTAL +34
 
 ## Card 35
 
-- **Heading**: `// TUTORIAL 35 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: middle of the screen; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 
@@ -772,7 +773,7 @@ TOTAL +34
 
 ## Card 36
 
-- **Heading**: `// TUTORIAL 36 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: middle of the screen; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 
@@ -788,7 +789,7 @@ TOTAL +34
 
 ## Card 37
 
-- **Heading**: `// TUTORIAL 37 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: middle of the screen; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 
@@ -804,7 +805,7 @@ TOTAL +34
 
 ## Card 38
 
-- **Heading**: `// TUTORIAL 38 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: middle of the screen; **BOT**: resting
 - **Buttons**: EXIT, BACK
 
@@ -820,7 +821,7 @@ TOTAL +34
 
 ## Card 39
 
-- **Heading**: `// TUTORIAL 39 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: bottom of the screen; **BOT**: resting
 - **Buttons**: EXIT, BACK
 
@@ -836,7 +837,7 @@ TOTAL +34
 
 ## Card 40
 
-- **Heading**: `// TUTORIAL 40 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: bottom of the screen; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 
@@ -852,7 +853,7 @@ TOTAL +34
 
 ## Card 41
 
-- **Heading**: `// TUTORIAL 41 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: bottom of the screen; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 
@@ -868,7 +869,7 @@ TOTAL +34
 
 ## Card 42
 
-- **Heading**: `// TUTORIAL 42 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: bottom of the screen; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 
@@ -884,7 +885,7 @@ TOTAL +34
 
 ## Card 43
 
-- **Heading**: `// TUTORIAL 43 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: middle of the screen; **BOT**: resting
 - **Buttons**: EXIT, BACK
 
@@ -900,7 +901,7 @@ TOTAL +34
 
 ## Card 44
 
-- **Heading**: `// TUTORIAL 44 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: bottom of the screen; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 
@@ -916,7 +917,7 @@ TOTAL +34
 
 ## Card 45
 
-- **Heading**: `// TUTORIAL 45 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: bottom of the screen; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 
@@ -932,7 +933,7 @@ TOTAL +34
 
 ## Card 46
 
-- **Heading**: `// TUTORIAL 46 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: bottom of the screen; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 
@@ -948,13 +949,13 @@ TOTAL +34
 
 ## Card 47
 
-- **Heading**: `// TUTORIAL 47 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: bottom of the screen; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 
 **Says:**
 
-> Below that: the DAILY DROP (free once a day), PATCHES, STARTER EXPLOITS, BLACK BOXES, and REMOVE ADS and FULL ACCESS.
+> Below that: the DAILY DROP (free once a day), PATCHES, EXPLOITS (TIER I, II and III), BLACK BOXES, and REMOVE ADS and FULL ACCESS.
 
 - **Asks you to**: Tap NEXT.
 - **Lights up**: nothing
@@ -964,7 +965,7 @@ TOTAL +34
 
 ## Card 48
 
-- **Heading**: `// TUTORIAL 48 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: middle of the screen; **BOT**: resting
 - **Buttons**: EXIT, BACK
 
@@ -980,7 +981,7 @@ TOTAL +34
 
 ## Card 49
 
-- **Heading**: `// TUTORIAL 49 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: bottom of the screen; **BOT**: resting
 - **Buttons**: EXIT, BACK
 
@@ -996,7 +997,7 @@ TOTAL +34
 
 ## Card 50
 
-- **Heading**: `// TUTORIAL 50 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: middle of the screen; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 
@@ -1012,7 +1013,7 @@ TOTAL +34
 
 ## Card 51
 
-- **Heading**: `// TUTORIAL 51 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: middle of the screen; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 
@@ -1028,7 +1029,7 @@ TOTAL +34
 
 ## Card 52
 
-- **Heading**: `// TUTORIAL 52 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: middle of the screen; **BOT**: resting
 - **Buttons**: EXIT, BACK
 
@@ -1044,7 +1045,7 @@ TOTAL +34
 
 ## Card 53
 
-- **Heading**: `// TUTORIAL 53 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: bottom of the screen; **BOT**: resting
 - **Buttons**: EXIT, BACK
 
@@ -1060,7 +1061,7 @@ TOTAL +34
 
 ## Card 54
 
-- **Heading**: `// TUTORIAL 54 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 
@@ -1076,7 +1077,7 @@ TOTAL +34
 
 ## Card 55
 
-- **Heading**: `// TUTORIAL 55 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: happy
 - **Buttons**: EXIT, BACK, NEXT
 
@@ -1092,13 +1093,13 @@ TOTAL +34
 
 ## Card 56
 
-- **Heading**: `// TUTORIAL 56 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 
 **Says:**
 
-> Before a game, PATCHES and STARTERS on the main menu let you bring an edge in, once you have some.
+> Before a game, PATCHES and EXPLOIT L / R on the main menu let you bring an edge in, once you have some.
 
 - **Asks you to**: Tap NEXT.
 - **Lights up**: nothing
@@ -1108,7 +1109,7 @@ TOTAL +34
 
 ## Card 57
 
-- **Heading**: `// TUTORIAL 57 / 57`
+- **Heading**: `// TUTORIAL`
 - **Card sits**: top of the board; **BOT**: happy
 - **Buttons**: EXIT, BACK, MAIN MENU
 

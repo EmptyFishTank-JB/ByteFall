@@ -823,14 +823,16 @@ const Progress = (() => {
 
   // EXPLOITS TO KEEP: unlocked by level, an exploit past the first FREE_EXPLOITS is then bought once
   // with resources to equip it (the CHAIN METER only gives equipped ones), and it's kept until the
-  // next RANK UP. FULL ACCESS owns them all. The price: three times its STARTER price in resources,
-  // no KEYS (ECONOMY.md)
-  const OWN_TIMES = 3;
+  // next RANK UP. FULL ACCESS owns them all. The price: four times its one-game price in resources,
+  // no KEYS, and always full price: no WEEKEND or FLASH SALE, HIGH DEMAND or YOUR DEAL, only a
+  // HOLIDAY's sale (and the rank's prices, as everything) (ECONOMY.md)
+  const OWN_TIMES = 4;
   const FREE_EXPLOITS = 3; // (RNG, BITFLIP, BUFFER OVERFLOW)
+  const ownMult = () => { const h = holiday(priceDay()); return h && (!h.kind || h.kind === 'exploit') ? 1 - h.off : 1; };
   function ownPrice(id) {
-    const base = id === 'black-box' ? { crypto: 30, rootkits: 6 }
+    const base = id === 'black-box' ? { crypto: 40, rootkits: 8 }
       : Object.fromEntries(Object.entries(PRICES[id] || {}).filter(([res]) => res !== 'keys').map(([res, n]) => [res, n * OWN_TIMES]));
-    return Object.fromEntries(Object.entries(base).map(([res, n]) => [res, cost('exploit', n)]));
+    return Object.fromEntries(Object.entries(base).map(([res, n]) => [res, Math.max(1, Math.round(n * ownMult() * rankPrice()))]));
   }
   function isOwned(id) { return Unlocks.hasFullAccess() || EXPLOIT_ORDER.indexOf(id) < FREE_EXPLOITS || !!d.ownedExploits[id]; }
   const ownMissing = (id) => Object.entries(ownPrice(id)).filter(([res, n]) => have(res) < n).map(([res, n]) => [res, n - have(res)]);
@@ -888,7 +890,7 @@ const Progress = (() => {
       if (!d.achieved[a.id] && a.value() >= goalOf(a)) {
         d.achieved[a.id] = true;
         earn(KEY_PAY.achievement);
-        earned.push({ type: 'ACHIEVEMENT', name: a.name, keys: KEY_PAY.achievement });
+        earned.push({ type: 'ACHIEVEMENT', name: a.name, keys: KEY_PAY.achievement, desc: a.desc });
       }
     }
     save();

@@ -169,8 +169,10 @@ checks look for). Set up once in the Play Console:
    `testing: true`) shows what Google Play says is owned, and **RESET TEST PURCHASES** uses up
    everything the account owns (MainActivity's `billingReset`, Google Play's consume), so REMOVE
    ADS, then the UPGRADE, or FULL ACCESS straight away, can be bought again with the test card. A
-   product not made (or not active) in the Play Console answers `TEST // NOT SET UP IN PLAY
-   CONSOLE YET`. Gone with `testing: false`: a release's purchases are never used up.
+   product Google Play didn't send (not made, not active, no purchase option for your country, or
+   the app not installed from a testing track) answers `TEST // GOOGLE PLAY DIDN'T SEND THIS
+   PRODUCT`, and `// TEST PURCHASES` lists each missing one with Google Play's own reason (its
+   status code, or the query's error). Gone with `testing: false`: a release's purchases are never used up.
 
 ## Keys, resources and patches
 
@@ -188,9 +190,9 @@ and **MASTER KEYS** (every 5th level, the day's first daily game, the day's firs
 DAILY earn them all, BLITZ and ZEN at half the rate, VS only CRYPTO, ROOTKITS and MASTER KEYS, PUZZLE
 none. Each holds at most 999 (KEYS have no cap). Each has its own color in every theme (BUGS roach brown, CACHE light gray, CRYPTO Bitcoin orange,
 ROOTKITS red, MASTER KEYS gold with a glow; KEYS the theme's accent; PAPER darker, MONOCHROME in grays).
-The main menu shows them in a line under the level bar, the STORE too (its **[i]** by the title, or a tap on that line, opens a card of each resource and how it's earned; each STORE section, PATCHES, STARTER EXPLOITS and BLACK BOXES, has its own [i] saying what that kind of thing is, its note kept to a line); a drop that earns some
+The main menu shows them in a line 8px under the level bar, KEYS first, the STORE too (its **[i]** by the title, or a tap on that line, opens a card of each resource and how it's earned; each STORE section, PATCHES, EXPLOITS (TIER I) and BLACK BOXES, has its own [i] saying what that kind of thing is, its note kept to a line); a drop that earns some
 floats them up off the board, and the result screen lists the game's haul. PATCHES (boosters, `BOOSTERS` in the code) cost KEYS;
-STARTER EXPLOITS and BLACK BOXES cost KEYS and resources (a MASTER KEY buys any exploit outright):
+EXPLOITS (for a game) and BLACK BOXES cost KEYS and resources (a MASTER KEY buys any exploit outright):
 
 | Patch | Keys | Does |
 |---|---|---|
@@ -217,10 +219,12 @@ NEW YEAR, PI DAY, PROGRAMMERS' DAY, HALLOWEEN's BLACK BOXES, ECONOMY.md; else WE
 EVERYTHING, FLASH SALE // 25% OFF BLACK BOXES, HIGH DEMAND // 10% UP ON EVERYTHING, YOUR DEAL // 10% OFF,
 or NORMAL PRICES TODAY; a DECRYPTOR rank adds (DECRYPTOR +10%): each rank earns 5% more XP, KEYS and
 resources and prices rise 5% to match, ECONOMY.md). What a buy says (BOUGHT // ...) shows under the gauge,
-taking no room till then. Under the ===== line the list scrolls as one: the DAILY DROP, PATCHES, STARTER
-EXPLOITS, BLACK BOXES (with BUYER BEWARE) and SUPPORT THE GAME, each under its ===== line; a section whose
-prices are off today carries a -15% / +10% tag by its name. GET PATCHES and GET STARTERS scroll to
-theirs, the REMOVE ADS link to it. A sale or HIGH DEMAND is also said once a day on the notice line.
+taking no room till then. Under the ===== line the list scrolls as one: the DAILY DROP, PATCHES, the
+EXPLOITS (TIER I, TIER II and TIER III, each its own head, split by ----- lines as one category), BLACK
+BOXES (with BUYER BEWARE) and SUPPORT THE GAME, each category under its ===== line; every item whose
+price is off today carries its own -15% / +10% badge by its name. A locked exploit is dimmed under a
+padlock centered on it, its UNLOCKS AT LV n bright; a tap anywhere on it pulses that line, as the main
+menu's can't-do line does. GET PATCHES and BUY EXPLOITS scroll to theirs, the REMOVE ADS link to it. A sale or HIGH DEMAND is also said once a day on the notice line.
 
 **WATCH AD** (the Android app only; `adPerDay` on a patch, store.js, ads.js's `RewardAd`): RESTORE
 POINT's STORE card has a WATCH AD button on its left, level with BUY on its right (a patch's price has no resources to show there): a rewarded ad, the player's choice, that gives one
@@ -231,7 +235,7 @@ ADS (that takes the banner away; nobody has to watch one), behind the same conse
 banner. Its ad unit is `rewardedId` in `js/ads-config.js` (Google's sample rewarded unit till
 ByteFall's is made).
 
-**THE SIDE SLOTS**: one each side of the exploit button (CLASSIC, BLITZ and ZEN only), opened by level: the left at Lv 3, the right at Lv 9 (`SIDE_SLOT_LEVELS` in progress.js; before then the main menu's STARTER L / STARTER R show LV 3 / LV 9 behind a padlock, a tap saying so in the card's title and in a game the slot shows a padlock over its level, so the BLACK MARKET comes a slot at a time).
+**THE SIDE SLOTS**: one each side of the exploit button (CLASSIC, BLITZ and ZEN only), opened by level: the left at Lv 3, the right at Lv 9 (`SIDE_SLOT_LEVELS` in progress.js; before then the main menu's EXPLOIT L / EXPLOIT R show LV 3 / LV 9 behind a padlock, a tap saying so in the card's title and in a game the slot shows a padlock over its level, so the BLACK MARKET comes a slot at a time).
 **THE PATCH SLOTS** (script.js `patchSlots`; `PATCH_SLOT_LEVELS` in progress.js): the exploit row's
 two ends, so the row reads PATCH 1, BLACK MARKET L, the earned EXPLOIT, BLACK MARKET R, PATCH 2. The
 left opens at Lv 5, the right at Lv 12 (a padlock over the level till then; FULL ACCESS both). Each
@@ -243,10 +247,12 @@ MARKET's window for it (PATCH // APPLIED AT ONCE and what it does now; no MASTER
 if it would do nothing); bought, it's applied at once (HEAD START: the meter to half; FIREWALL DELAY:
 the next layer 4 drops later; LOOKAHEAD: the next 60 seconds; OVERTIME: +15 seconds; ANTIVIRUS:
 every infection running cleared, or with none, waiting, pulsing, for the next one; RESTORE POINT:
-waiting, pulsing, till it saves you) and the slot's done for the game, lit with a tick. With the one
-switched on before the game, three patches a game at most; the result screen's PATCHED: lists them.
+waiting, pulsing, till it saves you), lit with a tick a moment, and then the slot sells again, a new
+patch in it (ANTIVIRUS or RESTORE POINT waiting keeps its slot till it's used, then the slot sells
+again at the next drop; a slot with nothing useful to sell tries again at each turnover); nothing
+bought in a game shuts a slot for good. The result screen's PATCHED: lists them.
 Paused, the whole row (and PUZZLE's HINT and UNDO) dims to the drop buttons' 25% and takes no taps.
-**STARTER EXPLOITS** (STORE) are exploits of your own, any you've unlocked by level, by tier: tier 1
+**EXPLOITS** for a game (STORE: TIER I, II and III) are exploits of your own, any you've unlocked by level, by tier: tier 1
 (RNG, BITFLIP, BUFFER OVERFLOW, TROJAN, PIVOT) 10 KEYS and about 12 BUGS, CACHE or CRYPTO; tier 2
 (SWAP, WORM VIRUS, KEYLOGGER, PACKET SNIFFER, BACKDOOR) 20 KEYS, about 17 of those and a ROOTKIT;
 tier 3 (LOGIC BOMB, HONEYPOT, DICTIONARY ATTACK, RAINBOW TABLE) 30 KEYS, about 22 and 2 or 3
@@ -255,10 +261,10 @@ short of it (its amount pulses red; a BUY tapped without enough flashes it), and
 sold; **BLACK BOXES** I, II and III are (5 KEYS and 3 CRYPTO; 12, 5 and a ROOTKIT; 20, 8 and 2), a
 random pull each, their odds on them: an exploit of tier 1, 2 or 3 (any of the tier, unlocked or not)
 or an **INFECTION** (I: 65 / 20 / 3 / 12%; II: 35 / 45 / 12 / 8%; III: 10 / 45 / 42 / 3%).
-Pick 2 on the main menu to take into a game, one in each slot (marked S): two of one kind
-(if you have two) or one each of two. The menu shows the two slots as VS's settings are laid out, two across under PATCHES: STARTER L and STARTER R and what's in each (EMPTY, or its name, trailing off when long), filled while one's in it.
-A tap on a slot opens its card: every starter and box you own and how many, to put in that slot, EMPTY
-THIS SLOT, and BUY EXPLOITS (the STORE's starters); each is used once in the game. In
+Pick 2 on the main menu to take into a game, one in each slot (marked L or R): two of one kind
+(if you have two) or one each of two. The menu shows the two slots as VS's settings are laid out, two across under PATCHES: EXPLOIT L and EXPLOIT R and what's in each (EMPTY, or its name, trailing off when long), filled while one's in it.
+A tap on a slot opens its card: every exploit and box you own to bring in and how many, to put in that slot, EMPTY
+THIS SLOT, and BUY EXPLOITS (the STORE's TIER I); each is used once in the game. In
 the game, a tap arms an exploit as your next drop, as an earned one, and it's used up (the ones not
 used stay yours). A box waits sealed (pulsing); a tap opens it: the slot spins like a slot machine's
 reel for about 1.5 seconds and lands on an exploit, which waits there (a tick in its corner) to be
@@ -272,7 +278,7 @@ tap on it pays 1 to 8, at random, a -KEYS floating up off it; paid off, the bit'
 what was paid on it is lost), **MALWARE** (the board's bits shown as flickering junk for 3 drops), a **CRYPTOJACKER**
 (5 drops' resources stolen, a CPU making off with them on a sign through the overflow row) or **SCAREWARE**
 (fake alerts over the board for 8 drops, popping up on their own clock with a cooldown between, now and then a burst of 2 to 4, up to 4 stacked at random spots in the grid, each closed only by its tiny X). Each has four looks, one picked at random each time. Infections stack (two infected boxes, two infections); ADWARE, the CRYPTOJACKER and SCAREWARE quietly demand KEYS (10 to 20, never shown; RANSOMWARE's are on its bits), stealing a few on every tap until paid off (then they go) or until their clock runs out, and the STORE's BLACK BOXES section warns of all six. While any's on, a little bot at its laptop types away at a virus in CURRENT's corner. The UNLOCKED / ACHIEVEMENT banners are LED signs of small lights in the game's font (js/led-banner.js; the dev page's BANNER LOOK: DOTS, PIXELS, MARQUEE, CHASE or the CLASSIC box), and ADWARE's AD tag is pixels in the game's font too. A menu over the board (pause, game over) hides the infections' displays. SETTINGS' CRT DISPLAY (OFF / SOFT / FULL, bytefall-crt) lays an old tube over the whole screen: scanlines and a vignette darkening toward rounded corners; FULL adds phosphor stripes, a faint flicker, a slow rolling band and a touch of glow (still on REDUCED effects or reduced motion). A slot taken in empty, or once its starter is used, is the **BLACK MARKET** (so it's there
-whether you take starters in or not):
+whether you bring exploits in or not):
 a random exploit you've unlocked or, a quarter of the time, a BLACK BOX, marked for sale with the
 game's own currency sign in its corner (a 0 struck through twice, as a dollar sign is: no one
 country's), changing every 4 drops (once the market's open, 4 pips under its icon count the drops left, going dark one a drop; on the last drop what's left of them and the icon blink, and at the turnover the icon rolls through a few others like a reel, ticking once for the whole row, and lands on the new offer; REDUCED effects: it just changes). A tap opens the BLACK MARKET's window: a neon sign of a border in
@@ -283,7 +289,7 @@ over what you have / what it costs (red and pulsing where you're short), and BUY
 closes it; drops wait while it's open. A buy waits in the slot until you tap it to arm (or open) it,
 then the slot sells again: buy as often as you like. Buying opens once the game's first encryption layer
 rises (ZEN, with no layers: after 8 drops, when the first would); till then the slots show their offers
-dimmed, and the window shows OPENS IN n DROPS in place of BUY. A game that used them says so on its result screen (STARTERS: ... // BLACK MARKET: ...).
+dimmed, and the window shows OPENS IN n DROPS in place of BUY. A game that used them says so on its result screen (EXPLOIT L / R: ... // BLACK MARKET: ...).
 
 How far KEYS go (a simulation of CLASSIC games on the CPU's own board code: node tools/keysim.js): a game
 decrypts about 90 to 110 bits, so it earns about 14 to 18 KEYS, or 20 to 23 all in with the levels,
@@ -361,11 +367,11 @@ style (plain glowing words, nothing boxed), holds a few seconds and bursts into 
 the next waiting. Nothing covers the board or the menu. They wait while a card is open, while the title
 screen or the screen saver is up, and through a game (see the level meter below: what a game earns waits
 for its result screen's EARNED list). **NOTICES**, RULES & RECORDS' third tab, keeps every one with when it
-came, newest first (it says so under its head), the unread ones lit; while some are unread, a dot sits on RULES & RECORDS (the main
+came, newest first (it says so under its head), the unread ones lit, an ACHIEVEMENT's with what it was for under it; while some are unread, a dot sits on RULES & RECORDS (the main
 menu's and the pause screen's) and on the tab. The DAILY DROP never pops up: a new day's is in NOTICES and
 lights the STORE buttons, and claimed, the STORE's DAILY DROP card shows what it gave right under CLAIM. A
 "can't do that" shows in the title of the card it happened on, the title stepping aside while it pulses,
-then bursts, as VS's setup has it: HARD still locked or a starter slot not open yet where the main menu's
+then bursts, as VS's setup has it: HARD still locked or EXPLOIT L / R not open yet where the main menu's
 // CLASSIC is, LOADOUT LOCKED or SLOTS FULL where the card's // EXPLOITS is. What a drop earns in RESOURCES shows in the SCORE box along
 its foot (as far up from its bottom border as SCORE is down from its top), every resource on one line at
 once, shrinking to fit if it must.
@@ -423,9 +429,10 @@ difficulty picked but locked again falls back to the default until it reopens.
 unlock drops into a free slot by itself; tap an exploit card to remove or equip
 it. **Exploits to keep** (`Progress.isOwned` / `buyToOwn`): the first three (RNG,
 BITFLIP, BUFFER OVERFLOW; `FREE_EXPLOITS`) are yours to equip as soon as they
-unlock; from TROJAN on, an unlocked exploit is bought once with resources (three
-times its STARTER price in resources, no KEYS; BLACK BOX the exploit 30 CRYPTO + 6
-ROOTKITS) and is then yours until the next RANK UP, which gives the bought ones up
+unlock; from TROJAN on, an unlocked exploit is bought once with resources (four
+times its one-game price in resources, no KEYS; BLACK BOX the exploit 40 CRYPTO + 8
+ROOTKITS; always full price: no WEEKEND or FLASH SALE, HIGH DEMAND or YOUR DEAL, only a
+HOLIDAY's sale, and the rank's rise) and is then yours until the next RANK UP, which gives the bought ones up
 (its warnings say so: BOUGHT EXPLOITS ARE LOST). The EXPLOITS list splits its tiers
 with a ----- line (one section: ===== lines split sections). Its EXPLOITS card shows the
 price as have / cost (red where short); a first tap lights it, a second buys it
@@ -433,7 +440,7 @@ price as have / cost (red where short); a first tap lights it, a second buys it
 and the card's title says NOT ENOUGH. Its UNLOCKED notice adds // BUY IT IN
 EXPLOITS. FULL ACCESS (and the dev page's UNLOCK EVERYTHING) owns them all while
 it lasts. Saves from before this kept what they could already use: every exploit
-their level had reached or that was equipped (`ownedSeed`, `OWN_SEED`). The BLACK MARKET, STARTERS and BLACK BOXES still deal in any
+their level had reached or that was equipped (`ownedSeed`, `OWN_SEED`). The BLACK MARKET, EXPLOIT L / R and BLACK BOXES still deal in any
 unlocked exploit (or any at all, a box), owned or not: a one-off taste. The loadout is locked during a session: change it before the first drop or
 after the game ends. The daily games always use the five standard exploits, so
 they're the same for everyone.
@@ -480,7 +487,9 @@ RULES & RECORDS (main menu and pause screen) opens a card with two tabs, **RULES
 **RECORDS**; **EXPLOITS** and **STORE** have buttons of their own beside it (main menu and pause
 screen), each opening the same card on its own, under its own title and with no tabs. RECORDS has level and DECRYPTOR rank,
 every unlock and achievement with a progress tracker, and lifetime stats
-(UNLOCKS / ACHIEVEMENTS / STATS / HISTORY). HISTORY (`Progress.logGame`, `history`) lists the
+(UNLOCKS / ACHIEVEMENTS / STATS / HISTORY; STATS includes KEYS EARNED and KEYS SPENT: earned less
+what's held and what infections took). Everything in RULES, RECORDS and NOTICES sits 8px apart
+(headings, paragraphs, ===== lines, groups, rows, stat lines, RECORDS' own tabs). HISTORY (`Progress.logGame`, `history`) lists the
 last 10 games, newest first (not PUZZLE or the tutorial; VS matches too): the game (mode and
 difficulty, or the daily, or VS and the bot), how it ended (TRACED, TIME'S UP, DONE, BREACHED, WON,
 LOST), when, its score, drops, time (from the first drop), best chain, the KEYS and resources it
@@ -621,7 +630,9 @@ phase for the player's date (lit on the right as it waxes, the left as it wanes,
 none at the new moon), now and then over the other night skies too; in September and October its
 full moon is the orange HARVEST MOON. October's own moons (the werewolf's, the blood moon) stay as
 they are. The game card's lane gets its clouds
-for the rain, the snow and the storms (dark for a storm, pale for snow). Achievements: STORM
+for the rain, the snow and the storms (dark for a storm, pale for snow). The wind (its leaves, its
+rain and snow, the dandelion fluff, the tumbleweed) always blows the way the clouds drift: a spell
+that comes with clouds sends them its way, and one that comes while clouds are up blows theirs. Achievements: STORM
 CHASER (a thunderstorm, a blizzard and hail) and STARGAZER (the aurora, a meteor shower and
 fireflies). The dev page's WEATHER brings it OFTEN, in a chosen season, or one kind to stay; the
 BOT SANDBOX has a button for each.
@@ -744,8 +755,8 @@ EXPLOIT READY // its name on the notice line for a few seconds. ENCRYPT IN has a
 (the layer it counts down to, as a bit is [n]), flashing with the line under the
 board when the next drop brings one.
 
-The tutorial opens on a welcome (no step number, BEGIN), then 57 short steps, every card listed in
-TUTORIAL.md; on a step that asks for a tap, the screen dims a little but for what to tap and the banner
+The tutorial opens on a welcome (BEGIN), then short steps, every card listed in TUTORIAL.md (the
+heading is just `// TUTORIAL`: no card number or count, so the count isn't what a player watches); on a step that asks for a tap, the screen dims a little but for what to tap and the banner
 (a 0.25s fade, its openings measured from the dim's own corner, so the ad banner never shifts them); a
 step can take its drop in more than one column (column 4 or 7; the layer peels: 3, 4 or 5). The
 chain meter keeps its charge from the chain lesson through the WORM VIRUS.
@@ -1000,7 +1011,7 @@ the WORM VIRUS waiting in the EXPLOIT button, then drop it on a tall column), th
 shown locked, then one as a BLACK MARKET with a TROJAN for sale and its pips), PAUSE (top right) and
 the pause screen, RULES & RECORDS (RULES, RECORDS with HISTORY, levels and RANK UP, NOTICES), ← BACK,
 EXPLOITS (the loadout, buying exploits), the STORE (resources, PRICES TODAY, what's sold), SETTINGS,
-RESUME, ENCRYPTION STRENGTH (a sample line under BYTEFALL and SCORE bar), PATCHES and STARTERS on the
+RESUME, ENCRYPTION STRENGTH (a sample line under BYTEFALL and SCORE bar), PATCHES and EXPLOIT L / R on the
 main menu, then MAIN MENU. Over an open menu the banner moves to the bottom or middle of the screen.
 BACK (from step 2 on) redoes the step just played, or before a drop goes to the step before, putting
 the board, bits, score, chain and exploit back as they were. EXIT leaves at any
@@ -1061,7 +1072,8 @@ nothing to pause: VS's setup screen), and SETTINGS waits on the pause screen.
 as on VS's setup screen and the clocks stop (BLITZ's, the CPU's): RESUME, RESTART (VS: a new
 match with the same options) and, in VS, EXIT (back to its setup screen), the last two taking
 a second tap; RULES & RECORDS, SETTINGS and EXPLOITS open over it (every button under RESUME one size, two to a row, as on the main menu; no STORE in a game, it's on the main menu); QUIT (a second tap
-to confirm, CONFIRM?) ends the game, nothing kept, as RESTART, and goes to the main menu. A pause pressed mid-drop opens once the drop finishes. The game over box
+to confirm, CONFIRM?) ends the game, nothing kept, as RESTART, and goes to the main menu (a PUZZLE:
+to the PUZZLES list). A pause pressed mid-drop opens once the drop finishes. The game over box
 has MAIN MENU under NEW SESSION.
 
 **BACK** (the phone's back button, or the browser's): an open panel (MENU, SETTINGS, the
