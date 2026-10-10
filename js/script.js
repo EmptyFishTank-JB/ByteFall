@@ -757,8 +757,10 @@ const INFECT_GAP = 12;
 let infectedBit = null; // (the bit on the board now, its .infected the drop it came out on)
 let infectedAt = -Infinity; // (the drop the last one came out on)
 const infectModes = () => !daily && (mode === 'classic' || mode === 'blitz');
+// (INFECTIONS: ON / OFF on the main menu, beside GOAL: OFF, no infected bits; BLACK BOXES still can be)
+let infectWanted = storage.get('bytefall-infections') !== 'off';
 function mayInfect() {
-  if (!infectModes() || gameOver || infectedBit) return false;
+  if (!infectModes() || !infectWanted || gameOver || infectedBit) return false;
   if (Progress.runDrops() - infectedAt < INFECT_GAP) return false;
   return Math.random() < (INFECT_ODDS[difficulty] || 0);
 }
@@ -2621,6 +2623,22 @@ goalBtn.addEventListener('click', () => {
     SFX.play('punct');
   });
 });
+// INFECTIONS: ON / OFF (CLASSIC and BLITZ): the infected bits; mid-game it asks first, as GOAL does,
+// and starts a new game. Off, a BLACK BOX can still be infected
+const infectBtn = document.getElementById('infect-btn');
+function updateInfectBtn() {
+  infectBtn.querySelector('.opt-text').textContent = `INFECTIONS: ${infectWanted ? 'ON' : 'OFF'}`;
+  infectBtn.classList.toggle('active', infectWanted);
+  infectBtn.setAttribute('aria-label', infectWanted ? 'Infections on: now and then a revealed bit is infected. Tap to turn them off' : 'Infections off: no infected bits. Tap to turn them on');
+}
+infectBtn.addEventListener('click', () => {
+  requestReset(infectBtn, 'CONFIRM?', () => {
+    infectWanted = !infectWanted;
+    storage.set('bytefall-infections', infectWanted ? 'on' : 'off');
+    updateInfectBtn();
+    SFX.play('punct');
+  });
+});
 document.querySelectorAll('#difficulty-row button').forEach((btn) => {
   btn.addEventListener('click', () => {
     const next = btn.dataset.difficulty;
@@ -2961,8 +2979,13 @@ function applyModeUi() {
   // (VS: VS. CPU // its game mode, under BYTEFALL as in every game)
   document.getElementById('game-mode-label').textContent = mode === 'vs' ? `VS. CPU // ${VS_MODES[vsMode].label}` : `// ${modeLine()}${goalLine()}`;
   document.getElementById('difficulty-row').hidden = mode !== 'classic';
-  document.getElementById('goal-row').hidden = mode !== 'classic' || daily;
+  // (GOAL in CLASSIC, INFECTIONS in CLASSIC and BLITZ: two across, or INFECTIONS alone)
+  const goalRow = document.getElementById('goal-row');
+  goalRow.hidden = daily || (mode !== 'classic' && mode !== 'blitz');
+  goalBtn.hidden = mode !== 'classic';
+  goalRow.classList.toggle('single', goalBtn.hidden);
   updateGoalBtn();
+  updateInfectBtn();
   document.getElementById('daily-kinds').hidden = !daily;
   document.getElementById('daily-pips').hidden = !daily;
   centerDaily(); // (the pick in the middle of its row)
