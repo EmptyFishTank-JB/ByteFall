@@ -166,7 +166,15 @@ checks look for). Set up once in the Play Console:
 4. **Settings → License testing**: your Google account (the one on the phone's Play Store), so
    your purchases go through Google's test cards and charge nothing. Refund one from **Order
    management** to see the game take it back at the next launch.
-5. **To buy them again**: SETTINGS → `// TEST PURCHASES` (only while `js/ads-config.js` says
+5. **In-app updates** (`js/app-update.js`, MainActivity's `updateCheck` / `updateStart` /
+   `updateRestart`, Google Play's in-app updates library): the release installed from Google Play
+   checks its track for a newer version at launch and on each return to the app. One there, UPDATE
+   shows beside TUTORIAL on the main menu (a notice says so once per version); a tap opens Google
+   Play's own sheet, the update downloads while the game goes on (UPDATING n%), and RESTART TO
+   UPDATE installs it and starts the game again. To try it: install a build from the testing track,
+   then upload a higher one to the same track and open the game (Google Play can take a while to
+   offer it; clearing the Play Store's cache helps). The website and ByteFall Test never show it.
+6. **To buy them again**: SETTINGS → `// TEST PURCHASES` (only while `js/ads-config.js` says
    `testing: true`) shows what Google Play says is owned, and **RESET TEST PURCHASES** uses up
    everything the account owns (MainActivity's `billingReset`, Google Play's consume), so REMOVE
    ADS, then the UPGRADE, or FULL ACCESS straight away, can be bought again with the test card. A

@@ -36,6 +36,13 @@ import com.android.billingclient.api.QueryProductDetailsParams;
 import com.android.billingclient.api.QueryPurchasesParams;
 import com.android.billingclient.api.UnfetchedProduct;
 import com.getcapacitor.BridgeActivity;
+import com.google.android.play.core.appupdate.AppUpdateManager;
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
+import com.google.android.play.core.appupdate.AppUpdateOptions;
+import com.google.android.play.core.install.InstallStateUpdatedListener;
+import com.google.android.play.core.install.model.AppUpdateType;
+import com.google.android.play.core.install.model.InstallStatus;
+import com.google.android.play.core.install.model.UpdateAvailability;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -314,6 +321,7 @@ public class MainActivity extends BridgeActivity {
         stopOutputViz();
         stopCapture();
         if (billing != null) billing.endConnection();
+        if (updates != null) updates.unregisterListener(updateListener);
         super.onDestroy();
     }
 
@@ -397,6 +405,60 @@ public class MainActivity extends BridgeActivity {
         public void billingRestore() { runOnUiThread(() -> withBilling(() -> queryOwned(true))); }
         @JavascriptInterface
         public void billingReset() { runOnUiThread(() -> withBilling(() -> consumeOwned())); }
+        // IN-APP UPDATES (js/app-update.js): is there a newer version; get it; install it and restart
+        @JavascriptInterface
+        public void updateCheck() { runOnUiThread(() -> { updatesWanted = true; checkUpdate(); }); }
+        @JavascriptInterface
+        public void updateStart() { runOnUiThread(() -> startUpdate()); }
+        @JavascriptInterface
+        public void updateRestart() { runOnUiThread(() -> updates().completeUpdate()); }
+    }
+
+    // IN-APP UPDATES (Google Play's in-app updates; js/app-update.js asks, the Google Play release
+    // only): a newer version on the player's track is told to the page ('available'), which shows
+    // UPDATE on the main menu; a tap opens Google Play's own sheet (a FLEXIBLE update: it downloads
+    // while the game goes on, 'downloading' with its percent), and once it's in ('ready') the page's
+    // RESTART TO UPDATE has Google Play install it and start the game again
+    private AppUpdateManager updates;
+    private boolean updatesWanted = false; // (the page asked: checked again on each return to the app)
+    private static final int UPDATE_REQUEST = 7001;
+    private final InstallStateUpdatedListener updateListener = (state) -> {
+        int s = state.installStatus();
+        if (s == InstallStatus.DOWNLOADING) {
+            long total = state.totalBytesToDownload();
+            int pct = total > 0 ? (int) (state.bytesDownloaded() * 100 / total) : 0;
+            tellUpdate("{\"state\":\"downloading\",\"percent\":" + pct + "}");
+        } else if (s == InstallStatus.DOWNLOADED) tellUpdate("{\"state\":\"ready\"}");
+        else if (s == InstallStatus.FAILED || s == InstallStatus.CANCELED) tellUpdate("{\"state\":\"failed\"}");
+    };
+    private void tellUpdate(String json) {
+        runOnUiThread(() -> bridge.getWebView().evaluateJavascript("window.bytefallUpdate && window.bytefallUpdate(" + json + ")", null));
+    }
+    private AppUpdateManager updates() {
+        if (updates == null) {
+            updates = AppUpdateManagerFactory.create(this);
+            updates.registerListener(updateListener);
+        }
+        return updates;
+    }
+    private void checkUpdate() {
+        updates().getAppUpdateInfo().addOnSuccessListener((info) -> {
+            if (info.installStatus() == InstallStatus.DOWNLOADED) tellUpdate("{\"state\":\"ready\"}");
+            else if (info.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) tellUpdate("{\"state\":\"downloading\",\"percent\":0}");
+            else if (info.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && info.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
+                tellUpdate("{\"state\":\"available\",\"version\":" + info.availableVersionCode() + "}");
+            }
+        }); // (not installed from Google Play, or no Play Store: it fails quietly, and nothing shows)
+    }
+    private void startUpdate() {
+        updates().getAppUpdateInfo().addOnSuccessListener((info) -> {
+            if (info.updateAvailability() != UpdateAvailability.UPDATE_AVAILABLE || !info.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) { checkUpdate(); return; }
+            try {
+                updates().startUpdateFlowForResult(info, this, AppUpdateOptions.newBuilder(AppUpdateType.FLEXIBLE).build(), UPDATE_REQUEST);
+            } catch (Exception e) {
+                tellUpdate("{\"state\":\"failed\"}");
+            }
+        });
     }
 
     @Override
@@ -477,6 +539,7 @@ public class MainActivity extends BridgeActivity {
         web.resumeTimers();
         web.onResume();
         if (billingSetUp) queryOwned(false); // (a purchase paid, or refunded, while away)
+        if (updatesWanted) checkUpdate(); // (an update downloaded, or a newer one out, while away)
     }
 
     @Override
