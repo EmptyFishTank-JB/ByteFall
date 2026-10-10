@@ -234,7 +234,7 @@ let overlayNext = null; // what the overlay button does in PUZZLE: 'next' or 're
 // drop; RESTORE POINT only when it saves you; HINT and UNDO (PUZZLE) when they're pressed. Never
 // in DAILY or VS (or the tutorial): those stay the same for everyone. A patched game says so.
 const BOOSTERS = {
-  'head-start': { name: 'HEAD START', cost: 15, desc: 'The CHAIN METER starts half full.', modes: ['classic', 'blitz', 'zen'] },
+  'head-start': { name: 'HEAD START', cost: 15, desc: 'The CHAIN METER starts half full, and holds until your first decrypt.', modes: ['classic', 'blitz', 'zen'] },
   'firewall-delay': { name: 'FIREWALL DELAY', cost: 20, desc: 'The first encryption layer rises 4 drops later.', modes: ['classic', 'blitz'] },
   lookahead: { name: 'LOOKAHEAD', cost: 15, desc: 'See your next bit for the first 60 seconds (EASY always shows it).', modes: ['classic', 'blitz', 'zen'] },
   overtime: { name: 'OVERTIME', cost: 20, desc: '+15 seconds on the BLITZ clock.', modes: ['blitz'] },
@@ -285,11 +285,14 @@ let marketBought = [];
 let patchSlots = []; // this game's: [{ state: 'locked' | 'market' | 'applied' | 'closed', id }]
 let patchesBought = [];
 let restoreBought = false; // (a RESTORE POINT bought in the game: waiting to save you)
+// HEAD START's half meter holds through drops that decrypt nothing (on an empty board only a [1]
+// does), till the first that decrypts something; from then the meter's rules are the usual ones
+let headStartHold = false;
 let antivirusArmed = false; // (ANTIVIRUS waiting: the next infection a BLACK BOX lets out is quarantined)
 let cureLift = false; // (ANTIVIRUS freed RANSOMWARE's bits: they settle at the next drop)
 // (what each does when it's bought in a game)
 const PATCH_NOW = {
-  'head-start': 'The CHAIN METER jumps to half full.',
+  'head-start': 'The CHAIN METER jumps to half full, and holds until your next decrypt.',
   'firewall-delay': 'The next encryption layer rises 4 drops later.',
   lookahead: 'See your next bit for the next 60 seconds.',
   overtime: '+15 seconds on the clock.',
@@ -696,6 +699,7 @@ function initGame() {
   puzzleHistory = [];
   hintCol = null;
   if (runBoosts.has('head-start')) streak = Math.floor(streakCap() / 2);
+  headStartHold = runBoosts.has('head-start');
   if (runBoosts.has('firewall-delay')) dropsSinceLastPulse = -4;
   if (runBoosts.has('overtime')) timeLeft += 15;
   lookaheadLeft = runBoosts.has('lookahead') ? LOOKAHEAD_MS : 0;
@@ -2000,9 +2004,12 @@ function showChainMeter() {
   }
 }
 // A drop's end: nothing decrypted breaks the streak (EASY: a segment; the rest: all of it)
+// (HEAD START's half meter, headStartHold: held through drops that decrypt nothing)
 function endStreakDrop(usedExploit) {
+  if (dropLinks > 0) headStartHold = false;
   if (MODES[mode].noHacks || usedExploit || dropLinks > 0) return;
   if (mode === 'tutorial' && Tutorial.holdsMeter()) return;
+  if (headStartHold) return;
   streak = streakRule() === 'easy' ? Math.max(0, streak - 1) : 0;
   showChainMeter();
 }
@@ -5712,7 +5719,7 @@ function closeShop() {
 }
 // A patch bought in the game: applied at once
 function applyPatch(id) {
-  if (id === 'head-start') { streak = Math.max(streak, Math.floor(streakCap() / 2)); showChainMeter(); }
+  if (id === 'head-start') { streak = Math.max(streak, Math.floor(streakCap() / 2)); headStartHold = true; showChainMeter(); }
   if (id === 'firewall-delay') dropsSinceLastPulse -= 4;
   if (id === 'overtime') { timeLeft += 15; showClock(); }
   if (id === 'lookahead') lookaheadLeft = LOOKAHEAD_MS;

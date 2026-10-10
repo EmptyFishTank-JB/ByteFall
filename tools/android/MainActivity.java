@@ -78,6 +78,9 @@ public class MainActivity extends BridgeActivity {
     }
 
     private volatile boolean playerOpen = false;
+    // (a full-screen ad up, the STORE's WATCH AD: js/ads.js says so. The ad draws in a WebView of its
+    // own in this app, and pauseTimers stops every WebView's timers, the ad's too, which froze it)
+    private volatile boolean fullscreenAd = false;
     // OTHER APPS (the music player's SOURCE): what the phone is playing, from any app (Pandora,
     // Spotify, ...). From Android 10 on, by audio playback capture (CaptureService: Android asks
     // each time, as for a screen recording, and shows a notification while it listens); before
@@ -339,6 +342,8 @@ public class MainActivity extends BridgeActivity {
     public class AppBridge {
         @JavascriptInterface
         public void setPlayerOpen(boolean open) { playerOpen = open; }
+        @JavascriptInterface
+        public void setFullscreenAd(boolean open) { fullscreenAd = open; }
         // (OTHER APPS: start listening (asking for the permission first if it's not given yet),
         // stop, how it's going (off, asking, on, ended, denied, error), and a frame: by capture,
         // "pcm,rate,base64" (the last 2048 stereo frames, 16-bit), or by the Visualizer,
@@ -529,13 +534,14 @@ public class MainActivity extends BridgeActivity {
         if (playerOpen) return; // (the music plays on: only the page's drawing stops, as Android does)
         WebView web = bridge.getWebView();
         web.onPause(); // (the page is told it's hidden: the game and the music rest)
-        web.pauseTimers(); // (and its timers stop)
+        if (!fullscreenAd) web.pauseTimers(); // (and its timers stop: not under a full-screen ad, whose own WebView they'd stop too)
     }
 
     @Override
     public void onResume() {
         super.onResume();
         WebView web = bridge.getWebView();
+        fullscreenAd = false; // (back from it: the ad's gone)
         web.resumeTimers();
         web.onResume();
         if (billingSetUp) queryOwned(false); // (a purchase paid, or refunded, while away)
