@@ -100,5 +100,7 @@ edit('build.gradle', (s) => s
             if (System.getenv('BYTEFALL_UPLOAD_KEYSTORE')) signingConfig signingConfigs.release`));
 // (Google Play's billing: version 8 or later is what Play takes from August 2026)
 const BILLING = 'com.android.billingclient:billing:9.1.0';
-edit('build.gradle', (s) => s.replace("implementation project(':capacitor-android')", `implementation project(':capacitor-android')\n    implementation '${BILLING}'`));
-console.log(`android/ set up: version 0.${build} (code ${build}), portrait, full screen; TEST (debug) as ByteFall Test, test-signed; RELEASE signed when BYTEFALL_UPLOAD_KEYSTORE is set at build time; AdMob app ${adAppId}; ${BILLING}`);
+// (Google Play's in-app updates: MainActivity's updateCheck / updateStart / updateRestart, js/app-update.js)
+const APP_UPDATE = 'com.google.android.play:app-update:2.1.0';
+edit('build.gradle', (s) => s.replace("implementation project(':capacitor-android')", `implementation project(':capacitor-android')\n    implementation '${BILLING}'\n    implementation '${APP_UPDATE}'`));
+console.log(`android/ set up: version 0.${build} (code ${build}), portrait, full screen; TEST (debug) as ByteFall Test, test-signed; RELEASE signed when BYTEFALL_UPLOAD_KEYSTORE is set at build time; AdMob app ${adAppId}; ${BILLING}; ${APP_UPDATE}`);
