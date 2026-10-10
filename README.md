@@ -68,7 +68,7 @@ js/pixel.js             PIXEL MODE (the sandbox's switch, for now): the bots on 
                         art's resolution: moves in whole pixels, turns redrawn, hair that flows
 js/bot-svg.js           the bots' pixel art (shared by the game and the sandbox)
 docs/achievements.csv   every achievement, grouped
-STORES.md               the plan for Steam and the Microsoft Store (decisions, work, paperwork)
+STORES.md               the plan for Steam, the Microsoft Store and cars (decisions, work, paperwork)
 tools/build-app.js      the Android app's copy of the game (www/): no dev page, no DEV link, build info baked in
 tools/setup-android.js  the Android project made ByteFall's: full screen, portrait, back button, version, test key
 tools/android/          its MainActivity, icon and splash images, and the test signing key
