@@ -1,8 +1,8 @@
-# ByteFall on Steam and the Microsoft Store
+# ByteFall on Steam, the Microsoft Store and in cars
 
 A plan for taking ByteFall to PC stores, written ahead of time so the game can be shaped for it as
 it goes. Nothing here is built yet: the desktop edition starts once the game is finalized on
-Android. The Apple App Store is left for later.
+Android. Cars (Android Automotive OS) come after it; the Apple App Store is left for later.
 
 ## Decisions (made: the recommended way for all three)
 
@@ -100,6 +100,26 @@ violence, no real money gambling (BLACK BOXES are bought with KEYS earned in pla
 money, in the PC builds). Expect E / PEGI 3 or close. A paid loot-box question may come up in the
 surveys: on PC nothing is sold for real money, so the answer is no.
 
+## In cars (later, after the desktop edition)
+
+- **Not Android Auto.** Android Auto (the phone's screen on the car's display) is for driving: media,
+  messaging, navigation and the like. Games haven't been among the kinds of app it takes.
+- **Android Automotive OS instead.** Cars with Google built-in (some Volvo, Polestar, GM and Honda
+  models) run Android itself and have their own Play Store. That store carries games to play while
+  parked, and that's the way in for ByteFall.
+- **What it would need:**
+  - **A landscape layout.** Car screens are wide, and ByteFall is portrait only. The desktop
+    edition's layout (the portrait column in the middle of a wide screen) is most of this work, which
+    is why cars come after it.
+  - **Parked only.** The car blocks a parked-only app once it moves. The game has to pause cleanly
+    then and pick up where it was; it already pauses and resumes.
+  - **Touch.** Car screens are touchscreens, so play needs no change.
+  - **Ads.** Google's ad rules for cars need checking. A one-price car build without ads, like the PC
+    one, avoids the question.
+- **Shipping it:** a car build of the same Android app, submitted for the car form factor in the
+  Play Console. Google's car app programs and their rules change often: read the current
+  requirements when it's time.
+
 ## Order of work
 
 1. **The DESKTOP edition and an Electron shell**, with a GitHub Actions workflow building a Windows
@@ -111,3 +131,5 @@ surveys: on PC nothing is sold for real money, so the answer is no.
 5. **The MSIX** for the Microsoft Store.
 6. **Store assets:** capsules, screenshots, the trailer and the achievement icons.
 7. **Accounts and pages:** Steamworks and Partner Center, the Coming Soon page, then the reviews.
+8. **Cars (later):** the landscape layout carried over to a car build for Android Automotive OS,
+   parked only.
