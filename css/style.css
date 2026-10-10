@@ -4447,7 +4447,7 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
    slot not open yet locked (its level dimmed behind the padlock). A long name trails off */
 .home .home-opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap); width: 100%; margin: 0; }
 .home .home-opts.single { grid-template-columns: minmax(0, 1fr); }
-.home .home-opts[hidden] { display: none; }
+.home .home-opts[hidden], .home .home-opts button[hidden] { display: none; }
 .home .home-opts button { height: 32px; min-width: 0; padding: 0 8px; font-size: 12px; letter-spacing: 1px; }
 .home .home-opts .opt-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .home .home-opts .ico { width: 1.15em; height: 1.15em; vertical-align: -0.22em; margin-right: 3px; }
