@@ -9,6 +9,11 @@ The tutorial lives in `js/tutorial.js` (`STEPS`).
 
 ## What changed this round
 
+- **Focus**: a card can dim the whole screen but what it's about (several things at once), as a tap card
+  dims all but what to tap: cards 25, 27, 28, 34-37, 40, 45, 46, 54-56. Cards 54 and 55 frame theirs 8px out.
+- **The drop buttons** are never faded in the tutorial; a tap the card doesn't want gets BOT's -_-.
+- **SIDE SLOTS are EXPLOIT SLOTS** (EXPLOIT L and R); the loadout's slots are LOADOUT SLOTS.
+- **Cards 56 and 57** are on the main menu; finishing earns **HELLO, WORLD**.
 - **No card counter**: the heading is just `// TUTORIAL`, so the count isn't what a player watches.
 - **Long cards split** into short ones: 26 steps became 57, each a sentence or two.
 - **Taps follow the card**: a tap before BOT has finished talking shows the rest of the words at once and
@@ -581,7 +586,7 @@ TOTAL +34
 
 **Says:**
 
-> Other exploits wipe an area, peel layers or change bits. Each one has its card in EXPLOITS.
+> Other exploits do different things. Each one has a card in the EXPLOITS menu.
 
 - **Asks you to**: Tap NEXT.
 - **Lights up**: nothing
@@ -598,10 +603,10 @@ TOTAL +34
 
 **Says:**
 
-> The row under the drop buttons holds more than the EXPLOIT button: a SIDE SLOT on each side of it, and a PATCH SLOT at each end.
+> The row under the drop buttons holds more than the EXPLOIT button: an EXPLOIT SLOT on each side of it, and a PATCH SLOT at each end.
 
 - **Asks you to**: Tap NEXT.
-- **Lights up**: nothing
+- **Lights up**: the whole bottom row: the PATCH SLOTS, the EXPLOIT SLOTS and the EXPLOIT button (in focus: the rest of the screen dims)
 - **Notes**: 
 
 ---
@@ -632,10 +637,10 @@ TOTAL +34
 
 **Says:**
 
-> A PATCH SLOT sells a patch during a game, for KEYS and resources, and the patch works the moment you buy it.
+> A PATCH SLOT sells a patch during a game, for KEYS and a resource or two, and the patch works the moment you buy it.
 
 - **Asks you to**: Tap NEXT.
-- **Lights up**: nothing
+- **Lights up**: both PATCH SLOTS (in focus)
 - **Notes**: 
 
 ---
@@ -649,10 +654,10 @@ TOTAL +34
 
 **Says:**
 
-> The SIDE SLOTS, EXPLOIT L and EXPLOIT R, hold exploits you bring into a game. An empty one becomes the BLACK MARKET once the first layer rises.
+> The left and right EXPLOIT SLOTS can bring in a purchased EXPLOIT from the STORE. An empty slot becomes the BLACK MARKET once the first layer rises.
 
 - **Asks you to**: Tap NEXT.
-- **Lights up**: nothing
+- **Lights up**: both EXPLOIT SLOTS (in focus)
 - **Notes**: 
 
 ---
@@ -666,7 +671,7 @@ TOTAL +34
 
 **Says:**
 
-> It sells an exploit or a BLACK BOX, swapped for another every 4 drops. The pips under it count the drops left, and the last one blinks.
+> There, you can buy an EXPLOIT or a BLACK BOX. Each one is swapped for another every 4 drops. The pips in each button count down how many drops until the next one.
 
 - **Asks you to**: Tap NEXT.
 - **Lights up**: nothing
@@ -715,7 +720,7 @@ TOTAL +34
 
 **Says:**
 
-> The pause screen has RESUME, RESTART, RULES & RECORDS, SETTINGS, EXPLOITS and QUIT. Tap RULES & RECORDS.
+> The pause screen has various buttons. Tap RULES & RECORDS.
 
 - **Asks you to**: Tap RULES & RECORDS on the pause screen.
 - **Lights up**: RULES & RECORDS on the pause screen
@@ -731,7 +736,7 @@ TOTAL +34
 
 **Says:**
 
-> RULES & RECORDS opens as a card over the game, with its tabs along the top.
+> RULES & RECORDS opens this page with its tabs along the top.
 
 - **Asks you to**: Tap NEXT.
 - **Lights up**: nothing
@@ -750,7 +755,7 @@ TOTAL +34
 > The RULES tab has everything you’re learning here, written down, with the TUTORIAL button to come back any time.
 
 - **Asks you to**: Tap NEXT.
-- **Lights up**: the drop button(s) for the allowed column(s)
+- **Lights up**: the RULES tab (in focus)
 - **Notes**: 
 
 ---
@@ -766,7 +771,7 @@ TOTAL +34
 > The RECORDS tab shows your level and DECRYPTOR rank, every unlock and its level, your achievements, HISTORY (your last 10 games) and your lifetime stats.
 
 - **Asks you to**: Tap NEXT.
-- **Lights up**: the drop button(s) for the allowed column(s)
+- **Lights up**: the RECORDS tab (in focus)
 - **Notes**: 
 
 ---
@@ -774,7 +779,7 @@ TOTAL +34
 ## Card 36
 
 - **Heading**: `// TUTORIAL`
-- **Card sits**: middle of the screen; **BOT**: resting
+- **Card sits**: bottom of the screen; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 
 **Says:**
@@ -782,8 +787,8 @@ TOTAL +34
 > Every bit you decrypt is XP: 100 bits a level. At Lv 80 you can RANK UP: everything locks again to unlock once more, and each rank earns a little more.
 
 - **Asks you to**: Tap NEXT.
-- **Lights up**: nothing
-- **Notes**: 
+- **Lights up**: the LV / DECRYPTOR box (in focus)
+- **Notes**: The card sits at the bottom of the screen, clear of the LV box.
 
 ---
 
@@ -795,10 +800,10 @@ TOTAL +34
 
 **Says:**
 
-> NOTICES, the next tab, keeps every notice the game has shown you.
+> NOTICES, the next tab, keeps a history of each notification the game has shown.
 
 - **Asks you to**: Tap NEXT.
-- **Lights up**: has-unread
+- **Lights up**: the NOTICES tab (in focus)
 - **Notes**: 
 
 ---
@@ -811,7 +816,7 @@ TOTAL +34
 
 **Says:**
 
-> Tapping outside a card won’t close it: tap ← BACK, at the top left of the card.
+> Tap ← BACK, at the top left of the page.
 
 - **Asks you to**: Tap ← BACK.
 - **Lights up**: ← BACK
@@ -838,16 +843,16 @@ TOTAL +34
 ## Card 40
 
 - **Heading**: `// TUTORIAL`
-- **Card sits**: bottom of the screen; **BOT**: resting
+- **Card sits**: middle of the screen; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 
 **Says:**
 
-> EXPLOITS is your loadout. You can only earn exploits that are in a slot: SLOTS, at the top, counts the slots you’ve filled and the ones you have.
+> Here’s your EXPLOITS loadout. You can only earn exploits that are in an active slot during a game.
 
 - **Asks you to**: Tap NEXT.
-- **Lights up**: SLOTS
-- **Notes**: 
+- **Lights up**: the loadout's six boxes (in focus)
+- **Notes**: The loadout is six boxes now (EXPLOITS menu), filled left to right by the equipped exploits: empty ones dashed, ones not open yet a padlock and the level.
 
 ---
 
@@ -891,7 +896,7 @@ TOTAL +34
 
 **Says:**
 
-> Tap ← BACK to close it.
+> Tap ← BACK.
 
 - **Asks you to**: Tap ← BACK.
 - **Lights up**: ← BACK
@@ -902,7 +907,7 @@ TOTAL +34
 ## Card 44
 
 - **Heading**: `// TUTORIAL`
-- **Card sits**: bottom of the screen; **BOT**: resting
+- **Card sits**: middle of the screen; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 
 **Says:**
@@ -911,14 +916,14 @@ TOTAL +34
 
 - **Asks you to**: Tap NEXT.
 - **Opens**: the STORE, on its own (the pause screen has no STORE button)
-- **Notes**: 
+- **Notes**: No PAUSE in the corner while the STORE is open.
 
 ---
 
 ## Card 45
 
 - **Heading**: `// TUTORIAL`
-- **Card sits**: bottom of the screen; **BOT**: resting
+- **Card sits**: middle of the screen; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 
 **Says:**
@@ -926,7 +931,7 @@ TOTAL +34
 > YOUR RESOURCES are at the top: KEYS, BUGS, CACHE, CRYPTO, ROOTKITS and MASTER KEYS, all earned by playing. The [i] shows how.
 
 - **Asks you to**: Tap NEXT.
-- **Lights up**: YOUR RESOURCES
+- **Lights up**: YOUR RESOURCES and the line under it, framed as one (in focus)
 - **Notes**: 
 
 ---
@@ -934,7 +939,7 @@ TOTAL +34
 ## Card 46
 
 - **Heading**: `// TUTORIAL`
-- **Card sits**: bottom of the screen; **BOT**: resting
+- **Card sits**: middle of the screen; **BOT**: resting
 - **Buttons**: EXIT, BACK, NEXT
 
 **Says:**
@@ -942,7 +947,7 @@ TOTAL +34
 > Under them, PRICES TODAY: sales, holidays and busy days move the prices up and down.
 
 - **Asks you to**: Tap NEXT.
-- **Lights up**: the PRICES TODAY gauge
+- **Lights up**: PRICES TODAY (in focus)
 - **Notes**: 
 
 ---
@@ -987,7 +992,7 @@ TOTAL +34
 
 **Says:**
 
-> Now tap SETTINGS.
+> We’re back at the PAUSE screen now. Tap SETTINGS.
 
 - **Asks you to**: Tap SETTINGS on the pause screen.
 - **Lights up**: SETTINGS on the pause screen
@@ -1023,7 +1028,7 @@ TOTAL +34
 
 - **Asks you to**: Tap NEXT.
 - **Lights up**: nothing
-- **Notes**: 
+- **Notes**: SETTINGS scrolls smoothly to DISPLAY: its ===== line and heading land at the top of the card's border.
 
 ---
 
@@ -1051,7 +1056,7 @@ TOTAL +34
 
 **Says:**
 
-> And RESUME to get back to the game.
+> Tap RESUME to get back to the game.
 
 - **Asks you to**: Tap RESUME on the pause screen.
 - **Lights up**: RESUME on the pause screen
@@ -1070,7 +1075,7 @@ TOTAL +34
 > In CLASSIC, every game has a key to crack: its ENCRYPTION STRENGTH, shown under BYTEFALL. It starts at 128-BIT, cracked at 1,500 points on NORMAL.
 
 - **Asks you to**: Tap NEXT.
-- **Lights up**: the line under BYTEFALL
+- **Lights up**: the ENCRYPTION STRENGTH line under BYTEFALL (in focus, its frame 8px out from the words)
 - **Notes**: 
 
 ---
@@ -1086,7 +1091,7 @@ TOTAL +34
 > The bar along the bottom of SCORE fills toward it. Crack it for KEYS, then GO DEEPER for a stronger key and more KEYS, or DISCONNECT and end the game on a win.
 
 - **Asks you to**: Tap NEXT.
-- **Lights up**: the bar along SCORE
+- **Lights up**: the bar along the bottom of SCORE (in focus, its frame 8px out from the bar)
 - **Notes**: 
 
 ---
@@ -1094,23 +1099,23 @@ TOTAL +34
 ## Card 56
 
 - **Heading**: `// TUTORIAL`
-- **Card sits**: top of the board; **BOT**: resting
-- **Buttons**: EXIT, BACK, NEXT
+- **Card sits**: over the main menu, bottom of the screen; **BOT**: resting
+- **Buttons**: EXIT, NEXT
 
 **Says:**
 
 > Before a game, PATCHES and EXPLOIT L / R on the main menu let you bring an edge in, once you have some.
 
 - **Asks you to**: Tap NEXT.
-- **Lights up**: nothing
-- **Notes**: 
+- **Lights up**: PATCHES and EXPLOIT L / R on the main menu (in focus)
+- **Notes**: Over the main menu (CLASSIC's panel). No BACK on this card: the lesson's board is gone.
 
 ---
 
 ## Card 57
 
 - **Heading**: `// TUTORIAL`
-- **Card sits**: top of the board; **BOT**: happy
+- **Card sits**: over the main menu, bottom of the screen; **BOT**: happy
 - **Buttons**: EXIT, BACK, MAIN MENU
 
 **Says:**
@@ -1119,4 +1124,4 @@ TOTAL +34
 
 - **Asks you to**: Tap MAIN MENU (out to the main menu).
 - **Lights up**: nothing
-- **Notes**: 
+- **Notes**: On the main menu. MAIN MENU ends the lesson and earns HELLO, WORLD (an achievement, +10 KEYS).

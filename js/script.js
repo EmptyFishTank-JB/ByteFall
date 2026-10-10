@@ -702,6 +702,8 @@ function initGame() {
   patchesBought = [];
   restoreBought = false;
   antivirusArmed = runBoosts.has('antivirus'); // (switched on before the game: waiting from the start)
+  infectedBit = null;
+  infectedAt = -Infinity;
   cureLift = false;
   const patchOpen = Progress.patchSlots();
   patchSlots = sideSlots.length ? [0, 1].map((i) => ({ state: i >= patchOpen ? 'locked' : 'market', id: null })) : [];
@@ -723,9 +725,76 @@ function initGame() {
   } else Tutorial.end();
 }
 
+// THE TUTORIAL's last cards go on over the main menu (CLASSIC's panel: PATCHES and EXPLOIT L / R): a
+// fresh CLASSIC game behind it, the lesson's banner kept (Tutorial.end lets a home step be); its
+// MAIN MENU then earns HELLO, WORLD there
+window.tutorialHome = () => {
+  if (homeOpen && mode === 'classic') return;
+  topMode = 'classic';
+  storage.set('bytefall-mode', 'classic');
+  setModeFromChoice();
+  resetNow();
+  showHome();
+};
+window.tutorialFinished = () => {
+  Progress.finishTutorial();
+  announce(Progress.check());
+};
+
 // A layer peeled to 0 shows the bit under it: fixed in PUZZLE boards, random otherwise.
 function revealBit(layer) {
-  return layer.hidden ? { type: 'number', val: layer.hidden } : newPacket();
+  const bit = layer.hidden ? { type: 'number', val: layer.hidden } : newPacket();
+  if (mayInfect()) infect(bit);
+  return bit;
+}
+// INFECTED BITS (CLASSIC and BLITZ, not the dailies): a layer broken down to its bit now and then lets
+// out an infected one (EASY 2%, NORMAL 4%, HARD 6%), marked with a virus and pulsing red. Gone from the
+// board by the end of the next drop (decrypted, or wiped by an exploit), it's QUARANTINED: +1 ROOTKIT.
+// Still there after it, it goes off: an INFECTION, any of the six, as a BLACK BOX's (ANTIVIRUS waiting
+// catches it). One at a time, and never two within INFECT_GAP drops
+const INFECT_ODDS = { easy: 0.02, normal: 0.04, hard: 0.06 };
+const INFECT_GAP = 12;
+let infectedBit = null; // (the bit on the board now, its .infected the drop it came out on)
+let infectedAt = -Infinity; // (the drop the last one came out on)
+const infectModes = () => !daily && (mode === 'classic' || mode === 'blitz');
+function mayInfect() {
+  if (!infectModes() || gameOver || infectedBit) return false;
+  if (Progress.runDrops() - infectedAt < INFECT_GAP) return false;
+  return Math.random() < (INFECT_ODDS[difficulty] || 0);
+}
+function infect(bit) {
+  bit.infected = Progress.runDrops();
+  infectedBit = bit;
+  infectedAt = bit.infected;
+  setMessage('INFECTED BIT // DECRYPT IT WITH YOUR NEXT DROP OR IT GOES OFF', 'alarm');
+  SFX.play('denied');
+}
+// (after each drop: gone from the board, quarantined; still there a whole drop on, it goes off)
+function tickInfectedBit() {
+  const bit = infectedBit;
+  if (!bit || gameOver) return;
+  const onBoard = columns.some((col) => col.includes(bit));
+  if (!onBoard) {
+    infectedBit = null;
+    Progress.addRes('rootkits', 1);
+    setMessage('INFECTED BIT // QUARANTINED: +1 ROOTKIT', 'byte');
+    SFX.play('egg');
+    showKeys();
+    return;
+  }
+  if (Progress.runDrops() <= bit.infected) return; // (its drop's not over yet: one more)
+  infectedBit = null;
+  delete bit.infected;
+  if (antivirusArmed) { // (ANTIVIRUS waiting: caught, it does nothing)
+    antivirusArmed = false;
+    setMessage('ANTIVIRUS // INFECTED BIT QUARANTINED', 'byte');
+    SFX.play('egg');
+    renderPatches();
+    render();
+    return;
+  }
+  const ids = Progress.antiIds();
+  runAnti(ids[Math.floor(Math.random() * ids.length)]);
 }
 
 // BREACH: the bottom rows start as a firewall, the same for everyone today. Layers are level 1 or 2
@@ -1228,13 +1297,13 @@ function updateColumnButtons() {
   });
   if (dropCtlReady) applyDropControls(); // (the tutorial takes both)
   const buttons = columnButtonsEl.querySelectorAll('button');
+  columnButtonsEl.classList.toggle('tut-full', mode === 'tutorial'); // (the tutorial's: never faded)
   buttons.forEach((btn, c) => {
     const target = pivotFrom !== null && Math.abs(c - pivotFrom) === 1;
     // While PIVOT waits for a side, only the two neighbors can be pressed: the choice is committed
     btn.disabled = gameOver || busy || vsPaused || (pivotFrom !== null ? !target : columns[c].length >= MAX_ROWS); // (paused: off, dimmed, till RESUME)
     btn.classList.toggle('pivot-from', c === pivotFrom);
     btn.classList.toggle('pivot-target', target);
-    btn.classList.toggle('tut-off', mode === 'tutorial' && !Tutorial.allows(c)); // (dimmed: not this lesson's column)
     btn.textContent = target ? (c < pivotFrom ? '\u2190' : '\u2192') : String(c + 1);
     // (ADWARE: a pop-up over one button; its column takes no drop at all, attemptDrop)
     const ad = !!adware && adware.col === c && pivotFrom === null;
@@ -1393,6 +1462,11 @@ function render(popped = [], falling = null) {
           div.classList.add('disc');
           fillBit(div, cell.val);
           spinBit(div, cell);
+          if (cell.infected !== undefined) { // (an INFECTED BIT: a virus in its corner, pulsing red)
+            div.classList.add('infected');
+            div.insertAdjacentHTML('beforeend', `<span class="inf-mark" aria-hidden="true">${VIRUS_SVG}</span>`);
+            div.title = 'INFECTED BIT: decrypt it with your next drop or it goes off';
+          }
         } else if (cell.type === 'hack') {
           div.classList.add('hack');
           div.innerHTML = `[${iconHtml(cell.id)}]`;
@@ -1723,6 +1797,7 @@ async function attemptDrop(col) {
     jackLeft--;
   }
   await tickInfections();
+  tickInfectedBit();
   showPickup(resBefore);
   Progress.endDrop({
     hack: piece.type === 'hack', heights: columns.map((c) => c.length), rows: ROWS, over: overflowed(),
@@ -4911,14 +4986,14 @@ const SECTION_INFO = {
     'Not in DAILY or VS.']],
   starters: ['// EXPLOITS FOR A GAME', [
     'An exploit you own and bring into a game, instead of waiting for the CHAIN METER to earn one. TIER I, II and III, each its own section.',
-    `Pick up to two on the main menu, in EXPLOIT L and EXPLOIT R. Each sits in a side slot next to the exploit button: the left slot opens at Lv ${Progress.sideSlotLevel(0)}, the right at Lv ${Progress.sideSlotLevel(1)}.`,
+    `Pick up to two on the main menu, in EXPLOIT L and EXPLOIT R. Each sits in an EXPLOIT SLOT next to the exploit button: the left slot opens at Lv ${Progress.sideSlotLevel(0)}, the right at Lv ${Progress.sideSlotLevel(1)}.`,
     'In the game, tap one to use it as your next drop. Any you don\'t use stay yours.',
     'Short on resources? A MASTER KEY buys any exploit.',
-    'An empty side slot turns into the BLACK MARKET once the first encryption layer rises: something for sale that changes every 4 drops. The pips under it count the drops left.',
+    'An empty EXPLOIT SLOT turns into the BLACK MARKET once the first encryption layer rises: something for sale that changes every 4 drops. The pips under it count the drops left.',
     'CLASSIC, BLITZ and ZEN only.']],
   boxes: ['// BLACK BOXES', [
     'A sealed box with a random exploit inside, for less than it usually holds.',
-    'Bring it into a game in a side slot, then tap it to open it. Most of the time you get an exploit of the box\'s tier, to use when you like.',
+    'Bring it into a game in an EXPLOIT SLOT, then tap it to open it. Most of the time you get an exploit of the box\'s tier, to use when you like.',
     'Sometimes it\'s INFECTED, and the infection hits right away: ADWARE blocks a column with an ad, SPYWARE hides your next bits, RANSOMWARE locks bits so they can\'t decrypt (tap one to pay its ransom, a few KEYS a tap), MALWARE scrambles what your board shows, a CRYPTOJACKER steals the resources you earn, or SCAREWARE throws up fake alerts over your board for 8 drops, up to 4 at once, each closed only by its little X.',
     'Infections stack: open two infected boxes and both hit. The same infection twice starts its count over, a second RANSOMWARE locks more bits, and a second SCAREWARE stacks another pop-up over the first.',
     'The higher the tier, the better the odds. Each box shows its own.']],
@@ -5323,7 +5398,7 @@ function renderStarters() {
       b.disabled = true;
       b.innerHTML = `${SLOT_LOCK_SVG}<span class="slot-lv">LV ${Progress.sideSlotLevel(i)}</span>`;
       b.dataset.key = '';
-      b.title = `${i ? 'RIGHT' : 'LEFT'} SIDE SLOT // opens at Lv ${Progress.sideSlotLevel(i)}`;
+      b.title = `EXPLOIT ${i ? 'R' : 'L'} // opens at Lv ${Progress.sideSlotLevel(i)}`;
       b.setAttribute('aria-label', b.title);
       return;
     }
@@ -6399,7 +6474,7 @@ function renderRecords() {
     exList.className = 'rec-list';
     const slotsNow = Progress.slotInfo();
     exList.appendChild(recordRow({
-      name: `EXPLOIT SLOTS ${slotsNow.slots} / ${slotsNow.max}`,
+      name: `LOADOUT SLOTS ${slotsNow.slots} / ${slotsNow.max}`,
       desc: slotsNow.nextLevel ? `Next slot at Lv ${slotsNow.nextLevel}. Each DECRYPTOR rank keeps one more.` : 'Each DECRYPTOR rank keeps one more, up to 6.',
       current: slotsNow.slots,
       goal: slotsNow.max,
@@ -6674,16 +6749,22 @@ const tierHeads = EXPLOIT_TIERS.map(([title, note], t) => {
 });
 const tierOfCard = (id) => (id === 'black-box' ? 3 : Progress.tierOf(id));
 function refreshExploitCards() {
-  const { slots, max, nextLevel } = Progress.slotInfo();
+  const { slots, max, nextLevel, at } = Progress.slotInfo();
   const equipped = Progress.equipped();
   const editable = loadoutEditable();
-  if (daily) {
-    slotInfoEl.textContent = mode === 'puzzle' ? 'DAILY PUZZLE // NO EXPLOITS' : 'DAILY // THE SAME FIVE EXPLOITS FOR EVERYONE';
-  } else {
-    slotInfoEl.textContent = `SLOTS ${equipped.length} / ${slots}`
-      + (slots < max ? (nextLevel ? ` // NEXT SLOT AT LV ${nextLevel}` : ' // MORE SLOTS WITH DECRYPTOR RANKS') : '')
-      + (editable ? '' : ' // LOCKED UNTIL THE SESSION ENDS');
-  }
+  // THE LOADOUT: a box per slot, as the game's own buttons, the equipped exploits filling them left
+  // to right; an empty one a dashed frame; one not open yet its padlock and level (one more with a
+  // DECRYPTOR rank: RANK). DAILY: its five, the same for everyone (none in the daily puzzle)
+  const shown = daily ? (mode === 'puzzle' ? [] : DAILY_EXPLOITS) : equipped;
+  const boxes = daily ? shown.length : max;
+  slotInfoEl.innerHTML = Array.from({ length: boxes }, (_, i) => {
+    const id = shown[i];
+    if (id) return `<span class="exploit-icon loadout-box filled" role="listitem" title="${HACKS[id].name}"><span class="exploit-glyph">${itemIcon(id)}</span></span>`;
+    if (i >= slots) return `<span class="exploit-icon side-slot locked-slot loadout-box" role="listitem" title="Opens at Lv ${at[i]}">${SLOT_LOCK_SVG}<span class="slot-lv">${at[i] ? `LV ${at[i]}` : 'RANK'}</span></span>`;
+    return '<span class="exploit-icon loadout-box empty" role="listitem" title="Empty slot"></span>';
+  }).join('');
+  slotInfoEl.classList.toggle('fixed', !editable || daily); // (locked till the session ends: dimmed a little)
+  slotInfoEl.setAttribute('aria-label', daily ? 'Daily loadout' : `Loadout: ${equipped.length} of ${slots} slots filled${slots < max && nextLevel ? `, next slot at level ${nextLevel}` : ''}${editable ? '' : ', locked until the session ends'}`);
   tierHeads.forEach((h) => { delete h.dataset.placed; });
   for (const id of Progress.exploitOrder()) {
     const el = hacksPanelEl.querySelector(`.hack-item[data-hack="${id}"]`);
@@ -6781,7 +6862,7 @@ hacksPanelEl.addEventListener('click', (e) => {
     SFX.play('enter');
   } else {
     SFX.play('denied');
-    cardNotice(Progress.slotInfo().slots ? 'SLOTS FULL // REMOVE ONE TO SWAP' : 'NO EXPLOIT SLOTS YET');
+    cardNotice(Progress.slotInfo().slots ? 'SLOTS FULL // REMOVE ONE TO SWAP' : 'NO LOADOUT SLOTS YET');
   }
   refreshExploitCards();
 });

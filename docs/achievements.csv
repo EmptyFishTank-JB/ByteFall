@@ -1,4 +1,5 @@
 Category,Name,Description,Goal,Type,ID
+SESSIONS,"HELLO, WORLD",Finish the tutorial,1,Standard,hello-world
 SESSIONS,FIRST CONTACT,Start your first session,1,Standard,first-contact
 SESSIONS,REGULAR,Play 25 sessions,25,Standard,regular
 SESSIONS,VETERAN,Play 100 sessions,100,Standard,veteran
