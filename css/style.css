@@ -3183,6 +3183,21 @@ html.pixel-mode .walker.skater.walking[data-look="left"] .bot { transform: none;
 .starter-pick-item:disabled { opacity: 0.4; cursor: default; }
 .starter-pick-empty { justify-content: center; color: var(--fg-dim); border-style: dashed; }
 .starter-pick-foot { display: flex; gap: 8px; justify-content: center; }
+/* GAME SETTINGS: a section each (a head, its buttons, a note), 8px apart; its can't-do line over the
+   title, as VS's setup has it */
+.mode-settings-box { position: relative; }
+.mode-settings-box h2 { margin: 0; }
+.mode-settings-box .ms-msg { position: absolute; top: 18px; left: 18px; right: 18px; height: 20px; line-height: 20px; min-height: 0; font-size: 13px; text-align: center; }
+.mode-settings-box .ms-msg.show + h2 { visibility: hidden; }
+.mode-settings-box .ms-sec { margin: var(--gap) 0 0; }
+.mode-settings-box .ms-sec[hidden] { display: none; }
+.mode-settings-box .ms-head { margin: 0 0 var(--gap); font-size: 13px; letter-spacing: 2px; color: var(--fg-dim); }
+.mode-settings-box .ms-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gap); margin: 0; }
+.mode-settings-box .ms-row.one { grid-template-columns: minmax(0, 1fr); }
+.mode-settings-box .ms-row button { height: 32px; min-width: 0; padding: 0 8px; font-size: 12px; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; white-space: nowrap; overflow: hidden; }
+#mode-settings #difficulty-row button { height: 32px; }
+.mode-settings-box .ms-note { margin: var(--gap) 0 0; font-size: 13px; line-height: 1.4; color: var(--fg-dim); }
+.mode-settings-box .starter-pick-foot { margin-top: 16px; }
 .starter-pick-foot button { font-family: inherit; font-size: 11px; letter-spacing: 1px; padding: 8px 12px; color: var(--fg); background: transparent; border: 1px solid var(--fg-dim); border-radius: 4px; cursor: pointer; }
 .booster-break { flex-basis: 100%; height: 0; } /* (the slots on one line, the exploits owned below) */
 /* PUZZLE: HINT and UNDO under the drop buttons, and the column HINT lights */
@@ -4447,7 +4462,7 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
    slot not open yet locked (its level dimmed behind the padlock). A long name trails off */
 .home .home-opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap); width: 100%; margin: 0; }
 .home .home-opts.single { grid-template-columns: minmax(0, 1fr); }
-.home .home-opts[hidden], .home .home-opts button[hidden] { display: none; }
+.home .home-opts[hidden] { display: none; }
 .home .home-opts button { height: 32px; min-width: 0; padding: 0 8px; font-size: 12px; letter-spacing: 1px; }
 .home .home-opts .opt-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .home .home-opts .ico { width: 1.15em; height: 1.15em; vertical-align: -0.22em; margin-right: 3px; }
