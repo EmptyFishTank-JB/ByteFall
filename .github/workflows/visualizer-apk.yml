@@ -62,7 +62,7 @@ jobs:
           echo "file=ByteFallViz-${KIND}-v${BUILD}-${GITHUB_SHA::7}.apk" >> "$GITHUB_OUTPUT"
           cp android/app/build/outputs/apk/debug/app-debug.apk "ByteFallViz-${KIND}-v${BUILD}-${GITHUB_SHA::7}.apk"
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: ${{ steps.name.outputs.file }}
           path: ${{ steps.name.outputs.file }}
