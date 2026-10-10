@@ -100,6 +100,23 @@ violence, no real money gambling (BLACK BOXES are bought with KEYS earned in pla
 money, in the PC builds). Expect E / PEGI 3 or close. A paid loot-box question may come up in the
 surveys: on PC nothing is sold for real money, so the answer is no.
 
+## The website (decided)
+
+- **Until the stores launch** the game stays on GitHub Pages as it is, with no ads. GitHub Pages
+  isn't meant for commercial sites, and AdSense wants a domain you own, so ads on it are out.
+- **At launch** the game's page gives way to a landing page on the studio's site (the
+  `EmptyFishTank-JB.github.io` repo, which already has the privacy policy): screenshots or the
+  trailer, the store badges, and maybe a short demo (the tutorial and a few CLASSIC games).
+- **This repo's Pages site can't just be switched off**: the TEST app's live source loads the game
+  from it (`tools/live-app.js`). At launch, `index.html` sends ordinary browsers to the landing page
+  and runs the game only inside the app (its `ByteFallApp` user agent) or for the developer.
+- **Making this repo private** hides the code and its history; the Actions builds keep working.
+  Pages from a private repo needs a paid plan (GitHub Pro), and the site it serves is still public,
+  so the browser gate above is needed either way. Any web version's scripts can be read in a
+  browser; going private stops anyone from copying the whole project in one go.
+- **A web version that earns** would go on Poki, CrazyGames or itch.io (they run the ads and share
+  the revenue), never ads on our own site.
+
 ## In cars (later, after the desktop edition)
 
 - **Not Android Auto.** Android Auto (the phone's screen on the car's display) is for driving: media,
