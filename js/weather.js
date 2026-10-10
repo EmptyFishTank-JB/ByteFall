@@ -194,8 +194,10 @@ function createWeather(api) {
     if (!k) return;
     ensureLayers();
     const now = performance.now();
-    wx = { kind, k, at: now, level: 0, phase: 'in', until: now + (ms || (k.night ? rand(200000, 380000) : rand(150000, 330000))), dir: Math.random() < 0.5 ? 1 : -1, nextBolt: now + rand(3000, 7000), nextSay: now + rand(4000, 9000), nextTumble: now + rand(4000, 12000), nextMeteor: now + rand(800, 2500) };
-    if (k.clouds) api.clouds(k.clouds);
+    // (the wind blows the way the clouds already up are drifting; clouds it brings drift its way)
+    const dir = (api.cloudDir && api.cloudDir()) || (Math.random() < 0.5 ? 1 : -1);
+    wx = { kind, k, at: now, level: 0, phase: 'in', until: now + (ms || (k.night ? rand(200000, 380000) : rand(150000, 330000))), dir, nextBolt: now + rand(3000, 7000), nextSay: now + rand(4000, 9000), nextTumble: now + rand(4000, 12000), nextMeteor: now + rand(800, 2500) };
+    if (k.clouds) api.clouds(k.clouds, dir);
     if (k.rainbowNow) rainbowIn(now, wx.until - now);
     if (k.night || k.aurora || k.meteors) makeStars();
     // (the moon: the night's own, and now and then over the other night skies; not on a new moon,
@@ -801,5 +803,5 @@ function createWeather(api) {
     const opts = TABLE[season].filter(([k, , when]) => kinds.includes(k) && (!when || WHEN[when]()) && !(light() && KIND[k] && KIND[k].night));
     if (opts.length) start(pick(opts)[0]);
   }
-  return { frame, clear, fit, start: (kind) => start(kind), stop: () => end(), current: () => (wx ? wx.kind : null), moon: () => moonPhaseName() };
+  return { frame, clear, fit, start: (kind) => start(kind), stop: () => end(), current: () => (wx ? wx.kind : null), dir: () => (wx ? wx.dir : 0), moon: () => moonPhaseName() };
 }

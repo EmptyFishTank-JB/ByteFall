@@ -279,8 +279,9 @@ let marketBought = [];
 // THE PATCH SLOTS, the row's two ends (PATCH 1 left of the BLACK MARKET's left slot, PATCH 2 right of
 // its right one), open by level (Progress.patchSlotLevel): each sells a patch that fits the
 // mode and would do something now, for KEYS and resources (Progress, 'patch:<id>'; ECONOMY.md),
-// turning over with the BLACK MARKET and opening with it. Bought, it's applied at once and that slot's
-// done for the game: with the one switched on before it, three patches a game at most
+// turning over with the BLACK MARKET and opening with it. Bought, it's applied at once and the slot
+// sells again, a new patch in it (one waiting for its moment, SECOND CHANCE or ANTIVIRUS, keeps its
+// slot till it's used); a slot with nothing useful to sell tries again at each turnover
 let patchSlots = []; // this game's: [{ state: 'locked' | 'market' | 'applied' | 'closed', id }]
 let patchesBought = [];
 let restoreBought = false; // (a RESTORE POINT bought in the game: waiting to save you)
@@ -2379,7 +2380,7 @@ function endGame(reason = 'trace') {
     note.hidden = false;
     note.textContent += ` // PATCHED: ${patched.map((id) => BOOSTERS[id].name).join(', ')}`;
   }
-  if (usedStarters.length) note.textContent += ` // STARTERS: ${usedStarters.map(itemName).join(', ')}`; // (and one that used side slots)
+  if (usedStarters.length) note.textContent += ` // EXPLOIT L / R: ${usedStarters.map(itemName).join(', ')}`; // (and one that used side slots)
   if (marketBought.length) {
     note.textContent += ` // BLACK MARKET: ${marketBought.map(itemName).join(', ')}`;
   }
@@ -3663,7 +3664,7 @@ document.getElementById('pause-records').addEventListener('click', () => setReco
 document.getElementById('pause-exploits').addEventListener('click', () => setRecordsOpen(true, 'exploits'));
 document.getElementById('pause-settings').addEventListener('click', () => setSettingsOpen(true));
 // QUIT: the first tap arms it (CONFIRM?), the second ends the game (nothing kept, as RESTART) and
-// goes back to the main menu
+// goes back to the main menu (a PUZZLE: back to the puzzles, as its result card's PUZZLES)
 document.getElementById('pause-menu').addEventListener('click', (e) => {
   const btn = e.currentTarget;
   if (!armed || armed.btn !== btn) { armReset(btn, 'CONFIRM?'); return; }
@@ -3673,6 +3674,7 @@ document.getElementById('pause-menu').addEventListener('click', (e) => {
   resumeMatch();
   resetNow();
   showHome();
+  if (mode === 'puzzle' && !daily) setRecordsOpen(true, 'puzzles');
 });
 document.getElementById('home-records').addEventListener('click', () => setRecordsOpen(true, rulesPane));
 document.getElementById('home-exploits').addEventListener('click', () => setRecordsOpen(true, 'exploits'));
@@ -4831,11 +4833,12 @@ const priceHtml = (price, checked = false) => ['keys', ...Progress.resIds()].fil
 const priceText = (price) => ['keys', ...Progress.resIds()].filter((id) => price[id]).map((id) => `${price[id]} ${RES_INFO[id].name}`).join(' + ');
 // The wallet: the main menu's line under the level bar, and the STORE's
 function showWallet() {
-  const html = Progress.resIds().map((id) => resChip(id, fmt(Progress.res(id)))).join('');
+  // (KEYS first, then the resources, on the one line: the main menu's and the STORE's YOUR RESOURCES)
+  const html = resChip('keys', fmt(Progress.keys())) + Progress.resIds().map((id) => resChip(id, fmt(Progress.res(id)))).join('');
   const home = document.getElementById('wallet');
   if (home) home.innerHTML = html;
-  const store = document.getElementById('store-wallet'); // (the STORE's YOUR RESOURCES: KEYS first, on the one line)
-  if (store) store.innerHTML = resChip('keys', fmt(Progress.keys())) + html;
+  const store = document.getElementById('store-wallet');
+  if (store) store.innerHTML = html;
 }
 // What a drop earned, in the SCORE box along its foot (as far up from its bottom border as SCORE is down
 // from its top), every resource on the one line at once (a long line shrinks to fit), for a moment
@@ -4857,8 +4860,6 @@ function showPickup(before) {
 }
 function showKeys() {
   showWallet();
-  const n = fmt(Progress.keys());
-  document.getElementById('key-label').innerHTML = `${KEY_SVG} ${n}`;
   // (the STORE buttons' sign: the currency sign, always there, lit like a HOT NOW sign while the DAILY DROP waits)
   for (const id of ['home-store']) {
     const b = document.getElementById(id);
@@ -4908,9 +4909,9 @@ const SECTION_INFO = {
     'One per game. It\'s used up when the game starts (RESTORE POINT only when it saves you).',
     `In the game, the PATCH SLOTS at the two ends of the exploit row sell one more each (the left opens at Lv ${Progress.patchSlotLevel(0)}, the right at Lv ${Progress.patchSlotLevel(1)}): KEYS and resources, applied the moment you buy it.`,
     'Not in DAILY or VS.']],
-  starters: ['// STARTER EXPLOITS', [
-    'An exploit you own and bring into a game, instead of waiting for the CHAIN METER to earn one.',
-    `Pick up to two under STARTERS on the main menu. Each sits in a side slot next to the exploit button: the left slot opens at Lv ${Progress.sideSlotLevel(0)}, the right at Lv ${Progress.sideSlotLevel(1)}.`,
+  starters: ['// EXPLOITS FOR A GAME', [
+    'An exploit you own and bring into a game, instead of waiting for the CHAIN METER to earn one. TIER I, II and III, each its own section.',
+    `Pick up to two on the main menu, in EXPLOIT L and EXPLOIT R. Each sits in a side slot next to the exploit button: the left slot opens at Lv ${Progress.sideSlotLevel(0)}, the right at Lv ${Progress.sideSlotLevel(1)}.`,
     'In the game, tap one to use it as your next drop. Any you don\'t use stay yours.',
     'Short on resources? A MASTER KEY buys any exploit.',
     'An empty side slot turns into the BLACK MARKET once the first encryption layer rises: something for sale that changes every 4 drops. The pips under it count the drops left.',
@@ -5013,7 +5014,7 @@ function refreshBoosterRow() {
   refitHome(); // (new words in set boxes)
 }
 
-// The main menu's STARTERS: the two side slots, STARTER L and STARTER R, what's in each (or EMPTY), as
+// The main menu's EXPLOIT L and EXPLOIT R: the two side slots, what's in each (or EMPTY), as
 // VS's settings are: NAME: what's on it, lit while one's in it. A slot not open yet is locked (its
 // level; a tap says so in the card's title). A tap on an open slot opens its card (BUY EXPLOITS in it: the STORE's starters): every starter exploit
 // owned (and unlocked), how many, to put in that slot (two of one kind, if there are two; one each
@@ -5041,8 +5042,8 @@ function openStarterPick(slot) {
   const owned = [...Progress.exploitOrder().filter((id) => Progress.starters(id) > 0 && Progress.exploitInfo(id).unlocked),
     ...Progress.boxIds().filter((id) => Progress.starters(id) > 0)];
   document.getElementById('starter-pick-note').textContent = owned.length
-    ? 'Pick a starter exploit or BLACK BOX for this side of the exploit button. It\'s used once in the game; the ones you don\'t use stay yours.'
-    : 'You don\'t have any starter exploits yet.';
+    ? 'Pick an exploit or BLACK BOX for this side of the exploit button. It\'s used once in the game; the ones you don\'t use stay yours.'
+    : 'You don\'t have any exploits to bring in yet.';
   const list = document.getElementById('starter-pick-list');
   list.textContent = '';
   for (const id of owned) {
@@ -5087,12 +5088,12 @@ function refreshStarterRow() {
   for (let i = 0; i < STARTER_MAX; i++) {
     const b = document.createElement('button');
     b.type = 'button';
-    const name = `STARTER ${i ? 'R' : 'L'}`;
+    const name = `EXPLOIT ${i ? 'R' : 'L'}`;
     if (i >= Progress.sideSlots()) { // (not open yet: the level it opens at, behind a lock)
       const lv = Progress.sideSlotLevel(i);
       b.className = 'locked';
       b.innerHTML = `<span class="opt-text">${name}: LV ${lv}</span>`;
-      b.setAttribute('aria-label', `${i ? 'Right' : 'Left'} starter slot: opens at level ${lv}`);
+      b.setAttribute('aria-label', `EXPLOIT ${i ? 'R' : 'L'}: opens at level ${lv}`);
       b.addEventListener('click', () => { SFX.play('denied'); homeNotice(`LOCKED // ${name} OPENS AT LV ${lv}`); });
       row.appendChild(b);
       continue;
@@ -5348,13 +5349,13 @@ function renderStarters() {
       b.dataset.key = key;
       b.innerHTML = `<span class="exploit-glyph">${itemIcon(sl.id)}</span>`
         + (market && marketOpen ? PIPS_HTML : '')
-        + (market ? `<span class="slot-sale" aria-hidden="true">${CURRENCY_SVG}</span>` : sl.state === 'armed' ? '' : `<span class="starter-tag">${sl.state === 'starter' ? 'S' : '✓'}</span>`);
+        + (market ? `<span class="slot-sale" aria-hidden="true">${CURRENCY_SVG}</span>` : sl.state === 'armed' ? '' : `<span class="starter-tag">${sl.state === 'starter' ? (i ? 'R' : 'L') : '✓'}</span>`);
     }
     setPips(b, market && marketOpen);
     const name = itemName(sl.id);
     b.title = sl.state === 'armed' ? `${itemName(sl.id)} // ARMED: drop it` : market ? `BLACK MARKET // ${name}: ${priceText(price)} (${marketOpen ? `tap to see it; a new one in ${left} drop${left === 1 ? '' : 's'}` : `opens in ${marketOpensIn()} drops`})`
-      : sealed ? `${sl.state === 'starter' ? 'STARTER' : 'BOUGHT'} // ${name}: tap to open it`
-        : `${sl.state === 'starter' ? 'STARTER' : sl.state === 'opened' ? 'BLACK BOX' : 'BOUGHT'} // ${name}: tap to arm it`;
+      : sealed ? `${sl.state === 'starter' ? `EXPLOIT ${i ? 'R' : 'L'}` : 'BOUGHT'} // ${name}: tap to open it`
+        : `${sl.state === 'starter' ? `EXPLOIT ${i ? 'R' : 'L'}` : sl.state === 'opened' ? 'BLACK BOX' : 'BOUGHT'} // ${name}: tap to arm it`;
     b.setAttribute('aria-label', b.title);
     if (!market && !sealed && armedHack) b.disabled = true;
   });
@@ -5459,6 +5460,20 @@ function renderPatches() {
     b.setAttribute('aria-label', b.title);
   });
 }
+// (a patch used up: its slot back to the market with a new one in it)
+const patchWaiting = (ps) => (ps.id === 'second-chance' && restoreBought) || (ps.id === 'antivirus' && antivirusArmed);
+function freePatchSlots() {
+  let changed = false;
+  patchSlots.forEach((ps, i) => {
+    if (!(ps.state === 'applied' && !patchWaiting(ps)) && ps.state !== 'closed') return;
+    const id = patchPick(patchSlots.map((x, k) => (k === i ? null : x.id)));
+    if (!id && ps.state === 'closed') return;
+    ps.state = id ? 'market' : 'closed';
+    ps.id = id;
+    changed = true;
+  });
+  if (changed) renderPatches();
+}
 function patchTap(i) {
   const ps = patchSlots[i];
   if (!ps || gameOver || ps.state !== 'market' || ps.turning) return;
@@ -5508,7 +5523,7 @@ function openShop(i) {
   const master = missing.length > 0 && !box && Progress.res('master') > 0;
   const odds = box ? Progress.boxOdds(id) : null;
   document.getElementById('shop-item').innerHTML = `<span class="shop-ico">${bracketIcon(id)}</span><span class="shop-name">${itemName(id)}</span>`
-    + `<span class="shop-tier">${box ? `T1 ${odds[0]}% // T2 ${odds[1]}% // T3 ${odds[2]}% // INFECTION ${odds[3]}%` : `TIER ${Progress.tierOf(id) + 1} EXPLOIT`}</span>`
+    + `<span class="shop-tier">${box ? `TIER I ${odds[0]}% // II ${odds[1]}% // III ${odds[2]}% // INFECTION ${odds[3]}%` : `TIER ${['I', 'II', 'III'][Progress.tierOf(id)]} EXPLOIT`}</span>`
     + `<span class="shop-desc">${itemDesc(id)}</span>`;
   document.getElementById('shop-costs').innerHTML = costHtml(price);
   const buy = document.getElementById('shop-buy');
@@ -5612,6 +5627,8 @@ function patchBuy() {
   ps.state = 'applied';
   patchesBought.push(ps.id);
   applyPatch(ps.id);
+  const run = runId;
+  setTimeout(() => { if (run === runId && !gameOver) freePatchSlots(); }, 900); // (its tick shown a moment, then the slot sells again)
   SFX.play('egg');
   const cured = ps.id === 'antivirus' && !antivirusArmed;
   setMessage(`PATCH // ${BOOSTERS[ps.id].name}${ps.id === 'second-chance' ? ': READY IF THE TRACE COMPLETES' : cured ? ': INFECTIONS CLEARED' : ps.id === 'antivirus' ? ': THE NEXT INFECTION IS QUARANTINED' : ' APPLIED'}`);
@@ -5702,6 +5719,7 @@ function openBox(i) {
 // Every MARKET_EVERY drops, the market's slots turn over (a price shown and not taken up goes too)
 function marketTick() {
   if (!sideSlots.length) return;
+  freePatchSlots(); // (a waiting patch that's been used: its slot sells again)
   if (++marketDrops >= BASE_INTERVAL && MODES[mode].noLayers) openMarket(); // (ZEN: no layers rise)
   if (marketDrops % MARKET_EVERY) { renderStarters(); return; }
   // (the turnover: each offer rolls into the next one; one set of ticks for them all)
@@ -5963,7 +5981,7 @@ function armExploit(slot = null) {
     if (sl.state === 'starter') {
       if (!Progress.useStarter(sl.id)) return false;
       usedStarters.push(sl.id);
-      label = 'STARTER';
+      label = `EXPLOIT ${slot ? 'R' : 'L'}`;
     } else label = sl.state === 'opened' ? 'BLACK BOX' : 'BLACK MARKET';
     id = sl.id;
     sl.state = 'armed'; // (it stays in its slot, lit, till it's dropped; then the slot opens to the market)
@@ -6016,7 +6034,8 @@ exploitBtn.addEventListener('click', () => {
 // style: plain glowing words fading in over the line's own, holding, then bursting into pixels; one at
 // a time, the next waiting for it. They wait while a card is open (RULES & RECORDS, SETTINGS, the music
 // player) and while the title screen is up. Each is kept in RULES & RECORDS → NOTICES too, unless
-// opts.log is false (the passing ones: EXPLOIT READY); opts.read keeps it without the unread dot
+// opts.log is false (the passing ones: EXPLOIT READY); opts.read keeps it without the unread dot;
+// opts.desc goes under it in NOTICES (an ACHIEVEMENT's: what it was for)
 const NOTICE_MS = 2600;
 const NOTICE_LONG_MS = 3600; // (an ACHIEVEMENT, a LEVEL UP, an UNLOCKED: a little longer to read)
 const NOTICE_GAP_MS = 350;
@@ -6025,7 +6044,7 @@ const noticeQueue = [];
 let noticeShowing = false;
 function showToast(text, opts = {}) {
   if (window.infTestQuiet && window.infTestQuiet()) return; // (the INFECTION TESTER, its banners switched off)
-  if (opts.log !== false) logNotice(text, opts.read);
+  if (opts.log !== false) logNotice(text, opts.read, opts.desc);
   noticeQueue.push(text);
   if (!noticeShowing) nextNotice();
 }
@@ -6080,9 +6099,9 @@ const NOTICES_MAX = 60;
 let notices = []; // ({ t: when, text, read })
 try { notices = JSON.parse(storage.get(NOTICES_KEY)) || []; } catch (e) { notices = []; }
 const saveNotices = () => storage.set(NOTICES_KEY, JSON.stringify(notices));
-function logNotice(text, read = false) {
+function logNotice(text, read = false, desc = '') {
   const looking = !recordsEl.hidden && menuPane === 'notices';
-  notices.push({ t: Date.now(), text, read: read || looking }); // (read: seen where it happened, the result screen or the STORE)
+  notices.push({ t: Date.now(), text, read: read || looking, ...(desc ? { desc } : {}) }); // (read: seen where it happened, the result screen or the STORE)
   if (notices.length > NOTICES_MAX) notices = notices.slice(-NOTICES_MAX);
   saveNotices();
   updateNoticeDots();
@@ -6111,8 +6130,14 @@ function noticeWhen(t) {
 }
 function renderNotices() {
   const body = document.getElementById('notices-body');
+  // (an ACHIEVEMENT logged before they kept what it was for: found by its name)
+  const descs = new Map(Progress.achievements().map((a) => [a.name, a.desc]));
+  for (const n of notices) {
+    const m = !n.desc && /^ACHIEVEMENT \/\/ (.+?)(?: \+\d+ KEYS)?$/.exec(n.text);
+    if (m && descs.has(m[1])) n.desc = descs.get(m[1]);
+  }
   body.innerHTML = notices.length
-    ? notices.slice().reverse().map((n) => `<div class="notice-item${n.read ? '' : ' unread'}"><span class="notice-when">${noticeWhen(n.t)}</span><span class="notice-text">${n.text}</span></div>`).join('')
+    ? notices.slice().reverse().map((n) => `<div class="notice-item${n.read ? '' : ' unread'}"><span class="notice-when">${noticeWhen(n.t)}</span><span class="notice-text">${n.text}</span>${n.desc ? `<span class="notice-desc">${n.desc}</span>` : ''}</div>`).join('')
     : '<p class="notices-empty">Nothing yet. Achievements, unlocks, level ups and rewards are kept here as they come.</p>';
 }
 updateNoticeDots();
@@ -6136,7 +6161,7 @@ function announce(earned) {
   }
   if (!earned.length) return;
   SFX.play('egg');
-  for (const e of earned) showToast(earnedText(e));
+  for (const e of earned) showToast(earnedText(e), { desc: e.desc });
   showKeys();
   applyUnlocks();
   if (!recordsEl.hidden) renderRecords();
@@ -6148,7 +6173,7 @@ function showEarned(held) {
   if (overlayEl.classList.contains('hidden') || mode === 'tutorial') return false;
   box.innerHTML = `<p class="oe-head">EARNED</p>${held.map((e) => `<p class="oe-item">${earnedText(e)}</p>`).join('')}`;
   box.hidden = false;
-  for (const e of held) logNotice(earnedText(e), true);
+  for (const e of held) logNotice(earnedText(e), true, e.desc);
   SFX.play('egg');
   showKeys();
   applyUnlocks();
@@ -6499,6 +6524,10 @@ function renderRecords() {
       ['DAILY DECRYPT TODAY', storage.get(dailyPlayedKey('decrypt')) ? fmt(Number(storage.get(dailyKey('decrypt'))) || 0) : 'not played'],
       ['DATA DECRYPTED', fmtData(s.bits)],
       ['TOTAL POINTS', fmt(s.points)],
+      // (KEYS: every one earned, and what's gone to the STORE, the BLACK MARKET and the PATCH SLOTS: earned
+      // less what's held and what infections took)
+      ['KEYS EARNED', fmt(s.keysEarned)],
+      ['KEYS SPENT', fmt(Math.max(0, s.keysEarned - s.keys - (s.keysExtorted || 0)))],
       ['BEST // BLITZ', fmt(Number(storage.get('bytefall-best-blitz')) || 0)],
       ['BEST // ZEN', fmt(Number(storage.get('bytefall-best-zen')) || 0)],
       ...Object.entries(CpuBoard.LEVELS).map(([id, l]) => [`VS ${l.label} CPU // WON-LOST`, `${fmt(s.vsWins[id] || 0)} - ${fmt(s.vsLosses[id] || 0)}`]),
@@ -6631,9 +6660,9 @@ const loadoutEditable = () => gameOver || Progress.runDrops() === 0;
 const slotInfoEl = document.getElementById('slot-info');
 // The list's sections, by tier (as priced in the STORE and the BLACK MARKET), each under a ===== line
 const EXPLOIT_TIERS = [
-  ['TIER 1 // THE BASICS', 'Quick fixes that shake up the board. The first three are yours as they unlock; the other two are bought once with resources to keep.'],
-  ['TIER 2 // PRECISION TOOLS', 'Aim these where they do the most. Unlocked, each is bought once with resources to keep (ROOTKITS too).'],
-  ['TIER 3 // HEAVY HITTERS', 'Big plays that change the whole board. The last to unlock, and the dearest to keep.'],
+  ['TIER I // THE BASICS', 'Quick fixes that shake up the board. The first three are yours as they unlock; the other two are bought once with resources to keep.'],
+  ['TIER II // PRECISION TOOLS', 'Aim these where they do the most. Unlocked, each is bought once with resources to keep (ROOTKITS too).'],
+  ['TIER III // HEAVY HITTERS', 'Big plays that change the whole board. The last to unlock, and the dearest to keep.'],
   ['SPECIAL // UNKNOWN', 'Never sold in the STORE. Unlocked, it\'s bought once to keep, like the tiers above.'],
 ];
 const tierHeads = EXPLOIT_TIERS.map(([title, note], t) => {

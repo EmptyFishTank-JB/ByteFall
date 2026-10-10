@@ -1,5 +1,5 @@
 // STORE: the MENU's fourth tab. The DAILY DROP to claim (script.js's dailyDrop), the PATCHES
-// bought with KEYS (script.js's BOOSTERS, Progress's wallet), STARTER EXPLOITS and BLACK BOXES
+// bought with KEYS (script.js's BOOSTERS, Progress's wallet), EXPLOITS (TIER I, II, III) and BLACK BOXES
 // bought with KEYS and RESOURCES (ECONOMY.md), and two purchases: REMOVE ADS (no ads, nothing unlocked) and FULL
 // ACCESS (everything that unlocks by level, and no ads; for a REMOVE ADS owner, the upgrade at the
 // difference), plus RESTORE PURCHASES. In the app's RELEASE edition they're Google Play's
@@ -42,12 +42,14 @@ const Store = (() => {
     el.className = `price-gauge pos-${pos}`;
     el.innerHTML = `<span class="pg-row"><span class="pg-label">PRICES</span><span class="pg-end">LOW</span><span class="pg-bar">${[0, 1, 2, 3, 4].map((i) => `<i${i === pos ? ' class="on"' : ''}></i>`).join('')}</span><span class="pg-end">HIGH</span></span><span class="pg-why">${why}${rank}</span>`;
     el.setAttribute('aria-label', `Prices today: ${why}`);
-    for (const h of menu.querySelectorAll('.store-sub[data-kind]')) {
-      let tag = h.querySelector('.sub-tag');
-      const pct = Math.round((p.mults[h.dataset.kind] - 1) * 100);
-      if (!pct) { if (tag) tag.remove(); continue; }
-      if (!tag) { tag = document.createElement('b'); tag.className = 'sub-tag'; h.appendChild(tag); }
-      tag.textContent = `${pct > 0 ? '+' : ''}${pct}%`;
+    // (each item its own -n% / +n% badge, its kind's change today: PATCHES, EXPLOITS, BLACK BOXES)
+    for (const item of menu.querySelectorAll('.booster-item')) {
+      const tag = item.querySelector('.sale-tag');
+      if (!tag) continue;
+      const kind = item.dataset.booster ? 'patch' : Progress.isBox(item.dataset.starter) ? 'box' : 'exploit';
+      const pct = Math.round((p.mults[kind] - 1) * 100);
+      tag.hidden = !pct;
+      tag.textContent = pct ? `${pct > 0 ? '+' : ''}${pct}%` : '';
       tag.classList.toggle('up', pct > 0);
     }
   }
@@ -84,7 +86,7 @@ const Store = (() => {
     const item = document.createElement('div');
     item.className = 'store-item booster-item';
     item.dataset.booster = id;
-    item.innerHTML = `<h3><span class="store-ico bracketed"><span class="ico-br">[</span>${BOOSTER_SVG[id] || ''}<span class="ico-br">]</span></span><span class="store-name">${b.name}</span></h3><p class="store-desc">${b.desc}</p>`
+    item.innerHTML = `<h3><span class="store-ico bracketed"><span class="ico-br">[</span>${BOOSTER_SVG[id] || ''}<span class="ico-br">]</span></span><span class="store-name">${b.name}</span><b class="sale-tag" hidden></b></h3><p class="store-desc">${b.desc}</p>`
       // (no resources in a patch's price: WATCH AD, where there is one, takes that room on the left, level with BUY)
       + `<div class="store-deal"><div class="store-terms${b.adPerDay ? ' with-ad' : ''}">${b.adPerDay ? '<button type="button" class="store-buy store-ad" hidden></button>' : ''}<span class="booster-owned"></span></div><div class="store-btns"><button type="button" class="store-buy store-pay">${BUY_HTML(Progress.cost('patch', b.cost))}</button></div></div>`;
     const adBtn = item.querySelector('.store-ad');
@@ -118,10 +120,11 @@ const Store = (() => {
     });
     shop.appendChild(item);
   }
-  // STARTER EXPLOITS and BLACK BOXES: each with its icon, its price in KEYS and RESOURCES
-  // (Progress; ECONOMY.md), what's still short of it, how many are owned and BUY; an exploit short of
-  // its price can take a MASTER KEY instead. The exploits in the order they unlock (the locked ones
-  // show their level; BLACK BOX itself isn't sold); each BLACK BOX shows its odds
+  // EXPLOITS (for a game, from EXPLOIT L or R) and BLACK BOXES: each with its icon, its price in KEYS
+  // and RESOURCES (Progress; ECONOMY.md), what's still short of it, how many are owned and BUY; an
+  // exploit short of its price can take a MASTER KEY instead. The exploits by tier, each tier its own
+  // section under a ----- line, in the order they unlock (a locked one: dimmed under a padlock, its
+  // level; a tap on it pulses that level); BLACK BOX itself isn't sold; each BLACK BOX shows its odds
   function shopItem(id, parent) {
     const item = document.createElement('div');
     item.className = 'store-item booster-item starter-item';
@@ -129,13 +132,13 @@ const Store = (() => {
     const box = Progress.isBox(id);
     const odds = box ? Progress.boxOdds(id) : null;
     item.innerHTML = `<h3><span class="store-ico bracketed">${bracketIcon(id)}</span><span class="store-name">${itemName(id)}</span>`
-      + `<span class="store-price">${box ? '' : `TIER ${Progress.tierOf(id) + 1}`}</span></h3>`
+      + '<b class="sale-tag" hidden></b></h3>'
       + `<p class="store-desc">${itemDesc(id)}</p>`
-      + (box ? `<p class="store-odds">TIER 1 EXPLOIT ${odds[0]}% // TIER 2 ${odds[1]}% // TIER 3 ${odds[2]}% // INFECTION ${odds[3]}%</p>` : '')
+      + (box ? `<p class="store-odds">TIER I EXPLOIT ${odds[0]}% // TIER II ${odds[1]}% // TIER III ${odds[2]}% // INFECTION ${odds[3]}%</p>` : '')
       // (the price and how many are owned as one block, BUY level with it; what's short pulses red)
       + `<div class="store-deal"><div class="store-terms"><div class="store-costs"></div><span class="booster-owned"></span></div><div class="store-btns">${box ? '' : `<button type="button" class="store-buy store-master" hidden title="Use a MASTER KEY in place of the price" aria-label="Use a MASTER KEY">USE ${RES_INFO.master.svg}</button>`}<button type="button" class="store-buy store-pay">${BUY_HTML(Progress.price(id).keys)}</button></div></div>`;
     const buy = (master) => {
-      if (!box && !Progress.exploitInfo(id).unlocked) { SFX.play('denied'); return; }
+      if (!box && !Progress.exploitInfo(id).unlocked) { lockedTap(item); return; }
       if (!Progress.payFor(id, master)) {
         SFX.play('denied');
         flashShort(item); // (what's short flashes; no words)
@@ -143,18 +146,40 @@ const Store = (() => {
       }
       Progress.addStarter(id);
       SFX.play('egg');
-      say(`BOUGHT // ${itemName(id)}${master ? ' WITH A MASTER KEY' : ''}: TAKE IT INTO A GAME FROM A STARTER SLOT ON THE MAIN MENU`);
+      say(`BOUGHT // ${itemName(id)}${master ? ' WITH A MASTER KEY' : ''}: TAKE IT INTO A GAME FROM EXPLOIT L OR R ON THE MAIN MENU`);
       if (typeof showKeys === 'function') showKeys();
       if (typeof refreshStarterRow === 'function') refreshStarterRow();
       render();
     };
-    item.querySelector('.store-pay').addEventListener('click', () => buy(false));
+    item.querySelector('.store-pay').addEventListener('click', (e) => { e.stopPropagation(); buy(false); });
     const m = item.querySelector('.store-master');
-    if (m) m.addEventListener('click', () => buy(true));
+    if (m) m.addEventListener('click', (e) => { e.stopPropagation(); buy(true); });
+    // (a locked one: a tap anywhere on it pulses UNLOCKS AT LV n, as the main menu's can't-do line)
+    if (!box) item.addEventListener('click', () => { if (!Progress.exploitInfo(id).unlocked) lockedTap(item); });
     parent.appendChild(item);
   }
+  function lockedTap(item) {
+    SFX.play('denied');
+    const tag = item.querySelector('.booster-owned');
+    tag.classList.remove('pulse');
+    void tag.offsetWidth;
+    tag.classList.add('pulse');
+    clearTimeout(tag.pulseTimer);
+    tag.pulseTimer = setTimeout(() => tag.classList.remove('pulse'), 2200);
+  }
   const starterShop = document.getElementById('starter-shop');
-  for (const id of Progress.exploitOrder()) if (Progress.sellable(id)) shopItem(id, starterShop);
+  const TIER_NAMES = ['I', 'II', 'III'];
+  let shopTier = 0;
+  for (const id of Progress.exploitOrder()) {
+    if (!Progress.sellable(id)) continue;
+    const t = Progress.tierOf(id);
+    if (t !== shopTier) { // (the next tier: a ----- line and its own head, as the EXPLOITS menu's)
+      shopTier = t;
+      starterShop.insertAdjacentHTML('beforeend', '<div class="store-rule tier-rule" aria-hidden="true">--------------------------------------------------------------------------------</div>'
+        + `<h3 class="store-sub tier-shop-sub" data-sec="tier-${t + 1}">TIER ${TIER_NAMES[t]} EXPLOITS</h3>`);
+    }
+    shopItem(id, starterShop);
+  }
   const boxShop = document.getElementById('box-shop');
   for (const id of Progress.boxIds()) shopItem(id, boxShop);
   // (the BLACK MARKET's look: the currency sign's tilted, glowing sign in the corner)
@@ -250,8 +275,9 @@ const Store = (() => {
     if (pretending()) preview.textContent = 'TEST // BUY PRETENDS: NOTHING IS CHARGED';
     if (box.hidden) return;
     const has = (yes, name) => `${name}: ${yes ? 'OWNED' : 'NOT OWNED'}`;
+    const why = Billing.on && Billing.missing(); // (products Google Play didn't hand over, and its reason)
     document.getElementById('buy-test-status').textContent = resetting ? 'Using up the test purchases...'
-      : `${Billing.on ? 'Google Play says' : 'Pretend purchases'}: ${has(Unlocks.hasFullAccess(), 'FULL ACCESS')}, ${has(Unlocks.owned().noAds || Unlocks.hasFullAccess(), 'REMOVE ADS')}.`;
+      : `${Billing.on ? 'Google Play says' : 'Pretend purchases'}: ${has(Unlocks.hasFullAccess(), 'FULL ACCESS')}, ${has(Unlocks.owned().noAds || Unlocks.hasFullAccess(), 'REMOVE ADS')}.${why ? ` Missing from Google Play: ${why}.` : ''}`;
     document.getElementById('buy-test-note').textContent = Billing.on
       ? 'BUY in the STORE is Google Play\'s: on a license tester\'s account, pay with the test card and nothing is charged. RESET uses up what\'s owned so it can be bought again (REMOVE ADS, then FULL ACCESS as the UPGRADE).'
       : 'BUY in the STORE owns it at once here, nothing charged. RESET takes it back, ads and all.';
@@ -334,7 +360,8 @@ const Store = (() => {
       if (e.reason === 'canceled') say('CANCELED // NOTHING WAS CHARGED');
       else if (e.reason === 'missing') { // (the product isn't made, or isn't active, in Play Console)
         SFX.play('denied');
-        say(testing() ? 'TEST // NOT SET UP IN PLAY CONSOLE YET (OR NOT ACTIVE)' : 'NOT FOR SALE RIGHT NOW // NOTHING WAS CHARGED');
+        say(testing() ? 'TEST // GOOGLE PLAY DIDN\'T SEND THIS PRODUCT: WHY IS IN SETTINGS // TEST PURCHASES' : 'NOT FOR SALE RIGHT NOW // NOTHING WAS CHARGED');
+        renderBuyTest();
       }
       else {
         SFX.play('denied');

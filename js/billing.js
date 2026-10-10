@@ -29,8 +29,12 @@ const Billing = (() => {
   const boughtNow = new Set();
   const apply = () => Unlocks.own(owned.has(FULL) || owned.has(UPGRADE), owned.has(REMOVE_ADS));
 
+  let why = ''; // (Google Play's word on the products that didn't come back: TEST PURCHASES shows it)
   window.bytefallBilling = (e) => {
-    if (e.type === 'products') Object.assign(prices, e.prices);
+    if (e.type === 'products') {
+      Object.assign(prices, e.prices);
+      why = e.why || '';
+    } else if (e.type === 'failed' && e.why) why = e.why;
     else if (e.type === 'owned') {
       owned = new Set([...e.owned, ...boughtNow]);
       apply();
@@ -48,6 +52,7 @@ const Billing = (() => {
     FULL,
     UPGRADE,
     price: (id) => prices[id] || '',
+    missing: () => why,
     buy(id) { if (on) app.billingBuy(id); },
     restore() { if (on) app.billingRestore(); },
     // (TEST PURCHASES, builds with test ads only: what's owned used up, to buy again with the test card)

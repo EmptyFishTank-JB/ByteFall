@@ -1068,8 +1068,12 @@ function createVisitors(api) {
   const cloudLane = () => api.lane.classList.contains('game-walkers');
   const cloudSeason = () => typeof Season !== 'undefined' && (Season.is('halloween') || Season.is('november'));
   // (tone: the weather's, weather.js, which holds the sky while it rains or snows)
-  function startClouds(stays = false, tone = null) {
+  // (dir: the way they drift, the weather's wind's when one's blowing: weather.js)
+  function startClouds(stays = false, tone = null, dir = 0) {
     if (clouds || !cloudLane()) return clouds;
+    let wind = 0;
+    try { wind = weather ? weather.dir() : 0; } catch (e) {} // (before the weather's made: none yet)
+    dir = dir || wind || (Math.random() < 0.5 ? 1 : -1);
     const now = performance.now();
     const el = (cls) => {
       const e = document.createElement(cls.startsWith('cloud-layer') ? 'canvas' : 'div');
@@ -1079,7 +1083,7 @@ function createVisitors(api) {
       return e;
     };
     clouds = {
-      phase: 'in', at: now, front: 0, level: 0, dir: Math.random() < 0.5 ? 1 : -1, t: rand(0, 200), drawn: 0, stays, spooky: spooky(),
+      phase: 'in', at: now, front: 0, level: 0, dir, t: rand(0, 200), drawn: 0, stays, spooky: spooky(),
       dark: el('cloud-dark'), flash: el('cloud-flash'), layers: [0, 1, 2].map((i) => el(`cloud-layer cloud-${i}`)),
       until: now + rand(150000, 260000), nextFlash: now + rand(5000, 12000), tone,
     };
@@ -2573,14 +2577,15 @@ function createVisitors(api) {
     lane: api.lane, tall, foggy: () => !!fog, walkers: api.walkers, botEvent: api.botEvent,
     scene: () => (scenes ? scenes.current() : null),
     say: (w, m, text) => api.say(w, m, text),
-    clouds: (tone) => {
-      const c = clouds && clouds.phase === 'lift' ? null : clouds || startClouds(false, tone);
+    clouds: (tone, dir) => {
+      const c = clouds && clouds.phase === 'lift' ? null : clouds || startClouds(false, tone, dir);
       if (!c) return;
       c.held = true;
       if (!c.spooky) c.tone = tone;
     },
     releaseClouds: (soon) => { if (clouds && (clouds.held || soon) && !clouds.stays) { clouds.held = false; clouds.until = performance.now() + (soon ? 0 : rand(6000, 16000)); } },
     fog: () => { if (!fog) startFog(false, false, window.BYTERRIUM ? false : undefined); }, // (BYTERRIUM: a mist over the place, no woods)
+    cloudDir: () => (clouds && clouds.phase !== 'lift' ? clouds.dir : 0), // (the wind: the clouds' way)
   }) : null;
   // SCENES (scenes.js): now and then the lane becomes a place (a meadow, a beach, a city...), with
   // weather to suit; not with the fog or the HAUNTED FOREST
