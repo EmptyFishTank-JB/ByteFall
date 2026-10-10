@@ -42,8 +42,8 @@
   } catch (e) {}
 </script>
 <title>BYTEFALL // decryption terminal</title>
-<script src="js/fonts.js?v=547"></script>
-<link rel="stylesheet" href="css/style.css?v=547">
+<script src="js/fonts.js?v=548"></script>
+<link rel="stylesheet" href="css/style.css?v=548">
 </head>
 <body>
   <!-- Dev: TWINKLE BACKGROUND (grid-bg.js): the starlight behind the whole game, off by default -->
@@ -149,7 +149,7 @@
             <p>Either side of the EXPLOIT button, an <b>EXPLOIT SLOT</b> (<b>EXPLOIT L</b> and <b>EXPLOIT R</b>) holds an exploit you bring in from the main menu. An empty one is the <b>BLACK MARKET</b> once the first layer rises: something for sale, a new one every 4 drops (the pips count them).</p>
             <p>At each end, a <b>PATCH SLOT</b> sells a patch mid-game, applied the moment you buy it, then sells another. The slots open as you level up.</p>
             <p><b>BLACK BOXES</b> open into a random exploit, but some are <b>INFECTED</b>.</p>
-            <p>In CLASSIC and BLITZ, a bit freed from its last layer is now and then an <b>INFECTED BIT</b>: red, with a virus in its corner. Decrypt it with your next drop and it's quarantined for a ROOTKIT; leave it, and it goes off as an infection. <b>INFECTIONS: OFF</b> on the main menu turns them off.</p>
+            <p>In CLASSIC and BLITZ, a bit freed from its last layer is now and then an <b>INFECTED BIT</b>: red, with a virus in its corner. Decrypt it with your next drop and it's quarantined for a ROOTKIT; leave it, and it goes off as an infection. <b>INFECTIONS: OFF</b> in the mode's settings on the main menu turns them off.</p>
             <div class="store-rule" aria-hidden="true">================================================================================</div>
             <h3 class="rules-sub">// CLASSIC'S GOAL</h3>
             <p>Every CLASSIC game has a key to crack, its <b>ENCRYPTION STRENGTH</b> (128-BIT at 1,500 points on Normal). Crack it for KEYS, then <b>GO DEEPER</b> for a stronger key or <b>DISCONNECT</b> to end the game on a win. <b>GOAL: OFF</b> on the main menu plays CLASSIC endless instead.</p>
@@ -491,14 +491,9 @@
           <button type="button" data-daily="breach">BREACH</button>
         </div>
         <div class="daily-pips" id="daily-pips" aria-hidden="true" hidden><i data-daily="decrypt"></i><i data-daily="puzzle"></i><i data-daily="blitz"></i><i data-daily="breach"></i></div>
-        <div class="difficulty" id="difficulty-row" role="group" aria-label="Difficulty">
-          <button data-difficulty="easy">EASY</button>
-          <button data-difficulty="normal">NORMAL</button>
-          <button data-difficulty="hard">HARD</button>
-        </div>
-        <!-- CLASSIC's GOAL (script.js): ON, a key to crack each game (ENCRYPTION STRENGTH); OFF, endless -->
-        <!-- GOAL (CLASSIC) and INFECTIONS (CLASSIC and BLITZ: infected bits), ON / OFF (script.js) -->
-        <div class="difficulty home-opts" id="goal-row" hidden><button type="button" id="goal-btn"><span class="opt-text">GOAL: ON</span></button><button type="button" id="infect-btn"><span class="opt-text">INFECTIONS: ON</span></button></div>
+        <!-- GAME SETTINGS (CLASSIC, BLITZ): what's set, on one button; a tap opens the mode's settings
+             card, #mode-settings (script.js) -->
+        <div class="difficulty home-opts single" id="mode-settings-row" hidden><button type="button" id="mode-settings-btn"><span class="opt-text">NORMAL // GOAL: ON // INFECTIONS: ON</span></button></div>
         <!-- PATCHES and EXPLOIT L / R (script.js), as VS's settings: a button each, NAME: what's on it -->
         <div class="difficulty home-opts single" id="booster-row" hidden></div>
         <div class="difficulty home-opts" id="starter-row" hidden></div>
@@ -836,6 +831,37 @@
     </div>
   </div>
   <!-- The main menu's PATCHES card (script.js's openBoosterPick): the ones owned for this mode, each switched on or off -->
+  <!-- GAME SETTINGS (script.js): the picked mode's settings, a section each, those that fit it: CLASSIC
+       its DIFFICULTY, GOAL and INFECTIONS, BLITZ its INFECTIONS. Mid-game a change asks CONFIRM? first
+       and starts a new game. (PATCHES and EXPLOIT L / R stay on the menu's panel) -->
+  <div id="mode-settings" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="mode-settings-title">
+    <div class="overlay-box starter-pick-box mode-settings-box">
+      <p class="vs-setup-msg ms-msg" id="mode-settings-msg" aria-live="polite"></p>
+      <h2 id="mode-settings-title">// CLASSIC SETTINGS</h2>
+      <div class="ms-sec" id="ms-difficulty">
+        <p class="ms-head">DIFFICULTY</p>
+        <div class="difficulty ms-row" id="difficulty-row" role="group" aria-label="Difficulty">
+          <button data-difficulty="easy">EASY</button>
+          <button data-difficulty="normal">NORMAL</button>
+          <button data-difficulty="hard">HARD</button>
+        </div>
+        <p class="ms-note">EASY shows your next bit. HARD is an 8x8 board, bits up to 8.</p>
+      </div>
+      <div class="ms-sec" id="ms-goal">
+        <p class="ms-head">GOAL</p>
+        <div class="difficulty ms-row one"><button type="button" id="goal-btn"><span class="opt-text">GOAL: ON</span></button></div>
+        <p class="ms-note">ON: each game has a key to crack for KEYS. OFF: endless.</p>
+      </div>
+      <div class="ms-sec" id="ms-infect">
+        <p class="ms-head">INFECTIONS</p>
+        <div class="difficulty ms-row one"><button type="button" id="infect-btn"><span class="opt-text">INFECTIONS: ON</span></button></div>
+        <p class="ms-note">ON: now and then a revealed bit is infected. OFF: none (a BLACK BOX still can be).</p>
+      </div>
+      <div class="starter-pick-foot">
+        <button type="button" id="mode-settings-close">DONE</button>
+      </div>
+    </div>
+  </div>
   <div id="booster-pick" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="booster-pick-title">
     <div class="overlay-box starter-pick-box">
       <h2 id="booster-pick-title">// PATCHES</h2>
@@ -881,55 +907,55 @@
     </div>
   </div>
 
-  <script src="js/bot-svg.js?v=547"></script>
-  <script src="js/unlocks.js?v=547"></script>
-  <script src="js/progress.js?v=547"></script>
-  <script src="js/music/output.js?v=547"></script>
-  <script src="js/music/mixes.js?v=547"></script>
-  <script src="js/sfx.js?v=547"></script>
-  <script src="js/music/music-bytefall-theme.js?v=547"></script>
-  <script src="js/music/music-sleep-mode.js?v=547"></script>
-  <script src="js/music/music-brute-force.js?v=547"></script>
-  <script src="js/music/music-deep-web.js?v=547"></script>
-  <script src="js/music/music-zero-day.js?v=547"></script>
-  <script src="js/music/music-system-restore.js?v=547"></script>
-  <script src="js/music/music-night-drive.js?v=547"></script>
-  <script src="js/music/music-standby-mode.js?v=547"></script>
-  <script src="js/music/music-core-dump.js?v=547"></script>
-  <script src="js/music/music-handshake.js?v=547"></script>
-  <script src="js/music/music-stack-overflow.js?v=547"></script>
-  <script src="js/music/music-generated.js?v=547"></script>
-  <script src="js/music/music.js?v=547"></script>
-  <script src="js/data/puzzles.js?v=547"></script>
-  <script src="js/data/daily-puzzles.js?v=547"></script>
-  <script src="js/cpu.js?v=547"></script>
-  <script src="js/fx.js?v=547"></script>
-  <script src="js/viz.js?v=547"></script>
-  <script src="js/pixel.js?v=547"></script>
-  <script src="js/minibot.js?v=547"></script>
-  <script src="js/seasons.js?v=547"></script>
-  <script src="js/bigart.js?v=547"></script>
-  <script src="js/scenes.js?v=547"></script>
-  <script src="js/weather.js?v=547"></script>
-  <script src="js/visitors.js?v=547"></script>
-  <script src="js/data/bot-anims.js?v=547"></script>
-<script src="js/wanderers.js?v=547"></script>
-  <script src="js/tutorial.js?v=547"></script>
-  <script src="js/puzzle-sim.js?v=547"></script>
-  <script src="js/led-banner.js?v=547"></script>
-  <script src="js/infections.js?v=547"></script>
-  <script src="js/script.js?v=547"></script>
-  <script src="js/grid-bg.js?v=547"></script>
-  <script src="js/lights.js?v=547"></script>
-  <script src="js/inf-test.js?v=547"></script>
-  <script src="js/extsource.js?v=547"></script>
-  <script src="js/player.js?v=547"></script>
-  <script src="js/billing.js?v=547"></script>
-  <script src="js/store.js?v=547"></script>
-  <script src="js/ads-config.js?v=547"></script>
-  <script src="js/ads.js?v=547"></script>
-  <script src="js/start.js?v=547"></script>
-  <script src="js/place.js?v=547"></script>
-  <script src="js/saver.js?v=547"></script>
+  <script src="js/bot-svg.js?v=548"></script>
+  <script src="js/unlocks.js?v=548"></script>
+  <script src="js/progress.js?v=548"></script>
+  <script src="js/music/output.js?v=548"></script>
+  <script src="js/music/mixes.js?v=548"></script>
+  <script src="js/sfx.js?v=548"></script>
+  <script src="js/music/music-bytefall-theme.js?v=548"></script>
+  <script src="js/music/music-sleep-mode.js?v=548"></script>
+  <script src="js/music/music-brute-force.js?v=548"></script>
+  <script src="js/music/music-deep-web.js?v=548"></script>
+  <script src="js/music/music-zero-day.js?v=548"></script>
+  <script src="js/music/music-system-restore.js?v=548"></script>
+  <script src="js/music/music-night-drive.js?v=548"></script>
+  <script src="js/music/music-standby-mode.js?v=548"></script>
+  <script src="js/music/music-core-dump.js?v=548"></script>
+  <script src="js/music/music-handshake.js?v=548"></script>
+  <script src="js/music/music-stack-overflow.js?v=548"></script>
+  <script src="js/music/music-generated.js?v=548"></script>
+  <script src="js/music/music.js?v=548"></script>
+  <script src="js/data/puzzles.js?v=548"></script>
+  <script src="js/data/daily-puzzles.js?v=548"></script>
+  <script src="js/cpu.js?v=548"></script>
+  <script src="js/fx.js?v=548"></script>
+  <script src="js/viz.js?v=548"></script>
+  <script src="js/pixel.js?v=548"></script>
+  <script src="js/minibot.js?v=548"></script>
+  <script src="js/seasons.js?v=548"></script>
+  <script src="js/bigart.js?v=548"></script>
+  <script src="js/scenes.js?v=548"></script>
+  <script src="js/weather.js?v=548"></script>
+  <script src="js/visitors.js?v=548"></script>
+  <script src="js/data/bot-anims.js?v=548"></script>
+<script src="js/wanderers.js?v=548"></script>
+  <script src="js/tutorial.js?v=548"></script>
+  <script src="js/puzzle-sim.js?v=548"></script>
+  <script src="js/led-banner.js?v=548"></script>
+  <script src="js/infections.js?v=548"></script>
+  <script src="js/script.js?v=548"></script>
+  <script src="js/grid-bg.js?v=548"></script>
+  <script src="js/lights.js?v=548"></script>
+  <script src="js/inf-test.js?v=548"></script>
+  <script src="js/extsource.js?v=548"></script>
+  <script src="js/player.js?v=548"></script>
+  <script src="js/billing.js?v=548"></script>
+  <script src="js/store.js?v=548"></script>
+  <script src="js/ads-config.js?v=548"></script>
+  <script src="js/ads.js?v=548"></script>
+  <script src="js/start.js?v=548"></script>
+  <script src="js/place.js?v=548"></script>
+  <script src="js/saver.js?v=548"></script>
 </body>
 </html>

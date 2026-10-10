@@ -2623,6 +2623,39 @@ goalBtn.addEventListener('click', () => {
     SFX.play('punct');
   });
 });
+// GAME SETTINGS: the picked mode's own settings in a card, on one button on the menu's panel that says
+// what's set (NORMAL // GOAL: ON // INFECTIONS: ON). CLASSIC: DIFFICULTY, GOAL, INFECTIONS; BLITZ:
+// INFECTIONS; the other modes have none. Each change, mid-game, asks CONFIRM? and starts a new game
+const modeSettingsEl = document.getElementById('mode-settings');
+const modeSettingsBtn = document.getElementById('mode-settings-btn');
+const modeHasSettings = () => !daily && (mode === 'classic' || mode === 'blitz');
+function updateModeSettingsBtn() {
+  const parts = mode === 'classic' ? [classicDifficulty.toUpperCase(), `GOAL: ${goalWanted ? 'ON' : 'OFF'}`] : [];
+  parts.push(`INFECTIONS: ${infectWanted ? 'ON' : 'OFF'}`);
+  modeSettingsBtn.querySelector('.opt-text').textContent = parts.join(' // ');
+  modeSettingsBtn.setAttribute('aria-label', `${MODES[mode] ? MODES[mode].label : ''} settings: ${parts.join(', ')}. Tap to change`);
+  if (!modeSettingsEl.classList.contains('hidden')) fitHome();
+}
+const modeSettingsOpen = () => !modeSettingsEl.classList.contains('hidden');
+function openModeSettings() {
+  if (!modeHasSettings()) return;
+  document.getElementById('mode-settings-title').textContent = `// ${MODES[mode].label} SETTINGS`;
+  document.getElementById('ms-difficulty').hidden = mode !== 'classic';
+  document.getElementById('ms-goal').hidden = mode !== 'classic';
+  document.getElementById('ms-infect').hidden = !(mode === 'classic' || mode === 'blitz');
+  modeSettingsEl.classList.remove('hidden');
+  SFX.play('click');
+}
+function closeModeSettings() {
+  if (!modeSettingsOpen()) return;
+  disarmReset();
+  modeSettingsEl.classList.add('hidden');
+  updateModeSettingsBtn();
+}
+modeSettingsBtn.addEventListener('click', openModeSettings);
+document.getElementById('mode-settings-close').addEventListener('click', () => { SFX.play('click'); closeModeSettings(); });
+modeSettingsEl.addEventListener('click', (e) => { if (e.target === modeSettingsEl) closeModeSettings(); }); // (a tap off the card)
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modeSettingsOpen()) { e.stopImmediatePropagation(); closeModeSettings(); } }, true);
 // INFECTIONS: ON / OFF (CLASSIC and BLITZ): the infected bits; mid-game it asks first, as GOAL does,
 // and starts a new game. Off, a BLACK BOX can still be infected
 const infectBtn = document.getElementById('infect-btn');
@@ -2729,7 +2762,8 @@ function titleNotice(el, text) {
   }, 2200));
 }
 const vsNotice = (text) => titleNotice(document.getElementById('vs-setup-msg'), text);
-const homeNotice = (text) => titleNotice(document.getElementById('home-panel-msg'), text);
+// (with GAME SETTINGS open, in its card's title instead: HARD still locked)
+const homeNotice = (text) => titleNotice(document.getElementById(!document.getElementById('mode-settings').classList.contains('hidden') ? 'mode-settings-msg' : 'home-panel-msg'), text);
 const cardNotice = (text) => titleNotice(document.getElementById('records-title-msg'), text);
 
 // VS CPU's opponent: which bot (its look, lines and play style)
@@ -2978,14 +3012,11 @@ function applyModeUi() {
   document.getElementById('mode-info').textContent = daily ? dailyHeader() : MODES[mode].info(todayKey()).replace(/^[A-Z ]+ \/\/ (.)/, (_, c) => c.toUpperCase());
   // (VS: VS. CPU // its game mode, under BYTEFALL as in every game)
   document.getElementById('game-mode-label').textContent = mode === 'vs' ? `VS. CPU // ${VS_MODES[vsMode].label}` : `// ${modeLine()}${goalLine()}`;
-  document.getElementById('difficulty-row').hidden = mode !== 'classic';
-  // (GOAL in CLASSIC, INFECTIONS in CLASSIC and BLITZ: two across, or INFECTIONS alone)
-  const goalRow = document.getElementById('goal-row');
-  goalRow.hidden = daily || (mode !== 'classic' && mode !== 'blitz');
-  goalBtn.hidden = mode !== 'classic';
-  goalRow.classList.toggle('single', goalBtn.hidden);
+  // (GAME SETTINGS: CLASSIC's and BLITZ's, on one button that says what's set)
+  document.getElementById('mode-settings-row').hidden = !modeHasSettings();
   updateGoalBtn();
   updateInfectBtn();
+  updateModeSettingsBtn();
   document.getElementById('daily-kinds').hidden = !daily;
   document.getElementById('daily-pips').hidden = !daily;
   centerDaily(); // (the pick in the middle of its row)
@@ -7035,6 +7066,7 @@ document.getElementById('home-back').addEventListener('click', () => { if (windo
 window.bytefallBack = () => {
   if (!starterPickEl.classList.contains('hidden')) { closeStarterPick(); return true; } // (a starter slot's card)
   if (!boosterPickEl.classList.contains('hidden')) { closeBoosterPick(); return true; } // (the BOOSTERS card)
+  if (modeSettingsOpen()) { closeModeSettings(); return true; } // (GAME SETTINGS)
   if (shopSlot !== null || shopPatch !== null) { closeShop(); return true; } // (the BLACK MARKET's window)
   const start = document.getElementById('start-screen');
   if (start && !start.hidden) return false;
