@@ -131,10 +131,14 @@
 
   // WATCH AD: resolves { earned, error } once the ad's closed (error: it couldn't be had or shown)
   let watching = null; // (the one up: { earned, done })
+  // (the app told when a full-screen ad is up: its pause then leaves the WebViews' timers running,
+  // the ad's own included, which froze it: MainActivity's setFullscreenAd)
+  const fullscreen = (open) => { if (window.BytefallAndroid && window.BytefallAndroid.setFullscreenAd) window.BytefallAndroid.setFullscreenAd(open); };
   const endWatch = (error) => {
     const w = watching;
     if (!w) return;
     watching = null;
+    fullscreen(false);
     w.done({ earned: w.earned, error });
   };
   AdMob.addListener('onRewardedVideoAdReward', () => { if (watching) watching.earned = true; });
@@ -156,6 +160,7 @@
       }
       const r = await new Promise((done) => {
         watching = { earned: false, done };
+        fullscreen(true);
         AdMob.showRewardVideoAd().then(() => { if (watching) watching.earned = true; }, (e) => endWatch(why(e)));
       });
       say('reward', r.earned ? 'Rewarded ad watched through: reward given.' : r.error ? `The rewarded ad didn't show: ${r.error}.` : 'Rewarded ad closed early: no reward.');

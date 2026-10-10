@@ -205,7 +205,7 @@ EXPLOITS (for a game) and BLACK BOXES cost KEYS and resources (a MASTER KEY buys
 
 | Patch | Keys | Does |
 |---|---|---|
-| HEAD START | 15 | the CHAIN METER starts half full |
+| HEAD START | 15 | the CHAIN METER starts half full, and holds through drops that decrypt nothing until the first that decrypts something (on an empty board only a [1] would), so the head start isn't lost to the first drop |
 | FIREWALL DELAY | 20 | the first encryption layer rises 4 drops later |
 | LOOKAHEAD | 15 | the next bit shown for the first 60 seconds of play |
 | OVERTIME | 20 | +15 seconds in BLITZ |
@@ -253,7 +253,7 @@ the meter's half full, no LOOKAHEAD while one runs or on EASY, no RESTORE POINT 
 at KEYS and a resource or two (`PATCH_PRICES`, ECONOMY.md), shown as the BLACK MARKET's are (dashed,
 the currency sign in its corner, the pips), opening and turning over with it. A tap opens the BLACK
 MARKET's window for it (PATCH // APPLIED AT ONCE and what it does now; no MASTER KEYS; NOT NEEDED NOW
-if it would do nothing); bought, it's applied at once (HEAD START: the meter to half; FIREWALL DELAY:
+if it would do nothing); bought, it's applied at once (HEAD START: the meter to half, held till the next decrypt; FIREWALL DELAY:
 the next layer 4 drops later; LOOKAHEAD: the next 60 seconds; OVERTIME: +15 seconds; ANTIVIRUS:
 every infection running cleared, or with none, waiting, pulsing, for the next one; RESTORE POINT:
 waiting, pulsing, till it saves you), lit with a tick a moment, and then the slot sells again, a new
