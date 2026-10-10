@@ -111,7 +111,7 @@ jobs:
         if: always()
         run: rm -f "$RUNNER_TEMP/upload.jks"
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: ${{ steps.name.outputs.file }}
           path: ${{ steps.name.outputs.file }}
