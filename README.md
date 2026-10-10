@@ -59,7 +59,8 @@ js/data/                puzzles.js, daily-puzzles.js
 js/music/               music.js (the player), one music-*.js per track, output.js (SOUND
                         OUTPUT, instrument channels), mixes.js (mix tables), archive/
 assets/                 fonts/, icons/, audio/ (WAV renders of the tracks, not used by the game)
-dev-tools/audio.html    the audio compendium (tracks-info.js: the track list for it and the mixer)
+dev-tools/audio.html    the audio compendium (sound-scenes.js: every sound and a scene of its moment;
+                        tracks-info.js: the track list for it and the mixer)
 dev-tools/mixer.html    the mixer, one track at a time (?track=sleep-mode)
 dev-tools/bots.html     the bot sandbox: the wanderers, visitors, seasons, fog and headphones on buttons
 dev-tools/frames.html   the frame editor: the bots' animations drawn a frame at a time, exported as .json
@@ -113,7 +114,7 @@ package name in the Play Console), built by **Actions → Android release bundle
 an Android App Bundle (`.aab`, under the run's Artifacts) to upload in the Play Console (Testing →
 Internal testing, or another track → Create new release). It's the game with every dev piece out
 (`tools/build-app.js release`): no UNLOCK EVERYTHING padlock (nor the dev unlocks, whatever's in
-storage or the URL: `js/unlocks.js`), every dev switch cleared, no infection tester or archived
+storage or the URL: `js/unlocks.js`), every dev switch cleared, no infection or sound tester or archived
 tracks. Nor the music player's other sources, OTHER APPS and MICROPHONE: its visualizer shows
 ByteFall's own music only, with no SOURCE button (`js/extsource.js`), and its own manifest
 (`android/app/src/release/`, written by `tools/setup-android.js`) takes out the capture service,
@@ -961,8 +962,24 @@ with a cached older script (GitHub Pages lets browsers cache for 10 minutes).
   FM brightening, 16th hats, a pushing bass and extra kick, an FM bell counter-melody; the
   BOSS layer's MUTE (dev pages) keeps the zone theme, its SOLO plays the boss theme.
 - `dev-tools/audio.html` — the audio compendium, opened by the `</>` icon in
-  the footer: every sound effect with a play button and where each is used in the
-  game, and the track list, each track opening in the mixer
+  the footer: every sound the game makes (`dev-tools/sound-scenes.js`), the ten effects each
+  SOUND THEME plays its own way and the five that are the same in every theme (the dial-up,
+  BOT's voice, the score counting up, the level meter, LEVEL UP), each on a card with a scene
+  beside it: the moment in a game where it plays, acted out on a little board (or the goal card,
+  the result screen, BOT's banner, the menu) at the game's own timing, the sound coming at the
+  instant the game plays it and its name lit under the scene. A card's theme buttons play that
+  theme's take (and say what it is); SOUND THEME at the top sets every card. THE SCENES PLAY: THIS
+  SOUND ALONE, or THE WHOLE MOMENT (every sound of it, the others' names struck through while
+  they're silent); SPEED: REAL TIME or 4X SLOWER. Under each, where the game plays it (from the
+  code's calls) and how it vibrates. Then the track list, each track opening in the mixer.
+  `SFX.preview(name, theme, ...)` plays any of them whatever the SOUND setting
+- `index.html?sfxtest` — the SOUND TESTER (`js/sfx-test.js`; the compendium's dev switches link it):
+  the game straight in on a board of bits, every sound named as it plays: a caption over the
+  board (the sound, and what set it off, read from the function that played it) and a panel
+  along the bottom, folded to a line naming the latest till SHOW: the last few, every sound with
+  how often it's been heard (tap one to hear it alone), a SOUND THEME to play in (any, locked or
+  not: `SFX.devTheme`), FILL GRID and NEW LAYER. Nothing's saved (as `?inftest`, the INFECTION
+  TESTER), SOUND is on there whatever the setting, and the RELEASE build leaves it out
 - `dev-tools/mixer.html?track=<id>` — the MIXER, one track per page (only that
   track's file loads): PLAY with a seekable position line and a visualizer; SOUND
   OUTPUT (PHONE / HEADPHONES / SPEAKERS, as in the game); the intensity slider and

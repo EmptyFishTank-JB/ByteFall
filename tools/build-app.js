@@ -50,16 +50,19 @@ const first = html.indexOf('<script>');
 if (first < 0) throw new Error('build-app: no inline script in index.html to boot before');
 html = html.slice(0, first) + boot + html.slice(first);
 if (RELEASE) {
-  // (the padlock, its note and all; and the infection tester, which only ?inftest wakes)
+  // (the padlock, its note and all; and the infection and sound testers, which only ?inftest and
+  // ?sfxtest wake)
   const padlock = /\s*<!-- \(the Android test app: UNLOCK EVERYTHING[^>]*-->\s*<button type="button" class="dev-link dev-unlock-btn"[\s\S]*?<\/button>/;
   if (!padlock.test(html)) throw new Error('build-app: the UNLOCK EVERYTHING padlock was not found in index.html');
   html = html.replace(padlock, '');
-  const tester = /\s*<script src="js\/inf-test\.js[^"]*"><\/script>/;
-  if (!tester.test(html)) throw new Error('build-app: the infection tester\'s script tag was not found in index.html');
-  html = html.replace(tester, '');
-  fs.rmSync(path.join(OUT, 'js', 'inf-test.js'));
+  for (const file of ['inf-test', 'sfx-test']) {
+    const tester = new RegExp(`\\s*<script src="js\\/${file}\\.js[^"]*"><\\/script>`);
+    if (!tester.test(html)) throw new Error(`build-app: ${file}.js's script tag was not found in index.html`);
+    html = html.replace(tester, '');
+    fs.rmSync(path.join(OUT, 'js', `${file}.js`));
+  }
   fs.rmSync(path.join(OUT, 'js', 'music', 'archive'), { recursive: true, force: true }); // (old versions of tracks: the game never loads them)
-  if (html.includes('dev-unlock-btn') || html.includes('inf-test.js')) throw new Error('build-app: dev pieces left in the RELEASE page');
+  if (html.includes('dev-unlock-btn') || html.includes('inf-test.js') || html.includes('sfx-test.js')) throw new Error('build-app: dev pieces left in the RELEASE page');
 }
 fs.writeFileSync(path.join(OUT, 'index.html'), html);
 
