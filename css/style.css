@@ -2463,8 +2463,18 @@ body:not(.vs-mode) .hud .stat:not(.cpu-stat):not(.cpu-face) > .label {
   0%, 100% { box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.9), 0 0 6px rgba(var(--accent-rgb), 0.5); }
   50% { box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 1), 0 0 16px rgba(var(--accent-rgb), 0.9); }
 }
+/* (roomy: the pulsing frame 8px out from what it frames, its words or a thin bar never touching it;
+   the line under BYTEFALL framed round its words, not the screen's width) */
+#game-mode-label.tut-roomy { width: fit-content; margin-left: auto; margin-right: auto; }
+.tut-pulse.tut-roomy { border-radius: 4px; outline: 1px solid var(--accent); outline-offset: 8px; animation: tut-pulse-roomy 0.9s ease-in-out infinite !important; }
+@keyframes tut-pulse-roomy {
+  0%, 100% { outline-width: 1px; outline-color: rgba(var(--accent-rgb), 0.9); filter: drop-shadow(0 0 0 transparent); }
+  50% { outline-width: 2px; outline-color: rgba(var(--accent-rgb), 1); filter: drop-shadow(0 0 6px rgba(var(--accent-rgb), 0.6)); }
+}
 .overflow-line.tut-pulse { box-shadow: none; animation: warn-pulse 0.9s ease-in-out infinite !important; color: var(--accent); }
-.column-buttons button.tut-off { opacity: 0.3; }
+/* (the tutorial's drop buttons: full presence, as the rest of the screen, whether or not this card
+   takes a drop; a tap it doesn't want gets BOT's -_- instead) */
+.column-buttons.tut-full button:disabled { opacity: 1; cursor: default; }
 
 /* START SCREEN: a card filling the screen, the starlight twinkling across it, the title in the
    middle and TAP TO START blinking below. Tapping fades everything to black (.start-black), then
@@ -2961,6 +2971,9 @@ body.player-open :is(.cabinet, body > footer) { visibility: hidden; }
 .records-btn span.rb-back { display: none; pointer-events: none; }
 body.in-game .records-btn .rb-menu { display: none; } /* (gone, not just hidden: PAUSE's words are fitted to what's in the button) */
 body.in-game.can-pause .records-btn .rb-pause { visibility: visible; }
+/* (a card open over the game, the STORE, RULES & RECORDS, EXPLOITS or SETTINGS: no PAUSE in the corner;
+   its own visibility mustn't show it through the hidden button) */
+body.panel-open .records-btn .rb-pause { visibility: hidden !important; }
 body.in-game:not(.can-pause) .records-btn span.rb-back { display: inline-flex; }
 body.in-game:not(.can-pause) .records-btn { opacity: 1; width: auto; height: auto; top: 8px; } /* (the main menu's ← BACK's inset) */
 @media (hover: hover) { body.in-game:not(.can-pause) .records-btn:hover .rb-back { background: rgba(var(--fg-rgb), 0.12); } }
@@ -4103,6 +4116,11 @@ html, body { overflow-x: clip; }
 .inf-win .inf-due { position: static; display: block; width: max-content; margin: -4px auto 8px; font-size: 9px; line-height: 13px; } /* (its sign solid in each cell: nothing under it shows through) */
 /* RANSOMWARE: a locked bit's little screen, its padlock, its value and the drops left */
 .cell.ransom { position: relative; overflow: hidden; color: var(--danger); border-color: var(--danger); }
+/* An INFECTED BIT (script.js): its number as ever, a red frame pulsing and a virus in its corner */
+.cell.infected { position: relative; border-color: var(--danger); animation: infected-pulse 0.8s ease-in-out infinite; }
+.cell.infected .inf-mark { position: absolute; top: 1px; right: 1px; width: 38%; height: 38%; display: flex; color: var(--danger); filter: drop-shadow(0 0 2px var(--danger)); pointer-events: none; }
+.cell.infected .inf-mark .ico { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2.4; }
+@keyframes infected-pulse { 0%, 100% { box-shadow: inset 0 0 0 1px var(--danger), 0 0 4px rgba(255, 59, 78, 0.4); } 50% { box-shadow: inset 0 0 0 2px var(--danger), 0 0 12px rgba(255, 59, 78, 0.8); } }
 .inf-screen { position: absolute; inset: 3px; border-radius: 3px; background: #050607; overflow: hidden; box-shadow: inset 0 0 4px rgba(var(--danger-rgb), 0.5); }
 .inf-face, .inf-term { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
 .inf-face { animation: inf-swap 3.2s ease-in-out infinite; }
@@ -4211,6 +4229,13 @@ html, body { overflow-x: clip; }
 .hacks-top { flex: none; }
 .hacks-top h2 { margin-top: 0; }
 .hacks-top .slot-info { margin-bottom: 0; }
+/* THE LOADOUT: a box per slot in a centered row, 8px apart, each as the game's slot buttons: filled,
+   lit as a ready exploit; empty, a dashed frame; not open yet, its padlock and level */
+.loadout-boxes { display: flex; justify-content: center; gap: var(--gap); margin: var(--gap) 0 0; }
+.loadout-boxes .loadout-box { width: 40px; height: 40px; flex: none; cursor: default; }
+.loadout-boxes .loadout-box.filled { color: var(--fg); --dim: 1; border-color: var(--fg); text-shadow: 0 0 6px rgba(var(--fg-rgb), 0.6); }
+.loadout-boxes .loadout-box.empty { border-style: dashed; }
+.loadout-boxes.fixed .loadout-box.filled { --dim: 0.75; border-color: rgba(var(--fg-rgb), 0.6); }
 .hacks-top::after { content: "================================================================================"; display: block; margin-top: 8px; overflow: hidden; white-space: nowrap; font-size: 14.5px; line-height: 15px; letter-spacing: 2px; color: var(--accent); opacity: 0.7; }
 .hacks-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; padding: 10px 0 14px; }
 .hacks-scroll .store-rule { margin: 12px 0 2px; }

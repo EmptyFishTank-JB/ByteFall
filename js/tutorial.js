@@ -21,7 +21,10 @@ const Tutorial = (() => {
   // face while it says the step / the explanation after the drop (idle when left out). intro:
   // the welcome ahead of the steps (not counted, no number; BEGIN starts step 1). demo: what the
   // game shows only for the lesson ('slots': the bottom row's slots, locked; 'market': one of them a
-  // BLACK MARKET; 'goal': CLASSIC's ENCRYPTION STRENGTH line and bar).
+  // BLACK MARKET; 'goal': CLASSIC's ENCRYPTION STRENGTH line and bar). focus: selectors left bright
+  // (and pulsing) while the rest of the screen dims, as a tap step's target is; roomy: the pulsing
+  // frame 8px out from what it frames; scroll: an element brought smoothly to the top of the card
+  // that scrolls it; home: the lesson goes on over the main menu (script.js's tutorialHome).
   const STEPS = [
     {
       text: 'Welcome to BYTEFALL! This tutorial shows you how the game is played and where everything is. Each card is short, and there’s no math needed as long as you can count to 7. Let’s begin!',
@@ -93,43 +96,43 @@ const Tutorial = (() => {
       drop: 2, cells: [[0, 2], [1, 2], [2, 2], [3, 2]], mood: 'devious', explainMood: 'happy', holdMeter: true,
       explain: () => 'The WORM VIRUS wiped out the whole column. Blocks wiped out by an exploit score a flat 10 each.',
     },
-    { text: 'Other exploits wipe an area, peel layers or change bits. Each one has its card in EXPLOITS.', next: true },
+    { text: 'Other exploits do different things. Each one has a card in the EXPLOITS menu.', next: true },
     // THE BOTTOM ROW
-    { text: 'The row under the drop buttons holds more than the EXPLOIT button: a SIDE SLOT on each side of it, and a PATCH SLOT at each end.', board: EMPTY, bits: [], demo: 'slots', pulse: ['.side-slot'], next: true },
+    { text: 'The row under the drop buttons holds more than the EXPLOIT button: an EXPLOIT SLOT on each side of it, and a PATCH SLOT at each end.', board: EMPTY, bits: [], demo: 'slots', focus: ['.exploit-row'], next: true },
     { text: 'They open as you level up. Until then, each one shows a padlock and the level it opens at.', demo: 'slots', pulse: ['.side-slot'], next: true },
-    { text: 'A PATCH SLOT sells a patch during a game, for KEYS and resources, and the patch works the moment you buy it.', demo: 'slots', pulse: ['.patch-slot'], next: true },
-    { text: 'The SIDE SLOTS, EXPLOIT L and EXPLOIT R, hold exploits you bring into a game. An empty one becomes the BLACK MARKET once the first layer rises.', demo: 'market', pulse: ['.side-slot:not(.patch-slot)'], next: true },
-    { text: 'It sells an exploit or a BLACK BOX, swapped for another every 4 drops. The pips under it count the drops left, and the last one blinks.', demo: 'market', pulse: ['.side-slot.market'], next: true },
+    { text: 'A PATCH SLOT sells a patch during a game, for KEYS and a resource or two, and the patch works the moment you buy it.', demo: 'slots', focus: ['.patch-slot'], next: true },
+    { text: 'The left and right EXPLOIT SLOTS can bring in a purchased EXPLOIT from the STORE. An empty slot becomes the BLACK MARKET once the first layer rises.', demo: 'market', focus: ['.side-slot:not(.patch-slot)'], next: true },
+    { text: 'There, you can buy an EXPLOIT or a BLACK BOX. Each one is swapped for another every 4 drops. The pips in each button count down how many drops until the next one.', demo: 'market', pulse: ['.side-slot.market'], next: true },
     { text: 'BLACK BOXES are cheap, but some of them are INFECTED!', demo: 'market', mood: 'devious', next: true },
     // THE MENUS
     { text: 'The button at the top right PAUSES the game. Tap it now!', closeMenus: true, tap: '#records-btn', pass: true },
-    { text: 'The pause screen has RESUME, RESTART, RULES & RECORDS, SETTINGS, EXPLOITS and QUIT. Tap RULES & RECORDS.', paused: true, closeMenus: true, tap: '#pause-records', pass: true, float: true },
-    { text: 'RULES & RECORDS opens as a card over the game, with its tabs along the top.', paused: true, pane: 'rules', float: 'middle', next: true },
-    { text: 'The RULES tab has everything you’re learning here, written down, with the TUTORIAL button to come back any time.', paused: true, pane: 'rules', pulse: ['.menu-tabs [data-pane="rules"]'], float: 'middle', next: true },
-    { text: 'The RECORDS tab shows your level and DECRYPTOR rank, every unlock and its level, your achievements, HISTORY (your last 10 games) and your lifetime stats.', paused: true, pane: 'records', pulse: ['.menu-tabs [data-pane="records"]'], float: 'middle', next: true },
-    { text: 'Every bit you decrypt is XP: 100 bits a level. At Lv 80 you can RANK UP: everything locks again to unlock once more, and each rank earns a little more.', paused: true, pane: 'records', float: 'middle', next: true },
-    { text: 'NOTICES, the next tab, keeps every notice the game has shown you.', paused: true, pane: 'records', pulse: ['.menu-tabs [data-pane="notices"]'], float: 'middle', next: true },
-    { text: 'Tapping outside a card won’t close it: tap ← BACK, at the top left of the card.', paused: true, pane: 'records', tap: '.card-back[data-close="records"]', pass: true, float: 'middle' },
+    { text: 'The pause screen has various buttons. Tap RULES & RECORDS.', paused: true, closeMenus: true, tap: '#pause-records', pass: true, float: true },
+    { text: 'RULES & RECORDS opens this page with its tabs along the top.', paused: true, pane: 'rules', float: 'middle', next: true },
+    { text: 'The RULES tab has everything you’re learning here, written down, with the TUTORIAL button to come back any time.', paused: true, pane: 'rules', focus: ['.menu-tabs [data-pane="rules"]'], float: 'middle', next: true },
+    { text: 'The RECORDS tab shows your level and DECRYPTOR rank, every unlock and its level, your achievements, HISTORY (your last 10 games) and your lifetime stats.', paused: true, pane: 'records', focus: ['.menu-tabs [data-pane="records"]'], float: 'middle', next: true },
+    { text: 'Every bit you decrypt is XP: 100 bits a level. At Lv 80 you can RANK UP: everything locks again to unlock once more, and each rank earns a little more.', paused: true, pane: 'records', focus: ['.rec-level'], float: true, next: true },
+    { text: 'NOTICES, the next tab, keeps a history of each notification the game has shown.', paused: true, pane: 'records', focus: ['.menu-tabs [data-pane="notices"]'], float: 'middle', next: true },
+    { text: 'Tap ← BACK, at the top left of the page.', paused: true, pane: 'records', tap: '.card-back[data-close="records"]', pass: true, float: 'middle' },
     { text: 'Now tap EXPLOITS.', paused: true, closeMenus: true, tap: '#pause-exploits', pass: true, float: true },
-    { text: 'EXPLOITS is your loadout. You can only earn exploits that are in a slot: SLOTS, at the top, counts the slots you’ve filled and the ones you have.', paused: true, pane: 'exploits', pulse: ['#slot-info'], float: true, next: true },
+    { text: 'Here’s your EXPLOITS loadout. You can only earn exploits that are in an active slot during a game.', paused: true, pane: 'exploits', focus: ['#slot-info'], float: 'middle', next: true },
     { text: 'Tap a card to put it in a free slot, or tap it again to take it out. The loadout locks from a game’s first drop until it ends.', paused: true, pane: 'exploits', pulse: ['.hack-item'], float: true, next: true },
     { text: 'The first three exploits are yours as they unlock. The rest are bought once with resources and kept until you RANK UP.', paused: true, pane: 'exploits', float: true, next: true },
-    { text: 'Tap ← BACK to close it.', paused: true, pane: 'exploits', tap: '.card-back[data-close="records"]', pass: true, float: 'middle' },
-    { text: 'The STORE isn’t on the pause screen: it’s on the MAIN MENU. Here’s a look inside.', paused: true, pane: 'store', float: true, next: true },
-    { text: 'YOUR RESOURCES are at the top: KEYS, BUGS, CACHE, CRYPTO, ROOTKITS and MASTER KEYS, all earned by playing. The [i] shows how.', paused: true, pane: 'store', pulse: ['#store-wallet'], float: true, next: true },
-    { text: 'Under them, PRICES TODAY: sales, holidays and busy days move the prices up and down.', paused: true, pane: 'store', pulse: ['#price-gauge'], float: true, next: true },
+    { text: 'Tap ← BACK.', paused: true, pane: 'exploits', tap: '.card-back[data-close="records"]', pass: true, float: 'middle' },
+    { text: 'The STORE isn’t on the pause screen: it’s on the MAIN MENU. Here’s a look inside.', paused: true, pane: 'store', float: 'middle', next: true },
+    { text: 'YOUR RESOURCES are at the top: KEYS, BUGS, CACHE, CRYPTO, ROOTKITS and MASTER KEYS, all earned by playing. The [i] shows how.', paused: true, pane: 'store', focus: ['#store-res'], float: 'middle', next: true },
+    { text: 'Under them, PRICES TODAY: sales, holidays and busy days move the prices up and down.', paused: true, pane: 'store', focus: ['#price-gauge'], float: 'middle', next: true },
     { text: 'Below that: the DAILY DROP (free once a day), PATCHES, EXPLOITS (TIER I, II and III), BLACK BOXES, and REMOVE ADS and FULL ACCESS.', paused: true, pane: 'store', float: true, next: true },
     { text: 'Tap ← BACK to close the STORE.', paused: true, pane: 'store', tap: '.card-back[data-close="records"]', pass: true, float: 'middle' },
-    { text: 'Now tap SETTINGS.', paused: true, closeMenus: true, tap: '#pause-settings', pass: true, float: true },
+    { text: 'We’re back at the PAUSE screen now. Tap SETTINGS.', paused: true, closeMenus: true, tap: '#pause-settings', pass: true, float: true },
     { text: 'SETTINGS has SOUND (sound and music, the sound effects, what you’re listening on), the PLAYLIST and MUSIC PLAYER, and CONTROLS (where the drop buttons sit, vibration).', paused: true, settings: true, float: 'middle', next: true },
-    { text: 'DISPLAY has THEMES and FONTS (more unlock as you level up), the CRT DISPLAY, text size and REDUCED EFFECTS. EXTRAS has the wandering bots and the screen saver.', paused: true, settings: true, float: 'middle', next: true },
+    { text: 'DISPLAY has THEMES and FONTS (more unlock as you level up), the CRT DISPLAY, text size and REDUCED EFFECTS. EXTRAS has the wandering bots and the screen saver.', paused: true, settings: true, scroll: '#settings-display', float: 'middle', next: true },
     { text: 'Tap ← BACK to close SETTINGS.', paused: true, settings: true, tap: '.card-back[data-close="settings"]', pass: true, float: 'middle' },
-    { text: 'And RESUME to get back to the game.', paused: true, closeMenus: true, tap: '#pause-resume', pass: true, float: true },
+    { text: 'Tap RESUME to get back to the game.', paused: true, closeMenus: true, tap: '#pause-resume', pass: true, float: true },
     // CLASSIC'S GOAL
-    { text: 'In CLASSIC, every game has a key to crack: its ENCRYPTION STRENGTH, shown under BYTEFALL. It starts at 128-BIT, cracked at 1,500 points on NORMAL.', closeMenus: true, demo: 'goal', pulse: ['#game-mode-label'], next: true },
-    { text: 'The bar along the bottom of SCORE fills toward it. Crack it for KEYS, then GO DEEPER for a stronger key and more KEYS, or DISCONNECT and end the game on a win.', demo: 'goal', pulse: ['#goal-bar'], next: true, mood: 'happy' },
-    { text: 'Before a game, PATCHES and EXPLOIT L / R on the main menu let you bring an edge in, once you have some.', next: true },
-    { text: 'That’s everything you need to know. Good luck, decryptor.', closeMenus: true, done: true, mood: 'happy' },
+    { text: 'In CLASSIC, every game has a key to crack: its ENCRYPTION STRENGTH, shown under BYTEFALL. It starts at 128-BIT, cracked at 1,500 points on NORMAL.', closeMenus: true, demo: 'goal', focus: ['#game-mode-label'], roomy: true, next: true },
+    { text: 'The bar along the bottom of SCORE fills toward it. Crack it for KEYS, then GO DEEPER for a stronger key and more KEYS, or DISCONNECT and end the game on a win.', demo: 'goal', focus: ['#goal-bar'], roomy: true, next: true, mood: 'happy' },
+    { text: 'Before a game, PATCHES and EXPLOIT L / R on the main menu let you bring an edge in, once you have some.', home: true, focus: ['#booster-row', '#starter-row'], float: true, next: true },
+    { text: 'That’s everything you need to know. Good luck, decryptor.', home: true, float: true, done: true, mood: 'happy' },
   ];
 
   // The column(s) a step's drop may go in (drop: an index, or a list of them)
@@ -264,11 +267,13 @@ const Tutorial = (() => {
     const H = base.height;
     let d = `M0 0H${W}V${H}H0Z`;
     const parts = bannerEl ? [bannerEl.querySelector('.tut-card'), ...bannerEl.querySelectorAll('.tut-actions button')] : [];
-    for (const el of [dimOn, ...parts]) { // (the card and each button: not the empty row beside them)
+    // (what's left bright: elements, or selectors looked up each frame, so ones drawn later count too)
+    const bright = (dimOn || []).flatMap((t) => (typeof t === 'string' ? [...document.querySelectorAll(t)] : [t]));
+    for (const el of [...bright, ...parts]) { // (the card and each button: not the empty row beside them)
       if (!el || !el.isConnected) continue;
       const r = el.getBoundingClientRect();
       if (!r.width) continue;
-      const pad = el === dimOn ? 4 : 0;
+      const pad = bright.includes(el) ? (el.classList.contains('tut-roomy') ? 12 : 4) : 0;
       const L = r.left - base.left - pad;
       const T = r.top - base.top - pad;
       const R = r.right - base.left + pad;
@@ -278,7 +283,7 @@ const Tutorial = (() => {
     dimEl.style.clipPath = `path(evenodd, '${d}')`;
     if (dimOn) dimRaf = requestAnimationFrame(dimPath);
   }
-  function dim(target) {
+  function dim(targets) {
     if (!dimEl) {
       dimEl = document.createElement('div');
       dimEl.className = 'tut-dim';
@@ -287,12 +292,12 @@ const Tutorial = (() => {
       void dimEl.offsetWidth; // (drawn clear first, so the first dim fades in too)
     }
     cancelAnimationFrame(dimRaf);
-    dimOn = target || null;
+    dimOn = targets && targets.length ? targets : null;
     if (dimOn) dimPath();
     dimEl.classList.toggle('on', !!dimOn);
   }
   function clearPulses() {
-    document.querySelectorAll('.tut-pulse').forEach((el) => el.classList.remove('tut-pulse'));
+    document.querySelectorAll('.tut-pulse').forEach((el) => el.classList.remove('tut-pulse', 'tut-roomy'));
     if (tapTarget) tapTarget.removeEventListener('click', onTap, true);
     tapTarget = null;
   }
@@ -307,6 +312,7 @@ const Tutorial = (() => {
   }
   // The menus as a step wants them: one open on a tab, or both shut
   function menus(s) {
+    if (s.home && typeof tutorialHome === 'function') { tutorialHome(); return; } // (the last cards: over the main menu)
     // (the pause screen, open or not as the step wants it)
     if (s.paused && !vsPaused) openPause();
     else if (!s.paused && vsPaused) resumeMatch();
@@ -378,27 +384,39 @@ const Tutorial = (() => {
     body.appendChild(text);
     card.appendChild(body);
     botMood(s.mood);
-    if (step > 0) addButton('BACK', back, 'tut-back');
+    if (step > 0 && !(s.home && !STEPS[step - 1].home)) addButton('BACK', back, 'tut-back'); // (not back out of the main menu into the lesson)
     if (s.intro) addButton('BEGIN', () => go(step + 1));
     if (s.next) addButton('NEXT', () => go(step + 1));
-    if (s.done) addButton('MAIN MENU', () => leave());
+    if (s.done) addButton('MAIN MENU', () => leave('done'));
     pinTop(text, s.text);
     say(text, s.text);
-    // What it's talking about pulses
-    (s.pulse || []).forEach((sel) => document.querySelectorAll(sel).forEach((n) => n.classList.add('tut-pulse')));
-    if (!s.tap) dim(null);
+    if (typeof tutorialDemo === 'function') tutorialDemo(s.demo || null);
+    // What it's talking about pulses; what it's focused on stays bright as the rest dims
+    [...(s.pulse || []), ...(s.focus || [])].forEach((sel) => document.querySelectorAll(sel).forEach((n) => n.classList.add('tut-pulse')));
     if (s.tap) {
       tapTarget = document.querySelector(s.tap);
-      dim(tapTarget);
       if (tapTarget) {
         tapTarget.classList.add('tut-pulse');
         tapTarget.addEventListener('click', onTap, true);
       }
     }
-    if (typeof tutorialDemo === 'function') tutorialDemo(s.demo || null);
+    if (s.roomy) document.querySelectorAll('.tut-pulse').forEach((n) => n.classList.add('tut-roomy'));
+    dim([...(s.focus || []), ...(tapTarget ? [tapTarget] : [])]);
+    if (s.scroll) scrollTo(s.scroll);
     decorate();
     updateColumnButtons();
     SFX.play('punct');
+  }
+  // (a section brought to the top of the card that scrolls it, smoothly: SETTINGS' DISPLAY)
+  function scrollTo(sel) {
+    requestAnimationFrame(() => {
+      const el = document.querySelector(sel);
+      let box = el && el.parentElement;
+      while (box && !(box.scrollHeight > box.clientHeight && /auto|scroll/.test(getComputedStyle(box).overflowY))) box = box.parentElement;
+      if (!box) return;
+      const top = box.scrollTop + el.getBoundingClientRect().top - box.getBoundingClientRect().top - parseFloat(getComputedStyle(box).paddingTop);
+      box.scrollTo({ top, behavior: 'smooth' });
+    });
   }
   function addButton(label, fn, cls = '') {
     let row = bannerEl.querySelector('.tut-actions');
@@ -468,8 +486,10 @@ const Tutorial = (() => {
   }
   let resumeFrom = null; // (set by resumeAt: the next begin() picks up there)
 
-  // Leaves the tutorial for the mode picked before it (or CLASSIC)
+  // Leaves the tutorial for the mode picked before it (or CLASSIC); 'done': its last card's MAIN
+  // MENU, for HELLO, WORLD once it's out
   function leave(to) {
+    const done = to === 'done';
     stopTyping(false);
     clearPulses();
     dim(null);
@@ -486,6 +506,7 @@ const Tutorial = (() => {
     setModeFromChoice();
     resetNow();
     showHome(); // (out to the main menu)
+    if (done && typeof tutorialFinished === 'function') tutorialFinished();
   }
 
   // What the last drop decrypted, link by link, each part in its own color: the bits, what each
@@ -524,8 +545,9 @@ const Tutorial = (() => {
     resumeAt(saved) {
       resumeFrom = saved;
     },
-    // Called by initGame for every other mode
+    // Called by initGame for every other mode (not a card over the main menu: the lesson's still on)
     end() {
+      if (cur() && cur().home) return;
       stopTyping(false);
       clearPulses();
       if (bannerEl) bannerEl.hidden = true;

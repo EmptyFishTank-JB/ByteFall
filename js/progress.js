@@ -105,6 +105,7 @@ const Progress = (() => {
     resEarned: {}, // resource -> every one ever earned
     vsMasterDay: '', // the day a VS win last paid a MASTER KEY (one a day)
     ransomsPaid: 0, // INFECTIONS whose demand was paid in full (tapped till they took what they asked)
+    tutorialDone: 0, // the TUTORIAL finished, to its last card's MAIN MENU (HELLO, WORLD)
     keysExtorted: 0, // KEYS lost to infections, all told
     infectionsOutlasted: 0, // infections that ran out their clock without getting a key
   });
@@ -181,14 +182,15 @@ const Progress = (() => {
     const level = EXPLOIT_LEVELS[EXPLOIT_ORDER.indexOf(id)];
     return { unlocked: Unlocks.hasFullAccess() || levelInfo().level >= level, kept: false, level, owned: isOwned(id) };
   }
+  // (at: the level each slot opens at, in order: 0 for one a DECRYPTOR rank keeps)
   function slotInfo() {
-    if (Unlocks.hasFullAccess()) return { slots: MAX_SLOTS, max: MAX_SLOTS, kept: MAX_SLOTS, nextLevel: 0 };
+    if (Unlocks.hasFullAccess()) return { slots: MAX_SLOTS, max: MAX_SLOTS, kept: MAX_SLOTS, nextLevel: 0, at: Array(MAX_SLOTS).fill(0) };
     const kept = Math.min(d.decryptor, MAX_SLOTS);
     const { level } = levelInfo();
     const levels = SLOT_LEVELS.slice(0, MAX_SLOTS - kept);
     const earned = levels.filter((l) => level >= l).length;
     const next = levels.find((l) => level < l);
-    return { slots: kept + earned, max: MAX_SLOTS, kept, nextLevel: next || 0 };
+    return { slots: kept + earned, max: MAX_SLOTS, kept, nextLevel: next || 0, at: [...Array(kept).fill(0), ...levels] };
   }
   const unlockedExploits = () => EXPLOIT_ORDER.filter((id) => exploitInfo(id).unlocked);
 
@@ -225,7 +227,7 @@ const Progress = (() => {
     { id: 'vs-insane', group: 'VS CPU', name: 'INSANE CPU', ...atLevel(40) },
     ...BOT_ORDER.map(([id, name, level]) => ({ id: `bot-${id}`, group: 'VS CPU', name: `BOT: ${name}`, ...atLevel(level) })),
     ...TRACK_LEVELS.map((level, i) => ({ id: `track-${i + 2}`, group: 'TRACKS', name: `TRACK ${String(i + 2).padStart(2, '0')}`, ...atLevel(level) })),
-    ...SIDE_SLOT_LEVELS.map((level, i) => ({ id: `side-slot-${i + 1}`, group: 'SIDE SLOTS', name: `SIDE SLOT: ${i ? 'RIGHT' : 'LEFT'}`, ...atLevel(level) })),
+    ...SIDE_SLOT_LEVELS.map((level, i) => ({ id: `side-slot-${i + 1}`, group: 'EXPLOIT SLOTS', name: `EXPLOIT ${i ? 'R' : 'L'}`, ...atLevel(level) })),
     ...PATCH_SLOT_LEVELS.map((level, i) => ({ id: `patch-slot-${i + 1}`, group: 'PATCH SLOTS', name: `PATCH SLOT: ${i ? 'RIGHT' : 'LEFT'}`, ...atLevel(level) })),
     ...THEME_ORDER.map(([id, name, level]) => ({ id: `theme-${id}`, group: 'THEMES', name, ...atLevel(level) })),
     ...FONT_ORDER.map(([id, name, level]) => ({ id: `font-${id}`, group: 'FONTS', name, ...atLevel(level) })),
@@ -274,6 +276,7 @@ const Progress = (() => {
     { id: 'extorted', name: 'EXTORTED', desc: 'Lose 100 KEYS to infections', value: () => d.keysExtorted, goal: 100 },
     { id: 'walking-atm', name: 'WALKING ATM', desc: 'Lose 1,000 KEYS to infections', value: () => d.keysExtorted, goal: 1000 },
     { id: 'we-dont-negotiate', name: "WE DON'T NEGOTIATE", desc: 'Outlast 10 infections without paying them a key', value: () => d.infectionsOutlasted, goal: 10 },
+    { id: 'hello-world', name: 'HELLO, WORLD', desc: 'Finish the tutorial', value: () => d.tutorialDone, goal: 1 },
     { id: 'first-contact', name: 'FIRST CONTACT', desc: 'Start your first session', value: () => d.games, goal: 1 },
     { id: 'regular', name: 'REGULAR', desc: 'Play 25 sessions', value: () => d.games, goal: 25 },
     { id: 'veteran', name: 'VETERAN', desc: 'Play 100 sessions', value: () => d.games, goal: 100 },
@@ -498,7 +501,7 @@ const Progress = (() => {
   // RECORDS sections, in order. Hidden and impossible ones show in their own sections at the
   // bottom whatever their group; the group is also the category in achievements.csv.
   const ACHIEVEMENT_GROUPS = [
-    ['SESSIONS', ['first-contact', 'regular', 'veteran', 'lifer', 'marathon', 'rage-quit']],
+    ['SESSIONS', ['hello-world', 'first-contact', 'regular', 'veteran', 'lifer', 'marathon', 'rage-quit']],
     ['BITS DECRYPTED', ['handshake', 'kilobit', 'kilobyte', 'megabit', 'megabyte', '106473', 'full-range', 'lucky-sevens', 'jackpot', 'gigabit']],
     ['NIBBLES', ['just-a-crumb', 'a-full-byte', '64-bit-architecture', 'snack-attack', 'nibbling', 'kilonibble', 'kibinibble', 'kibibyte', 'dial-up-speeds', '16-bit-era', '64k-memory-limit', 'meganibble', 'mebinibble', 'mebibyte', '32-bit-overflow']],
     ['CHAINS AND SKILL', ['chain-reaction', 'cascade', 'overclocked', 'supernova', 'heap-spray', 'surgical', 'zero-day', 'clean-sweep', 'close-call', 'second-wind', 'full-stack', 'full-house']],
@@ -879,7 +882,7 @@ const Progress = (() => {
     }
     const { slots } = slotInfo();
     if (slots > d.slotsSeen) {
-      earned.push({ type: 'UNLOCKED', name: `EXPLOIT SLOT ${slots}` });
+      earned.push({ type: 'UNLOCKED', name: `LOADOUT SLOT ${slots}` });
       d.slotsSeen = slots;
       opened = true;
     }
@@ -1243,6 +1246,8 @@ const Progress = (() => {
     },
     ransomPaid() { if (run.mode === 'tutorial') return; d.ransomsPaid++; save(); },
     outlasted() { if (run.mode === 'tutorial') return; d.infectionsOutlasted++; save(); },
+    // (the TUTORIAL's last card: MAIN MENU, HELLO, WORLD's)
+    finishTutorial() { d.tutorialDone = 1; save(); },
     spendKeys(n) {
       if (d.keys < n) return false;
       d.keys -= n;

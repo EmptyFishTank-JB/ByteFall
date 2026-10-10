@@ -235,7 +235,7 @@ ADS (that takes the banner away; nobody has to watch one), behind the same conse
 banner. Its ad unit is `rewardedId` in `js/ads-config.js` (Google's sample rewarded unit till
 ByteFall's is made).
 
-**THE SIDE SLOTS**: one each side of the exploit button (CLASSIC, BLITZ and ZEN only), opened by level: the left at Lv 3, the right at Lv 9 (`SIDE_SLOT_LEVELS` in progress.js; before then the main menu's EXPLOIT L / EXPLOIT R show LV 3 / LV 9 behind a padlock, a tap saying so in the card's title and in a game the slot shows a padlock over its level, so the BLACK MARKET comes a slot at a time).
+**THE EXPLOIT SLOTS** (EXPLOIT L and R; `sideSlots` in the code): one each side of the exploit button (CLASSIC, BLITZ and ZEN only), opened by level: the left at Lv 3, the right at Lv 9 (`SIDE_SLOT_LEVELS` in progress.js; before then the main menu's EXPLOIT L / EXPLOIT R show LV 3 / LV 9 behind a padlock, a tap saying so in the card's title and in a game the slot shows a padlock over its level, so the BLACK MARKET comes a slot at a time).
 **THE PATCH SLOTS** (script.js `patchSlots`; `PATCH_SLOT_LEVELS` in progress.js): the exploit row's
 two ends, so the row reads PATCH 1, BLACK MARKET L, the earned EXPLOIT, BLACK MARKET R, PATCH 2. The
 left opens at Lv 5, the right at Lv 12 (a padlock over the level till then; FULL ACCESS both). Each
@@ -261,6 +261,13 @@ short of it (its amount pulses red; a BUY tapped without enough flashes it), and
 sold; **BLACK BOXES** I, II and III are (5 KEYS and 3 CRYPTO; 12, 5 and a ROOTKIT; 20, 8 and 2), a
 random pull each, their odds on them: an exploit of tier 1, 2 or 3 (any of the tier, unlocked or not)
 or an **INFECTION** (I: 65 / 20 / 3 / 12%; II: 35 / 45 / 12 / 8%; III: 10 / 45 / 42 / 3%).
+**INFECTED BITS** (CLASSIC and BLITZ, not the dailies, ZEN, PUZZLE, VS or the tutorial): a layer broken
+down to its bit now and then lets out an infected one (EASY 2%, NORMAL 4%, HARD 6%; `INFECT_ODDS`),
+its number as ever but its frame pulsing red and a virus in its corner, the notice line saying DECRYPT
+IT WITH YOUR NEXT DROP OR IT GOES OFF. Gone from the board by the end of the next drop (decrypted, or
+wiped by an exploit) it's QUARANTINED, +1 ROOTKIT; still there, it goes off: an INFECTION, any of the
+six, as a BLACK BOX's (ANTIVIRUS waiting catches it instead). One at a time, never two within 12 drops
+(`INFECT_GAP`); RULES says so under the BLACK BOXES.
 Pick 2 on the main menu to take into a game, one in each slot (marked L or R): two of one kind
 (if you have two) or one each of two. The menu shows the two slots as VS's settings are laid out, two across under PATCHES: EXPLOIT L and EXPLOIT R and what's in each (EMPTY, or its name, trailing off when long), filled while one's in it.
 A tap on a slot opens its card: every exploit and box you own to bring in and how many, to put in that slot, EMPTY
@@ -441,7 +448,13 @@ and the card's title says NOT ENOUGH. Its UNLOCKED notice adds // BUY IT IN
 EXPLOITS. FULL ACCESS (and the dev page's UNLOCK EVERYTHING) owns them all while
 it lasts. Saves from before this kept what they could already use: every exploit
 their level had reached or that was equipped (`ownedSeed`, `OWN_SEED`). The BLACK MARKET, EXPLOIT L / R and BLACK BOXES still deal in any
-unlocked exploit (or any at all, a box), owned or not: a one-off taste. The loadout is locked during a session: change it before the first drop or
+unlocked exploit (or any at all, a box), owned or not: a one-off taste. Under the EXPLOITS title the
+loadout is a row of six boxes, 8px apart and centered, each as the game's slot buttons: the equipped
+exploits fill them left to right, lit; an empty one is a dashed frame; one not open yet shows its padlock
+and the level it opens at (RANK for one a DECRYPTOR rank adds); in DAILY, its five; locked for the
+session, the filled ones dim a little. A loadout slot unlocking says UNLOCKED // LOADOUT SLOT n, and
+RECORDS lists LOADOUT SLOTS. No PAUSE shows in the corner while a card (the STORE, RULES & RECORDS,
+EXPLOITS, SETTINGS) is open over a game. The loadout is locked during a session: change it before the first drop or
 after the game ends. The daily games always use the five standard exploits, so
 they're the same for everyone.
 
@@ -758,8 +771,15 @@ board when the next drop brings one.
 The tutorial opens on a welcome (BEGIN), then short steps, every card listed in TUTORIAL.md (the
 heading is just `// TUTORIAL`: no card number or count, so the count isn't what a player watches); on a step that asks for a tap, the screen dims a little but for what to tap and the banner
 (a 0.25s fade, its openings measured from the dim's own corner, so the ad banner never shifts them); a
-step can take its drop in more than one column (column 4 or 7; the layer peels: 3, 4 or 5). The
-chain meter keeps its charge from the chain lesson through the WORM VIRUS.
+step can take its drop in more than one column (column 4 or 7; the layer peels: 3, 4 or 5). A card
+can also put things in focus (`focus`): the same dim, cut open around each (the bottom row, the two
+PATCH SLOTS or EXPLOIT SLOTS, a menu tab, the LV box, the loadout, YOUR RESOURCES, PRICES TODAY, the
+ENCRYPTION STRENGTH line and the SCORE bar, the last two framed 8px out: `roomy`); SETTINGS' card
+scrolls smoothly to DISPLAY (`scroll`). The drop buttons are never faded in the tutorial (a tap the
+card doesn't want gets -_-). The last two cards are on the main menu (`home`: a fresh CLASSIC behind
+it, PATCHES and EXPLOIT L / R in focus, no BACK out of it), and the last one's MAIN MENU earns
+**HELLO, WORLD** (finish the tutorial; +10 KEYS). The chain meter keeps its charge from the chain
+lesson through the WORM VIRUS.
 
 THE EXPLOIT BUTTON: under the grid in its own row, below the drop buttons with a gap
 between (it's not one of them), a square the size of a grid square with the exploit's
