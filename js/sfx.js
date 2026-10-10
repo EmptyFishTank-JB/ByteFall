@@ -502,13 +502,16 @@ const SFX = (() => {
     burst(c) { const t = c.currentTime; air(c, t, 0.08, 0.4, 'bandpass', 3500, 2000, 3); bar(c, t, pickOf(SCHOOL), 0.28, 0.3, 3.9); },
   };
   const SETS = { terminal: sounds, handshake, haunted, icicle, sweetheart, birdsong, island, schoolyard };
+  let devTheme = null; // (the SOUND TESTER's pick: any theme, locked or not)
   const current = () => {
+    if (devTheme) return SETS[devTheme];
     const t = THEMES.find((x) => x.id === themeId);
     return t && themeOpen(t) ? SETS[themeId] : sounds;
   };
   const playIn = (set, name) => (set[name] || sounds[name])(getCtx());
+  let forcing = false; // (a preview: heard even with SOUND off)
 
-  return {
+  const api = {
     // (pitch: 1 its own, 2 an octave up; every theme's take on the sound follows it)
     play(name, pitch = 1) {
       if (muted) return;
@@ -516,13 +519,22 @@ const SFX = (() => {
       try { playIn(current(), name); } catch (e) {}
       P = 1;
     },
-    // Plays even when muted (used by the dev audio compendium); theme: a sound theme's take on it
-    preview(name, theme) {
-      try { playIn(theme ? SETS[theme] || sounds : current(), name); } catch (e) {}
+    // Plays even when muted (used by the dev audio compendium); theme: a sound theme's take on it.
+    // The sounds of their own (blip, count, xpFill, levelUp) take their own arguments after it;
+    // an effect takes its pitch
+    preview(name, theme, ...args) {
+      forcing = true;
+      try {
+        if (OWN.includes(name)) api[name](...args);
+        else { P = args[0] || 1; playIn(theme ? SETS[theme] || sounds : current(), name); }
+      } catch (e) {}
+      P = 1;
+      forcing = false;
     },
+    devTheme(id) { devTheme = SETS[id] ? id : null; },
     // One short square-wave blip of a voice (the tutorial's BOT talking), at freq Hz
     blip(freq) {
-      if (muted) return;
+      if (muted && !forcing) return;
       try {
         const c = getCtx();
         const t = c.currentTime;
@@ -539,7 +551,7 @@ const SFX = (() => {
     // THE LEVEL METER after a game: a rising square tone while it fills (from f0 to f1 of the level,
     // 0-1, over dur seconds), and a little fanfare at each LEVEL UP
     xpFill(f0, f1, dur) {
-      if (muted || dur <= 0) return;
+      if ((muted && !forcing) || dur <= 0) return;
       try {
         const c = getCtx();
         const t = c.currentTime;
@@ -559,7 +571,7 @@ const SFX = (() => {
     },
     // (the score racking up on the result screen: a tick, higher as it nears the total, p 0-1)
     count(p = 0) {
-      if (muted) return;
+      if (muted && !forcing) return;
       try {
         const c = getCtx();
         const t = c.currentTime;
@@ -572,7 +584,7 @@ const SFX = (() => {
       } catch (e) {}
     },
     levelUp() {
-      if (muted) return;
+      if (muted && !forcing) return;
       try {
         const c = getCtx();
         const t0 = c.currentTime;
@@ -621,4 +633,6 @@ const SFX = (() => {
       return muted;
     },
   };
+  const OWN = ['blip', 'count', 'xpFill', 'levelUp'];
+  return api;
 })();

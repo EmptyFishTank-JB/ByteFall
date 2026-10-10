@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="../js/fonts.js?v=556"></script>
+<script src="../js/fonts.js?v=557"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#020403">
@@ -210,6 +210,78 @@
     .card-top { flex-direction: column; }
     button.play, a.play { align-self: flex-start; }
   }
+
+  /* THE SOUNDS: each card a scene of its moment (sound-scenes.js) beside what it is */
+  .snd-controls { display: flex; flex-direction: column; gap: 8px; margin: 0 0 20px; }
+  .snd-controls > div { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  #sfx-themes { display: flex; flex-wrap: wrap; gap: 4px; }
+  .ctl-label { font-size: 10px; letter-spacing: 0.14em; color: var(--green-dim); min-width: 112px; }
+  .snd-controls button, .themes-strip button {
+    background: transparent; border: 1px solid var(--green-dim); color: var(--text-dim);
+    font-family: inherit; font-size: 10.5px; letter-spacing: 0.06em; padding: 4px 7px; border-radius: 4px; cursor: pointer;
+  }
+  .snd-controls button:hover, .themes-strip button:hover { border-color: var(--green-dim); color: var(--green); }
+  .snd-controls button.on, .themes-strip button.on { border-color: var(--amber); color: var(--amber); }
+  .theme-note { font-size: 11.5px; color: var(--text-dim); margin: 0; }
+  .snd-top { display: flex; align-items: flex-start; gap: 16px; }
+  .snd-top .card-main { flex: 1; min-width: 0; }
+  .moment { font-size: 12px; color: var(--amber); margin: 6px 0 0; }
+  .themes-strip { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
+  .take { font-size: 12.5px; color: var(--text); margin: 8px 0 12px; }
+  .take b { color: var(--amber); font-weight: normal; letter-spacing: 0.08em; }
+  @media (max-width: 560px) {
+    .snd-top { flex-direction: column; align-items: center; }
+  }
+  .scene { position: relative; flex-shrink: 0; width: 188px; padding: 8px; border: 1px solid var(--line); border-radius: 6px; background: #020806; cursor: pointer; overflow: hidden; }
+  .scene:hover { border-color: var(--green-dim); }
+  .sc-msg { height: 16px; font-size: 10px; line-height: 16px; letter-spacing: 0.5px; text-align: center; color: var(--amber); text-shadow: 0 0 6px var(--amber); white-space: nowrap; overflow: hidden; }
+  .sc-msg.alarm { color: #fff3d6; text-shadow: 0 0 8px var(--amber), 0 0 16px rgba(255, 209, 102, 0.8); }
+  .sc-msg.byte { color: #eafff2; letter-spacing: 2px; text-shadow: 0 0 8px var(--green), 0 0 16px rgba(57, 255, 143, 0.8); }
+  .sc-msg.danger { color: var(--red); text-shadow: 0 0 8px var(--red); }
+  .sc-view { height: 248px; margin-top: 4px; display: flex; flex-direction: column; justify-content: flex-end; }
+  .sc-board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; padding: 4px; border: 1px solid var(--line); border-radius: 5px; background: #01120a; }
+  .sc-cell { aspect-ratio: 1; min-width: 0; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; white-space: nowrap; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--line); }
+  .sc-cell.over { background: rgba(255, 77, 94, 0.04); border-color: rgba(255, 77, 94, 0.2); }
+  .sc-cell.bit { background: #06140d; border-color: var(--green); color: var(--green); text-shadow: 0 0 6px rgba(57, 255, 143, 0.6); }
+  .sc-cell.layer { background: repeating-linear-gradient(45deg, #2a2a2a, #2a2a2a 4px, #1a1a1a 4px, #1a1a1a 8px); border: 1px dashed #777; color: #999; }
+  .sc-cell.layer.cracked { border-color: var(--amber); color: var(--amber); }
+  .sc-cell.hack { background: #1a1405; border-color: var(--amber); color: var(--amber); text-shadow: 0 0 6px rgba(255, 209, 102, 0.6); }
+  .sc-cell.over.bit, .sc-cell.over.hack, .sc-board.dead .sc-cell.bit { border-color: var(--red); color: var(--red); text-shadow: 0 0 6px rgba(255, 77, 94, 0.6); }
+  .sc-cell.pop { animation: sc-pop 0.16s ease-out forwards; }
+  @keyframes sc-pop { 0% { opacity: 1; filter: brightness(2.2); } 100% { opacity: 0; transform: scale(0.9); } }
+  .sc-cell.landed { animation: sc-land 0.15s ease; }
+  @keyframes sc-land { 0% { transform: translateY(-8px) scale(0.9); } 100% { transform: none; } }
+  .sc-cell.flash { animation: sc-flash 0.45s ease-out; }
+  @keyframes sc-flash { 0% { filter: brightness(2.6); box-shadow: 0 0 10px var(--amber); } 100% { filter: none; box-shadow: none; } }
+  .sc-line, .sc-layerline { grid-column: 1 / -1; overflow: hidden; white-space: nowrap; text-align: center; font-size: 8px; line-height: 8px; letter-spacing: 1px; }
+  .sc-line { color: var(--red); opacity: 0.8; }
+  .sc-line.hot { animation: sc-blink 0.9s ease-in-out infinite; }
+  .sc-layerline { color: var(--green-dim); opacity: 0.55; }
+  .sc-layerline.next { color: var(--amber); opacity: 1; animation: sc-blink 0.6s ease-in-out infinite; }
+  @keyframes sc-blink { 50% { opacity: 0.3; } }
+  .sc-btns { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; margin-top: 4px; padding: 0 5px; }
+  .sc-btns button { all: unset; text-align: center; font-size: 10px; line-height: 18px; border: 1px solid var(--green-dim); border-radius: 3px; color: var(--green); }
+  .sc-btns button.down, .sc-menu button.down { background: rgba(57, 255, 143, 0.25); transform: scale(0.94); }
+  .sc-tag { height: 16px; margin-top: 6px; font-size: 10px; line-height: 16px; letter-spacing: 1px; text-align: center; color: var(--text-dim); opacity: 0; transition: opacity 0.3s; white-space: nowrap; }
+  .sc-tag.on { opacity: 1; transition: none; }
+  .sc-tag.mine { color: var(--amber); text-shadow: 0 0 6px rgba(255, 209, 102, 0.6); }
+  .sc-tag.on.silent { opacity: 0.5; text-decoration: line-through; }
+  .sc-spark { position: absolute; width: 4px; height: 4px; background: var(--green); box-shadow: 0 0 4px var(--green); pointer-events: none; }
+  .sc-card { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 12px 10px; text-align: center; border: 1px solid var(--line); border-radius: 5px; background: #01120a; }
+  .sc-title { margin: 0; font-size: 11px; letter-spacing: 1px; color: var(--green); }
+  .sc-title.danger { color: var(--red); text-shadow: 0 0 6px rgba(255, 77, 94, 0.6); }
+  .sc-note { margin: 0; font-size: 10px; color: var(--text-dim); }
+  .sc-label { margin: 0; font-size: 10px; letter-spacing: 1px; color: var(--green-dim); }
+  .sc-label.up { color: var(--amber); text-shadow: 0 0 8px var(--amber); }
+  .sc-score { margin: 0; font-size: 22px; color: var(--green); text-shadow: 0 0 8px rgba(57, 255, 143, 0.6); font-variant-numeric: tabular-nums; }
+  .sc-xp { width: 100%; height: 8px; border: 1px solid var(--green-dim); border-radius: 2px; overflow: hidden; }
+  .sc-xp i { display: block; height: 100%; width: 0; background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .sc-menu { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+  .sc-menu button { all: unset; text-align: center; font-size: 10px; letter-spacing: 1px; padding: 7px 0; border: 1px solid var(--green); border-radius: 4px; color: var(--green); }
+  .sc-menu button.go { border-color: var(--amber); color: var(--amber); }
+  .sc-bot { margin: 0; font-size: 10.5px; line-height: 1.5; text-align: left; color: var(--text); }
+  .sc-bot b { color: var(--green); font-weight: normal; }
+  .sc-bot .unsaid { visibility: hidden; }
 </style>
 </head>
 <body>
@@ -219,7 +291,7 @@
   <div class="hero">
     <div class="eyebrow"><span class="dot"></span>BYTEFALL // DEV TOOLS</div>
     <h1>AUDIO <span>COMPENDIUM</span></h1>
-    <p class="lede">Every sound in the game: the one-shot effects, and the soundtrack, each track opening in the MIXER (its instruments, their levels per stack height and per SOUND OUTPUT, and how it intensifies near the red line). Nothing here is a recording: the pages load the game's own <code>sfx.js</code> and track files, so everything plays exactly what the game plays.</p>
+    <p class="lede">Every sound in the game: the sound effects, each with a scene of the moment it plays, in every SOUND THEME, and the soundtrack, each track opening in the MIXER (its instruments, their levels per stack height and per SOUND OUTPUT, and how it intensifies near the red line). Nothing here is a recording: the pages load the game's own <code>sfx.js</code> and track files, so everything plays exactly what the game plays.</p>
   </div>
 
   <nav class="tocnav">
@@ -250,6 +322,7 @@
     </div>
     <p class="sec-desc" style="margin-top: 14px;"><a href="infections.html" style="color: var(--amber);">INFECTION WALL &rarr;</a> A wall chart of every INFECTION in every look, all playing at once: a row an infection, a tile a look, numbered as the INFECTION LOOK switch and the tester number them.</p>
     <p class="sec-desc"><a href="../index.html?inftest" style="color: var(--amber);">INFECTION TESTER &rarr;</a> The game with a board of bits and a panel of buttons: set off any INFECTION on the grid (several to stack them), in any of its looks or at random, count drops down without dropping, refill the board or clear it all. The column buttons still drop bits, so you can play against them. Nothing played there is saved, and BANNERS switches the achievement pop-ups off.</p>
+    <p class="sec-desc"><a href="../index.html?sfxtest" style="color: var(--amber);">SOUND TESTER &rarr;</a> The game on a board of bits, every sound named as it plays: a caption over the board (the sound and what set it off) and a panel keeping the last few, every sound with how often you've heard it (tap one to hear it alone), and a SOUND THEME to play in, locked or not. FILL GRID and NEW LAYER set things going; the column buttons drop bits as in a game. Nothing played there is saved, and SOUND is on there whatever the game's setting. (Every sound, with a scene of its moment, is in 01 below.)</p>
     <p class="sec-desc"><a href="bots.html" style="color: var(--amber);">BOT SANDBOX &rarr;</a> The wandering bots on the game's own code: spawn any bot at any level, call up every visitor, virus, season and the fog, play the music for the headphones, and set off every mood and reaction on a button, on the game card, the start screen or the screen saver.</p>
     <p class="sec-desc"><a href="../visualizer/" target="_blank" rel="noopener" style="color: var(--amber);">BYTEFALL VIZ &rarr;</a> The music player's visualizers as their own app, live: every style full screen, for whatever plays. On a computer, SCREEN AUDIO hears a shared tab (Pandora, YouTube, ...) or on Windows the whole computer; elsewhere the microphone. The Android app (Actions &rarr; ByteFall Viz APK) also shows the song from any app.</p>
     <p class="sec-desc"><a href="frames.html" style="color: var(--amber);">FRAME EDITOR &rarr;</a> Draw the bots' animations a frame at a time on their pixel grid: start from any bot or the game's own CORE DUMP moves, paint and erase in the bots' colors, add, copy and reorder frames, time each, play it back at game size, and EXPORT a file of it to have it built into the game.</p>
@@ -257,9 +330,14 @@
   </section>
 
   <section id="effects">
-    <h2><span class="sec-num">01</span> One-Shot Effects</h2>
-    <p class="sec-desc">Nine short synthesized sounds defined in <code>sfx.js</code>: eight ported from the ECHOES terminal audio compendium, plus the data burst made for decrypting bits. They're turned on and off with the SOUND button in the game; the buttons here play them regardless.</p>
-    <p class="sec-desc">SOUND THEME (SETTINGS &rarr; SOUND EFFECTS in the game): <span id="sfx-themes"></span> The PLAY buttons below play the theme picked here (the dial-up and the narrator's voice are the same in every theme).</p>
+    <h2><span class="sec-num">01</span> Sound Effects</h2>
+    <p class="sec-desc">Every sound the game makes, all synthesized in <code>sfx.js</code>: ten effects that each SOUND THEME plays its own way, and five that are the same in every theme (the dial-up, BOT's voice, the score counting up, the level meter and LEVEL UP). Each card has a scene beside it: the moment in a game where you hear it, played out at the game's own timing, the sound coming at the instant it does in the game and its name lit under the scene. Tap a scene or PLAY to run it; the theme buttons on a card play that theme's take. The game's SOUND setting doesn't matter here: everything plays.</p>
+    <div class="snd-controls">
+      <div><span class="ctl-label">SOUND THEME</span><span id="sfx-themes"></span></div>
+      <p class="theme-note" id="theme-note"></p>
+      <div><span class="ctl-label">THE SCENES PLAY</span><button type="button" id="snd-whole">THIS SOUND ALONE</button><span class="theme-note">or every sound of the moment (the others' names show struck through while they're silent)</span></div>
+      <div><span class="ctl-label">SPEED</span><button type="button" id="snd-speed">REAL TIME</button><span class="theme-note">or 4x slower, to see where each sound falls (the sounds keep their own length)</span></div>
+    </div>
     <div id="sfx-list"></div>
   </section>
 
@@ -272,116 +350,111 @@
   <footer>GENERATED FROM SOURCE &mdash; NO AUDIO FILES, ALL SYNTHESIZED ON PLAY</footer>
 </div>
 
-<script src="../js/music/output.js?v=556"></script>
-<script src="../js/music/mixes.js?v=556"></script>
-<script src="../js/sfx.js?v=556"></script>
-<script src="tracks-info.js?v=556"></script>
+<script src="../js/music/output.js?v=557"></script>
+<script src="../js/music/mixes.js?v=557"></script>
+<script src="../js/sfx.js?v=557"></script>
+<script src="sound-scenes.js?v=557"></script>
+<script src="tracks-info.js?v=557"></script>
 <script>
 (() => {
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-  // ── One-shot effects ───────────────────────────────────────────────
-  const EFFECTS = [
-    {
-      id: 'click', name: 'TYPING CLICK',
-      desc: 'A 25 ms burst of noise through a bandpass filter. Short and dry, so it can repeat quickly.',
-      params: ['dur 25ms', 'noise', 'bandpass 3000–4000Hz'],
-      uses: ['Every row a dropped bit or exploit falls through', 'Every row bits drop after a decrypt (gravity)'],
-    },
-    {
-      id: 'enter', name: 'ENTER / SUBMIT',
-      desc: 'A louder, low-passed thump.',
-      params: ['dur 55ms', 'noise', 'lowpass 800Hz', '1.2× volume'],
-      uses: ['A bit or exploit lands in its column', 'Buffer Overflow, RNG or Bitflip finishes changing the board'],
-    },
-    {
-      id: 'burst', name: 'DATA BURST',
-      desc: 'A quiet retro 8-bit explosion: grainy sample-and-hold noise under a falling lowpass, plus a quick square-wave pitch drop. The pitch varies slightly each time so chains don\'t repeat exactly.',
-      params: ['dur 280ms', 'S&H noise', 'lowpass 3200 → 260Hz', 'square 520–660 → 70Hz', '0.2× volume'],
-      uses: ['Each step of a chain when bits decrypt', 'Worm Virus or Trojan wipes out its blocks'],
-    },
-    {
-      id: 'button', name: 'BUTTON',
-      desc: 'A short, clear square-wave tick, falling a little in pitch: every button is heard.',
-      params: ['dur 35ms', 'square 1250 → 900Hz', 'lowpass 3000Hz', '0.22× volume'],
-      uses: ['Any button pressed (not the drop buttons, which have the drop\'s own sound)'],
-    },
-    {
-      id: 'dialup', name: 'DIAL-UP',
-      desc: 'A little dial-up modem, never quite the same twice: 4 to 7 touch-tone digits at their own pace, the answer tone, the carrier warbling between two pitches under bursts of static, then the kshhht as the line opens up.',
-      params: ['about 1.5-2s', 'DTMF pairs 60-90ms apart', '~2100Hz answer', 'square ~1550-1700 / +380-500Hz warble', 'band-passed static', 'high-passed static wash (the kshhht)'],
-      uses: ['RESTORE PURCHASES in the STORE, while it checks'],
-    },
-    {
-      id: 'egg', name: 'EASTER EGG TONE',
-      desc: 'Two rising sine pings (660Hz then 880Hz), a bright "found something" chime.',
-      params: ['660 → 880Hz sine', 'stagger 90ms'],
-      uses: ['Every chain step from 2x upward, on top of the burst', 'An exploit is unlocked', 'BYTE DECRYPTED on Hard'],
-    },
-    {
-      id: 'backspace', name: 'BACKSPACE',
-      desc: 'A duller, double-filtered noise tick.',
-      params: ['dur 32ms', 'bandpass 900–1200Hz', 'lowpass 1800Hz'],
-      uses: ['A decrypt peels a neighboring encryption layer from [=] to [-]'],
-    },
-    {
-      id: 'punct', name: 'PUNCTUATION CLICK',
-      desc: 'A soft triangle-wave blip at 200Hz.',
-      params: ['200Hz triangle', 'dur 40ms', '0.55× volume'],
-      uses: ['The last layer peels off and reveals the bit underneath (plays instead of the backspace tick)', 'Turning SOUND on, as confirmation'],
-    },
-    {
-      id: 'alert', name: 'ALERT (TWO-TONE)',
-      desc: 'Two falling sawtooth tones, a classic warning beep.',
-      params: ['440 → 330Hz saw', 'stagger 120ms'],
-      uses: ['ENCRYPTION // NEW LAYER, just before a row of layers rises'],
-    },
-    {
-      id: 'static', name: 'LINE STATIC',
-      desc: 'A brief high-passed noise pop.',
-      params: ['dur 35ms', 'highpass 2000Hz', '0.75× volume'],
-      uses: ['A dropped exploit starts executing', 'RESTART or NEW SESSION starts a new run'],
-    },
-    {
-      id: 'denied', name: 'ACCESS DENIED',
-      desc: 'Three noise bursts that get quieter, each with a short high static tick.',
-      params: ['3× burst', 'bandpass 320Hz', 'tick 3500Hz', 'vol 0.9 → 0.35 → 0.12'],
-      uses: ['Game over (CONNECTION LOST)', 'Pressing a number key for a stack that has no room'],
-    },
-  ];
-
+  // ── The sounds: a card each, its scene beside it (sound-scenes.js) ──────
+  const THEMES = SFX.themes();
+  const themeName = (id) => (THEMES.find((t) => t.id === id) || THEMES[0]).name;
+  const CALLS = { dialup: "SFX.play('dialup')", blip: 'SFX.blip(freq)', count: 'SFX.count(p)', xpFill: 'SFX.xpFill(from, to, secs)', levelUp: 'SFX.levelUp()' };
   let sfxTheme = 'terminal';
+  const cards = [];
+  let active = null; // (the scene playing: another started puts it back to its still)
+
   const themesEl = document.getElementById('sfx-themes');
-  for (const t of SFX.themes()) {
+  const noteEl = document.getElementById('theme-note');
+  const showTheme = () => {
+    const t = THEMES.find((x) => x.id === sfxTheme);
+    themesEl.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x.dataset.theme === sfxTheme));
+    noteEl.textContent = `${t.name}: ${t.desc}${t.unlock ? ` Unlocks with the ${t.track} track.` : ''}`;
+  };
+  for (const t of THEMES) {
     const b = document.createElement('button');
     b.type = 'button';
-    b.className = 'play';
-    b.style.marginRight = '6px';
+    b.dataset.theme = t.id;
     b.textContent = t.name;
     b.title = t.desc;
-    b.style.opacity = t.id === sfxTheme ? '1' : '0.55';
     b.addEventListener('click', () => {
       sfxTheme = t.id;
-      themesEl.querySelectorAll('button').forEach((x) => { x.style.opacity = x === b ? '1' : '0.55'; });
+      showTheme();
+      cards.forEach((c) => c.setTheme(t.id));
       SFX.preview('egg', sfxTheme);
     });
     themesEl.appendChild(b);
   }
+  showTheme();
+  let whole = false;
+  let slow = false;
+  const wholeBtn = document.getElementById('snd-whole');
+  const speedBtn = document.getElementById('snd-speed');
+  wholeBtn.addEventListener('click', () => {
+    whole = !whole;
+    wholeBtn.textContent = whole ? 'THE WHOLE MOMENT' : 'THIS SOUND ALONE';
+    wholeBtn.classList.toggle('on', whole);
+    SoundScenes.set({ whole });
+  });
+  speedBtn.addEventListener('click', () => {
+    slow = !slow;
+    speedBtn.textContent = slow ? '4X SLOWER' : 'REAL TIME';
+    speedBtn.classList.toggle('on', slow);
+    SoundScenes.set({ slow: slow ? 4 : 1 });
+  });
+
   const sfxList = document.getElementById('sfx-list');
-  for (const fx of EFFECTS) {
+  for (const fx of SOUND_LIST) {
     const card = document.createElement('div');
     card.className = 'card';
+    card.id = `sfx-${fx.id}`;
+    const chips = [...fx.params, ...(fx.buzz ? [`VIBRATES ${fx.buzz}`] : [])];
     card.innerHTML = `
-      <div class="card-top">
+      <div class="snd-top">
+        <div class="snd-stage"></div>
         <div class="card-main">
-          <div class="card-name">${esc(fx.name)}<span class="card-id">SFX.play('${esc(fx.id)}')</span></div>
+          <div class="card-name">${esc(fx.name)}<span class="card-id">${esc(CALLS[fx.id] || `SFX.play('${fx.id}')`)}</span></div>
+          <p class="moment">// ${esc(fx.moment)}</p>
           <div class="card-desc">${esc(fx.desc)}</div>
-          <div class="chips">${fx.params.map((p) => `<span class="chip">${esc(p)}</span>`).join('')}</div>
+          <div class="chips">${chips.map((p) => `<span class="chip">${esc(p)}</span>`).join('')}</div>
+          ${fx.takes ? `<div class="themes-strip">${THEMES.map((t) => `<button type="button" data-theme="${t.id}" title="${esc(t.desc)}">${esc(t.name)}</button>`).join('')}</div>` : ''}
+          <p class="take"></p>
+          <button class="play" type="button"><svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true" style="vertical-align:-1px"><path d="M7 4l12 8-12 8z" fill="currentColor"/></svg> PLAY</button>
         </div>
-        <button class="play" type="button"><svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true" style="vertical-align:-1px"><path d="M7 4l12 8-12 8z" fill="currentColor"/></svg> PLAY</button>
       </div>
       <div class="uses"><h4>// PLAYS WHEN</h4><ul>${fx.uses.map((u) => `<li>${esc(u)}</li>`).join('')}</ul></div>`;
-    card.querySelector('button').addEventListener('click', () => SFX.preview(fx.id, sfxTheme));
+    const st = SoundScenes.make();
+    card.querySelector('.snd-stage').appendChild(st.el);
+    SoundScenes.still(st, fx);
+    const playBtn = card.querySelector('button.play');
+    const takeEl = card.querySelector('.take');
+    let theme = sfxTheme;
+    const setTheme = (id) => {
+      theme = id;
+      if (fx.takes) {
+        takeEl.innerHTML = `<b>${esc(themeName(id))}:</b> ${esc(fx.takes[id] || '')}`;
+        card.querySelectorAll('.themes-strip button').forEach((x) => x.classList.toggle('on', x.dataset.theme === id));
+      } else takeEl.innerHTML = '<b>EVERY THEME:</b> the same sound.';
+    };
+    setTheme(theme);
+    const run = async () => {
+      if (active && active.st !== st) SoundScenes.still(active.st, active.fx);
+      const me = { st, fx };
+      active = me;
+      playBtn.classList.add('playing');
+      await SoundScenes.play(st, fx, fx.takes ? theme : sfxTheme);
+      if (active === me) { active = null; playBtn.classList.remove('playing'); }
+    };
+    // (put back to its still by another scene: its button too)
+    const observer = new MutationObserver(() => { if (!active || active.st !== st) playBtn.classList.remove('playing'); });
+    observer.observe(st.view, { childList: true });
+    playBtn.addEventListener('click', run);
+    st.el.addEventListener('click', run);
+    card.querySelectorAll('.themes-strip button').forEach((b) => b.addEventListener('click', () => { setTheme(b.dataset.theme); run(); }));
+    cards.push({ setTheme });
     sfxList.appendChild(card);
   }
 
@@ -474,34 +547,6 @@
     seaBtn.addEventListener('click', () => {
       set(SEA, SEA_STEPS[(SEA_STEPS.indexOf(seaNow()) + 1) % SEA_STEPS.length]);
       showSea();
-    const WX = 'bytefall-dev-weather';
-    const WX_STEPS = ['auto', 'often', 'spring', 'summer', 'autumn', 'winter', 'drizzle', 'rain', 'storm', 'sunshower', 'hail', 'sleet', 'snow', 'blizzard', 'wind', 'sunny', 'rainbow', 'aurora', 'fireflies', 'meteors', 'moon', 'fog', 'overcast', 'flurries', 'thundersnow', 'diamonddust', 'pollen', 'fluff', 'heatwave', 'duststorm', 'heatlightning', 'sunrise', 'sunset'];
-    const wxBtn = document.getElementById('dev-weather');
-    const wxNow = () => (WX_STEPS.includes(get(WX)) ? get(WX) : 'auto');
-    const showWx = () => {
-      wxBtn.textContent = `WEATHER: ${wxNow().toUpperCase()}`;
-      wxBtn.classList.toggle('on', wxNow() !== 'auto');
-    };
-    wxBtn.addEventListener('click', () => {
-      set(WX, WX_STEPS[(WX_STEPS.indexOf(wxNow()) + 1) % WX_STEPS.length]);
-      showWx();
-    const SC = 'bytefall-dev-scene';
-    const SC_STEPS = ['auto', 'often', 'meadow', 'beach', 'city', 'woodland', 'snowfield', 'desert', 'farm', 'lake'];
-    const scBtn = document.getElementById('dev-scene');
-    const scNow = () => (SC_STEPS.includes(get(SC)) ? get(SC) : 'auto');
-    const showSc = () => { scBtn.textContent = `SCENE: ${scNow().toUpperCase()}`; scBtn.classList.toggle('on', scNow() !== 'auto'); };
-    scBtn.addEventListener('click', () => { set(SC, SC_STEPS[(SC_STEPS.indexOf(scNow()) + 1) % SC_STEPS.length]); showSc(); status.textContent = 'Saved. Reload the game to see it.'; });
-    showSc();
-      status.textContent = 'Saved. Reload the game to see it.';
-    });
-    showWx();
-    const SC = 'bytefall-dev-scene';
-    const SC_STEPS = ['auto', 'often', 'meadow', 'beach', 'city', 'woodland', 'snowfield', 'desert', 'farm', 'lake'];
-    const scBtn = document.getElementById('dev-scene');
-    const scNow = () => (SC_STEPS.includes(get(SC)) ? get(SC) : 'auto');
-    const showSc = () => { scBtn.textContent = `SCENE: ${scNow().toUpperCase()}`; scBtn.classList.toggle('on', scNow() !== 'auto'); };
-    scBtn.addEventListener('click', () => { set(SC, SC_STEPS[(SC_STEPS.indexOf(scNow()) + 1) % SC_STEPS.length]); showSc(); status.textContent = 'Saved. Reload the game to see it.'; });
-    showSc();
       status.textContent = 'Saved. New wanderers dress for it (reload the game to see it at once).';
     });
     showSea();
@@ -516,13 +561,6 @@
     wxBtn.addEventListener('click', () => {
       set(WX, WX_STEPS[(WX_STEPS.indexOf(wxNow()) + 1) % WX_STEPS.length]);
       showWx();
-    const SC = 'bytefall-dev-scene';
-    const SC_STEPS = ['auto', 'often', 'meadow', 'beach', 'city', 'woodland', 'snowfield', 'desert', 'farm', 'lake'];
-    const scBtn = document.getElementById('dev-scene');
-    const scNow = () => (SC_STEPS.includes(get(SC)) ? get(SC) : 'auto');
-    const showSc = () => { scBtn.textContent = `SCENE: ${scNow().toUpperCase()}`; scBtn.classList.toggle('on', scNow() !== 'auto'); };
-    scBtn.addEventListener('click', () => { set(SC, SC_STEPS[(SC_STEPS.indexOf(scNow()) + 1) % SC_STEPS.length]); showSc(); status.textContent = 'Saved. Reload the game to see it.'; });
-    showSc();
       status.textContent = 'Saved. Reload the game to see it.';
     });
     showWx();

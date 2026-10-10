@@ -4219,6 +4219,22 @@ html, body { overflow-x: clip; }
 .inftest button.on { background: var(--fg); color: #020403; border-color: var(--fg); }
 .inftest a { color: var(--fg-dim); margin-left: auto; }
 .inftest-note { margin: 6px 0 0; font-size: 8.5px; line-height: 1.4; color: var(--fg-dim); }
+/* SOUND TESTER (index.html?sfxtest): the same panel, the sounds named as they play: the last few,
+   each sound and how often it's been heard, and a caption flashing over the top of the board */
+.sfxtest-now { flex: 1; min-width: 0; margin: 0 8px; text-align: right; color: var(--fg); letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sfxtest-log { margin-top: 6px; min-height: 52px; }
+.sfxtest-log p { margin: 0; font-size: 9.5px; line-height: 13px; color: var(--fg-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sfxtest-log p:first-child { color: var(--fg); }
+.sfxtest-log b { font-weight: normal; color: var(--accent); margin-right: 4px; }
+.sfxtest-heard button { opacity: 0.5; }
+.sfxtest-heard button.heard { opacity: 1; border-color: var(--fg); }
+.sfxtest-heard i { font-style: normal; color: var(--accent); }
+.sfxtest-cap { position: fixed; z-index: 401; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 5px 10px; background: rgba(2, 6, 4, 0.88); border: 1px solid var(--accent); border-radius: 6px; pointer-events: none; font-family: 'Courier New', monospace; white-space: nowrap; }
+.sfxtest-cap[hidden] { display: none; }
+.sfxtest-cap b { font-size: 12px; letter-spacing: 2px; color: var(--accent); text-shadow: 0 0 6px var(--accent); }
+.sfxtest-cap span { font-size: 10px; color: var(--fg); }
+.sfxtest-cap.on { animation: sfxtest-cap 1.1s ease-out forwards; }
+@keyframes sfxtest-cap { 0% { opacity: 0; transform: translateX(-50%) scale(0.9); } 10% { opacity: 1; transform: translateX(-50%) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; } }
 
 /* CRT DISPLAY (SETTINGS): the whole screen as an old tube, laid over everything and never in the way
    of a tap. SOFT: scanlines, the glass darkening toward its rounded corners. FULL: and the phosphor's
