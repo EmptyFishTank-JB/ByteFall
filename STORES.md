@@ -1,21 +1,22 @@
 # ByteFall on Steam and the Microsoft Store
 
 A plan for taking ByteFall to PC stores, written ahead of time so the game can be shaped for it as
-it goes. Nothing here is built yet. The Apple App Store is left for later.
+it goes. Nothing here is built yet: the desktop edition starts once the game is finalized on
+Android. The Apple App Store is left for later.
 
-## Decisions to make first
+## Decisions (made: the recommended way for all three)
 
-1. **How it's sold on PC.** Recommended: a one-time price (around $4.99), no ads and no purchases
+1. **How it's sold on PC.** Decided: a one-time price (around $4.99), no ads and no purchases
    inside. Everything is earned by playing, as on the website. PC players expect to pay once, and
    Steam players dislike paying to skip progress, so FULL ACCESS and REMOVE ADS wouldn't exist there.
    (The other way is free with an optional FULL ACCESS DLC on Steam. It works, but it means wiring up
    Steam's purchase API and the Microsoft Store's, two more billing systems to test.)
-2. **How it's packaged.** Recommended: one desktop app built with **Electron** (the game in its own
+2. **How it's packaged.** Decided: one desktop app built with **Electron** (the game in its own
    Chromium window), packaged for both stores. One build, one save format, and Steam's features
    (achievements, cloud saves, the overlay) work in it through `steamworks.js`. The Microsoft Store
    could also take the website as a PWA (wrapped by Microsoft's PWABuilder), which is quicker, but it
    would be a second thing to maintain.
-3. **Which platforms on Steam.** Windows at launch. Linux (and the Steam Deck) comes almost free with
+3. **Which platforms on Steam.** Decided: Windows at launch. Linux (and the Steam Deck) comes almost free with
    Electron and is worth it if controller support goes in (below). macOS on Steam needs Apple
    signing and notarizing: leave it for the App Store step.
 
