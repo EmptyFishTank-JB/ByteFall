@@ -344,7 +344,7 @@ runs where it lands. With nothing to arm, the button opens the menu's EXPLOITS t
 | Packet Sniffer `[~]` * | 3x | For your next 3 bits, tap CURRENT (or press ↑ / ↓) to pick each one's number |
 | Logic Bomb `[!]` * | 4x | Lands as a `[!3]` block counting down each drop; at zero it wipes out the 5×5 around it |
 | Honeypot `[◎]` * | 4x | Lands as a trap; when a bit next to it decrypts, every bit of that number within 2 cells decrypts too |
-| Swap (two arrows) * | 3x | Any two bits trade places: armed, tap a bit on the grid, then another (the first again puts it back; the bits it can pick glow faintly); the second pick drops it, and any match they make decrypts. A column tap first is refused (with fewer than two bits on the board it drops and does nothing). Touch or mouse |
+| Swap (two bits, curved arrows trading them) * | 3x | Any two bits trade places: armed, tap a bit on the grid, then another (the first again puts it back; the bits it can pick glow faintly); the second pick drops it, and any match they make decrypts. A column tap first is refused (with fewer than two bits on the board it drops and does nothing). Touch or mouse |
 | Black Box (a box with a ?) * | 5x | Opens, as it's armed, into a random exploit, any of them, equipped or not (the button flicks through their icons first); the last exploit to unlock. Opening it counts toward FULL TOOLKIT |
 
 Every exploit is unlocked by level and has to be equipped in a slot (see below).
