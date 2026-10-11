@@ -2499,15 +2499,24 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
 .start-btn {
   position: absolute; left: 50%; bottom: 22%; transform: translateX(-50%); cursor: pointer;
   padding: 10px 34px; font-family: inherit; font-size: 16px; letter-spacing: 5px;
-  background: rgba(var(--fg-rgb), 0.08); color: var(--fg); border: 1px solid var(--fg); border-radius: 6px;
-  text-shadow: 0 0 8px var(--fg); box-shadow: 0 0 14px rgba(var(--fg-rgb), 0.35);
+  /* (a neon sign: the tube's core near white, the theme's color glowing round it, inside and out) */
+  background: rgba(var(--fg-rgb), 0.06); color: rgb(var(--burst-hot-rgb)); border: 2px solid var(--fg); border-radius: 6px;
+  text-shadow: 0 0 2px rgba(var(--fg-rgb), 0.9), 0 0 8px var(--fg), 0 0 18px rgba(var(--fg-rgb), 0.6);
+  box-shadow: 0 0 12px rgba(var(--fg-rgb), 0.45), inset 0 0 10px rgba(var(--fg-rgb), 0.3);
   animation: start-glow 1.6s ease-in-out infinite;
 }
 /* (unseen till index.html's placeStartBtn has put it under the tagline, so it never shows here first) */
 .start-btn:not(.placed) { visibility: hidden; }
 .start-btn:focus-visible { background: rgba(var(--fg-rgb), 0.18); outline: none; }
 @media (hover: hover) { .start-btn:hover { background: rgba(var(--fg-rgb), 0.18); outline: none; } }
-@keyframes start-glow { 0%, 100% { box-shadow: 0 0 8px rgba(var(--fg-rgb), 0.25); } 50% { box-shadow: 0 0 20px rgba(var(--fg-rgb), 0.6); } }
+@keyframes start-glow { 0%, 100% { box-shadow: 0 0 8px rgba(var(--fg-rgb), 0.3), inset 0 0 6px rgba(var(--fg-rgb), 0.2); } 50% { box-shadow: 0 0 22px rgba(var(--fg-rgb), 0.65), inset 0 0 12px rgba(var(--fg-rgb), 0.4); } }
+/* (after the title's intro: START flickering on like a neon sign, the tube catching, dropping out and
+   catching again before it holds, then glowing as ever) */
+.start-btn.neon { animation: neon-on 1.4s steps(1, end) both, start-glow 1.6s ease-in-out 1.4s infinite; }
+@keyframes neon-on {
+  0% { opacity: 0; } 5% { opacity: 0.12; } 10% { opacity: 1; } 13% { opacity: 0.12; } 28% { opacity: 1; } 30% { opacity: 0.12; }
+  34% { opacity: 0.9; } 39% { opacity: 0.3; } 44% { opacity: 1; } 47% { opacity: 0.12; } 60% { opacity: 1; } 62% { opacity: 0.5; } 65%, 100% { opacity: 1; }
+}
 @keyframes start-blink { 0%, 55% { opacity: 1; } 56%, 100% { opacity: 0; } }
 .start-screen.starting .start-btn { animation: start-blink 0.16s steps(1) infinite; }
 /* START → the game: the start card's contents fade out, its border staying (laid exactly over the game
@@ -2522,7 +2531,22 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
 .crt.card-out > :not(.card-lights) { opacity: 0; transition: opacity 0.6s ease; }
 .start-black { position: fixed; inset: 0; z-index: 210; background: #000; opacity: 0; pointer-events: none; transition: opacity 0.6s ease; }
 .start-black.on { opacity: 1; pointer-events: auto; }
-@media (prefers-reduced-motion: reduce) { .start-btn { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .start-btn, .start-btn.neon { animation: none; } }
+/* THE TITLE's INTRO (start.js): the title, its tagline and START unseen from the first paint till it
+   plays (and shown anyway after 5s, should it never start). It plays on a copy of the title laid over
+   the real one, which never moves; START shows as it flickers on */
+.start-card:is(.intro-wait, .intro-run) > .start-title:not(.start-intro) { visibility: hidden; }
+.start-card:is(.intro-wait, .intro-run) .start-btn:not(.neon) { visibility: hidden; }
+.start-card.intro-wait > .start-title, .start-card.intro-wait .start-btn { animation: intro-failsafe 0s linear 5s forwards; }
+@keyframes intro-failsafe { to { visibility: visible; } }
+.start-title.start-intro { position: absolute; margin: 0; pointer-events: none; }
+.start-intro h1 { white-space: nowrap; } /* (its letters split into boxes of their own mustn't wrap) */
+.start-intro h1 .intro-l { display: inline-block; color: inherit; text-shadow: inherit; }
+.start-intro h1 .intro-l.scrambled { color: var(--fg-dim); text-shadow: none; }
+.start-intro .intro-cursor { color: transparent; background: var(--fg-dim); }
+.start-intro .intro-rest { visibility: hidden; }
+/* (DROP's landing: an amber band out from under the title, bursting into pixels and binary dust) */
+.intro-band { position: absolute; height: 8px; border-radius: 2px; background: var(--accent); box-shadow: 0 0 10px var(--accent), 0 0 24px rgba(var(--accent-rgb), 0.7); transform: scaleX(0); }
 
 /* MINI BOTS (minibot.js): the CPU's face, small, anywhere (the tutorial's narrator, the start
    screen's wanderers) */

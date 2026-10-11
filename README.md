@@ -1100,8 +1100,21 @@ on from where it was when it shows again (nothing restarts):
 A fresh launch (the app or tab opened anew) opens on the START SCREEN (the studio,
 EMPTYFISHTANK PRESENTS, across the top; the copyright above the wanderers): a card
 filling the screen with the starlight twinkling across it, the BYTEFALL title
-in the middle and a glowing START button below it, as far under the tagline as
-the tagline is under the title (measured letter to letter, in every font; `js/start.js`). A tap anywhere
+in the middle and START below it, a neon sign (its tube's core near white, the theme's color
+glowing round it), as far under the tagline as the tagline is under the title (measured letter to
+letter, in every font, and placed before the first paint by a small script in index.html, so it's never
+seen anywhere else first; `js/start.js`). **On a launch the title plays an intro**, one of five picked at
+random (never the same one twice running; `?intro=drop`, `bit`, `rain`, `decrypt` or `power` picks
+one): DROP, the title falling from the top, gathering speed, and landing hard (a squash, a jolt, and
+an amber band under it bursting into pixels and binary dust); BIT, the title falling as a bit does on
+the board, a row at a time, landing with a bit's bump and a puff; RAIN, its letters falling one by one
+like bits down their columns, each landing in a puff; DECRYPT, scrambled glyphs locking into its
+letters one by one; POWER, an old CRT switching on, a bright line opening out into the title. Then the
+tagline types in behind a block cursor and START flickers on like a neon tube catching. The intro
+plays on a copy of the title laid over the real one (which never moves), and nothing of it shows
+before it plays. A tap, or a key, skips to the end; there's none on a refresh after START, coming back
+with BACK, or with REDUCED EFFECTS or the system's reduce motion on, and no sound (browsers play none
+before the first tap). A tap anywhere
 else lets the music begin (browsers need one) and leaves you on the screen.
 START (or Enter / Space) fades the start card's contents out, its border staying (the start card is laid exactly over the game card: the same size and place, on a phone or in a browser), and the MAIN MENU fades in inside the same border. The very first time the game is opened, it fades into the
 TUTORIAL instead (EXIT skips it, to the main menu). A refresh puts you back where you were: on the start screen until START is
