@@ -263,32 +263,38 @@ window.BOOSTERS = BOOSTERS;
 // next drop, as an earned one, and it's used up (the ones not used stay owned). A BLACK BOX waits
 // sealed: a tap opens it (used up), its slot rolling like a slot machine's reel and landing on an
 // exploit, which then waits there to be armed, or an INFECTION, which goes off at once. A slot
-// taken in empty, or whose starter is used, is the BLACK MARKET: a random exploit (of
-// the ones unlocked by level) or BLACK BOX at the STORE's price, changing every MARKET_EVERY drops.
-// A tap opens its window: the price, and BUY (short of it, an exploit takes a MASTER KEY instead, if
-// there's one); a buy waits in the slot until it's armed (or opened), then the slot sells again, as
-// often as you like. Buying opens once the first encryption layer rises (ZEN, with none: after as
-// many drops, BASE_INTERVAL); till then the offers can be looked at. A game that used them says so.
+// taken in empty is the BLACK MARKET: a random exploit (of the ones unlocked by level) or BLACK BOX
+// at the STORE's price, each slot's offer changing on its own count, MARKET_EVERY drops an offer
+// (its pips). A tap opens its window: the price, and BUY (short of it, an exploit takes a MASTER KEY
+// instead, if there's one); a buy waits in the slot until it's armed (or opened). Used (a starter
+// too), the slot sits out the next drop, the used item dimmed in it, then shuffles to a new offer,
+// its count starting afresh: so the slots' counts drift apart. Buying opens once the first
+// encryption layer rises (ZEN, with none: after as many drops, BASE_INTERVAL); till then the offers
+// can be looked at. A game that used them says so.
 const STARTER_MAX = 2;
 const MARKET_EVERY = 4;
 const starterFits = (m = mode) => !daily && ['classic', 'blitz', 'zen'].includes(m);
-let sideSlots = []; // this game's: [{ state: 'starter' | 'bought' | 'opened' | 'rolling' | 'market' | 'closed', id }]
+let sideSlots = []; // this game's: [{ state: 'starter' | 'bought' | 'opened' | 'rolling' | 'armed' | 'market' | 'spent' | 'closed', id, left }]
 let marketDrops = 0;
+let dropNo = 0; // (the drops begun this game: a slot used during one, or after it, waits out the next)
 let usedStarters = []; // (for the result screen)
 let marketBought = [];
 // THE PATCH SLOTS, the row's two ends (PATCH 1 left of the BLACK MARKET's left slot, PATCH 2 right of
 // its right one), open by level (Progress.patchSlotLevel): each sells a patch that fits the
 // mode and would do something now, for KEYS and resources (Progress, 'patch:<id>'; ECONOMY.md),
-// turning over with the BLACK MARKET and opening with it. Bought, it's applied at once and the slot
-// sells again, a new patch in it (one waiting for its moment, SECOND CHANCE or ANTIVIRUS, keeps its
-// slot till it's used); a slot with nothing useful to sell tries again at each turnover
-let patchSlots = []; // this game's: [{ state: 'locked' | 'market' | 'applied' | 'closed', id }]
+// on its own count as the BLACK MARKET's slots and opening with it. Bought, it's applied at once and
+// keeps the slot while it works (HEAD START till its hold ends, FIREWALL DELAY till the delayed layer
+// rises, LOOKAHEAD its 60 seconds, RESTORE POINT and ANTIVIRUS till they're used; OVERTIME is used
+// the moment it's bought); used up, the slot sits out the next drop, then shuffles to a new patch. A
+// slot with nothing useful to sell tries again after each drop
+let patchSlots = []; // this game's: [{ state: 'locked' | 'market' | 'applied' | 'spent' | 'closed', id, left }]
 let patchesBought = [];
 let restoreBought = false; // (a RESTORE POINT bought in the game: waiting to save you)
 // HEAD START's half meter holds through drops that decrypt nothing (on an empty board only a [1]
 // does), till the first that decrypts something; from then the meter's rules are the usual ones
 let headStartHold = false;
 let antivirusArmed = false; // (ANTIVIRUS waiting: the next infection a BLACK BOX lets out is quarantined)
+let layerDelayed = false; // (FIREWALL DELAY bought: the next layer held back, till it rises)
 let cureLift = false; // (ANTIVIRUS freed RANSOMWARE's bits: they settle at the next drop)
 // (what each does when it's bought in a game)
 const PATCH_NOW = {
@@ -678,6 +684,7 @@ function initGame() {
   usedStarters = [];
   marketBought = [];
   marketDrops = 0;
+  dropNo = 0;
   adware = null;
   spywareLeft = 0;
   malwareLeft = 0;
@@ -705,6 +712,7 @@ function initGame() {
   lookaheadLeft = runBoosts.has('lookahead') ? LOOKAHEAD_MS : 0;
   patchesBought = [];
   restoreBought = false;
+  layerDelayed = false;
   antivirusArmed = runBoosts.has('antivirus'); // (switched on before the game: waiting from the start)
   infectedBit = null;
   infectedAt = -Infinity;
@@ -716,6 +724,7 @@ function initGame() {
     ps.id = patchPick(patchSlots.map((x) => x.id));
     if (!ps.id) ps.state = 'closed';
   }
+  for (const sl of [...sideSlots, ...patchSlots]) sl.left = MARKET_EVERY; // (each slot's own count)
   updateHud();
   buildColumnButtons();
   render();
@@ -1721,6 +1730,7 @@ async function attemptDrop(col) {
   const resBefore = Progress.runRes();
   chainLog = []; // (what this drop decrypts, link by link, for the tutorial's explanations)
   dropLinks = 0;
+  dropNo++;
   const piece = queue.shift();
   if (piece.type === 'hack') {
     armedHack = null;
@@ -1821,6 +1831,7 @@ function finishTurn() {
   reportedScore = score;
   announce(Progress.check());
   if (overflowed()) secondChance();
+  renderPatches(); // (a patch used up in this drop: dimmed, its slot sitting out the next)
   if (overflowed()) endGame();
   else if (timeUp) endGame('time');
   else if (vsLost) endGame('vs-lose');
@@ -1842,6 +1853,7 @@ function overflowed() {
 }
 
 async function injectPulse() {
+  layerDelayed = false; // (FIREWALL DELAY's held-back layer: here now)
   setMessage('ENCRYPTION // NEW LAYER', 'alarm');
   SFX.play('alert');
   await sleep(800);
@@ -3078,6 +3090,7 @@ setInterval(() => {
   lookaheadLeft -= 250;
   if (lookaheadLeft > 0) return;
   updateHud();
+  renderPatches(); // (a LOOKAHEAD bought in a slot: used up)
   if (!busy) setMessage('LOOKAHEAD // OFF');
 }, 250);
 
@@ -5395,13 +5408,11 @@ function updateFreeBtn() {
   countEl.textContent = `x${count}`;
   renderStarters();
 }
-// THE COUNTDOWN: a pip under the icon for each drop till the offer turns over (MARKET_EVERY of them),
-// going dark one a drop; on the last, what's left blinks, and at the turnover the icon rolls through a
-// few others like a reel, ticking, and lands on the new one
+// THE COUNTDOWN: a pip under the icon for each drop till the slot's offer turns over (MARKET_EVERY of
+// them, each slot counting its own), going dark one a drop; on the last, what's left blinks, and at
+// the turnover the icon rolls through a few others like a reel, ticking, and lands on the new one
 const PIPS_HTML = `<span class="slot-pips" aria-hidden="true">${'<i></i>'.repeat(MARKET_EVERY)}</span>`;
-const marketLeft = () => MARKET_EVERY - (marketDrops % MARKET_EVERY);
-function setPips(b, on) {
-  const left = marketLeft();
+function setPips(b, on, left) {
   b.querySelectorAll('.slot-pips i').forEach((pip, k) => pip.classList.toggle('on', k < left));
   b.classList.toggle('last-drop', on && left === 1);
 }
@@ -5464,7 +5475,20 @@ function renderStarters() {
       return;
     }
     if (sl.state === 'rolling') { b.dataset.key = ''; return; } // (the reel draws itself)
-    if (sl.turning) { setPips(b, true); return; } // (turning over: the reel's, till it lands)
+    if (sl.turning) { setPips(b, true, sl.left); return; } // (turning over: the reel's, till it lands)
+    if (sl.state === 'spent') { // (used: dimmed in its slot for a drop, then the market's next offer)
+      b.className = 'exploit-icon side-slot spent';
+      b.disabled = true;
+      const key = `spent|${sl.id}`;
+      if (b.dataset.key !== key) {
+        b.dataset.key = key;
+        b.innerHTML = `<span class="exploit-glyph">${sl.face || itemIcon(sl.id)}</span><span class="starter-tag">\u2713</span>`;
+      }
+      b.title = `EXPLOIT ${i ? 'R' : 'L'} // ${itemName(sl.used || sl.id)} USED: a new offer after the next drop`;
+      b.setAttribute('aria-label', b.title);
+      return;
+    }
+    b.classList.remove('spent');
     const market = sl.state === 'market';
     const price = Progress.price(sl.id);
     const sealed = Progress.isBox(sl.id);
@@ -5477,7 +5501,7 @@ function renderStarters() {
     b.classList.toggle('armed', sl.state === 'armed');
     b.classList.toggle('locked', market && !marketOpen); // (not open yet: the first layer hasn't risen)
     b.classList.toggle('short', short);
-    const left = marketLeft();
+    const left = sl.left;
     // (drawn afresh only when what it holds changes: a new item, bought, opened, the market opening; a
     // drop only darkens a pip, so its icon's animation runs on unbroken)
     const key = `${sl.id}|${sl.state}|${market && marketOpen}`;
@@ -5487,7 +5511,7 @@ function renderStarters() {
         + (market && marketOpen ? PIPS_HTML : '')
         + (market ? `<span class="slot-sale" aria-hidden="true">${CURRENCY_SVG}</span>` : sl.state === 'armed' ? '' : `<span class="starter-tag">${sl.state === 'starter' ? (i ? 'R' : 'L') : '✓'}</span>`);
     }
-    setPips(b, market && marketOpen);
+    setPips(b, market && marketOpen, left);
     const name = itemName(sl.id);
     b.title = sl.state === 'armed' ? `${itemName(sl.id)} // ARMED: drop it` : market ? `BLACK MARKET // ${name}: ${priceText(price)} (${marketOpen ? `tap to see it; a new one in ${left} drop${left === 1 ? '' : 's'}` : `opens in ${marketOpensIn()} drops`})`
       : sealed ? `${sl.state === 'starter' ? `EXPLOIT ${i ? 'R' : 'L'}` : 'BOUGHT'} // ${name}: tap to open it`
@@ -5555,6 +5579,7 @@ const patchSlotEls = () => patchEls || (patchEls = [0, 1].map((i) => {
 const patchIcon = (id) => `<span class="exploit-glyph">${BOOSTER_SVG[id] || ''}</span>`;
 function renderPatches() {
   if (demoSlots && mode === 'tutorial') return;
+  settlePatches();
   patchSlotEls().forEach((b, i) => {
     const ps = patchSlots[i];
     const show = !!ps && !gameOver && mode !== 'tutorial';
@@ -5569,57 +5594,69 @@ function renderPatches() {
       b.setAttribute('aria-label', b.title);
       return;
     }
-    if (ps.turning) { setPips(b, true); return; }
+    if (ps.turning) { setPips(b, true, ps.left); return; }
+    if (ps.state === 'spent') { // (used up: dimmed in its slot for a drop, then a new patch)
+      b.className = 'exploit-icon side-slot patch-slot spent';
+      b.disabled = true;
+      const key = `spent|${ps.id}`;
+      if (b.dataset.key !== key) {
+        b.dataset.key = key;
+        b.innerHTML = `${patchIcon(ps.id)}<span class="starter-tag">\u2713</span>`;
+      }
+      b.title = `PATCH // ${BOOSTERS[ps.id].name} USED UP: a new patch after the next drop`;
+      b.setAttribute('aria-label', b.title);
+      return;
+    }
     const market = ps.state === 'market';
-    const waiting = ps.state === 'applied' && ((ps.id === 'second-chance' && restoreBought) || (ps.id === 'antivirus' && antivirusArmed)); // (bought, waiting for its moment)
+    const live = ps.state === 'applied'; // (bought and working: it keeps the slot till it's used up)
     const short = market && Progress.missing(`patch:${ps.id}`).length > 0;
     b.className = 'exploit-icon side-slot patch-slot';
     b.classList.toggle('market', market);
     b.classList.toggle('owned', !market);
-    b.classList.toggle('armed', waiting);
+    b.classList.toggle('armed', live);
     b.classList.toggle('confirm', market && shopPatch === i);
     b.classList.toggle('locked', market && !marketOpen);
     b.classList.toggle('short', short);
     b.disabled = !market;
-    const key = `${ps.id}|${ps.state}|${market && marketOpen}|${waiting}`;
+    const key = `${ps.id}|${ps.state}|${market && marketOpen}`;
     if (b.dataset.key !== key) {
       b.dataset.key = key;
       b.innerHTML = patchIcon(ps.id)
         + (market && marketOpen ? PIPS_HTML : '')
-        + (market ? `<span class="slot-sale" aria-hidden="true">${CURRENCY_SVG}</span>` : waiting ? '' : '<span class="starter-tag">\u2713</span>');
+        + (market ? `<span class="slot-sale" aria-hidden="true">${CURRENCY_SVG}</span>` : '');
     }
-    setPips(b, market && marketOpen);
+    setPips(b, market && marketOpen, ps.left);
     const name = BOOSTERS[ps.id].name;
-    const left = marketLeft();
+    const left = ps.left;
     b.title = market ? `PATCH // ${name}: ${priceText(Progress.price(`patch:${ps.id}`))} (${marketOpen ? `tap to see it; a new one in ${left} drop${left === 1 ? '' : 's'}` : `opens in ${marketOpensIn()} drops`})`
-      : waiting ? `PATCH // ${name}: ${ps.id === 'antivirus' ? 'waiting for the next infection' : 'ready to roll the trace back'}` : `PATCH // ${name}: applied`;
+      : `PATCH // ${name}: ${PATCH_LIVE[ps.id] ? PATCH_LIVE[ps.id]() : 'working'}`;
     b.setAttribute('aria-label', b.title);
   });
 }
-// (a patch used up: its slot back to the market with a new one in it)
-const patchWaiting = (ps) => (ps.id === 'second-chance' && restoreBought) || (ps.id === 'antivirus' && antivirusArmed);
-function freePatchSlots() {
-  let changed = false;
-  patchSlots.forEach((ps, i) => {
-    if (!(ps.state === 'applied' && !patchWaiting(ps)) && ps.state !== 'closed') return;
-    const id = patchPick(patchSlots.map((x, k) => (k === i ? null : x.id)));
-    if (!id && ps.state === 'closed') return;
-    ps.state = id ? 'market' : 'closed';
-    ps.id = id;
-    changed = true;
-  });
-  if (changed) renderPatches();
+// A patch bought keeps its slot while it works; each one's work, and how it reads on the slot
+const PATCH_LIVE = {
+  'head-start': () => (headStartHold ? 'the CHAIN METER held till your next decrypt' : ''),
+  'firewall-delay': () => (layerDelayed ? 'the next layer held back' : ''),
+  lookahead: () => (lookaheadLeft > 0 ? `your next bit shown, ${Math.ceil(lookaheadLeft / 1000)}s left` : ''),
+  'second-chance': () => (restoreBought ? 'ready to roll the trace back' : ''),
+  antivirus: () => (antivirusArmed ? 'waiting for the next infection' : ''),
+};
+// (used up, OVERTIME the moment it's bought: the slot dimmed, sitting out the next drop)
+function settlePatches() {
+  for (const ps of patchSlots) if (ps.state === 'applied' && !(PATCH_LIVE[ps.id] && PATCH_LIVE[ps.id]())) slotSpent(ps, ps.id);
 }
 function patchTap(i) {
   const ps = patchSlots[i];
   if (!ps || gameOver || ps.state !== 'market' || ps.turning) return;
   openPatchShop(i);
 }
-// The slot's next life once what was in it is used: the BLACK MARKET, again
-function slotSpent(sl, used) {
-  sl.state = 'market';
-  sl.id = marketPick(sideSlots.map((x) => x.id).concat(used));
-  if (!sl.id) sl.state = 'closed';
+// A slot's item used: dimmed in it (face: what shows, an INFECTION's virus) through the next drop,
+// then the market's next offer shuffles in (marketTick)
+function slotSpent(sl, used, face = null) {
+  sl.state = 'spent';
+  sl.used = used;
+  sl.face = face;
+  sl.spentAt = dropNo;
 }
 // Drops till the BLACK MARKET opens: till the first layer rises (ZEN: BASE_INTERVAL drops)
 const marketOpensIn = () => (MODES[mode].noLayers ? Math.max(1, BASE_INTERVAL - marketDrops) : Math.max(1, pulseInterval - dropsSinceLastPulse));
@@ -5632,7 +5669,7 @@ function openMarket() {
 }
 function slotTap(i) {
   const sl = sideSlots[i];
-  if (!sl || gameOver || sl.state === 'closed' || sl.state === 'locked' || sl.state === 'rolling' || sl.state === 'armed') return; // (armed: no taking it back)
+  if (!sl || gameOver || ['closed', 'locked', 'rolling', 'armed', 'spent'].includes(sl.state)) return; // (armed: no taking it back)
   if (sl.state !== 'market') {
     if (Progress.isBox(sl.id)) openBox(i);
     else if (!armExploit(i)) SFX.play('denied');
@@ -5720,7 +5757,7 @@ function closeShop() {
 // A patch bought in the game: applied at once
 function applyPatch(id) {
   if (id === 'head-start') { streak = Math.max(streak, Math.floor(streakCap() / 2)); headStartHold = true; showChainMeter(); }
-  if (id === 'firewall-delay') dropsSinceLastPulse -= 4;
+  if (id === 'firewall-delay') { dropsSinceLastPulse -= 4; layerDelayed = true; }
   if (id === 'overtime') { timeLeft += 15; showClock(); }
   if (id === 'lookahead') lookaheadLeft = LOOKAHEAD_MS;
   if (id === 'second-chance') restoreBought = true;
@@ -5763,8 +5800,6 @@ function patchBuy() {
   ps.state = 'applied';
   patchesBought.push(ps.id);
   applyPatch(ps.id);
-  const run = runId;
-  setTimeout(() => { if (run === runId && !gameOver) freePatchSlots(); }, 900); // (its tick shown a moment, then the slot sells again)
   SFX.play('egg');
   const cured = ps.id === 'antivirus' && !antivirusArmed;
   setMessage(`PATCH // ${BOOSTERS[ps.id].name}${ps.id === 'second-chance' ? ': READY IF THE TRACE COMPLETES' : cured ? ': INFECTIONS CLEARED' : ps.id === 'antivirus' ? ': THE NEXT INFECTION IS QUARANTINED' : ' APPLIED'}`);
@@ -5829,7 +5864,7 @@ function openBox(i) {
       antivirusArmed = false;
       b.innerHTML = `<span class="exploit-glyph">${VIRUS_SVG}</span>`;
       b.classList.add('quarantined');
-      setTimeout(() => { b.classList.remove('quarantined'); slotSpent(sl, box); renderStarters(); }, 900);
+      setTimeout(() => { b.classList.remove('quarantined'); slotSpent(sl, box, VIRUS_SVG); renderStarters(); }, 900);
       setMessage(`ANTIVIRUS // ${ANTI[result].name} QUARANTINED`);
       burstMessage('warning');
       SFX.play('egg');
@@ -5839,7 +5874,7 @@ function openBox(i) {
     if (Progress.isAnti(result)) {
       b.innerHTML = `<span class="exploit-glyph">${VIRUS_SVG}</span>`;
       b.classList.add('glitched');
-      setTimeout(() => { b.classList.remove('glitched'); slotSpent(sl, box); renderStarters(); }, 700);
+      setTimeout(() => { b.classList.remove('glitched'); slotSpent(sl, box, VIRUS_SVG); renderStarters(); }, 700);
       runAnti(result);
       return;
     }
@@ -5852,27 +5887,50 @@ function openBox(i) {
   };
   spin();
 }
-// Every MARKET_EVERY drops, the market's slots turn over (a price shown and not taken up goes too)
+// After every drop: each market slot's own count a drop on, its offer turning over when it runs out
+// (a price shown and not taken up goes too); a slot whose item was used, once a whole drop has gone
+// by, shuffles to the market's next offer; a patch slot with nothing worth selling tries again
 function marketTick() {
   if (!sideSlots.length) return;
-  freePatchSlots(); // (a waiting patch that's been used: its slot sells again)
+  settlePatches();
   if (++marketDrops >= BASE_INTERVAL && MODES[mode].noLayers) openMarket(); // (ZEN: no layers rise)
-  if (marketDrops % MARKET_EVERY) { renderStarters(); return; }
-  // (the turnover: each offer rolls into the next one; one set of ticks for them all)
+  // (each offer rolls into the next one; one set of ticks for them all)
   let tick = marketOpen;
+  const turn = (b, sl, faces, patch) => {
+    sl.left = MARKET_EVERY;
+    if (b.matches('.spent, .closed')) { // (used or empty till now: lit for the shuffle)
+      b.className = `exploit-icon side-slot${patch ? ' patch-slot' : ''} market`;
+      b.innerHTML = '<span class="exploit-glyph"></span>';
+    }
+    turnSlot(b, sl, faces, tick);
+    tick = false;
+  };
   const exploitFaces = [...marketPool(), ...Progress.boxIds()].map(itemIcon);
   sideSlots.forEach((sl, i) => {
-    if (sl.state !== 'market') return;
-    sl.id = marketPick(sideSlots.map((x) => x.id)) || sl.id;
-    turnSlot(sideSlotEls()[i], sl, exploitFaces, tick);
-    tick = false;
+    if (sl.state === 'spent') {
+      if (dropNo <= sl.spentAt) return; // (used in this drop: it sits out the next)
+      sl.id = marketPick(sideSlots.filter((x) => x !== sl).map((x) => x.id).concat(sl.used));
+      sl.state = sl.id ? 'market' : 'closed';
+      if (sl.id) turn(sideSlotEls()[i], sl, exploitFaces, false);
+    } else if (sl.state === 'market' && --sl.left <= 0) {
+      sl.id = marketPick(sideSlots.map((x) => x.id)) || sl.id;
+      turn(sideSlotEls()[i], sl, exploitFaces, false);
+    }
   });
   const patchFaces = Object.keys(BOOSTERS).filter((id) => !BOOSTERS[id].inGame).map((id) => BOOSTER_SVG[id]);
   patchSlots.forEach((ps, i) => {
-    if (ps.state !== 'market') return;
-    ps.id = patchPick(patchSlots.map((x, k) => (k === i ? null : x.id))) || ps.id;
-    turnSlot(patchSlotEls()[i], ps, patchFaces, tick);
-    tick = false;
+    const others = patchSlots.filter((x) => x !== ps).map((x) => x.id);
+    if (ps.state === 'spent' || ps.state === 'closed') {
+      if (ps.state === 'spent' && dropNo <= ps.spentAt) return;
+      const id = patchPick(others.concat(ps.state === 'spent' ? [ps.used] : []));
+      if (!id) { ps.state = 'closed'; ps.id = null; return; } // (nothing worth selling: again after the next drop)
+      ps.id = id;
+      ps.state = 'market';
+      turn(patchSlotEls()[i], ps, patchFaces, true);
+    } else if (ps.state === 'market' && --ps.left <= 0) {
+      ps.id = patchPick(patchSlots.map((x) => x.id)) || ps.id;
+      turn(patchSlotEls()[i], ps, patchFaces, true);
+    }
   });
   renderStarters();
 }

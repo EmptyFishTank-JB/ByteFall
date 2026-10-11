@@ -1929,6 +1929,8 @@ header { margin-bottom: 6px; }
 .exploit-row { gap: 10px; }
 .exploit-icon.side-slot[hidden] { display: none; }
 .exploit-icon.side-slot.closed { visibility: hidden; }
+/* (used: the item dimmed in its slot, a tick in the corner, through the next drop; then the shuffle) */
+.exploit-icon.side-slot.spent, .exploit-icon.side-slot.spent:disabled { --dim: 0.5; color: var(--fg-dim); border-style: dotted; border-color: rgba(var(--fg-rgb), 0.45); cursor: default; }
 .exploit-icon.side-slot.owned { color: var(--accent); --dim: 1; border-color: rgba(var(--accent-rgb), 0.7); }
 .exploit-icon.side-slot.owned:disabled { --dim: 0.35; cursor: default; }
 .exploit-icon.side-slot.market { --dim: 0.85; border-style: dashed; border-color: rgba(var(--accent-rgb), 0.55); color: var(--fg-dim); }

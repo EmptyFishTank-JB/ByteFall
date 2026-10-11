@@ -252,14 +252,17 @@ left opens at Lv 5, the right at Lv 12 (a padlock over the level till then; FULL
 sells a patch that fits the mode and would do something now (no HEAD START while an exploit waits or
 the meter's half full, no LOOKAHEAD while one runs or on EASY, no RESTORE POINT while one's waiting),
 at KEYS and a resource or two (`PATCH_PRICES`, ECONOMY.md), shown as the BLACK MARKET's are (dashed,
-the currency sign in its corner, the pips), opening and turning over with it. A tap opens the BLACK
+the currency sign in its corner, the pips), opening with it and turning over on its own count. A tap opens the BLACK
 MARKET's window for it (PATCH // APPLIED AT ONCE and what it does now; no MASTER KEYS; NOT NEEDED NOW
 if it would do nothing); bought, it's applied at once (HEAD START: the meter to half, held till the next decrypt; FIREWALL DELAY:
 the next layer 4 drops later; LOOKAHEAD: the next 60 seconds; OVERTIME: +15 seconds; ANTIVIRUS:
 every infection running cleared, or with none, waiting, pulsing, for the next one; RESTORE POINT:
-waiting, pulsing, till it saves you), lit with a tick a moment, and then the slot sells again, a new
-patch in it (ANTIVIRUS or RESTORE POINT waiting keeps its slot till it's used, then the slot sells
-again at the next drop; a slot with nothing useful to sell tries again at each turnover); nothing
+waiting, pulsing, till it saves you). It keeps its slot, lit and pulsing, while it works (HEAD START
+till its hold ends, FIREWALL DELAY till the delayed layer rises, LOOKAHEAD its 60 seconds, ANTIVIRUS
+and RESTORE POINT till they're used; OVERTIME, and ANTIVIRUS clearing what's running, are used the
+moment they're bought): no other patch shows in it meanwhile. Used up, it stays in the slot dimmed,
+with a tick, through the next drop; then the slot shuffles (the reel) to a new patch, its pips
+counting afresh (a slot with nothing useful to sell tries again after each drop); nothing
 bought in a game shuts a slot for good. The result screen's PATCHED: lists them.
 Paused, the whole row (and PUZZLE's HINT and UNDO) dims to the drop buttons' 25% and takes no taps.
 **EXPLOITS** for a game (STORE: TIER I, II and III) are exploits of your own, any you've unlocked by level, by tier: tier 1
@@ -299,13 +302,15 @@ what was paid on it is lost), **MALWARE** (the board's bits shown as flickering 
 whether you bring exploits in or not):
 a random exploit you've unlocked or, a quarter of the time, a BLACK BOX, marked for sale with the
 game's own currency sign in its corner (a 0 struck through twice, as a dollar sign is: no one
-country's), changing every 4 drops (once the market's open, 4 pips under its icon count the drops left, going dark one a drop; on the last drop what's left of them and the icon blink, and at the turnover the icon rolls through a few others like a reel, ticking once for the whole row, and lands on the new offer; REDUCED effects: it just changes). A tap opens the BLACK MARKET's window: a neon sign of a border in
+country's), each slot's offer changing every 4 drops on its own count (once the market's open, 4 pips under its icon count the drops left, going dark one a drop; on the last drop what's left of them and the icon blink, and at the turnover the icon rolls through a few others like a reel, ticking once for the whole row, and lands on the new offer; REDUCED effects: it just changes). The slots start in step, and drift apart as their items are bought and used. A tap opens the BLACK MARKET's window: a neon sign of a border in
 the accent, a tilted, flickering sign-sign-sign in its corner and scan lines over it; the item's icon
 in brackets and its name (a box's odds under it), then each part of its price as the resource's icon
 over what you have / what it costs (red and pulsing where you're short), and BUY in the middle
 (USE A MASTER KEY under it when short of an exploit's price with one). A tap off it, the X, Esc or back
-closes it; drops wait while it's open. A buy waits in the slot until you tap it to arm (or open) it,
-then the slot sells again: buy as often as you like. Buying opens once the game's first encryption layer
+closes it; drops wait while it's open. A buy waits in the slot until you tap it to arm (or open) it.
+Once it's used (the armed exploit dropped, a box's INFECTION gone off; an EXPLOIT L / R starter too),
+the slot keeps it, dimmed with a tick, through the next drop, then shuffles to a new offer with its
+pips counting afresh: buy as often as you like. Buying opens once the game's first encryption layer
 rises (ZEN, with no layers: after 8 drops, when the first would); till then the slots show their offers
 dimmed, and the window shows OPENS IN n DROPS in place of BUY. A game that used them says so on its result screen (EXPLOIT L / R: ... // BLACK MARKET: ...).
 

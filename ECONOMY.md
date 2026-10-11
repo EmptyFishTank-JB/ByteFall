@@ -68,7 +68,7 @@ So a game pays for about two tier 1 exploits, or one tier 2, and a tier 3 takes 
 | STORE, EXPLOITS (TIER I, II, III) | an exploit to take into a game, from EXPLOIT L or R (below) | KEYS + resources, or 1 MASTER KEY |
 | STORE, BLACK BOXES | a random pull to take into a game (below) | KEYS + resources (no MASTER KEYS) |
 | BLACK MARKET (in a game) | an exploit or BLACK BOX, the STORE's price | the same |
-| PATCH SLOTS (in a game, Lv 5 and Lv 12; a slot sells again once its patch is used) | HEAD START 8 KEYS + 4 CRYPTO, FIREWALL DELAY 10 + 5 CACHE, LOOKAHEAD 8 + 5 BUGS, OVERTIME 10 + 3 BUGS + 3 CACHE, ANTIVIRUS 10 + 4 CACHE + 1 ROOTKIT, RESTORE POINT 20 + 5 CRYPTO + 2 ROOTKITS (`PATCH_PRICES`) | KEYS + resources, applied at once |
+| PATCH SLOTS (in a game, Lv 5 and Lv 12; a patch keeps its slot while it works, and once it's used up the slot sits out a drop, then sells again) | HEAD START 8 KEYS + 4 CRYPTO, FIREWALL DELAY 10 + 5 CACHE, LOOKAHEAD 8 + 5 BUGS, OVERTIME 10 + 3 BUGS + 3 CACHE, ANTIVIRUS 10 + 4 CACHE + 1 ROOTKIT, RESTORE POINT 20 + 5 CRYPTO + 2 ROOTKITS (`PATCH_PRICES`) | KEYS + resources, applied at once |
 | EXPLOITS, to keep | an exploit from TROJAN on, once unlocked: four times its one-game price in resources, no KEYS (BLACK BOX the exploit: 40 CRYPTO + 8 ROOTKITS), always full price (no sale but a HOLIDAY's, no YOUR DEAL; the rank's rise as everything); RNG, BITFLIP and BUFFER OVERFLOW are free (`ownPrice`, `OWN_TIMES`, `FREE_EXPLOITS`); kept till the next RANK UP | resources, once a rank |
 
 ## DECRYPTOR ranks
@@ -240,11 +240,11 @@ mining pickaxe, a getaway rocket; SCAREWARE a crash screen, files deleting, a pr
 | Where | a side slot taken in empty (from the start), or one whose exploit has been used |
 | Modes | CLASSIC, BLITZ and ZEN (not DAILY, PUZZLE, VS or the tutorial) |
 | What's offered | a random unlocked exploit, or (a quarter of the time) a BLACK BOX: I 60%, II 30%, III 10% |
-| Turnover | a new offer every 4 drops (a price shown and not taken goes too) |
+| Turnover | a new offer every 4 drops, each slot on its own count (a price shown and not taken goes too) |
 | Buying | a tap opens the BLACK MARKET's window: each part of the price as have / cost under its icon, BUY (and USE A MASTER KEY when short of an exploit's price with one) |
 | Marked | the game's own currency sign (a 0 struck through twice) in the slot's corner |
 | Opens | once the game's first encryption layer rises (ZEN, with no layers: after 8 drops); till then the offers can be looked at |
-| Limit | none: once a buy is used, the slot sells again |
+| Limit | none: once a buy is used, the slot sits out the next drop (the item dimmed in it), then shuffles to a new offer |
 | After | a bought exploit waits in the slot to be armed; a bought box waits sealed to be opened |
 
 ## Not sold for money
