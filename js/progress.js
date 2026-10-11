@@ -77,7 +77,10 @@ const Progress = (() => {
     leet: 0, // finished on exactly 1,337
     bestClassicDrops: 0, // longest CLASSIC session, in drops
     dailyDay: { date: '', kinds: {} }, // daily games played on the latest UTC day (the dailies' own)
-    dailySweeps: 0, // days all four daily games were played
+    dailySweeps: 0, // days all four daily games were played (DECRYPT, PUZZLE, BLITZ, BREACH: not the ARCADE's)
+    codeGames: 0, // CODE BREAKER games finished (the DAILY ARCADE on Mondays, arcade.js)
+    codesBroken: 0, // ...and the codes broken
+    bestCodeTries: 0, // the fewest tries a code was broken in (0: none yet)
     breaches: 0, // BREACH boards cleared
     sundaySolves: 0, // Sunday (hardest) daily puzzles solved
     dailyFirstTries: 0, // daily puzzles solved on the first try
@@ -266,8 +269,10 @@ const Progress = (() => {
   // The Daily streak as it stands today: back to 0 once a day's dailies have been missed (the
   // streak achievements track this, not the best one, so a missed day starts them over)
   const currentStreak = () => (d.lastDaily === utcDay() || d.lastDaily === utcDay(-1) ? d.dailyStreak : 0);
-  // The daily games played today, toward DAILY SWEEP (back to 0 when the dailies change)
-  const kindsToday = () => (d.dailyDay.date === utcDay() ? count(d.dailyDay.kinds) : 0);
+  // The daily games played today, toward DAILY SWEEP (back to 0 when the dailies change): the four
+  // ByteFall dailies, not the ARCADE's (CODE BREAKER is only on Mondays)
+  const SWEEP_KINDS = ['decrypt', 'puzzle', 'blitz', 'breach'];
+  const kindsToday = () => (d.dailyDay.date === utcDay() ? SWEEP_KINDS.filter((k) => d.dailyDay.kinds[k]).length : 0);
 
   const ACHIEVEMENTS = [
     // INFECTIONS: paying them off, or not
@@ -368,10 +373,12 @@ const Progress = (() => {
     { id: '106473', name: '106473', desc: 'Decrypt 106,473 bits', value: () => d.bits, goal: 106473 },
     { id: 'lucky-sevens', name: 'LUCKY SEVENS', desc: 'Decrypt 1,000 [7]s', value: () => d.bitsByValue[7] || 0, goal: 1000 },
     { id: 'lightspeed', name: 'LIGHTSPEED', desc: 'Score 5,000 in one Blitz', value: () => d.bestBlitz, goal: 5000 },
-    { id: 'daily-sweep', name: 'DAILY SWEEP', desc: 'Play all four daily games on the same day', value: () => (d.dailySweeps ? 4 : kindsToday()), goal: 4, note: 'Progress shows today\u2019s games; it starts over when the dailies change, at 00:00 UTC' },
+    { id: 'daily-sweep', name: 'DAILY SWEEP', desc: 'Play DECRYPT, PUZZLE, BLITZ and BREACH on the same day', value: () => (d.dailySweeps ? 4 : kindsToday()), goal: 4, note: 'Progress shows today\u2019s games; it starts over when the dailies change, at 00:00 UTC' },
     { id: 'breached', name: 'BREACHED', desc: 'Clear the whole board in BREACH', value: () => d.breaches, goal: 1 },
     { id: 'one-shot', name: 'ONE SHOT', desc: 'Solve a daily puzzle on the first try', value: () => d.dailyFirstTries, goal: 1 },
     { id: 'sunday-best', name: 'SUNDAY BEST', desc: "Solve a Sunday daily puzzle (the week's hardest)", value: () => d.sundaySolves, goal: 1 },
+    { id: 'code-breaker', name: 'CODE BREAKER', desc: "Break a Monday CODE BREAKER code (the DAILY ARCADE)", value: () => d.codesBroken, goal: 1 },
+    { id: 'mind-reader', name: 'MIND READER', desc: 'Break a CODE BREAKER code in 4 tries or fewer', value: () => (d.bestCodeTries && d.bestCodeTries <= 4 ? 1 : 0), goal: 1 },
     { id: 'safecracker', name: 'SAFECRACKER', desc: 'Solve 30 puzzles', value: () => count(d.puzzles), goal: 30 },
     { id: 'century', name: 'CENTURY', desc: 'Play a Daily game 100 days in a row', value: currentStreak, goal: 100, note: 'Progress shows your current streak; a day\u2019s dailies missed (they change at 00:00 UTC) starts it over' },
     { id: 'triple-crown', name: 'TRIPLE CROWN', desc: 'Reach DECRYPTOR 3', value: () => d.decryptor, goal: 3 },
@@ -510,7 +517,7 @@ const Progress = (() => {
     ['ENCRYPTION LAYERS', ['layer-peeler', 'onion-router', 'onion-core', 'demolition', 'firewall-breach']],
     ['EXPLOITS', ['script-kiddie', 'black-hat', 'advanced-persistent-threat', 'full-toolkit', 'chained-exploits', 'arsenal', 'time-bomb', 'sting', 'wiretap', 'lateral-movement', 'overkill', 'double-trouble']],
     ['BLITZ AND ZEN', ['speed-run', 'blitzkrieg', 'lightspeed', 'zen-master', 'last-second']],
-    ['DAILY', ['daily-driver', 'daily-grind', 'streak', 'century', 'daily-sweep', 'perfect-daily', 'breached', 'one-shot', 'sunday-best', 'stubborn', 'so-close']],
+    ['DAILY', ['daily-driver', 'daily-grind', 'streak', 'century', 'daily-sweep', 'perfect-daily', 'breached', 'one-shot', 'sunday-best', 'stubborn', 'so-close', 'code-breaker', 'mind-reader']],
     ['PUZZLES', ['first-try', 'locksmith', 'safecracker', 'master-key', 'pickpocket']],
     ['LEVELS AND DECRYPTOR RANKS', ['lv-40', 'maxed-out', 'rollover', 'triple-crown', 'full-spectrum']],
     ['THEMES, FONTS AND MUSIC', ['collector', 'chameleon', 'tech-support', 'insert-coin', 'bit-by-bit', 'bite-sized', 'in-orbit', 'dj', 'audiophile', 'theme-park', 'channel-surfer', 'silent-running']],
@@ -567,7 +574,8 @@ const Progress = (() => {
   const RANK_CAP = 10;
   const rankBoost = () => 1 + RANK_EARN * Math.min(RANK_CAP, d.decryptor || 0);
   const rankPrice = () => 1 + RANK_PRICE * Math.min(RANK_CAP, d.decryptor || 0);
-  const KEY_PAY = { chain5: 2, chain7: 5, achievement: 10, level: 10, daily: 5, puzzle: { e: 2, n: 4, h: 6 } };
+  // (code: CODE BREAKER's code broken, 12 less the tries it took: 11 in one, 2 in ten)
+  const KEY_PAY = { chain5: 2, chain7: 5, achievement: 10, level: 10, daily: 5, puzzle: { e: 2, n: 4, h: 6 }, code: (tries) => 12 - tries };
   function earn(n) {
     if (!(n > 0)) return;
     d.keys += n;
@@ -1016,7 +1024,7 @@ const Progress = (() => {
           if (d.dailyDay.date !== today) d.dailyDay = { date: today, kinds: {} };
           if (!d.dailyDay.kinds[run.mode]) {
             d.dailyDay.kinds[run.mode] = true;
-            if (count(d.dailyDay.kinds) === 4) d.dailySweeps++;
+            if (SWEEP_KINDS.includes(run.mode) && kindsToday() === 4) d.dailySweeps++;
           }
         }
         if (run.mode === 'puzzle' && run.puzzle !== null) d.puzzleTries[run.puzzle] = (d.puzzleTries[run.puzzle] || 0) + 1;
@@ -1126,6 +1134,28 @@ const Progress = (() => {
       if (weekday === 6) d.sundaySolves++;
       if (tries === 1) d.dailyFirstTries++;
     },
+    // THE DAILY ARCADE (arcade.js): its first guess makes it the day's daily game (the streak, the
+    // day's KEYS and MASTER KEY), as a ByteFall daily's first drop does
+    arcadePlayed(kind) {
+      playedDaily();
+      const today = utcDay();
+      if (d.dailyDay.date !== today) d.dailyDay = { date: today, kinds: {} };
+      d.dailyDay.kinds[kind] = true;
+      save();
+    },
+    // ...and CODE BREAKER over: broken in `tries`, or not (0). Returns the KEYS it paid
+    codeBreaker(tries) {
+      d.codeGames++;
+      const keys = tries ? KEY_PAY.code(tries) : 0;
+      if (tries) {
+        d.codesBroken++;
+        d.bestCodeTries = d.bestCodeTries ? Math.min(d.bestCodeTries, tries) : tries;
+        earn(keys);
+      }
+      save();
+      return keys;
+    },
+    codeStats: () => ({ games: d.codeGames, broken: d.codesBroken, best: d.bestCodeTries }),
     // A live session thrown away with RESTART or a difficulty switch
     restarted() {
       if (run.mode === 'tutorial') return; // (the tutorial counts toward nothing)

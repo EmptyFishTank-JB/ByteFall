@@ -3015,7 +3015,7 @@ body.at-home :is(.records-btn, .settings-btn):not([aria-expanded="true"]) { visi
   padding: 6px 12px; background: transparent; border: 1px solid var(--fg); border-radius: 4px;
   color: var(--fg); font-family: inherit; font-size: 12px; letter-spacing: 1px; cursor: pointer;
 }
-@media (hover: hover) { :is(.records, .settings) .card-back:hover { background: rgba(var(--fg-rgb), 0.12); } }
+@media (hover: hover) { :is(.records, .settings, .arcade) .card-back:hover { background: rgba(var(--fg-rgb), 0.12); } }
 body.panel-open .crt :is(.records-btn, .settings-btn) { visibility: hidden !important; }
 
 /* THE HUD (not VS): BEST over SCORE on the left, CURRENT large in the middle (NEXT, on Easy, a
@@ -4412,10 +4412,10 @@ header h1, .card-brand { font-size: 19.2px; letter-spacing: 0.1em; }
    as on the main menu, the card's name under it as a game's mode line (// PUZZLES, // MUSIC PLAYER),
    what's under it 8px under that */
 .card-brand { display: none; }
-:is(.records.puzzles, .music-player) .card-head { position: relative; flex-direction: column; justify-content: flex-start; gap: 8px; margin-bottom: 6px; }
-:is(.records.puzzles, .music-player) .card-head .card-back { position: absolute; left: 0; top: 0; }
-:is(.records.puzzles, .music-player) .card-brand { display: block; margin: var(--head-nudge, 4.9px) 0 0; line-height: 1; white-space: nowrap; } /* (where every game's sits: script.js's alignHeader) */
-:is(.records.puzzles #records-title, .music-player .mp-title) { font-size: 11px; line-height: 1; letter-spacing: 2px; color: var(--fg-dim); text-shadow: none; }
+:is(.records.puzzles, .music-player, .arcade) .card-head { position: relative; flex-direction: column; justify-content: flex-start; gap: 8px; margin-bottom: 6px; }
+:is(.records.puzzles, .music-player, .arcade) .card-head .card-back { position: absolute; left: 0; top: 0; }
+:is(.records.puzzles, .music-player, .arcade) .card-brand { display: block; margin: var(--head-nudge, 4.9px) 0 0; line-height: 1; white-space: nowrap; } /* (where every game's sits: script.js's alignHeader) */
+:is(.records.puzzles #records-title, .music-player .mp-title, .arcade .arcade-title) { font-size: 11px; line-height: 1; letter-spacing: 2px; color: var(--fg-dim); text-shadow: none; }
 .music-player .card-head.mp-head { margin-bottom: -4px; } /* (with the player's 12px gap: the visualizer 8px under its name) */
 .card-head .card-brand span { font-size: inherit; letter-spacing: inherit; color: var(--accent); text-shadow: 0 0 8px var(--accent); } /* (FALL as the title's, not the card's heading) */
 /* DAILY's cards: one row that slides sideways under the panel's sides and loops, a card at a time in
@@ -4589,3 +4589,64 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 .records .hist-game { padding: var(--gap) 0; }
 .records .hist-game:first-child { padding-top: 0; }
 .records :is(.hist-when, .hist-stats, .hist-earned, .hist-patched) { margin-top: var(--gap); }
+
+/* THE DAILY ARCADE (arcade.js): a card of its own covering the game card, as SETTINGS does, its top
+   as PUZZLES' (BACK in the corner, BYTEFALL, // CODE BREAKER under it). CODE BREAKER: the line, the
+   board (the code, a ===== line, the ten tries from the bottom up, each row's number at its left and
+   its pips at its right), what the pips mean, then the keypad (the seven bits, DELETE, ENTER) or,
+   once it's over, SHARE */
+.arcade { position: absolute; inset: 0; z-index: 20; display: flex; flex-direction: column; gap: 8px; padding: 8px 8px 16px; background: var(--panel); overflow: hidden; }
+.arcade[hidden] { display: none; }
+.arcade .card-head { flex: none; margin-bottom: 0; }
+.cb-line { flex: none; margin: 0; min-height: 17px; text-align: center; font-size: 13px; line-height: 17px; letter-spacing: 1px; color: var(--fg); }
+.cb-line.note { color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+/* (sized by script: arcade.js's fit sets --cb-cell, the squares as big as the room allows, 44px at most) */
+.cb-board { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px; background: var(--board-bg); border: 1px solid var(--grid-line); border-radius: 6px; }
+.cb-row { display: grid; grid-template-columns: 44px repeat(4, var(--cb-cell, 36px)) 44px; gap: 4px; align-items: center; }
+.cb-row .cell { width: var(--cb-cell, 36px); height: var(--cb-cell, 36px); font-size: calc(var(--cb-cell, 36px) * 0.42); }
+.cb-no { padding-right: 4px; text-align: right; font-size: 11.5px; letter-spacing: 1px; color: var(--fg-dim); }
+.cb-live .cb-no { color: var(--accent); }
+.cb-code .cb-no { color: var(--accent); }
+.cb-empty .cell { opacity: 0.6; }
+.cb-rule { align-self: stretch; height: 0; border-top: 1px dashed rgba(var(--accent-rgb), 0.7); }
+/* (the code: ?s, dashed, till it's over; then its bits, glowing if it was broken) */
+.cb-code .cell.cb-hidden { border: 1px dashed rgba(var(--accent-rgb), 0.7); background: rgba(var(--accent-rgb), 0.06); color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+.cb-code.lost .cell.disc { border-color: var(--accent); color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.6); }
+:is(.cb-code.won, .cb-row.won) .cell.disc { box-shadow: 0 0 10px rgba(var(--fg-rgb), 0.6); animation: cb-won 1.2s ease-out 1; }
+@keyframes cb-won { 0% { transform: scale(1); } 30% { transform: scale(1.12); box-shadow: 0 0 18px var(--fg); } 100% { transform: scale(1); } }
+/* (the row being keyed in: its empty squares dashed, the next one to fill pulsing) */
+.cb-slot { border: 1px dashed rgba(var(--accent-rgb), 0.5); }
+.cb-slot.next { border: 1px solid var(--accent); animation: warn-pulse 1.1s ease-in-out infinite; }
+.cb-live.shake { animation: cb-shake 0.3s ease-in-out 1; }
+@keyframes cb-shake { 20%, 60% { transform: translateX(-4px); } 40%, 80% { transform: translateX(4px); } }
+/* THE PIPS, in a row at the right of each try: lit, a bit in the right place; hollow, a right bit in
+   the wrong place; dark, no match (the lit first, then the hollow) */
+.cb-pips { display: flex; gap: 3px; padding-left: 4px; }
+:is(.cb-pips, .cb-legend) i { flex: none; width: 7px; height: 7px; border-radius: 1px; background: rgba(var(--fg-rgb), 0.1); box-sizing: border-box; }
+:is(.cb-pips, .cb-legend) i.hit { background: var(--fg); box-shadow: 0 0 6px rgba(var(--fg-rgb), 0.7); }
+:is(.cb-pips, .cb-legend) i.near { background: transparent; border: 1.5px solid var(--accent); box-shadow: 0 0 5px rgba(var(--accent-rgb), 0.5); }
+.cb-pips i.miss { background: rgba(var(--fg-rgb), 0.22); }
+.cb-legend { flex: none; display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 12px; margin: 0; font-size: 11.5px; letter-spacing: 1px; color: var(--fg-dim); }
+.cb-legend span { display: inline-flex; align-items: center; gap: 4px; }
+.cb-legend i:not(.hit):not(.near) { background: rgba(var(--fg-rgb), 0.22); }
+/* THE KEYPAD: the seven bits as the theme draws them, as the drop buttons are; DELETE and ENTER under */
+.cb-pad { flex: none; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.cb-pad[hidden], .cb-acts[hidden], .cb-over[hidden] { display: none; }
+.cb-pad button { min-width: 0; height: 44px; padding: 0; display: flex; align-items: center; justify-content: center; background: rgba(var(--fg-rgb), 0.08); border: 1px solid var(--fg-dim); border-radius: 4px; color: var(--fg); font-family: var(--font); font-size: 15.5px; font-weight: bold; text-shadow: 0 0 6px rgba(var(--fg-rgb), 0.6); cursor: pointer; transition: background 0.15s, transform 0.1s; }
+.cb-pad button:active:not(:disabled) { background: rgba(var(--fg-rgb), 0.25); transform: translateY(1px); }
+.cb-pad button:disabled { opacity: 0.35; cursor: default; }
+.cb-face { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; }
+.cb-face .glyph { display: block; width: 100%; height: 100%; overflow: visible; }
+.cb-acts { flex: none; display: flex; gap: 8px; }
+.cb-acts button, #cb-share { flex: 1; height: 40px; background: transparent; border: 1px solid var(--fg); border-radius: 4px; color: var(--fg); font-family: inherit; font-size: 13px; letter-spacing: 2px; cursor: pointer; }
+.cb-acts button:disabled { opacity: 0.35; cursor: default; }
+#cb-enter, #cb-share { border-color: var(--accent); color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+#cb-enter.ready { background: rgba(var(--accent-rgb), 0.15); box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.35); }
+@media (hover: hover) {
+  .cb-pad button:hover:not(:disabled) { background: rgba(var(--fg-rgb), 0.2); }
+  :is(.cb-acts button, #cb-share):hover:not(:disabled) { background: rgba(var(--fg-rgb), 0.12); }
+}
+.cb-over { flex: none; display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
+.cb-over #cb-share { flex: none; }
+.cb-next { margin: 0; text-align: center; font-size: 12px; letter-spacing: 1px; color: var(--fg-dim); }
+@media (prefers-reduced-motion: reduce) { .cb-slot.next, .cb-live.shake, :is(.cb-code.won, .cb-row.won) .cell.disc { animation: none; } }

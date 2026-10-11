@@ -14,6 +14,15 @@ Ideas queued for later (not built yet).
 
 See [WANDERERS.md](WANDERERS.md) for the season-by-season chart and the full ideas list.
 
+## The DAILY ARCADE (a game a day)
+
+The DAILY menu's fifth card, ARCADE (`js/arcade.js`): a different game each weekday on the bits and
+the board, not necessarily ByteFall's rules. **Monday: CODE BREAKER** (done: a 4-bit code, 10 tries,
+pips at each row's right, one game a Monday). Still to pick for the other six days; ideas so far:
+a SUDOKU on the bits (each row, column and box [1] to [7] once), a match-3 clearing game (DEFRAG,
+below), a falling-pieces game (PURGE, below), a TETRIS-like one. Once every day has one, the ARCADE
+can count toward DAILY SWEEP (all five).
+
 ## The ARCADE (after the Android launch)
 
 Two more puzzle games in ByteFall's world, as updates after launch: an **ARCADE** section on the
