@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+<title>ARENA TEST</title>
+<link rel="icon" href="data:,">
+<!-- ARENA TEST: a first look at a 3D vehicle arena (TODO.md, WARTHOG ARENA) on three.js (rendering)
+     and cannon-es (physics), both in lib/ with their licenses. Not part of ByteFall: the app's build
+     never copies this folder. -->
+<style>
+  :root { --fg: #39ff8f; --dim: #1f7a52; --accent: #ffd166; --danger: #ff4d5e; --panel: rgba(4, 10, 8, 0.78); }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0b1220; color: var(--fg); font-family: 'Courier New', Courier, monospace; -webkit-user-select: none; user-select: none; touch-action: none; }
+  #view { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  .hud { position: fixed; z-index: 2; pointer-events: none; text-shadow: 0 0 6px rgba(0, 0, 0, 0.9); }
+  #score { top: calc(8px + env(safe-area-inset-top)); left: 16px; font-size: 13px; letter-spacing: 1px; }
+  #score b { display: block; font-size: 15.5px; letter-spacing: 3px; margin-bottom: 4px; }
+  #score .boost { margin-top: 8px; width: 120px; height: 6px; border: 1px solid var(--dim); background: rgba(0, 0, 0, 0.4); }
+  #score .boost i { display: block; height: 100%; width: 100%; background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+  #corner { top: calc(8px + env(safe-area-inset-top)); right: 16px; text-align: right; pointer-events: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+  #fps { font-size: 11.5px; color: var(--dim); }
+  #feed { top: 22%; left: 0; right: 0; text-align: center; font-size: 17px; letter-spacing: 2px; color: var(--accent); text-shadow: 0 0 10px var(--accent), 0 0 2px #000; opacity: 0; transition: opacity 0.4s; }
+  #feed.on { opacity: 1; transition: none; }
+  #feed.bad { color: var(--danger); text-shadow: 0 0 10px var(--danger), 0 0 2px #000; }
+  button { font-family: inherit; }
+  .pill { pointer-events: auto; background: var(--panel); color: var(--fg); border: 1px solid var(--dim); border-radius: 6px; font-size: 11.5px; letter-spacing: 1px; padding: 6px 10px; cursor: pointer; }
+  .pill.on { border-color: var(--accent); color: var(--accent); }
+  /* touch: the stick appears where the left thumb lands; BOOST and FLIP on the right */
+  #stick { position: fixed; z-index: 3; width: 112px; height: 112px; margin: -56px 0 0 -56px; border: 2px solid rgba(57, 255, 143, 0.45); border-radius: 50%; pointer-events: none; display: none; }
+  #stick i { position: absolute; left: 50%; top: 50%; width: 48px; height: 48px; margin: -24px 0 0 -24px; border-radius: 50%; background: rgba(57, 255, 143, 0.35); border: 2px solid var(--fg); }
+  #pads { position: fixed; z-index: 3; right: calc(16px + env(safe-area-inset-right)); bottom: calc(24px + env(safe-area-inset-bottom)); display: none; flex-direction: column; align-items: flex-end; gap: 12px; }
+  .touch #pads { display: flex; }
+  #pads button { width: 88px; height: 88px; border-radius: 50%; background: var(--panel); border: 2px solid var(--accent); color: var(--accent); font-size: 14.5px; letter-spacing: 1px; touch-action: none; }
+  #pads button.small { width: 60px; height: 60px; font-size: 11.5px; border-color: var(--dim); color: var(--fg); }
+  #pads button.down { background: rgba(255, 209, 102, 0.3); }
+  #pads button:disabled { opacity: 0.4; }
+  #hint { left: 0; right: 0; bottom: calc(8px + env(safe-area-inset-bottom)); text-align: center; font-size: 11.5px; color: var(--dim); }
+  .touch #hint { display: none; }
+  #card { position: fixed; z-index: 5; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(92vw, 420px); padding: 24px 16px; background: var(--panel); border: 1px solid var(--fg); border-radius: 8px; text-align: center; box-shadow: 0 0 24px rgba(57, 255, 143, 0.25); }
+  #card h1 { margin: 0 0 8px; font-size: 17px; letter-spacing: 4px; }
+  #card p { margin: 0 0 8px; font-size: 13px; line-height: 1.5; color: #c9f7dc; }
+  #card .keys { color: var(--dim); font-size: 12px; }
+  #card button { margin-top: 8px; width: 100%; padding: 12px; font-size: 15.5px; letter-spacing: 3px; background: transparent; color: var(--accent); border: 1px solid var(--accent); border-radius: 6px; cursor: pointer; box-shadow: 0 0 10px rgba(255, 209, 102, 0.3); }
+  #card[hidden] { display: none; }
+</style>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div class="hud" id="score"><b>ARENA TEST</b><span id="tally">KNOCKOUTS 0 // FALLS 0</span><div class="boost"><i id="boost-bar"></i></div></div>
+<div class="hud" id="corner"><span id="fps"></span><button type="button" class="pill" id="shadows">SHADOWS: ON</button><button type="button" class="pill" id="cam">CAMERA: CHASE</button></div>
+<div class="hud" id="feed"></div>
+<div class="hud" id="hint">DRIVE: WASD / ARROWS // BOOST: SPACE // FLIP: R // A CONTROLLER WORKS TOO</div>
+<div id="stick"><i></i></div>
+<div id="pads"><button type="button" class="small" id="flip">FLIP</button><button type="button" id="boost">BOOST</button></div>
+<div id="card">
+  <h1>ARENA TEST</h1>
+  <p>Push the others off the edge. Watch out for the sweeper in the middle, and for TIMMY.</p>
+  <p class="keys" id="how">DRIVE: WASD or the arrows. BOOST: SPACE. FLIP: R.</p>
+  <button type="button" id="start">START</button>
+</div>
+<script type="module" src="main.js?v=561"></script>
+</body>
+</html>
