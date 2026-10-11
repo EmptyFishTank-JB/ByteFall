@@ -2503,6 +2503,8 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
   text-shadow: 0 0 8px var(--fg); box-shadow: 0 0 14px rgba(var(--fg-rgb), 0.35);
   animation: start-glow 1.6s ease-in-out infinite;
 }
+/* (unseen till index.html's placeStartBtn has put it under the tagline, so it never shows here first) */
+.start-btn:not(.placed) { visibility: hidden; }
 .start-btn:focus-visible { background: rgba(var(--fg-rgb), 0.18); outline: none; }
 @media (hover: hover) { .start-btn:hover { background: rgba(var(--fg-rgb), 0.18); outline: none; } }
 @keyframes start-glow { 0%, 100% { box-shadow: 0 0 8px rgba(var(--fg-rgb), 0.25); } 50% { box-shadow: 0 0 20px rgba(var(--fg-rgb), 0.6); } }
