@@ -4618,6 +4618,11 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 .cb-slot { border: 1px dashed rgba(var(--accent-rgb), 0.5); }
 .cb-slot.next { border: 1px solid var(--accent); animation: warn-pulse 1.1s ease-in-out infinite; }
 .cb-live.shake { animation: cb-shake 0.3s ease-in-out 1; }
+/* (a code keyed in again: the try that had it pulses red three times, its number too) */
+.cb-row.tried .cell.disc { animation: cb-tried 0.4s ease-in-out 3; }
+.cb-row.tried .cb-no { animation: cb-tried-no 0.4s ease-in-out 3; }
+@keyframes cb-tried { 50% { border-color: var(--danger); color: var(--danger); background: rgba(var(--danger-rgb), 0.18); box-shadow: 0 0 12px rgba(var(--danger-rgb), 0.7); text-shadow: 0 0 6px rgba(var(--danger-rgb), 0.7); } }
+@keyframes cb-tried-no { 50% { color: var(--danger); } }
 @keyframes cb-shake { 20%, 60% { transform: translateX(-4px); } 40%, 80% { transform: translateX(4px); } }
 /* THE PIPS, in a row at the right of each try: lit, a bit in the right place; hollow, a right bit in
    the wrong place; dark, no match (the lit first, then the hollow) */
