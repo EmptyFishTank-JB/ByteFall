@@ -135,6 +135,7 @@ const Arcade = (() => {
       const guess = game.g[i];
       if (guess) {
         const r = row(i === win && done ? 'won' : '', no);
+        r.dataset.try = String(i);
         for (const v of guess) cell(r, v);
         pips(r, mark(guess, game.code), i === reveal ? lit : CB_LEN);
       } else if (i === game.g.length && !done) { // (the row being keyed in)
@@ -209,6 +210,15 @@ const Arcade = (() => {
       showLine(`ENTER ${CB_LEN} BITS FIRST`);
       const live = boardEl.querySelector('.cb-live');
       if (live) { live.classList.remove('shake'); void live.offsetWidth; live.classList.add('shake'); }
+      return;
+    }
+    // (a code already tried: the error buzz, and that try's row pulses; what's keyed in stays, to change)
+    const dupe = game.g.findIndex((g) => g.join('') === typed.join(''));
+    if (dupe >= 0) {
+      SFX.play('denied');
+      showLine(`ALREADY TRIED // TRY ${String(dupe + 1).padStart(2, '0')}`);
+      const was = boardEl.querySelector(`.cb-row[data-try="${dupe}"]`);
+      if (was) { was.classList.remove('tried'); void was.offsetWidth; was.classList.add('tried'); }
       return;
     }
     game.g.push(typed);
