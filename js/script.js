@@ -448,6 +448,18 @@ const dailyPuzzleSolvedKey = () => `bytefall-daily-puzzle-solved-${todayKey()}`;
 const dailyPuzzleTries = () => Number(storage.get(dailyPuzzleTriesKey())) || 0;
 const dailyPuzzleSolvedAt = () => Number(storage.get(dailyPuzzleSolvedKey())) || 0; // the try it was solved on
 const dailyPuzzleOfficial = () => !dailyPuzzleSolvedAt() && dailyPuzzleTries() < DAILY_PUZZLE_TRIES;
+// THE DAILY PUZZLE's HINT, on the EXPLOIT button (a puzzle drops no exploits): only on the bigger
+// puzzles (DAILY_HINT_BITS bits and up: Thursday to Sunday; on the smaller ones a hint would be the
+// answer), one a try, none on the first two. The 3rd try's is in words: where the next bit lands,
+// not which column ("THE [3] GOES ON A [6]"); the 4th try's (and practice's) lights the column too,
+// as PUZZLE's HINT does. A solve with one says so (the result, SHARE, the DAILY card)
+const DAILY_HINT_BITS = 3;
+const DAILY_HINT_WORDS = 3; // (the try the worded hint comes on)
+const DAILY_HINT_COLUMN = 4; // (the try the column's lit on)
+let dailyHintUsed = false; // (this try's)
+const dailyHintedKey = () => `bytefall-daily-puzzle-hinted-${todayKey()}`;
+const dailyHinted = () => (storage.get(dailyHintedKey()) || '').split(',').filter(Boolean).map(Number); // (the tries one was used on)
+const dailySolvedWithHint = () => dailyPuzzleSolvedAt() > 0 && dailyHinted().includes(dailyPuzzleSolvedAt());
 
 // Randomness. DAILY seeds each stream from the date, so the bits you're dealt are the same for
 // everyone however they play; bits revealed under layers and exploits use their own streams.
@@ -705,6 +717,7 @@ function initGame() {
   }
   puzzleHistory = [];
   hintCol = null;
+  dailyHintUsed = false;
   if (runBoosts.has('head-start')) streak = Math.floor(streakCap() / 2);
   headStartHold = runBoosts.has('head-start');
   if (runBoosts.has('firewall-delay')) dropsSinceLastPulse = -4;
@@ -889,7 +902,7 @@ function showPuzzleResult(solved, firstTime = false) {
   const triesLeft = DAILY_PUZZLE_TRIES - dailyPuzzleTries();
   document.getElementById('overlay-sub').textContent = daily
     ? (!dailyOfficial ? (solved ? 'Cracked (practice).' : 'Blocks are still encrypted (practice).')
-      : solved ? `Today's puzzle cracked on try ${dailyPuzzleSolvedAt()} of ${DAILY_PUZZLE_TRIES}.`
+      : solved ? `Today's puzzle cracked on try ${dailyPuzzleSolvedAt()} of ${DAILY_PUZZLE_TRIES}${dailySolvedWithHint() ? ', with a hint' : ''}.`
       : triesLeft > 0 ? `Blocks are still encrypted. ${triesLeft} ${triesLeft === 1 ? 'try' : 'tries'} left today.`
       : `Blocks are still encrypted. That was today's last try.`)
     : solved
@@ -2868,7 +2881,7 @@ function dailyStatus(kind) {
   if (kind === 'puzzle') {
     const at = dailyPuzzleSolvedAt();
     const used = dailyPuzzleTries();
-    if (at) return { done: true, text: `SOLVED ON TRY ${at}/${DAILY_PUZZLE_TRIES}` };
+    if (at) return { done: true, text: `SOLVED ON TRY ${at}/${DAILY_PUZZLE_TRIES}${dailySolvedWithHint() ? ' WITH A HINT' : ''}` };
     if (used >= DAILY_PUZZLE_TRIES) return { done: true, text: `NOT SOLVED // ${DAILY_PUZZLE_TRIES}/${DAILY_PUZZLE_TRIES} TRIES USED` };
     return { done: false, text: used ? `${DAILY_PUZZLE_TRIES - used} OF ${DAILY_PUZZLE_TRIES} TRIES LEFT` : `${DAILY_PUZZLE_TRIES} TRIES TODAY` };
   }
@@ -4137,7 +4150,7 @@ function dailyShareText() {
     const solvedAt = dailyPuzzleSolvedAt();
     const used = solvedAt || dailyPuzzleTries();
     const squares = Array.from({ length: DAILY_PUZZLE_TRIES }, (_, n) => (n + 1 === solvedAt ? '\u{1F7E9}' : n < used ? '\u{1F7E5}' : '\u2B1B')).join('');
-    const result = solvedAt ? `Solved on try ${solvedAt}/${DAILY_PUZZLE_TRIES}`
+    const result = solvedAt ? `Solved on try ${solvedAt}/${DAILY_PUZZLE_TRIES}${dailySolvedWithHint() ? ' with a hint \u{1F4A1}' : ''}`
       : used >= DAILY_PUZZLE_TRIES ? `Not solved // ${DAILY_PUZZLE_TRIES}/${DAILY_PUZZLE_TRIES} tries used`
       : `Not solved yet // ${used}/${DAILY_PUZZLE_TRIES} tries used`;
     return [`${head} // ${WEEKDAYS[utcWeekday()]} ${utcWeekday() + 1}/7`, result, squares, url].join('\n');
@@ -5394,6 +5407,20 @@ function updateFreeBtn() {
   vsQuitBtn.hidden = true; // (PAUSE is the top-left icon now, in VS too; EXIT is on the pause screen)
   updateTopIcons();
   showChainMeter();
+  const hint = dailyHint();
+  if (hint) { // (the DAILY PUZZLE's HINT in its place: a bulb, lit when there's one to use)
+    document.getElementById('exploit-glyph').innerHTML = BOOSTER_SVG.hint;
+    const lit = hint === 'words' || hint === 'column';
+    exploitBtn.classList.remove('armed');
+    exploitBtn.classList.toggle('ready', lit);
+    exploitBtn.title = hint === 'locked' ? `HINT // from try ${DAILY_HINT_WORDS}` : hint === 'used' ? 'HINT // used on this try'
+      : `HINT // tap for ${hint === 'words' ? 'where your next bit goes' : 'the column your next bit goes in'}`;
+    const countEl = document.getElementById('exploit-count');
+    countEl.hidden = hint !== 'locked';
+    countEl.textContent = `TRY ${DAILY_HINT_WORDS}`;
+    renderStarters();
+    return;
+  }
   const ready = nextExploit();
   const centerArmed = armedHack && armedSlot === null; // (one armed from a side slot shows there, not here)
   const shown = (centerArmed && armedHack) || ready;
@@ -6213,8 +6240,44 @@ function armExploit(slot = null) {
   if (id === 'swap') render(); // (the bits it can pick)
   return true;
 }
+// (null: no hint here; 'locked' till its try; 'words' or 'column' to use; 'used')
+function dailyHint() {
+  if (!daily || mode !== 'puzzle' || todayPuzzle().pieces.length < DAILY_HINT_BITS) return null;
+  if (dailyHintUsed) return 'used';
+  const tryNow = dailyOfficial ? dailyPuzzleTries() + (Progress.runDrops() === 0 ? 1 : 0) : Infinity; // (practice: as the last try)
+  if (tryNow < DAILY_HINT_WORDS) return 'locked';
+  return tryNow < DAILY_HINT_COLUMN ? 'words' : 'column';
+}
+function useDailyHint() {
+  const kind = dailyHint();
+  if (kind === 'locked' || kind === 'used') {
+    SFX.play('denied');
+    setMessage(kind === 'locked' ? `HINT // FROM TRY ${DAILY_HINT_WORDS} OF ${DAILY_PUZZLE_TRIES}` : 'HINT // ONE A TRY: USED');
+    return;
+  }
+  if (busy || gameOver || !queue.length) { SFX.play('denied'); return; }
+  const board = columns.map((c) => c.map((b) => (b.type === 'number' ? b.val : `L${b.level}:${b.hidden}`)));
+  const r = PuzzleSim.solve(board, queue.map((q) => q.val), ROWS, 1);
+  if (!r.solutions.length) { // (a wrong turn already: the hint's kept for the next try)
+    SFX.play('denied');
+    setMessage('NO WAY THROUGH FROM HERE // RETRY', 'warn');
+    return;
+  }
+  const col = r.solutions[0][0];
+  const top = columns[col][columns[col].length - 1];
+  const bit = `[${queue[0].val}]`;
+  dailyHintUsed = true;
+  if (dailyOfficial) storage.set(dailyHintedKey(), [...dailyHinted(), dailyPuzzleTries() + (Progress.runDrops() === 0 ? 1 : 0)].join(','));
+  if (kind === 'column') {
+    showHint(col);
+    setMessage(`HINT // THE ${bit} GOES IN COLUMN ${col + 1}`);
+  } else setMessage(`HINT // THE ${bit} GOES ${!top ? 'IN AN EMPTY COLUMN' : top.type === 'number' ? `ON A [${top.val}]` : 'ON AN ENCRYPTED BLOCK'}`);
+  SFX.play('punct');
+  updateFreeBtn();
+}
 exploitBtn.addEventListener('click', () => {
   if (mode === 'tutorial' && !Tutorial.allowsExploit()) { SFX.play('denied'); return; } // (only when the lesson says)
+  if (dailyHint()) { useDailyHint(); return; }
   if (armedHack) return; // armed: drop it
   if (nextExploit()) {
     if (!armExploit()) SFX.play('denied');
