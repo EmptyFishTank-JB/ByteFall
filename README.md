@@ -5,7 +5,7 @@ A browser number puzzle about cracking encrypted data, inspired by
 
 - **Play:** https://emptyfishtank-jb.github.io/ByteFall/
 - **Studio:** Empty Fish Tank
-- *Started:** September 23, 2026, 8:13 PM CST
+- **Started:** September 23, 2026, 8:13 PM CST
 
 Mechanically it's a Drop7-style puzzle:
 
