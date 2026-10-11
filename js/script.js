@@ -6271,28 +6271,82 @@ function dailyHint() {
   return tryNow < DAILY_HINT_COLUMN ? 'soft' : 'any';
 }
 // The kinds of hint, each about the bit about to drop and where it goes (the solver's way through):
-// RIDDLE (its column's number as a riddle: a count everyone knows, a holiday's weekday this year,
-// or sums on the bit's own number), SPOT (what it lands on), SIDE (three columns it's among),
+// RIDDLE (its column's number as a riddle: hintRiddle), SPOT (what it lands on), SIDE (three columns it's among),
 // OUTCOME (what the drop sets off), CROSS (columns crossed out, no drop there till the next one) and,
 // from try 4, PULSE (its column lit)
-const RIDDLES = {
-  1: ['HOW MANY MOONS DOES EARTH HAVE?', 'HOW MANY NOSES ON A FACE?', 'HOW MANY HORNS ON A UNICORN?'],
-  2: ['HOW MANY WHEELS ON A BICYCLE?', 'HOW MANY WINGS ON A BIRD?', 'HOW MANY HALVES MAKE A WHOLE?'],
-  3: ['HOW MANY SIDES ON A TRIANGLE?', 'HOW MANY WHEELS ON A TRICYCLE?', 'HOW MANY LITTLE PIGS?'],
-  4: ['HOW MANY LEGS ON A TABLE?', 'HOW MANY SEASONS IN A YEAR?', 'HOW MANY SUITS IN A DECK OF CARDS?'],
-  5: ['HOW MANY FINGERS ON ONE HAND?', 'HOW MANY SIDES ON A PENTAGON?', 'HOW MANY OLYMPIC RINGS?'],
-  6: ['HOW MANY LEGS ON AN INSECT?', 'HOW MANY FACES ON A DIE?', 'HOW MANY STRINGS ON A GUITAR?'],
-  7: ['HOW MANY DAYS IN A WEEK?', 'HOW MANY COLORS IN A RAINBOW?', 'HOW MANY CONTINENTS ARE THERE?'],
-};
-const HINT_DAYS = [["NEW YEAR'S DAY", 0, 1], ["VALENTINE'S DAY", 1, 14], ["ST. PATRICK'S DAY", 2, 17], ["APRIL FOOLS' DAY", 3, 1], ['THE FOURTH OF JULY', 6, 4], ['HALLOWEEN', 9, 31], ['CHRISTMAS', 11, 25], ["NEW YEAR'S EVE", 11, 31]];
+// THE RIDDLE HINT: the column's number as a riddle, from a family picked at random (the counts in
+// js/data/hint-riddles.js weighing most), and within it one not shown lately (the last
+// HINT_SEEN_MAX are kept on the device), so the same riddle doesn't come back day after day
+const HINT_SEEN_KEY = 'bytefall-hint-seen';
+const HINT_SEEN_MAX = 120;
+const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
+const WEEKDAY_NAMES = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
 const pickOne = (list) => list[Math.floor(Math.random() * list.length)];
-function hintRiddle(n, val) {
+const RIDDLE_WEIGHT = { facts: 4, board: 2 };
+function riddleFamilies(n, val) {
+  const R = HINT_RIDDLES;
   const year = new Date().getUTCFullYear();
-  const options = [...RIDDLES[n]];
-  for (const [name, m, d] of HINT_DAYS) if (((new Date(Date.UTC(year, m, d)).getUTCDay() + 6) % 7) + 1 === n) options.push(`WHAT DAY OF THE WEEK IS ${name} THIS YEAR? (MONDAY IS 1)`);
+  const weekday = (m, d) => ((new Date(Date.UTC(year, m, d)).getUTCDay() + 6) % 7) + 1;
+  const fam = {
+    facts: [...R.facts[n]],
+    words: (R.words[n] || []).map((w) => `HOW MANY LETTERS IN '${w}'?`),
+    days: R.days.filter(([, m, d]) => weekday(m, d) === n).map(([name]) => `WHAT DAY OF THE WEEK IS ${name} THIS YEAR? (MONDAY IS 1)`),
+    months: [`WHAT NUMBER MONTH IS ${R.months[n - 1]}?`],
+    binary: [`WHAT NUMBER IS BINARY ${n.toString(2)}?`],
+    roman: [`WHAT NUMBER IS THE ROMAN NUMERAL ${ROMAN[n]}?`],
+    dice: n < 7 ? [`ON A DIE, HOW MANY DOTS ARE OPPOSITE THE ${7 - n}?`] : [],
+    sums: [],
+    sequences: [],
+    time: [],
+    own: [],
+    board: [],
+  };
+  if (((new Date().getUTCDay() + 6) % 7) + 1 === n) fam.days.push('WHAT DAY OF THE WEEK IS TODAY? (MONDAY IS 1)');
+  // (sums that come to it)
+  for (let a = 1; a < n; a++) fam.sums.push(`${a} + ${n - a}`);
+  for (let b = 1; b <= 9; b++) fam.sums.push(`${n + b} - ${b}`);
+  for (let b = 2; b <= 5; b++) fam.sums.push(`${n * b} ÷ ${b}`);
+  for (let a = 2; a <= n / 2; a++) if (n % a === 0) fam.sums.push(`${a} × ${n / a}`);
+  // (runs of numbers it's next in, or missing from)
+  for (const d of [1, 2, 3, -1, -2]) {
+    const next = [n - 3 * d, n - 2 * d, n - d];
+    if (next.every((x) => x >= 0 && x <= 20)) fam.sequences.push(`WHAT COMES NEXT: ${next.join(', ')}, ?`);
+    const gap = [n - 2 * d, n - d, n + d];
+    if (gap.every((x) => x >= 0 && x <= 20)) fam.sequences.push(`WHAT'S MISSING: ${gap[0]}, ${gap[1]}, ?, ${gap[2]}`);
+  }
+  // (the clock and the week)
+  for (let h = 1; h <= 12; h++) fam.time.push(`HOW MANY HOURS FROM ${h} O'CLOCK TO ${((h - 1 + n) % 12) + 1} O'CLOCK?`);
+  for (let d = 0; d < 7; d++) fam.time.push(`HOW MANY DAYS FROM ${WEEKDAY_NAMES[d]} TO THE NEXT ${WEEKDAY_NAMES[(d + n) % 7]}?`);
+  // (the bit's own number)
   const diff = n - val;
-  options.push(`ITS OWN NUMBER${diff > 0 ? ` PLUS ${diff}` : diff < 0 ? ` MINUS ${-diff}` : ', NO MORE, NO LESS'}`);
-  return pickOne(options);
+  fam.own.push(`ITS OWN NUMBER${diff > 0 ? ` PLUS ${diff}` : diff < 0 ? ` MINUS ${-diff}` : ', NO MORE, NO LESS'}`);
+  // (the board as it stands)
+  const cells = columns.flat().filter(Boolean);
+  for (let v = 1; v <= 7; v++) if (cells.filter((b) => b.type === 'number' && b.val === v).length === n) fam.board.push(`HOW MANY [${v}]S ARE ON THE BOARD RIGHT NOW?`);
+  if (cells.filter((b) => b.type === 'firewall').length === n) fam.board.push('HOW MANY ENCRYPTED BLOCKS ARE ON THE BOARD?');
+  if (queue.length === n) fam.board.push('HOW MANY BITS ARE LEFT TO DROP, THIS ONE INCLUDED?');
+  if (Math.max(...columns.map((c) => c.length)) === n) fam.board.push('HOW TALL IS THE TALLEST STACK?');
+  if (columns.filter((c) => !c.length).length === n) fam.board.push('HOW MANY COLUMNS ARE EMPTY?');
+  return fam;
+}
+function hintRiddle(n, val) {
+  let seen = [];
+  try { seen = JSON.parse(storage.get(HINT_SEEN_KEY)) || []; } catch (e) { seen = []; }
+  const fam = riddleFamilies(n, val);
+  // (a family with something not seen lately, by weight; failing that, the one seen longest ago)
+  const fresh = Object.entries(fam).map(([k, list]) => [k, list.filter((q) => !seen.includes(q))]).filter(([, list]) => list.length);
+  let text;
+  if (fresh.length) {
+    const total = fresh.reduce((t, [k]) => t + (RIDDLE_WEIGHT[k] || 1), 0);
+    let r = Math.random() * total;
+    const [, list] = fresh.find(([k]) => (r -= RIDDLE_WEIGHT[k] || 1) < 0) || fresh[0];
+    text = pickOne(list);
+  } else {
+    const all = Object.values(fam).flat();
+    text = all.reduce((best, q) => (seen.indexOf(q) < seen.indexOf(best) ? q : best), all[0]);
+  }
+  storage.set(HINT_SEEN_KEY, JSON.stringify([...seen.filter((q) => q !== text), text].slice(-HINT_SEEN_MAX)));
+  return text;
 }
 function useDailyHint() {
   const state = dailyHint();
