@@ -64,6 +64,8 @@ dev-tools/audio.html    the audio compendium (sound-scenes.js: every sound and a
 dev-tools/mixer.html    the mixer, one track at a time (?track=sleep-mode)
 dev-tools/bots.html     the bot sandbox: the wanderers, visitors, seasons, fog and headphones on buttons
 dev-tools/frames.html   the frame editor: the bots' animations drawn a frame at a time, exported as .json
+arena/                  ARENA TEST: a first look at a 3D vehicle arena (TODO.md: WARTHOG ARENA), three.js
+                        and cannon-es in arena/lib; not part of ByteFall (the app's build never copies it)
 js/data/bot-anims.js    the drawn animations, built in from the frame editor's files (the windmill)
 js/pixel.js             PIXEL MODE (the sandbox's switch, for now): the bots on a screen at twice the
                         art's resolution: moves in whole pixels, turns redrawn, hair that flows

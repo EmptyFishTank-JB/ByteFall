@@ -189,6 +189,17 @@ the Play Store, Steam and a trademark search before settling on it.
   scripting kills on exit and hands out random weapons; moving parts on timers; a kill zone under
   the arena (check whether objects can be welded to vehicles). As a game: a build screen of rams,
   wedges and spinners, Timmy as a secret vehicle, the arena falling away as the match goes on.
+  **A first look is live: `arena/` (ARENA TEST)**: a floating arena in three.js with cannon-es
+  physics, a low-poly buggy to drive (keys, touch stick, a controller), four CPU drivers with their
+  own front ends (a ram, a spinner, a wedge, spikes) and TIMMY, the sweeper turning in the middle,
+  ramps, a road out to a far pad with a boost strip, knockouts and falls counted.
+- **WHALE HUNTING** (started late in Halo 5, never finished): an Infection variant. The hunters are
+  the infected, two to start (a driver and a gunner) in a Warthog with pieces welded on, colored and
+  textured as wood to make it a boat. The hunted are the uninfected, made to ride TIMMY: a whale
+  fused to a Mongoose. The giant grid sits just under the water line in a map, so both drive on the
+  water. As a game: a sea of low waves over a hidden floor, the hunters' boat (driver and gunner),
+  a pod of TIMMYs to get away in, a whale caught joining the hunt; the ARENA TEST's TIMMY and its
+  physics are a start, with water in place of the arena floor.
 - **PAC-MAN ARENA FIESTA**: everyone spawns in a huge Pac-Man maze in the game's iconography, with
   random weapons; at a full lobby, super hectic. Ideas: pellets that score, power pellets for a
   short buff (overshield, speed, sword), four AI ghosts hunting everyone, teleporters as the wrap
