@@ -14,6 +14,50 @@ Ideas queued for later (not built yet).
 
 See [WANDERERS.md](WANDERERS.md) for the season-by-season chart and the full ideas list.
 
+## The ARCADE (after the Android launch)
+
+Two more puzzle games in ByteFall's world, as updates after launch: an **ARCADE** section on the
+main menu holding ByteFall's own game (DECRYPT), DEFRAG and PURGE, sharing KEYS, the bots, the
+themes, the sounds, achievements and RECORDS. Either could become an app of its own later if it
+takes off. DEFRAG first (the smaller job: the board and its bits as they are), then PURGE (new
+controls). Their own names and art throughout: the rules are fair to rebuild, the originals' names
+and characters aren't.
+
+### DEFRAG (a swap-and-match game)
+
+- The 7x7 board **full of bits**, dealt so nothing matches yet and at least one swap works.
+- **Swipe a bit into a neighbor** (or tap one, then the neighbor: mouse and controller) to swap
+  them; a swap that makes no match snaps back.
+- **4 or more of the same number touching** (up, down, left, right, any shape: a line, an L, a T, a
+  square) decrypt. ByteFall's own rule (a bit's number = its row's or column's length) can't work
+  on a full board, so here the numbers are colors.
+- The bits above fall and **new ones drop in from the top**; a match made by the fall is a chain
+  link (the CHAIN METER and chain scoring as they are).
+- **How many numbers**: about 4 on EASY, 5 on NORMAL, 6 on HARD (all 7 would rarely make groups of
+  4); to be tuned.
+- **ByteFall's twists**: encrypted bits that can't be swapped and crack when a match decrypts beside
+  them; infected bits that spread every few swaps till a match next to them clears them.
+- **A game**: 30 swaps for the best score (RECORDS keeps it); no swap left, the board reshuffles
+  free; idle a few seconds, a hint pulses.
+- **Later**: DEFRAG puzzles (clear every encrypted bit in N swaps), a daily DEFRAG.
+
+### PURGE (a falling-pieces game after Pac-Attack)
+
+- **The well**: about 7 wide and 11 tall (squares a little smaller than ByteFall's).
+- **Pieces of three squares** (straight or bent) fall: **encryption layers** [=] and **viruses**
+  (the infected bit's little virus). Move, rotate and drop them: drag to move, tap to rotate, swipe
+  down to drop on touch; keys and a controller on PC.
+- **A full row of layers clears**; viruses don't clear with rows.
+- **A CPU bot** comes now and then (BOT, GRIFTER, BUNKER or GLITCH, picked before the game, each with
+  a quirk: GLITCH skips a square now and then). Landed, it walks the way it faces (rotating the
+  piece flips it), **eating every virus in its path**, dropping into gaps and turning at walls and
+  layers; boxed in with nothing to eat, it's gone. Its faces react as it goes.
+- **The meter** (the CHAIN METER's look) fills with viruses eaten; full, an **ANTIVIRUS** piece
+  drops and wipes the viruses in the rows under where it lands (what's above falls).
+- **Game over** when the stack reaches the top.
+- **VS**: viruses you eat go to the CPU opponent's well (ByteFall's VS as it is). **PUZZLE**: set
+  wells to clear of viruses with N bots (ByteFall's puzzle setup).
+
 ## Future games (separate from ByteFall)
 
 Ideas for games of their own, written down so they're not lost; nothing here is for ByteFall.
