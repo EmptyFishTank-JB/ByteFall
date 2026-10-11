@@ -89,13 +89,15 @@ DAILY,DAILY DRIVER,Play a Daily game 7 days in a row,7,Standard,daily-driver
 DAILY,DAILY GRIND,Play the Daily on 30 different days,30,Standard,daily-grind
 DAILY,STREAK,Play a Daily game 30 days in a row,30,Standard,streak
 DAILY,CENTURY,Play a Daily game 100 days in a row,100,Standard,century
-DAILY,DAILY SWEEP,Play all four daily games on the same day,4,Standard,daily-sweep
+DAILY,DAILY SWEEP,"Play DECRYPT, PUZZLE, BLITZ and BREACH on the same day",4,Standard,daily-sweep
 DAILY,PERFECT DAILY,Finish a Daily Decrypt with the board empty,1,Standard,perfect-daily
 DAILY,BREACHED,Clear the whole board in BREACH,1,Standard,breached
 DAILY,ONE SHOT,Solve a daily puzzle on the first try,1,Standard,one-shot
 DAILY,SUNDAY BEST,Solve a Sunday daily puzzle (the week's hardest),1,Standard,sunday-best
 DAILY,STUBBORN,Try the same daily puzzle 10 times,1,Hidden,stubborn
 DAILY,SO CLOSE,End a BREACH with one layer left,1,Hidden,so-close
+DAILY,CODE BREAKER,Break a Monday CODE BREAKER code (the DAILY ARCADE),1,Standard,code-breaker
+DAILY,MIND READER,Break a CODE BREAKER code in 4 tries or fewer,1,Standard,mind-reader
 PUZZLES,FIRST TRY,Solve a puzzle on your first attempt,1,Standard,first-try
 PUZZLES,LOCKSMITH,Solve 10 puzzles,10,Standard,locksmith
 PUZZLES,SAFECRACKER,Solve 30 puzzles,30,Standard,safecracker
