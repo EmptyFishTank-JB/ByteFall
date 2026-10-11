@@ -1372,8 +1372,8 @@ function spinBit(el, cell) {
 // are drawn as SVG (BITFLIP's up/down arrow). iconHtml() is for places that render markup.
 const ICON_SVG = {
   bitflip: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M7 8l5-5 5 5M7 16l5 5 5-5"/></svg>',
-  // (two arrows trading places)
-  swap: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h14M14 4l4 4-4 4M20 16H6M10 12l-4 4 4 4"/></svg>',
+  // (two bits at opposite corners, curved arrows trading their places: not PIVOT's ⇆)
+  swap: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h7v7H3zM14 14h7v7h-7z"/><path d="M13.5 6.5h2a3 3 0 0 1 3 3v1.5M16.5 9l2 2 2-2M10.5 17.5h-2a3 3 0 0 1-3-3V13M3.5 15l2-2 2 2"/></svg>',
   // (a closed box with a question mark)
   'black-box': '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14M12 17.5v.5"/></svg>',
 };
