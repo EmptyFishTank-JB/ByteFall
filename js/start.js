@@ -126,28 +126,11 @@
   const startBtn = document.getElementById('start-btn');
   startBtn.addEventListener('click', start);
 
-  // START sits under the tagline as far as the tagline sits under the title, measured letter to
-  // letter (the drawn letters, not their line boxes, which differ from font to font)
+  // START under the tagline (index.html's placeStartBtn, run first as the page loads, so it's in
+  // its place from the first paint): again as the card's fitted and the fonts load
   const card = screen.querySelector('.start-card');
-  const title = screen.querySelector('.start-title h1');
-  const tagline = screen.querySelector('.start-tagline');
-  const measure = document.createElement('canvas').getContext('2d');
-  function ink(el) {
-    const cs = getComputedStyle(el);
-    measure.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
-    const m = measure.measureText(el.textContent);
-    const range = document.createRange();
-    range.selectNodeContents(el);
-    const baseline = range.getBoundingClientRect().top + m.fontBoundingBoxAscent;
-    return { top: baseline - m.actualBoundingBoxAscent, bottom: baseline + m.actualBoundingBoxDescent };
-  }
   function placeStart() {
-    if (screen.hidden || !measure || !('fontBoundingBoxAscent' in TextMetrics.prototype)) return;
-    const head = ink(title);
-    const tag = ink(tagline);
-    const top = tag.bottom + (tag.top - head.bottom) - card.getBoundingClientRect().top - card.clientTop;
-    startBtn.style.top = `${Math.round(top)}px`;
-    startBtn.style.bottom = 'auto';
+    if (!screen.hidden) window.placeStartBtn();
   }
   fitStart();
   window.addEventListener('resize', fitStart);
