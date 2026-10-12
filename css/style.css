@@ -3274,6 +3274,8 @@ html.pixel-mode .walker.skater.walking[data-look="left"] .bot { transform: none;
 .overlay-xp.leveled .oxp-bar i { background: var(--accent); }
 @keyframes oxp-flash { 50% { opacity: 0.3; } }
 .key-ico { width: 1em; height: 1em; vertical-align: -0.15em; }
+/* PATCHES' USB stick (USB_SVG): KEYS's height, twice its width */
+.usb-ico { width: 2em; height: 1em; vertical-align: -0.15em; margin-right: 0.35em; flex: none; }
 /* STORE: the ===== line between what KEYS buy and what money buys, as the other menus have them */
 .store-rule { margin: 16px 0 4px; overflow: hidden; white-space: nowrap; font-size: 14.5px; line-height: 15px; letter-spacing: 2px; color: var(--accent); opacity: 0.7; } /* (as RECORDS' .rec-sep) */
 body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; line-height: 1; }
