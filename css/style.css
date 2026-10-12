@@ -3275,7 +3275,7 @@ html.pixel-mode .walker.skater.walking[data-look="left"] .bot { transform: none;
 @keyframes oxp-flash { 50% { opacity: 0.3; } }
 .key-ico { width: 1em; height: 1em; vertical-align: -0.15em; }
 /* EXPLOITS' terminal (TERMINAL_SVG): in a heading, KEYS's size */
-h2 > .term-ico, h3 > .term-ico { width: 1em; height: 1em; vertical-align: -0.15em; margin-right: 0.35em; }
+h2 > .term-ico, h3 > .term-ico, .opt-text .term-ico { width: 1em; height: 1em; vertical-align: -0.15em; margin-right: 0.35em; }
 /* PATCHES' USB stick (USB_SVG): KEYS's height, twice its width */
 .usb-ico { width: 2em; height: 1em; vertical-align: -0.15em; margin-right: 0.35em; flex: none; }
 /* STORE: the ===== line between what KEYS buy and what money buys, as the other menus have them */

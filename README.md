@@ -227,9 +227,9 @@ EXPLOITS (for a game) and BLACK BOXES cost KEYS and resources (a MASTER KEY buys
 | HINT | 10 | PUZZLE: lights the column the next bit goes in (worked out by js/puzzle-sim.js) |
 | UNDO | 8 | PUZZLE: takes back the last drop, even after running out of bits |
 
-The first six are switched on from the main menu's PATCHES button (laid out as VS's settings: PATCHES:
-NONE ON, or the patch's name, filled while one's on; one patch per game), which opens a card of the ones owned for the
-mode, each with its icon, how many and ON / OFF (switching one on switches the other off), and GET PATCHES (the STORE's); per mode, for the modes they fit and paid for at
+The first six are switched on from the main menu's PATCHES button (the USB stick, then as VS's settings: PATCHES:
+NONE ON, or the names of the ones on, HEAD START / LOOKAHEAD, filled while one's on; up to two patches a game, `BOOSTS_MAX`), which opens a card of the ones owned for the
+mode ("Activate up to two starting patches to use in your next CLASSIC game..."), each with its icon, how many and ON / OFF (a third switched on takes the place of the first), and GET PATCHES (the STORE's); per mode, for the modes they fit and paid for at
 a game's first drop (RESTORE POINT only when it saves you); HINT and UNDO sit under a
 puzzle's drop buttons, and with none owned a second tap buys one. Never in DAILY or VS. A
 patched game says so on its result screen (PATCHED: and their names).
@@ -257,7 +257,7 @@ ADS (that takes the banner away; nobody has to watch one), behind the same conse
 banner. Its ad unit is `rewardedId` in `js/ads-config.js` (Google's sample rewarded unit till
 ByteFall's is made).
 
-**THE EXPLOIT SLOTS** (EXPLOIT L and R; `sideSlots` in the code): one each side of the exploit button (CLASSIC, BLITZ and ZEN only), opened by level: the left at Lv 3, the right at Lv 9 (`SIDE_SLOT_LEVELS` in progress.js; before then the main menu's EXPLOIT L / EXPLOIT R show LV 3 / LV 9 behind a padlock, a tap saying so in the card's title and in a game the slot shows a padlock over its level, so the BLACK MARKET comes a slot at a time).
+**THE EXPLOIT SLOTS** (`sideSlots` in the code; the left fills first): one each side of the exploit button (CLASSIC, BLITZ and ZEN only), opened by level: the left at Lv 3, the right at Lv 9 (`SIDE_SLOT_LEVELS` in progress.js; before then the main menu's EXPLOITS shows LV 3 behind a padlock and its card says when the second opens and in a game the slot shows a padlock over its level, so the BLACK MARKET comes a slot at a time).
 **THE PATCH SLOTS** (script.js `patchSlots`; `PATCH_SLOT_LEVELS` in progress.js): the exploit row's
 two ends, so the row reads PATCH 1, BLACK MARKET L, the earned EXPLOIT, BLACK MARKET R, PATCH 2. The
 left opens at Lv 5, the right at Lv 12 (a padlock over the level till then; FULL ACCESS both). Each
@@ -294,10 +294,8 @@ wiped by an exploit) it's QUARANTINED, +1 ROOTKIT; still there, it goes off: an 
 six, as a BLACK BOX's (ANTIVIRUS waiting catches it instead). One at a time, never two within 12 drops
 (`INFECT_GAP`); RULES says so under the BLACK BOXES. INFECTIONS: OFF in the mode's GAME SETTINGS
 turns them off.
-Pick 2 on the main menu to take into a game, one in each slot (marked L or R): two of one kind
-(if you have two) or one each of two. The menu shows the two slots as VS's settings are laid out, two across under PATCHES: EXPLOIT L and EXPLOIT R and what's in each (EMPTY, or its name, trailing off when long), filled while one's in it.
-A tap on a slot opens its card: every exploit and box you own to bring in and how many, to put in that slot, EMPTY
-THIS SLOT, and BUY EXPLOITS (the STORE's TIER I); each is used once in the game. In
+Pick up to 2 on the main menu to take into a game: two of one kind (if you have two) or one each of two. The menu has one EXPLOITS button under PATCHES, as VS's settings are laid out: the terminal icon, EXPLOITS: and the names of the ones in, RNG / BITFLIP (NONE; long names trail off), filled while one's in; locked behind the first slot's level till it opens.
+A tap opens its card (// EXPLOITS): every exploit and box you own to bring in, how many and ON / OFF / ON x2. A tap puts one in (the left slot fills first; with both full it takes the other's place), a second tap a second of it (if you have two), and the next tap takes them out, as PATCHES' tap on one that's on. BUY EXPLOITS (the STORE's TIER I) and DONE under them; each is used once in the game. In
 the game, a tap arms an exploit as your next drop, as an earned one, and it's used up (the ones not
 used stay yours). A box waits sealed (pulsing); a tap opens it: the slot spins like a slot machine's
 reel for about 1.5 seconds and lands on an exploit, which waits there (a tick in its corner) to be
@@ -320,11 +318,11 @@ in brackets and its name (a box's odds under it), then each part of its price as
 over what you have / what it costs (red and pulsing where you're short), and BUY in the middle
 (USE A MASTER KEY under it when short of an exploit's price with one). A tap off it, the X, Esc or back
 closes it; drops wait while it's open. A buy waits in the slot until you tap it to arm (or open) it.
-Once it's used (the armed exploit dropped, a box's INFECTION gone off; an EXPLOIT L / R starter too),
+Once it's used (the armed exploit dropped, a box's INFECTION gone off; an EXPLOITS starter too),
 the slot keeps it, dimmed with a tick, through the next drop, then shuffles to a new offer with its
 pips counting afresh: buy as often as you like. Buying opens once the game's first encryption layer
 rises (ZEN, with no layers: after 8 drops, when the first would); till then the slots show their offers
-dimmed, and the window shows OPENS IN n DROPS in place of BUY. A game that used them says so on its result screen (EXPLOIT L / R: ... // BLACK MARKET: ...).
+dimmed, and the window shows OPENS IN n DROPS in place of BUY. A game that used them says so on its result screen (EXPLOITS: ... // BLACK MARKET: ...).
 
 How far KEYS go (a simulation of CLASSIC games on the CPU's own board code: node tools/keysim.js): a game
 decrypts about 90 to 110 bits, so it earns about 14 to 18 KEYS, or 20 to 23 all in with the levels,
@@ -367,7 +365,7 @@ A drop earns at most one exploit, picked from the longest chain it set off.
 
 | Mode | What changes |
 |---|---|
-| CLASSIC | The main game, on EASY / NORMAL / HARD **ENCRYPTION STRENGTH** (script.js `GOAL_BASE`): every CLASSIC game (not the daily) has a key to crack, a score to reach: 128-BIT at 1,000 / 1,500 / 2,000 on EASY / NORMAL / HARD, shown under BYTEFALL (// CLASSIC // NORMAL // 128-BIT: 1,500) and as a thin bar along the SCORE box's foot that lights up from 80%. Reach it and the game holds on a card in PAUSE's place: // 128-BIT CRACKED, +KEYS (the target / 150: 10 on NORMAL), then **GO DEEPER** (the next key, 192-BIT, 256-BIT, 384, 512, 1024, 2048, 4096 and on, each half the first target's points higher and paying more) or **DISCONNECT** (the game ends there, cracked: the bits fade instead of burning, ENCRYPTION CRACKED in the terminal color, CRACKED in HISTORY). Traced after a crack, the KEYS it paid are kept and the result says how far you got (CRACKED: 192-BIT). **GAME SETTINGS**: the mode's settings in a card of their own (`#mode-settings`), on one button on the main menu's panel that says what's set (NORMAL // GOAL: ON // INFECTIONS: ON); PATCHES and EXPLOIT L / R stay on the panel. CLASSIC's card has DIFFICULTY (EASY / NORMAL / HARD, HARD behind its padlock till Lv 8, a tap saying so in the card's title), **GOAL: ON / OFF** (bytefall-goal, ON at first: OFF plays CLASSIC endless, as it was, no key, bar or card, and the mode's description says so) and **INFECTIONS: ON / OFF** (bytefall-infections, ON at first: OFF, no INFECTED BITS; a BLACK BOX can still be infected), each with a line on what it does; BLITZ's has INFECTIONS alone; the other modes have none, so no button. Mid-game a change asks CONFIRM? and starts a new game. DONE, a tap off the card, Esc or back closes it. |
+| CLASSIC | The main game, on EASY / NORMAL / HARD **ENCRYPTION STRENGTH** (script.js `GOAL_BASE`): every CLASSIC game (not the daily) has a key to crack, a score to reach: 128-BIT at 1,000 / 1,500 / 2,000 on EASY / NORMAL / HARD, shown under BYTEFALL (// CLASSIC // NORMAL // 128-BIT: 1,500) and as a thin bar along the SCORE box's foot that lights up from 80%. Reach it and the game holds on a card in PAUSE's place: // 128-BIT CRACKED, +KEYS (the target / 150: 10 on NORMAL), then **GO DEEPER** (the next key, 192-BIT, 256-BIT, 384, 512, 1024, 2048, 4096 and on, each half the first target's points higher and paying more) or **DISCONNECT** (the game ends there, cracked: the bits fade instead of burning, ENCRYPTION CRACKED in the terminal color, CRACKED in HISTORY). Traced after a crack, the KEYS it paid are kept and the result says how far you got (CRACKED: 192-BIT). **GAME SETTINGS**: the mode's settings in a card of their own (`#mode-settings`), on one button on the main menu's panel that says what's set (NORMAL // GOAL: ON // INFECTIONS: ON); PATCHES and EXPLOITS stay on the panel. CLASSIC's card has DIFFICULTY (EASY / NORMAL / HARD, HARD behind its padlock till Lv 8, a tap saying so in the card's title), **GOAL: ON / OFF** (bytefall-goal, ON at first: OFF plays CLASSIC endless, as it was, no key, bar or card, and the mode's description says so) and **INFECTIONS: ON / OFF** (bytefall-infections, ON at first: OFF, no INFECTED BITS; a BLACK BOX can still be infected), each with a line on what it does; BLITZ's has INFECTIONS alone; the other modes have none, so no button. Mid-game a change asks CONFIRM? and starts a new game. DONE, a tap off the card, Esc or back closes it. |
 | DAILY | Four daily games, picked on DAILY's setup on the main menu's panel: the daily streak and the time to the next set, then what counts (your first play of each game today; PUZZLE: 4 tries; after that it's practice), over a card for each game (its rules in a line and how today stands: OFFICIAL RUN READY, the official score with PRACTICE after it, the puzzle's tries left / the try it was solved on), in a row that slides sideways and loops (past BREACH comes DECRYPT again, and the other way round): one card in the middle, each snapping softly to the center, the cards beside it peeking in at the panel's sides, softly dimmed, and four pips under the row lighting where it is. The card reaching the middle comes into focus at once and is the pick right then (a swipe, a tap on a card beside it or on a pip); with a game under way it waits for the row to settle and asks CONFIRM? first, a tap on it to switch, sliding back if left unanswered. PLAY plays it. Each is the same for everyone that UTC day. Each also keeps its own WIN STREAK (STREAK n on its card's name line, a line in SHARE, and each one's current and best in RECORDS → STATS): days in a row its official run was won (PUZZLE: solved in its 4 tries; DECRYPT, BLITZ and BREACH: played to the end, not traced). A loss (TRACE COMPLETE, PUZZLE's tries used up), an official run quit or left unfinished, or a day missed starts it over (`Progress.dailyBegin` / `dailyEnd`; `kindStreak` in js/script.js). The streak in DAILY's header is the overall one: days in a row any daily was played. **DECRYPT**: a fixed stack of 40 bits dealt from a seed of the date (Normal rules, the five standard exploits); it ends when the stack runs out. **PUZZLE**: a new puzzle every day (from `js/data/daily-puzzles.js`), harder through the week: Monday is 1 bit, Sunday 4 bits with layers; you get 4 tries a day (a try counts from its first drop); once it's solved or the tries are used up, later runs are practice. The EXPLOIT button is its HINTS (a light bulb; a puzzle drops no exploits): one fewer a try than the puzzle has bits (none on Monday's 1-bit puzzle, 1 on the 2-bit days, 3 on Saturday and Sunday), none on tries 1 and 2 (the bulb dim, TRY 3 on it; from try 3 its count of hints left). Each is about the bit about to drop, a different kind each tap on the same drop, picked at random: a RIDDLE whose answer is its column (50 to 75 for each number, from a family picked at random: a count everyone knows, HOW MANY LITTLE PIGS?, the most often; letters in a word, HOW MANY LETTERS IN 'CACHE'?; a holiday's weekday this year, Monday 1; a month's number; binary, WHAT NUMBER IS BINARY 101?; Roman numerals; the dots opposite on a die; sums, 12 ÷ 4; runs of numbers, WHAT COMES NEXT: 1, 3, 5, ?; hours on a clock and days of the week; the bit's own number, ITS OWN NUMBER MINUS 1; and the board itself, HOW MANY [6]S ARE ON THE BOARD RIGHT NOW?; the device remembers the last 120 shown and picks one not among them, so they don't come back day after day), the SPOT it lands on (ON A [5], IN AN EMPTY COLUMN, ON AN ENCRYPTED BLOCK), the SIDE (COLUMN 3, 4 OR 5), the OUTCOME (SETS OFF 2 DECRYPTS AND PEELS A LAYER, or DECRYPTS NOTHING: IT SETS UP THE NEXT DROP), a CROSS (up to 3 wrong columns crossed out, a red X on their buttons and a red tint over them: no drop there till the next one) and, from try 4 (and in practice), the PULSE (its column's button lit). The words show in a card over the board's empty top (HINT // 1 OF 3), till the next drop or a tap on it. With no way through left, it says so and the hint isn't used. A solve with hints says how many on the result screen, the DAILY card and SHARE (a bulb each). The numbers are `DAILY_HINT_FROM` and `DAILY_HINT_COLUMN` in js/script.js; the riddles' words are in `js/data/hint-riddles.js` (add freely), the rest is `hintRiddle` in js/script.js. **BLITZ**: the same bits for everyone against a 60-second clock. **BREACH** (daily only): the board starts with a 3-row firewall of level 1 and 2 layers and you get 30 bits to break through; each layer broken is +25 and clearing the whole board is +1,000. For DECRYPT, BLITZ and BREACH your first run each day is the official score and later runs are practice. SHARE on the results screen (every daily game, win or lose; the puzzle shares one square per try) sends or copies your result |
 | BLITZ | Normal rules against a 2-minute clock that starts on your first drop (paused while the tab is hidden) |
 | ZEN | Normal rules with no encryption layers and no clock |
@@ -406,7 +404,7 @@ came, newest first (it says so under its head), the unread ones lit, an ACHIEVEM
 menu's and the pause screen's) and on the tab. The DAILY DROP never pops up: a new day's is in NOTICES and
 lights the STORE buttons, and claimed, the STORE's DAILY DROP card shows what it gave right under CLAIM. A
 "can't do that" shows in the title of the card it happened on, the title stepping aside while it pulses,
-then bursts, as VS's setup has it: HARD still locked or EXPLOIT L / R not open yet where the main menu's
+then bursts, as VS's setup has it: HARD still locked or EXPLOITS not open yet where the main menu's
 // CLASSIC is, LOADOUT LOCKED or SLOTS FULL where the card's // EXPLOITS is. What a drop earns in RESOURCES shows in the SCORE box along
 its foot (as far up from its bottom border as SCORE is down from its top), every resource on one line at
 once, shrinking to fit if it must.
@@ -475,7 +473,7 @@ price as have / cost (red where short); a first tap lights it, a second buys it
 and the card's title says NOT ENOUGH. Its UNLOCKED notice adds // BUY IT IN
 EXPLOITS. FULL ACCESS (and the dev page's UNLOCK EVERYTHING) owns them all while
 it lasts. Saves from before this kept what they could already use: every exploit
-their level had reached or that was equipped (`ownedSeed`, `OWN_SEED`). The BLACK MARKET, EXPLOIT L / R and BLACK BOXES still deal in any
+their level had reached or that was equipped (`ownedSeed`, `OWN_SEED`). The BLACK MARKET, EXPLOITS and BLACK BOXES still deal in any
 unlocked exploit (or any at all, a box), owned or not: a one-off taste. Under the EXPLOITS title the
 loadout is a row of six boxes, 8px apart and centered, each as the game's slot buttons: the equipped
 exploits fill them left to right, lit; an empty one is a dashed frame; one not open yet shows its padlock
@@ -806,7 +804,7 @@ PATCH SLOTS or EXPLOIT SLOTS, a menu tab, the LV box, the loadout, YOUR RESOURCE
 ENCRYPTION STRENGTH line and the SCORE bar, the last two framed 8px out: `roomy`); SETTINGS' card
 scrolls smoothly to DISPLAY (`scroll`). The drop buttons are never faded in the tutorial (a tap the
 card doesn't want gets -_-). The last two cards are on the main menu (`home`: a fresh CLASSIC behind
-it, PATCHES and EXPLOIT L / R in focus, no BACK out of it), and the last one's MAIN MENU earns
+it, PATCHES and EXPLOITS in focus, no BACK out of it), and the last one's MAIN MENU earns
 **HELLO, WORLD** (finish the tutorial; +10 KEYS). The chain meter keeps its charge from the chain
 lesson through the WORM VIRUS.
 
@@ -1081,7 +1079,7 @@ the WORM VIRUS waiting in the EXPLOIT button, then drop it on a tall column), th
 shown locked, then one as a BLACK MARKET with a TROJAN for sale and its pips), PAUSE (top right) and
 the pause screen, RULES & RECORDS (RULES, RECORDS with HISTORY, levels and RANK UP, NOTICES), ← BACK,
 EXPLOITS (the loadout, buying exploits), the STORE (resources, PRICES TODAY, what's sold), SETTINGS,
-RESUME, ENCRYPTION STRENGTH (a sample line under BYTEFALL and SCORE bar), PATCHES and EXPLOIT L / R on the
+RESUME, ENCRYPTION STRENGTH (a sample line under BYTEFALL and SCORE bar), PATCHES and EXPLOITS on the
 main menu, then MAIN MENU. Over an open menu the banner moves to the bottom or middle of the screen.
 BACK (from step 2 on) redoes the step just played, or before a drop goes to the step before, putting
 the board, bits, score, chain and exploit back as they were. EXIT leaves at any

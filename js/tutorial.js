@@ -131,7 +131,7 @@ const Tutorial = (() => {
     // CLASSIC'S GOAL
     { text: 'In CLASSIC, every game has a key to crack: its ENCRYPTION STRENGTH, shown under BYTEFALL. It starts at 128-BIT, cracked at 1,500 points on NORMAL.', closeMenus: true, demo: 'goal', focus: ['#game-mode-label'], roomy: true, next: true },
     { text: 'The bar along the bottom of SCORE fills toward it. Crack it for KEYS, then GO DEEPER for a stronger key and more KEYS, or DISCONNECT and end the game on a win.', demo: 'goal', focus: ['#goal-bar'], roomy: true, next: true, mood: 'happy' },
-    { text: 'Before a game, PATCHES and EXPLOIT L / R on the main menu let you bring an edge in, once you have some.', home: true, focus: ['#booster-row', '#starter-row'], float: true, next: true },
+    { text: 'Before a game, PATCHES and EXPLOITS on the main menu let you bring an edge in (up to two of each), once you have some.', home: true, focus: ['#booster-row', '#starter-row'], float: true, next: true },
     { text: 'That’s everything you need to know. Good luck, decryptor.', home: true, float: true, done: true, mood: 'happy' },
   ];
 
