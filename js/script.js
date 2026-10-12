@@ -4992,6 +4992,10 @@ window.dailyDrop = {
 // KEYS: on the main menu under the title, and in the STORE; the STORE buttons get a mark
 // while the DAILY DROP waits
 const KEY_SVG = '<svg class="key-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 4h6v8H1zM3 6v4h2V6zM7 7h8v2H7zM11 9h1.5v2H11zM13.5 9H15v3h-1.5z" fill="currentColor" fill-rule="evenodd"/></svg>';
+// EXPLOITS' own icon, the USB stick's partner (a patch you plug in, an exploit you run): a terminal
+// window, solid, its title bar's three dots and a >_ prompt cut out of it (#term-cut, below). On the
+// empty EXPLOIT button, the EXPLOITS tab and the EXPLOITS title
+const TERMINAL_SVG = '<svg class="term-ico" viewBox="0 0 16 16" aria-hidden="true"><rect width="16" height="16" fill="currentColor" mask="url(#term-cut)"/></svg>';
 // PATCHES' own icon: a USB stick on its side, twice as wide as KEYS (its connector out of the body's
 // right side, the two locking holes one over the other), the USB trident cut out of the body with a
 // + in an open ring at its base. The cut is one mask (#usb-cut, put in the page once below), so every
@@ -5002,10 +5006,17 @@ document.body.insertAdjacentHTML('beforeend', `<svg width="0" height="0" style="
   <g fill="none" stroke="#000"><circle cx="4.1" cy="6" r="1.7" stroke-width="0.8"/>
     <path d="M3.05 6h2.1M4.1 4.95v2.1M5.8 6H13.4M7.6 6L9 4.1H11.2M9.4 6L10.8 7.9H11.6" stroke-width="1"/></g>
   <path d="M13.2 4.5L15.4 6L13.2 7.5zM11.2 7.1h1.6v1.6h-1.6z" fill="#000"/><circle cx="11.4" cy="4.1" r="0.85" fill="#000"/>
+</mask>
+<mask id="term-cut" maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16">
+  <path d="M0.5 2h15v12h-15z" fill="#fff"/>
+  <path d="M2.4 2.9h1.1v1h-1.1zM4.1 2.9h1.1v1h-1.1zM5.8 2.9h1.1v1h-1.1zM0.5 4.3h15v0.5h-15zM7.6 10.4h4.4v1.4H7.6z" fill="#000"/>
+  <path d="M3.6 6.6L6.2 8.75L3.6 10.9" fill="none" stroke="#000" stroke-width="1.4" stroke-linejoin="miter"/>
 </mask></svg>`);
 // (the STORE's PATCHES heading and the PATCHES card's title wear it)
 document.querySelector('.store-sub[data-sec="patches"]').insertAdjacentHTML('afterbegin', USB_SVG);
 document.getElementById('booster-pick-title').innerHTML = `// ${USB_SVG}PATCHES`;
+document.querySelector('[role="tab"][data-pane="exploits"] svg').outerHTML = TERMINAL_SVG;
+document.querySelector('#hacks-panel .hacks-top h2').insertAdjacentHTML('afterbegin', TERMINAL_SVG);
 // The RESOURCES (Progress, ECONOMY.md): a name and a small pixel icon each
 const resSvg = (d) => `<svg class="key-ico res-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="${d}" fill="currentColor" fill-rule="evenodd"/></svg>`;
 const RES_INFO = {
@@ -5443,7 +5454,6 @@ document.body.classList.add('cards-in-settings');
 // The lower corners: RESTART (QUIT in VS; grayed out until the first drop), and the
 // exploit button
 const exploitBtn = document.getElementById('exploit-btn');
-const LIGHTNING_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 10-13h-7z" fill="currentColor"/></svg>';
 
 // The exploit button: dim lightning when there's nothing to arm; glowing green (showing that
 // exploit's icon) when one is ready; glowing, pulsing amber once armed as the next drop
@@ -5483,7 +5493,7 @@ function updateFreeBtn() {
   const ready = nextExploit();
   const centerArmed = armedHack && armedSlot === null; // (one armed from a side slot shows there, not here)
   const shown = (centerArmed && armedHack) || ready;
-  document.getElementById('exploit-glyph').innerHTML = shown ? iconHtml(shown) : LIGHTNING_SVG;
+  document.getElementById('exploit-glyph').innerHTML = shown ? iconHtml(shown) : TERMINAL_SVG;
   exploitBtn.classList.toggle('armed', !!centerArmed);
   exploitBtn.classList.toggle('ready', !armedHack && !!ready);
   exploitBtn.title = armedHack ? `${HACKS[armedHack].name} // ARMED: drop it`
