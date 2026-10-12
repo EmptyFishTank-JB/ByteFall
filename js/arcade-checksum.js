@@ -100,10 +100,10 @@ Arcade.register('checksum', (() => {
   }
   const empty = (x) => x.v.reduce((a, d) => a + (d ? 0 : 1), 0);
 
-  // THE GRID: nine boxes of nine squares; a given bit, a bit written in (the accent's), or notes
-  function build() {
-    cells = new Array(81);
-    const boxes = Array.from({ length: 9 }, (_, b) => {
+  // THE GRID: nine boxes of nine squares; a given bit, a bit written in (the accent's), or notes. The
+  // boxes, their squares into sq (the game's, or the ARCADE menu's preview's)
+  function boxes(sq) {
+    return Array.from({ length: 9 }, (_, b) => {
       const box = document.createElement('div');
       box.className = 'ck-box';
       for (let k = 0; k < 9; k++) {
@@ -111,15 +111,18 @@ Arcade.register('checksum', (() => {
         const c = document.createElement('span');
         c.dataset.i = String(i);
         c.setAttribute('role', 'gridcell');
-        cells[i] = c;
+        sq[i] = c;
         box.appendChild(c);
       }
       return box;
     });
+  }
+  function build() {
+    cells = new Array(81);
     stamp = document.createElement('p');
     stamp.className = 'ck-stamp';
     stamp.setAttribute('aria-hidden', 'true');
-    boardEl.replaceChildren(...boxes, stamp);
+    boardEl.replaceChildren(...boxes(cells), stamp);
     padEl.replaceChildren(...Array.from({ length: 9 }, (_, k) => {
       const b = document.createElement('button');
       b.type = 'button';
@@ -132,36 +135,40 @@ Arcade.register('checksum', (() => {
       return b;
     }));
   }
-  function render() {
-    cells.forEach((c, i) => {
-      const d = s.v[i];
+  // (the squares, sq, drawn from x, at the square picked)
+  function paint(x, sq, at) {
+    sq.forEach((c, i) => {
+      const d = x.v[i];
       let cls = 'cell ck-cell';
-      if (d) cls += ` disc ${s.given[i] ? 'ck-given' : 'ck-mine'}`;
-      if (i === sel) cls += ' sel';
-      else if (sel >= 0 && (ROW[i] === ROW[sel] || COL[i] === COL[sel] || BOX[i] === BOX[sel])) cls += ' peer';
-      if (s.solved) cls += ' ck-valid';
+      if (d) cls += ` disc ${x.given[i] ? 'ck-given' : 'ck-mine'}`;
+      if (i === at) cls += ' sel';
+      else if (at >= 0 && (ROW[i] === ROW[at] || COL[i] === COL[at] || BOX[i] === BOX[at])) cls += ' peer';
+      if (x.solved) cls += ' ck-valid';
       c.className = cls;
       if (d) {
         fillBit(c, d);
-        c.setAttribute('aria-label', `${d}${s.given[i] ? ', given' : ''}`);
-      } else if (s.n[i]) {
+        c.setAttribute('aria-label', `${d}${x.given[i] ? ', given' : ''}`);
+      } else if (x.n[i]) {
         const box = document.createElement('span');
         box.className = 'ck-notes';
         for (let k = 1; k <= 9; k++) {
           const m = document.createElement('i');
-          m.textContent = s.n[i] & (1 << k) ? String(k) : '';
+          m.textContent = x.n[i] & (1 << k) ? String(k) : '';
           box.appendChild(m);
         }
         c.replaceChildren(box);
         c.classList.remove('has-glyph');
-        c.setAttribute('aria-label', `Notes ${[1, 2, 3, 4, 5, 6, 7, 8, 9].filter((k) => s.n[i] & (1 << k)).join(' ')}`);
+        c.setAttribute('aria-label', `Notes ${[1, 2, 3, 4, 5, 6, 7, 8, 9].filter((k) => x.n[i] & (1 << k)).join(' ')}`);
       } else {
         c.replaceChildren();
         c.classList.remove('has-glyph');
         c.setAttribute('aria-label', 'Empty');
       }
-      if (s.solved) c.style.animationDelay = `${(ROW[i] + COL[i]) * 30}ms`;
+      if (x.solved) c.style.animationDelay = `${(ROW[i] + COL[i]) * 30}ms`;
     });
+  }
+  function render() {
+    paint(s, cells, sel);
     // (a bit with all nine in: its button dimmed)
     const count = new Array(10).fill(0);
     s.v.forEach((d) => { count[d]++; });
@@ -255,6 +262,56 @@ Arcade.register('checksum', (() => {
     render();
   }
 
+  // THE ARCADE MENU's preview (arcade.js plays it): a grid filled a square at a time, the one with the
+  // fewest bits it could be first (now and then its notes pencilled in before), then CHECKSUM VALID
+  function demo(host) {
+    const sol = solve(new Uint8Array(81), 1, (ds) => shuffle(ds, Math.random)).first;
+    const given = Uint8Array.from(sol);
+    shuffle(Array.from({ length: 81 }, (_, i) => i), Math.random).slice(GIVENS).forEach((i) => { given[i] = 0; });
+    const x = { given, sol, v: Uint8Array.from(given), n: new Uint16Array(81), solved: false };
+    const board = document.createElement('div');
+    board.className = 'ck-board';
+    const sq = new Array(81);
+    const word = document.createElement('p');
+    word.className = 'ck-stamp';
+    board.replaceChildren(...boxes(sq), word);
+    host.replaceChildren(board);
+    paint(x, sq, -1);
+    const could = (i) => { let m = ALL; for (const j of PEERS[i]) if (x.v[j]) m &= ~(1 << x.v[j]); return m; };
+    let at = -1;
+    return {
+      step() {
+        if (x.solved) return null;
+        if (at >= 0) { // (the bit written in, and off the notes round it)
+          x.v[at] = sol[at];
+          x.n[at] = 0;
+          for (const j of PEERS[at]) x.n[j] &= ~(1 << sol[at]);
+          paint(x, sq, at);
+          at = -1;
+          return 100;
+        }
+        let fewest = 10;
+        let pick = [];
+        for (let i = 0; i < 81; i++) {
+          if (x.v[i]) continue;
+          const n = bits(could(i));
+          if (n < fewest) { fewest = n; pick = [i]; } else if (n === fewest) pick.push(i);
+        }
+        if (!pick.length) {
+          x.solved = true;
+          paint(x, sq, -1);
+          word.textContent = 'CHECKSUM VALID';
+          word.className = 'ck-stamp good show';
+          return 0;
+        }
+        at = pick[Math.floor(Math.random() * pick.length)];
+        if (fewest > 1 || Math.random() < 0.15) x.n[at] = could(at); // (its notes first)
+        paint(x, sq, at);
+        return x.n[at] ? 380 : 110;
+      },
+    };
+  }
+
   boardEl.addEventListener('click', (e) => {
     const c = e.target.closest('.ck-cell');
     if (!c || !s || s.solved) return;
@@ -320,6 +377,7 @@ Arcade.register('checksum', (() => {
     best: (x) => Math.floor(x.t / 1000),
     bestText: (v) => kit.fmtTime(v * 1000),
     low: true,
+    demo,
     // SHARE: the time and the failed checks, over the nine boxes, all green
     share(x) {
       const box = '\u{1F7E9}\u{1F7E9}\u{1F7E9}';

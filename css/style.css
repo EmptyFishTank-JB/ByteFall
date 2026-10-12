@@ -4799,15 +4799,33 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 .home-row[hidden] { display: none; }
 .arcade-menu { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: 16px; container-type: inline-size; }
 .arcade-menu[hidden] { display: none; }
-.daily-cards.arcade-cards { display: flex; gap: 8px; width: calc(100% + 16px); margin: 0 -8px; padding: 6px calc(14cqw + 8px); overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; }
+.daily-cards.arcade-cards { flex: 1 1 0; min-height: 0; max-height: 600px; display: flex; gap: 8px; width: calc(100% + 16px); margin: 0 -8px; padding: 6px calc(14cqw + 8px); overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; }
 .arcade-cards::-webkit-scrollbar { display: none; }
-.arcade-cards button { flex: 0 0 72cqw; min-height: 128px; gap: 8px; padding: 12px; scroll-snap-align: center; scroll-snap-stop: always; opacity: 0.55; transition: opacity 0.25s ease-out, border-color 0.25s, background-color 0.25s, box-shadow 0.25s; }
+.arcade-cards button { flex: 0 0 72cqw; min-height: 0; gap: 8px; padding: 12px; scroll-snap-align: center; scroll-snap-stop: always; opacity: 0.55; transition: opacity 0.25s ease-out, border-color 0.25s, background-color 0.25s, box-shadow 0.25s; }
 .arcade-cards button.focus { opacity: 1; border-color: var(--fg); background: rgba(var(--fg-rgb), 0.1); box-shadow: 0 0 10px rgba(var(--fg-rgb), 0.3); }
 .arcade-cards .dc-name { font-size: 15.5px; letter-spacing: 2px; }
 .arcade-cards button.focus .dc-name { text-shadow: 0 0 6px rgba(var(--fg-rgb), 0.6); }
 .arcade-cards .dc-rule { font-size: 12px; line-height: 1.4; }
 .arcade-cards .dc-status { font-size: 11.5px; line-height: 1.4; }
 .arcade-menu .daily-pips:not([hidden]) { display: flex; }
+/* THE PREVIEWS (arcade.js plays them; each game's demo draws it): over each card's name, its game
+   playing itself on a small board, as the game's own board looks, sized to the room the card leaves
+   it (each board's squares from the box's size: container units); a fade between one game and the next */
+.ac-demo { flex: 1 1 0; min-height: 0; align-self: stretch; display: flex; align-items: center; justify-content: center; container-type: size; pointer-events: none; transition: opacity 0.35s ease; }
+.ac-demo.out { opacity: 0; }
+.ac-demo :is(.cb-board, .tr-board, .ck-board, .mg-board, .rt-board) { flex: none; align-self: center; border-radius: 4px; }
+.ac-demo .cell { cursor: default; }
+.ac-demo .cb-board { padding: 6px; gap: 3px; --cb-cell: min(30px, calc((100cqh - 40px) / 8), calc((100cqw - 36px) / 5)); }
+.ac-demo .cb-row { grid-template-columns: repeat(4, var(--cb-cell)) auto; gap: 3px; }
+.ac-demo .cb-pips { gap: 2px; padding-left: 2px; }
+.ac-demo .cb-pips i { width: calc(var(--cb-cell) * 0.24); height: calc(var(--cb-cell) * 0.24); }
+.ac-demo .tr-board { padding: 4px; gap: 2px; --tr-cell: min(calc((100cqw - 28px) / 9), calc((100cqh - 34px) / 12)); }
+.ac-demo .ck-board { padding: 4px; gap: 2px; --ck-cell: calc((min(100cqw, 100cqh) - 36px) / 9); }
+.ac-demo .ck-box { gap: 1px; padding: 1px; }
+.ac-demo .ck-cell.sel { outline-width: 1.5px; }
+.ac-demo .ck-stamp { padding: 5px 9px; font-size: 12px; letter-spacing: 2px; }
+.ac-demo .mg-board { --mg-cell: calc((min(100cqw, 100cqh) - 40px) / 4); }
+.ac-demo .rt-board { --rt-cell: calc((min(100cqw, 100cqh) - 38px) / 7); }
 .arcade-menu-acts { display: flex; justify-content: center; gap: 8px; }
 .arcade-menu-acts .vs-start { display: flex; align-items: center; justify-content: center; height: 40px; padding: 0 34px; }
 .arcade-new { height: 40px; padding: 0 16px; background: transparent; border: 1px solid var(--fg-dim); border-radius: 4px; color: var(--fg); font-family: inherit; font-size: 13px; letter-spacing: 2px; cursor: pointer; }

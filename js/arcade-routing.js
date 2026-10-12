@@ -32,13 +32,13 @@ Arcade.register('routing', (() => {
   const rise = (n) => (880 * Math.pow(2, (16 * Math.log(1 + n / 16)) / 12) - 880) / 700;
   // One path through every square: a snake back and forth, then shuffled by "backbites" (one end
   // stepping onto a square beside it and the path re-joined round it), many times over
-  function wander(rand) {
+  function wander(rand, turns = N * N * 60) {
     let path = [];
     for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) path.push(r * N + (r % 2 ? N - 1 - c : c));
     const at = new Int16Array(N * N);
     const index = () => path.forEach((cell, i) => { at[cell] = i; });
     index();
-    for (let it = 0; it < N * N * 60; it++) {
+    for (let it = 0; it < turns; it++) {
       if (rand() < 0.5) { path.reverse(); index(); }
       const end = path[path.length - 1];
       const nb = around(end);
@@ -177,39 +177,48 @@ Arcade.register('routing', (() => {
 
   // THE GRID: the squares (a pair's bits in its color; a square a line runs through tinted with it)
   // under the lines, drawn over them as one picture, a square to a unit
-  function build() {
-    cells = Array.from({ length: N * N }, (_, i) => {
+  // (the squares and the lines' picture into a board: the game's, or the ARCADE menu's preview's)
+  function squares(board) {
+    const sq = Array.from({ length: N * N }, (_, i) => {
       const c = document.createElement('span');
       c.className = 'cell rt-cell';
       c.dataset.i = String(i);
       return c;
     });
-    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('class', 'rt-lines');
-    svg.setAttribute('viewBox', `0 0 ${N} ${N}`);
-    svg.setAttribute('aria-hidden', 'true');
-    boardEl.replaceChildren(...cells, svg);
+    const lines = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    lines.setAttribute('class', 'rt-lines');
+    lines.setAttribute('viewBox', `0 0 ${N} ${N}`);
+    lines.setAttribute('aria-hidden', 'true');
+    board.replaceChildren(...sq, lines);
+    return { sq, lines };
   }
-  function render() {
-    const own = owners(s);
-    cells.forEach((c, i) => {
+  function build() {
+    ({ sq: cells, lines: svg } = squares(boardEl));
+  }
+  // (the squares, sq, and the lines' picture drawn from x)
+  function paint(x, sq, lines) {
+    const own = owners(x);
+    sq.forEach((c, i) => {
       const k = own[i];
-      const end = s.endAt[i];
-      c.className = `cell rt-cell${end >= 0 ? ' disc rt-end' : ''}${k >= 0 && end < 0 ? ' rt-on' : ''}${end >= 0 && done(s, end) ? ' rt-linked' : ''}`;
+      const end = x.endAt[i];
+      c.className = `cell rt-cell${end >= 0 ? ' disc rt-end' : ''}${k >= 0 && end < 0 ? ' rt-on' : ''}${end >= 0 && done(x, end) ? ' rt-linked' : ''}`;
       if (k >= 0) c.style.setProperty('--rt', HUES[k]);
       else c.style.removeProperty('--rt');
       if (end >= 0) fillBit(c, end + 1);
       else { c.replaceChildren(); c.classList.remove('has-glyph'); }
       c.setAttribute('aria-label', end >= 0 ? `Bit ${end + 1}` : k >= 0 ? `Route ${k + 1}` : 'Empty');
     });
-    svg.replaceChildren(...s.paths.filter((p) => p.length > 1).map((p) => {
-      const k = s.paths.indexOf(p);
+    lines.replaceChildren(...x.paths.filter((p) => p.length > 1).map((p) => {
+      const k = x.paths.indexOf(p);
       const pl = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
       pl.setAttribute('points', p.map((cell) => { const [r, c] = rc(cell); return `${c + 0.5},${r + 0.5}`; }).join(' '));
       pl.setAttribute('stroke', `rgb(${HUES[k]})`);
-      pl.setAttribute('class', done(s, k) ? 'done' : '');
+      pl.setAttribute('class', done(x, k) ? 'done' : '');
       return pl;
     }));
+  }
+  function render() {
+    paint(s, cells, svg);
     boardEl.classList.toggle('rt-won', s.won);
     actsEl.hidden = s.won;
     kit.refresh();
@@ -231,6 +240,53 @@ Arcade.register('routing', (() => {
     if (pending.fresh || pending.pair !== s.last) s.routes++;
     s.last = pending.pair;
     pending = null;
+  }
+
+  // THE ARCADE MENU's preview (arcade.js plays it): a grid routed a line at a time, square by square,
+  // from one of its pair's bits to the other, till every square's filled (made as the day's are, but
+  // not checked for one answer only: it's only watched)
+  function demo(host) {
+    const rand = Math.random;
+    let runs = null;
+    while (!runs) { // (a path shuffled less than a day's is, and cut again and again till it cuts right: quick)
+      const path = wander(rand, N * N * 12);
+      for (let t = 0; t < 40 && !runs; t++) {
+        const r = cut(path, rand);
+        if (r.length >= MIN_PAIRS && r.length <= MAX_PAIRS && r.every((x) => x.length >= 3)) runs = r;
+      }
+    }
+    runs = runs.map((r) => (r[0] < r[r.length - 1] ? r : r.slice().reverse())).sort((a, b) => a[0] - b[0]); // (numbered as the game numbers them)
+    const ends = runs.map((r) => [r[0], r[r.length - 1]]);
+    const endAt = new Int8Array(N * N).fill(-1);
+    ends.forEach(([a, b], k) => { endAt[a] = k; endAt[b] = k; });
+    const x = { ends, endAt, paths: ends.map(() => []), won: false };
+    const board = document.createElement('div');
+    board.className = 'rt-board';
+    const { sq, lines } = squares(board);
+    host.replaceChildren(board);
+    paint(x, sq, lines);
+    const todo = runs.map((r, k) => ({ k, run: rand() < 0.5 ? r : r.slice().reverse() }));
+    for (let i = todo.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [todo[i], todo[j]] = [todo[j], todo[i]]; }
+    let line = 0;
+    let at = 0;
+    return {
+      step() {
+        if (x.won) return null;
+        if (line >= todo.length) {
+          x.won = true;
+          board.classList.add('rt-won');
+          return 0;
+        }
+        const { k, run } = todo[line];
+        at++;
+        x.paths[k] = run.slice(0, at + 1);
+        paint(x, sq, lines);
+        if (at + 1 < run.length) return 130;
+        line++;
+        at = 0;
+        return 450;
+      },
+    };
   }
 
   // DRAWING: a press on a bit starts its pair's line over from it; on a line, carries that line on from
@@ -363,6 +419,7 @@ Arcade.register('routing', (() => {
     best: (x) => Math.floor(x.t / 1000),
     bestText: (v) => kit.fmtTime(v * 1000),
     low: true,
+    demo,
     // SHARE: the time, and the seven colors linked
     share: (x) => [`All routed in ${kit.fmtTime(x.t)} // ${x.routes} route${x.routes === 1 ? '' : 's'} for ${x.ends.length} pairs${perfect(x) ? ': perfect' : ''}`, ['\u{1F7E5}', '\u{1F7E7}', '\u{1F7E8}', '\u{1F7E9}', '\u{1F7E6}', '\u{1F7EA}', '\u{1F7EB}', '\u2B1C'].slice(0, x.ends.length).join('')],
     wander, // (for testing)

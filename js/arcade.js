@@ -21,8 +21,10 @@
 // card's: { done, text }), line(s), show(s) (its part drawn, for s), key(e) (a key: true if taken),
 // fit(), pay(s) (a daily game's result counted: the KEYS paid), share(s) (SHARE's lines), leave() (the
 // card closing, or another game on it), best(s) (a finished game's result for FREE PLAY's best, or
-// null), bestText(v), low (a lower best is better), and timed (a clock: 'open', running whenever the
-// card's up, or 'move', from the first move).
+// null), bestText(v), low (a lower best is better), timed (a clock: 'open', running whenever the
+// card's up, or 'move', from the first move), and demo(host) (the ARCADE menu's preview: a game
+// playing itself, drawn into host; its step() plays the next bit of it and says how long till the one
+// after, in ms, or null once it's over).
 const Arcade = (() => {
   const el = (id) => document.getElementById(id);
   const card = el('arcade');
@@ -49,6 +51,8 @@ const Arcade = (() => {
   let noteTimer = 0;
   let clockTimer = 0;
   let clockAt = 0;
+  let demos = []; // (the ARCADE menu's previews: { id, card, el, run, phase, due, seen })
+  let demoTimer = 0;
 
   const today = () => DAYS[utcWeekday()];
   const read = (key) => {
@@ -244,6 +248,7 @@ const Arcade = (() => {
     }
     view = 'game';
     menuEl.hidden = true;
+    demoTick();
     card.querySelectorAll('.arcade-game').forEach((sec) => { sec.hidden = sec.dataset.game !== g.id; });
     titleEl.textContent = `// ${GAMES[g.id].name}${g.free ? ': FREE PLAY' : ''}`;
     card.setAttribute('aria-label', `Arcade: ${GAMES[g.id].name}`);
@@ -281,6 +286,8 @@ const Arcade = (() => {
   // beside the middle slides it in, on the one in the middle plays it
   function menuCards() {
     const all = stats();
+    if (seenIO) seenIO.disconnect();
+    demos = [];
     cardsEl.replaceChildren(...ORDER.map((id) => {
       const G = GAMES[id];
       const st = all[id];
@@ -291,10 +298,65 @@ const Arcade = (() => {
       const rule = G.rule();
       b.innerHTML = `<span class="dc-name">${G.name}</span><span class="dc-rule">${rule[0].toUpperCase()}${rule.slice(1)}</span>`
         + `<span class="dc-status">${underWay(id) ? 'A GAME UNDER WAY' : st && st.best != null ? `BEST ${G.bestText(st.best)}` : 'NOT PLAYED YET'}${day >= 0 ? ` // DAILY ON ${WEEKDAYS[day]}S` : ''}</span>`;
+      const pre = document.createElement('span');
+      pre.className = 'ac-demo';
+      pre.setAttribute('aria-hidden', 'true');
+      b.prepend(pre);
+      if (G.demo) demos.push({ id, card: b, el: pre, run: G.demo(pre), phase: 'play', due: performance.now() + DEMO_START, seen: !seenIO });
       return b;
     }));
     pipsEl.replaceChildren(...ORDER.map((id) => { const i = document.createElement('i'); i.dataset.game = id; return i; }));
+    if (still()) for (const d of demos) while (d.run.step() != null); // (each shown finished, still)
+    if (seenIO) for (const d of demos) seenIO.observe(d.card);
   }
+
+  // THE PREVIEWS: on each card of the ARCADE menu, its game playing itself, over and over (a pause on
+  // the finished board, a fade, a new game). Only the cards on screen play (the one in the middle and
+  // the two peeking in at its sides), and only while the menu's up and the page in view: one slid away
+  // holds where it was till it's back. REDUCED EFFECTS (or reduced motion): each a finished board, still
+  const DEMO_START = 600; // (a new one's first move, after it shows)
+  const DEMO_HOLD = 2600; // (the finished board, before it fades)
+  const DEMO_FADE = 350; // (style.css: .ac-demo.out)
+  const still = () => document.documentElement.classList.contains('low-fx') || matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const seenIO = window.IntersectionObserver ? new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      const d = demos.find((x) => x.card === e.target);
+      if (d) d.seen = e.isIntersecting;
+    }
+    demoTick();
+  }, { root: cardsEl }) : null;
+  function demoStep(d, now) {
+    if (d.phase === 'play') {
+      const ms = d.run.step();
+      if (ms != null) d.due = now + ms;
+      else { d.phase = 'hold'; d.due = now + DEMO_HOLD; }
+    } else if (d.phase === 'hold') {
+      d.el.classList.add('out');
+      d.phase = 'fade';
+      d.due = now + DEMO_FADE;
+    } else {
+      d.run = GAMES[d.id].demo(d.el);
+      d.el.classList.remove('out');
+      d.phase = 'play';
+      d.due = now + DEMO_START;
+    }
+  }
+  // (each one seen whose time's come played on, then a timer for the soonest next)
+  function demoTick() {
+    clearTimeout(demoTimer);
+    demoTimer = 0;
+    if (view !== 'menu' || card.hidden || document.hidden || still()) return;
+    const now = performance.now();
+    let next = Infinity;
+    for (const d of demos) {
+      if (!d.seen) continue;
+      if (d.due <= now + 4) demoStep(d, now);
+      next = Math.min(next, d.due);
+    }
+    if (next < Infinity) demoTimer = setTimeout(demoTick, Math.max(16, next - performance.now()));
+  }
+  // (a game's preview as a list of [what to do, ms till the next]: its step())
+  const steps = (q) => ({ step() { const a = q.shift(); if (!a) return null; a[0](); return a[1]; } });
   const cardOf = (id) => cardsEl.querySelector(`[data-game="${id}"]`);
   function nearest() {
     const mid = cardsEl.scrollLeft + cardsEl.clientWidth / 2;
@@ -338,6 +400,7 @@ const Arcade = (() => {
     const at = GAMES[pick] ? pick : ORDER[0];
     slideTo(at, false);
     requestAnimationFrame(() => slideTo(at, false)); // (again once it's laid out)
+    demoTick();
   }
   // The main menu's ARCADE
   function openMenu() {
@@ -374,8 +437,12 @@ const Arcade = (() => {
     syncPanelOpen();
     applyModeUi(); // (the DAILY panel: the streak, and the ARCADE card's result)
     showKeys();
+    demoTick();
   }
-  document.addEventListener('visibilitychange', () => { if (document.hidden && view === 'game') save(); });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && view === 'game') save();
+    demoTick();
+  });
 
   if (window.ResizeObserver) new ResizeObserver(() => { if (!card.hidden && g && view === 'game') GAMES[g.id].fit(); }).observe(card);
   card.querySelector('.card-back').addEventListener('click', back);
@@ -398,6 +465,6 @@ const Arcade = (() => {
     ORDER.push(id);
   }
   // (what the games use of the frame)
-  const kit = { save, moved, finish, refresh, note, fmtTime, game: () => g, isOpen: () => !card.hidden };
+  const kit = { save, moved, finish, refresh, note, fmtTime, steps, game: () => g, isOpen: () => !card.hidden };
   return { register, open, openMenu, close, back, rule, status, isOpen: () => !card.hidden, kit, games: GAMES };
 })();

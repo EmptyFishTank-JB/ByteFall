@@ -194,6 +194,76 @@ Arcade.register('codebreaker', (() => {
     }, PIP_MS * (CB_LEN + 1));
   }
 
+  // THE ARCADE MENU's preview (arcade.js plays it): a code broken, try by try, each a code that fits
+  // every try before it (as a good player guesses), its bits keyed in, then its pips lighting; once
+  // broken, the code shows over the rows. DEMO_TRIES rows, broken in 3 tries at least
+  const DEMO_TRIES = 7;
+  let codes = null; // (every code there is, made once)
+  function demo(host) {
+    if (!codes) {
+      codes = [];
+      for (let n = 0; n < CB_BITS ** CB_LEN; n++) {
+        const c = [];
+        for (let k = 0, m = n; k < CB_LEN; k++, m = Math.floor(m / CB_BITS)) c.push(1 + (m % CB_BITS));
+        codes.push(c);
+      }
+    }
+    const pick = (a) => a[Math.floor(Math.random() * a.length)];
+    let code;
+    let tries;
+    do {
+      code = pick(codes);
+      tries = [];
+      let fits = codes;
+      while (tries.length < DEMO_TRIES) {
+        const guess = pick(fits);
+        tries.push(guess);
+        const m = mark(guess, code);
+        if (m.hit === CB_LEN) break;
+        fits = fits.filter((c) => { const k = mark(guess, c); return k.hit === m.hit && k.near === m.near; });
+      }
+    } while (mark(tries[tries.length - 1], code).hit !== CB_LEN || tries.length < 3);
+    const board = document.createElement('div');
+    board.className = 'cb-board';
+    const row = (cls) => { const r = document.createElement('div'); r.className = cls; board.appendChild(r); return r; };
+    const cellIn = (r, cls) => { const c = document.createElement('span'); c.className = cls; r.appendChild(c); return c; };
+    const pipsIn = (r) => {
+      const p = document.createElement('span');
+      p.className = 'cb-pips';
+      r.appendChild(p);
+      return Array.from({ length: CB_LEN }, () => p.appendChild(document.createElement('i')));
+    };
+    const top = row('cb-row cb-code');
+    const hidden = code.map(() => { const c = cellIn(top, 'cell cb-hidden'); c.textContent = '?'; return c; });
+    pipsIn(top)[0].parentNode.style.visibility = 'hidden';
+    row('cb-rule');
+    const rows = [];
+    for (let i = DEMO_TRIES - 1; i >= 0; i--) {
+      const r = row('cb-row cb-empty');
+      rows[i] = { r, cells: Array.from({ length: CB_LEN }, () => cellIn(r, 'cell')), pips: pipsIn(r) };
+    }
+    host.replaceChildren(board);
+    const q = [];
+    tries.forEach((guess, i) => {
+      const { r, cells, pips } = rows[i];
+      const m = mark(guess, code);
+      q.push([() => { r.className = 'cb-row cb-live'; cells.forEach((c, n) => { c.className = `cell cb-slot${n ? '' : ' next'}`; }); }, 320]);
+      guess.forEach((v, n) => q.push([() => {
+        cells[n].className = 'cell disc';
+        fillBit(cells[n], v);
+        if (cells[n + 1]) cells[n + 1].classList.add('next');
+      }, n < CB_LEN - 1 ? 190 : 300]));
+      q.push([() => { r.className = 'cb-row'; }, PIP_MS]); // (ENTER)
+      pips.forEach((p, n) => q.push([() => { p.className = n < m.hit ? 'hit' : n < m.hit + m.near ? 'near' : 'miss'; }, n < CB_LEN - 1 ? PIP_MS : 520]));
+    });
+    q.push([() => {
+      top.classList.add('won');
+      rows[tries.length - 1].r.classList.add('won');
+      hidden.forEach((c, n) => { c.className = 'cell disc'; fillBit(c, code[n]); });
+    }, 0]);
+    return kit.steps(q);
+  }
+
   padEl.addEventListener('click', (e) => {
     const b = e.target.closest('button');
     if (b) press(Number(b.dataset.v));
@@ -244,6 +314,7 @@ Arcade.register('codebreaker', (() => {
     best: (x) => (broken(x) ? x.g.length : null),
     bestText: (v) => `${v} ${v === 1 ? 'TRY' : 'TRIES'}`,
     low: true,
+    demo,
     // SHARE: a line of squares per try, as the pips (green, yellow, black), under the result
     share(x) {
       const lines = x.g.map((guess) => {
