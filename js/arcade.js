@@ -1,31 +1,27 @@
-// THE ARCADE: games of their own on a card over the game card, not ByteFall's board: CODE BREAKER
-// (arcade-codebreaker.js), TRACE (arcade-trace.js), MERGE (arcade-merge.js), CHECKSUM
+// THE ARCADE (arcade.html; its own page, on its way to its own app): games of their own on the bits:
+// CODE BREAKER (arcade-codebreaker.js), TRACE (arcade-trace.js), MERGE (arcade-merge.js), CHECKSUM
 // (arcade-checksum.js), DEFRAG (arcade-defrag.js), DECODE (arcade-decode.js) and ROUTING
-// (arcade-routing.js). Two ways in:
-//   THE DAILY ARCADE (DAILY's ARCADE card): the day's game, MONDAY CODE BREAKER, TUESDAY TRACE,
-//     WEDNESDAY MERGE, THURSDAY CHECKSUM, FRIDAY DEFRAG, SATURDAY DECODE, SUNDAY ROUTING (a day without
-//     one, PLAY opens the ARCADE menu). One game a day, the same for everyone (seeded by the date, UTC),
-//     saved as it goes; its first move is the day's daily game (the streak, the day's KEYS and MASTER
-//     KEY), and its result pays KEYS; SHARE once it's over.
-//   THE ARCADE MENU (the main menu's ARCADE): every game as a card in a row that slides sideways, as
-//     DAILY's do; PLAY plays the one in the middle, FREE PLAY: a new game each time (its own random
-//     seed), as many as you like, the one under way kept (BACK, or closing the app, keeps it), no KEYS,
-//     your best kept (bytefall-arcade-free-stats). BACK in one goes back to the menu.
-// This is the frame they share: the card, its title and line (the clock, what's left, the result, a
-// passing note), the game's own part under them, and SHARE (or NEW GAME) once it's over. Loaded before
-// script.js: what it uses of it (storage, todayKey, seeded, hashString, fillBit, homeNotice,
-// syncPanelOpen ...) it reaches only once the page is running. ?arcade=trace (any game's id: the dev
-// page's links) puts that one in the middle of the ARCADE menu.
+// (arcade-routing.js), on a card that opens on the ARCADE MENU:
+//   TODAY: the day's game, MONDAY CODE BREAKER, TUESDAY TRACE, WEDNESDAY MERGE, THURSDAY CHECKSUM,
+//     FRIDAY DEFRAG, SATURDAY DECODE, SUNDAY ROUTING. One game a day, the same for everyone (seeded by
+//     the date, UTC), saved as it goes; SHARE once it's over.
+//   THE CARDS: every game in a row that slides sideways; PLAY plays the one in the middle, FREE PLAY: a
+//     new game each time (its own random seed), as many as you like, the one under way kept (BACK, or
+//     closing the page, keeps it), your best kept (bytefall-arcade-free-stats).
+// BACK in a game goes back to the menu; in the menu, back to the landing page. This is the frame the
+// games share: the card, its title and line (the clock, what's left, the result, a passing note), the
+// game's own part under them, and SHARE (or NEW GAME) once it's over. What it needs of ByteFall's
+// (storage, todayKey, seeded, fillBit ...) is arcade-shell.js; SFX, FX and the themes are ByteFall's own
+// files. ?game=trace puts that one in the middle of the menu; ?today opens the day's game.
 //
 // A game (Arcade.register(id, game)): name, rule() (its line on the cards), make(rand, saved) (its
-// state from a seed, with what was saved), pack(s) (what to save), over(s), status(saved) (the DAILY
-// card's: { done, text }), line(s), show(s) (its part drawn, for s), key(e) (a key: true if taken),
-// fit(), pay(s) (a daily game's result counted: the KEYS paid), share(s) (SHARE's lines), leave() (the
-// card closing, or another game on it), best(s) (a finished game's result for FREE PLAY's best, or
-// null), bestText(v), low (a lower best is better), timed (a clock: 'open', running whenever the
-// card's up, or 'move', from the first move), and demo(host) (the ARCADE menu's preview: a game
-// playing itself, drawn into host; its step() plays the next bit of it and says how long till the one
-// after, in ms, or null once it's over).
+// state from a seed, with what was saved), pack(s) (what to save), over(s), status(saved) (TODAY's:
+// { done, text }), line(s), show(s) (its part drawn, for s), key(e) (a key: true if taken), fit(),
+// share(s) (SHARE's lines), leave() (the card closing, or another game on it), best(s) (a finished
+// game's result for FREE PLAY's best, or null), bestText(v), low (a lower best is better), timed (a
+// clock: 'open', running whenever the card's up, or 'move', from the first move), and demo(host) (the
+// menu card's preview: a game playing itself, drawn into host; its step() plays the next bit of it and
+// says how long till the one after, in ms, or null once it's over).
 const Arcade = (() => {
   const el = (id) => document.getElementById(id);
   const card = el('arcade');
@@ -39,14 +35,14 @@ const Arcade = (() => {
   const pipsEl = el('arcade-pips');
   const menuPlay = el('arcade-play');
   const menuNew = el('arcade-new');
+  const todayBtn = el('arcade-today');
   const GAMES = {};
   const ORDER = []; // (as registered: the week's order)
   const DAYS = ['codebreaker', 'trace', 'merge', 'checksum', 'defrag', 'decode', 'routing']; // (UTC weekdays, Monday first)
   const PICK_KEY = 'bytefall-arcade-pick';
   const STATS_KEY = 'bytefall-arcade-free-stats';
-  let g = null; // the game on the card: { id, day, free, seed, played, paid, k (KEYS paid), t (ms on the clock), moved, ...its own }
+  let g = null; // the game on the card: { id, day, free, seed, played, paid (counted), t (ms on the clock), moved, ...its own }
   let view = 'game'; // ('menu': the ARCADE menu's cards)
-  let fromMenu = false; // (BACK in a game: to the menu, or out)
   let pick = null; // (the ARCADE menu's card in the middle)
   let noteUntil = 0;
   let noteTimer = 0;
@@ -81,7 +77,7 @@ const Arcade = (() => {
     if (!g) return;
     const data = { ...GAMES[g.id].pack(g), paid: g.paid ? 1 : 0, t: Math.round(g.t), m: g.moved ? 1 : 0 };
     if (g.free) storage.set(freeKey(g.id), JSON.stringify({ ...data, seed: g.seed }));
-    else storage.set(saveKey(g.id, g.day), JSON.stringify({ ...data, played: g.played ? 1 : 0, k: g.k }));
+    else storage.set(saveKey(g.id, g.day), JSON.stringify({ ...data, played: g.played ? 1 : 0 }));
   }
   const over = () => !!g && GAMES[g.id].over(g);
   const stats = () => read(STATS_KEY) || {};
@@ -185,12 +181,10 @@ const Arcade = (() => {
     if (!g.free && !g.played) {
       g.played = true;
       save();
-      Progress.arcadePlayed('arcade');
-      earned();
     }
     if (first) clock();
   }
-  // Over: counted once (a daily one's result paid; a free one's toward its best)
+  // Over: counted once (a free one's toward its best; the day's is kept as it ended)
   function finish() {
     stopClock();
     if (!g.paid) {
@@ -202,26 +196,16 @@ const Arcade = (() => {
         if (v != null && (st.best == null || (GAMES[g.id].low ? v < st.best : v > st.best))) { st.best = v; g.newBest = true; }
         all[g.id] = st;
         storage.set(STATS_KEY, JSON.stringify(all));
-      } else {
-        g.k = GAMES[g.id].pay(g);
-        earned();
       }
       g.paid = true;
       save();
     }
     refresh();
   }
-  // (what it earned: on the notice line once the card's closed. At the menu nothing's held for a
-  // result screen, so what initGame set to wait for one is let go)
-  function earned() {
-    flushEarned();
-    announce(Progress.check());
-  }
-
   // SHARE: the game's lines under its name and the day (FREE PLAY's button: another game)
   shareBtn.addEventListener('click', async () => {
     if (g.free) { play(g.id, true); return; }
-    const text = [`BYTEFALL // ${GAMES[g.id].name} ${g.day}`, ...GAMES[g.id].share(g), location.href.split(/[?#]/)[0]].join('\n');
+    const text = [`BYTEFALL ARCADE // ${GAMES[g.id].name} ${g.day}`, ...GAMES[g.id].share(g), location.href.split(/[?#]/)[0]].join('\n');
     try {
       if (navigator.share) {
         await navigator.share({ text });
@@ -263,10 +247,9 @@ const Arcade = (() => {
   function showCard() {
     if (!card.hidden) return;
     card.hidden = false;
-    syncPanelOpen();
     SFX.play('static');
   }
-  // PLAY on DAILY's ARCADE card: today's game (on a day with none, the ARCADE menu)
+  // TODAY: the day's game (on a day with none, the menu)
   function open() {
     const id = today();
     if (!id) {
@@ -276,7 +259,6 @@ const Arcade = (() => {
       return;
     }
     const day = todayKey();
-    fromMenu = false;
     showCard();
     if (g && g.id === id && g.day === day && !g.free) play(id);
     else play(id, false, false);
@@ -398,27 +380,41 @@ const Arcade = (() => {
   function showMenu() {
     leaveGame();
     view = 'menu';
-    fromMenu = true;
     card.querySelectorAll('.arcade-game').forEach((sec) => { sec.hidden = true; });
     overEl.hidden = true;
     menuEl.hidden = false;
     titleEl.textContent = '// ARCADE';
     card.setAttribute('aria-label', 'Arcade');
     menuCards();
+    showToday();
     showLine();
     const at = GAMES[pick] ? pick : ORDER[0];
     slideTo(at, false);
     requestAnimationFrame(() => slideTo(at, false)); // (again once it's laid out)
     demoTick();
   }
-  // The main menu's ARCADE
+  // (TODAY's button over the cards: the day's game and how it stands)
+  function showToday() {
+    const id = today();
+    const st = status();
+    todayBtn.innerHTML = id ? `<span class="at-day">TODAY // ${WEEKDAYS[utcWeekday()]}</span><span class="at-name">${GAMES[id].name}</span><span class="at-status">${st.done ? '&check; ' : ''}${st.text}</span>`
+      : `<span class="at-day">TODAY</span><span class="at-status">${st.text}</span>`;
+    todayBtn.classList.toggle('done', !!st.done);
+    todayBtn.disabled = !id;
+  }
+  // The page opening: the menu
   function openMenu() {
-    const asked = new URLSearchParams(location.search).get('arcade');
+    const asked = new URLSearchParams(location.search).get('game');
     const saved = storage.get(PICK_KEY);
     pick = GAMES[asked] ? asked : GAMES[saved] ? saved : ORDER[0];
     showCard();
     showMenu();
   }
+  window.addEventListener('load', () => setTimeout(() => {
+    openMenu();
+    if (new URLSearchParams(location.search).has('today')) open();
+  }, 0));
+  todayBtn.addEventListener('click', () => { SFX.play('button'); open(); });
   let scrollFrame = 0;
   cardsEl.addEventListener('scroll', () => {
     if (scrollFrame) return;
@@ -434,19 +430,14 @@ const Arcade = (() => {
   menuPlay.addEventListener('click', () => { if (pick) play(pick, false); });
   menuNew.addEventListener('click', () => { if (pick) play(pick, true); });
 
-  // BACK (or Esc): from a free game to the menu, else out
+  // BACK (or Esc): from a game to the menu; from the menu out, to the landing page
   function back() {
-    if (view === 'game' && fromMenu) { SFX.play('button'); showMenu(); return; }
+    if (view === 'game') { SFX.play('button'); showMenu(); return; }
     close();
   }
   function close() {
-    if (card.hidden) return;
     leaveGame();
-    card.hidden = true;
-    syncPanelOpen();
-    applyModeUi(); // (the DAILY panel: the streak, and the ARCADE card's result)
-    showKeys();
-    demoTick();
+    location.href = './';
   }
   document.addEventListener('visibilitychange', () => {
     if (document.hidden && view === 'game') save();

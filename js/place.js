@@ -1,7 +1,7 @@
 // PLACE: a refresh puts you back where you were. As the page goes, what's open is kept for this
 // tab: the MAIN MENU, the MENU (and its tab, RECORDS' sub-tab and how far it's scrolled), SETTINGS, the MUSIC
 // PLAYER, or the TUTORIAL at the step it's on (tutorial.js). The start screen does its own part:
-// it shows again on a refresh until START is pressed (index.html's head script, start.js).
+// it shows again on a refresh until START is pressed (bytefall.html's head script, start.js).
 (() => {
   const KEY = 'bytefall-place';
   const player = document.getElementById('music-player');

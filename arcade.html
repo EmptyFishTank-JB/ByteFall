@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#020403">
+<link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+<script>
+  // Apply the saved color theme and font before first paint (ByteFall's SETTINGS, on the web the same browser's: the arcade has none of its own yet).
+  try {
+    var theme = localStorage.getItem('bytefall-theme');
+    var font = localStorage.getItem('bytefall-font');
+    if (['share-tech', 'press-start', 'bitcount', 'bytesized', 'orbitron'].indexOf(font) >= 0) document.documentElement.dataset.font = font;
+    if (['cipher', 'amber-crt', 'monochrome', 'anaglyph', 'synthwave', 'dot-matrix', 'paper', 'glyph', 'spectrum'].indexOf(theme) >= 0) document.documentElement.dataset.theme = theme;
+    // (SPECTRUM's page drift: a random place in its 48s cycle to start from, so it isn't always red)
+    var hue = Math.random();
+    document.documentElement.style.setProperty('--page-hue-at', (-hue * 48).toFixed(2) + 's');
+    document.documentElement.style.setProperty('--page-hue-deg', Math.round(hue * 360) + 'deg');
+    if (localStorage.getItem('bytefall-effects') === 'reduced') document.documentElement.classList.add('low-fx');
+  } catch (e) {}
+</script>
+<title>THE ARCADE // BYTEFALL</title>
+<script src="js/fonts.js?v=582"></script>
+<link rel="stylesheet" href="css/style.css?v=582">
+<link rel="stylesheet" href="css/arcade.css?v=582">
+</head>
+<body class="arcade-page">
+<!-- THE ARCADE (arcade.js and a file per game): its games on the bits, on a card of its own, on its way
+     to an app of its own. The menu first (TODAY, the day's game; then every game as a card in a row that
+     slides sideways, FREE PLAY); the frame they share: BACK and the title, the line (the clock, what's
+     left, the result), then the menu or the game's own part, and SHARE (or NEW GAME) when it's over. The
+     starlight twinkles behind it all, and behind each game's board (grid-bg.js) -->
+<main class="arcade-app">
+<div id="arcade" class="arcade" aria-label="Arcade">
+    <canvas class="arcade-bg" id="arcade-bg" aria-hidden="true"></canvas>
+    <div class="card-head"><button type="button" class="card-back" data-close="arcade">&larr; BACK</button><h1 class="card-brand" aria-hidden="true">BYTE<span>FALL</span></h1><span class="title-wrap"><span class="arcade-title" id="arcade-title">// CODE BREAKER</span></span></div>
+    <p class="arcade-line" id="arcade-line" aria-live="polite"></p>
+    <div class="arcade-menu" id="arcade-menu" hidden>
+      <button type="button" class="arcade-today" id="arcade-today"></button>
+      <div class="daily-cards arcade-cards" id="arcade-cards" role="group" aria-label="Arcade games"></div>
+      <div class="daily-pips" id="arcade-pips" aria-hidden="true"></div>
+      <div class="arcade-menu-acts"><button type="button" class="vs-start home-play" id="arcade-play">PLAY</button><button type="button" class="arcade-new" id="arcade-new" hidden>NEW GAME</button></div>
+      <p class="arcade-menu-note">TODAY: one game a day, the same for everyone. THE CARDS: FREE PLAY, as many as you like.</p>
+    </div>
+    <!-- MONDAY: CODE BREAKER (arcade-codebreaker.js). The code over the rows (? till it's over), the ten
+         tries under it from the bottom up, each row's pips at its right; the keypad's seven bits,
+         DELETE and ENTER under the board -->
+    <div class="arcade-game" data-game="codebreaker" hidden>
+      <div class="cb-board" id="cb-board"></div>
+      <p class="cb-legend" aria-hidden="true"><span><i class="hit"></i>RIGHT PLACE</span><span><i class="near"></i>WRONG PLACE</span><span><i></i>NO MATCH</span></p>
+      <div class="cb-pad" id="cb-pad" role="group" aria-label="Bits"></div>
+      <div class="cb-acts" id="cb-acts"><button type="button" id="cb-del">DELETE</button><button type="button" id="cb-enter">ENTER</button></div>
+    </div>
+    <!-- TUESDAY: TRACE (arcade-trace.js). The board of encrypted blocks, infected bits under some;
+         under it what a tap does (OPEN or FLAG) -->
+    <div class="arcade-game" data-game="trace" hidden>
+      <div class="tr-board" id="tr-board" role="grid" aria-label="Trace board"></div>
+      <div class="tr-acts" id="tr-acts"><button type="button" id="tr-mode" aria-pressed="false">TAP: OPEN</button><p class="tr-hint">HOLD A BLOCK TO FLAG IT</p></div>
+    </div>
+    <!-- THURSDAY: CHECKSUM (arcade-checksum.js). The 9x9 grid in its nine boxes; the bits [1] to [9]
+         to write in; NOTES, ERASE and CONFIRM -->
+    <div class="arcade-game" data-game="checksum" hidden>
+      <div class="ck-board" id="ck-board" role="grid" aria-label="Checksum grid"></div>
+      <div class="ck-pad" id="ck-pad" role="group" aria-label="Bits"></div>
+      <div class="ck-acts" id="ck-acts"><button type="button" id="ck-notes" aria-pressed="false">NOTES: OFF</button><button type="button" id="ck-erase">ERASE</button><button type="button" id="ck-confirm">CONFIRM</button></div>
+    </div>
+    <!-- WEDNESDAY: MERGE (arcade-merge.js). The 4x4 board, swiped (or the arrows), what to do under it -->
+    <div class="arcade-game" data-game="merge" hidden>
+      <div class="mg-board" id="mg-board" aria-label="Merge board"></div>
+      <p class="mg-hint" id="mg-hint">SWIPE TO SLIDE THE BITS // TWO THE SAME MERGE</p>
+    </div>
+    <!-- FRIDAY: DEFRAG (arcade-defrag.js). The 7x7 board full of bits, each number its own color, two
+         side by side swapped at a time; what to do under it -->
+    <div class="arcade-game" data-game="defrag" hidden>
+      <div class="df-board" id="df-board" aria-label="Defrag board"></div>
+      <p class="mg-hint" id="df-hint">SWIPE A BIT INTO ITS NEIGHBOR TO SWAP</p>
+    </div>
+    <!-- SATURDAY: DECODE (arcade-decode.js). The grid, its numbers over each column and at each row's
+         left; what a tap does (FILL or MARK) under it, and once it's decoded, the picture's name -->
+    <div class="arcade-game" data-game="decode" hidden>
+      <div class="dc-board" id="dc-board" aria-label="Decode grid"></div>
+      <div class="tr-acts" id="dc-acts"><button type="button" id="dc-mode" aria-pressed="false">TAP: FILL</button><p class="tr-hint">HOLD A SQUARE TO MARK IT // DRAG ALONG A LINE</p></div>
+      <p class="dc-name" id="dc-name" hidden></p>
+    </div>
+    <!-- SUNDAY: ROUTING (arcade-routing.js). The 7x7 grid, its pairs of bits and the lines drawn
+         between them; CLEAR ALL under it -->
+    <div class="arcade-game" data-game="routing" hidden>
+      <div class="rt-board" id="rt-board" aria-label="Routing grid"></div>
+      <div class="rt-acts" id="rt-acts"><button type="button" id="rt-clear">CLEAR ALL</button><p class="rt-hint">DRAG FROM A BIT TO ITS TWIN</p></div>
+    </div>
+    <div class="arcade-over" id="arcade-over" hidden><button type="button" id="arcade-share">SHARE</button><p class="arcade-next" id="arcade-next"></p></div>
+  </div>
+</main>
+<canvas id="board-fx" aria-hidden="true"></canvas>
+<script src="js/music/output.js?v=582"></script>
+<script src="js/sfx.js?v=582"></script>
+<script src="js/fx.js?v=582"></script>
+<script src="js/arcade-shell.js?v=582"></script>
+<script src="js/arcade.js?v=582"></script>
+<script src="js/arcade-codebreaker.js?v=582"></script>
+<script src="js/arcade-trace.js?v=582"></script>
+<script src="js/arcade-merge.js?v=582"></script>
+<script src="js/arcade-checksum.js?v=582"></script>
+<script src="js/arcade-defrag.js?v=582"></script>
+<script src="js/arcade-decode.js?v=582"></script>
+<script src="js/arcade-routing.js?v=582"></script>
+<script src="js/grid-bg.js?v=582"></script>
+</body>
+</html>

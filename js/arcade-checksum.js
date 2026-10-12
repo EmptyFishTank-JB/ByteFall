@@ -183,7 +183,7 @@ Arcade.register('checksum', (() => {
   }
   function line(x) {
     const time = kit.fmtTime(x.t);
-    if (x.solved) return `CHECKSUM VALID IN ${time}${x.k ? ` // +${x.k} KEYS` : ''}`;
+    if (x.solved) return `CHECKSUM VALID IN ${time}`;
     const e = empty(x);
     return `TIME ${time} // ${e ? `${e} TO FILL` : 'GRID FULL: CONFIRM IT'}`;
   }
@@ -369,12 +369,11 @@ Arcade.register('checksum', (() => {
       if (!s || boardEl.closest('.arcade-game').hidden) return;
       const host = boardEl.parentElement;
       const pad = 16; // (the board's padding and border)
-      const gaps = 2 * 4 + 6 * 2; // (between boxes, and between squares)
+      const gaps = 2 * 4 + 6 * 2 + 3 * 6; // (between boxes, between squares, and each box's padding and border)
       const room = host.clientHeight - padEl.offsetHeight - actsEl.offsetHeight - 16;
       const size = Math.floor(Math.min(44, (host.clientWidth - pad - gaps) / 9, (room - pad - gaps) / 9));
       boardEl.style.setProperty('--ck-cell', `${Math.max(16, size)}px`);
     },
-    pay: (x) => Progress.arcadeResult('checksum', true, Math.floor(x.t / 1000)),
     best: (x) => Math.floor(x.t / 1000),
     bestText: (v) => kit.fmtTime(v * 1000),
     low: true,

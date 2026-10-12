@@ -1,4 +1,4 @@
-// START SCREEN: a fresh launch (see the inline script in index.html) opens on the title over the
+// START SCREEN: a fresh launch (see the inline script in bytefall.html) opens on the title over the
 // twinkling starlight with TAP TO START blinking, on a card the game card's own size and place (laid
 // over it: fitStart). A tap (or Enter / Space) fades what's on the card out, its border staying, and
 // the game card's contents in, within the same border: the first time the game is ever opened the
@@ -130,7 +130,7 @@
   const startBtn = document.getElementById('start-btn');
   startBtn.addEventListener('click', start);
 
-  // START under the tagline (index.html's placeStartBtn, run first as the page loads, so it's in
+  // START under the tagline (bytefall.html's placeStartBtn, run first as the page loads, so it's in
   // its place from the first paint): again as the card's fitted and the fonts load
   const card = screen.querySelector('.start-card');
   function placeStart() {
@@ -143,7 +143,7 @@
     document.fonts.ready.then(placeStart);
     document.fonts.addEventListener('loadingdone', placeStart);
   }
-  // THE TITLE's INTRO, on a launch (index.html marks the card intro-wait before the first paint, so
+  // THE TITLE's INTRO, on a launch (bytefall.html marks the card intro-wait before the first paint, so
   // the title and START are never seen in place first): one of a few, never the same one twice
   // running (?intro=drop and the like picks one). It plays on a copy of the title laid over the
   // real one, which never moves (START is placed by it), then the tagline types in and START

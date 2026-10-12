@@ -307,7 +307,7 @@ Arcade.register('defrag', (() => {
     kit.refresh();
   }
   function line(x) {
-    if (x.over) return `SCORE ${fmt(x.score)} // CHAIN x${Math.max(1, x.best)}${x.k ? ` // +${x.k} KEYS` : ''}`;
+    if (x.over) return `SCORE ${fmt(x.score)} // CHAIN x${Math.max(1, x.best)}`;
     if (!x.swaps) return `${MATCH} TOUCHING DECRYPT // ${SWAPS} SWAPS`;
     const inf = infectedLeft(x);
     return `SCORE ${fmt(x.score)} // ${SWAPS - x.swaps} SWAPS LEFT // ${inf ? `${inf} INFECTED` : 'CLEAN'}`;
@@ -471,7 +471,6 @@ Arcade.register('defrag', (() => {
       const size = Math.floor(Math.min(60, (host.clientWidth - pad - gap * (SIZE - 1)) / SIZE, (room - pad - gap * (SIZE - 1)) / SIZE));
       boardEl.style.setProperty('--df-cell', `${Math.max(28, size)}px`);
     },
-    pay: (x) => Progress.defragResult(x.score, x.best),
     best: (x) => x.score,
     bestText: (v) => `${fmt(v)} POINTS`,
     low: false,

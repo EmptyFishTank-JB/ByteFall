@@ -140,7 +140,7 @@ Arcade.register('trace', (() => {
   }
   function line(x) {
     const time = kit.fmtTime(x.t);
-    if (x.won) return `BOARD CLEAN IN ${time}${x.k ? ` // +${x.k} KEYS` : ''}`;
+    if (x.won) return `BOARD CLEAN IN ${time}`;
     if (x.hit >= 0) return `INFECTED // TRACE FAILED AT ${time}`;
     if (!x.moved) return `CLEAR THE BOARD // ${INFECTED} INFECTED HIDDEN`;
     return `TIME ${time} // ${left(x)} INFECTED LEFT`;
@@ -307,7 +307,6 @@ Arcade.register('trace', (() => {
       const size = Math.floor(Math.min(40, (host.clientWidth - pad - gap * (COLS - 1)) / COLS, (room - pad - gap * (ROWS - 1)) / ROWS));
       boardEl.style.setProperty('--tr-cell', `${Math.max(14, size)}px`);
     },
-    pay: (x) => Progress.arcadeResult('trace', x.won, Math.floor(x.t / 1000)),
     best: (x) => (x.won ? Math.floor(x.t / 1000) : null),
     bestText: (v) => kit.fmtTime(v * 1000),
     low: true,

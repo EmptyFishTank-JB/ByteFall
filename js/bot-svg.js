@@ -1,7 +1,7 @@
 // THE BOTS' PIXEL ART: BOT, GRIFTER, BUNKER and GLITCH on one 16x17 grid (their shapes, every
 // face, the sweat and the teeth; style.css shows the ones a bot, level and mood call for). Put into
 // the VS CPU's face (#cpu-face) as the page loads; minibot.js copies it for the wanderers and the
-// tutorial's narrator. Kept here, not in index.html, so the dev page's bot sandbox draws the same.
+// tutorial's narrator. Kept here, not in bytefall.html, so the dev page's bot sandbox draws the same.
 const BOT_SVG = `
 <svg class="cpu-bot" viewBox="0 0 16 17" shape-rendering="crispEdges">
   <defs>

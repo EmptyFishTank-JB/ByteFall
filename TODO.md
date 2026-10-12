@@ -14,24 +14,15 @@ Ideas queued for later (not built yet).
 
 See [WANDERERS.md](WANDERERS.md) for the season-by-season chart and the full ideas list.
 
-## The DAILY ARCADE (a game a day) and the ARCADE (any time)
+## THE ARCADE (its own page, then its own app)
 
-The main menu's ARCADE (beside TUTORIAL) opens the ARCADE menu: every game as FREE PLAY, bests kept, no
-KEYS (done). Later: the bests in RECORDS, and an ARCADE section there.
-
-
-The DAILY menu's fifth card, ARCADE (`js/arcade.js` and a file per game): a different game each
-weekday on the bits and the board, not necessarily ByteFall's rules. Done: **Monday CODE BREAKER** (a
-4-bit code, 10 tries, pips at each row's right), **Tuesday TRACE** (Minesweeper's rules on encrypted
-blocks, infected bits under them), **Wednesday MERGE** (2048's, [1] to BYTE to QWORD, an encrypted
-block every 10 moves), **Thursday CHECKSUM** (a timed 9x9 Sudoku with notes and CONFIRM), **Friday
-DEFRAG** (swap-and-match, below: 30 swaps, encrypted and infected bits) and **Sunday ROUTING** (Flow's,
-7 pairs on 7x7), **Saturday DECODE** (Picross on 23 of the bots' and visitors' pictures, each checked
-to solve a line at a time): every day has its game. More ideas: PURGE (below), a TETRIS-like one.
-Now that every day has one, the ARCADE could count toward DAILY SWEEP (five games, not four): not done,
-as it makes the achievement harder; to decide.
-Later for these: CHECKSUM's twist (some squares under layers; sum cages on harder days), TRACE's (a
-bigger board on some days), ROUTING's (bigger grids, bridges), and RECORDS lines for their bests.
+The seven daily games left ByteFall for a page of their own, `arcade.html` (ARCADE.md has it as it is),
+on the way to an app of their own: the next one for Google Play, after refinement. To come for it: its
+own settings (sound, theme, text size, effects), a start screen, its own rewards (a streak, records,
+achievements: no KEYS, those are ByteFall's), its own app build (an Android project of its own on these
+files, as ByteFall Viz has), and the twists noted for each game: CHECKSUM's (some squares under layers;
+sum cages on harder days), TRACE's (a bigger board on some days), ROUTING's (bigger grids, bridges). More
+games ideas: PURGE (below), a TETRIS-like one.
 
 ## The ARCADE (after the Android launch)
 
@@ -44,7 +35,7 @@ and characters aren't.
 
 ### DEFRAG (a swap-and-match game)
 
-Built as the DAILY ARCADE's Friday game (`js/arcade-defrag.js`; README has it as it is): 6 numbers, 30
+Built as THE ARCADE's Friday game (`js/arcade-defrag.js`; ARCADE.md has it as it is): 6 numbers, 30
 swaps, 6 encrypted and 2 infected bits dealt, new bits never matching by themselves. Still to come from
 the list below: the CHAIN METER's look and its resources, hints as an option, EASY/HARD boards, and the
 puzzles.

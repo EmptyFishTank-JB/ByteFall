@@ -223,7 +223,7 @@ Arcade.register('merge', (() => {
     kit.refresh();
   }
   function line(x) {
-    if (x.over) return `SCORE ${fmt(x.score)} // BEST ${name(x.top)}${x.k ? ` // +${x.k} KEYS` : ''}`;
+    if (x.over) return `SCORE ${fmt(x.score)} // BEST ${name(x.top)}`;
     const locked = ENCRYPT_EVERY - (x.moves % ENCRYPT_EVERY);
     return `SCORE ${fmt(x.score)} // BEST ${name(x.top)} // ENCRYPT IN ${locked}`;
   }
@@ -347,7 +347,6 @@ Arcade.register('merge', (() => {
       const size = Math.floor(Math.min(84, (area.clientWidth - pad - gap * (SIZE - 1)) / SIZE, (room - pad - gap * (SIZE - 1)) / SIZE));
       boardEl.style.setProperty('--mg-cell', `${Math.max(36, size)}px`);
     },
-    pay: (x) => Progress.mergeResult(x.score, x.top),
     best: (x) => x.score,
     bestText: (v) => `${fmt(v)} POINTS`,
     low: false,

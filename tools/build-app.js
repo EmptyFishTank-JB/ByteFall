@@ -4,8 +4,8 @@
 //                                    its own app beside the Play one, with UNLOCK EVERYTHING
 //   node tools/build-app.js release  the RELEASE edition (Actions → Android release bundle), for
 //                                    Google Play: no UNLOCK EVERYTHING, every dev switch off for good
-// - only what the game loads: index.html, the manifest, css/, js/, the fonts and icons (not the
-//   dev tools, the docs or the screenshots)
+// - only what the game loads: bytefall.html (the app's index.html), the manifest, css/, js/, the
+//   fonts and icons (not the landing page, the dev tools, the docs or the screenshots)
 // - the settings' DEV link taken out
 // - the build, commit and date baked in (the web version asks GitHub for them on each load)
 // - any dev switches left in storage cleared on launch (VIRUSES: OFTEN, ...): in TEST all but
@@ -21,10 +21,11 @@ const EDITION = process.argv[2] || 'test';
 if (!['test', 'release'].includes(EDITION)) throw new Error(`build-app: edition test or release, not ${EDITION}`);
 const RELEASE = EDITION === 'release';
 const OUT = path.join(ROOT, 'www');
-const COPY = ['index.html', 'manifest.webmanifest', 'css', 'js', 'assets/fonts', 'assets/icons'];
+const COPY = ['manifest.webmanifest', 'css', 'js', 'assets/fonts', 'assets/icons'];
 
 fs.rmSync(OUT, { recursive: true, force: true });
 for (const p of COPY) fs.cpSync(path.join(ROOT, p), path.join(OUT, p), { recursive: true });
+fs.copyFileSync(path.join(ROOT, 'bytefall.html'), path.join(OUT, 'index.html')); // (the game: the landing page's index.html isn't the app's)
 
 const git = (cmd, fallback) => { try { return execSync(`git ${cmd}`, { cwd: ROOT }).toString().trim(); } catch (e) { return fallback; } };
 let html = fs.readFileSync(path.join(OUT, 'index.html'), 'utf8');

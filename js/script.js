@@ -152,7 +152,7 @@ let dailyOfficial = true;
 const dailyTag = (kind = mode) => (kind === 'decrypt' ? '' : `${kind}-`);
 const dailyKey = (kind = mode) => `bytefall-daily-${dailyTag(kind)}${todayKey()}`;
 const dailyPlayedKey = (kind = mode) => `bytefall-daily-played-${dailyTag(kind)}${todayKey()}`;
-const DAILY_KINDS = { decrypt: 'DAILY DECRYPT', puzzle: 'DAILY PUZZLE', blitz: 'DAILY BLITZ', breach: 'BREACH', arcade: 'DAILY ARCADE' };
+const DAILY_KINDS = { decrypt: 'DAILY DECRYPT', puzzle: 'DAILY PUZZLE', blitz: 'DAILY BLITZ', breach: 'BREACH' };
 const WEEKDAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
 const utcWeekday = () => (new Date().getUTCDay() + 6) % 7; // Monday = 0
 let reportedScore = 0; // points already added to lifetime data extracted
@@ -161,7 +161,7 @@ const dailyNote = (date, what) => (dailyOfficial
   ? `${DAILY_KINDS[mode]} // ${date} (UTC): ${what} Your first attempt today is the official one.`
   : `${DAILY_KINDS[mode]} // ${date} // PRACTICE: your official score today is ${fmt(Number(storage.get(dailyKey())) || 0)}.`);
 // `mode` is the game being played. The mode row picks CLASSIC, DAILY, BLITZ, ZEN or PUZZLE; under
-// DAILY (`daily`) the second row picks DECRYPT, PUZZLE, BLITZ, BREACH or ARCADE (those two daily only).
+// DAILY (`daily`) the second row picks DECRYPT, PUZZLE, BLITZ or BREACH (BREACH daily only).
 const MODES = {
   classic: { label: 'CLASSIC', info: () => `CLASSIC // No clock and no bit limit: keep your columns under the line as long as you can.${goalWanted ? ' Each game has a key to crack: reach its ENCRYPTION STRENGTH for KEYS, then go deeper or disconnect.' : ' GOAL: OFF plays it endless, no key to crack.'}` },
   decrypt: {
@@ -202,9 +202,6 @@ const MODES = {
     noLayers: true, // the firewall is built at the start; no new layers rise
     info: (date) => dailyNote(date, `break through a ${BREACH_ROWS}-row firewall with ${BREACH_BITS} bits. +${BREACH_LAYER_POINTS} for every layer broken, +${BREACH_CLEAR_BONUS} for clearing the board.`),
   },
-  // THE DAILY ARCADE (arcade.js): a game of its own on its own card (MONDAY: CODE BREAKER); PLAY
-  // opens the card, so nothing drops on the board behind it
-  arcade: { label: 'ARCADE', noLayers: true, noHacks: true, info: () => `DAILY ARCADE // ${Arcade.rule()}` },
 };
 // PUZZLE: three sets of 100 (EASY and NORMAL on the 7x7, HARD on the 8x8), each played in order:
 // puzzle 1 of each is open, and every one after it opens once the one before it is solved
@@ -1364,7 +1361,7 @@ const GLYPHS = {
   6: '<polygon points="50.0,14.0 84.6,34.0 84.6,74.0 50.0,94.0 15.4,74.0 15.4,34.0"/>',
   7: '<polygon points="50.0,14.0 81.3,29.1 89.0,62.9 67.4,90.0 32.6,90.0 11.0,62.9 18.7,29.1"/>',
   8: '<polygon points="65.3,17.0 87.0,38.7 87.0,69.3 65.3,91.0 34.7,91.0 13.0,69.3 13.0,38.7 34.7,17.0"/>',
-  // (9: CHECKSUM's [9], the DAILY ARCADE's Thursday grid; nowhere else has a 9)
+  // (9: nothing in ByteFall has a 9: THE ARCADE's CHECKSUM, arcade.html, which shares these)
   9: '<polygon points="50.0,14.0 75.7,23.4 89.4,47.1 84.6,74.0 63.7,91.6 36.3,91.6 15.4,74.0 10.6,47.1 24.3,23.4"/>',
 };
 const themeIs = (id) => document.documentElement.dataset.theme === id;
@@ -2892,17 +2889,15 @@ function showVsGoal() {
 }
 
 // DAILY's setup: today's date, the streak and the time to the next set over a card for each game,
-// DECRYPT, PUZZLE, BLITZ, BREACH, ARCADE: its rules in a line and how today stands (the official run
-// still to play, its score, the puzzle's tries, the ARCADE game's result); a tap picks it, PLAY plays it
+// DECRYPT, PUZZLE, BLITZ, BREACH: its rules in a line and how today stands (the official run still to
+// play, its score, the puzzle's tries); a tap picks it, PLAY plays it
 const DAILY_CARD = {
   decrypt: { name: 'DECRYPT', rule: () => `The same ${DAILY_BITS} bits for everyone.` },
   puzzle: { name: 'PUZZLE', rule: () => `The ${WEEKDAYS[utcWeekday()]} puzzle: difficulty ${utcWeekday() + 1}/7, ${DAILY_PUZZLE_TRIES} tries.` },
   blitz: { name: 'BLITZ', rule: () => `${DAILY_BLITZ_SECONDS} seconds, the same bits for everyone.` },
   breach: { name: 'BREACH', rule: () => `Break a ${BREACH_ROWS}-row firewall with ${BREACH_BITS} bits.` },
-  arcade: { name: 'ARCADE', rule: () => Arcade.rule() },
 };
 function dailyStatus(kind) {
-  if (kind === 'arcade') return Arcade.status();
   if (kind === 'puzzle') {
     const at = dailyPuzzleSolvedAt();
     const used = dailyPuzzleTries();
@@ -2922,7 +2917,7 @@ function dailyTurnover() {
 }
 // (the streak and the countdown on their own line, then what counts: the first play of each, or
 // PUZZLE's first tries)
-const dailyHeader = () => `STREAK ${fmt(Progress.dailyStreak())} // NEW GAMES IN ${dailyTurnover()}\nYour first play of each game today counts (PUZZLE: ${DAILY_PUZZLE_TRIES} tries; ARCADE: one game). After that, it's practice.`;
+const dailyHeader = () => `STREAK ${fmt(Progress.dailyStreak())} // NEW GAMES IN ${dailyTurnover()}\nYour first play of each game today counts (PUZZLE: ${DAILY_PUZZLE_TRIES} tries). After that, it's practice.`;
 function renderDailyCards() {
   document.querySelectorAll('#daily-kinds button').forEach((btn) => {
     if (armed && armed.btn === btn) return; // (asking to confirm: left as it is)
@@ -2935,7 +2930,7 @@ function renderDailyCards() {
   });
 }
 setInterval(() => { if (homeOpen && daily) { renderDailyCards(); applyModeUi(); } }, 30000); // (the countdown)
-// DAILY's games: DECRYPT, PUZZLE, BLITZ, BREACH, ARCADE, in a row that slides sideways and loops: a
+// DAILY's games: DECRYPT, PUZZLE, BLITZ, BREACH, in a row that slides sideways and loops: a
 // copy of the five on each side, and once it settles on a copy it's swapped, unseen, for the same card
 // in the middle five. The card in the middle (each snaps softly to the center) is in focus at once, the rest
 // a little dimmer, and it's the pick: straight away when switching costs nothing, or, with a game under
@@ -3866,7 +3861,6 @@ document.getElementById('pause-menu').addEventListener('click', (e) => {
 document.getElementById('home-records').addEventListener('click', () => setRecordsOpen(true, rulesPane));
 document.getElementById('home-exploits').addEventListener('click', () => setRecordsOpen(true, 'exploits'));
 document.getElementById('home-store').addEventListener('click', () => setRecordsOpen(true, 'store'));
-document.getElementById('home-arcade').addEventListener('click', () => Arcade.openMenu()); // (THE ARCADE: every game, any time; arcade.js)
 document.getElementById('home-settings').addEventListener('click', () => setSettingsOpen(true));
 document.addEventListener('keydown', (e) => {
   if ((e.key !== 'Escape' && e.key !== 'p' && e.key !== 'P') || panelOpen() || homeOpen) return;
@@ -4002,10 +3996,6 @@ homePlayBtn.addEventListener('click', () => {
   if (busy && !gameOver) return; // (a mode switch still melting the old board)
   if (mode === 'puzzle' && !daily && !inAGame()) { // (PUZZLE: pick one first)
     setRecordsOpen(true, 'puzzles');
-    return;
-  }
-  if (mode === 'arcade') { // (the DAILY ARCADE: its own card, over the menu)
-    Arcade.open();
     return;
   }
   if (gameOver) resetNow();
@@ -4491,7 +4481,7 @@ wanderersBtn.addEventListener('click', () => {
 updateWanderersBtn();
 
 // Color themes: each id matches a [data-theme] block in style.css ('terminal' is the default :root).
-// Every theme but TERMINAL is unlocked by progress.js (theme-<id>). Keep the head script in index.html in sync.
+// Every theme but TERMINAL is unlocked by progress.js (theme-<id>). Keep the head script in bytefall.html in sync.
 const THEMES = [
   { id: 'terminal', label: 'TERMINAL', desc: 'green bits, gray layers, amber cracks and exploits.' },
   { id: 'cipher', label: 'CIPHER', desc: 'cyan bits, magenta layers, yellow cracks and exploits.' },
@@ -4694,10 +4684,8 @@ applyFont();
 const PLAYLIST_SLOTS = 16; // unmade tracks show as COMING SOON
 const settingsBtn = document.getElementById('settings-btn');
 const settingsEl = document.getElementById('settings');
-// (a card over the game card: SETTINGS, RULES & RECORDS (with its tabs: EXPLOITS, the STORE ...)
-// or the DAILY ARCADE's (arcade.js))
-const arcadeEl = document.getElementById('arcade');
-const syncPanelOpen = () => document.body.classList.toggle('panel-open', !settingsEl.hidden || !recordsEl.hidden || !arcadeEl.hidden);
+// (a card over the game card: SETTINGS, RULES & RECORDS (with its tabs: EXPLOITS, the STORE ...))
+const syncPanelOpen = () => document.body.classList.toggle('panel-open', !settingsEl.hidden || !recordsEl.hidden);
 const playlistTracksEl = document.getElementById('playlist-tracks');
 
 // A locked THEME or FONT button: the level it opens at, in its corner (as the PLAYLIST's tracks show)
@@ -6478,7 +6466,7 @@ function showToast(text, opts = {}) {
   if (!noticeShowing) nextNotice();
 }
 // (a card over the game, the title screen or the screen saver: notices wait)
-const panelOpen = () => !recordsEl.hidden || !settingsEl.hidden || !arcadeEl.hidden || !document.getElementById('music-player').hidden;
+const panelOpen = () => !recordsEl.hidden || !settingsEl.hidden || !document.getElementById('music-player').hidden;
 const noticeWaits = () => panelOpen() || startScreenUp() || document.getElementById('start-black').classList.contains('on') || document.documentElement.classList.contains('saver-on'); // (and the screen saver)
 function nextNotice() {
   noticeShowing = noticeQueue.length > 0;
@@ -7073,7 +7061,7 @@ recordsEl.querySelectorAll('.records-tabs button').forEach((b) => {
 // (a card of its own over the game card: BACK or Esc closes it, not a tap beside it)
 document.querySelectorAll('.card-back').forEach((b) => b.addEventListener('click', () => {
   if (b.dataset.close === 'records') setRecordsOpen(false);
-  else if (b.dataset.close === 'settings') setSettingsOpen(false); // (the ARCADE's: arcade.js)
+  else if (b.dataset.close === 'settings') setSettingsOpen(false);
 }));
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !recordsEl.hidden) setRecordsOpen(false);
@@ -7333,7 +7321,7 @@ function formatCentral(isoDate) {
   return `${date} ${hh}:${get('minute')} ${get('timeZoneName')}`;
 }
 
-// The build number: this page's own version (index.html's ?v= on this script)
+// The build number: this page's own version (bytefall.html's ?v= on this script)
 {
   const build = (window.BYTEFALL_APP && window.BYTEFALL_APP.build) || (document.currentScript && new URL(document.currentScript.src).searchParams.get('v'));
   document.getElementById('buildInfo').textContent = build || '\u2014';
