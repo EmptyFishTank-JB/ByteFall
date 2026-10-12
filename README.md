@@ -406,8 +406,9 @@ lights the STORE buttons, and claimed, the STORE's DAILY DROP card shows what it
 "can't do that" shows in the title of the card it happened on, the title stepping aside while it pulses,
 then bursts, as VS's setup has it: HARD still locked or EXPLOITS not open yet where the main menu's
 // CLASSIC is, LOADOUT LOCKED or SLOTS FULL where the card's // EXPLOITS is. What a drop earns in RESOURCES shows in the CHAIN box (chains
-earn them), centered in the 8px band under its value, every resource on one line at once, shrinking to fit
-if it must.
+earn them), centered between the foot of its value and its bottom edge, every resource on one line at
+once, shrinking to fit if it must; each icon and its +1 line up by their middles (the number trimmed to
+its capitals).
 
 ## Levels, DECRYPTOR ranks and unlocks
 
@@ -778,9 +779,11 @@ RESTART (two taps) is on the pause screen; there's no corner button for it.
 The HUD (not VS): BEST over SCORE on the left, CURRENT large in the middle (on Easy, NEXT in a
 short panel under it, its bit in full color as CURRENT's; TIME or BITS LEFT under it in the timed and counted modes), ENCRYPT IN
 over CHAIN on the right (CHAIN the whole column in ZEN). The four small boxes are one size (two equal
-rows), each its title 4px from its top edge, its value 8px under the title and 8px over its foot,
-centered across; CURRENT is as tall as the two beside it, its title 4px from its top and its bit (its
-own 42px) centered in the room under it. SCORE's story meter (2px tall, 3px up from its foot) and
+rows): each its title 4px from its top edge, its height that title plus 8px, the 16px value and 8px;
+the value itself centered between the box's top and bottom edges, and across. CURRENT is as tall as
+the two beside it, its title 4px from its top and its bit (its own 42px) centered the same way, never
+closer than 2px under its title (over NEXT or TIME the box is shorter, and the bit sits that 2px
+under it). SCORE's story meter (2px tall, 3px up from its foot) and
 ENCRYPT IN's ===== sit in the band under their values and take no room of their own. It's one shape on every phone: laid out at
 368px (`HUD_DESIGN_W`, the S23 Ultra's) and zoomed to the grid card's width (script.js's `zoomHud`, from
 `fitBoard`, which works the board's size out twice, since the HUD's height follows the board's width), so

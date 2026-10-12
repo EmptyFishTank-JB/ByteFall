@@ -5103,7 +5103,7 @@ function showWallet() {
 // from its top), every resource on the one line at once (a long line shrinks to fit), for a moment
 function showPickup(before) {
   const now = Progress.runRes();
-  const parts = Progress.resIds().filter((id) => (now[id] || 0) > (before[id] || 0)).map((id) => resChip(id, `+${now[id] - (before[id] || 0)}`));
+  const parts = Progress.resIds().filter((id) => (now[id] || 0) > (before[id] || 0)).map((id) => resChip(id, `<span class="rc-n">+${now[id] - (before[id] || 0)}</span>`));
   if (!parts.length) return;
   const box = document.getElementById('chain-stat'); // (chains earn them: in CHAIN, under its value)
   box.querySelectorAll('.res-pop').forEach((old) => old.remove());
