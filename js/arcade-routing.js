@@ -21,6 +21,7 @@ Arcade.register('routing', (() => {
   let cells = [];
   let svg = null;
   let drag = null; // (a line being drawn: its pair)
+  let pending = null; // (that drag's route, counted at its first change: { pair, fresh })
 
   const rc = (i) => [Math.floor(i / N), i % N];
   const adjacent = (a, b) => { const [ra, ca] = rc(a); const [rb, cb] = rc(b); return Math.abs(ra - rb) + Math.abs(ca - cb) === 1; };
@@ -143,7 +144,7 @@ Arcade.register('routing', (() => {
     const ends = grid(rand).map((e) => e.slice().sort((a, b) => a - b)).sort((a, b) => a[0] - b[0]); // ([1] the pair whose first bit is nearest the top left, and on)
     const endAt = new Int8Array(N * N).fill(-1);
     ends.forEach(([a, b], k) => { endAt[a] = k; endAt[b] = k; });
-    const x = { ends, endAt, paths: ends.map(() => []), won: false };
+    const x = { ends, endAt, paths: ends.map(() => []), won: false, routes: 0, last: -1 };
     // (what was drawn: each line kept if it still makes sense, from one of its pair's bits, square by square)
     if (saved && Array.isArray(saved.p) && saved.p.length === ends.length) {
       const used = new Set();
@@ -154,6 +155,8 @@ Arcade.register('routing', (() => {
         if (ok) { x.paths[k] = p.slice(); p.forEach((cell) => used.add(cell)); }
       });
       x.won = !!saved.w && won(x);
+      x.routes = Number.isInteger(saved.r) && saved.r >= 0 ? saved.r : 0;
+      x.last = Number.isInteger(saved.l) && saved.l < ends.length ? saved.l : -1;
     }
     return x;
   }
@@ -207,11 +210,23 @@ Arcade.register('routing', (() => {
     actsEl.hidden = s.won;
     kit.refresh();
   }
+  const perfect = (x) => x.routes === x.ends.length; // (a route a pair: not one taken up again)
+  const routesText = (n) => `${n} ROUTE${n === 1 ? '' : 'S'}`;
   function line(x) {
     const time = kit.fmtTime(x.t);
-    if (x.won) return `ALL ROUTED IN ${time}${x.k ? ` // +${x.k} KEYS` : ''}`;
+    if (x.won) return `ALL ROUTED IN ${time} // ${routesText(x.routes)}${perfect(x) ? ': PERFECT' : ''}${x.k ? ` // +${x.k} KEYS` : ''}`;
     if (!x.moved) return `LINK EVERY PAIR // FILL EVERY SQUARE`;
-    return `TIME ${time} // ${linked(x)} OF ${x.ends.length} LINKED // ${Math.round((filled(x) / (N * N)) * 100)}% FILLED`;
+    return `TIME ${time} // ROUTES ${x.routes} // LINKED ${linked(x)}/${x.ends.length} // ${Math.round((filled(x) / (N * N)) * 100)}%`;
+  }
+  // ROUTES: how many times a line's been drawn. A new one (a drag from a bit, the line started over)
+  // counts; carrying on the line drawn last doesn't; carrying on any other line does, as it's taken up
+  // again. Counted once a drag draws (or takes back) a square: a tap alone isn't a route, even one that
+  // wipes a line by its bit
+  function counted() {
+    if (!pending) return;
+    if (pending.fresh || pending.pair !== s.last) s.routes++;
+    s.last = pending.pair;
+    pending = null;
   }
 
   // DRAWING: a press on a bit starts its pair's line over from it; on a line, carries that line on from
@@ -223,11 +238,13 @@ Arcade.register('routing', (() => {
     if (end >= 0) {
       s.paths[end] = [i];
       drag = end;
+      pending = { pair: end, fresh: true };
     } else {
       const k = s.paths.findIndex((p) => p.includes(i));
       if (k < 0) return;
       s.paths[k] = s.paths[k].slice(0, s.paths[k].indexOf(i) + 1);
       drag = k;
+      pending = { pair: k, fresh: false };
     }
     kit.moved();
     render();
@@ -265,11 +282,12 @@ Arcade.register('routing', (() => {
       if (!step(next)) break;
       moved = true;
     }
-    if (moved) render();
+    if (moved) { counted(); render(); }
   }
   function release() {
     if (drag === null) return;
     drag = null;
+    pending = null; // (a press that changed nothing: no route)
     s.paths = s.paths.map((p) => (p.length > 1 ? p : [])); // (a lone press leaves nothing)
     if (won(s)) {
       s.won = true;
@@ -311,17 +329,17 @@ Arcade.register('routing', (() => {
     name: 'ROUTING',
     rule: () => 'link each bit to its twin; the lines fill the grid, never crossing.',
     make,
-    pack: (x) => ({ p: x.paths.map((p) => p.slice()), w: x.won ? 1 : 0 }),
+    pack: (x) => ({ p: x.paths.map((p) => p.slice()), w: x.won ? 1 : 0, r: x.routes, l: x.last }),
     over: (x) => x.won,
     timed: 'move',
     status(saved) {
       const t = kit.fmtTime((saved && saved.t) || 0);
-      if (saved && saved.w) return { done: true, text: `ROUTED IN ${t}` };
+      if (saved && saved.w) return { done: true, text: `ROUTED IN ${t} // ${routesText(saved.r || 0)}` };
       return { done: false, text: saved && saved.m ? `UNDER WAY // ${t}` : 'ONE GAME TODAY // TIMED' };
     },
     line,
     show(x) {
-      if (x !== s) { s = x; drag = null; }
+      if (x !== s) { s = x; drag = null; pending = null; }
       build();
       render();
     },
@@ -342,7 +360,7 @@ Arcade.register('routing', (() => {
     bestText: (v) => kit.fmtTime(v * 1000),
     low: true,
     // SHARE: the time, and the seven colors linked
-    share: (x) => [`All routed in ${kit.fmtTime(x.t)} // ${x.ends.length} pairs`, ['\u{1F7E5}', '\u{1F7E7}', '\u{1F7E8}', '\u{1F7E9}', '\u{1F7E6}', '\u{1F7EA}', '\u{1F7EB}', '\u2B1C'].slice(0, x.ends.length).join('')],
+    share: (x) => [`All routed in ${kit.fmtTime(x.t)} // ${x.routes} route${x.routes === 1 ? '' : 's'} for ${x.ends.length} pairs${perfect(x) ? ': perfect' : ''}`, ['\u{1F7E5}', '\u{1F7E7}', '\u{1F7E8}', '\u{1F7E9}', '\u{1F7E6}', '\u{1F7EA}', '\u{1F7EB}', '\u2B1C'].slice(0, x.ends.length).join('')],
     wander, // (for testing)
     routings,
   };
