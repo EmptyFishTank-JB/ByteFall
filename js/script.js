@@ -1056,6 +1056,16 @@ function alignHeader() {
 }
 
 const HUD_MIN_W = 300;
+// THE HUD AT ONE SHAPE ON EVERY PHONE (not VS, which lays out its own): laid out at HUD_DESIGN_W, the
+// S23 Ultra's width for it, and zoomed to the grid card's width, so its boxes, CURRENT and the words
+// in them keep the same proportions on a narrow phone and a wide one alike (CURRENT never tall and
+// thin); a wider screen than the game needs (a Fold open) keeps the game its width, empty either side
+const HUD_DESIGN_W = 368;
+function zoomHud(hudEl, w) {
+  if (mode === 'vs') { hudEl.style.zoom = ''; hudEl.style.width = `${Math.max(w, HUD_MIN_W)}px`; return; }
+  hudEl.style.width = `${HUD_DESIGN_W}px`;
+  hudEl.style.zoom = String(w / HUD_DESIGN_W);
+}
 let boardStale = false; // (a layout put off while the main menu covers the game: done as it closes)
 function fitBoard() {
   // (behind the MAIN MENU nothing of the game shows: picking a mode there, VS above all, would lay out
@@ -1071,16 +1081,23 @@ function fitBoard() {
   fitStatValues(true);
   alignHeader();
   const frame = document.querySelector('.board-frame');
+  const hudEl = document.querySelector('.hud');
   const was = parseFloat(boardWrapEl.style.maxWidth) || 0;
   boardWrapEl.style.maxWidth = '';
   const cssMax = boardWrapEl.getBoundingClientRect().width;
-  // (the card's contents, not the card: on phones the card fills the screen height)
-  crtEl.classList.add('measuring');
-  const rest = crtEl.getBoundingClientRect().height - frame.getBoundingClientRect().height;
-  crtEl.classList.remove('measuring');
   const pad = parseFloat(getComputedStyle(document.body).paddingTop) * 2;
   const ratio = frame.offsetHeight / frame.offsetWidth;
-  const width = Math.max(MIN_BOARD, Math.min(cssMax, (viewportHeight() - pad - rest) / ratio));
+  // (the HUD's height follows the board's width, zoomed with it, and the board's width the room the
+  // HUD leaves: worked out twice, the second time with the HUD at the first answer's size)
+  let width = cssMax;
+  for (let pass = 0; pass < 2; pass++) {
+    zoomHud(hudEl, width);
+    // (the card's contents, not the card: on phones the card fills the screen height)
+    crtEl.classList.add('measuring');
+    const rest = crtEl.getBoundingClientRect().height - frame.getBoundingClientRect().height;
+    crtEl.classList.remove('measuring');
+    width = Math.max(MIN_BOARD, Math.min(cssMax, (viewportHeight() - pad - rest) / ratio));
+  }
   // (what's around the board is measured at the board's last size, and some of it, the buttons
   // under it, follows its width: worked out again, it can land a pixel or two off, and every
   // switch of game type nudged it. A change that small keeps the size it has.)
@@ -1088,8 +1105,7 @@ function fitBoard() {
   // The HUD's outer edges line up with the grid card's (not in VS, which lays out its own; and
   // no narrower than its boxes need, so nothing has to shrink to fit)
   // (VS too: its strip is then laid out again at that width)
-  const hudEl = document.querySelector('.hud');
-  hudEl.style.width = `${Math.max(frame.getBoundingClientRect().width, HUD_MIN_W)}px`;
+  zoomHud(hudEl, frame.getBoundingClientRect().width);
   if (mode === 'vs') layoutVsTop();
   // VS's setup card: the screen's width (8px in from its edges, as the main menu's card), the HUD
   // over it too, at the height it has in the match; the board's fitted again when it comes in
