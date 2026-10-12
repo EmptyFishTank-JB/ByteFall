@@ -151,8 +151,9 @@
   // none before the first tap.)
   //   DROP     the title falls from the top, gathering speed, and lands hard: a squash, a jolt, and
   //            an amber band under it bursting into pixels and binary dust
-  //   BIT      the title falls as a bit does on the board, a row at a time, ticking down, and lands
-  //            with a bit's little bump and a puff
+  //   BIT      the title falls as a bit does on the board, a row at a time, ticking down, a fading
+  //            ghost of it left at each row it passes, and lands with a bit's little bump, a puff and
+  //            a ghost swelling out from where it landed
   //   RAIN     its letters fall one by one, like bits down their columns, each landing in a puff
   //   DECRYPT  scrambled glyphs, locking into its letters one by one
   //   POWER    an old CRT switching on: a bright line opening out into the title
@@ -277,9 +278,26 @@
       },
       bit(then) {
         const n = Math.max(6, Math.round(above / FALL_STEP));
-        const fall = play(h, [{ transform: `translateY(${-above}px)` }, { transform: 'none' }], { duration: n * FALL_MS * 1.5, delay: 250, easing: `steps(${n}, end)`, fill: 'backwards' });
+        const step = FALL_MS * 1.5;
+        // (its ghosts: a copy left at each row it falls past, fading as it goes on down, and one where
+        // it lands, swelling out as it fades; placed from where it sits before it moves)
+        const o = ov.getBoundingClientRect();
+        const r = h.getBoundingClientRect();
+        const fall = play(h, [{ transform: `translateY(${-above}px)` }, { transform: 'none' }], { duration: n * step, delay: 250, easing: `steps(${n}, end)`, fill: 'backwards' });
+        const ghost = (y) => {
+          const gh = h.cloneNode(true);
+          gh.className = 'intro-ghost';
+          Object.assign(gh.style, { left: `${r.left - o.left}px`, top: `${r.top - o.top}px`, width: `${r.width}px`, transform: `translateY(${y}px)` });
+          ov.appendChild(gh);
+          return gh;
+        };
+        for (let k = 0; k < n; k++) {
+          const y = -above * (1 - k / n); // (where it stood that step)
+          play(ghost(y), [{ opacity: 0.5 }, { opacity: 0 }], { duration: 340, delay: 250 + (k + 1) * step, easing: 'ease-out' });
+        }
         landed(fall, () => {
           play(h, [{ transform: 'translateY(-8px) scale(0.94)' }, { transform: 'none' }], { duration: 150, easing: 'ease' }); // (a bit's landing: style.css's land)
+          play(ghost(0), [{ opacity: 0.6, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(1.18, 1.35)' }], { duration: 520, easing: 'ease-out' });
           fx([{ rect: { left: ink.left, top: ink.bottom - 6, width: ink.width, height: 6 }, type: 'number' }]);
           later(350, then);
         });
