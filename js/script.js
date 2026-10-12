@@ -2682,8 +2682,9 @@ goalBtn.addEventListener('click', () => {
   });
 });
 // GAME SETTINGS: the picked mode's own settings in a card, on one button on the menu's panel that says
-// what's set (NORMAL // GOAL: ON // INFECTIONS: ON). CLASSIC: DIFFICULTY, GOAL, INFECTIONS; BLITZ:
-// INFECTIONS; the other modes have none. Each change, mid-game, asks CONFIRM? and starts a new game
+// what's set (NORMAL // GOAL: ON // INFECTIONS: ON). CLASSIC: DIFFICULTY, GOAL, INFECTIONS in the card;
+// BLITZ: INFECTIONS alone, so its button just toggles it; the other modes have none. Each change,
+// mid-game, asks CONFIRM? and starts a new game
 const modeSettingsEl = document.getElementById('mode-settings');
 const modeSettingsBtn = document.getElementById('mode-settings-btn');
 const modeHasSettings = () => !daily && (mode === 'classic' || mode === 'blitz');
@@ -2691,7 +2692,11 @@ function updateModeSettingsBtn() {
   const parts = mode === 'classic' ? [classicDifficulty.toUpperCase(), `GOAL: ${goalWanted ? 'ON' : 'OFF'}`] : [];
   parts.push(`INFECTIONS: ${infectWanted ? 'ON' : 'OFF'}`);
   modeSettingsBtn.querySelector('.opt-text').textContent = parts.join(' // ');
-  modeSettingsBtn.setAttribute('aria-label', `${MODES[mode] ? MODES[mode].label : ''} settings: ${parts.join(', ')}. Tap to change`);
+  // (BLITZ's one setting: the button toggles it, lit while it's on, as VS's LAYERS: ON)
+  modeSettingsBtn.classList.toggle('active', mode === 'blitz' && infectWanted);
+  modeSettingsBtn.setAttribute('aria-label', mode === 'blitz'
+    ? `Infections ${infectWanted ? 'on' : 'off'}. Tap to turn them ${infectWanted ? 'off' : 'on'}`
+    : `${MODES[mode] ? MODES[mode].label : ''} settings: ${parts.join(', ')}. Tap to change`);
   if (!modeSettingsEl.classList.contains('hidden')) fitHome();
 }
 const modeSettingsOpen = () => !modeSettingsEl.classList.contains('hidden');
@@ -2710,7 +2715,17 @@ function closeModeSettings() {
   modeSettingsEl.classList.add('hidden');
   updateModeSettingsBtn();
 }
-modeSettingsBtn.addEventListener('click', openModeSettings);
+modeSettingsBtn.addEventListener('click', () => {
+  if (mode !== 'blitz') { openModeSettings(); return; }
+  // BLITZ has INFECTIONS alone: no card, the button is the switch (mid-game, CONFIRM? first)
+  requestReset(modeSettingsBtn, 'CONFIRM?', () => {
+    infectWanted = !infectWanted;
+    storage.set('bytefall-infections', infectWanted ? 'on' : 'off');
+    updateInfectBtn();
+    updateModeSettingsBtn();
+    SFX.play('punct');
+  });
+});
 document.getElementById('mode-settings-close').addEventListener('click', () => { SFX.play('click'); closeModeSettings(); });
 modeSettingsEl.addEventListener('click', (e) => { if (e.target === modeSettingsEl) closeModeSettings(); }); // (a tap off the card)
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modeSettingsOpen()) { e.stopImmediatePropagation(); closeModeSettings(); } }, true);
@@ -2779,22 +2794,49 @@ vsExploitsBtn.addEventListener('click', () => {
   });
 });
 
-// VS CPU's opponent level
-document.querySelectorAll('#vs-levels button[data-vs]').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    const next = btn.dataset.vs;
-    if (next === vsLevel) return;
-    if (!vsLevelOpen(next)) {
-      SFX.play('denied');
-      vsNotice(`LOCKED // ${Progress.unlock(`vs-${next}`).need.toUpperCase()}`);
-      return;
-    }
-    requestReset(btn, 'CONFIRM?', () => {
-      vsLevel = next;
-      storage.set('bytefall-vs-level', next);
-      botFlash = null; // (a new level: just its own face, no reaction)
-      botMood();
-    });
+// VS's setup pickers, the game mode, the bot and its difficulty: a button each that steps to the
+// next on a tap, round and round. A locked bot or difficulty is passed over, and the card's title
+// says what opens it (the first one passed over)
+function vsStep(order, now, open = () => true) {
+  const at = order.indexOf(now);
+  let locked = null;
+  for (let k = 1; k <= order.length; k++) {
+    const id = order[(at + k) % order.length];
+    if (open(id)) return { next: id, locked };
+    if (!locked) locked = id;
+  }
+  return { next: now, locked };
+}
+const vsModeBtn = document.getElementById('vs-mode-btn');
+const vsBotBtn = document.getElementById('vs-bot-btn');
+const vsLevelBtn = document.getElementById('vs-level-btn');
+vsModeBtn.addEventListener('click', () => {
+  const { next } = vsStep(Object.keys(VS_MODES), vsMode);
+  requestReset(vsModeBtn, 'CONFIRM?', () => {
+    vsMode = next;
+    botMood('skeptic', 1800); // (a new game mode: hm?)
+    storage.set('bytefall-vs-mode', next);
+  });
+});
+vsBotBtn.addEventListener('click', () => {
+  const { next, locked } = vsStep(Object.keys(CpuBoard.BOTS), vsBot, vsBotOpen);
+  if (locked) vsNotice(`${CpuBoard.BOTS[locked].label} LOCKED // ${Progress.unlock(`bot-${locked}`).need.toUpperCase()}`);
+  if (next === vsBot) { SFX.play('denied'); return; }
+  requestReset(vsBotBtn, 'CONFIRM?', () => {
+    vsBot = next;
+    storage.set('bytefall-vs-bot', next);
+    botMood(BOT_HELLO[next], 2100); // (the new bot's hello, once it's pixelated in)
+  });
+});
+vsLevelBtn.addEventListener('click', () => {
+  const { next, locked } = vsStep(Object.keys(CpuBoard.LEVELS), vsLevel, vsLevelOpen);
+  if (locked) vsNotice(`${CpuBoard.LEVELS[locked].label} LOCKED // ${Progress.unlock(`vs-${locked}`).need.toUpperCase()}`);
+  if (next === vsLevel) { SFX.play('denied'); return; }
+  requestReset(vsLevelBtn, 'CONFIRM?', () => {
+    vsLevel = next;
+    storage.set('bytefall-vs-level', next);
+    botFlash = null; // (a new level: just its own face, no reaction)
+    botMood();
   });
 });
 
@@ -2824,36 +2866,6 @@ const vsNotice = (text) => titleNotice(document.getElementById('vs-setup-msg'), 
 const homeNotice = (text) => titleNotice(document.getElementById(!document.getElementById('mode-settings').classList.contains('hidden') ? 'mode-settings-msg' : 'home-panel-msg'), text);
 const cardNotice = (text) => titleNotice(document.getElementById('records-title-msg'), text);
 
-// VS CPU's opponent: which bot (its look, lines and play style)
-document.querySelectorAll('#vs-bots button[data-bot]').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    const next = btn.dataset.bot;
-    if (next === vsBot) return;
-    if (!vsBotOpen(next)) {
-      SFX.play('denied');
-      vsNotice(`LOCKED // ${Progress.unlock(`bot-${next}`).need.toUpperCase()}`);
-      return;
-    }
-    requestReset(btn, 'CONFIRM?', () => {
-      vsBot = next;
-      storage.set('bytefall-vs-bot', next);
-      botMood(BOT_HELLO[next], 2100); // (the new bot's hello, once it's pixelated in)
-    });
-  });
-});
-
-// VS game mode: CLASSIC, ATTRITION, DEATHMATCH, TUG OF WAR
-document.querySelectorAll('#vs-modes button[data-vsmode]').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    const next = btn.dataset.vsmode;
-    if (next === vsMode) return;
-    requestReset(btn, 'CONFIRM?', () => {
-      vsMode = next;
-      botMood('skeptic', 1800); // (a new game mode: hm?)
-      storage.set('bytefall-vs-mode', next);
-    });
-  });
-});
 // The target score (ATTRITION, DEATHMATCH) or starting points (TUG OF WAR): -/+ by 500
 function stepVsGoal(dir) {
   if (vsStarted) return;
@@ -3047,21 +3059,17 @@ addEventListener('resize', () => requestAnimationFrame(centerDaily));
 
 // Shows what the current mode changes: the mode row, its note, the difficulty row (CLASSIC
 // only), the layer countdown (not in ZEN) and the BLITZ clock.
-// The VS setup's level and bot buttons: which is picked, which are still locked
+// The VS setup's pickers: what each is on now (a locked bot or difficulty kept from before: back to
+// the first). LAYERS between [=]s, a layer's own block (dimmed while it's OFF), EXPLOITS with theirs
 function refreshVsPicks() {
   if (!vsLevelOpen(vsLevel)) vsLevel = 'normal';
   if (!vsBotOpen(vsBot)) vsBot = 'bot';
-  document.querySelectorAll('#vs-levels button[data-vs]').forEach((btn) => {
-    btn.classList.toggle('active', btn.dataset.vs === vsLevel);
-    btn.classList.toggle('locked', !vsLevelOpen(btn.dataset.vs));
-  });
-  document.querySelectorAll('#vs-bots button[data-bot]').forEach((btn) => {
-    btn.classList.toggle('active', btn.dataset.bot === vsBot);
-    btn.classList.toggle('locked', !vsBotOpen(btn.dataset.bot));
-  });
-  document.querySelectorAll('#vs-modes button[data-vsmode]').forEach((btn) => {
-    btn.classList.toggle('active', btn.dataset.vsmode === vsMode);
-  });
+  if (!armed || armed.btn !== vsModeBtn) vsModeBtn.textContent = `MODE: ${VS_MODES[vsMode].label}`;
+  if (!armed || armed.btn !== vsBotBtn) vsBotBtn.textContent = `CPU: ${CpuBoard.BOTS[vsBot].label}`;
+  if (!armed || armed.btn !== vsLevelBtn) vsLevelBtn.textContent = `DIFFICULTY: ${CpuBoard.LEVELS[vsLevel].label}`;
+  vsModeBtn.setAttribute('aria-label', `Game mode: ${VS_MODES[vsMode].label}. Tap for the next`);
+  vsBotBtn.setAttribute('aria-label', `CPU: ${CpuBoard.BOTS[vsBot].label}. Tap for the next`);
+  vsLevelBtn.setAttribute('aria-label', `Difficulty: ${CpuBoard.LEVELS[vsLevel].label}. Tap for the next`);
   document.getElementById('vs-setup-note').textContent = VS_MODES[vsMode].note; // (fitted by lockButtons)
   showVsGoal();
   lockButtons();
@@ -3087,12 +3095,9 @@ function applyModeUi() {
   document.getElementById('daily-kinds').hidden = !daily;
   document.getElementById('daily-pips').hidden = !daily;
   centerDaily(); // (the pick in the middle of its row)
-  document.querySelectorAll('#vs-levels button[data-vs]').forEach((btn) => {
-    btn.classList.toggle('active', btn.dataset.vs === vsLevel);
-  });
-  vsLayersBtn.textContent = `LAYERS: ${vsLayers ? 'ON' : 'OFF'}`;
+  vsLayersBtn.innerHTML = `<span class="lay-ico" aria-hidden="true">[=]</span>LAYERS: ${vsLayers ? 'ON' : 'OFF'}<span class="lay-ico" aria-hidden="true">[=]</span>`;
   vsLayersBtn.classList.toggle('active', vsLayers);
-  vsExploitsBtn.textContent = `EXPLOITS: ${vsExploits ? 'ON' : 'OFF'}`;
+  vsExploitsBtn.innerHTML = `${TERMINAL_SVG}EXPLOITS: ${vsExploits ? 'ON' : 'OFF'}`;
   vsExploitsBtn.classList.toggle('active', vsExploits);
   document.body.classList.toggle('vs-mode', mode === 'vs'); // a slimmer header, room for the boards
   // (VS keeps it with layers off, its count a -, so nothing shifts when the option changes)
@@ -3584,7 +3589,7 @@ function holdCpu(on) {
   if (on) drawCpuFull();
 }
 cpuStatEl.addEventListener('pointerdown', (e) => {
-  if (!cpu) return;
+  if (!cpu || !vsStarted) return; // (before START there's no board to see)
   cpuStatEl.setPointerCapture(e.pointerId);
   holdCpu(true);
 });
@@ -4029,6 +4034,7 @@ if (document.fonts) document.fonts.addEventListener('loadingdone', () => showCpu
 function showCpuDesc() {
   const el = document.getElementById('cpu-desc');
   el.hidden = mode !== 'vs' || vsStarted;
+  cpuStatEl.classList.toggle('pre-start', !el.hidden); // (before START: the card alone, no board or score)
   if (el.hidden) return;
   const [kind, text] = CpuBoard.BOTS[vsBot].desc.split(' // ');
   el.innerHTML = `<b>${kind}</b><span>${text}</span>`;
