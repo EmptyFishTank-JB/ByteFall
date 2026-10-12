@@ -165,7 +165,7 @@ const dailyNote = (date, what) => (dailyOfficial
 const MODES = {
   // (CLASSIC and STORY: one mode, CLASSIC's button flipping between them, goalWanted the switch)
   classic: { label: 'CLASSIC', info: () => (goalWanted
-    ? 'STORY // CLASSIC with a story: every game has a key to crack, its ENCRYPTION STRENGTH. Crack it for KEYS and the next file of the story, then go deeper or disconnect. Tap STORY again for CLASSIC.'
+    ? 'STORY // Uncover the story, one key at a time: every game has a key to crack, its ENCRYPTION STRENGTH. Crack it for KEYS and the next file, then go deeper (each key harder than the last) or disconnect. Tap STORY again for CLASSIC.'
     : 'CLASSIC // No clock and no bit limit: keep your columns under the line as long as you can. Tap CLASSIC again for STORY.') },
   decrypt: {
     label: 'DAILY DECRYPT',
@@ -580,6 +580,14 @@ let goal = null; // this game's: k, the key being cracked now (0: 128-BIT); crac
 // STORY (CLASSIC's button, tapped again): CLASSIC with keys to crack, each recovering a story's next
 // file (js/stories.js); CLASSIC itself plays endless. CLASSIC at first (bytefall-goal: on is STORY)
 let goalWanted = storage.get('bytefall-goal') === 'on';
+// (STORY: CLASSIC's mode with the switch on, not the daily. It has no settings: the 7x7 board, infections
+// on, and its keys set the pace instead of a difficulty, see storyPace)
+const storyOn = () => mode === 'classic' && !daily && goalWanted;
+// STORY's pace: each key deeper is harder to crack. Its layers come a drop sooner every two keys (8,
+// then 7 from 256-BIT, 6 from 512-BIT, never under 4), and infections get likelier, 4% up to 8%
+const storyPace = (k) => ({ interval: Math.max(HARD_MIN_INTERVAL, BASE_INTERVAL - Math.floor(k / 2)), infect: Math.min(0.08, 0.04 + 0.01 * k) });
+// (the drops between layers: VS on one pace for both boards, STORY on its key's, else the difficulty's)
+const layerInterval = (pts) => (mode === 'vs' ? BASE_INTERVAL : goal ? storyPace(goal.k).interval : DIFFICULTIES[difficulty].interval(pts));
 // (the mode's name as the game shows it: CLASSIC's is STORY while that's on)
 const modeLabel = () => (mode === 'classic' && goalWanted ? 'STORY' : MODES[mode].label);
 // (the switch's mark on CLASSIC's button: two arrows, one each way)
@@ -606,7 +614,8 @@ function openGoal() {
   SFX.play('egg');
   document.getElementById('goal-title').textContent = `// ${goalBits(k)}-BIT CRACKED`;
   document.getElementById('goal-keys').innerHTML = `+${keys} ${KEY_SVG}`;
-  document.getElementById('goal-note').textContent = `Next: ${goalBits(k + 1)}-BIT at ${fmt(goalTarget(k + 1))}, for +${goalKeys(k + 1)} KEYS. Or disconnect now and end the game cracked.`;
+  const faster = storyPace(k + 1).interval < storyPace(k).interval ? ` Its layers come every ${storyPace(k + 1).interval} drops.` : '';
+  document.getElementById('goal-note').textContent = `Next: ${goalBits(k + 1)}-BIT at ${fmt(goalTarget(k + 1))}, for +${goalKeys(k + 1)} KEYS.${faster} Or disconnect now and end the game cracked.`;
   requestAnimationFrame(() => fitText(document.getElementById('goal-note')));
   goalCardEl.classList.remove('closing');
   goalCardEl.hidden = false;
@@ -627,12 +636,17 @@ document.getElementById('goal-deeper').addEventListener('click', () => {
   SFX.play('click');
   closeGoal(() => {
     goal.k++;
+    // (a stronger key: its pace at once, the count to the next layer cut to it, never to nothing)
+    pulseInterval = Math.max(dropsSinceLastPulse + 1, layerInterval(score));
+    updateHud();
     document.querySelector('.board-frame').classList.remove('paused');
     document.getElementById('game-mode-label').textContent = `// ${modeLine()}${goalLine()}`;
     updateGoal();
     busy = false;
     updateColumnButtons();
-    setMessage(`ENCRYPTION // ${goalBits(goal.k)}-BIT // CRACK IT AT ${fmt(goalTarget(goal.k))}`, 'warn');
+    setMessage(storyPace(goal.k).interval < storyPace(goal.k - 1).interval
+      ? `${goalBits(goal.k)}-BIT // LAYERS EVERY ${storyPace(goal.k).interval} DROPS // CRACK IT AT ${fmt(goalTarget(goal.k))}`
+      : `ENCRYPTION // ${goalBits(goal.k)}-BIT // CRACK IT AT ${fmt(goalTarget(goal.k))}`, 'warn');
   });
 });
 document.getElementById('goal-out').addEventListener('click', () => {
@@ -646,10 +660,10 @@ function initGame() {
   xpHold = mode !== 'tutorial';
   runId++;
   // (VS plays on the CPU level's board: HARD's 8x8 against HARD and INSANE, NORMAL's 7x7 otherwise)
-  difficulty = mode === 'classic' ? classicDifficulty : mode === 'puzzle' && !daily ? puzzleTier
+  difficulty = mode === 'classic' ? (storyOn() ? 'normal' : classicDifficulty) : mode === 'puzzle' && !daily ? puzzleTier
     : mode === 'vs' && CpuBoard.sizeFor(vsLevel) === 8 ? 'hard' : 'normal';
   dailyOfficial = daily && (mode === 'puzzle' ? dailyPuzzleOfficial() : !storage.get(dailyPlayedKey()));
-  goal = mode === 'classic' && !daily && goalWanted ? { k: 0, cracked: 0 } : null; // (ENCRYPTION STRENGTH: STORY's key to crack)
+  goal = storyOn() ? { k: 0, cracked: 0 } : null; // (ENCRYPTION STRENGTH: STORY's key to crack)
   if (goalOpen || !goalCardEl.hidden) { goalOpen = false; goalCardEl.hidden = true; }
   if (!vsPaused) document.querySelector('.board-frame').classList.remove('paused'); // (a game that ended cracked faded its bits)
   setupDice();
@@ -687,7 +701,7 @@ function initGame() {
   armedSlot = null;
   streak = 0;
   chainLit = 0;
-  pulseInterval = mode === 'vs' ? BASE_INTERVAL : DIFFICULTIES[difficulty].interval(0); // (VS: both boards on the same pace)
+  pulseInterval = layerInterval(0);
   gameOver = false;
   busy = false;
   chainEl.textContent = '0x';
@@ -803,9 +817,9 @@ const infectModes = () => !daily && (mode === 'classic' || mode === 'blitz');
 // (INFECTIONS: ON / OFF in GAME SETTINGS: OFF, no infected bits; BLACK BOXES still can be)
 let infectWanted = storage.get('bytefall-infections') !== 'off';
 function mayInfect() {
-  if (!infectModes() || !infectWanted || gameOver || infectedBit) return false;
+  if (!infectModes() || !(infectWanted || storyOn()) || gameOver || infectedBit) return false; // (STORY: always on)
   if (Progress.runDrops() - infectedAt < INFECT_GAP) return false;
-  return Math.random() < (INFECT_ODDS[difficulty] || 0);
+  return Math.random() < (goal ? storyPace(goal.k).infect : INFECT_ODDS[difficulty] || 0);
 }
 function infect(bit) {
   bit.infected = Progress.runDrops();
@@ -1850,7 +1864,7 @@ async function attemptDrop(col) {
       openMarket(); // (the first layer: the BLACK MARKET opens)
       wentOver = wentOver || overflowed();
       await resolveChains();
-      pulseInterval = mode === 'vs' ? BASE_INTERVAL : DIFFICULTIES[difficulty].interval(score);
+      pulseInterval = layerInterval(score);
     }
   }
 
@@ -2701,6 +2715,23 @@ function toggleStory(btn) {
     SFX.play('punct');
   });
 }
+// STORY's intro: the first time STORY's on with the main menu up, a card setting the scene (once:
+// bytefall-story-intro). BEGIN, a tap off the card, Esc or back closes it
+const storyIntroEl = document.getElementById('story-intro');
+const storyIntroOpen = () => !storyIntroEl.classList.contains('hidden');
+function maybeStoryIntro() {
+  if (storage.get('bytefall-story-intro') || !storyOn() || !homeOpen || homeEl.hidden || storyIntroOpen()) return;
+  storage.set('bytefall-story-intro', '1');
+  storyIntroEl.classList.remove('hidden');
+}
+function closeStoryIntro() {
+  if (!storyIntroOpen()) return;
+  storyIntroEl.classList.add('hidden');
+  SFX.play('click');
+}
+document.getElementById('story-intro-close').addEventListener('click', closeStoryIntro);
+storyIntroEl.addEventListener('click', (e) => { if (e.target === storyIntroEl) closeStoryIntro(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && storyIntroOpen()) { e.stopImmediatePropagation(); closeStoryIntro(); } }, true);
 function updateStoryBtn() {
   const btn = document.querySelector('.modes button[data-mode="classic"]');
   if (!btn || (armed && armed.btn === btn)) return;
@@ -2708,12 +2739,12 @@ function updateStoryBtn() {
   btn.setAttribute('aria-label', goalWanted ? 'Story: CLASSIC with a story to recover. Tap again for CLASSIC' : 'Classic. Tap again for STORY');
 }
 // GAME SETTINGS: the picked mode's own settings in a card, on one button on the menu's panel that says
-// what's set (NORMAL // INFECTIONS: ON). CLASSIC (and STORY): DIFFICULTY and INFECTIONS in the card;
+// what's set (NORMAL // INFECTIONS: ON). CLASSIC: DIFFICULTY and INFECTIONS in the card (STORY: none);
 // BLITZ: INFECTIONS alone, so its button just toggles it; the other modes have none. Each change,
 // mid-game, asks CONFIRM? and starts a new game
 const modeSettingsEl = document.getElementById('mode-settings');
 const modeSettingsBtn = document.getElementById('mode-settings-btn');
-const modeHasSettings = () => !daily && (mode === 'classic' || mode === 'blitz');
+const modeHasSettings = () => !daily && ((mode === 'classic' && !goalWanted) || mode === 'blitz'); // (STORY has none)
 function updateModeSettingsBtn() {
   const parts = mode === 'classic' ? [classicDifficulty.toUpperCase()] : [];
   parts.push(`INFECTIONS: ${infectWanted ? 'ON' : 'OFF'}`);
@@ -3934,6 +3965,7 @@ const homePlayBtn = document.getElementById('home-play');
 // The mode's name: on the menu's panel and under the title in a game
 function modeLine() {
   if (mode === 'tutorial') return 'TUTORIAL';
+  if (storyOn()) return 'STORY'; // (no difficulty: its keys set the pace)
   if (mode === 'classic') return `${modeLabel()} // ${DIFFICULTIES[classicDifficulty].label}`;
   if (mode === 'puzzle' && !daily) return `PUZZLE // ${tierLabel()} ${puzzleIndex + 1}`;
   if (daily) return `${DAILY_KINDS[mode]}${dailyOfficial ? '' : ' // PRACTICE'}`;
@@ -3952,6 +3984,7 @@ function updateHome() {
   refreshStarterRow();
   fitHome(); // (the words fitted to their boxes; again once the mode's rows have all settled)
   refitHome();
+  maybeStoryIntro(); // (STORY's first time: the scene set)
 }
 function updateTopIcons() {
   const inGame = !homeOpen; // (the tutorial too: PAUSE, as in a game)
@@ -7135,7 +7168,7 @@ recordsEl.querySelectorAll('.records-tabs button').forEach((b) => {
 // (a card of its own over the game card: BACK or Esc closes it, not a tap beside it). A small card
 // open over it (an [i], the PATCHES or EXPLOITS card, GAME SETTINGS) is closed first: BACK, and the
 // phone's back (start.js), take it away and leave the panel or menu under it
-const OVER_CARDS = ['res-info', 'booster-pick', 'starter-pick', 'mode-settings'];
+const OVER_CARDS = ['res-info', 'booster-pick', 'starter-pick', 'mode-settings', 'story-intro'];
 window.closeOverCard = () => {
   const open = OVER_CARDS.map((id) => document.getElementById(id)).find((el) => el && !el.classList.contains('hidden'));
   if (!open) return false;

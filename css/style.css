@@ -2387,13 +2387,20 @@ body:not(.vs-mode) .hud .stat:not(.cpu-stat):not(.cpu-face) > .label {
 body:not(.vs-mode) .hud .stat:not(.cpu-stat):not(.cpu-face) > :is(.value, .bit-sq, .bit-row) {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; max-width: calc(100% - 4px);
 }
+/* (each value trimmed to its capitals, so its digits center by what shows, not the font's line box;
+   --val-foot: how far under the middle the digits end, where the bands under them start) */
+body:not(.vs-mode) .hud .stat:not(.cpu-stat):not(.cpu-face) > .value { text-box: trim-both cap alphabetic; }
+body:not(.vs-mode) .hud { --val-foot: 5.5px; }
 body:not(.vs-mode) .hud-bits .stat-current { padding-bottom: 0; }
 /* (CURRENT's bit centered too, but never up under its title: 4px, the title's 10.5px line, 2px clear,
    then half the bit's 42px) */
 body:not(.vs-mode) .hud .hud-bits .stat.stat-current:not(.cpu-stat):not(.cpu-face) > .bit-sq { top: max(50%, 37.5px); }
 /* (ENCRYPT IN's ===== in the band under its 8, taking no room either) */
-body:not(.vs-mode) .hud #pulse-stat > .layer-mark { top: auto; bottom: 0; height: calc(50% - 8px); align-items: center; justify-content: center; line-height: 1; font-size: 9px; } /* (centered between the foot of its count and the box's bottom edge) */
+body:not(.vs-mode) .hud #pulse-stat > .layer-mark { top: auto; bottom: 0; height: calc(50% - var(--val-foot)); align-items: center; justify-content: center; line-height: 1; font-size: 9px; } /* (centered between the foot of its count and the box's bottom edge) */
 body:not(.vs-mode) .hud #pulse-stat.counts-layers > .layer-mark { display: flex; }
+/* (its = signs sit high in their line, so the band's top is taken in a little: they center in it by
+   what shows) */
+body:not(.vs-mode) .hud #pulse-stat > .layer-mark { box-sizing: border-box; padding-top: 1.5px; }
 /* (NEXT and TIME's short panel under CURRENT: its words and value trimmed to their capitals, so they
    center in it by what shows, whatever the font's ascent and descent) */
 body:not(.vs-mode) .hud-bits :is(#next-stat, #time-stat) > :is(.label, .value) { text-box: trim-both cap alphabetic; }
@@ -3260,6 +3267,13 @@ html.pixel-mode .walker.skater.walking[data-look="left"] .bot { transform: none;
 #mode-settings #difficulty-row button { height: 32px; }
 .mode-settings-box .ms-note { margin: var(--gap) 0 0; font-size: 13px; line-height: 1.4; color: var(--fg-dim); }
 .mode-settings-box .starter-pick-foot { margin-top: 16px; }
+/* STORY's intro: a terminal's incoming message, its head in the accent color as a recovered file's */
+.story-intro-box p { margin: var(--gap) 0 0; font-size: 13px; line-height: 1.4; text-align: left; color: var(--panel-text); }
+.story-intro-box .si-head { margin: 4px 0 0; font-size: 11.5px; letter-spacing: 1px; color: var(--accent); }
+.story-intro-box .si-last { color: var(--fg); }
+.story-intro-box .sf-caret { display: inline-block; width: 0.55em; height: 1em; margin-left: 2px; background: var(--fg); vertical-align: -0.15em; animation: sf-blink 1s steps(1) infinite; }
+.low-fx .story-intro-box .sf-caret { animation: none; }
+.story-intro-box .starter-pick-foot { margin-top: 16px; }
 .starter-pick-foot button { font-family: inherit; font-size: 11px; letter-spacing: 1px; padding: 8px 12px; color: var(--fg); background: transparent; border: 1px solid var(--fg-dim); border-radius: 4px; cursor: pointer; }
 .booster-break { flex-basis: 100%; height: 0; } /* (the slots on one line, the exploits owned below) */
 /* PUZZLE: HINT and UNDO under the drop buttons, and the column HINT lights */
@@ -4587,10 +4601,10 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 .daily-got[hidden] { display: none; }
 .daily-got.fresh { animation: alarm-in 0.25s ease-out, warn-pulse 1s ease-in-out 0.25s 2; }
 /* WHAT A DROP EARNED: in the CHAIN box (chains earn the resources), centered between the foot of its
-   value and its bottom edge (the value's centered: its foot 8px under the middle), every resource on
+   value's digits and its bottom edge (the value's centered: its foot --val-foot under the middle), every resource on
    one line (shrunk to fit) */
 #chain-stat .res-pop {
-  position: absolute; left: 2px; right: 2px; bottom: 0; height: calc(50% - 8px); z-index: 2; display: flex; justify-content: center; align-items: center; gap: 5px;
+  position: absolute; left: 2px; right: 2px; bottom: 0; height: calc(50% - var(--val-foot, 8px)); z-index: 2; display: flex; justify-content: center; align-items: center; gap: 5px;
   white-space: nowrap; font-size: 10px; line-height: 1; letter-spacing: 0.5px; color: var(--fg); pointer-events: none;
   animation: pickup 1.7s ease-out forwards;
 }

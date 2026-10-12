@@ -46,8 +46,8 @@
   } catch (e) {}
 </script>
 <title>BYTEFALL // decryption terminal</title>
-<script src="js/fonts.js?v=595"></script>
-<link rel="stylesheet" href="css/style.css?v=595">
+<script src="js/fonts.js?v=596"></script>
+<link rel="stylesheet" href="css/style.css?v=596">
 </head>
 <body>
   <!-- Dev: TWINKLE BACKGROUND (grid-bg.js): the starlight behind the whole game, off by default -->
@@ -200,7 +200,8 @@
             <p>In CLASSIC and BLITZ, a bit freed from its last layer is now and then an <b>INFECTED BIT</b>: red, with a virus in its corner. Decrypt it with your next drop and it's quarantined for a ROOTKIT; leave it, and it goes off as an infection. <b>INFECTIONS: OFF</b> in the mode's settings on the main menu turns them off.</p>
             <div class="store-rule" aria-hidden="true">================================================================================</div>
             <h3 class="rules-sub">// STORY</h3>
-            <p>Tap <b>CLASSIC</b> again on the main menu for <b>STORY</b> (and again for CLASSIC). In STORY every game has a key to crack, its <b>ENCRYPTION STRENGTH</b> (128-BIT at 1,500 points on Normal). Crack it for KEYS and the next file of the story, then <b>GO DEEPER</b> for a stronger key or <b>DISCONNECT</b> to end the game on a win. Deeper chapters need deeper keys; the <b>ARCHIVE</b> keeps every file.</p>
+            <p>Tap <b>CLASSIC</b> again on the main menu for <b>STORY</b> (and again for CLASSIC). In STORY every game has a key to crack, its <b>ENCRYPTION STRENGTH</b> (128-BIT at 1,500 points). Crack it for KEYS and the next file of the story, then <b>GO DEEPER</b> for a stronger key or <b>DISCONNECT</b> to end the game on a win. Deeper chapters need deeper keys; the <b>ARCHIVE</b> keeps every file.</p>
+            <p>STORY has no settings: it's played on the 7x7 board with INFECTIONS on, and each key is harder than the last. Layers come a drop sooner every two keys (every 8 drops, then 7 from 256-BIT, 6 from 512-BIT, never under 4), and infections get likelier.</p>
             <div class="store-rule" aria-hidden="true">================================================================================</div>
             <h3 class="rules-sub">// DIFFICULTY</h3>
             <p><b>Easy</b> shows the next bit, and a drop that clears nothing only takes one bar off the CHAIN METER (on <b>Normal</b> it empties it).</p>
@@ -906,6 +907,20 @@
       </div>
     </div>
   </div>
+  <!-- STORY's intro (script.js's openStoryIntro): the first time STORY's picked, the scene set -->
+  <div id="story-intro" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="story-intro-title">
+    <div class="overlay-box starter-pick-box story-intro-box">
+      <h2 id="story-intro-title">// STORY</h2>
+      <p class="si-head">INCOMING // ENCRYPTED // SOURCE UNKNOWN</p>
+      <p>Something reached your terminal tonight: a trail of encrypted files, buried under layer on layer of keys. Messages. Memos. Logs. Someone didn't want them read.</p>
+      <p>Every key you crack recovers one FILE. Read them in order and uncover the story: who sent them, what they're hiding, and who's watching you read.</p>
+      <p>The deeper files sit under stronger keys, and every key is harder to crack than the last. Everything you recover is kept in the ARCHIVE.</p>
+      <p class="si-last">The first file is waiting. Crack your first key to read it.<span class="sf-caret" aria-hidden="true"></span></p>
+      <div class="starter-pick-foot">
+        <button type="button" id="story-intro-close">BEGIN</button>
+      </div>
+    </div>
+  </div>
   <div id="booster-pick" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="booster-pick-title">
     <div class="overlay-box starter-pick-box">
       <h2 id="booster-pick-title">// PATCHES</h2>
@@ -951,60 +966,60 @@
     </div>
   </div>
 
-  <script src="js/bot-svg.js?v=595"></script>
-  <script src="js/unlocks.js?v=595"></script>
-  <script src="js/progress.js?v=595"></script>
-  <script src="js/music/output.js?v=595"></script>
-  <script src="js/music/mixes.js?v=595"></script>
-  <script src="js/sfx.js?v=595"></script>
-  <script src="js/music/music-bytefall-theme.js?v=595"></script>
-  <script src="js/music/music-sleep-mode.js?v=595"></script>
-  <script src="js/music/music-brute-force.js?v=595"></script>
-  <script src="js/music/music-deep-web.js?v=595"></script>
-  <script src="js/music/music-zero-day.js?v=595"></script>
-  <script src="js/music/music-system-restore.js?v=595"></script>
-  <script src="js/music/music-night-drive.js?v=595"></script>
-  <script src="js/music/music-standby-mode.js?v=595"></script>
-  <script src="js/music/music-core-dump.js?v=595"></script>
-  <script src="js/music/music-handshake.js?v=595"></script>
-  <script src="js/music/music-stack-overflow.js?v=595"></script>
-  <script src="js/music/music-generated.js?v=595"></script>
-  <script src="js/music/music.js?v=595"></script>
-  <script src="js/data/puzzles.js?v=595"></script>
-  <script src="js/data/daily-puzzles.js?v=595"></script>
-  <script src="js/data/hint-riddles.js?v=595"></script>
-  <script src="js/cpu.js?v=595"></script>
-  <script src="js/fx.js?v=595"></script>
-  <script src="js/viz.js?v=595"></script>
-  <script src="js/pixel.js?v=595"></script>
-  <script src="js/minibot.js?v=595"></script>
-  <script src="js/seasons.js?v=595"></script>
-  <script src="js/bigart.js?v=595"></script>
-  <script src="js/scenes.js?v=595"></script>
-  <script src="js/weather.js?v=595"></script>
-  <script src="js/visitors.js?v=595"></script>
-  <script src="js/data/bot-anims.js?v=595"></script>
-<script src="js/wanderers.js?v=595"></script>
-  <script src="js/tutorial.js?v=595"></script>
-  <script src="js/puzzle-sim.js?v=595"></script>
-  <script src="js/led-banner.js?v=595"></script>
-  <script src="js/infections.js?v=595"></script>
-  <script src="js/script.js?v=595"></script>
-  <script src="js/grid-bg.js?v=595"></script>
-  <script src="js/lights.js?v=595"></script>
-  <script src="js/inf-test.js?v=595"></script>
-  <script src="js/sfx-test.js?v=595"></script>
-  <script src="js/extsource.js?v=595"></script>
-  <script src="js/player.js?v=595"></script>
-  <script src="js/billing.js?v=595"></script>
-  <script src="js/store.js?v=595"></script>
-  <script src="js/data/stories.js?v=595"></script>
-  <script src="js/stories.js?v=595"></script>
-  <script src="js/ads-config.js?v=595"></script>
-  <script src="js/ads.js?v=595"></script>
-  <script src="js/app-update.js?v=595"></script>
-  <script src="js/start.js?v=595"></script>
-  <script src="js/place.js?v=595"></script>
-  <script src="js/saver.js?v=595"></script>
+  <script src="js/bot-svg.js?v=596"></script>
+  <script src="js/unlocks.js?v=596"></script>
+  <script src="js/progress.js?v=596"></script>
+  <script src="js/music/output.js?v=596"></script>
+  <script src="js/music/mixes.js?v=596"></script>
+  <script src="js/sfx.js?v=596"></script>
+  <script src="js/music/music-bytefall-theme.js?v=596"></script>
+  <script src="js/music/music-sleep-mode.js?v=596"></script>
+  <script src="js/music/music-brute-force.js?v=596"></script>
+  <script src="js/music/music-deep-web.js?v=596"></script>
+  <script src="js/music/music-zero-day.js?v=596"></script>
+  <script src="js/music/music-system-restore.js?v=596"></script>
+  <script src="js/music/music-night-drive.js?v=596"></script>
+  <script src="js/music/music-standby-mode.js?v=596"></script>
+  <script src="js/music/music-core-dump.js?v=596"></script>
+  <script src="js/music/music-handshake.js?v=596"></script>
+  <script src="js/music/music-stack-overflow.js?v=596"></script>
+  <script src="js/music/music-generated.js?v=596"></script>
+  <script src="js/music/music.js?v=596"></script>
+  <script src="js/data/puzzles.js?v=596"></script>
+  <script src="js/data/daily-puzzles.js?v=596"></script>
+  <script src="js/data/hint-riddles.js?v=596"></script>
+  <script src="js/cpu.js?v=596"></script>
+  <script src="js/fx.js?v=596"></script>
+  <script src="js/viz.js?v=596"></script>
+  <script src="js/pixel.js?v=596"></script>
+  <script src="js/minibot.js?v=596"></script>
+  <script src="js/seasons.js?v=596"></script>
+  <script src="js/bigart.js?v=596"></script>
+  <script src="js/scenes.js?v=596"></script>
+  <script src="js/weather.js?v=596"></script>
+  <script src="js/visitors.js?v=596"></script>
+  <script src="js/data/bot-anims.js?v=596"></script>
+<script src="js/wanderers.js?v=596"></script>
+  <script src="js/tutorial.js?v=596"></script>
+  <script src="js/puzzle-sim.js?v=596"></script>
+  <script src="js/led-banner.js?v=596"></script>
+  <script src="js/infections.js?v=596"></script>
+  <script src="js/script.js?v=596"></script>
+  <script src="js/grid-bg.js?v=596"></script>
+  <script src="js/lights.js?v=596"></script>
+  <script src="js/inf-test.js?v=596"></script>
+  <script src="js/sfx-test.js?v=596"></script>
+  <script src="js/extsource.js?v=596"></script>
+  <script src="js/player.js?v=596"></script>
+  <script src="js/billing.js?v=596"></script>
+  <script src="js/store.js?v=596"></script>
+  <script src="js/data/stories.js?v=596"></script>
+  <script src="js/stories.js?v=596"></script>
+  <script src="js/ads-config.js?v=596"></script>
+  <script src="js/ads.js?v=596"></script>
+  <script src="js/app-update.js?v=596"></script>
+  <script src="js/start.js?v=596"></script>
+  <script src="js/place.js?v=596"></script>
+  <script src="js/saver.js?v=596"></script>
 </body>
 </html>
