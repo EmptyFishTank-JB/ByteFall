@@ -4761,6 +4761,7 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 .mg-slot { width: var(--mg-cell, 72px); height: var(--mg-cell, 72px); }
 .mg-tiles { position: absolute; left: 8px; top: 8px; pointer-events: none; }
 .mg-tile { position: absolute; left: 0; top: 0; width: var(--mg-cell, 72px); height: var(--mg-cell, 72px); font-size: calc(var(--mg-cell, 72px) * 0.3); translate: calc(var(--x) * (var(--mg-cell, 72px) + 6px)) calc(var(--y) * (var(--mg-cell, 72px) + 6px)); transition: translate 0.11s ease-out; } /* (placed by translate, so a pop's scale (transform) is about the bit's own middle) */
+.mg-tiles .cell.mg-tile { position: absolute; } /* (GLYPH's bits are position: relative: .cell.disc.has-glyph) */
 .mg-tile.disc { background: linear-gradient(rgba(var(--fg-rgb), calc(0.025 * var(--lv, 1))), rgba(var(--fg-rgb), calc(0.025 * var(--lv, 1)))), var(--cell-bg); box-shadow: 0 0 calc(var(--lv, 1) * 1.4px) rgba(var(--fg-rgb), 0.45); }
 .mg-tile.mg-big { color: var(--accent); border-color: var(--accent); background: linear-gradient(rgba(var(--accent-rgb), calc(0.05 * (var(--lv, 8) - 6))), rgba(var(--accent-rgb), calc(0.05 * (var(--lv, 8) - 6)))), var(--cell-bg); text-shadow: 0 0 8px var(--accent); box-shadow: 0 0 calc(var(--lv, 8) * 1.6px) rgba(var(--accent-rgb), 0.55); font-size: calc(var(--mg-cell, 72px) * 0.21); letter-spacing: 1px; }
 .mg-tile.mg-lock { color: var(--layer-text); }
