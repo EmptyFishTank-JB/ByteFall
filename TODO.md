@@ -14,7 +14,11 @@ Ideas queued for later (not built yet).
 
 See [WANDERERS.md](WANDERERS.md) for the season-by-season chart and the full ideas list.
 
-## The DAILY ARCADE (a game a day)
+## The DAILY ARCADE (a game a day) and the ARCADE (any time)
+
+The main menu's ARCADE (beside TUTORIAL) opens the ARCADE menu: every game as FREE PLAY, bests kept, no
+KEYS (done). Later: the bests in RECORDS, and an ARCADE section there.
+
 
 The DAILY menu's fifth card, ARCADE (`js/arcade.js` and a file per game): a different game each
 weekday on the bits and the board, not necessarily ByteFall's rules. Done: **Monday CODE BREAKER** (a

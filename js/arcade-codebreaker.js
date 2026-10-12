@@ -241,6 +241,9 @@ Arcade.register('codebreaker', (() => {
       boardEl.style.setProperty('--cb-cell', `${Math.max(14, size)}px`);
     },
     pay: (x) => Progress.codeBreaker(broken(x) ? x.g.length : 0),
+    best: (x) => (broken(x) ? x.g.length : null),
+    bestText: (v) => `${v} ${v === 1 ? 'TRY' : 'TRIES'}`,
+    low: true,
     // SHARE: a line of squares per try, as the pips (green, yellow, black), under the result
     share(x) {
       const lines = x.g.map((guess) => {

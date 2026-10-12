@@ -434,9 +434,6 @@ function setModeFromChoice() {
   daily = topMode === 'daily';
   mode = daily ? dailyKind : topMode;
 }
-// (?arcade=trace and the like, the dev page's practice links: the main menu on DAILY's ARCADE card,
-// PLAY playing that game; arcade.js)
-if (new URLSearchParams(location.search).get('arcade')) { topMode = 'daily'; dailyKind = 'arcade'; }
 setModeFromChoice();
 
 // PUZZLE: the archive puzzle picked, or today's daily one (daily-puzzles.js). The daily list
@@ -3869,6 +3866,7 @@ document.getElementById('pause-menu').addEventListener('click', (e) => {
 document.getElementById('home-records').addEventListener('click', () => setRecordsOpen(true, rulesPane));
 document.getElementById('home-exploits').addEventListener('click', () => setRecordsOpen(true, 'exploits'));
 document.getElementById('home-store').addEventListener('click', () => setRecordsOpen(true, 'store'));
+document.getElementById('home-arcade').addEventListener('click', () => Arcade.openMenu()); // (THE ARCADE: every game, any time; arcade.js)
 document.getElementById('home-settings').addEventListener('click', () => setSettingsOpen(true));
 document.addEventListener('keydown', (e) => {
   if ((e.key !== 'Escape' && e.key !== 'p' && e.key !== 'P') || panelOpen() || homeOpen) return;
@@ -7075,7 +7073,7 @@ recordsEl.querySelectorAll('.records-tabs button').forEach((b) => {
 // (a card of its own over the game card: BACK or Esc closes it, not a tap beside it)
 document.querySelectorAll('.card-back').forEach((b) => b.addEventListener('click', () => {
   if (b.dataset.close === 'records') setRecordsOpen(false);
-  else if (b.dataset.close === 'settings') setSettingsOpen(false); // (the DAILY ARCADE's: arcade.js)
+  else if (b.dataset.close === 'settings') setSettingsOpen(false); // (the ARCADE's: arcade.js)
 }));
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !recordsEl.hidden) setRecordsOpen(false);

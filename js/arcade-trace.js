@@ -266,6 +266,9 @@ Arcade.register('trace', (() => {
       boardEl.style.setProperty('--tr-cell', `${Math.max(14, size)}px`);
     },
     pay: (x) => Progress.arcadeResult('trace', x.won, Math.floor(x.t / 1000)),
+    best: (x) => (x.won ? Math.floor(x.t / 1000) : null),
+    bestText: (v) => kit.fmtTime(v * 1000),
+    low: true,
     // SHARE: the result, and how much of the board was cleared, as a bar
     share(x) {
       const cleared = x.open.reduce((a, v) => a + v, 0);

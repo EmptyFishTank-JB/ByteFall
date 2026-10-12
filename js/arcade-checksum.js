@@ -1,13 +1,13 @@
-// CHECKSUM (THE DAILY ARCADE's Thursday game; the card around it is arcade.js): a 9x9 grid in nine 3x3
-// boxes, some bits given, the same for everyone that Thursday (made from the date: a full grid, then
-// bits taken out in pairs, opposite each other, as long as it still has one answer only, down to
-// GIVENS). Fill it so every row, column and box holds [1] to [9] once. Tap a square, then a bit in
-// the row under the board to write it in (the same bit again takes it out); with NOTES on, the bits
-// are pencil marks instead, the ones it could be, small in the square; ERASE clears the square.
-// Writing a bit in takes it off the notes round it. CONFIRM checks the grid: INCOMPLETE (squares
-// still empty), CHECKSUM FAILED (full, but wrong somewhere: it doesn't say where) or CHECKSUM VALID,
-// the game over. Timed: the clock runs whenever the card's up, till it's valid. Keys: 1 to 9, 0 or
-// Backspace to erase, N for NOTES, the arrows to move, Enter to CONFIRM.
+// CHECKSUM (THE ARCADE's Thursday game; the card around it is arcade.js): a 9x9 grid in nine 3x3 boxes,
+// some bits given, the same for everyone that Thursday (made from the date: a full grid, then bits
+// taken out in pairs, opposite each other, as long as it still has one answer only, down to GIVENS).
+// Fill it so every row, column and box holds [1] to [9] once. Tap a square, then a bit in the row under
+// the board to write it in (the same bit again takes it out); with NOTES on, the bits are pencil marks
+// instead, the ones it could be, small in the square; ERASE clears the square. Writing a bit in takes
+// it off the notes round it. (The same bit elsewhere isn't lit: that made it too easy.) CONFIRM checks
+// the grid: INCOMPLETE (squares still empty), CHECKSUM FAILED (full, but wrong somewhere: it doesn't
+// say where) or CHECKSUM VALID, the game over. Timed: the clock runs whenever the card's up, till it's
+// valid. Keys: 1 to 9, 0 or Backspace to erase, N for NOTES, the arrows to move, Enter to CONFIRM.
 Arcade.register('checksum', (() => {
   const GIVENS = 30;
   const ROW = Array.from({ length: 81 }, (_, i) => Math.floor(i / 9));
@@ -133,14 +133,12 @@ Arcade.register('checksum', (() => {
     }));
   }
   function render() {
-    const at = sel >= 0 ? s.v[sel] : 0;
     cells.forEach((c, i) => {
       const d = s.v[i];
       let cls = 'cell ck-cell';
       if (d) cls += ` disc ${s.given[i] ? 'ck-given' : 'ck-mine'}`;
       if (i === sel) cls += ' sel';
       else if (sel >= 0 && (ROW[i] === ROW[sel] || COL[i] === COL[sel] || BOX[i] === BOX[sel])) cls += ' peer';
-      if (at && d === at && i !== sel) cls += ' same';
       if (s.solved) cls += ' ck-valid';
       c.className = cls;
       if (d) {
@@ -319,6 +317,9 @@ Arcade.register('checksum', (() => {
       boardEl.style.setProperty('--ck-cell', `${Math.max(16, size)}px`);
     },
     pay: (x) => Progress.arcadeResult('checksum', true, Math.floor(x.t / 1000)),
+    best: (x) => Math.floor(x.t / 1000),
+    bestText: (v) => kit.fmtTime(v * 1000),
+    low: true,
     // SHARE: the time and the failed checks, over the nine boxes, all green
     share(x) {
       const box = '\u{1F7E9}\u{1F7E9}\u{1F7E9}';
