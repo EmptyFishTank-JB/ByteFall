@@ -112,6 +112,9 @@ const Progress = (() => {
     // a row up to `last` (the UTC day of its last official run), `open` the day of an official run begun
     // and not yet ended
     kindStreaks: {},
+    // THE STORIES (js/stories.js): pick, the one being decrypted; got: story id -> files recovered;
+    // seen: story id -> files read in the ARCHIVE (the rest show as new)
+    stories: { pick: 'trace', got: {}, seen: {} },
   });
 
   let d = fresh();
@@ -979,6 +982,27 @@ const Progress = (() => {
       s.best = Math.max(s.best, s.n);
       s.last = s.open;
       s.open = '';
+      save();
+    },
+    // THE STORIES (js/stories.js keeps the files and the rules): the story being decrypted, how many
+    // of each one's files are recovered, and how many of those have been read
+    stories() {
+      if (!d.stories || typeof d.stories !== 'object') d.stories = { pick: 'trace', got: {}, seen: {} };
+      d.stories.got = d.stories.got || {};
+      d.stories.seen = d.stories.seen || {};
+      return d.stories;
+    },
+    storyPick(id) { this.stories().pick = id; save(); },
+    storyRecover(id) {
+      const st = this.stories();
+      st.got[id] = (st.got[id] || 0) + 1;
+      save();
+      return st.got[id];
+    },
+    storyRead(id) {
+      const st = this.stories();
+      if ((st.seen[id] || 0) === (st.got[id] || 0)) return;
+      st.seen[id] = st.got[id] || 0;
       save();
     },
     // (as it stands today: n, back to 0 after a missed day; open: an official run begun today and not
