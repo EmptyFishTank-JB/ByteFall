@@ -1177,7 +1177,7 @@ TOTAL +34
 
 **Says:**
 
-> Every key you crack also recovers a FILE of a STORY, typed out on the cracked card. Deeper chapters need deeper keys: 256-BIT, then 512-BIT.
+> Every key you crack also recovers a FILE of a STORY, typed out on the cracked card. Deeper chapters need deeper keys: 256-BIT, then 512-BIT. Some files reveal the exploits and patches you can use in STORY.
 
 - **Asks you to**: Tap NEXT.
 - **Lights up**: the line under BYTEFALL (in focus) and a sample ENCRYPTION STRENGTH line and SCORE bar (for the lesson)

@@ -3274,6 +3274,24 @@ html.pixel-mode .walker.skater.walking[data-look="left"] .bot { transform: none;
 .story-intro-box .sf-caret { display: inline-block; width: 0.55em; height: 1em; margin-left: 2px; background: var(--fg); vertical-align: -0.15em; animation: sf-blink 1s steps(1) infinite; }
 .low-fx .story-intro-box .sf-caret { animation: none; }
 .story-intro-box .starter-pick-foot { margin-top: 16px; }
+/* STORY's kit: the side slots as PATCHES and EXPLOITS, how many uses this key has left in the corner;
+   used up, dimmed */
+.exploit-icon.side-slot.story-kit { color: var(--fg); border-color: rgba(var(--fg-rgb), 0.6); }
+.exploit-icon.side-slot.story-kit .exploit-glyph { display: inline-flex; align-items: center; gap: 1px; font-size: 12px; opacity: 1; }
+.exploit-icon.side-slot.story-kit .exploit-glyph svg { width: 16px; height: auto; }
+.exploit-icon.side-slot.story-kit .kit-left { position: absolute; top: 1px; right: 3px; font-size: 8px; line-height: 1; color: var(--accent); }
+.exploit-icon.side-slot.story-kit.spent { opacity: 0.45; }
+/* (its card: owned items as the main menu's pick cards; the BLACK MARKET's offers with their price on
+   one line, red where you're short) */
+.story-kit-box #story-kit-title svg { width: 1.1em; height: auto; margin-right: 6px; vertical-align: -0.1em; }
+.story-kit-box .starter-pick-item.off { opacity: 0.5; }
+.story-kit-box .kit-cost { display: inline-flex; gap: 6px; margin-left: auto; font-size: 11px; white-space: nowrap; }
+.story-kit-box .kit-cost .kc { display: inline-flex; align-items: center; gap: 2px; }
+.story-kit-box .kit-cost .kc svg { width: 11px; height: 11px; }
+.story-kit-box .kit-cost .kc.short { color: var(--danger, #ff5a5a); }
+.story-kit-box #story-kit-market svg { width: 1em; height: 1em; margin-right: 4px; vertical-align: -0.15em; }
+/* (the cracked card and the ARCHIVE: what a file revealed, in the accent color) */
+.story-frag .sf-reveal, .archive-file .af-reveal { margin: 6px 0 0; font-size: 11.5px; letter-spacing: 1px; color: var(--accent); }
 .starter-pick-foot button { font-family: inherit; font-size: 11px; letter-spacing: 1px; padding: 8px 12px; color: var(--fg); background: transparent; border: 1px solid var(--fg-dim); border-radius: 4px; cursor: pointer; }
 .booster-break { flex-basis: 100%; height: 0; } /* (the slots on one line, the exploits owned below) */
 /* PUZZLE: HINT and UNDO under the drop buttons, and the column HINT lights */

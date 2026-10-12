@@ -9,7 +9,7 @@ together.
 
 | Resource | Icon | Rarity | Earned by | Rate |
 |---|---|---|---|---|
-| **KEYS** | key, the theme's accent | money | bits decrypted (any way), chains of 5 and 7, levels, achievements, first puzzle solves, the day's first daily game, the DAILY DROP, CLASSIC's ENCRYPTION STRENGTH cracks | 1 per 10 bits; +2 at a 5-link chain, +5 at 7; 10 a level; 10 an achievement; 5 the first daily game; 25 the DAILY DROP; first puzzle solves 2 / 4 / 6 (EASY / NORMAL / HARD); a crack pays its target / 150 (NORMAL: 128-BIT at 1,500 pays 10, 192-BIT at 2,250 pays 15, 256-BIT at 3,000 pays 20, and on) |
+| **KEYS** | key, the theme's accent | money | bits decrypted (any way), chains of 5 and 7, levels, achievements, first puzzle solves, the day's first daily game, the DAILY DROP, STORY's ENCRYPTION STRENGTH cracks | 1 per 10 bits; +2 at a 5-link chain, +5 at 7; 10 a level; 10 an achievement; 5 the first daily game; 25 the DAILY DROP; first puzzle solves 2 / 4 / 6 (EASY / NORMAL / HARD); a crack pays its target / 150 (128-BIT at 1,500 pays 10, 192-BIT at 3,000 pays 20, 256-BIT at 4,500 pays 30, and on) |
 | **BUGS** | bug with two antennae, roach brown `#b5824a` | common | bits decrypted **down a column** | 1 per 5 |
 | **CACHE** | stacked disks, light gray `#c8ccd0` | common | bits decrypted **across a row** | 1 per 5 |
 | **CRYPTO** | the game's coin: a hexagon with a C struck through twice, Bitcoin orange `#f7931a` | common | **chain links** from the 3rd on | 1 per link |

@@ -6,6 +6,9 @@
 // RULES & RECORDS → ARCHIVE: every story, its files recovered so far to read again (new ones marked
 // till they're read), the rest still ENCRYPTED with the key they need, and DECRYPT THIS STORY to
 // pick it. In STORY the main menu's story button says which and how far, and opens it.
+// WHAT THE STORY REVEALS: files carry reveals (js/data/stories.js), the exploits, BLACK BOXES and
+// patches usable in STORY (owned or bought on its BLACK MARKET) and the BLACK MARKET itself: revealed()
+// is every one from the files recovered so far, in any story; the cracked card and the ARCHIVE say so
 const Stories = (() => {
   const PER_CHAPTER = 4;
   const byId = (id) => STORIES.find((s) => s.id === id);
@@ -31,6 +34,14 @@ const Stories = (() => {
     for (let i = 0; i < len; i++) out += i % 5 === 4 ? ' ' : r() < 0.18 ? '░▒▓'[Math.floor(r() * 3)] : glyphs[Math.floor(r() * 16)];
     return out;
   }
+  // (what the files recovered so far have revealed, every story's)
+  function revealed() {
+    const out = new Set();
+    for (const s of STORIES) s.files.slice(0, got(s)).forEach((f) => (f.reveals || []).forEach((id) => out.add(id)));
+    return out;
+  }
+  const revealName = (id) => (id === 'market' ? 'THE BLACK MARKET' : BOOSTERS[id] ? BOOSTERS[id].name : itemName(id));
+  const revealLine = (f) => (f.reveals && f.reveals.length ? `REVEALED // ${f.reveals.map(revealName).join(' / ')}` : '');
   const lowFx = () => document.documentElement.classList.contains('low-fx') || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
 
   // THE CRACKED CARD: the file this key recovered, typed out (or what the next one needs)
@@ -80,7 +91,14 @@ const Stories = (() => {
     }
     Progress.storyRecover(s.id);
     const f = s.files[n];
-    host.innerHTML = `<p class="sf-head">RECOVERED // ${esc(s.title)} // FILE ${n + 1} OF ${s.files.length}</p><p class="sf-doc">${esc(f.doc)}</p><p class="sf-body"></p>`;
+    const rv = revealLine(f);
+    host.innerHTML = `<p class="sf-head">RECOVERED // ${esc(s.title)} // FILE ${n + 1} OF ${s.files.length}</p><p class="sf-doc">${esc(f.doc)}</p><p class="sf-body"></p>`
+      + (rv ? `<p class="sf-reveal">${esc(rv)}</p>` : '');
+    if (rv) { // (and in NOTICES: where it's used)
+      const market = f.reveals.includes('market');
+      logNotice(`STORY // ${rv}`, false, market ? 'Open it in a STORY game from the PATCHES or EXPLOITS button beside your EXPLOIT button.'
+        : 'Usable in STORY games from now on: owned ones from the PATCHES or EXPLOITS button beside your EXPLOIT button.');
+    }
     host.onclick = stop; // (a tap: the whole file at once)
     const body = host.querySelector('.sf-body');
     body.textContent = f.text; // (measured whole first)
@@ -145,7 +163,7 @@ const Stories = (() => {
       for (let i = c * PER_CHAPTER; i < Math.min(s.files.length, (c + 1) * PER_CHAPTER); i++) {
         const f = s.files[i];
         html += i < n
-          ? `<div class="archive-file${i >= seen ? ' new' : ''}"><p class="af-head">FILE ${i + 1} // ${esc(f.doc)}${i >= seen ? ' <b>NEW</b>' : ''}</p><p class="af-body">${esc(f.text)}</p></div>`
+          ? `<div class="archive-file${i >= seen ? ' new' : ''}"><p class="af-head">FILE ${i + 1} // ${esc(f.doc)}${i >= seen ? ' <b>NEW</b>' : ''}</p><p class="af-body">${esc(f.text)}</p>${revealLine(f) ? `<p class="af-reveal">${esc(revealLine(f))}</p>` : ''}</div>`
           : `<div class="archive-file locked"><p class="af-head">FILE ${i + 1} // ENCRYPTED // ${gateText(gateOf(i))}</p><p class="af-noise">${noise(`${s.id}:${i}`)}</p></div>`;
       }
     });
@@ -197,5 +215,5 @@ const Stories = (() => {
   marks();
   refreshRow();
 
-  return { onCrack, stop, render, refreshRow, openStory, toList: () => { view = null; }, picked: () => picked().id };
+  return { onCrack, stop, render, refreshRow, openStory, revealed, revealName, toList: () => { view = null; }, picked: () => picked().id };
 })();
