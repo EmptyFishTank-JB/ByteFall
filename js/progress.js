@@ -108,6 +108,10 @@ const Progress = (() => {
     tutorialDone: 0, // the TUTORIAL finished, to its last card's MAIN MENU (HELLO, WORLD)
     keysExtorted: 0, // KEYS lost to infections, all told
     infectionsOutlasted: 0, // infections that ran out their clock without getting a key
+    // THE DAILY GAMES' OWN WIN STREAKS (dailyBegin / dailyEnd): kind -> { n, best, last, open }: n days in
+    // a row up to `last` (the UTC day of its last official run), `open` the day of an official run begun
+    // and not yet ended
+    kindStreaks: {},
   });
 
   let d = fresh();
@@ -958,6 +962,31 @@ const Progress = (() => {
     // (a DECRYPTOR rank's pay: how much more play earns, and prices cost, in percent)
     rankBonus: () => ({ earn: Math.round((rankBoost() - 1) * 100), price: Math.round((rankPrice() - 1) * 100) }),
     dailyStreak: currentStreak, // (as it stands today, back to 0 after a missed day)
+    // EACH DAILY GAME'S OWN WIN STREAK (DECRYPT, PUZZLE, BLITZ, BREACH): days in a row its official
+    // run was won (PUZZLE: solved in its tries; the score games: played to the end, not traced). A
+    // loss, a day missed or an official run never finished starts it over. dailyBegin: an official run
+    // under way (its first drop; a PUZZLE try's); dailyEnd: how it ended, on the day it began
+    dailyBegin(kind) {
+      const s = d.kindStreaks[kind] || (d.kindStreaks[kind] = { n: 0, best: 0, last: '', open: '' });
+      s.open = utcDay();
+      save();
+    },
+    dailyEnd(kind, won) {
+      const s = d.kindStreaks[kind];
+      if (!s || !s.open) return;
+      const before = new Date(Date.parse(`${s.open}T00:00:00Z`) - 86400000).toISOString().slice(0, 10);
+      s.n = won ? (s.last === before ? s.n + 1 : 1) : 0;
+      s.best = Math.max(s.best, s.n);
+      s.last = s.open;
+      s.open = '';
+      save();
+    },
+    // (as it stands today: n, back to 0 after a missed day; open: an official run begun today and not
+    // ended, which script.js counts as lost once it can't be finished)
+    kindStreak(kind) {
+      const s = d.kindStreaks[kind] || { n: 0, best: 0, last: '', open: '' };
+      return { n: s.last === utcDay() || s.last === utcDay(-1) ? s.n : 0, best: s.best, open: s.open === utcDay() };
+    },
     // Lv 80 only: back to Lv 0 with everything locked again but one more kept exploit slot
     rankUp() {
       if (!levelInfo().maxed) return false;

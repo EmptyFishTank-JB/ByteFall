@@ -901,6 +901,7 @@ function showPuzzleResult(solved, firstTime = false) {
   setMessage('');
   SFX.play(solved ? 'egg' : 'denied');
   if (!solved && !daily) Progress.puzzleFailed();
+  if (daily && dailyOfficial && (solved || dailyPuzzleTries() >= DAILY_PUZZLE_TRIES)) Progress.dailyEnd('puzzle', solved); // (its own streak)
   const last = daily || puzzleIndex === tierPuzzles().length - 1;
   overlayNext = solved && !last ? 'next' : 'retry';
   document.querySelector('.overlay-box').classList.toggle('win', solved);
@@ -1789,6 +1790,7 @@ async function attemptDrop(col) {
   }
   columns[col].push(piece);
   if (daily && dailyOfficial) storage.set(dailyPlayedKey(), '1'); // this is today's official run
+  if (daily && dailyOfficial && Progress.runDrops() === 0) Progress.dailyBegin(mode); // (its own streak: under way)
   if (daily && mode === 'puzzle' && Progress.runDrops() === 0) {
     if (dailyOfficial) storage.set(dailyPuzzleTriesKey(), String(dailyPuzzleTries() + 1));
     const attempts = (Number(storage.get(dailyPuzzleAttemptsKey())) || 0) + 1;
@@ -2518,6 +2520,9 @@ function endGame(reason = 'trace') {
   shareBtn.textContent = 'SHARE';
   replayBtn.hidden = true;
 
+  // (the game's own streak: TRACE COMPLETE loses it, a score game played to its end wins; a PUZZLE try
+  // traced loses it only on the last try)
+  if (daily && dailyOfficial && (mode !== 'puzzle' || dailyPuzzleTries() >= DAILY_PUZZLE_TRIES)) Progress.dailyEnd(mode, mode !== 'puzzle' && reason !== 'trace');
   if (mode === 'puzzle') {
     if (!daily) Progress.puzzleFailed();
   } else {
@@ -2908,6 +2913,14 @@ function dailyStatus(kind) {
   if (storage.get(dailyPlayedKey(kind))) return { done: true, text: `OFFICIAL ${fmt(Number(storage.get(dailyKey(kind))) || 0)} // PRACTICE` };
   return { done: false, text: 'OFFICIAL RUN READY' };
 }
+// A daily game's own WIN STREAK as it stands: an official run under way keeps it for now; one begun
+// today that can't be finished any more (quit, or the page closed on it) has lost it
+function kindStreak(kind) {
+  const s = Progress.kindStreak(kind);
+  const live = daily && mode === kind && dailyOfficial && Progress.runDrops() > 0 && !gameOver;
+  const playable = kind === 'puzzle' ? dailyPuzzleOfficial() : !storage.get(dailyPlayedKey(kind));
+  return s.open && !live && !playable ? 0 : s.n;
+}
 // (to the next UTC midnight, when the dailies turn over)
 function dailyTurnover() {
   const now = new Date();
@@ -2925,7 +2938,8 @@ function renderDailyCards() {
     const st = dailyStatus(kind);
     btn.classList.toggle('active', kind === dailyKind);
     btn.classList.toggle('done', st.done);
-    btn.innerHTML = `<span class="dc-name">${DAILY_CARD[kind].name}</span><span class="dc-rule">${DAILY_CARD[kind].rule()}</span><span class="dc-status">${st.done ? '\u2713 ' : ''}${st.text}</span>`;
+    const streak = kindStreak(kind);
+    btn.innerHTML = `<span class="dc-name">${DAILY_CARD[kind].name}${streak ? `<span class="dc-streak">STREAK ${fmt(streak)}</span>` : ''}</span><span class="dc-rule">${DAILY_CARD[kind].rule()}</span><span class="dc-status">${st.done ? '\u2713 ' : ''}${st.text}</span>`;
     btn.setAttribute('aria-pressed', String(kind === dailyKind));
   });
 }
@@ -4165,6 +4179,8 @@ function dailyShareText() {
   };
   const head = `BYTEFALL // ${DAILY_KINDS[mode]} ${todayKey()}`;
   const url = location.href.split(/[?#]/)[0];
+  const n = kindStreak(mode); // (its own win streak, when there's one)
+  const streak = n ? [`\u{1F525} ${fmt(n)}-day win streak`] : [];
   if (mode === 'puzzle') {
     // One square per official try: green solved, red missed, black unused
     const solvedAt = dailyPuzzleSolvedAt();
@@ -4173,18 +4189,18 @@ function dailyShareText() {
     const result = solvedAt ? `Solved on try ${solvedAt}/${DAILY_PUZZLE_TRIES}${dailySolveHints() ? ` with ${dailySolveHints()} hint${dailySolveHints() === 1 ? '' : 's'} ${'\u{1F4A1}'.repeat(dailySolveHints())}` : ''}`
       : used >= DAILY_PUZZLE_TRIES ? `Not solved // ${DAILY_PUZZLE_TRIES}/${DAILY_PUZZLE_TRIES} tries used`
       : `Not solved yet // ${used}/${DAILY_PUZZLE_TRIES} tries used`;
-    return [`${head} // ${WEEKDAYS[utcWeekday()]} ${utcWeekday() + 1}/7`, result, squares, url].join('\n');
+    return [`${head} // ${WEEKDAYS[utcWeekday()]} ${utcWeekday() + 1}/7`, result, squares, ...streak, url].join('\n');
   }
   const practice = dailyOfficial ? '' : ' (practice)';
   if (mode === 'breach') {
     const total = BREACH_ROWS * COLS;
     const broken = total - layersLeft();
-    return [`${head}${practice}`, `${fmt(score)} pts // ${broken}/${total} layers broken${breached ? ' // BREACHED' : ''}`, bar(broken, total), url].join('\n');
+    return [`${head}${practice}`, `${fmt(score)} pts // ${broken}/${total} layers broken${breached ? ' // BREACHED' : ''}`, bar(broken, total), ...streak, url].join('\n');
   }
   if (mode === 'blitz') {
-    return [`${head}${practice}`, `${fmt(score)} pts in ${DAILY_BLITZ_SECONDS}s // ${run.chain}x best chain // ${run.bits} bits decrypted`, url].join('\n');
+    return [`${head}${practice}`, `${fmt(score)} pts in ${DAILY_BLITZ_SECONDS}s // ${run.chain}x best chain // ${run.bits} bits decrypted`, ...streak, url].join('\n');
   }
-  return [`${head}${practice}`, `${fmt(score)} pts // ${run.chain}x best chain // ${run.bits} bits decrypted`, bar(run.bits, DAILY_BITS), url].join('\n');
+  return [`${head}${practice}`, `${fmt(score)} pts // ${run.chain}x best chain // ${run.bits} bits decrypted`, bar(run.bits, DAILY_BITS), ...streak, url].join('\n');
 }
 function copyText(text) {
   if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
@@ -6938,6 +6954,7 @@ function renderRecords() {
       ['CLOSE CALLS', fmt(s.closeCalls)],
       ['DAILY DECRYPTS PLAYED', fmt(s.dailies)],
       ['DAILY STREAK', `${fmt(Progress.dailyStreak())} (best ${fmt(s.bestDailyStreak)})`],
+      ...Object.keys(DAILY_KINDS).map((k) => [`${DAILY_KINDS[k]} // WIN STREAK`, `${fmt(kindStreak(k))} (best ${fmt(Progress.kindStreak(k).best)})`]),
       ['DAILY DECRYPT TODAY', storage.get(dailyPlayedKey('decrypt')) ? fmt(Number(storage.get(dailyKey('decrypt'))) || 0) : 'not played'],
       ['DATA DECRYPTED', fmtData(s.bits)],
       ['TOTAL POINTS', fmt(s.points)],
