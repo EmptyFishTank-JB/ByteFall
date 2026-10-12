@@ -227,7 +227,7 @@ Arcade.register('routing', (() => {
   const routesText = (n) => `${n} ROUTE${n === 1 ? '' : 'S'}`;
   function line(x) {
     const time = kit.fmtTime(x.t);
-    if (x.won) return `ALL ROUTED IN ${time} // ${routesText(x.routes)}${perfect(x) ? ': PERFECT' : ''}${x.k ? ` // +${x.k} KEYS` : ''}`;
+    if (x.won) return `ALL ROUTED IN ${time} // ${routesText(x.routes)}${perfect(x) ? ': PERFECT' : ''}`;
     if (!x.moved) return `LINK EVERY PAIR // FILL EVERY SQUARE`;
     return `TIME ${time} // ROUTES ${x.routes} // LINKED ${linked(x)}/${x.ends.length} // ${Math.round((filled(x) / (N * N)) * 100)}%`;
   }
@@ -415,7 +415,6 @@ Arcade.register('routing', (() => {
       const size = Math.floor(Math.min(52, (host.clientWidth - pad - gap * (N - 1)) / N, (room - pad - gap * (N - 1)) / N));
       boardEl.style.setProperty('--rt-cell', `${Math.max(20, size)}px`);
     },
-    pay: (x) => Progress.arcadeResult('routing', true, Math.floor(x.t / 1000)),
     best: (x) => Math.floor(x.t / 1000),
     bestText: (v) => kit.fmtTime(v * 1000),
     low: true,

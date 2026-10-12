@@ -250,7 +250,7 @@ Arcade.register('decode', (() => {
 
   function line(x) {
     const time = kit.fmtTime(x.t);
-    if (x.solved) return `DECODED IN ${time}${x.k ? ` // +${x.k} KEYS` : ''}`;
+    if (x.solved) return `DECODED IN ${time}`;
     if (!x.moved) return `DECODE THE PICTURE // ${x.W}x${x.H}`;
     let rows = 0;
     let cols = 0;
@@ -403,7 +403,6 @@ Arcade.register('decode', (() => {
       const size = Math.floor(Math.min(40, (host.clientWidth - pad - 2 * s.W) / (s.W + view.rcw), (host.clientHeight - below - pad - 2 * s.H) / (s.H + view.cch)));
       boardEl.style.setProperty('--dc-cell', `${Math.max(12, size)}px`);
     },
-    pay: (x) => Progress.arcadeResult('decode', true, Math.floor(x.t / 1000)),
     best: (x) => Math.floor(x.t / 1000),
     bestText: (v) => kit.fmtTime(v * 1000),
     low: true,

@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="../js/fonts.js?v=581"></script>
+<script src="../js/fonts.js?v=582"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#020403">
-<title>Audio Compendium // BYTEFALL</title>
+<title>Sound &amp; Music // BYTEFALL</title>
 <style>
   /* The game's chosen font (SETTINGS → FONT) applies here too: the fonts come from js/fonts.js */
 </style>
@@ -197,14 +197,6 @@
 
   footer { text-align: center; font-size: 10px; letter-spacing: 0.16em; color: var(--green-dim); margin-top: 40px; }
 
-  .dev-switches { display: flex; flex-wrap: wrap; gap: 8px; }
-  .dev-switches button {
-    background: transparent; border: 1px solid var(--line); color: var(--text-dim);
-    font-family: inherit; font-size: 12px; letter-spacing: 0.1em; padding: 8px 12px; border-radius: 4px; cursor: pointer;
-  }
-  .dev-switches button:hover { border-color: var(--green-dim); color: var(--green); }
-  .dev-switches button.on { border-color: var(--amber); color: var(--amber); }
-  .dev-status { font-size: 11px; letter-spacing: 0.1em; color: var(--amber); min-height: 16px; margin-top: 10px; }
 
   @media (max-width: 560px) {
     .card-top { flex-direction: column; }
@@ -286,50 +278,19 @@
 </head>
 <body>
 <div class="wrap">
-  <a class="back" href="../index.html">&larr; BACK TO THE GAME</a>
+  <a class="back" href="./">&larr; DEV &amp; TESTING</a>
 
   <div class="hero">
-    <div class="eyebrow"><span class="dot"></span>BYTEFALL // DEV TOOLS</div>
-    <h1>AUDIO <span>COMPENDIUM</span></h1>
-    <p class="lede">Every sound in the game: the sound effects, each with a scene of the moment it plays, in every SOUND THEME, and the soundtrack, each track opening in the MIXER (its instruments, their levels per stack height and per SOUND OUTPUT, and how it intensifies near the red line). Nothing here is a recording: the pages load the game's own <code>sfx.js</code> and track files, so everything plays exactly what the game plays.</p>
+    <div class="eyebrow"><span class="dot"></span>BYTEFALL // DEV &amp; TESTING</div>
+    <h1>SOUND <span>&amp; MUSIC</span></h1>
+    <p class="lede">Everything you hear in the game, in one place: the sound effects, each with a scene of the moment it plays, in every SOUND THEME; the SOUND TESTER, the game itself naming each sound as it plays; and the soundtrack, each track opening in the MIXER (its instruments, their levels per stack height and per SOUND OUTPUT, and how it intensifies near the red line). Nothing here is a recording: the pages load the game's own <code>sfx.js</code> and track files, so everything plays exactly what the game plays.</p>
   </div>
 
   <nav class="tocnav">
-    <a href="#dev">00 Dev Switches</a>
-    <a href="#effects">01 One-Shot Effects</a>
-    <a href="#tracks">02 Music Tracks</a>
+    <a href="#effects">01 Sound Effects</a>
+    <a href="#tester">02 Sound Tester</a>
+    <a href="#tracks">03 Music Tracks</a>
   </nav>
-
-  <section id="dev">
-    <h2><span class="sec-num">00</span> Dev Switches</h2>
-    <p class="sec-desc">For testing in this browser only. UNLOCK EVERYTHING works like owning Full Access (Hard, every track, theme and exploit) without touching your saved progress, and the game shows a DEV badge while it's on (it owns Full Access in the STORE too). OWN REMOVE ADS previews owning just REMOVE ADS in the STORE (reload the game to see it). While it's on, press and hold any exploit card in the game for 2 seconds to make it your next drop, slotted or not. JUMP TO LV 80 and +10 LEVELS edit your saved progress so you can try levels, exploit slots and DECRYPTOR ranks quickly. AD BANNER PREVIEW (off by default) steps through 50, 60 and 90px: a gray strip where a phone's banner ad would sit, with everything fitted around it, to get a feel for the space. AD BANNER SPOT puts it at the TOP (the default) or BOTTOM of the screen. BACKGROUND switches what's behind the game card between the PLAIN gradient and the TWINKLE starlight. SEASON forces the seasonal touches (AUTO follows the date: HALLOWEEN is the whole of October, NOVEMBER the whole month) on or OFF: the wanderers' costumes, snacks and visitors. VIRUSES: OFTEN brings a virus every few seconds (the PHAGE, the BUG and the TROJAN in turn) instead of one every ten minutes or so. WEATHER: AUTO follows the date and the time of day (a spell every few minutes, some of the time); OFTEN brings a new spell every few seconds; SPRING, SUMMER, AUTUMN or WINTER does the same with that season's weather, at any hour; or pick one kind (RAIN, THUNDERSTORM, SNOW, AURORA...) to keep it on. SCENE: AUTO (now and then a place for a while, by the season), OFTEN (a new one every few seconds), or one kind to keep (MEADOW, BEACH, CITY, WOODLAND, SNOWFIELD, DESERT, FARM, LAKE). FOG: OFTEN rolls the November fog in at the next visit (any season), and the light mist after it lifts in 20 seconds instead of 2 minutes. BLACK BOX INFECTION makes every black box opened in a game come up an INFECTION: ANY (a random one) or one kind (ADWARE, SPYWARE, RANSOMWARE, MALWARE, CRYPTOJACKER, SCAREWARE); OFF leaves it to the box's odds. BANNER LOOK picks how the UNLOCKED / ACHIEVEMENT banners look: a sign of small lights in the game's font, as DOTS (round LEDs), PIXELS (finer square pixels), MARQUEE (the words running across), CHASE (bulbs chasing round the edge), or the CLASSIC plain box. INFECTION LOOK shows every infection in that look (1 to 8; reload the game; ADWARE and MALWARE have 6 looks, RANSOMWARE 5, the CRYPTOJACKER 8, the rest 4, and one with fewer picks at random) instead of a RANDOM one each time. These change as soon as you go back to the game.</p>
-    <div class="dev-switches">
-      <button type="button" id="dev-unlock">UNLOCK EVERYTHING: OFF</button>
-      <button type="button" id="dev-noads">OWN REMOVE ADS: OFF</button>
-      <button type="button" id="dev-lv80">JUMP TO LV 80</button>
-      <button type="button" id="dev-levels">+10 LEVELS</button>
-      <button type="button" id="dev-adpreview">AD BANNER PREVIEW: OFF</button>
-      <button type="button" id="dev-adpos">AD BANNER SPOT: TOP</button>
-      <button type="button" id="dev-twinkle">BACKGROUND: PLAIN</button>
-      <button type="button" id="dev-season">SEASON: AUTO</button>
-      <button type="button" id="dev-weather">WEATHER: AUTO</button>
-      <button type="button" id="dev-scene">SCENE: AUTO</button>
-      <button type="button" id="dev-virus">VIRUSES: RARE</button>
-      <button type="button" id="dev-fog">FOG: RARE</button>
-      <button type="button" id="dev-infection">BLACK BOX INFECTION: OFF</button>
-      <button type="button" id="dev-inflook">INFECTION LOOK: RANDOM</button>
-      <button type="button" id="dev-banner">BANNER LOOK: CLASSIC</button>
-    </div>
-    <p class="sec-desc" style="margin-top: 14px;"><a href="infections.html" style="color: var(--amber);">INFECTION WALL &rarr;</a> A wall chart of every INFECTION in every look, all playing at once: a row an infection, a tile a look, numbered as the INFECTION LOOK switch and the tester number them.</p>
-    <p class="sec-desc"><a href="../index.html?inftest" style="color: var(--amber);">INFECTION TESTER &rarr;</a> The game with a board of bits and a panel of buttons: set off any INFECTION on the grid (several to stack them), in any of its looks or at random, count drops down without dropping, refill the board or clear it all. The column buttons still drop bits, so you can play against them. Nothing played there is saved, and BANNERS switches the achievement pop-ups off.</p>
-    <p class="sec-desc"><a href="../index.html?sfxtest" style="color: var(--amber);">SOUND TESTER &rarr;</a> The game on a board of bits, every sound named as it plays: a caption over the board (the sound and what set it off) and a panel keeping the last few, every sound with how often you've heard it (tap one to hear it alone), and a SOUND THEME to play in, locked or not. FILL GRID and NEW LAYER set things going; the column buttons drop bits as in a game. Nothing played there is saved, and SOUND is on there whatever the game's setting. (Every sound, with a scene of its moment, is in 01 below.)</p>
-    <p class="sec-desc">THE ARCADE, with that game in the middle of its menu (the main menu's ARCADE; FREE PLAY, any day): <a href="../index.html?arcade=codebreaker" style="color: var(--amber);">CODE BREAKER &rarr;</a> <a href="../index.html?arcade=trace" style="color: var(--amber);">TRACE &rarr;</a> <a href="../index.html?arcade=merge" style="color: var(--amber);">MERGE &rarr;</a> <a href="../index.html?arcade=checksum" style="color: var(--amber);">CHECKSUM &rarr;</a> <a href="../index.html?arcade=defrag" style="color: var(--amber);">DEFRAG &rarr;</a> <a href="../index.html?arcade=decode" style="color: var(--amber);">DECODE &rarr;</a> <a href="../index.html?arcade=routing" style="color: var(--amber);">ROUTING &rarr;</a> Each opens the game; its main menu's ARCADE then has that one in the middle.</p>
-    <p class="sec-desc"><a href="../arena/" style="color: var(--amber);">ARENA TEST &rarr;</a> Not ByteFall: a first look at a 3D game here (TODO.md, WARTHOG ARENA). A floating arena, a low-poly buggy to drive (WASD or the arrows, SPACE to boost, R to flip; on a phone, drag on the left side and the buttons on the right; a controller works too) and four CPU drivers to push off the edge, TIMMY among them. SHADOWS and the CAMERA switch in the corner, and the FPS shows how it runs.</p>
-    <p class="sec-desc"><a href="bots.html" style="color: var(--amber);">BOT SANDBOX &rarr;</a> The wandering bots on the game's own code: spawn any bot at any level, call up every visitor, virus, season and the fog, play the music for the headphones, and set off every mood and reaction on a button, on the game card, the start screen or the screen saver.</p>
-    <p class="sec-desc"><a href="../visualizer/" target="_blank" rel="noopener" style="color: var(--amber);">BYTEFALL VIZ &rarr;</a> The music player's visualizers as their own app, live: every style full screen, for whatever plays. On a computer, SCREEN AUDIO hears a shared tab (Pandora, YouTube, ...) or on Windows the whole computer; elsewhere the microphone. The Android app (Actions &rarr; ByteFall Viz APK) also shows the song from any app.</p>
-    <p class="sec-desc"><a href="frames.html" style="color: var(--amber);">FRAME EDITOR &rarr;</a> Draw the bots' animations a frame at a time on their pixel grid: start from any bot or the game's own CORE DUMP moves, paint and erase in the bots' colors, add, copy and reorder frames, time each, play it back at game size, and EXPORT a file of it to have it built into the game.</p>
-    <div class="dev-status" id="dev-status"></div>
-  </section>
 
   <section id="effects">
     <h2><span class="sec-num">01</span> Sound Effects</h2>
@@ -343,8 +304,13 @@
     <div id="sfx-list"></div>
   </section>
 
+  <section id="tester">
+    <h2><span class="sec-num">02</span> Sound Tester</h2>
+    <p class="sec-desc"><a href="../bytefall.html?sfxtest" style="color: var(--amber);">SOUND TESTER &rarr;</a> The game on a board of bits, every sound named as it plays: a caption over the board (the sound and what set it off) and a panel keeping the last few, every sound with how often you've heard it (tap one to hear it alone), and a SOUND THEME to play in, locked or not. FILL GRID and NEW LAYER set things going; the column buttons drop bits as in a game. Nothing played there is saved, and SOUND is on there whatever the game's setting.</p>
+  </section>
+
   <section id="tracks">
-    <h2><span class="sec-num">02</span> Music Tracks</h2>
+    <h2><span class="sec-num">03</span> Music Tracks</h2>
     <p class="sec-desc">The playlist, each track a 32-bar loop scheduled live by <code>music.js</code>. <b>MIXER</b> opens a track on its own page: play it at any stack height as the game would, through PHONE, HEADPHONES or SPEAKERS; see where each instrument plays; set each instrument's level per stack height and output; and EXPORT the levels for <code>js/music/mixes.js</code>. The intensity layers and the notes on how the music intensifies are there too.</p>
     <div id="track-list"></div>
   </section>
@@ -352,11 +318,11 @@
   <footer>GENERATED FROM SOURCE &mdash; NO AUDIO FILES, ALL SYNTHESIZED ON PLAY</footer>
 </div>
 
-<script src="../js/music/output.js?v=581"></script>
-<script src="../js/music/mixes.js?v=581"></script>
-<script src="../js/sfx.js?v=581"></script>
-<script src="sound-scenes.js?v=581"></script>
-<script src="tracks-info.js?v=581"></script>
+<script src="../js/music/output.js?v=582"></script>
+<script src="../js/music/mixes.js?v=582"></script>
+<script src="../js/sfx.js?v=582"></script>
+<script src="sound-scenes.js?v=582"></script>
+<script src="tracks-info.js?v=582"></script>
 <script>
 (() => {
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -482,173 +448,6 @@
     trackList.appendChild(card);
   }
 })();
-</script>
-<script>
-  // Dev switches: flags and progress edits read by the game (unlocks.js, progress.js)
-  (() => {
-    const FLAG = 'bytefall-dev-unlockall';
-    const btn = document.getElementById('dev-unlock');
-    const status = document.getElementById('dev-status');
-    const get = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
-    const set = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
-    const show = () => {
-      const on = get(FLAG) === 'on';
-      btn.textContent = `UNLOCK EVERYTHING: ${on ? 'ON' : 'OFF'}`;
-      btn.classList.toggle('on', on);
-    };
-    btn.addEventListener('click', () => {
-      set(FLAG, get(FLAG) === 'on' ? 'off' : 'on');
-      show();
-      status.textContent = 'Saved. Reload the game to see it.';
-    });
-    const AD = 'bytefall-dev-adpreview';
-    const AD_STEPS = ['off', '50', '60', '90'];
-    const adBtn = document.getElementById('dev-adpreview');
-    const adNow = () => { const v = get(AD) === 'on' ? '50' : get(AD); return AD_STEPS.includes(v) ? v : 'off'; };
-    const showAd = () => {
-      const v = adNow();
-      adBtn.textContent = `AD BANNER PREVIEW: ${v === 'off' ? 'OFF' : `${v}PX`}`;
-      adBtn.classList.toggle('on', v !== 'off');
-    };
-    adBtn.addEventListener('click', () => {
-      set(AD, AD_STEPS[(AD_STEPS.indexOf(adNow()) + 1) % AD_STEPS.length]);
-      showAd();
-      status.textContent = 'Saved. Go back to the game to see it.';
-    });
-    showAd();
-    const POS = 'bytefall-dev-adpos';
-    const posBtn = document.getElementById('dev-adpos');
-    const showPos = () => { posBtn.textContent = `AD BANNER SPOT: ${get(POS) === 'bottom' ? 'BOTTOM' : 'TOP'}`; };
-    posBtn.addEventListener('click', () => {
-      set(POS, get(POS) === 'bottom' ? 'top' : 'bottom');
-      showPos();
-      status.textContent = 'Saved. Go back to the game to see it.';
-    });
-    showPos();
-    const NA = 'bytefall-dev-noads';
-    const naBtn = document.getElementById('dev-noads');
-    const showNa = () => {
-      const on = get(NA) === 'on';
-      naBtn.textContent = `OWN REMOVE ADS: ${on ? 'ON' : 'OFF'}`;
-      naBtn.classList.toggle('on', on);
-    };
-    naBtn.addEventListener('click', () => {
-      set(NA, get(NA) === 'on' ? 'off' : 'on');
-      showNa();
-      status.textContent = 'Saved. Reload the game to see it.';
-    });
-    showNa();
-    const SEA = 'bytefall-dev-season';
-    const SEA_STEPS = ['auto', 'off', 'halloween', 'november', 'winter', 'hanukkah', 'christmas', 'kwanzaa', 'nye', 'newyear', 'frost', 'valentine', 'spring', 'summer', 'autumn'];
-    const seaBtn = document.getElementById('dev-season');
-    const seaNow = () => (SEA_STEPS.includes(get(SEA)) ? get(SEA) : 'auto');
-    const showSea = () => {
-      seaBtn.textContent = `SEASON: ${seaNow().toUpperCase()}`;
-      seaBtn.classList.toggle('on', seaNow() !== 'auto');
-    };
-    seaBtn.addEventListener('click', () => {
-      set(SEA, SEA_STEPS[(SEA_STEPS.indexOf(seaNow()) + 1) % SEA_STEPS.length]);
-      showSea();
-      status.textContent = 'Saved. New wanderers dress for it (reload the game to see it at once).';
-    });
-    showSea();
-    const WX = 'bytefall-dev-weather';
-    const WX_STEPS = ['auto', 'often', 'spring', 'summer', 'autumn', 'winter', 'drizzle', 'rain', 'storm', 'sunshower', 'hail', 'sleet', 'snow', 'blizzard', 'wind', 'sunny', 'rainbow', 'aurora', 'fireflies', 'meteors', 'moon', 'fog', 'overcast', 'flurries', 'thundersnow', 'diamonddust', 'pollen', 'fluff', 'heatwave', 'duststorm', 'heatlightning', 'sunrise', 'sunset'];
-    const wxBtn = document.getElementById('dev-weather');
-    const wxNow = () => (WX_STEPS.includes(get(WX)) ? get(WX) : 'auto');
-    const showWx = () => {
-      wxBtn.textContent = `WEATHER: ${wxNow().toUpperCase()}`;
-      wxBtn.classList.toggle('on', wxNow() !== 'auto');
-    };
-    wxBtn.addEventListener('click', () => {
-      set(WX, WX_STEPS[(WX_STEPS.indexOf(wxNow()) + 1) % WX_STEPS.length]);
-      showWx();
-      status.textContent = 'Saved. Reload the game to see it.';
-    });
-    showWx();
-    const SC = 'bytefall-dev-scene';
-    const SC_STEPS = ['auto', 'often', 'meadow', 'beach', 'city', 'woodland', 'snowfield', 'desert', 'farm', 'lake'];
-    const scBtn = document.getElementById('dev-scene');
-    const scNow = () => (SC_STEPS.includes(get(SC)) ? get(SC) : 'auto');
-    const showSc = () => { scBtn.textContent = `SCENE: ${scNow().toUpperCase()}`; scBtn.classList.toggle('on', scNow() !== 'auto'); };
-    scBtn.addEventListener('click', () => { set(SC, SC_STEPS[(SC_STEPS.indexOf(scNow()) + 1) % SC_STEPS.length]); showSc(); status.textContent = 'Saved. Reload the game to see it.'; });
-    showSc();
-    const VI = 'bytefall-dev-virus';
-    const viBtn = document.getElementById('dev-virus');
-    const showVi = () => {
-      const on = get(VI) === 'on';
-      viBtn.textContent = `VIRUSES: ${on ? 'OFTEN' : 'RARE'}`;
-      viBtn.classList.toggle('on', on);
-    };
-    viBtn.addEventListener('click', () => {
-      set(VI, get(VI) === 'on' ? 'off' : 'on');
-      showVi();
-      status.textContent = 'Saved. Go back to the game to see it.';
-    });
-    showVi();
-    // INFECTIONS: every BLACK BOX opens as one (that kind, or ANY at random), and the look each shows
-    const INF = 'bytefall-dev-infection';
-    const INF_STEPS = ['off', 'any', 'adware', 'spyware', 'ransomware', 'malware', 'cryptojacker', 'scareware'];
-    const infBtn = document.getElementById('dev-infection');
-    const infNow = () => (INF_STEPS.includes(get(INF)) ? get(INF) : 'off');
-    const showInf = () => { infBtn.textContent = `BLACK BOX INFECTION: ${infNow().toUpperCase()}`; infBtn.classList.toggle('on', infNow() !== 'off'); };
-    infBtn.addEventListener('click', () => { set(INF, INF_STEPS[(INF_STEPS.indexOf(infNow()) + 1) % INF_STEPS.length]); showInf(); status.textContent = 'Saved. Open a black box in a game to see it.'; });
-    showInf();
-    const INFL = 'bytefall-dev-infection-look';
-    const INFL_STEPS = ['random', '1', '2', '3', '4', '5', '6', '7', '8'];
-    const inflBtn = document.getElementById('dev-inflook');
-    const inflNow = () => (INFL_STEPS.includes(get(INFL)) ? get(INFL) : 'random');
-    const showInfl = () => { inflBtn.textContent = `INFECTION LOOK: ${inflNow().toUpperCase()}`; inflBtn.classList.toggle('on', inflNow() !== 'random'); };
-    inflBtn.addEventListener('click', () => { set(INFL, INFL_STEPS[(INFL_STEPS.indexOf(inflNow()) + 1) % INFL_STEPS.length]); showInfl(); status.textContent = 'Saved. Reload the game to see it.'; });
-    showInfl();
-    // The UNLOCKED / ACHIEVEMENT banners' look (led-banner.js)
-    const BAN = 'bytefall-banner-look';
-    const BAN_STEPS = ['dots', 'pixels', 'marquee', 'chase', 'classic'];
-    const banBtn = document.getElementById('dev-banner');
-    const banNow = () => (BAN_STEPS.includes(get(BAN)) ? get(BAN) : 'classic');
-    const showBan = () => { banBtn.textContent = `BANNER LOOK: ${banNow().toUpperCase()}`; banBtn.classList.toggle('on', banNow() !== 'classic'); };
-    banBtn.addEventListener('click', () => { set(BAN, BAN_STEPS[(BAN_STEPS.indexOf(banNow()) + 1) % BAN_STEPS.length]); showBan(); status.textContent = 'Saved. The next banner in the game shows it (the INFECTION TESTER has a TEST BANNER button).'; });
-    showBan();
-    const FG = 'bytefall-dev-fog';
-    const fgBtn = document.getElementById('dev-fog');
-    const showFg = () => {
-      const on = get(FG) === 'on';
-      fgBtn.textContent = `FOG: ${on ? 'OFTEN' : 'RARE'}`;
-      fgBtn.classList.toggle('on', on);
-    };
-    fgBtn.addEventListener('click', () => {
-      set(FG, get(FG) === 'on' ? 'off' : 'on');
-      showFg();
-      status.textContent = 'Saved. Go back to the game to see it.';
-    });
-    showFg();
-    const TW = 'bytefall-dev-twinkle';
-    const twBtn = document.getElementById('dev-twinkle');
-    const showTw = () => {
-      const on = get(TW) === 'on';
-      twBtn.textContent = `BACKGROUND: ${on ? 'TWINKLE' : 'PLAIN'}`;
-      twBtn.classList.toggle('on', on);
-    };
-    twBtn.addEventListener('click', () => {
-      set(TW, get(TW) === 'on' ? 'off' : 'on');
-      showTw();
-      status.textContent = 'Saved. Go back to the game to see it.';
-    });
-    showTw();
-    const editProgress = (fn, message) => {
-      let d = {};
-      try { d = JSON.parse(get('bytefall-progress')) || {}; } catch (e) {}
-      fn(d);
-      set('bytefall-progress', JSON.stringify(d));
-      status.textContent = message;
-    };
-    // 100 bits per level; a full Lv 80 (8,000 bits, a kilobyte) opens RANK UP
-    document.getElementById('dev-lv80').addEventListener('click', () => editProgress((d) => { d.xp = Math.max(d.xp || 0, 8000); }, 'Lv 80 (full) saved. Reload the game, then rank up to DECRYPTOR from RECORDS.'));
-    document.getElementById('dev-levels').addEventListener('click', () => editProgress((d) => {
-      d.xp = Math.min((d.xp || 0) + 1000, 8000);
-    }, '+10 levels saved. Reload the game to see new exploits and slots unlock.'));
-    show();
-  })();
 </script>
 </body>
 </html>

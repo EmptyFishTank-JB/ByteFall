@@ -14,7 +14,7 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
-const LIVE = 'https://emptyfishtank-jb.github.io/ByteFall/';
+const LIVE = 'https://emptyfishtank-jb.github.io/ByteFall/bytefall.html'; // (the game: the site's front page is the landing page)
 const step = process.argv[2];
 if (step === 'config') {
   const p = path.join(ROOT, 'capacitor.config.json');

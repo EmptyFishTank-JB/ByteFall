@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="../js/fonts.js?v=582"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#020403">
+<title>Dev &amp; Testing // BYTEFALL</title>
+<link rel="icon" href="../assets/icons/icon.svg" type="image/svg+xml">
+<script>
+  try { // (the game's chosen font: SETTINGS → FONT)
+    var FONTS = { 'share-tech': "'Share Tech Mono'", 'press-start': "'Press Start 2P'", bitcount: "'Bitcount Single'", bytesized: "'Bytesized'", orbitron: "'Orbitron'" };
+    var font = FONTS[localStorage.getItem('bytefall-font')];
+    if (font) document.documentElement.style.setProperty('--game-font', font + ", 'Courier New', Courier, monospace");
+  } catch (e) {}
+</script>
+<link rel="stylesheet" href="dev.css?v=582">
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../">&larr; ALL OF BYTEFALL</a>
+  <div class="eyebrow"><span class="dot"></span>BYTEFALL // DEV &amp; TESTING</div>
+  <h1>DEV <span>&amp; TESTING</span></h1>
+  <p class="lede">Every tester, tool and dev switch for ByteFall and the pages beside it. Testers that run the game read your saved game but never change it; the dev switches are saved in this browser only, for testing.</p>
+
+  <h2><span class="num">01</span>Sound &amp; music</h2>
+  <div class="cards">
+    <a class="card wide" href="audio.html">
+      <span class="name">SOUND &amp; MUSIC</span>
+      <p class="desc">Everything you hear in one place: every sound effect with a scene of its moment, in every SOUND THEME; the SOUND TESTER (the game naming each sound as it plays); and the soundtrack, each track opening in the MIXER (its instruments and their levels by stack height and SOUND OUTPUT).</p>
+    </a>
+  </div>
+
+  <h2><span class="num">02</span>Game testers</h2>
+  <div class="cards">
+    <a class="card" href="../bytefall.html?inftest">
+      <span class="name">INFECTION TESTER</span>
+      <p class="desc">The game on a board of bits with a panel of buttons: set off any INFECTION (several to stack them) in any look, count drops down, refill or clear the board. Nothing played there is saved; BANNERS switches the achievement pop-ups off.</p>
+    </a>
+    <a class="card" href="infections.html">
+      <span class="name">INFECTION WALL</span>
+      <p class="desc">A wall chart of every INFECTION in every look, side by side.</p>
+    </a>
+  </div>
+
+  <h2><span class="num">03</span>Bots &amp; art</h2>
+  <div class="cards">
+    <a class="card" href="bots.html">
+      <span class="name">BOT SANDBOX</span>
+      <p class="desc">The wandering bots on the game's own code: spawn any bot at any level, call up every visitor, virus, season and the fog, and set off every mood and reaction, on the game card, the start screen or the screen saver.</p>
+    </a>
+    <a class="card" href="frames.html">
+      <span class="name">FRAME EDITOR</span>
+      <p class="desc">Draw the bots' animations a frame at a time on their pixel grid, from any bot, visitor or sprite, and play them back.</p>
+    </a>
+  </div>
+
+  <h2><span class="num">04</span>Dev switches</h2>
+  <p class="note">Saved in this browser only, read by the game the next time it loads (the Android release has none of them).</p>
+  <div class="switch-group">
+    <h3>PROGRESS &amp; PURCHASES</h3>
+    <div class="switches">
+      <button type="button" id="dev-unlock">UNLOCK EVERYTHING: OFF</button>
+      <button type="button" id="dev-noads">OWN REMOVE ADS: OFF</button>
+      <button type="button" id="dev-lv80">JUMP TO LV 80</button>
+      <button type="button" id="dev-levels">+10 LEVELS</button>
+    </div>
+  </div>
+  <div class="switch-group">
+    <h3>ADS</h3>
+    <div class="switches">
+      <button type="button" id="dev-adpreview">AD BANNER PREVIEW: OFF</button>
+      <button type="button" id="dev-adpos">AD BANNER SPOT: TOP</button>
+    </div>
+  </div>
+  <div class="switch-group">
+    <h3>THE WORLD</h3>
+    <div class="switches">
+      <button type="button" id="dev-twinkle">BACKGROUND: PLAIN</button>
+      <button type="button" id="dev-season">SEASON: AUTO</button>
+      <button type="button" id="dev-weather">WEATHER: AUTO</button>
+      <button type="button" id="dev-scene">SCENE: AUTO</button>
+      <button type="button" id="dev-virus">VIRUSES: RARE</button>
+      <button type="button" id="dev-fog">FOG: RARE</button>
+    </div>
+  </div>
+  <div class="switch-group">
+    <h3>INFECTIONS &amp; BANNERS</h3>
+    <div class="switches">
+      <button type="button" id="dev-infection">BLACK BOX INFECTION: OFF</button>
+      <button type="button" id="dev-inflook">INFECTION LOOK: RANDOM</button>
+      <button type="button" id="dev-banner">BANNER LOOK: CLASSIC</button>
+    </div>
+  </div>
+  <div class="status" id="dev-status"></div>
+
+  <h2><span class="num">05</span>Prototypes</h2>
+  <div class="cards">
+    <a class="card" href="../arena/">
+      <span class="name">ARENA TEST</span>
+      <p class="desc">Not ByteFall: a first look at a 3D game (TODO.md, WARTHOG ARENA). A floating arena, a buggy to drive and four CPU drivers to push off the edge, TIMMY among them.</p>
+      <span class="tag">PROTOTYPE</span>
+    </a>
+  </div>
+
+  <footer>EMPTY FISH TANK // BYTEFALL</footer>
+</div>
+<script>
+  // Dev switches: flags and progress edits read by the game (unlocks.js, progress.js)
+  (() => {
+    const FLAG = 'bytefall-dev-unlockall';
+    const btn = document.getElementById('dev-unlock');
+    const status = document.getElementById('dev-status');
+    const get = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+    const set = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+    const show = () => {
+      const on = get(FLAG) === 'on';
+      btn.textContent = `UNLOCK EVERYTHING: ${on ? 'ON' : 'OFF'}`;
+      btn.classList.toggle('on', on);
+    };
+    btn.addEventListener('click', () => {
+      set(FLAG, get(FLAG) === 'on' ? 'off' : 'on');
+      show();
+      status.textContent = 'Saved. Reload the game to see it.';
+    });
+    const AD = 'bytefall-dev-adpreview';
+    const AD_STEPS = ['off', '50', '60', '90'];
+    const adBtn = document.getElementById('dev-adpreview');
+    const adNow = () => { const v = get(AD) === 'on' ? '50' : get(AD); return AD_STEPS.includes(v) ? v : 'off'; };
+    const showAd = () => {
+      const v = adNow();
+      adBtn.textContent = `AD BANNER PREVIEW: ${v === 'off' ? 'OFF' : `${v}PX`}`;
+      adBtn.classList.toggle('on', v !== 'off');
+    };
+    adBtn.addEventListener('click', () => {
+      set(AD, AD_STEPS[(AD_STEPS.indexOf(adNow()) + 1) % AD_STEPS.length]);
+      showAd();
+      status.textContent = 'Saved. Go back to the game to see it.';
+    });
+    showAd();
+    const POS = 'bytefall-dev-adpos';
+    const posBtn = document.getElementById('dev-adpos');
+    const showPos = () => { posBtn.textContent = `AD BANNER SPOT: ${get(POS) === 'bottom' ? 'BOTTOM' : 'TOP'}`; };
+    posBtn.addEventListener('click', () => {
+      set(POS, get(POS) === 'bottom' ? 'top' : 'bottom');
+      showPos();
+      status.textContent = 'Saved. Go back to the game to see it.';
+    });
+    showPos();
+    const NA = 'bytefall-dev-noads';
+    const naBtn = document.getElementById('dev-noads');
+    const showNa = () => {
+      const on = get(NA) === 'on';
+      naBtn.textContent = `OWN REMOVE ADS: ${on ? 'ON' : 'OFF'}`;
+      naBtn.classList.toggle('on', on);
+    };
+    naBtn.addEventListener('click', () => {
+      set(NA, get(NA) === 'on' ? 'off' : 'on');
+      showNa();
+      status.textContent = 'Saved. Reload the game to see it.';
+    });
+    showNa();
+    const SEA = 'bytefall-dev-season';
+    const SEA_STEPS = ['auto', 'off', 'halloween', 'november', 'winter', 'hanukkah', 'christmas', 'kwanzaa', 'nye', 'newyear', 'frost', 'valentine', 'spring', 'summer', 'autumn'];
+    const seaBtn = document.getElementById('dev-season');
+    const seaNow = () => (SEA_STEPS.includes(get(SEA)) ? get(SEA) : 'auto');
+    const showSea = () => {
+      seaBtn.textContent = `SEASON: ${seaNow().toUpperCase()}`;
+      seaBtn.classList.toggle('on', seaNow() !== 'auto');
+    };
+    seaBtn.addEventListener('click', () => {
+      set(SEA, SEA_STEPS[(SEA_STEPS.indexOf(seaNow()) + 1) % SEA_STEPS.length]);
+      showSea();
+      status.textContent = 'Saved. New wanderers dress for it (reload the game to see it at once).';
+    });
+    showSea();
+    const WX = 'bytefall-dev-weather';
+    const WX_STEPS = ['auto', 'often', 'spring', 'summer', 'autumn', 'winter', 'drizzle', 'rain', 'storm', 'sunshower', 'hail', 'sleet', 'snow', 'blizzard', 'wind', 'sunny', 'rainbow', 'aurora', 'fireflies', 'meteors', 'moon', 'fog', 'overcast', 'flurries', 'thundersnow', 'diamonddust', 'pollen', 'fluff', 'heatwave', 'duststorm', 'heatlightning', 'sunrise', 'sunset'];
+    const wxBtn = document.getElementById('dev-weather');
+    const wxNow = () => (WX_STEPS.includes(get(WX)) ? get(WX) : 'auto');
+    const showWx = () => {
+      wxBtn.textContent = `WEATHER: ${wxNow().toUpperCase()}`;
+      wxBtn.classList.toggle('on', wxNow() !== 'auto');
+    };
+    wxBtn.addEventListener('click', () => {
+      set(WX, WX_STEPS[(WX_STEPS.indexOf(wxNow()) + 1) % WX_STEPS.length]);
+      showWx();
+      status.textContent = 'Saved. Reload the game to see it.';
+    });
+    showWx();
+    const SC = 'bytefall-dev-scene';
+    const SC_STEPS = ['auto', 'often', 'meadow', 'beach', 'city', 'woodland', 'snowfield', 'desert', 'farm', 'lake'];
+    const scBtn = document.getElementById('dev-scene');
+    const scNow = () => (SC_STEPS.includes(get(SC)) ? get(SC) : 'auto');
+    const showSc = () => { scBtn.textContent = `SCENE: ${scNow().toUpperCase()}`; scBtn.classList.toggle('on', scNow() !== 'auto'); };
+    scBtn.addEventListener('click', () => { set(SC, SC_STEPS[(SC_STEPS.indexOf(scNow()) + 1) % SC_STEPS.length]); showSc(); status.textContent = 'Saved. Reload the game to see it.'; });
+    showSc();
+    const VI = 'bytefall-dev-virus';
+    const viBtn = document.getElementById('dev-virus');
+    const showVi = () => {
+      const on = get(VI) === 'on';
+      viBtn.textContent = `VIRUSES: ${on ? 'OFTEN' : 'RARE'}`;
+      viBtn.classList.toggle('on', on);
+    };
+    viBtn.addEventListener('click', () => {
+      set(VI, get(VI) === 'on' ? 'off' : 'on');
+      showVi();
+      status.textContent = 'Saved. Go back to the game to see it.';
+    });
+    showVi();
+    // INFECTIONS: every BLACK BOX opens as one (that kind, or ANY at random), and the look each shows
+    const INF = 'bytefall-dev-infection';
+    const INF_STEPS = ['off', 'any', 'adware', 'spyware', 'ransomware', 'malware', 'cryptojacker', 'scareware'];
+    const infBtn = document.getElementById('dev-infection');
+    const infNow = () => (INF_STEPS.includes(get(INF)) ? get(INF) : 'off');
+    const showInf = () => { infBtn.textContent = `BLACK BOX INFECTION: ${infNow().toUpperCase()}`; infBtn.classList.toggle('on', infNow() !== 'off'); };
+    infBtn.addEventListener('click', () => { set(INF, INF_STEPS[(INF_STEPS.indexOf(infNow()) + 1) % INF_STEPS.length]); showInf(); status.textContent = 'Saved. Open a black box in a game to see it.'; });
+    showInf();
+    const INFL = 'bytefall-dev-infection-look';
+    const INFL_STEPS = ['random', '1', '2', '3', '4', '5', '6', '7', '8'];
+    const inflBtn = document.getElementById('dev-inflook');
+    const inflNow = () => (INFL_STEPS.includes(get(INFL)) ? get(INFL) : 'random');
+    const showInfl = () => { inflBtn.textContent = `INFECTION LOOK: ${inflNow().toUpperCase()}`; inflBtn.classList.toggle('on', inflNow() !== 'random'); };
+    inflBtn.addEventListener('click', () => { set(INFL, INFL_STEPS[(INFL_STEPS.indexOf(inflNow()) + 1) % INFL_STEPS.length]); showInfl(); status.textContent = 'Saved. Reload the game to see it.'; });
+    showInfl();
+    // The UNLOCKED / ACHIEVEMENT banners' look (led-banner.js)
+    const BAN = 'bytefall-banner-look';
+    const BAN_STEPS = ['dots', 'pixels', 'marquee', 'chase', 'classic'];
+    const banBtn = document.getElementById('dev-banner');
+    const banNow = () => (BAN_STEPS.includes(get(BAN)) ? get(BAN) : 'classic');
+    const showBan = () => { banBtn.textContent = `BANNER LOOK: ${banNow().toUpperCase()}`; banBtn.classList.toggle('on', banNow() !== 'classic'); };
+    banBtn.addEventListener('click', () => { set(BAN, BAN_STEPS[(BAN_STEPS.indexOf(banNow()) + 1) % BAN_STEPS.length]); showBan(); status.textContent = 'Saved. The next banner in the game shows it (the INFECTION TESTER has a TEST BANNER button).'; });
+    showBan();
+    const FG = 'bytefall-dev-fog';
+    const fgBtn = document.getElementById('dev-fog');
+    const showFg = () => {
+      const on = get(FG) === 'on';
+      fgBtn.textContent = `FOG: ${on ? 'OFTEN' : 'RARE'}`;
+      fgBtn.classList.toggle('on', on);
+    };
+    fgBtn.addEventListener('click', () => {
+      set(FG, get(FG) === 'on' ? 'off' : 'on');
+      showFg();
+      status.textContent = 'Saved. Go back to the game to see it.';
+    });
+    showFg();
+    const TW = 'bytefall-dev-twinkle';
+    const twBtn = document.getElementById('dev-twinkle');
+    const showTw = () => {
+      const on = get(TW) === 'on';
+      twBtn.textContent = `BACKGROUND: ${on ? 'TWINKLE' : 'PLAIN'}`;
+      twBtn.classList.toggle('on', on);
+    };
+    twBtn.addEventListener('click', () => {
+      set(TW, get(TW) === 'on' ? 'off' : 'on');
+      showTw();
+      status.textContent = 'Saved. Go back to the game to see it.';
+    });
+    showTw();
+    const editProgress = (fn, message) => {
+      let d = {};
+      try { d = JSON.parse(get('bytefall-progress')) || {}; } catch (e) {}
+      fn(d);
+      set('bytefall-progress', JSON.stringify(d));
+      status.textContent = message;
+    };
+    // 100 bits per level; a full Lv 80 (8,000 bits, a kilobyte) opens RANK UP
+    document.getElementById('dev-lv80').addEventListener('click', () => editProgress((d) => { d.xp = Math.max(d.xp || 0, 8000); }, 'Lv 80 (full) saved. Reload the game, then rank up to DECRYPTOR from RECORDS.'));
+    document.getElementById('dev-levels').addEventListener('click', () => editProgress((d) => {
+      d.xp = Math.min((d.xp || 0) + 1000, 8000);
+    }, '+10 levels saved. Reload the game to see new exploits and slots unlock.'));
+    show();
+  })();
+</script>
+</body>
+</html>

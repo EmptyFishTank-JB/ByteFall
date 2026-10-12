@@ -14,7 +14,7 @@
 // - PURCHASES: Google Play's billing library (MainActivity's PURCHASES, js/billing.js); it brings
 //   its own BILLING permission
 // - portrait only, as the web app's manifest asks
-// - the version: the game's build number (index.html's ?v=), so each build installs over the last
+// - the version: the game's build number (bytefall.html's ?v=), so each build installs over the last
 // - two editions from the one project, by build type:
 //   TEST (debug, Actions → Android test APK): ByteFall Test, its own app (com.emptyfishtank.bytefall
 //   .test) beside the Play one, signed with the repo's own test key (tools/android/test.keystore,
@@ -70,7 +70,7 @@ fs.writeFileSync(path.join(APP, 'src', 'release', 'AndroidManifest.xml'), `<?xml
 // (black behind everything: the strip a system bar leaves, the notch, the splash's edges)
 edit('src/main/res/values/styles.xml', (s) => s.replace('<item name="android:background">@null</item>', '<item name="android:background">@null</item>\n        <item name="android:windowBackground">@android:color/black</item>\n        <item name="android:statusBarColor">@android:color/black</item>\n        <item name="android:navigationBarColor">@android:color/black</item>'));
 
-const build = Number((/\?v=(\d+)/.exec(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')) || [])[1] || 1);
+const build = Number((/\?v=(\d+)/.exec(fs.readFileSync(path.join(ROOT, 'bytefall.html'), 'utf8')) || [])[1] || 1);
 edit('build.gradle', (s) => s
   .replace(/versionCode \d+/, `versionCode ${build}`)
   .replace(/versionName "[^"]*"/, `versionName "0.${build}"\n        manifestPlaceholders = [appLabel: "ByteFall"]`)

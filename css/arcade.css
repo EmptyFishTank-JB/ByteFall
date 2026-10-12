@@ -1,0 +1,285 @@
+/* THE ARCADE (arcade.html): its own styles, over ByteFall's (css/style.css: the themes, the bits, the
+   cards' heads, the starlight). Moved here from style.css when the arcade left ByteFall for a page of its own */
+
+/* THE DAILY ARCADE (arcade.js): a card of its own covering the game card, as SETTINGS does, its top
+   as PUZZLES' (BACK in the corner, BYTEFALL, // CODE BREAKER under it). CODE BREAKER: the line, the
+   board (the code, a ===== line, the ten tries from the bottom up, each row's number at its left and
+   its pips at its right), what the pips mean, then the keypad (the seven bits, DELETE, ENTER) or,
+   once it's over, SHARE */
+.arcade { position: absolute; inset: 0; z-index: 20; display: flex; flex-direction: column; gap: 8px; padding: 8px 8px 16px; background: var(--panel); overflow: hidden; }
+.arcade[hidden] { display: none; }
+.arcade .card-head { flex: none; margin-bottom: 0; }
+.arcade-line { flex: none; margin: 0; min-height: 17px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px; line-height: 17px; letter-spacing: 1px; color: var(--fg); }
+.arcade-line.note { color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+/* (the game's own part: the room under the line, its board taking what its buttons leave) */
+.arcade-game { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.arcade-game[hidden] { display: none; }
+/* (sized by script: arcade.js's fit sets --cb-cell, the squares as big as the room allows, 44px at most) */
+.cb-board { position: relative; isolation: isolate; flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px; background: var(--board-bg); border: 1px solid var(--grid-line); border-radius: 6px; }
+.cb-row { display: grid; grid-template-columns: 44px repeat(4, var(--cb-cell, 36px)) 44px; gap: 4px; align-items: center; }
+.cb-row .cell { width: var(--cb-cell, 36px); height: var(--cb-cell, 36px); font-size: calc(var(--cb-cell, 36px) * 0.42); }
+.cb-no { padding-right: 4px; text-align: right; font-size: 11.5px; letter-spacing: 1px; color: var(--fg-dim); }
+.cb-live .cb-no { color: var(--accent); }
+.cb-code .cb-no { color: var(--accent); }
+.cb-empty .cell { opacity: 0.6; }
+.cb-rule { align-self: stretch; height: 0; border-top: 1px dashed rgba(var(--accent-rgb), 0.7); }
+/* (the code: ?s, dashed, till it's over; then its bits, glowing if it was broken) */
+.cb-code .cell.cb-hidden { border: 1px dashed rgba(var(--accent-rgb), 0.7); background: rgba(var(--accent-rgb), 0.06); color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+.cb-code.lost .cell.disc { border-color: var(--accent); color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.6); }
+:is(.cb-code.won, .cb-row.won) .cell.disc { box-shadow: 0 0 10px rgba(var(--fg-rgb), 0.6); animation: cb-won 1.2s ease-out 1; }
+@keyframes cb-won { 0% { transform: scale(1); } 30% { transform: scale(1.12); box-shadow: 0 0 18px var(--fg); } 100% { transform: scale(1); } }
+/* (the row being keyed in: its empty squares dashed, the next one to fill pulsing) */
+.cb-slot { border: 1px dashed rgba(var(--accent-rgb), 0.5); }
+.cb-slot.next { border: 1px solid var(--accent); animation: warn-pulse 1.1s ease-in-out infinite; }
+.cb-live.shake { animation: cb-shake 0.3s ease-in-out 1; }
+/* (a code keyed in again: the try that had it pulses red three times, its number too) */
+.cb-row.tried .cell.disc { animation: cb-tried 0.4s ease-in-out 3; }
+.cb-row.tried .cb-no { animation: cb-tried-no 0.4s ease-in-out 3; }
+@keyframes cb-tried { 50% { border-color: var(--danger); color: var(--danger); background: rgba(var(--danger-rgb), 0.18); box-shadow: 0 0 12px rgba(var(--danger-rgb), 0.7); text-shadow: 0 0 6px rgba(var(--danger-rgb), 0.7); } }
+@keyframes cb-tried-no { 50% { color: var(--danger); } }
+@keyframes cb-shake { 20%, 60% { transform: translateX(-4px); } 40%, 80% { transform: translateX(4px); } }
+/* THE PIPS, in a row at the right of each try: lit, a bit in the right place; hollow, a right bit in
+   the wrong place; dark, no match (the lit first, then the hollow) */
+.cb-pips { display: flex; gap: 3px; padding-left: 4px; }
+:is(.cb-pips, .cb-legend) i { flex: none; width: 7px; height: 7px; border-radius: 1px; background: rgba(var(--fg-rgb), 0.1); box-sizing: border-box; }
+:is(.cb-pips, .cb-legend) i.hit { background: var(--fg); box-shadow: 0 0 6px rgba(var(--fg-rgb), 0.7); }
+:is(.cb-pips, .cb-legend) i.near { background: transparent; border: 1.5px solid var(--accent); box-shadow: 0 0 5px rgba(var(--accent-rgb), 0.5); }
+.cb-pips i.miss { background: rgba(var(--fg-rgb), 0.22); }
+.cb-legend { flex: none; display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 12px; margin: 0; font-size: 11.5px; letter-spacing: 1px; color: var(--fg-dim); }
+.cb-legend span { display: inline-flex; align-items: center; gap: 4px; }
+.cb-legend i:not(.hit):not(.near) { background: rgba(var(--fg-rgb), 0.22); }
+/* THE KEYPAD: the seven bits as the theme draws them, as the drop buttons are; DELETE and ENTER under */
+.cb-pad { flex: none; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.cb-pad[hidden], .cb-acts[hidden], .arcade-over[hidden] { display: none; }
+.cb-pad button { min-width: 0; height: 44px; padding: 0; display: flex; align-items: center; justify-content: center; background: rgba(var(--fg-rgb), 0.08); border: 1px solid var(--fg-dim); border-radius: 4px; color: var(--fg); font-family: var(--font); font-size: 15.5px; font-weight: bold; text-shadow: 0 0 6px rgba(var(--fg-rgb), 0.6); cursor: pointer; transition: background 0.15s, transform 0.1s; }
+.cb-pad button:active:not(:disabled) { background: rgba(var(--fg-rgb), 0.25); transform: translateY(1px); }
+.cb-pad button:disabled { opacity: 0.35; cursor: default; }
+.cb-face { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; }
+.cb-face .glyph { display: block; width: 100%; height: 100%; overflow: visible; }
+.cb-acts { flex: none; display: flex; gap: 8px; }
+.cb-acts button, #arcade-share { flex: 1; height: 40px; background: transparent; border: 1px solid var(--fg); border-radius: 4px; color: var(--fg); font-family: inherit; font-size: 13px; letter-spacing: 2px; cursor: pointer; }
+.cb-acts button:disabled { opacity: 0.35; cursor: default; }
+#cb-enter, #arcade-share { border-color: var(--accent); color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+#cb-enter.ready { background: rgba(var(--accent-rgb), 0.15); box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.35); }
+@media (hover: hover) {
+  .cb-pad button:hover:not(:disabled) { background: rgba(var(--fg-rgb), 0.2); }
+  :is(.cb-acts button, #arcade-share):hover:not(:disabled) { background: rgba(var(--fg-rgb), 0.12); }
+}
+.arcade-over { flex: none; display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
+.arcade-over #arcade-share { flex: none; }
+.arcade-next { margin: 0; text-align: center; font-size: 12px; letter-spacing: 1px; color: var(--fg-dim); }
+@media (prefers-reduced-motion: reduce) { .cb-slot.next, .cb-live.shake, :is(.cb-code.won, .cb-row.won) .cell.disc { animation: none; } }
+
+/* TRACE (arcade-trace.js): the board of encrypted blocks (the layers' own stripes), infected bits under
+   some; open ones a bit counting the infected round it, or nothing; a flag a crosshair on its block.
+   Once over: the infected showing, the one hit in red, wrong flags crossed (sized by arcade-trace.js's
+   fit: --tr-cell) */
+.tr-board { position: relative; isolation: isolate; flex: none; align-self: center; display: grid; grid-template-columns: repeat(9, var(--tr-cell, 36px)); gap: 3px; padding: 7px; background: var(--board-bg); border: 1px solid var(--grid-line); border-radius: 6px; touch-action: manipulation; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.tr-board .cell { width: var(--tr-cell, 36px); height: var(--tr-cell, 36px); font-size: calc(var(--tr-cell, 36px) * 0.4); cursor: pointer; }
+.tr-board .cell.firewall { color: var(--layer-text); }
+.tr-board .cell.tr-zero { background: transparent; border-color: rgba(var(--fg-rgb), 0.12); }
+.tr-board .cell.tr-open { cursor: default; }
+.tr-board .tr-flag { width: 70%; height: 70%; fill: none; stroke: var(--accent); stroke-width: 2.4; stroke-linecap: round; filter: drop-shadow(0 0 3px rgba(var(--accent-rgb), 0.8)); }
+.tr-board .cell.tr-bad { background: rgba(var(--danger-rgb), 0.12); border: 1px solid rgba(var(--danger-rgb), 0.7); color: var(--danger); }
+.tr-board .cell.tr-bad .ico { width: 70%; height: 70%; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+.tr-board .cell.tr-hit { background: rgba(var(--danger-rgb), 0.5); box-shadow: 0 0 12px rgba(var(--danger-rgb), 0.8); color: #fff; }
+.tr-board .cell.tr-caught { background: rgba(var(--fg-rgb), 0.08); border-color: var(--fg); color: var(--fg); animation: tr-caught 0.5s ease-out both; }
+@keyframes tr-caught { from { transform: scale(0.6); opacity: 0; } }
+.tr-board .cell.tr-wrong::after { content: ''; position: absolute; inset: 15%; background: linear-gradient(45deg, transparent 45%, var(--danger) 45%, var(--danger) 55%, transparent 55%), linear-gradient(-45deg, transparent 45%, var(--danger) 45%, var(--danger) 55%, transparent 55%); }
+.tr-board .cell.tr-flagged { position: relative; }
+.tr-board.tr-over .cell { cursor: default; }
+.tr-acts { flex: none; display: flex; align-items: center; gap: 12px; }
+.tr-acts[hidden] { display: none; }
+:is(#tr-mode, #dc-mode) { flex: none; height: 40px; padding: 0 16px; background: transparent; border: 1px solid var(--fg); border-radius: 4px; color: var(--fg); font-family: inherit; font-size: 13px; letter-spacing: 2px; cursor: pointer; }
+:is(#tr-mode, #dc-mode).on { border-color: var(--accent); color: var(--accent); background: rgba(var(--accent-rgb), 0.12); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+.tr-hint { flex: 1; margin: 0; text-align: center; font-size: 11.5px; letter-spacing: 1px; color: var(--fg-dim); }
+
+/* CHECKSUM (arcade-checksum.js): nine boxes of nine squares, the boxes set apart; a given bit as the
+   board's bits, one written in in the accent, notes small in a 3x3 in their square; the square picked
+   outlined, its row, column and box tinted (the same bit elsewhere isn't lit). Under it the bits [1] to [9]
+   (one dimmed with all nine in) and NOTES, ERASE, CONFIRM (sized by arcade-checksum.js's fit: --ck-cell) */
+.ck-board { position: relative; isolation: isolate; flex: none; align-self: center; display: grid; grid-template-columns: repeat(3, auto); gap: 4px; padding: 7px; background: var(--board-bg); border: 1px solid var(--grid-line); border-radius: 6px; -webkit-user-select: none; user-select: none; }
+.ck-box { display: grid; grid-template-columns: repeat(3, var(--ck-cell, 36px)); gap: 2px; padding: 2px; border: 1px solid rgba(var(--fg-rgb), 0.35); border-radius: 3px; }
+.ck-cell { width: var(--ck-cell, 36px); height: var(--ck-cell, 36px); font-size: calc(var(--ck-cell, 36px) * 0.36); cursor: pointer; }
+.ck-cell.ck-mine { color: var(--accent); border-color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.6); background: rgba(var(--accent-rgb), 0.06); }
+.ck-cell.peer { background-color: rgba(var(--fg-rgb), 0.07); }
+.ck-cell.sel { outline: 2px solid var(--accent); outline-offset: -1px; background-color: rgba(var(--accent-rgb), 0.14); }
+.ck-notes { display: grid; grid-template-columns: repeat(3, 1fr); width: 100%; height: 100%; font-size: calc(var(--ck-cell, 36px) * 0.28); font-weight: bold; line-height: 1; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.6); } /* (as bright as a bit written in) */
+.ck-notes i { display: flex; align-items: center; justify-content: center; font-style: normal; }
+.ck-cell.ck-valid { animation: ck-valid 0.5s ease-out both; }
+@keyframes ck-valid { 40% { transform: scale(1.12); box-shadow: 0 0 14px var(--fg); } }
+.ck-board.shake { animation: cb-shake 0.3s ease-in-out 1; }
+/* (CONFIRM's word over the grid for a moment) */
+.ck-stamp { position: absolute; left: 50%; top: 50%; z-index: 3; margin: 0; padding: 8px 14px; transform: translate(-50%, -50%); white-space: nowrap; font-size: 17px; letter-spacing: 3px; background: var(--panel); border: 2px solid currentColor; border-radius: 6px; pointer-events: none; opacity: 0; }
+.ck-stamp.bad { color: var(--danger); text-shadow: 0 0 8px rgba(var(--danger-rgb), 0.7); }
+.ck-stamp.good { color: var(--fg); text-shadow: 0 0 10px var(--fg); }
+.ck-stamp.show { animation: ck-stamp 1.5s ease-out both; }
+@keyframes ck-stamp { 0% { opacity: 0; transform: translate(-50%, -50%) scale(1.4); } 12% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; } }
+.ck-pad { flex: none; display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 3px; }
+.ck-pad[hidden], .ck-acts[hidden] { display: none; }
+.ck-pad button { min-width: 0; height: 44px; padding: 0; display: flex; align-items: center; justify-content: center; background: rgba(var(--fg-rgb), 0.08); border: 1px solid var(--fg-dim); border-radius: 4px; color: var(--fg); font-family: var(--font); font-size: 14.5px; font-weight: bold; text-shadow: 0 0 6px rgba(var(--fg-rgb), 0.6); cursor: pointer; }
+.ck-pad button .cb-face { width: 26px; height: 26px; }
+.ck-pad button.full { opacity: 0.3; }
+.ck-pad.notes button { border-style: dashed; border-color: var(--accent); color: var(--accent); font-size: 12px; text-shadow: none; }
+.ck-pad button:active { background: rgba(var(--fg-rgb), 0.25); }
+.ck-acts { flex: none; display: flex; gap: 8px; }
+.ck-acts button { flex: 1; min-width: 0; height: 40px; padding: 0 4px; white-space: nowrap; background: transparent; border: 1px solid var(--fg); border-radius: 4px; color: var(--fg); font-family: inherit; font-size: 12px; letter-spacing: 1.5px; cursor: pointer; }
+#ck-notes.on { border-color: var(--accent); color: var(--accent); background: rgba(var(--accent-rgb), 0.12); }
+#ck-confirm { border-color: var(--accent); color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+@media (hover: hover) { :is(.ck-acts button, #tr-mode, #dc-mode):hover { background: rgba(var(--fg-rgb), 0.12); } }
+@media (prefers-reduced-motion: reduce) { .ck-cell.ck-valid, .ck-board.shake, .tr-board .cell.tr-caught { animation: none; } .ck-stamp.show { animation-duration: 0.01s; animation-delay: 1.4s; opacity: 1; } }
+
+/* MERGE (arcade-merge.js): the 4x4 board's empty squares under, the bits over them, each sliding from
+   square to square (--x, --y) and glowing brighter the higher it is (--lv); a BYTE and up in the
+   accent, by name; an encrypted block in the layers' stripes. New bits appear once the slide's done,
+   a merged one pops (sized by arcade-merge.js's fit: --mg-cell) */
+.mg-board { position: relative; isolation: isolate; flex: none; align-self: center; display: grid; grid-template-columns: repeat(4, var(--mg-cell, 72px)); gap: 6px; padding: 8px; background: var(--board-bg); border: 1px solid var(--grid-line); border-radius: 6px; touch-action: none; -webkit-user-select: none; user-select: none; }
+.mg-slot { width: var(--mg-cell, 72px); height: var(--mg-cell, 72px); }
+.mg-tiles { position: absolute; left: 8px; top: 8px; pointer-events: none; }
+.mg-tile { position: absolute; left: 0; top: 0; width: var(--mg-cell, 72px); height: var(--mg-cell, 72px); font-size: calc(var(--mg-cell, 72px) * 0.3); translate: calc(var(--x) * (var(--mg-cell, 72px) + 6px)) calc(var(--y) * (var(--mg-cell, 72px) + 6px)); transition: translate 0.11s ease-out; } /* (placed by translate, so a pop's scale (transform) is about the bit's own middle) */
+.mg-tiles .cell.mg-tile { position: absolute; } /* (GLYPH's bits are position: relative: .cell.disc.has-glyph) */
+.mg-tile.disc { background: linear-gradient(rgba(var(--fg-rgb), calc(0.025 * var(--lv, 1))), rgba(var(--fg-rgb), calc(0.025 * var(--lv, 1)))), var(--cell-bg); box-shadow: 0 0 calc(var(--lv, 1) * 1.4px) rgba(var(--fg-rgb), 0.45); }
+.mg-tile.mg-big { color: var(--accent); border-color: var(--accent); background: linear-gradient(rgba(var(--accent-rgb), calc(0.05 * (var(--lv, 8) - 6))), rgba(var(--accent-rgb), calc(0.05 * (var(--lv, 8) - 6)))), var(--cell-bg); text-shadow: 0 0 8px var(--accent); box-shadow: 0 0 calc(var(--lv, 8) * 1.6px) rgba(var(--accent-rgb), 0.55); font-size: calc(var(--mg-cell, 72px) * 0.21); letter-spacing: 1px; }
+.mg-tile.mg-lock { color: var(--layer-text); }
+.mg-tile.mg-born { animation: mg-born 0.18s ease-out 0.08s both; }
+@keyframes mg-born { from { opacity: 0; transform: scale(0.3); } }
+.mg-tile.mg-pop { animation: mg-pop 0.2s ease-out; }
+@keyframes mg-pop { 50% { transform: scale(1.16); } }
+.mg-board.mg-over .mg-tile { opacity: 0.6; }
+.mg-board .ck-stamp { z-index: 4; }
+.mg-hint { flex: none; margin: 0; text-align: center; font-size: 11.5px; letter-spacing: 1px; color: var(--fg-dim); }
+.mg-hint[hidden] { display: none; }
+
+/* ROUTING (arcade-routing.js): the 7x7 grid, each pair's bits in its own color (--rt), the lines drawn
+   under the squares (so a bit sits over its line's end), a square a line runs through tinted with it;
+   a linked pair's bits glowing (sized by arcade-routing.js's fit: --rt-cell) */
+.rt-board { position: relative; isolation: isolate; flex: none; align-self: center; display: grid; grid-template-columns: repeat(7, var(--rt-cell, 44px)); gap: 3px; padding: 7px; background: var(--board-bg); border: 1px solid var(--grid-line); border-radius: 6px; touch-action: none; -webkit-user-select: none; user-select: none; }
+.rt-cell { position: relative; z-index: 1; width: var(--rt-cell, 44px); height: var(--rt-cell, 44px); font-size: calc(var(--rt-cell, 44px) * 0.34); cursor: pointer; }
+.rt-cell.rt-on { background: rgba(var(--rt), 0.14); border-color: rgba(var(--rt), 0.35); }
+.cell.rt-cell.rt-end { color: rgb(var(--rt)); border-color: rgb(var(--rt)); text-shadow: 0 0 6px rgba(var(--rt), 0.7); background: linear-gradient(rgba(var(--rt), 0.14), rgba(var(--rt), 0.14)), var(--cell-bg); }
+.cell.rt-cell.rt-end.rt-linked { box-shadow: 0 0 10px rgba(var(--rt), 0.75); }
+.rt-lines { position: absolute; z-index: 0; left: 5.5px; top: 5.5px; width: calc(7 * (var(--rt-cell, 44px) + 3px)); height: calc(7 * (var(--rt-cell, 44px) + 3px)); pointer-events: none; overflow: visible; }
+.rt-lines polyline { fill: none; stroke-width: 0.3; stroke-linecap: round; stroke-linejoin: round; opacity: 0.8; }
+.rt-lines polyline.done { opacity: 1; }
+.rt-board.rt-won .cell.rt-cell { animation: ck-valid 0.5s ease-out both; }
+.rt-acts { flex: none; display: flex; align-items: center; gap: 12px; }
+.rt-acts[hidden] { display: none; }
+#rt-clear { flex: none; height: 40px; padding: 0 16px; background: transparent; border: 1px solid var(--fg); border-radius: 4px; color: var(--fg); font-family: inherit; font-size: 13px; letter-spacing: 2px; cursor: pointer; }
+.rt-hint { flex: 1; margin: 0; text-align: center; font-size: 11.5px; letter-spacing: 1px; color: var(--fg-dim); }
+@media (hover: hover) { #rt-clear:hover { background: rgba(var(--fg-rgb), 0.12); } }
+/* (MONOCHROME: no colors here either; the pairs told apart by their numbers, the lines by where they run) */
+[data-theme="monochrome"] .rt-cell { --rt: var(--fg-rgb) !important; }
+[data-theme="monochrome"] .rt-lines polyline { stroke: var(--fg); }
+@media (prefers-reduced-motion: reduce) { .mg-tile { transition: none; } .mg-tile.mg-born, .mg-tile.mg-pop, .rt-board.rt-won .cell.rt-cell { animation: none; } }
+
+/* DEFRAG (arcade-defrag.js): the 7x7 board's empty squares under, the bits over them, each number its own
+   color (--df), each sliding from square to square (--x, --y), new ones dropping in from above (the
+   layer clips them till they're on the board); an encrypted bit in the layers' stripes, its number dim;
+   an infected one ByteFall's red frame and virus; the one picked outlined; a swap that works pulsing
+   after a while idle (sized by arcade-defrag.js's fit: --df-cell) */
+.df-board { position: relative; isolation: isolate; flex: none; align-self: center; display: grid; grid-template-columns: repeat(7, var(--df-cell, 44px)); gap: 4px; padding: 8px; background: var(--board-bg); border: 1px solid var(--grid-line); border-radius: 6px; touch-action: none; -webkit-user-select: none; user-select: none; }
+.df-slot { width: var(--df-cell, 44px); height: var(--df-cell, 44px); }
+.df-tiles { position: absolute; left: 8px; top: 8px; width: calc(7 * var(--df-cell, 44px) + 24px); height: calc(7 * var(--df-cell, 44px) + 24px); overflow: hidden; pointer-events: none; }
+.df-tiles .cell.df-tile { position: absolute; left: 0; top: 0; width: var(--df-cell, 44px); height: var(--df-cell, 44px); font-size: calc(var(--df-cell, 44px) * 0.36); translate: calc(var(--x) * (var(--df-cell, 44px) + 4px)) calc(var(--y) * (var(--df-cell, 44px) + 4px)); transition: translate 0.15s ease-out; color: rgb(var(--df)); border-color: rgb(var(--df)); text-shadow: 0 0 6px rgba(var(--df), 0.7); background: linear-gradient(rgba(var(--df), 0.16), rgba(var(--df), 0.16)), var(--cell-bg); animation: none; }
+.df-tiles.df-falling .cell.df-tile { transition: translate 0.25s cubic-bezier(0.55, 0, 0.85, 0.55); }
+.df-tiles .cell.df-tile.df-lock { background: repeating-linear-gradient(45deg, var(--layer-a), var(--layer-a) 4px, var(--layer-b) 4px, var(--layer-b) 8px); border: 1px dashed var(--layer-border); color: var(--layer-text); text-shadow: none; }
+.df-tiles .cell.df-tile.infected { border-color: var(--danger); animation: infected-pulse 0.8s ease-in-out infinite; }
+.df-tiles .cell.df-tile.df-sel { outline: 2px solid var(--accent); outline-offset: 1px; z-index: 1; }
+.df-tiles .cell.df-tile.df-hinted { animation: df-hint 0.9s ease-in-out infinite; }
+.df-tiles .cell.df-tile.df-spread { animation: df-spread 0.4s ease-out 2, infected-pulse 0.8s ease-in-out 0.8s infinite; }
+.df-tiles .cell.df-tile.df-pop { animation: df-pop 0.22s ease-out forwards; z-index: 2; }
+@keyframes df-hint { 50% { transform: scale(1.1); box-shadow: 0 0 12px rgba(var(--df), 0.9); } }
+@keyframes df-spread { 50% { transform: scale(1.15); background: rgba(var(--danger-rgb), 0.45); } }
+@keyframes df-pop { 40% { transform: scale(1.2); filter: brightness(1.8); } 100% { transform: scale(0.3); opacity: 0; } }
+.df-board.df-over .df-tile { opacity: 0.6; }
+[data-theme="monochrome"] .df-tile { --df: var(--fg-rgb) !important; } /* (no colors: the numbers tell them apart) */
+@media (prefers-reduced-motion: reduce) { .df-tiles .cell.df-tile { transition: none; } .df-tiles .cell.df-tile:is(.df-pop, .df-hinted, .df-spread) { animation: none; } }
+
+/* DECODE (arcade-decode.js): the numbers over each column and at each row's left (dimmed once their line
+   is as they say; the row and column under a finger in the accent), then the squares, a brighter line
+   every 5; a filled square lit, a marked one an X. Decoded: the picture in its colors (MONOCHROME: grays),
+   coming in corner to corner, the empty squares and the numbers fading (sized by arcade-decode.js's fit:
+   --dc-cell; --dc-w, --dc-h the grid's size, --dc-rcw, --dc-cch the numbers' room in squares) */
+.dc-board { position: relative; isolation: isolate; flex: none; align-self: center; display: grid; grid-template-columns: auto repeat(var(--dc-w, 10), var(--dc-cell, 24px)); grid-template-rows: auto repeat(var(--dc-h, 10), var(--dc-cell, 24px)); gap: 2px; padding: 6px; background: var(--board-bg); border: 1px solid var(--grid-line); border-radius: 6px; touch-action: none; -webkit-user-select: none; user-select: none; }
+.dc-corner { display: block; }
+.dc-cc, .dc-rc { display: flex; align-items: center; font-family: var(--font); font-weight: bold; font-size: max(8px, calc(var(--dc-cell, 24px) * 0.48)); line-height: 1.05; color: var(--fg); transition: color 0.2s, opacity 0.2s; }
+.dc-cc { flex-direction: column; justify-content: flex-end; padding-bottom: 3px; }
+.dc-rc { justify-content: flex-end; gap: calc(var(--dc-cell, 24px) * 0.28); padding-right: 4px; white-space: nowrap; }
+.dc-cc i, .dc-rc i { font-style: normal; }
+.dc-cc.done, .dc-rc.done { color: var(--fg-dim); opacity: 0.6; }
+.dc-cc.hl, .dc-rc.hl { color: var(--accent); opacity: 1; text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.6); }
+.dc-cell { position: relative; width: var(--dc-cell, 24px); height: var(--dc-cell, 24px); box-sizing: border-box; border-radius: 2px; background: var(--cell-bg); border: 1px solid rgba(var(--fg-rgb), 0.14); cursor: pointer; }
+.dc-cell.c5 { border-right-color: rgba(var(--fg-rgb), 0.6); } .dc-cell.c0 { border-left-color: rgba(var(--fg-rgb), 0.6); }
+.dc-cell.r5 { border-bottom-color: rgba(var(--fg-rgb), 0.6); } .dc-cell.r0 { border-top-color: rgba(var(--fg-rgb), 0.6); }
+.dc-cell.on { background: var(--fg); border-color: var(--fg); box-shadow: 0 0 6px rgba(var(--fg-rgb), 0.45); }
+.dc-cell.x::before { content: ''; position: absolute; inset: 22%; background: linear-gradient(45deg, transparent 42%, var(--fg-dim) 42%, var(--fg-dim) 58%, transparent 58%), linear-gradient(-45deg, transparent 42%, var(--fg-dim) 42%, var(--fg-dim) 58%, transparent 58%); }
+.dc-board.dc-done .dc-cell { cursor: default; background: transparent; border-color: transparent; box-shadow: none; transition: background 0.4s, border-color 0.4s; }
+.dc-board.dc-done .dc-cell.px { background: var(--px); border-color: var(--px); animation: dc-reveal 0.45s ease-out both; }
+.dc-board.dc-done .dc-cell.px.still { animation: none; }
+.dc-board.dc-done :is(.dc-cc, .dc-rc) { opacity: 0.25; }
+@keyframes dc-reveal { 0% { transform: scale(0.4); opacity: 0; } 60% { transform: scale(1.15); filter: brightness(1.6); } 100% { transform: none; } }
+[data-theme="monochrome"] .dc-board.dc-done .dc-cell.px { filter: grayscale(1); animation-name: dc-reveal-gray; }
+@keyframes dc-reveal-gray { 0% { transform: scale(0.4); opacity: 0; } 60% { transform: scale(1.15); } 100% { transform: none; } }
+.dc-name { flex: none; margin: 0; text-align: center; font-size: 15.5px; letter-spacing: 3px; color: var(--accent); text-shadow: 0 0 8px rgba(var(--accent-rgb), 0.6); }
+.dc-name[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) { .dc-board.dc-done .dc-cell.px { animation: none; } }
+
+/* THE ARCADE MENU (the main menu's ARCADE; arcade.js): every game as a card in a row that slides
+   sideways under the card's sides, as DAILY's do, the one in the middle in focus (the rest dimmed),
+   the pips under it lighting it; PLAY (RESUME, with NEW GAME beside it, when one's under way), and what
+   FREE PLAY is */
+.home-row[hidden] { display: none; }
+.arcade-menu { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: 16px; container-type: inline-size; }
+.arcade-menu[hidden] { display: none; }
+.daily-cards.arcade-cards { flex: 1 1 0; min-height: 0; max-height: 600px; display: flex; gap: 8px; width: calc(100% + 16px); margin: 0 -8px; padding: 6px calc(14cqw + 8px); overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; }
+.arcade-cards::-webkit-scrollbar { display: none; }
+.arcade-cards button { flex: 0 0 72cqw; min-height: 0; gap: 8px; padding: 12px; scroll-snap-align: center; scroll-snap-stop: always; opacity: 0.55; transition: opacity 0.25s ease-out, border-color 0.25s, background-color 0.25s, box-shadow 0.25s; }
+.arcade-cards button.focus { opacity: 1; border-color: var(--fg); background: rgba(var(--fg-rgb), 0.1); box-shadow: 0 0 10px rgba(var(--fg-rgb), 0.3); }
+.arcade-cards .dc-name { font-size: 15.5px; letter-spacing: 2px; }
+.arcade-cards button.focus .dc-name { text-shadow: 0 0 6px rgba(var(--fg-rgb), 0.6); }
+.arcade-cards .dc-rule { font-size: 12px; line-height: 1.4; }
+.arcade-cards .dc-status { font-size: 11.5px; line-height: 1.4; }
+.arcade-menu .daily-pips:not([hidden]) { display: flex; }
+/* THE PREVIEWS (arcade.js plays them; each game's demo draws it): over each card's name, its game
+   playing itself on a small board, as the game's own board looks, sized to the room the card leaves
+   it (each board's squares from the box's size: container units); a fade between one game and the next */
+.ac-demo { flex: 1 1 0; min-height: 0; align-self: stretch; display: flex; align-items: center; justify-content: center; container-type: size; pointer-events: none; transition: opacity 0.35s ease; }
+.ac-demo.out { opacity: 0; }
+.ac-demo :is(.cb-board, .tr-board, .ck-board, .mg-board, .rt-board) { flex: none; align-self: center; border-radius: 4px; }
+.ac-demo .cell { cursor: default; }
+.ac-demo .cb-board { padding: 6px; gap: 3px; --cb-cell: min(44px, calc((100cqh - 40px) / 8), calc((100cqw - 32px) / 6.6)); }
+.ac-demo .cb-row { grid-template-columns: calc(var(--cb-cell) * 1.3) repeat(4, var(--cb-cell)) calc(var(--cb-cell) * 1.3); gap: 3px; }
+.ac-demo .cb-no { padding-right: 2px; font-size: calc(var(--cb-cell) * 0.3); letter-spacing: 0.5px; }
+.ac-demo .cb-pips { gap: 2px; padding-left: 2px; }
+.ac-demo .cb-pips i { width: calc(var(--cb-cell) * 0.24); height: calc(var(--cb-cell) * 0.24); }
+.ac-demo .tr-board { padding: 4px; gap: 2px; --tr-cell: min(calc((100cqw - 28px) / 9), calc((100cqh - 34px) / 12)); }
+.ac-demo .ck-board { padding: 4px; gap: 2px; --ck-cell: calc((min(100cqw, 100cqh) - 36px) / 9); }
+.ac-demo .ck-box { gap: 1px; padding: 1px; }
+.ac-demo .ck-cell.sel { outline-width: 1.5px; }
+.ac-demo .ck-stamp { padding: 5px 9px; font-size: 12px; letter-spacing: 2px; }
+.ac-demo .mg-board { --mg-cell: calc((min(100cqw, 100cqh) - 40px) / 4); }
+.ac-demo .rt-board { --rt-cell: calc((min(100cqw, 100cqh) - 38px) / 7); }
+.ac-demo .df-board { --df-cell: calc((min(100cqw, 100cqh) - 44px) / 7); }
+.ac-demo .dc-board { padding: 4px; gap: 1px; --dc-cell: min(calc((100cqw - 14px - var(--dc-w) * 1px) / (var(--dc-w) + var(--dc-rcw))), calc((100cqh - 14px - var(--dc-h) * 1px) / (var(--dc-h) + var(--dc-cch)))); }
+.ac-demo .dc-cell { border-radius: 1px; }
+.arcade-menu-acts { display: flex; justify-content: center; gap: 8px; }
+.arcade-menu-acts .vs-start { display: flex; align-items: center; justify-content: center; height: 40px; padding: 0 34px; }
+.arcade-new { height: 40px; padding: 0 16px; background: transparent; border: 1px solid var(--fg-dim); border-radius: 4px; color: var(--fg); font-family: inherit; font-size: 13px; letter-spacing: 2px; cursor: pointer; }
+.arcade-new[hidden] { display: none; }
+.arcade-menu-note { margin: 0 8px; text-align: center; font-size: 12px; line-height: 1.5; color: var(--fg-dim); }
+@media (hover: hover) { .arcade-new:hover { background: rgba(var(--fg-rgb), 0.12); } }
+
+/* THE PAGE (arcade.html): the card on its own, the whole height of the screen and as wide as ByteFall's
+   game card at most, framed as it is; TODAY over the menu's cards: the day's game, how it stands, a tap
+   to play it (done: its result, in the dim) */
+body.arcade-page { justify-content: flex-start; }
+.arcade-app { position: relative; width: 100%; max-width: 480px; height: 100vh; height: 100dvh; }
+.arcade-page .arcade { border-left: 1px solid var(--grid-line); border-right: 1px solid var(--grid-line); }
+@media (min-width: 520px) { .arcade-page .arcade { border: 1px solid var(--grid-line); border-radius: 8px; } .arcade-app { height: min(100dvh, 900px); margin: auto 0; } }
+.arcade-today { flex: none; display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 0 8px; padding: 10px 12px; font-family: inherit; color: var(--fg); background: rgba(var(--accent-rgb), 0.08); border: 1px solid var(--accent); border-radius: 6px; box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.25); cursor: pointer; }
+.arcade-today .at-day { font-size: 11.5px; letter-spacing: 2px; color: var(--accent); }
+.arcade-today .at-name { font-size: 17px; letter-spacing: 3px; color: var(--fg); text-shadow: 0 0 6px rgba(var(--fg-rgb), 0.6); }
+.arcade-today .at-status { font-size: 12px; letter-spacing: 1px; color: var(--fg-dim); }
+.arcade-today.done { border-color: var(--grid-line); background: transparent; box-shadow: none; }
+.arcade-today.done .at-day { color: var(--fg-dim); }
+@media (hover: hover) { .arcade-today:hover:not(:disabled) { background: rgba(var(--accent-rgb), 0.15); } }

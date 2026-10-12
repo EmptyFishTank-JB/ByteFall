@@ -1,0 +1,59 @@
+/* THE LANDING PAGE (index.html) and DEV & TESTING (dev-tools/index.html): the dev pages' terminal look,
+   a card a link. The game's chosen font (SETTINGS → FONT) applies here too (js/fonts.js, --game-font) */
+:root {
+  --bg: #020403;
+  --panel: #0b1512;
+  --panel-2: #0e1a16;
+  --line: #1c3d33;
+  --green: #39ff8f;
+  --green-dim: #1f7a52;
+  --text: #c9f7dc;
+  --text-dim: #7fb89b;
+  --amber: #ffd166;
+  --mono: var(--game-font, 'Courier New', Courier, monospace);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: radial-gradient(ellipse at top, #0d1b16 0%, #020403 70%);
+  background-color: var(--bg);
+  background-attachment: fixed;
+  color: var(--text);
+  font-family: var(--mono);
+  line-height: 1.55;
+}
+.wrap { max-width: 900px; margin: 0 auto; padding: 32px 16px 64px; }
+.back { display: inline-block; margin-bottom: 24px; color: var(--green-dim); text-decoration: none; font-size: 12px; letter-spacing: 0.12em; }
+.back:hover { color: var(--green); }
+.eyebrow { display: flex; align-items: center; gap: 10px; font-size: 11px; letter-spacing: 0.18em; color: var(--green-dim); margin-bottom: 12px; }
+.eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); }
+h1 { margin: 0 0 8px; font-size: clamp(28px, 8vw, 44px); letter-spacing: 0.12em; color: var(--green); text-shadow: 0 0 14px rgba(57, 255, 143, 0.45); }
+h1 span { color: var(--amber); text-shadow: 0 0 14px rgba(255, 209, 102, 0.45); }
+.lede { margin: 0 0 32px; max-width: 640px; font-size: 13px; color: var(--text-dim); }
+h2 { display: flex; align-items: baseline; gap: 10px; margin: 32px 0 12px; font-size: 13px; letter-spacing: 0.16em; color: var(--green); text-transform: uppercase; }
+h2 .num { color: var(--green-dim); }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.card { display: flex; flex-direction: column; gap: 8px; padding: 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; color: inherit; text-decoration: none; transition: border-color 0.15s, background 0.15s; }
+a.card:hover, a.card:focus-visible { border-color: var(--green-dim); background: var(--panel-2); outline: none; }
+.card .name { font-size: 15.5px; letter-spacing: 0.12em; color: var(--green); }
+.card .name::after { content: ' \2192'; color: var(--green-dim); }
+.card .desc { margin: 0; font-size: 12px; line-height: 1.5; color: var(--text-dim); }
+.card .tag { align-self: flex-start; font-size: 10.5px; letter-spacing: 0.14em; color: var(--amber); border: 1px solid rgba(255, 209, 102, 0.4); border-radius: 3px; padding: 1px 6px; }
+.card.main { grid-column: 1 / -1; padding: 24px 20px; border-color: var(--green-dim); box-shadow: 0 0 18px rgba(57, 255, 143, 0.12); }
+.card.main .name { font-size: 24px; letter-spacing: 0.18em; }
+.card.main .name span { color: var(--amber); }
+.card.wide { grid-column: 1 / -1; }
+.links { display: flex; flex-wrap: wrap; gap: 8px; }
+.links a { font-size: 12px; letter-spacing: 0.1em; color: var(--amber); text-decoration: none; border: 1px solid rgba(255, 209, 102, 0.35); border-radius: 4px; padding: 5px 9px; }
+.links a:hover { background: rgba(255, 209, 102, 0.1); }
+.links a small { color: var(--text-dim); font-size: 10.5px; margin-right: 6px; }
+.switches { display: flex; flex-wrap: wrap; gap: 8px; }
+.switches button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); font-family: inherit; font-size: 12px; letter-spacing: 0.1em; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
+.switches button:hover { border-color: var(--green-dim); color: var(--green); }
+.switches button.on { border-color: var(--amber); color: var(--amber); }
+.switch-group { margin: 0 0 16px; }
+.switch-group h3 { margin: 0 0 8px; font-size: 11px; letter-spacing: 0.16em; color: var(--text-dim); font-weight: normal; }
+.status { min-height: 16px; margin-top: 8px; font-size: 11px; letter-spacing: 0.1em; color: var(--amber); }
+.note { font-size: 12px; color: var(--text-dim); margin: 0 0 12px; }
+footer { margin-top: 48px; text-align: center; font-size: 10.5px; letter-spacing: 0.16em; color: var(--green-dim); }
+footer a { color: var(--green-dim); }

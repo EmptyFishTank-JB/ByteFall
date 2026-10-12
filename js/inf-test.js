@@ -1,8 +1,8 @@
-// INFECTION TESTER (the dev page's link: index.html?inftest): the game straight in, a board of bits,
+// INFECTION TESTER (the dev page's link: bytefall.html?inftest): the game straight in, a board of bits,
 // and a panel along the bottom: a button for each infection to set it off on the grid, the LOOK it
 // shows (or RANDOM), a DROP that counts one drop down without dropping, FILL for a fresh board, and
 // CLEAR. The column buttons still drop bits as in a game, so the infections can be played against too.
-// Nothing's saved (index.html keeps the page's writes in memory), and BANNERS switches off the
+// Nothing's saved (bytefall.html keeps the page's writes in memory), and BANNERS switches off the
 // UNLOCKED / ACHIEVEMENT pop-ups (remembered for the tab).
 (() => {
   if (!/[?&]inftest\b/.test(location.search)) return;
@@ -42,7 +42,7 @@
     <div class="inftest-body">
       <div class="inftest-row">${IDS.map((id) => `<button type="button" data-inf="${id}">${id === 'cryptojacker' ? 'CRYPTOJACK' : id.toUpperCase()}</button>`).join('')}</div>
       <div class="inftest-row"><span>LOOK</span>${['RANDOM', '1', '2', '3', '4', '5', '6', '7', '8'].map((l, i) => `<button type="button" data-look="${i - 1}"${i ? '' : ' class="on"'}>${l}</button>`).join('')}</div>
-      <div class="inftest-row"><button type="button" data-act="drop">DROP (COUNT DOWN)</button><button type="button" data-act="fill">FILL GRID</button><button type="button" data-act="clear">CLEAR</button><button type="button" data-act="keys">+50 KEYS</button><button type="button" data-act="banners"></button><button type="button" data-act="bantest">TEST NOTICE</button><a href="dev-tools/audio.html">DEV PAGE</a></div>
+      <div class="inftest-row"><button type="button" data-act="drop">DROP (COUNT DOWN)</button><button type="button" data-act="fill">FILL GRID</button><button type="button" data-act="clear">CLEAR</button><button type="button" data-act="keys">+50 KEYS</button><button type="button" data-act="banners"></button><button type="button" data-act="bantest">TEST NOTICE</button><a href="dev-tools/">DEV &amp; TESTING</a></div>
       <p class="inftest-note">NOT SAVED: nothing played here touches your progress. Tap an ad, the CRYPTOJACKER's sign or a pop-up and it steals KEYS toward its (hidden) demand; tap a RANSOMWARE-locked bit and it pays 1 to 8 KEYS of the ransom on it (paid off, the bit's free). Infections stack: tap more than one. ADWARE and MALWARE have 6 looks, RANSOMWARE 5, the CRYPTOJACKER 8, the rest 4 (a look past theirs picks at random). The column buttons still drop bits.</p>
     </div>`;
   document.body.appendChild(panel);

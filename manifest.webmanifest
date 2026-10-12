@@ -2,7 +2,7 @@
   "name": "ByteFall",
   "short_name": "ByteFall",
   "description": "A decryption puzzle: drop encrypted bits, decrypt them in chains, and crack every layer before the trace completes.",
-  "start_url": "./",
+  "start_url": "./bytefall.html",
   "scope": "./",
   "display": "fullscreen",
   "display_override": ["fullscreen", "standalone"],

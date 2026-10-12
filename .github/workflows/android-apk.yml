@@ -64,7 +64,7 @@ jobs:
       - name: Name it
         id: name
         run: |
-          BUILD=$(grep -o '?v=[0-9]*' index.html | head -1 | cut -d= -f2)
+          BUILD=$(grep -o '?v=[0-9]*' bytefall.html | head -1 | cut -d= -f2)
           KIND=$([ "${{ inputs.source }}" = "bundled" ] && echo test || echo live)
           echo "file=ByteFall-${KIND}-v${BUILD}-${GITHUB_SHA::7}.apk" >> "$GITHUB_OUTPUT"
           cp android/app/build/outputs/apk/debug/app-debug.apk "ByteFall-${KIND}-v${BUILD}-${GITHUB_SHA::7}.apk"

@@ -1,10 +1,10 @@
-// SOUND TESTER (the dev page's link: index.html?sfxtest): the game straight in on a board of bits,
+// SOUND TESTER (the dev page's link: bytefall.html?sfxtest): the game straight in on a board of bits,
 // every sound it makes named as it plays. A caption flashes over the board (the sound, and what set
 // it off, read from the code that played it); a panel along the bottom, folded to a line naming the
 // latest till SHOW opens it, keeps the last few, every
 // sound with how often it's been heard (tap one to hear it alone), and a SOUND THEME to play the
 // game in (any of them, locked or not). FILL GRID and NEW LAYER set things going; the column
-// buttons drop bits as in a game. Nothing's saved (index.html keeps the page's writes in memory,
+// buttons drop bits as in a game. Nothing's saved (bytefall.html keeps the page's writes in memory,
 // as for the INFECTION TESTER), and SOUND is on whatever the game's setting.
 (() => {
   if (!/[?&]sfxtest\b/.test(location.search)) return;
@@ -134,7 +134,7 @@
       <div class="sfxtest-log"></div>
       <div class="inftest-row sfxtest-heard">${Object.keys(NAMES).map((k) => `<button type="button" data-snd="${k}">${NAMES[k]} <i>0</i></button>`).join('')}</div>
       <div class="inftest-row"><span>THEME</span>${THEMES.map((t) => `<button type="button" data-theme="${t.id}">${t.name}</button>`).join('')}</div>
-      <div class="inftest-row"><button type="button" data-act="fill">FILL GRID</button><button type="button" data-act="layer">NEW LAYER</button><button type="button" data-act="reset">CLEAR COUNTS</button><a href="dev-tools/audio.html#effects">COMPENDIUM</a></div>
+      <div class="inftest-row"><button type="button" data-act="fill">FILL GRID</button><button type="button" data-act="layer">NEW LAYER</button><button type="button" data-act="reset">CLEAR COUNTS</button><a href="dev-tools/audio.html">SOUND &amp; MUSIC</a></div>
       <p class="inftest-note">NOT SAVED: nothing played here touches your progress. Every sound the game plays is named over the board and listed here with what set it off; the counts show which you've heard (tap one to hear it alone, in the theme picked). SOUND is on here whatever the game's setting. The column buttons drop bits as in a game.</p>
     </div>`;
   document.body.appendChild(panel);

@@ -6,7 +6,7 @@
 # variables → Actions): UPLOAD_KEYSTORE_BASE64 (the keystore file, base64), UPLOAD_KEYSTORE_PASSWORD,
 # UPLOAD_KEY_ALIAS and UPLOAD_KEY_PASSWORD (the README's "Releasing to Google Play" makes them).
 # Google Play re-signs it with the app signing key it keeps. Its version code is the game's build
-# number (index.html's ?v=): each upload needs a higher one than the last, so push before each.
+# number (bytefall.html's ?v=): each upload needs a higher one than the last, so push before each.
 name: Android release bundle
 
 on:
@@ -90,7 +90,7 @@ jobs:
         run: |
           AAB=android/app/build/outputs/bundle/release/app-release.aab
           jarsigner -verify "$AAB" | grep -q "jar verified" || { echo "::error::The bundle isn't signed"; exit 1; }
-          BUILD=$(grep -o '?v=[0-9]*' index.html | head -1 | cut -d= -f2)
+          BUILD=$(grep -o '?v=[0-9]*' bytefall.html | head -1 | cut -d= -f2)
           echo "file=ByteFall-release-v${BUILD}-${GITHUB_SHA::7}.aab" >> "$GITHUB_OUTPUT"
           cp "$AAB" "ByteFall-release-v${BUILD}-${GITHUB_SHA::7}.aab"
 

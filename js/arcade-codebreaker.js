@@ -120,7 +120,7 @@ Arcade.register('codebreaker', (() => {
   // (the line over the board: the tries, or the result)
   function line(x) {
     const n = x.g.length - (busy && x === s ? 1 : 0); // (while a guess's pips light, it's still that try)
-    if (broken(x) && !busy) return `CODE BROKEN IN ${n}/${CB_TRIES}${x.k ? ` // +${x.k} KEYS` : ''}`;
+    if (broken(x) && !busy) return `CODE BROKEN IN ${n}/${CB_TRIES}`;
     if (over(x) && !busy) return "NOT BROKEN // THE CODE'S UP TOP";
     return n ? `TRY ${n + 1} OF ${CB_TRIES}` : `CRACK THE ${CB_LEN}-BIT CODE // ${CB_TRIES} TRIES`;
   }
@@ -321,7 +321,6 @@ Arcade.register('codebreaker', (() => {
       const size = Math.floor(Math.min(44, (h - gap * (rows - 1)) / rows, (w - gap * (CB_LEN - 1)) / CB_LEN));
       boardEl.style.setProperty('--cb-cell', `${Math.max(14, size)}px`);
     },
-    pay: (x) => Progress.codeBreaker(broken(x) ? x.g.length : 0),
     best: (x) => (broken(x) ? x.g.length : null),
     bestText: (v) => `${v} ${v === 1 ? 'TRY' : 'TRIES'}`,
     low: true,

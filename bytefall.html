@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#020403">
+<!-- App view: "Add to Home Screen" opens ByteFall full screen like an app -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ByteFall">
+<script>
+  // The LIVE test app (tools/live-app.js) loads this page from the web: it's the Android app all
+  // the same (its user agent says so), without the build baked in as the bundled app has it
+  if (!window.BYTEFALL_APP && navigator.userAgent.indexOf('ByteFallApp') >= 0) window.BYTEFALL_APP = { live: true };
+  // Apply the saved color theme and font before first paint (script.js owns the settings).
+  try {
+    var theme = localStorage.getItem('bytefall-theme');
+    var font = localStorage.getItem('bytefall-font');
+    if (['share-tech', 'press-start', 'bitcount', 'bytesized', 'orbitron'].indexOf(font) >= 0) document.documentElement.dataset.font = font;
+    if (['cipher', 'amber-crt', 'monochrome', 'anaglyph', 'synthwave', 'dot-matrix', 'paper', 'glyph', 'spectrum'].indexOf(theme) >= 0) document.documentElement.dataset.theme = theme;
+    // (SPECTRUM's page drift: a random place in its 48s cycle to start from, so it isn't always red)
+    var hue = Math.random();
+    document.documentElement.style.setProperty('--page-hue-at', (-hue * 48).toFixed(2) + 's');
+    document.documentElement.style.setProperty('--page-hue-deg', Math.round(hue * 360) + 'deg');
+    // The start screen shows on a fresh launch, and again on a refresh until START is pressed
+    // (start.js sets the flag; coming back to the tab or a refresh after it goes straight in)
+    if (/[?&](inftest|sfxtest)\b/.test(location.search)) { // (the INFECTION and SOUND TESTERS: straight in, and nothing saved)
+      sessionStorage.setItem('bytefall-started', '1');
+      // (its writes kept in memory for this page only: it reads your saved game, never changes it)
+      var mem = {};
+      var P = Storage.prototype;
+      var get = P.getItem, set = P.setItem, del = P.removeItem, clr = P.clear;
+      P.setItem = function (k, v) { if (this === window.localStorage) { mem[k] = String(v); return; } return set.call(this, k, v); };
+      P.getItem = function (k) { if (this === window.localStorage && Object.prototype.hasOwnProperty.call(mem, k)) return mem[k]; return get.call(this, k); };
+      P.removeItem = function (k) { if (this === window.localStorage) { mem[k] = null; return; } return del.call(this, k); };
+      P.clear = function () { if (this === window.localStorage) return; return clr.call(this); };
+    }
+    if (sessionStorage.getItem('bytefall-started')) document.documentElement.classList.add('no-start');
+    if (localStorage.getItem('bytefall-effects') === 'reduced') document.documentElement.classList.add('low-fx');
+    var crt = localStorage.getItem('bytefall-crt'); // (CRT DISPLAY: the whole screen a tube)
+    if (crt === 'soft' || crt === 'full') document.documentElement.classList.add('crt-' + crt);
+  } catch (e) {}
+</script>
+<title>BYTEFALL // decryption terminal</title>
+<script src="js/fonts.js?v=582"></script>
+<link rel="stylesheet" href="css/style.css?v=582">
+</head>
+<body>
+  <!-- Dev: TWINKLE BACKGROUND (grid-bg.js): the starlight behind the whole game, off by default -->
+  <canvas class="page-bg" id="page-bg" aria-hidden="true"></canvas>
+  <!-- START SCREEN (start.js): a fresh launch opens on the title over the twinkling starlight;
+       START fades to black, then into the game (or the tutorial, the first time). A tap anywhere
+       else lets the music start (browsers need one) and leaves you on the screen -->
+  <div class="start-screen" id="start-screen">
+    <div class="start-card">
+      <canvas class="start-bg" id="start-bg" aria-hidden="true"></canvas>
+      <p class="start-studio">EMPTYFISHTANK <span>PRESENTS</span></p>
+      <div class="start-title">
+        <h1>BYTE<span>FALL</span></h1>
+        <p class="start-tagline">// DECRYPTION TERMINAL</p>
+      </div>
+      <button type="button" class="start-btn" id="start-btn">START</button>
+      <div class="start-legal">
+        <p>&copy; 2026 EMPTYFISHTANK. ALL RIGHTS RESERVED.</p>
+      </div>
+    </div>
+  </div>
+  <script>
+    // START under the tagline from the first paint, not where style.css puts it till then (it's
+    // unseen till placed): as far under the tagline as the tagline sits under the title, measured
+    // letter to letter (the drawn letters, not their line boxes, which differ from font to font).
+    // start.js places it again as the card's fitted to the game card and the fonts finish loading
+    window.placeStartBtn = (function () {
+      var btn = document.getElementById('start-btn');
+      var card = btn.parentNode;
+      var measure = null;
+      function ink(el) {
+        var cs = getComputedStyle(el);
+        measure.font = cs.fontStyle + ' ' + cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
+        var m = measure.measureText(el.textContent);
+        var range = document.createRange();
+        range.selectNodeContents(el);
+        var baseline = range.getBoundingClientRect().top + m.fontBoundingBoxAscent;
+        return { top: baseline - m.actualBoundingBoxAscent, bottom: baseline + m.actualBoundingBoxDescent };
+      }
+      return function () {
+        try {
+          if (!card.offsetWidth || !window.TextMetrics || !('fontBoundingBoxAscent' in TextMetrics.prototype)) return; // (not shown, or no way to measure: style.css's place)
+          measure = measure || document.createElement('canvas').getContext('2d');
+          var head = ink(card.querySelector('.start-title h1'));
+          var tag = ink(card.querySelector('.start-tagline'));
+          btn.style.top = Math.round(tag.bottom + (tag.top - head.bottom) - card.getBoundingClientRect().top - card.clientTop) + 'px';
+          btn.style.bottom = 'auto';
+        } catch (e) {} finally {
+          if (card.offsetWidth) btn.classList.add('placed');
+        }
+      };
+    })();
+    placeStartBtn();
+    // THE TITLE's INTRO (start.js) on a launch: the title, its tagline and START kept unseen from the
+    // first paint till it plays (not on a refresh after START, nor with less motion asked for)
+    (function () {
+      var root = document.documentElement;
+      var calm = root.classList.contains('no-start') || root.classList.contains('low-fx') || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+      if (!calm) document.getElementById('start-btn').parentNode.classList.add('intro-wait');
+    })();
+  </script>
+  <div class="start-black" id="start-black" aria-hidden="true"></div>
+  <div class="theme-black" id="theme-black" aria-hidden="true"></div>
+  <!-- Mosaic filters for the wanderers' pop in / decrypt out (a copy of the CPU face's, in an svg
+       that's always rendered: filters inside a hidden svg don't draw everywhere) -->
+  <svg class="svg-defs" width="0" height="0" aria-hidden="true" focusable="false">
+    <filter id="mini-pix2" x="-3" y="-3" width="22" height="23" filterUnits="userSpaceOnUse" primitiveUnits="userSpaceOnUse">
+      <feFlood x="0" y="0" width="1" height="1" flood-color="#000"/><feComposite width="1.5" height="1.5"/><feTile result="grid"/>
+      <feComposite in="SourceGraphic" in2="grid" operator="in"/><feMorphology operator="dilate" radius="0.75"/>
+    </filter>
+    <filter id="mini-pix4" x="-3" y="-3" width="22" height="23" filterUnits="userSpaceOnUse" primitiveUnits="userSpaceOnUse">
+      <feFlood x="0" y="0" width="1" height="1" flood-color="#000"/><feComposite width="2" height="2"/><feTile result="grid"/>
+      <feComposite in="SourceGraphic" in2="grid" operator="in"/><feMorphology operator="dilate" radius="1"/>
+    </filter>
+  </svg>
+  <main class="cabinet">
+    <div class="crt">
+      <div class="card-lights" aria-hidden="true"><i class="l"></i><i class="r"></i></div>
+      <button type="button" id="records-btn" class="records-btn" aria-label="Menu: rules, exploits and records" aria-expanded="false" aria-controls="records">
+        <!-- (in a game: PAUSE, or ← BACK to the main menu when there's nothing to pause) -->
+        <svg class="rb-pause" viewBox="19 1 22 22" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="21" y="3" width="6" height="18" rx="1"/>
+          <rect x="33" y="3" width="6" height="18" rx="1"/>
+        </svg>
+        <span class="rb-pause rb-pause-word" aria-hidden="true">PAUSE</span>
+        <span class="rb-back card-back" aria-hidden="true">&larr; BACK</span>
+        <svg class="rb-menu" viewBox="0 0 60 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M2 6 H18 M2 12 H18 M2 18 H18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M28 3 L22 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <g transform="translate(33 0)">
+            <path d="M7 3 H17 V9 A5 5 0 0 1 7 9 Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M7 5 H3 V7 A4 4 0 0 0 7.5 11 M17 5 H21 V7 A4 4 0 0 1 16.5 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M12 14 V18 M8 21 H16 M9.5 18 H14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </g>
+        </svg>
+      </button>
+      <div id="records" class="records" hidden>
+        <div class="card-top">
+        <!-- (PUZZLES shows the game's title over its name, as a game does: style.css's .records.puzzles) -->
+        <div class="card-head"><button type="button" class="card-back" data-close="records">&larr; BACK</button><h1 class="card-brand" aria-hidden="true">BYTE<span>FALL</span></h1><span class="title-wrap"><span id="records-title">// RULES &amp; RECORDS</span><span class="vs-setup-msg title-msg" id="records-title-msg" aria-live="polite"></span></span></div>
+        <div class="menu-tabs" role="tablist">
+          <button type="button" role="tab" data-pane="rules">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 2 H15 L19 6 V22 H6 Z M15 2 V6 H19 M9 11 H16 M9 14.5 H16 M9 18 H13" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+            RULES
+          </button>
+          <button type="button" role="tab" data-pane="records">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3 H17 V9 A5 5 0 0 1 7 9 Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M7 5 H3 V7 A4 4 0 0 0 7.5 11 M17 5 H21 V7 A4 4 0 0 1 16.5 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M12 14 V18 M8 21 H16 M9.5 18 H14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            RECORDS
+          </button>
+          <button type="button" role="tab" data-pane="notices">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 17 V11 A6 6 0 0 1 18 11 V17 L20 19 H4 Z M10 21.5 H14" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"/></svg>
+            NOTICES
+          </button>
+          <button type="button" role="tab" data-pane="exploits">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 10-13h-7z" fill="currentColor"/></svg>
+            EXPLOITS
+          </button>
+          <button type="button" role="tab" data-pane="store">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2 4 H5 L7.5 15 H18.5 L21 7 H6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="19.5" r="1.7" fill="currentColor"/><circle cx="17" cy="19.5" r="1.7" fill="currentColor"/></svg>
+            STORE
+          </button>
+        </div>
+        </div>
+        <div class="menu-pane" data-pane="rules">
+          <aside class="panel panel-rules" id="rules-panel">
+            <h2 class="rules-head">RULES <button type="button" class="tut-open" id="tutorial-btn">TUTORIAL</button></h2>
+            <p>Encrypted bits fall into the terminal. Drop each one into a column.</p>
+            <p>A bit decrypts when its number matches the length of the unbroken line it sits in, across or down. Decrypting can bring more bits down into new matches for a chain.</p>
+            <div class="store-rule" aria-hidden="true">================================================================================</div>
+            <h3 class="rules-sub">// SCORING</h3>
+            <p>A decrypted bit scores 10 plus its number (a <b>[4]</b> is 14), multiplied by the chain: the second link doubles, the third triples, and so on. Blocks wiped out by exploits score a flat 10.</p>
+            <p>On <b>Easy</b> and <b>Normal</b>, every 4 bits a single drop decrypts make a <b>NIBBLE</b>, worth 16 bonus points.</p>
+            <div class="store-rule" aria-hidden="true">================================================================================</div>
+            <h3 class="rules-sub">// LAYERS AND THE LINE</h3>
+            <p>Encryption layers <b>[=]</b> rise from below <span id="rules-pulse">every 8 drops</span>. Decrypt a bit beside one to peel a layer off; the second peel (<b>[-]</b>) reveals the bit hidden underneath.</p>
+            <p>Keep your columns below the <b>========</b> line. If anything is still above it once the decrypting stops, the trace completes and you're caught.</p>
+            <div class="store-rule" aria-hidden="true">================================================================================</div>
+            <h3 class="rules-sub">// EXPLOITS</h3>
+            <p>Each chain link lights a bar of the <b>CHAIN METER</b> beside the grid; fill all 5 for an <b>EXPLOIT</b> from your loadout. Tap the EXPLOIT button and it becomes your next drop.</p>
+            <p>The first three exploits are yours as they unlock; the rest are bought once with resources in EXPLOITS and kept until you <b>RANK UP</b>.</p>
+            <div class="store-rule" aria-hidden="true">================================================================================</div>
+            <h3 class="rules-sub">// THE BOTTOM ROW</h3>
+            <p>Either side of the EXPLOIT button, an <b>EXPLOIT SLOT</b> (<b>EXPLOIT L</b> and <b>EXPLOIT R</b>) holds an exploit you bring in from the main menu. An empty one is the <b>BLACK MARKET</b> once the first layer rises: something for sale, a new one every 4 drops (each slot's pips count its own). Once what you bought is used, its slot sits out the next drop, then shuffles to a new offer.</p>
+            <p>At each end, a <b>PATCH SLOT</b> sells a patch mid-game, applied the moment you buy it. It keeps the slot while it works; used up, the slot sits out the next drop, then sells another. The slots open as you level up.</p>
+            <p><b>BLACK BOXES</b> open into a random exploit, but some are <b>INFECTED</b>.</p>
+            <p>In CLASSIC and BLITZ, a bit freed from its last layer is now and then an <b>INFECTED BIT</b>: red, with a virus in its corner. Decrypt it with your next drop and it's quarantined for a ROOTKIT; leave it, and it goes off as an infection. <b>INFECTIONS: OFF</b> in the mode's settings on the main menu turns them off.</p>
+            <div class="store-rule" aria-hidden="true">================================================================================</div>
+            <h3 class="rules-sub">// CLASSIC'S GOAL</h3>
+            <p>Every CLASSIC game has a key to crack, its <b>ENCRYPTION STRENGTH</b> (128-BIT at 1,500 points on Normal). Crack it for KEYS, then <b>GO DEEPER</b> for a stronger key or <b>DISCONNECT</b> to end the game on a win. <b>GOAL: OFF</b> on the main menu plays CLASSIC endless instead.</p>
+            <div class="store-rule" aria-hidden="true">================================================================================</div>
+            <h3 class="rules-sub">// DIFFICULTY</h3>
+            <p><b>Easy</b> shows the next bit, and a drop that clears nothing only takes one bar off the CHAIN METER (on <b>Normal</b> it empties it).</p>
+            <p><b>Hard</b> is a full byte: an 8&times;8 terminal with bits up to 8, and new layers come faster as your score climbs. Every 8 bits a single drop decrypts make a <b>BYTE</b>, worth 256 bonus points, and 4 more a <b>NIBBLE</b>, worth 16. Its CHAIN METER empties after every chain: the 5 links have to come in one.</p>
+            <div class="store-rule" aria-hidden="true">================================================================================</div>
+            <h3 class="rules-sub">// RESOURCES AND LEVELS</h3>
+            <p>Decrypting earns <b>KEYS</b> and resources (the STORE's [i] says how), spent in the STORE, the BLACK MARKET and the PATCH SLOTS. <b>PATCHES</b> bought there are switched on from the main menu before a game.</p>
+            <p>Every bit you decrypt is XP, 100 bits a level. Exploits, slots, themes, fonts and tracks unlock by level; at Lv 80 you can <b>RANK UP</b> to start again, earning a little more each rank.</p>
+            <div class="store-rule" aria-hidden="true">================================================================================</div>
+            <p class="keys" id="rules-keys">Tap a column or its button, or press 1&ndash;7, to drop</p>
+          </aside>
+        </div>
+        <div class="menu-pane" data-pane="records">
+          <section class="panel panel-records">
+            <h2>RECORDS</h2>
+            <div class="records-tabs" role="tablist">
+              <button type="button" role="tab" data-tab="unlocks">UNLOCKS</button>
+              <button type="button" role="tab" data-tab="achievements">ACHIEVEMENTS</button>
+              <button type="button" role="tab" data-tab="stats">STATS</button>
+              <button type="button" role="tab" data-tab="history">HISTORY</button>
+            </div>
+            <div id="records-body" class="records-body"></div>
+          </section>
+        </div>
+        <!-- NOTICES (script.js's renderNotices): every notice the game has shown, newest first -->
+        <div class="menu-pane" data-pane="notices" hidden>
+          <section class="panel panel-notices">
+            <h2>NOTICES</h2>
+            <p class="notices-note">Newest at the top.</p>
+            <div class="notices-body" id="notices-body"></div>
+          </section>
+        </div>
+        <div class="menu-pane" data-pane="exploits">
+          <aside class="panel panel-hacks" id="hacks-panel">
+            <!-- (stays put: the title and the slots; the rest scrolls under it, as the STORE's) -->
+            <div class="hacks-top">
+              <h2>EXPLOITS <button type="button" class="store-info" data-info="exploits" aria-label="How exploits work" aria-haspopup="dialog" aria-controls="res-info"><span class="ico-br">[</span><svg viewBox="0 0 8 10" aria-hidden="true" shape-rendering="crispEdges"><path d="M3 0h2v2H3zM2 3h3v1H2zM3 4h2v4H3zM2 8h4v2H2z" fill="currentColor"/></svg><span class="ico-br">]</span></button></h2>
+              <!-- THE LOADOUT: a box for each slot, as the game's buttons, filled left to right (script.js) -->
+              <div class="slot-info loadout-boxes" id="slot-info" role="list" aria-label="Loadout"></div>
+            </div>
+            <div class="hacks-scroll">
+            <!-- (how exploits work: the [i] by the title) -->
+            <div class="hack-item" data-hack="worm-virus">
+              <h3><span class="icon">§</span> WORM VIRUS<span class="combo"></span></h3>
+              <p>Burrows down the column it lands in and wipes out every block there.</p>
+              <p class="lock-tag"></p>
+            </div>
+            <div class="hack-item" data-hack="buffer-overflow">
+              <h3><span class="icon">+</span> BUFFER OVERFLOW<span class="combo"></span></h3>
+              <p>Floods memory: every bit goes up by 1. A bit pushed past <span id="overflow-top">7</span> gets re-encrypted under two layers.</p>
+              <p class="lock-tag"></p>
+            </div>
+            <div class="hack-item" data-hack="trojan">
+              <h3><span class="icon">◈</span> TROJAN<span class="combo"></span></h3>
+              <p>Slips in quietly, then wipes out every block touching the spot where it lands.</p>
+              <p class="lock-tag"></p>
+            </div>
+            <div class="hack-item" data-hack="rng">
+              <h3><span class="icon">?</span> RNG<span class="combo"></span></h3>
+              <p>Scrambles every bit to a new random number.</p>
+              <p class="lock-tag"></p>
+            </div>
+            <div class="hack-item" data-hack="bitflip">
+              <h3><span class="icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M7 8l5-5 5 5M7 16l5 5 5-5"/></svg></span> BITFLIP<span class="combo"></span></h3>
+              <p>Turns every column upside down.</p>
+              <p class="lock-tag"></p>
+            </div>
+            <div class="hack-item" data-hack="dictionary-attack">
+              <h3><span class="icon">#</span> DICTIONARY ATTACK<span class="combo"></span></h3>
+              <p>Throws every known key at the encryption: every layer on the board loses one level at once.</p>
+              <p class="lock-tag"></p>
+            </div>
+            <div class="hack-item" data-hack="keylogger">
+              <h3><span class="icon">@</span> KEYLOGGER<span class="combo"></span></h3>
+              <p>Records the incoming stream: shows your next 3 bits for the next 10 drops.</p>
+              <p class="lock-tag"></p>
+            </div>
+            <div class="hack-item" data-hack="pivot">
+              <h3><span class="icon">&#8646;</span> PIVOT<span class="combo"></span></h3>
+              <p>Moves sideways through the network: the column it lands in swaps places with the one beside it. Pick the column, then tap the neighbor (&larr; or &rarr;) to swap with: once picked, you're committed. Edge columns swap with their only neighbor.</p>
+              <p class="lock-tag"></p>
+            </div>
+            <div class="hack-item" data-hack="swap">
+              <h3><span class="icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h7v7H3zM14 14h7v7h-7z"/><path d="M13.5 6.5h2a3 3 0 0 1 3 3v1.5M16.5 9l2 2 2-2M10.5 17.5h-2a3 3 0 0 1-3-3V13M3.5 15l2-2 2 2"/></svg></span> SWAP<span class="combo"></span></h3>
+              <p>Spoofs two addresses: any two bits on the board trade places. Armed, tap a bit on the grid, then another (tap the first again to put it back); they swap, and any match they make decrypts.</p>
+              <p class="lock-tag"></p>
+            </div>
+            <div class="hack-item" data-hack="packet-sniffer">
+              <h3><span class="icon">~</span> PACKET SNIFFER<span class="combo"></span></h3>
+              <p>Taps the incoming stream: for your next 3 bits, tap CURRENT (or press &uarr; / &darr;) to choose each one's number.</p>
+              <p class="lock-tag"></p>
+            </div>
+            <div class="hack-item" data-hack="logic-bomb">
+              <h3><span class="icon">!</span> LOGIC BOMB<span class="combo"></span></h3>
+              <p>Lands as a block counting down from 3. Three drops later it detonates, wiping out everything in the 5&times;5 around it.</p>
+              <p class="lock-tag"></p>
+            </div>
+            <div class="hack-item" data-hack="honeypot">
+              <h3><span class="icon">&#9678;</span> HONEYPOT<span class="combo"></span></h3>
+              <p>Lands as a trap. When a bit next to it decrypts, every bit with that number within 2 cells of the trap decrypts too.</p>
+              <p class="lock-tag"></p>
+            </div>
+            <div class="hack-item" data-hack="backdoor">
+              <h3><span class="icon">_</span> BACKDOOR<span class="combo"></span></h3>
+              <p>Opens a way in underneath: the entire bottom row is deleted, layers included, and everything drops by one.</p>
+              <p class="lock-tag"></p>
+            </div>
+            <div class="hack-item" data-hack="rainbow-table">
+              <h3><span class="icon">*</span> RAINBOW TABLE<span class="combo"></span></h3>
+              <p>Looks up the most common number on the board and decrypts every bit showing it.</p>
+              <p class="lock-tag"></p>
+            </div>
+            <div class="hack-item" data-hack="black-box">
+              <h3><span class="icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14M12 17.5v.5"/></svg></span> BLACK BOX<span class="combo"></span></h3>
+              <p>Nobody knows what's inside. Armed, it opens into a random exploit: any of them, equipped or not.</p>
+              <p class="lock-tag"></p>
+            </div>
+            </div>
+          </aside>
+        </div>
+        <!-- STORE (store.js): REMOVE ADS and FULL ACCESS, and RESTORE PURCHASES. A preview: nothing is
+             sold yet (the app will wire in Google Play's billing) -->
+        <div class="menu-pane" data-pane="store" hidden>
+          <section class="panel panel-store">
+            <div class="shop-sign store-sign" id="store-sign" aria-hidden="true"></div>
+            <!-- (stays put: the title, your KEYS and resources; the rest scrolls under it) -->
+            <div class="store-top">
+              <!-- (i: how each resource is earned; the resources' line opens it too) -->
+              <h2>STORE <button type="button" class="store-info" id="store-info" aria-label="How resources are earned" aria-haspopup="dialog" aria-controls="res-info"><span class="ico-br">[</span><svg viewBox="0 0 8 10" aria-hidden="true" shape-rendering="crispEdges"><path d="M3 0h2v2H3zM2 3h3v1H2zM3 4h2v4H3zM2 8h4v2H2z" fill="currentColor"/></svg><span class="ico-br">]</span></button></h2>
+              <!-- YOUR RESOURCES: KEYS first, then the rest, on one line (script.js's showWallet) -->
+              <!-- (YOUR RESOURCES and the line under it, framed as one: the tutorial points at them) -->
+              <div class="store-res" id="store-res">
+              <p class="store-keys">YOUR RESOURCES</p>
+              <div class="wallet store-wallet-btn" id="store-wallet" role="button" tabindex="0" aria-label="Resources: how each is earned" aria-haspopup="dialog" aria-controls="res-info"></div>
+              </div>
+              <!-- PRICES TODAY (progress.js's pricing, store.js): a gauge from LOW to HIGH, and why -->
+              <div class="price-gauge" id="price-gauge"></div>
+              <p class="store-msg" id="store-msg" aria-live="polite"></p>
+            </div>
+            <div class="store-scroll">
+            <!-- DAILY DROP (script.js): once a day, a free exploit and some KEYS, claimed here -->
+            <div class="store-item store-daily" data-item="daily-drop">
+              <h3>DAILY DROP <span class="store-price" id="daily-drop-state">FREE</span></h3>
+              <p>Once a day: a free exploit for your next game (not in DAILY, PUZZLE or VS), 25 KEYS, and 3 each of BUGS, CACHE and CRYPTO. Every 7th day in a row you play, 3 MASTER KEYS too.</p>
+              <p class="store-streak" id="login-streak"></p>
+              <button type="button" class="store-buy" id="daily-claim">CLAIM</button>
+              <!-- (what today's drop gave, once it's claimed: here, not as a pop-up) -->
+              <p class="daily-got" id="daily-got" hidden></p>
+            </div>
+            <!-- PATCHES (script.js's BOOSTERS, store.js): bought with KEYS -->
+            <div class="store-rule" aria-hidden="true">================================================================================</div>
+            <h3 class="store-sub" data-kind="patch" data-sec="patches">PATCHES <button type="button" class="store-info sub-info" data-info="boosters" aria-label="What patches are" aria-haspopup="dialog" aria-controls="res-info"><span class="ico-br">[</span><svg viewBox="0 0 8 10" aria-hidden="true" shape-rendering="crispEdges"><path d="M3 0h2v2H3zM2 3h3v1H2zM3 4h2v4H3zM2 8h4v2H2z" fill="currentColor"/></svg><span class="ico-br">]</span></button></h3>
+            <p class="store-sub-note">Switch one on from the main menu before a game.</p>
+            <div class="booster-shop" id="booster-shop"></div>
+            <div class="store-rule" aria-hidden="true">================================================================================</div>
+            <h3 class="store-sub" data-kind="exploit" data-sec="starters">TIER I EXPLOITS <button type="button" class="store-info sub-info" data-info="starters" aria-label="What exploits for a game are" aria-haspopup="dialog" aria-controls="res-info"><span class="ico-br">[</span><svg viewBox="0 0 8 10" aria-hidden="true" shape-rendering="crispEdges"><path d="M3 0h2v2H3zM2 3h3v1H2zM3 4h2v4H3zM2 8h4v2H2z" fill="currentColor"/></svg><span class="ico-br">]</span></button></h3>
+            <p class="store-sub-note">Exploits of your own to bring into a game, from EXPLOIT L or R.</p>
+            <!-- (each tier its own section, split by a ----- line as the EXPLOITS menu's: store.js adds II and III) -->
+            <div class="booster-shop" id="starter-shop"></div>
+            <div class="store-rule" aria-hidden="true">================================================================================</div>
+            <h3 class="store-sub" data-kind="box" data-sec="boxes">BLACK BOXES <button type="button" class="store-info sub-info" data-info="boxes" aria-label="What black boxes are" aria-haspopup="dialog" aria-controls="res-info"><span class="ico-br">[</span><svg viewBox="0 0 8 10" aria-hidden="true" shape-rendering="crispEdges"><path d="M3 0h2v2H3zM2 3h3v1H2zM3 4h2v4H3zM2 8h4v2H2z" fill="currentColor"/></svg><span class="ico-br">]</span></button></h3>
+            <p class="store-sub-note">A random exploit for less. Open it in a game.</p>
+            <div class="booster-shop" id="box-shop"></div>
+            <div class="box-warn" role="note" aria-label="Warning: black boxes can be infected">
+              <p class="box-warn-head">&#9888; BUYER BEWARE // NO REFUNDS</p>
+              <p>These come off the black market, and nobody checks what's inside. Some boxes are INFECTED, and it hits the moment you open one. Two infected boxes, two infections at once. Some want KEYS: tap them and they help themselves, and once they've got what they're after, they go. Or wait them out.</p>
+              <ul class="box-warn-list">
+                <li><b>ADWARE</b> blocks a column with an ad for 3 drops.</li>
+                <li><b>SPYWARE</b> hides your next 3 bits.</li>
+                <li><b>RANSOMWARE</b> locks 3 bits for 5 drops. They won't decrypt or fall.</li>
+                <li><b>MALWARE</b> scrambles what your board shows for 3 drops.</li>
+                <li><b>CRYPTOJACKER</b> steals the resources you earn for 5 drops.</li>
+                <li><b>SCAREWARE</b> throws up fake alerts for 8 drops, up to 4 at once. Find the little X.</li>
+              </ul>
+            </div>
+            <div class="store-rule" aria-hidden="true">================================================================================</div>
+            <h3 class="store-sub">SUPPORT THE GAME</h3>
+            <p>Everything in BYTEFALL can be earned by playing. These are for playing without ads, or having it all now.</p>
+            <p class="store-preview">PREVIEW // PURCHASES AREN'T OPEN YET</p>
+            <div class="store-item" data-item="remove-ads">
+              <h3>REMOVE ADS <span class="store-price" data-price="remove-ads"></span></h3>
+              <p>No more banner ads, for good. Everything else stays as it is: exploits, themes and tracks are still earned by playing.</p>
+              <button type="button" class="store-buy" data-buy="remove-ads">BUY</button>
+            </div>
+            <div class="store-item" data-item="full-access">
+              <h3>FULL ACCESS <span class="store-price" data-price="full-access"></span></h3>
+              <p>Everything that unlocks by level, unlocked now: HARD and INSANE, every CPU, exploit, theme, font and track. No ads either. Your levels, ranks and achievements still count what you play.</p>
+              <p class="store-upgrade" id="store-upgrade" hidden>You own REMOVE ADS, so FULL ACCESS is yours for the difference.</p>
+              <button type="button" class="store-buy" data-buy="full-access">BUY</button>
+            </div>
+            <button type="button" class="store-restore" id="store-restore">RESTORE PURCHASES</button>
+            <p class="store-note">Bought something on another device, or reinstalled the game? RESTORE PURCHASES brings back what your account owns.</p>
+            </div>
+          </section>
+        </div>
+        <!-- PUZZLES (script.js, renderPuzzleSelect): every puzzle of a set, in pages, to pick one -->
+        <div class="menu-pane" data-pane="puzzles" hidden>
+          <section class="panel panel-puzzles">
+            <div class="difficulty pz-tiers" role="group" aria-label="Puzzle set">
+              <button type="button" data-ptier-pick="easy">EASY</button>
+              <button type="button" data-ptier-pick="normal">NORMAL</button>
+              <button type="button" data-ptier-pick="hard">HARD</button>
+            </div>
+            <p class="pz-count"></p>
+            <div class="pz-pages" role="group" aria-label="Pages"></div>
+            <div class="pz-grid"></div>
+            <p class="pz-note">Solve a puzzle to open the next one. EASY and NORMAL are on the 7x7 grid, HARD on the 8x8.</p>
+          </section>
+        </div>
+        <!-- (on the other tabs: a way to the store while there are ads) -->
+        <button type="button" class="store-shortcut" id="store-shortcut">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2 4 H5 L7.5 15 H18.5 L21 7 H6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="19.5" r="1.7" fill="currentColor"/><circle cx="17" cy="19.5" r="1.7" fill="currentColor"/></svg>
+          REMOVE ADS
+        </button>
+      </div>
+      <button type="button" id="settings-btn" class="settings-btn" aria-label="Settings and music" aria-expanded="false" aria-controls="settings">
+        <svg viewBox="0 0 60 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="10" cy="12" r="5" stroke="currentColor" stroke-width="2"/>
+          <circle cx="10" cy="12" r="1.6" fill="currentColor"/>
+          <path d="M15 12 L18.2 12 M13.54 15.54 L15.8 17.8 M10 17 L10 20.2 M6.46 15.54 L4.2 17.8 M5 12 L1.8 12 M6.46 8.46 L4.2 6.2 M10 7 L10 3.8 M13.54 8.46 L15.8 6.2" stroke="currentColor" stroke-width="2.4"/>
+          <path d="M28 3 L22 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M33 9 H38 L44 4 V20 L38 15 H33 Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M48.5 9 Q50.5 12 48.5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M52 6.5 Q56 12 52 17.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <div id="settings" class="settings" hidden>
+        <div class="card-head"><button type="button" class="card-back" data-close="settings">&larr; BACK</button><span>// SETTINGS</span></div>
+        <!-- (the card stays put: its contents scroll in this box, as RULES, EXPLOITS and the STORE do) -->
+        <div class="panel settings-panel" id="settings-panel">
+        <!-- In sections: SOUND, PLAYLIST (a quick track change mid-game; the MUSIC PLAYER is for
+             listening), CONTROLS, DISPLAY, EXTRAS; notes only where an option isn't plain from
+             its name -->
+        <p class="settings-title settings-section settings-first">// SOUND</p>
+        <div class="settings-row">
+          <button type="button" id="sound-btn" class="toggle-btn">SOUND: ON</button>
+          <button type="button" id="music-btn" class="toggle-btn">MUSIC: ON</button>
+        </div>
+        <button type="button" id="sfx-theme-btn" class="toggle-btn on">SOUND EFFECTS: TERMINAL</button>
+        <p class="settings-note" id="sfx-theme-note"></p>
+        <button type="button" id="output-btn" class="toggle-btn on">SOUND OUTPUT: HEADPHONES</button>
+        <button type="button" id="music-layers-btn" class="toggle-btn on">GAME MUSIC: LAYERED</button>
+        <p class="settings-note">LAYERED: the music builds with your stack, a layer at a time, more coming in as the danger climbs. FULL: every layer in, the whole game long (as in the MUSIC PLAYER).</p>
+        <p class="settings-title settings-section">// PLAYLIST</p>
+        <button type="button" id="open-player-btn" class="toggle-btn on">OPEN MUSIC PLAYER</button>
+        <button type="button" id="viz-toggle" class="viz-toggle">
+          <canvas id="playlist-viz" aria-hidden="true"></canvas>
+        </button>
+        <ol id="playlist-tracks"></ol>
+        <p class="settings-note" id="gen-seed-note"></p>
+        <div class="settings-options">
+          <button type="button" id="play-mode-btn" class="toggle-btn">MODE: REPEAT</button>
+          <p class="settings-note">REPEAT loops the track. SEQUENCE and SHUFFLE play each track 4 times, then fade into the next (in order, or at random: SHUFFLE plays the official tracks only). RADIO is mostly brand-new GENERATED songs, with the SONG OF THE DAY and your tracks mixed in.</p>
+          <button type="button" id="bg-play-btn" class="toggle-btn">BACKGROUND PLAY: OFF</button>
+          <p class="settings-note">ON keeps the music going when you switch tabs or apps.</p>
+        </div>
+        <p class="settings-title settings-section">// CONTROLS</p>
+        <button type="button" id="buttons-pos-btn" class="toggle-btn on">DROP BUTTONS: BOTTOM</button>
+        <button type="button" id="vibrate-btn" class="toggle-btn" hidden>VIBRATION: ON</button>
+        <p class="settings-title settings-section" id="settings-display">// DISPLAY</p>
+        <p class="settings-title">THEME</p>
+        <div id="theme-list" class="theme-list" role="group" aria-label="Color theme"></div>
+        <p class="settings-note" id="theme-note"></p>
+        <p class="settings-title settings-sub">FONT</p>
+        <div id="font-list" class="theme-list font-list" role="group" aria-label="Font"></div>
+        <p class="settings-note" id="font-note"></p>
+        <button type="button" id="effects-btn" class="toggle-btn on settings-gap">EFFECTS: FULL</button>
+        <p class="settings-note">REDUCED, for slower phones: the backgrounds hold still, the glows go, and exploded bits break into fewer, bigger pieces.</p>
+        <button type="button" id="crt-btn" class="toggle-btn">CRT DISPLAY: OFF</button>
+        <p class="settings-note">The whole screen as an old tube: scanlines, the glass darker toward its rounded corners. FULL adds the phosphor stripes, a faint flicker and a slow rolling band.</p>
+        <p class="settings-title settings-section">// EXTRAS</p>
+        <button type="button" id="wanderers-btn" class="toggle-btn on">WANDERING BOTS: ON</button>
+        <p class="settings-note">The CPUs strolling along the bottom of the game card. Tap one to poke it.</p>
+        <button type="button" id="saver-btn" class="toggle-btn on">SCREEN SAVER: ON</button>
+        <p class="settings-note">After 90 seconds untouched (not in a timed game), the screen goes black but for the wandering bots, to save battery. Tap to come back.</p>
+        <!-- (the Android app's ads, where the law asks for a way to change the consent given: js/ads.js) -->
+        <div id="ad-privacy" hidden>
+          <p class="settings-title settings-section">// ADS</p>
+          <button type="button" id="ad-privacy-btn" class="toggle-btn">AD PRIVACY OPTIONS</button>
+          <p class="settings-note">How the ad banner may use your data: change the choice you made any time. REMOVE ADS in the STORE takes the banner away.</p>
+        </div>
+        <!-- (builds with TEST ads only: what the ads are doing, to see why a banner isn't there: js/ads.js) -->
+        <div id="ad-test" hidden>
+          <p class="settings-title settings-section">// TEST ADS</p>
+          <p class="settings-note" id="ad-status"></p>
+        </div>
+        <!-- (builds with TEST ads only: the STORE's purchases, owned or not, and a way to start over: js/store.js) -->
+        <div id="buy-test" hidden>
+          <p class="settings-title settings-section">// TEST PURCHASES</p>
+          <p class="settings-note" id="buy-test-status"></p>
+          <button type="button" id="buy-test-reset" class="toggle-btn">RESET TEST PURCHASES</button>
+          <p class="settings-note" id="buy-test-note"></p>
+        </div>
+        </div>
+      </div>
+      <!-- MAIN MENU (script.js, showHome): between the start screen and the game. The modes, the
+           picked mode's panel (its options, what it is, your best, PLAY) and the level bar; the
+           top corner icons stay for RULES & RECORDS and SETTINGS. In a game those two icons give
+           way to PAUSE, and the pause screen has them (and QUIT) -->
+      <section class="home" id="home" aria-label="Main menu" hidden>
+        <!-- (back to the title screen, as the phone's BACK does: script.js) -->
+        <button type="button" class="card-back home-back" id="home-back" aria-label="Back to the title screen">&larr; BACK</button>
+        <div class="home-head">
+          <h1>BYTE<span>FALL</span></h1>
+          <p class="home-tagline">// MAIN MENU</p>
+        </div>
+        <div class="level-bar" id="level-bar" aria-label="Level and Decryptor rank">
+          <span id="level-label">LV 0</span>
+          <span class="xp"><i id="xp-fill"></i></span>
+          <span id="xp-label">0 / 50 BITS</span>
+        </div>
+        <!-- KEYS and the RESOURCES, on one line as the STORE's (script.js's showWallet; ECONOMY.md) -->
+        <div class="wallet" id="wallet" aria-label="Resources"></div>
+        <div class="modes" role="group" aria-label="Game mode">
+          <button data-mode="daily">DAILY</button>
+          <button data-mode="classic">CLASSIC</button>
+          <button data-mode="puzzle">PUZZLE</button>
+          <button data-mode="blitz">BLITZ</button>
+          <button data-mode="vs">VS</button>
+          <button data-mode="zen">ZEN</button>
+        </div>
+        <div class="home-panel" id="home-panel">
+        <canvas class="vs-setup-bg home-panel-bg" id="home-panel-bg" aria-hidden="true"></canvas>
+        <!-- (a "can't do that" in the card's title, as VS's setup has it: HARD still locked, a slot not open yet) -->
+        <p class="vs-setup-msg home-panel-msg" id="home-panel-msg" aria-live="polite"></p>
+        <p class="home-mode-name" id="home-mode-name">// CLASSIC</p>
+        <!-- (what the mode puts in the panel, scrolling inside it on a short screen; PLAY stays under it) -->
+        <div class="home-panel-body" id="home-panel-body">
+        <p class="mode-info" id="mode-info"></p>
+        <!-- DAILY's setup (script.js's renderDailyCards): a card for each of today's games, its rules and how today stands,
+             in a row that slides sideways (the one in the middle is the pick), the pips under it showing where it is -->
+        <div class="daily-cards" id="daily-kinds" role="group" aria-label="Daily game" hidden>
+          <button type="button" data-daily="decrypt">DECRYPT</button>
+          <button type="button" data-daily="puzzle">PUZZLE</button>
+          <button type="button" data-daily="blitz">BLITZ</button>
+          <button type="button" data-daily="breach">BREACH</button>
+        </div>
+        <div class="daily-pips" id="daily-pips" aria-hidden="true" hidden><i data-daily="decrypt"></i><i data-daily="puzzle"></i><i data-daily="blitz"></i><i data-daily="breach"></i></div>
+        <!-- GAME SETTINGS (CLASSIC, BLITZ): what's set, on one button; a tap opens the mode's settings
+             card, #mode-settings (script.js) -->
+        <div class="difficulty home-opts single" id="mode-settings-row" hidden><button type="button" id="mode-settings-btn"><span class="opt-text">NORMAL // GOAL: ON // INFECTIONS: ON</span></button></div>
+        <!-- PATCHES and EXPLOIT L / R (script.js), as VS's settings: a button each, NAME: what's on it -->
+        <div class="difficulty home-opts single" id="booster-row" hidden></div>
+        <div class="difficulty home-opts" id="starter-row" hidden></div>
+        <p class="home-best" id="home-best"></p>
+        </div>
+        <button type="button" class="vs-start home-play" id="home-play">PLAY</button>
+        </div>
+        <div class="difficulty home-row">
+          <button type="button" id="home-exploits">EXPLOITS</button>
+          <button type="button" id="home-store">STORE</button>
+        </div>
+        <div class="difficulty home-row">
+          <button type="button" id="home-records">RULES &amp; RECORDS</button>
+          <button type="button" id="home-settings">SETTINGS</button>
+        </div>
+        <div class="difficulty home-row home-row-single">
+          <button type="button" id="home-tutorial">TUTORIAL</button>
+        </div>
+        <!-- (the Google Play release, a newer version out: UPDATE, then RESTART TO UPDATE, under them: js/app-update.js) -->
+        <div class="difficulty home-row home-row-single" id="home-update-row" hidden>
+          <button type="button" id="home-update">UPDATE</button>
+        </div>
+      </section>
+      <!-- The wanderers' lane: first in the card, so the HUD, the board's card, its buttons and the rest of the game paint over all of it (script.js's fitGameLane) -->
+      <div class="game-walkers" id="game-walkers" aria-hidden="true"></div>
+      <header>
+        <h1>BYTE<span>FALL</span></h1>
+        <p class="tagline" id="game-mode-label">// DECRYPTION TERMINAL</p>
+      </header>
+      <!-- THE NOTICE LINE (script.js's showToast): every notice in one spot on every screen, the line
+           under BYTEFALL, over its own words while it shows -->
+      <p class="notice-line" id="notice-line" role="status" aria-live="polite" hidden></p>
+
+      <div class="hud">
+        <div class="vs-status" id="vs-status"></div>
+        <div class="stat" id="score-stat">
+          <span class="label">SCORE</span>
+          <span class="value" id="score">0</span>
+          <!-- CLASSIC's ENCRYPTION STRENGTH: how far the score is toward cracking this game's key -->
+          <i class="goal-bar" id="goal-bar" hidden aria-hidden="true"><b></b></i>
+        </div>
+        <div class="stat stat-best" id="best-stat">
+          <span class="label">BEST</span>
+          <span class="value" id="best">0</span>
+        </div>
+        <div class="stat" id="chain-stat">
+          <span class="label">CHAIN</span>
+          <span class="value" id="chain">0x</span>
+        </div>
+        <div class="stat" id="pulse-stat">
+          <span class="label" id="pulse-label">ENCRYPT IN</span>
+          <span class="value" id="pulse-counter">8</span>
+          <span class="layer-mark" aria-hidden="true">=====</span>
+        </div>
+        <!-- VS CPU: BOT, the CPU's face (script.js sets its mood) -->
+        <div class="stat cpu-face" id="cpu-face" hidden data-mood="idle" data-level="normal" data-bot="bot" aria-hidden="true">
+          <!-- (the bots' pixel art: js/bot-svg.js, shared with the dev page's bot sandbox) -->
+          <span class="bot-say" id="bot-say">READY</span>
+        </div>
+        <!-- VS CPU: the opponent's board (press and hold to see it full size over yours) -->
+        <div class="stat cpu-stat" id="cpu-stat" hidden title="Press and hold to see the CPU's board full size">
+          <span class="label" id="cpu-label">CPU</span>
+          <div class="cpu-grid" id="cpu-grid" aria-label="The CPU's board"></div>
+          <!-- Before START: the picked bot's play style, over its (empty) board -->
+          <p class="cpu-desc" id="cpu-desc" hidden></p>
+        </div>
+        <!-- CURRENT and NEXT wrap together, so on narrow screens they share a row with CURRENT biggest -->
+        <div class="hud-bits" id="hud-bits">
+          <div class="stat stat-current">
+            <span class="label" id="current-label">CURRENT</span>
+            <div class="bit-sq" id="current-piece">?</div>
+            <i class="drop-timer" id="drop-timer" hidden aria-hidden="true"></i>
+            <i class="inf-badge" id="inf-badge" hidden></i>
+          </div>
+          <div class="stat" id="next-stat" hidden>
+            <span class="label" id="next-label">NEXT</span>
+            <div class="bit-row" id="next-piece"></div>
+          </div>
+          <!-- BLITZ's TIME (and a daily's BITS LEFT): a strip under CURRENT, as NEXT is -->
+          <div class="stat" id="time-stat" hidden>
+            <span class="label" id="time-label">TIME</span>
+            <span class="value" id="time-left">2:00</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="board-wrap">
+        <div class="board-frame">
+          <canvas id="board-bg" aria-hidden="true"></canvas>
+          <div id="board" class="board"></div>
+          <!-- The chain meter: a segmented bar up each side of the grid, lit link by link toward an
+               exploit, lit and pulsing while one is ready (script.js) -->
+          <!-- VS on points (ATTRITION, DEATHMATCH, TUG OF WAR): the score race above the grid -->
+          <div class="vs-bar" id="vs-bar" aria-hidden="true" hidden><i class="mine"></i><i class="theirs"></i><b class="mark"></b></div>
+          <div class="chain-meter left" aria-hidden="true"></div>
+          <div class="chain-meter right" aria-hidden="true"></div>
+          <div class="incoming" id="incoming" hidden></div>
+          <div class="board cpu-full" id="cpu-full" hidden aria-hidden="true"></div>
+          <!-- VS CPU: pick the opponent, then START (it bursts apart; it comes back after the match).
+               Laid out as the main menu's mode card, in the board's place until START -->
+          <div class="vs-setup" id="vs-setup" hidden>
+            <canvas class="vs-setup-bg" id="vs-setup-bg" aria-hidden="true"></canvas>
+            <p class="vs-setup-msg" id="vs-setup-msg" aria-live="polite"></p>
+            <p class="vs-setup-title">// VS CPU</p>
+            <!-- (the options, scrolling inside the card on a short screen; START stays under them) -->
+            <div class="vs-setup-body" id="vs-setup-body">
+            <p class="vs-setup-note" id="vs-setup-note">Your chains send encrypted blocks onto the CPU's board; its chains send them onto yours. First to overflow loses.</p>
+          <div class="difficulty vs-modes" id="vs-modes" role="group" aria-label="Game mode">
+            <button data-vsmode="classic">CLASSIC</button>
+            <button data-vsmode="attrition">ATTRITION</button>
+            <button data-vsmode="deathmatch">DEATHMATCH</button>
+            <button data-vsmode="tug">TUG OF WAR</button>
+          </div>
+          <div class="vs-goal-row" id="vs-goal-row">
+            <button type="button" id="vs-goal-down" aria-label="Lower">&minus;</button>
+            <span class="vs-goal" id="vs-goal">NO TARGET</span>
+            <button type="button" id="vs-goal-up" aria-label="Raise">+</button>
+          </div>
+          <div class="difficulty vs-bots" id="vs-bots" role="group" aria-label="Opponent">
+            <button data-bot="bot">BOT</button>
+            <button data-bot="grifter">GRIFTER</button>
+            <button data-bot="bunker">BUNKER</button>
+            <button data-bot="glitch">GLITCH</button>
+          </div>
+          <div class="difficulty" id="vs-levels" role="group" aria-label="CPU level">
+            <button data-vs="easy">EASY</button>
+            <button data-vs="normal">NORMAL</button>
+            <button data-vs="hard">HARD</button>
+            <button data-vs="insane">INSANE</button>
+          </div>
+          <div class="difficulty" id="vs-options-row">
+            <button type="button" id="vs-layers-btn">LAYERS: ON</button>
+            <button type="button" id="vs-exploits-btn">EXPLOITS: OFF</button>
+          </div>
+            </div>
+          <button type="button" class="vs-start" id="vs-start">START</button>
+          </div>
+          <!-- PAUSE (every mode but the tutorial): the board covered as on the VS setup screen;
+               RESTART, EXIT (VS: back to its setup) and QUIT (the game ended, to the main menu) take
+               two taps. No STORE in a game: it's on the main menu -->
+          <div class="vs-setup vs-pause" id="vs-pause" hidden>
+            <p class="vs-setup-title">// PAUSED</p>
+            <p class="vs-setup-note" id="pause-note">The CPU is waiting for you.</p>
+            <button type="button" class="vs-start" id="pause-resume">RESUME</button>
+            <div class="difficulty pause-row">
+              <button type="button" id="pause-restart">RESTART</button>
+              <button type="button" id="pause-exit">EXIT</button>
+            </div>
+            <div class="difficulty pause-row">
+              <button type="button" id="pause-records">RULES &amp; RECORDS</button>
+              <button type="button" id="pause-settings">SETTINGS</button>
+            </div>
+            <div class="difficulty pause-row">
+              <button type="button" id="pause-exploits">EXPLOITS</button>
+            </div>
+            <button type="button" class="pause-menu" id="pause-menu">QUIT</button>
+          </div>
+          <!-- CLASSIC's ENCRYPTION STRENGTH (script.js): the key's cracked, the game holds here: GO DEEPER
+               (a stronger key) or DISCONNECT (end the game, cracked) -->
+          <div class="vs-setup vs-pause goal-card" id="goal-card" hidden>
+            <p class="vs-setup-title" id="goal-title">// 128-BIT CRACKED</p>
+            <p class="goal-keys" id="goal-keys"></p>
+            <p class="vs-setup-note" id="goal-note"></p>
+            <button type="button" class="vs-start" id="goal-deeper">GO DEEPER</button>
+            <button type="button" class="pause-menu" id="goal-out">DISCONNECT</button>
+          </div>
+        </div>
+        <div id="column-buttons" class="column-buttons"></div>
+        <!-- PUZZLE: HINT and UNDO (boosters, script.js) -->
+        <div class="puzzle-tools" id="puzzle-tools" hidden>
+          <button type="button" id="puzzle-hint">HINT</button>
+          <button type="button" id="puzzle-undo">UNDO</button>
+        </div>
+        <!-- The EXPLOIT button: under the grid, a square the size of a bit's, set apart from the
+             drop buttons -->
+        <div class="exploit-row">
+          <button type="button" class="exploit-icon" id="exploit-btn" aria-label="Exploits">
+            <span class="exploit-glyph" id="exploit-glyph"></span>
+            <span class="exploit-count" id="exploit-count" hidden></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="message-slot">
+        <div id="message" class="message hidden"></div>
+      </div>
+
+      <!-- Lower corners: RESTART (QUIT in VS) during a session, and the exploit button -->
+      <!-- DEV badge (UNLOCK EVERYTHING on): a label only, behind the wanderers -->
+      <span class="dev-badge" id="dev-badge" hidden>DEV // EVERYTHING UNLOCKED</span>
+      <!-- The CPUs wandering along the bottom of the card (wanderers.js; SETTINGS → WANDERING BOTS) -->
+      <!-- (before the first drop it's EXIT instead: back to the title card) -->
+      <button type="button" class="corner-btn restart-icon" id="restart-btn" aria-label="Restart" title="Restart (press twice)" hidden>
+        <svg class="exit-glyph" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M10 4h9v16h-9" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M14 12H3M7 8l-4 4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <svg class="restart-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M23 4v6h-6"/>
+          <path d="M1 20v-6h6"/>
+          <path d="M3.5 9a9 9 0 0 1 14.9-3.4L23 10"/>
+          <path d="M1 14l4.6 4.4A9 9 0 0 0 20.5 15"/>
+        </svg>
+      </button>
+      <button type="button" class="corner-btn quit-icon" id="vs-quit" aria-label="Quit VS" title="Quit" hidden>
+        <svg class="pause-glyph" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="6" y="4" width="4" height="16" rx="1"/>
+          <rect x="14" y="4" width="4" height="16" rx="1"/>
+        </svg>
+        <svg class="quit-glyph" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M14 4H5v16h9" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M10 12h11M17 8l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+
+
+  </main>
+
+  <footer>
+    <div class="footer-text">
+      <p>BYTEFALL · &copy; 2026 <span>EmptyFishTank</span></p>
+      <p class="footer-meta">
+        <span class="meta-item">Build <span id="buildInfo">&mdash;</span></span>
+        <span class="meta-item">Updated <span id="updatedInfo">&mdash;</span></span>
+        <span class="meta-item">Commit <span id="commitInfo">&mdash;</span></span>
+      </p>
+    </div>
+    <a class="dev-link" href="dev-tools/" title="Dev and testing: the testers, the sound and music pages, the dev switches">&lt;/&gt; DEV</a>
+    <!-- (the Android test app: UNLOCK EVERYTHING here, where the DEV link is on the web; script.js) -->
+    <button type="button" class="dev-link dev-unlock-btn" id="dev-unlock-btn" hidden aria-pressed="false" title="UNLOCK EVERYTHING (testing): every level, theme, track and exploit open">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.6-1.7"/></svg>
+      <span id="dev-unlock-state">OFF</span>
+    </button>
+  </footer>
+
+  <!-- MUSIC PLAYER: the soundtrack on its own (every layer in), over the whole page -->
+  <div id="music-player" class="music-player" hidden role="dialog" aria-label="Music player">
+    <div class="mp-inner">
+      <!-- (BYTEFALL over its name, as a game's top: style.css) -->
+      <div class="card-head mp-head"><button type="button" class="card-back mp-close" id="mp-close" aria-label="Back: close the music player">&larr; BACK</button><h1 class="card-brand" aria-hidden="true">BYTE<span>FALL</span></h1><span class="mp-title">// MUSIC PLAYER</span></div>
+      <div class="mp-scroll"> <!-- (what scrolls, under the head, inside the card: as the game's own cards do) -->
+      <button type="button" class="mp-viz" id="mp-viz-btn" title="Switch the visualizer: tap the right side for the next style, the left side for the one before">
+        <canvas id="mp-viz" aria-hidden="true"></canvas>
+        <span class="mp-viz-name" id="mp-viz-name">// SPECTRUM</span>
+        <span class="mp-viz-hint">TAP TO SWITCH</span>
+        <!-- (full screen: play / pause, flashing in the middle when the middle is tapped) -->
+        <span class="mp-viz-flash" id="mp-viz-flash" aria-hidden="true">
+          <svg class="mp-flash-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"/></svg>
+          <svg class="mp-flash-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+        </span>
+      </button>
+      <!-- (full screen: its way back out, showing for a moment after each touch) -->
+      <button type="button" id="mp-viz-exit" class="mp-viz-exit" aria-label="Leave full screen" hidden>
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/></svg>
+      </button>
+      <!-- The styles drawer (player.js): the arrow under the visualizer's lower left pulls it out -->
+      <div class="mp-viz-drawer-wrap">
+        <button type="button" id="mp-viz-drawer-btn" class="mp-drawer-btn" aria-expanded="false" aria-controls="mp-viz-drawer" title="Every visualizer style">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>STYLES
+        </button>
+        <button type="button" id="mp-viz-source-btn" class="mp-drawer-btn mp-source-btn" title="What the visualizer shows: ByteFall's music, or music from other apps (the microphone on the web)">BYTEFALL</button>
+        <button type="button" id="mp-viz-full-btn" class="mp-drawer-btn mp-full-btn" title="The visualizer full screen: tap the middle to play or pause, either side to switch styles; the corner button, Esc or back to come out">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>FULL SCREEN
+        </button>
+        <div id="mp-viz-drawer" class="mp-viz-drawer" role="group" aria-label="Visualizer styles" hidden></div>
+      </div>
+      <div class="mp-now">
+        <span class="mp-label" id="mp-state">NOW PLAYING // FULL MIX</span>
+        <span class="mp-track" id="mp-track">01 BYTEFALL THEME</span>
+        <div class="mp-code">
+          <button type="button" id="mp-code-copy" class="mp-code-btn" hidden title="Copy this song's code, to play it again or share it">CODE</button>
+          <button type="button" id="mp-code-share" class="mp-code-btn code" hidden title="Copy the song's name and code, to share">SHARE</button>
+          <button type="button" id="mp-code-enter" class="mp-code-btn" title="Play a GENERATED song from its code">ENTER SONG CODE</button>
+          <form id="mp-code-form" class="mp-code-form" hidden>
+            <input id="mp-code-input" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="16" placeholder="H1-XXXXXXX" aria-label="Song code">
+            <button type="submit" class="mp-code-btn">PLAY</button>
+            <button type="button" id="mp-code-cancel" class="mp-code-btn" aria-label="Cancel">&times;</button>
+          </form>
+          <span class="mp-code-msg" id="mp-code-msg" aria-live="polite"></span>
+        </div>
+      </div>
+      <div class="mp-transport">
+        <button type="button" id="mp-prev" aria-label="Previous track">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="4" y="5" width="3" height="14"/><path d="M20 5v14L8 12z"/></svg>
+        </button>
+        <button type="button" id="mp-play" class="mp-play" aria-label="Play">
+          <svg class="mp-icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg>
+          <svg class="mp-icon-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+        </button>
+        <button type="button" id="mp-next" aria-label="Next track">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="17" y="5" width="3" height="14"/><path d="M4 5v14l12-7z"/></svg>
+        </button>
+      </div>
+      <div class="mp-modes" id="mp-modes" role="group" aria-label="Play mode">
+        <button type="button" data-mode="repeat">REPEAT</button>
+        <button type="button" data-mode="sequence">SEQUENCE</button>
+        <button type="button" data-mode="shuffle">SHUFFLE</button>
+        <button type="button" data-mode="radio">RADIO</button>
+      </div>
+      <ol class="mp-tracks" id="mp-tracks"></ol>
+      <!-- (only for a track whose tempo climbs: STACK OVERFLOW) -->
+      <button type="button" id="mp-output-btn" class="mp-bg" title="The same switch as SETTINGS' SOUND OUTPUT">SOUND OUTPUT: HEADPHONES</button>
+      <button type="button" id="mp-bg-btn" class="mp-bg">BACKGROUND PLAY: OFF</button>
+      <p class="mp-note">Every track plays with all its layers in. Tap STACK OVERFLOW or GENERATED again while it plays to switch it: FULL SPEED, or a RANDOM new song. BACKGROUND PLAY keeps it going with the screen off or in another app.</p>
+      </div>
+    </div>
+  </div>
+
+  <canvas id="board-fx" aria-hidden="true"></canvas>
+  <div class="crt-fx" aria-hidden="true"><i class="crt-roll"></i></div>
+
+  <!-- THE BLACK MARKET's window (script.js's openShop): a side slot's offer, its price, BUY -->
+  <div id="market-shop" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="shop-title">
+    <div class="overlay-box shop-box">
+      <div class="shop-sign" id="shop-sign" aria-hidden="true"></div>
+      <h2 id="shop-title">// BLACK MARKET</h2>
+      <div class="shop-item" id="shop-item"></div>
+      <div class="shop-costs" id="shop-costs"></div>
+      <p class="shop-note" id="shop-note"></p>
+      <div class="shop-foot">
+        <button type="button" id="shop-buy" class="shop-buy">BUY</button>
+        <button type="button" id="shop-master" class="shop-alt" hidden>USE A MASTER KEY</button>
+      </div>
+      <button type="button" id="shop-close" class="shop-x" aria-label="Close">&times;</button>
+    </div>
+  </div>
+  <!-- EXPLOIT L's or R's card (script.js): the exploits owned to bring in, to pick one for that slot -->
+  <!-- The STORE's i card (script.js's openResInfo): each resource and how it's earned -->
+  <div id="res-info" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="res-info-title">
+    <div class="overlay-box starter-pick-box res-info-box">
+      <h2 id="res-info-title">// HOW THEY'RE EARNED</h2>
+      <div class="res-info-list" id="res-info-list"></div>
+      <div class="res-info-body" id="res-info-body" hidden></div>
+      <p class="overlay-note res-info-note" id="res-info-note">CLASSIC and DAILY earn everything. BLITZ and ZEN earn resources at half the rate. VS earns only CRYPTO, ROOTKITS and MASTER KEYS. PUZZLE earns only KEYS (first solves). Bits cleared by an exploit earn nothing. Now and then a bot fishing off the pier reels one in for you. You can hold up to 999 of each resource; KEYS have no limit.</p>
+      <div class="starter-pick-foot">
+        <button type="button" id="res-info-close">DONE</button>
+      </div>
+    </div>
+  </div>
+  <!-- The main menu's PATCHES card (script.js's openBoosterPick): the ones owned for this mode, each switched on or off -->
+  <!-- GAME SETTINGS (script.js): the picked mode's settings, a section each, those that fit it: CLASSIC
+       its DIFFICULTY, GOAL and INFECTIONS, BLITZ its INFECTIONS. Mid-game a change asks CONFIRM? first
+       and starts a new game. (PATCHES and EXPLOIT L / R stay on the menu's panel) -->
+  <div id="mode-settings" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="mode-settings-title">
+    <div class="overlay-box starter-pick-box mode-settings-box">
+      <p class="vs-setup-msg ms-msg" id="mode-settings-msg" aria-live="polite"></p>
+      <h2 id="mode-settings-title">// CLASSIC SETTINGS</h2>
+      <div class="ms-sec" id="ms-difficulty">
+        <p class="ms-head">DIFFICULTY</p>
+        <div class="difficulty ms-row" id="difficulty-row" role="group" aria-label="Difficulty">
+          <button data-difficulty="easy">EASY</button>
+          <button data-difficulty="normal">NORMAL</button>
+          <button data-difficulty="hard">HARD</button>
+        </div>
+        <p class="ms-note">EASY shows your next bit. HARD is an 8x8 board, bits up to 8.</p>
+      </div>
+      <div class="ms-sec" id="ms-goal">
+        <p class="ms-head">GOAL</p>
+        <div class="difficulty ms-row one"><button type="button" id="goal-btn"><span class="opt-text">GOAL: ON</span></button></div>
+        <p class="ms-note">ON: each game has a key to crack for KEYS. OFF: endless.</p>
+      </div>
+      <div class="ms-sec" id="ms-infect">
+        <p class="ms-head">INFECTIONS</p>
+        <div class="difficulty ms-row one"><button type="button" id="infect-btn"><span class="opt-text">INFECTIONS: ON</span></button></div>
+        <p class="ms-note">ON: now and then a revealed bit is infected. OFF: none (a BLACK BOX still can be).</p>
+      </div>
+      <div class="starter-pick-foot">
+        <button type="button" id="mode-settings-close">DONE</button>
+      </div>
+    </div>
+  </div>
+  <div id="booster-pick" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="booster-pick-title">
+    <div class="overlay-box starter-pick-box">
+      <h2 id="booster-pick-title">// PATCHES</h2>
+      <p class="overlay-note" id="booster-pick-note"></p>
+      <div class="starter-pick-list" id="booster-pick-list"></div>
+      <div class="starter-pick-foot">
+        <button type="button" id="booster-pick-buy">GET PATCHES</button>
+        <button type="button" id="booster-pick-close">DONE</button>
+      </div>
+    </div>
+  </div>
+  <div id="starter-pick" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="starter-pick-title">
+    <div class="overlay-box starter-pick-box">
+      <h2 id="starter-pick-title">// LEFT SLOT</h2>
+      <p class="overlay-note" id="starter-pick-note"></p>
+      <div class="starter-pick-list" id="starter-pick-list"></div>
+      <div class="starter-pick-foot">
+        <button type="button" id="starter-pick-buy">BUY EXPLOITS</button>
+        <button type="button" id="starter-pick-close">CLOSE</button>
+      </div>
+    </div>
+  </div>
+  <div id="game-over" class="overlay hidden">
+    <div class="overlay-box">
+      <h2 id="overlay-title">TRACE COMPLETE</h2>
+      <p class="overlay-sub" id="overlay-sub">They found you.</p>
+      <p>Final score: <span id="final-score">0</span></p>
+      <p class="overlay-note" id="overlay-note" hidden></p>
+      <p class="overlay-keys" id="overlay-keys" hidden></p>
+      <!-- THE LEVEL METER (script.js, playXpMeter): this game's bits filling it, level by level -->
+      <div class="overlay-xp" id="overlay-xp" hidden>
+        <span class="oxp-level" id="oxp-level">LV 0</span>
+        <span class="oxp-bar"><i id="oxp-fill"></i></span>
+        <span class="oxp-gain" id="oxp-gain">+0 BITS</span>
+      </div>
+      <!-- EARNED: the achievements, unlocks and level ups the game held back till its end -->
+      <div class="overlay-earned" id="overlay-earned" hidden></div>
+      <p id="new-best" class="new-best" hidden>NEW HIGH SCORE</p>
+      <!-- (no space between the two: a space is a different width in each font) -->
+      <!-- (REPLAY: a PUZZLE just solved, beside NEXT PUZZLE: the same one again) -->
+      <button id="overlay-restart-btn">NEW SESSION</button><button id="overlay-replay-btn" class="overlay-replay-btn" hidden>REPLAY</button><button id="overlay-share-btn" class="overlay-share-btn" hidden>SHARE</button>
+      <button type="button" id="overlay-menu-btn" class="overlay-menu-btn">MAIN MENU</button>
+    </div>
+  </div>
+
+  <script src="js/bot-svg.js?v=582"></script>
+  <script src="js/unlocks.js?v=582"></script>
+  <script src="js/progress.js?v=582"></script>
+  <script src="js/music/output.js?v=582"></script>
+  <script src="js/music/mixes.js?v=582"></script>
+  <script src="js/sfx.js?v=582"></script>
+  <script src="js/music/music-bytefall-theme.js?v=582"></script>
+  <script src="js/music/music-sleep-mode.js?v=582"></script>
+  <script src="js/music/music-brute-force.js?v=582"></script>
+  <script src="js/music/music-deep-web.js?v=582"></script>
+  <script src="js/music/music-zero-day.js?v=582"></script>
+  <script src="js/music/music-system-restore.js?v=582"></script>
+  <script src="js/music/music-night-drive.js?v=582"></script>
+  <script src="js/music/music-standby-mode.js?v=582"></script>
+  <script src="js/music/music-core-dump.js?v=582"></script>
+  <script src="js/music/music-handshake.js?v=582"></script>
+  <script src="js/music/music-stack-overflow.js?v=582"></script>
+  <script src="js/music/music-generated.js?v=582"></script>
+  <script src="js/music/music.js?v=582"></script>
+  <script src="js/data/puzzles.js?v=582"></script>
+  <script src="js/data/daily-puzzles.js?v=582"></script>
+  <script src="js/data/hint-riddles.js?v=582"></script>
+  <script src="js/cpu.js?v=582"></script>
+  <script src="js/fx.js?v=582"></script>
+  <script src="js/viz.js?v=582"></script>
+  <script src="js/pixel.js?v=582"></script>
+  <script src="js/minibot.js?v=582"></script>
+  <script src="js/seasons.js?v=582"></script>
+  <script src="js/bigart.js?v=582"></script>
+  <script src="js/scenes.js?v=582"></script>
+  <script src="js/weather.js?v=582"></script>
+  <script src="js/visitors.js?v=582"></script>
+  <script src="js/data/bot-anims.js?v=582"></script>
+<script src="js/wanderers.js?v=582"></script>
+  <script src="js/tutorial.js?v=582"></script>
+  <script src="js/puzzle-sim.js?v=582"></script>
+  <script src="js/led-banner.js?v=582"></script>
+  <script src="js/infections.js?v=582"></script>
+  <script src="js/script.js?v=582"></script>
+  <script src="js/grid-bg.js?v=582"></script>
+  <script src="js/lights.js?v=582"></script>
+  <script src="js/inf-test.js?v=582"></script>
+  <script src="js/sfx-test.js?v=582"></script>
+  <script src="js/extsource.js?v=582"></script>
+  <script src="js/player.js?v=582"></script>
+  <script src="js/billing.js?v=582"></script>
+  <script src="js/store.js?v=582"></script>
+  <script src="js/ads-config.js?v=582"></script>
+  <script src="js/ads.js?v=582"></script>
+  <script src="js/app-update.js?v=582"></script>
+  <script src="js/start.js?v=582"></script>
+  <script src="js/place.js?v=582"></script>
+  <script src="js/saver.js?v=582"></script>
+</body>
+</html>
