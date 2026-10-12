@@ -4796,6 +4796,29 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 [data-theme="monochrome"] .rt-lines polyline { stroke: var(--fg); }
 @media (prefers-reduced-motion: reduce) { .mg-tile { transition: none; } .mg-tile.mg-born, .mg-tile.mg-pop, .rt-board.rt-won .cell.rt-cell { animation: none; } }
 
+/* DEFRAG (arcade-defrag.js): the 7x7 board's empty squares under, the bits over them, each number its own
+   color (--df), each sliding from square to square (--x, --y), new ones dropping in from above (the
+   layer clips them till they're on the board); an encrypted bit in the layers' stripes, its number dim;
+   an infected one ByteFall's red frame and virus; the one picked outlined; a swap that works pulsing
+   after a while idle (sized by arcade-defrag.js's fit: --df-cell) */
+.df-board { position: relative; isolation: isolate; flex: none; align-self: center; display: grid; grid-template-columns: repeat(7, var(--df-cell, 44px)); gap: 4px; padding: 8px; background: var(--board-bg); border: 1px solid var(--grid-line); border-radius: 6px; touch-action: none; -webkit-user-select: none; user-select: none; }
+.df-slot { width: var(--df-cell, 44px); height: var(--df-cell, 44px); }
+.df-tiles { position: absolute; left: 8px; top: 8px; width: calc(7 * var(--df-cell, 44px) + 24px); height: calc(7 * var(--df-cell, 44px) + 24px); overflow: hidden; pointer-events: none; }
+.df-tiles .cell.df-tile { position: absolute; left: 0; top: 0; width: var(--df-cell, 44px); height: var(--df-cell, 44px); font-size: calc(var(--df-cell, 44px) * 0.36); translate: calc(var(--x) * (var(--df-cell, 44px) + 4px)) calc(var(--y) * (var(--df-cell, 44px) + 4px)); transition: translate 0.15s ease-out; color: rgb(var(--df)); border-color: rgb(var(--df)); text-shadow: 0 0 6px rgba(var(--df), 0.7); background: linear-gradient(rgba(var(--df), 0.16), rgba(var(--df), 0.16)), var(--cell-bg); animation: none; }
+.df-tiles.df-falling .cell.df-tile { transition: translate 0.25s cubic-bezier(0.55, 0, 0.85, 0.55); }
+.df-tiles .cell.df-tile.df-lock { background: repeating-linear-gradient(45deg, var(--layer-a), var(--layer-a) 4px, var(--layer-b) 4px, var(--layer-b) 8px); border: 1px dashed var(--layer-border); color: var(--layer-text); text-shadow: none; }
+.df-tiles .cell.df-tile.infected { border-color: var(--danger); animation: infected-pulse 0.8s ease-in-out infinite; }
+.df-tiles .cell.df-tile.df-sel { outline: 2px solid var(--accent); outline-offset: 1px; z-index: 1; }
+.df-tiles .cell.df-tile.df-hinted { animation: df-hint 0.9s ease-in-out infinite; }
+.df-tiles .cell.df-tile.df-spread { animation: df-spread 0.4s ease-out 2, infected-pulse 0.8s ease-in-out 0.8s infinite; }
+.df-tiles .cell.df-tile.df-pop { animation: df-pop 0.22s ease-out forwards; z-index: 2; }
+@keyframes df-hint { 50% { transform: scale(1.1); box-shadow: 0 0 12px rgba(var(--df), 0.9); } }
+@keyframes df-spread { 50% { transform: scale(1.15); background: rgba(var(--danger-rgb), 0.45); } }
+@keyframes df-pop { 40% { transform: scale(1.2); filter: brightness(1.8); } 100% { transform: scale(0.3); opacity: 0; } }
+.df-board.df-over .df-tile { opacity: 0.6; }
+[data-theme="monochrome"] .df-tile { --df: var(--fg-rgb) !important; } /* (no colors: the numbers tell them apart) */
+@media (prefers-reduced-motion: reduce) { .df-tiles .cell.df-tile { transition: none; } .df-tiles .cell.df-tile:is(.df-pop, .df-hinted, .df-spread) { animation: none; } }
+
 /* THE ARCADE MENU (the main menu's ARCADE; arcade.js): every game as a card in a row that slides
    sideways under the card's sides, as DAILY's do, the one in the middle in focus (the rest dimmed),
    the pips under it lighting it; PLAY (RESUME, with NEW GAME beside it, when one's under way), and what
@@ -4831,6 +4854,7 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 .ac-demo .ck-stamp { padding: 5px 9px; font-size: 12px; letter-spacing: 2px; }
 .ac-demo .mg-board { --mg-cell: calc((min(100cqw, 100cqh) - 40px) / 4); }
 .ac-demo .rt-board { --rt-cell: calc((min(100cqw, 100cqh) - 38px) / 7); }
+.ac-demo .df-board { --df-cell: calc((min(100cqw, 100cqh) - 44px) / 7); }
 .arcade-menu-acts { display: flex; justify-content: center; gap: 8px; }
 .arcade-menu-acts .vs-start { display: flex; align-items: center; justify-content: center; height: 40px; padding: 0 34px; }
 .arcade-new { height: 40px; padding: 0 16px; background: transparent; border: 1px solid var(--fg-dim); border-radius: 4px; color: var(--fg); font-family: inherit; font-size: 13px; letter-spacing: 2px; cursor: pointer; }

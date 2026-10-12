@@ -9,7 +9,7 @@ together.
 
 | Resource | Icon | Rarity | Earned by | Rate |
 |---|---|---|---|---|
-| **KEYS** | key, the theme's accent | money | bits decrypted (any way), chains of 5 and 7, levels, achievements, first puzzle solves, the day's first daily game, the DAILY DROP, CLASSIC's ENCRYPTION STRENGTH cracks, CODE BREAKER codes broken, TRACE boards cleaned, MERGE games, CHECKSUM grids solved, ROUTING grids routed | 1 per 10 bits; +2 at a 5-link chain, +5 at 7; 10 a level; 10 an achievement; 5 the first daily game; 25 the DAILY DROP; a CODE BREAKER code 12 less its tries (11 in one, 2 in ten); a clean TRACE board 10; a MERGE game by its best bit ([7] 2, BYTE 5, WORD 8, DWORD 12, QWORD 20, past it 30, else 1); a valid CHECKSUM 15; a routed ROUTING grid 12; first puzzle solves 2 / 4 / 6 (EASY / NORMAL / HARD); a crack pays its target / 150 (NORMAL: 128-BIT at 1,500 pays 10, 192-BIT at 2,250 pays 15, 256-BIT at 3,000 pays 20, and on) |
+| **KEYS** | key, the theme's accent | money | bits decrypted (any way), chains of 5 and 7, levels, achievements, first puzzle solves, the day's first daily game, the DAILY DROP, CLASSIC's ENCRYPTION STRENGTH cracks, CODE BREAKER codes broken, TRACE boards cleaned, MERGE games, CHECKSUM grids solved, DEFRAG games, ROUTING grids routed | 1 per 10 bits; +2 at a 5-link chain, +5 at 7; 10 a level; 10 an achievement; 5 the first daily game; 25 the DAILY DROP; a CODE BREAKER code 12 less its tries (11 in one, 2 in ten); a clean TRACE board 10; a MERGE game by its best bit ([7] 2, BYTE 5, WORD 8, DWORD 12, QWORD 20, past it 30, else 1); a valid CHECKSUM 15; a DEFRAG game by its score (3, then 5 from 2,000, 8 from 3,000, 11 from 4,000, 14 from 5,500, 18 from 7,500); a routed ROUTING grid 12; first puzzle solves 2 / 4 / 6 (EASY / NORMAL / HARD); a crack pays its target / 150 (NORMAL: 128-BIT at 1,500 pays 10, 192-BIT at 2,250 pays 15, 256-BIT at 3,000 pays 20, and on) |
 | **BUGS** | bug with two antennae, roach brown `#b5824a` | common | bits decrypted **down a column** | 1 per 5 |
 | **CACHE** | stacked disks, light gray `#c8ccd0` | common | bits decrypted **across a row** | 1 per 5 |
 | **CRYPTO** | the game's coin: a hexagon with a C struck through twice, Bitcoin orange `#f7931a` | common | **chain links** from the 3rd on | 1 per link |
@@ -34,7 +34,7 @@ every theme (`--res-*` in `css/style.css`), but PAPER uses darker ones and MONOC
 |---|---|---|---|---|---|---|
 | CLASSIC | yes | full | full | full | full | levels |
 | DAILY (DECRYPT, PUZZLE, BLITZ, BREACH) | yes | full | full | full | full | levels, the day's first daily game |
-| DAILY ARCADE (CODE BREAKER, TRACE, MERGE, CHECKSUM, ROUTING) | its first move (the day's first daily game), a win (MERGE: every game, by its best bit) | no | no | no | no | the day's first daily game |
+| DAILY ARCADE (CODE BREAKER, TRACE, MERGE, CHECKSUM, DEFRAG, ROUTING) | its first move (the day's first daily game), a win (MERGE: every game, by its best bit; DEFRAG: every game, by its score) | no | no | no | no | the day's first daily game |
 | BLITZ | yes | half | half | half | half | levels |
 | ZEN | yes | half | half | half | half (no layers in ZEN) | levels |
 | VS | yes | no | no | full | cross decrypts and BYTES only (not layers) | levels, the day's first win |
