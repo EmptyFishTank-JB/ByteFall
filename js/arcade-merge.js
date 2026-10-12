@@ -140,6 +140,7 @@ Arcade.register('merge', (() => {
     elx.classList.add('disc');
     elx.dataset.v = String(v);
     elx.style.setProperty('--lv', Math.min(v, 12)); // (the higher, the brighter: style.css)
+    kit.spin(elx); // (SPECTRUM: each its own cycle, kept as it slides and merges)
     if (v <= 7) fillBit(elx, v);
     else {
       elx.classList.remove('has-glyph');

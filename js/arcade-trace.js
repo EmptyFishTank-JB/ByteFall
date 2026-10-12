@@ -111,7 +111,7 @@ Arcade.register('trace', (() => {
         const n = x.count[i];
         cls += n ? ' disc tr-open' : ' tr-open tr-zero';
         label = n ? `${n} infected round it` : 'Clear';
-        if (n) { c.className = cls; fillBit(c, n); c.setAttribute('aria-label', label); return; }
+        if (n) { c.className = cls; fillBit(c, n); kit.spin(c); c.setAttribute('aria-label', label); return; } // (SPECTRUM: each its own cycle)
       } else if (done && x.bad[i]) {
         cls += ` tr-bad${i === x.hit ? ' tr-hit' : ''}${x.won ? ' tr-caught' : ''}`;
         html = VIRUS_SVG;

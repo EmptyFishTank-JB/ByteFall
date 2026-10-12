@@ -355,6 +355,13 @@ const Arcade = (() => {
     }
     if (next < Infinity) demoTimer = setTimeout(demoTick, Math.max(16, next - performance.now()));
   }
+  // (SPECTRUM: a bit cycling on its own, as the game's bits do (script.js's spinBit). owner keeps its
+  // cycle through redraws that make the square anew; a square kept is given its cycle once, as setting it
+  // again would jump its hue)
+  function spin(el, owner = el) {
+    if (owner === el && el.style.getPropertyValue('--spin')) return;
+    spinBit(el, owner);
+  }
   // (a game's preview as a list of [what to do, ms till the next]: its step())
   const steps = (q) => ({ step() { const a = q.shift(); if (!a) return null; a[0](); return a[1]; } });
   const cardOf = (id) => cardsEl.querySelector(`[data-game="${id}"]`);
@@ -465,6 +472,6 @@ const Arcade = (() => {
     ORDER.push(id);
   }
   // (what the games use of the frame)
-  const kit = { save, moved, finish, refresh, note, fmtTime, steps, game: () => g, isOpen: () => !card.hidden };
+  const kit = { save, moved, finish, refresh, note, fmtTime, steps, spin, game: () => g, isOpen: () => !card.hidden };
   return { register, open, openMenu, close, back, rule, status, isOpen: () => !card.hidden, kit, games: GAMES };
 })();
