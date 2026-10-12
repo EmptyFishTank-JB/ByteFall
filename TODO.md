@@ -19,12 +19,12 @@ See [WANDERERS.md](WANDERERS.md) for the season-by-season chart and the full ide
 The DAILY menu's fifth card, ARCADE (`js/arcade.js` and a file per game): a different game each
 weekday on the bits and the board, not necessarily ByteFall's rules. Done: **Monday CODE BREAKER** (a
 4-bit code, 10 tries, pips at each row's right), **Tuesday TRACE** (Minesweeper's rules on encrypted
-blocks, infected bits under them) and **Thursday CHECKSUM** (a timed 9x9 Sudoku with notes and
-CONFIRM). Still to pick for Wednesday, Friday, Saturday and Sunday; ideas so far: MERGE (2048, two
-[7]s making a BYTE), DEFRAG (below), DECODE (Picross: the bots and visitors as its pictures),
-ROUTING (Flow), PURGE (below), a TETRIS-like one. Later for these: CHECKSUM's twist (some squares
-under layers; sum cages on harder days), TRACE's (a bigger board on some days), and RECORDS lines for
-their bests. Once every day has one, the ARCADE can count toward DAILY SWEEP (all five).
+blocks, infected bits under them), **Wednesday MERGE** (2048's, [1] to BYTE to QWORD, an encrypted
+block every 10 moves), **Thursday CHECKSUM** (a timed 9x9 Sudoku with notes and CONFIRM) and **Sunday
+ROUTING** (Flow's, 7 pairs on 7x7). Still to pick for Friday and Saturday; ideas so far: DEFRAG
+(below), DECODE (Picross: the bots and visitors as its pictures), PURGE (below), a TETRIS-like one.
+Later for these: CHECKSUM's twist (some squares under layers; sum cages on harder days), TRACE's (a
+bigger board on some days), ROUTING's (bigger grids, bridges), and RECORDS lines for their bests. Once every day has one, the ARCADE can count toward DAILY SWEEP (all five).
 
 ## The ARCADE (after the Android launch)
 

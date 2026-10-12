@@ -1,7 +1,8 @@
 // THE DAILY ARCADE: a game of its own each day on the DAILY menu's ARCADE card, played on a card over
 // the game card instead of ByteFall's board: MONDAY CODE BREAKER (arcade-codebreaker.js), TUESDAY
-// TRACE (arcade-trace.js), THURSDAY CHECKSUM (arcade-checksum.js); the other days' are still to come
-// (till then the card says which is next, and when). This is the frame they share: the card, its
+// TRACE (arcade-trace.js), WEDNESDAY MERGE (arcade-merge.js), THURSDAY CHECKSUM (arcade-checksum.js),
+// SUNDAY ROUTING (arcade-routing.js); Friday's and Saturday's are still to come (till then the card
+// says which is next, and when). This is the frame they share: the card, its
 // title and line (the clock, what's left, the result, a passing note), the game's own part under
 // them, and SHARE once it's over. One game a day, the same for everyone (seeded by the date, UTC),
 // saved as it goes (BACK keeps it); its first move is the day's daily game (the streak, the day's KEYS
@@ -27,7 +28,7 @@ const Arcade = (() => {
   const nextEl = el('arcade-next');
   const devEl = el('arcade-dev');
   const GAMES = {};
-  const DAYS = ['codebreaker', 'trace', null, 'checksum', null, null, null]; // (UTC weekdays, Monday first)
+  const DAYS = ['codebreaker', 'trace', 'merge', 'checksum', null, null, 'routing']; // (UTC weekdays, Monday first)
   let g = null; // the game on the card: { id, day, practice, played, paid, k (KEYS paid), t (ms on the clock), moved, ...its own }
   let noteUntil = 0;
   let noteTimer = 0;
@@ -105,19 +106,27 @@ const Arcade = (() => {
     noteTimer = setTimeout(() => { noteUntil = 0; showLine(); }, ms);
   }
   // THE CLOCK: a timed game's, while the card's up and the page in view (and, for 'move', from the
-  // first move), till it's over
-  function clock() {
+  // first move), till it's over. Running, it's left running (a redraw doesn't start it over); stopped,
+  // the time since its last tick counted first
+  function tick() {
+    const now = performance.now();
+    if (!document.hidden) g.t += now - clockAt;
+    clockAt = now;
+    showLine();
+  }
+  function stopClock() {
+    if (!clockTimer) return;
+    tick();
     clearInterval(clockTimer);
     clockTimer = 0;
+  }
+  function clock() {
     const timed = g && GAMES[g.id].timed;
-    if (!timed || card.hidden || over() || (timed === 'move' && !g.moved)) return;
+    const run = !!timed && !card.hidden && !over() && !(timed === 'move' && !g.moved);
+    if (!run) { stopClock(); return; }
+    if (clockTimer) return;
     clockAt = performance.now();
-    clockTimer = setInterval(() => {
-      const now = performance.now();
-      if (!document.hidden) g.t += now - clockAt;
-      clockAt = now;
-      showLine();
-    }, 250);
+    clockTimer = setInterval(tick, 250);
   }
   // (how it stands, after any change: the line, SHARE once it's over, the clock)
   function refresh() {
@@ -149,8 +158,7 @@ const Arcade = (() => {
   }
   // Over: the official game's result counted and paid once
   function finish() {
-    clearInterval(clockTimer);
-    clockTimer = 0;
+    stopClock();
     if (!g.practice && !g.paid) {
       g.k = GAMES[g.id].pay(g);
       g.paid = true;
@@ -186,6 +194,7 @@ const Arcade = (() => {
   // (a game on the card: its part shown, the others hidden; fresh: a new practice game of it)
   function play(id, fresh) {
     if (fresh) {
+      stopClock();
       if (g) { save(); if (GAMES[g.id].leave) GAMES[g.id].leave(); }
       g = practice(id);
     }
@@ -218,6 +227,7 @@ const Arcade = (() => {
     }
     const day = todayKey();
     if (!(g && g.id === id && g.day === day && g.practice === trial)) {
+      stopClock();
       if (g) { save(); if (GAMES[g.id].leave) GAMES[g.id].leave(); }
       g = trial ? practice(id) : load(id, day);
     }
@@ -229,8 +239,7 @@ const Arcade = (() => {
   }
   function close() {
     if (card.hidden) return;
-    clearInterval(clockTimer);
-    clockTimer = 0;
+    stopClock();
     save();
     if (g && GAMES[g.id].leave) GAMES[g.id].leave();
     card.hidden = true;

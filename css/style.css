@@ -4757,3 +4757,42 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 #ck-confirm { border-color: var(--accent); color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
 @media (hover: hover) { :is(.ck-acts button, #tr-mode, .arcade-dev button):hover { background: rgba(var(--fg-rgb), 0.12); } }
 @media (prefers-reduced-motion: reduce) { .ck-cell.ck-valid, .ck-board.shake, .tr-board .cell.tr-caught { animation: none; } .ck-stamp.show { animation-duration: 0.01s; animation-delay: 1.4s; opacity: 1; } }
+
+/* MERGE (arcade-merge.js): the 4x4 board's empty squares under, the bits over them, each sliding from
+   square to square (--x, --y) and glowing brighter the higher it is (--lv); a BYTE and up in the
+   accent, by name; an encrypted block in the layers' stripes. New bits appear once the slide's done,
+   a merged one pops (sized by arcade-merge.js's fit: --mg-cell) */
+.mg-board { position: relative; flex: none; align-self: center; display: grid; grid-template-columns: repeat(4, var(--mg-cell, 72px)); gap: 6px; padding: 8px; background: var(--board-bg); border: 1px solid var(--grid-line); border-radius: 6px; touch-action: none; -webkit-user-select: none; user-select: none; }
+.mg-slot { width: var(--mg-cell, 72px); height: var(--mg-cell, 72px); }
+.mg-tiles { position: absolute; left: 8px; top: 8px; pointer-events: none; }
+.mg-tile { position: absolute; left: 0; top: 0; width: var(--mg-cell, 72px); height: var(--mg-cell, 72px); font-size: calc(var(--mg-cell, 72px) * 0.3); translate: calc(var(--x) * (var(--mg-cell, 72px) + 6px)) calc(var(--y) * (var(--mg-cell, 72px) + 6px)); transition: translate 0.11s ease-out; } /* (placed by translate, so a pop's scale (transform) is about the bit's own middle) */
+.mg-tile.disc { background: linear-gradient(rgba(var(--fg-rgb), calc(0.025 * var(--lv, 1))), rgba(var(--fg-rgb), calc(0.025 * var(--lv, 1)))), var(--cell-bg); box-shadow: 0 0 calc(var(--lv, 1) * 1.4px) rgba(var(--fg-rgb), 0.45); }
+.mg-tile.mg-big { color: var(--accent); border-color: var(--accent); background: linear-gradient(rgba(var(--accent-rgb), calc(0.05 * (var(--lv, 8) - 6))), rgba(var(--accent-rgb), calc(0.05 * (var(--lv, 8) - 6)))), var(--cell-bg); text-shadow: 0 0 8px var(--accent); box-shadow: 0 0 calc(var(--lv, 8) * 1.6px) rgba(var(--accent-rgb), 0.55); font-size: calc(var(--mg-cell, 72px) * 0.21); letter-spacing: 1px; }
+.mg-tile.mg-lock { color: var(--layer-text); }
+.mg-tile.mg-born { animation: mg-born 0.18s ease-out 0.08s both; }
+@keyframes mg-born { from { opacity: 0; transform: scale(0.3); } }
+.mg-tile.mg-pop { animation: mg-pop 0.2s ease-out; }
+@keyframes mg-pop { 50% { transform: scale(1.16); } }
+.mg-board.mg-over .mg-tile { opacity: 0.6; }
+.mg-board .ck-stamp { z-index: 4; }
+.mg-hint { flex: none; margin: 0; text-align: center; font-size: 11.5px; letter-spacing: 1px; color: var(--fg-dim); }
+.mg-hint[hidden] { display: none; }
+
+/* ROUTING (arcade-routing.js): the 7x7 grid, each pair's bits in its own color (--rt), the lines drawn
+   under the squares (so a bit sits over its line's end), a square a line runs through tinted with it;
+   a linked pair's bits glowing (sized by arcade-routing.js's fit: --rt-cell) */
+.rt-board { position: relative; flex: none; align-self: center; display: grid; grid-template-columns: repeat(7, var(--rt-cell, 44px)); gap: 3px; padding: 7px; background: var(--board-bg); border: 1px solid var(--grid-line); border-radius: 6px; touch-action: none; -webkit-user-select: none; user-select: none; }
+.rt-cell { position: relative; z-index: 1; width: var(--rt-cell, 44px); height: var(--rt-cell, 44px); font-size: calc(var(--rt-cell, 44px) * 0.34); cursor: pointer; }
+.rt-cell.rt-on { background: rgba(var(--rt), 0.14); border-color: rgba(var(--rt), 0.35); }
+.cell.rt-cell.rt-end { color: rgb(var(--rt)); border-color: rgb(var(--rt)); text-shadow: 0 0 6px rgba(var(--rt), 0.7); background: linear-gradient(rgba(var(--rt), 0.14), rgba(var(--rt), 0.14)), var(--cell-bg); }
+.cell.rt-cell.rt-end.rt-linked { box-shadow: 0 0 10px rgba(var(--rt), 0.75); }
+.rt-lines { position: absolute; z-index: 0; left: 5.5px; top: 5.5px; width: calc(7 * (var(--rt-cell, 44px) + 3px)); height: calc(7 * (var(--rt-cell, 44px) + 3px)); pointer-events: none; overflow: visible; }
+.rt-lines polyline { fill: none; stroke-width: 0.3; stroke-linecap: round; stroke-linejoin: round; opacity: 0.8; }
+.rt-lines polyline.done { opacity: 1; }
+.rt-board.rt-won .cell.rt-cell { animation: ck-valid 0.5s ease-out both; }
+.rt-acts { flex: none; display: flex; align-items: center; gap: 12px; }
+.rt-acts[hidden] { display: none; }
+#rt-clear { flex: none; height: 40px; padding: 0 16px; background: transparent; border: 1px solid var(--fg); border-radius: 4px; color: var(--fg); font-family: inherit; font-size: 13px; letter-spacing: 2px; cursor: pointer; }
+.rt-hint { flex: 1; margin: 0; text-align: center; font-size: 11.5px; letter-spacing: 1px; color: var(--fg-dim); }
+@media (hover: hover) { #rt-clear:hover { background: rgba(var(--fg-rgb), 0.12); } }
+@media (prefers-reduced-motion: reduce) { .mg-tile { transition: none; } .mg-tile.mg-born, .mg-tile.mg-pop, .rt-board.rt-won .cell.rt-cell { animation: none; } }
