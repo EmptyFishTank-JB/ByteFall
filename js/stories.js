@@ -1,11 +1,11 @@
-// THE STORIES: CLASSIC's GOAL as a story (the files: js/data/stories.js; the plan: docs/STORIES.md).
+// THE STORIES: STORY (CLASSIC's other side) and its story (the files: js/data/stories.js; the plan: docs/STORIES.md).
 // Each key cracked recovers the next FILE of the story being decrypted, typed out on the cracked
 // card as the terminal would (a tap on it, or REDUCED EFFECTS, shows it whole). A chapter's files
 // only come from keys at least STORY_GATES deep: a key too shallow still pays its KEYS, and the
 // card says what it would take. A story finished opens the next, picked at once.
 // RULES & RECORDS → ARCHIVE: every story, its files recovered so far to read again (new ones marked
 // till they're read), the rest still ENCRYPTED with the key they need, and DECRYPT THIS STORY to
-// pick it. The main menu's STORY button (CLASSIC, GOAL: ON) says which and how far, and opens it.
+// pick it. In STORY the main menu's story button says which and how far, and opens it.
 const Stories = (() => {
   const PER_CHAPTER = 4;
   const byId = (id) => STORIES.find((s) => s.id === id);
@@ -107,7 +107,7 @@ const Stories = (() => {
   }
   function listView(el) {
     const pick = picked();
-    el.innerHTML = '<p class="archive-note">Every key cracked in CLASSIC (GOAL: ON) recovers the next file of the story you\'re decrypting. Deeper chapters need deeper keys.</p>'
+    el.innerHTML = '<p class="archive-note">Every key cracked in STORY (tap CLASSIC again on the main menu) recovers the next file of the story you\'re decrypting. Deeper chapters need deeper keys.</p>'
       + STORIES.map((s, i) => {
         const open = isOpen(s);
         const state = !open ? `LOCKED // FINISH ${STORIES[i - 1].title}` : done(s) ? 'COMPLETE' : s === pick ? 'DECRYPTING' : `${got(s) ? 'PAUSED' : 'NOT STARTED'}`;
@@ -170,7 +170,7 @@ const Stories = (() => {
     for (const el of document.querySelectorAll('.menu-tabs [data-pane="archive"], #story-row button')) el.classList.toggle('has-unread', any);
   }
 
-  // THE MAIN MENU's STORY button (CLASSIC with GOAL: ON): which story and how far; a tap opens it in
+  // THE MAIN MENU's story button (in STORY): which story and how far; a tap opens it in
   // the ARCHIVE
   const FOLDER_SVG = '<svg class="story-ico" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 5 H9.5 L11.5 7.5 H21 V19 H3 Z M3 10 H21" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
   function refreshRow() {
@@ -182,7 +182,7 @@ const Stories = (() => {
     row.innerHTML = '';
     const b = document.createElement('button');
     b.type = 'button';
-    b.innerHTML = `<span class="opt-text">${FOLDER_SVG}STORY: ${esc(s.title)} // ${done(s) ? 'COMPLETE' : `${got(s)} / ${s.files.length}`}</span>`;
+    b.innerHTML = `<span class="opt-text">${FOLDER_SVG}${esc(s.title)} // ${done(s) ? 'COMPLETE' : `${got(s)} / ${s.files.length}`}</span>`;
     b.setAttribute('aria-label', `Story: ${s.title}, ${got(s)} of ${s.files.length} files. Tap to read it in the archive`);
     b.addEventListener('click', () => { SFX.play('click'); view = s.id; setRecordsOpen(true, 'archive'); });
     row.appendChild(b);

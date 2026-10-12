@@ -1,4 +1,4 @@
-// THE STORIES (CLASSIC's GOAL; script.js's Stories, docs/STORIES.md): each key cracked recovers the
+// THE STORIES (STORY, CLASSIC's other side; js/stories.js, docs/STORIES.md): each key cracked recovers the
 // next FILE of the story being decrypted, shown on the cracked card and kept in the ARCHIVE. Three
 // chapters of four files a story; a chapter's files only come from keys at least STORY_GATES deep
 // (any key, then 256-BIT, then 512-BIT). A story finished opens the next. A file: doc, its header
