@@ -5105,13 +5105,11 @@ function showPickup(before) {
   const now = Progress.runRes();
   const parts = Progress.resIds().filter((id) => (now[id] || 0) > (before[id] || 0)).map((id) => resChip(id, `+${now[id] - (before[id] || 0)}`));
   if (!parts.length) return;
-  const box = document.getElementById('score-stat');
+  const box = document.getElementById('chain-stat'); // (chains earn them: in CHAIN, under its value)
   box.querySelectorAll('.res-pop').forEach((old) => old.remove());
   const el = document.createElement('div');
   el.className = 'res-pop';
   el.innerHTML = parts.join('');
-  const label = box.querySelector('.label').getBoundingClientRect();
-  el.style.bottom = `${Math.max(2, label.top - box.getBoundingClientRect().top - 1).toFixed(1)}px`; // (less the box's border)
   box.appendChild(el);
   let size = parseFloat(getComputedStyle(el).fontSize);
   while (el.scrollWidth > el.clientWidth + 0.5 && size > 6) el.style.fontSize = `${(size -= 0.5)}px`;
