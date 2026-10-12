@@ -97,6 +97,10 @@
   if (screen.hidden) inGameHistory();
   window.addEventListener('popstate', () => {
     if (!screen.hidden) return; // (on this screen: the next back leaves)
+    if (window.closeOverCard && window.closeOverCard()) { // (an [i] or a small card over it: just that)
+      history.pushState({ bytefall: 'game' }, '');
+      return;
+    }
     // An open panel closes first; a game goes back to the main menu (paused, for RESUME); the
     // tutorial stays (it has its own EXIT); the main menu goes back to this screen
     const player = document.getElementById('music-player');
