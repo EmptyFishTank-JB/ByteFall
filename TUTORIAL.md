@@ -1145,7 +1145,7 @@ TOTAL +34
 
 **Says:**
 
-> In STORY, every game has a key to crack: its ENCRYPTION STRENGTH, shown under BYTEFALL. It starts at 128-BIT, cracked at 1,500 points on NORMAL.
+> In STORY, every game has a key to crack: its ENCRYPTION STRENGTH, shown under BYTEFALL. It starts at 128-BIT, cracked at 1,500 points.
 
 - **Asks you to**: Tap NEXT.
 - **Lights up**: the line under BYTEFALL (in focus) and a sample ENCRYPTION STRENGTH line and SCORE bar (for the lesson)
@@ -1161,7 +1161,7 @@ TOTAL +34
 
 **Says:**
 
-> The bar along the bottom of SCORE fills toward it. Crack it for KEYS, then GO DEEPER for a stronger key and more KEYS, or DISCONNECT and end the game on a win.
+> The bar along the bottom of SCORE fills toward it. Crack it for KEYS, then GO DEEPER for a stronger key and more KEYS (each one harder: its layers come sooner), or DISCONNECT and end the game on a win.
 
 - **Asks you to**: Tap NEXT.
 - **Lights up**: the bar along the bottom of SCORE (in focus) and a sample ENCRYPTION STRENGTH line and SCORE bar (for the lesson)

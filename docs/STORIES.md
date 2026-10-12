@@ -16,11 +16,15 @@ PATIENT ZERO, outlined below, are written in full there. Edit the files freely; 
   next unread file of the picked story. A game that goes deep recovers several, one per key.
 - **Chapters are gated by key depth.** Each story has 3 chapters of 4 files:
 
-  | Chapter | Files | Recovered by cracking | NORMAL score | EASY | HARD |
-  |---|---|---|---|---|---|
-  | 1 | 1-4 | any key (128-BIT and up) | 1,500 | 1,000 | 2,000 |
-  | 2 | 5-8 | 256-BIT or deeper | 3,000 | 2,000 | 4,000 |
-  | 3 | 9-12 | 512-BIT or deeper | 4,500 | 3,000 | 6,000 |
+  | Chapter | Files | Recovered by cracking | Score | Layers every |
+  |---|---|---|---|---|
+  | 1 | 1-4 | any key (128-BIT and up) | 1,500 | 8 drops |
+  | 2 | 5-8 | 256-BIT or deeper | 3,000 | 7 drops |
+  | 3 | 9-12 | 512-BIT or deeper | 4,500 | 6 drops |
+
+  STORY has no settings: NORMAL's 7x7 board, INFECTIONS on. Each key deeper is harder (script.js
+  `storyPace`): layers a drop sooner every two keys (8, 8, 7, 7, 6, 6, 5, 5, then 4) and infections
+  likelier (4% at 128-BIT, +1% a key, up to 8%).
 
   A key too shallow for the next file still pays its KEYS, and the card says what it would
   take: `FILE 5 // ENCRYPTED DEEPER // CRACK 256-BIT TO RECOVER IT`. That makes GO DEEPER the
