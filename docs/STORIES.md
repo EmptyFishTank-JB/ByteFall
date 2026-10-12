@@ -19,12 +19,31 @@ PATIENT ZERO, outlined below, are written in full there. Edit the files freely; 
   | Chapter | Files | Recovered by cracking | Score | Layers every |
   |---|---|---|---|---|
   | 1 | 1-4 | any key (128-BIT and up) | 1,500 | 8 drops |
-  | 2 | 5-8 | 256-BIT or deeper | 3,000 | 7 drops |
-  | 3 | 9-12 | 512-BIT or deeper | 4,500 | 6 drops |
+  | 2 | 5-8 | 256-BIT or deeper | 4,500 | 6 drops |
+  | 3 | 9-12 | 512-BIT or deeper | 7,500 | 5 drops |
 
   STORY has no settings: NORMAL's 7x7 board, INFECTIONS on. Each key deeper is harder (script.js
-  `storyPace`): layers a drop sooner every two keys (8, 8, 7, 7, 6, 6, 5, 5, then 4) and infections
-  likelier (4% at 128-BIT, +1% a key, up to 8%).
+  `goalTarget`, `storyPace`): 1,500 more points to crack (1,500, 3,000, 4,500...), its layers sooner
+  (every 8, 7, 6, 6, 5, 5, then 4 drops) and infections likelier (4% at 128-BIT, +1.5% a key, up to
+  10%).
+- **What the story reveals.** Files carry `reveals` (`js/data/stories.js`): the exploits, BLACK BOXES
+  and patches usable in STORY, and THE BLACK MARKET. Nothing comes into a STORY game with you (no
+  patches or exploits picked on the menu); once a file has revealed one of its kind, a PATCHES or
+  EXPLOITS button takes a side slot's place in the game, opening a card of the revealed ones you own
+  (bought in the STORE, or on the BLACK MARKET from the same card once it's revealed: 3 offers of
+  what's revealed, new each key), up to 2 of each used a key. The chain meter earns only revealed
+  exploits (none yet: no meter). Owned or unlocked elsewhere doesn't count.
+
+  | Story | File | Reveals |
+  |---|---|---|
+  | THE TRACE | 1 | RNG, BITFLIP |
+  | | 2 / 3 / 4 / 5 | HEAD START / BUFFER OVERFLOW / TROJAN / LOOKAHEAD |
+  | | 6 | THE BLACK MARKET (M.: "a market that doesn't ask questions") |
+  | | 7 / 8 / 9 / 12 | PIVOT / SWAP / FIREWALL DELAY / WORM VIRUS |
+  | THE FOUR | 2 / 5 / 6 | KEYLOGGER / BACKDOOR / RESTORE POINT |
+  | | 7 / 8 / 10 / 12 | PACKET SNIFFER / LOGIC BOMB / HONEYPOT / DICTIONARY ATTACK |
+  | PATIENT ZERO | 1 / 3 / 5 / 7 | BLACK BOX I / BLACK BOX II / RAINBOW TABLE / BLACK BOX III |
+  | | 9 / 12 | BLACK BOX (the exploit) / ANTIVIRUS |
 
   A key too shallow for the next file still pays its KEYS, and the card says what it would
   take: `FILE 5 // ENCRYPTED DEEPER // CRACK 256-BIT TO RECOVER IT`. That makes GO DEEPER the

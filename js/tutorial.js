@@ -139,7 +139,7 @@ const Tutorial = (() => {
     // STORY
     { text: 'In STORY, every game has a key to crack: its ENCRYPTION STRENGTH, shown under BYTEFALL. It starts at 128-BIT, cracked at 1,500 points.', closeMenus: true, demo: 'goal', focus: ['#game-mode-label'], roomy: true, next: true },
     { text: 'The bar along the bottom of SCORE fills toward it. Crack it for KEYS, then GO DEEPER for a stronger key and more KEYS (each one harder: its layers come sooner), or DISCONNECT and end the game on a win.', demo: 'goal', focus: ['#goal-bar'], roomy: true, next: true, mood: 'happy' },
-    { text: 'Every key you crack also recovers a FILE of a STORY, typed out on the cracked card. Deeper chapters need deeper keys: 256-BIT, then 512-BIT.', demo: 'goal', focus: ['#game-mode-label'], roomy: true, next: true, mood: 'devious' },
+    { text: 'Every key you crack also recovers a FILE of a STORY, typed out on the cracked card. Deeper chapters need deeper keys: 256-BIT, then 512-BIT. Some files reveal the exploits and patches you can use in STORY.', demo: 'goal', focus: ['#game-mode-label'], roomy: true, next: true, mood: 'devious' },
     { text: 'On the main menu, tap CLASSIC again to switch it to STORY (and again for CLASSIC). In STORY, the button under its settings shows the story you’re decrypting; tap it to read the files in the ARCHIVE.', home: true, focus: ['.modes button[data-mode="classic"]'], float: true, next: true },
     { text: 'Before a game, PATCHES and EXPLOITS on the main menu let you bring an edge in (up to two of each), once you have some.', home: true, focus: ['#booster-row', '#starter-row'], float: true, next: true },
     { text: 'That’s everything you need to know. Good luck, decryptor.', home: true, float: true, done: true, mood: 'happy' },
