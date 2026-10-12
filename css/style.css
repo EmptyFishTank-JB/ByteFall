@@ -2552,6 +2552,8 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
 .start-intro h1 .intro-l.scrambled { color: var(--fg-dim); text-shadow: none; }
 .start-intro .intro-cursor { color: transparent; background: var(--fg-dim); }
 .start-intro .intro-rest { visibility: hidden; }
+/* (BIT's ghosts: copies of the title left behind as it falls, and where it lands, fading) */
+.start-intro .intro-ghost { position: absolute; margin: 0; opacity: 0; white-space: nowrap; pointer-events: none; filter: blur(0.6px); }
 /* (DROP's landing: an amber band out from under the title, bursting into pixels and binary dust) */
 .intro-band { position: absolute; height: 8px; border-radius: 2px; background: var(--accent); box-shadow: 0 0 10px var(--accent), 0 0 24px rgba(var(--accent-rgb), 0.7); transform: scaleX(0); }
 

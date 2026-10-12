@@ -1110,7 +1110,8 @@ seen anywhere else first; `js/start.js`). **On a launch the title plays an intro
 random (never the same one twice running; `?intro=drop`, `bit`, `rain`, `decrypt` or `power` picks
 one): DROP, the title falling from the top, gathering speed, and landing hard (a squash, a jolt, and
 an amber band under it bursting into pixels and binary dust); BIT, the title falling as a bit does on
-the board, a row at a time, landing with a bit's bump and a puff; RAIN, its letters falling one by one
+the board, a row at a time, a fading ghost of it left at each row it passes, landing with a bit's
+bump, a puff and a ghost swelling out from where it landed; RAIN, its letters falling one by one
 like bits down their columns, each landing in a puff; DECRYPT, scrambled glyphs locking into its
 letters one by one; POWER, an old CRT switching on, a bright line opening out into the title. Then the
 tagline types in behind a block cursor and START flickers on like a neon tube catching. The intro
