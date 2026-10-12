@@ -1,8 +1,8 @@
 // THE ARCADE: games of their own on a card over the game card, not ByteFall's board: CODE BREAKER
 // (arcade-codebreaker.js), TRACE (arcade-trace.js), MERGE (arcade-merge.js), CHECKSUM
-// (arcade-checksum.js) and ROUTING (arcade-routing.js). Two ways in:
+// (arcade-checksum.js), DEFRAG (arcade-defrag.js) and ROUTING (arcade-routing.js). Two ways in:
 //   THE DAILY ARCADE (DAILY's ARCADE card): the day's game, MONDAY CODE BREAKER, TUESDAY TRACE,
-//     WEDNESDAY MERGE, THURSDAY CHECKSUM, SUNDAY ROUTING (Friday's and Saturday's still to come: PLAY
+//     WEDNESDAY MERGE, THURSDAY CHECKSUM, FRIDAY DEFRAG, SUNDAY ROUTING (Saturday's still to come: PLAY
 //     then opens the ARCADE menu). One game a day, the same for everyone (seeded by the date, UTC),
 //     saved as it goes; its first move is the day's daily game (the streak, the day's KEYS and MASTER
 //     KEY), and its result pays KEYS; SHARE once it's over.
@@ -40,7 +40,7 @@ const Arcade = (() => {
   const menuNew = el('arcade-new');
   const GAMES = {};
   const ORDER = []; // (as registered: the week's order)
-  const DAYS = ['codebreaker', 'trace', 'merge', 'checksum', null, null, 'routing']; // (UTC weekdays, Monday first)
+  const DAYS = ['codebreaker', 'trace', 'merge', 'checksum', 'defrag', null, 'routing']; // (UTC weekdays, Monday first)
   const PICK_KEY = 'bytefall-arcade-pick';
   const STATS_KEY = 'bytefall-arcade-free-stats';
   let g = null; // the game on the card: { id, day, free, seed, played, paid, k (KEYS paid), t (ms on the clock), moved, ...its own }

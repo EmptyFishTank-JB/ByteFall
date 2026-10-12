@@ -24,9 +24,10 @@ The DAILY menu's fifth card, ARCADE (`js/arcade.js` and a file per game): a diff
 weekday on the bits and the board, not necessarily ByteFall's rules. Done: **Monday CODE BREAKER** (a
 4-bit code, 10 tries, pips at each row's right), **Tuesday TRACE** (Minesweeper's rules on encrypted
 blocks, infected bits under them), **Wednesday MERGE** (2048's, [1] to BYTE to QWORD, an encrypted
-block every 10 moves), **Thursday CHECKSUM** (a timed 9x9 Sudoku with notes and CONFIRM) and **Sunday
-ROUTING** (Flow's, 7 pairs on 7x7). Still to pick for Friday and Saturday; ideas so far: DEFRAG
-(below), DECODE (Picross: the bots and visitors as its pictures), PURGE (below), a TETRIS-like one.
+block every 10 moves), **Thursday CHECKSUM** (a timed 9x9 Sudoku with notes and CONFIRM), **Friday
+DEFRAG** (swap-and-match, below: 30 swaps, encrypted and infected bits) and **Sunday ROUTING** (Flow's,
+7 pairs on 7x7). Still to come for Saturday: DECODE (Picross: the bots and visitors as its pictures);
+other ideas: PURGE (below), a TETRIS-like one.
 Later for these: CHECKSUM's twist (some squares under layers; sum cages on harder days), TRACE's (a
 bigger board on some days), ROUTING's (bigger grids, bridges), and RECORDS lines for their bests. Once every day has one, the ARCADE can count toward DAILY SWEEP (all five).
 
@@ -40,6 +41,11 @@ controls). Their own names and art throughout: the rules are fair to rebuild, th
 and characters aren't.
 
 ### DEFRAG (a swap-and-match game)
+
+Built as the DAILY ARCADE's Friday game (`js/arcade-defrag.js`; README has it as it is): 6 numbers, 30
+swaps, 6 encrypted and 2 infected bits dealt, new bits never matching by themselves. Still to come from
+the list below: the CHAIN METER's look and its resources, hints as an option, EASY/HARD boards, and the
+puzzles.
 
 - The 7x7 board **full of bits**, dealt so nothing matches yet and at least one swap works.
 - **Swipe a bit into a neighbor** (or tap one, then the neighbor: mouse and controller) to swap

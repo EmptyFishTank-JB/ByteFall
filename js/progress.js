@@ -383,6 +383,7 @@ const Progress = (() => {
     { id: 'clean-trace', name: 'CLEAN TRACE', desc: 'Clear a Tuesday TRACE board without touching an infected bit', value: () => ((d.arcadeStats || {}).trace || {}).wins || 0, goal: 1 },
     { id: 'checksum-valid', name: 'CHECKSUM VALID', desc: 'Solve a Thursday CHECKSUM grid', value: () => ((d.arcadeStats || {}).checksum || {}).wins || 0, goal: 1 },
     { id: 'double-word', name: 'DOUBLE WORD', desc: 'Make a DWORD in a Wednesday MERGE', value: () => (((d.arcadeStats || {}).merge || {}).top >= 10 ? 1 : 0), goal: 1 },
+    { id: 'defragmented', name: 'DEFRAGMENTED', desc: 'Set off a chain of 5 in a Friday DEFRAG', value: () => (((d.arcadeStats || {}).defrag || {}).chain >= 5 ? 1 : 0), goal: 1 },
     { id: 'full-mesh', name: 'FULL MESH', desc: 'Route every pair and fill a Sunday ROUTING grid', value: () => ((d.arcadeStats || {}).routing || {}).wins || 0, goal: 1 },
     { id: 'safecracker', name: 'SAFECRACKER', desc: 'Solve 30 puzzles', value: () => count(d.puzzles), goal: 30 },
     { id: 'century', name: 'CENTURY', desc: 'Play a Daily game 100 days in a row', value: currentStreak, goal: 100, note: 'Progress shows your current streak; a day\u2019s dailies missed (they change at 00:00 UTC) starts it over' },
@@ -522,7 +523,7 @@ const Progress = (() => {
     ['ENCRYPTION LAYERS', ['layer-peeler', 'onion-router', 'onion-core', 'demolition', 'firewall-breach']],
     ['EXPLOITS', ['script-kiddie', 'black-hat', 'advanced-persistent-threat', 'full-toolkit', 'chained-exploits', 'arsenal', 'time-bomb', 'sting', 'wiretap', 'lateral-movement', 'overkill', 'double-trouble']],
     ['BLITZ AND ZEN', ['speed-run', 'blitzkrieg', 'lightspeed', 'zen-master', 'last-second']],
-    ['DAILY', ['daily-driver', 'daily-grind', 'streak', 'century', 'daily-sweep', 'perfect-daily', 'breached', 'one-shot', 'sunday-best', 'stubborn', 'so-close', 'code-breaker', 'mind-reader', 'clean-trace', 'checksum-valid', 'double-word', 'full-mesh']],
+    ['DAILY', ['daily-driver', 'daily-grind', 'streak', 'century', 'daily-sweep', 'perfect-daily', 'breached', 'one-shot', 'sunday-best', 'stubborn', 'so-close', 'code-breaker', 'mind-reader', 'clean-trace', 'checksum-valid', 'double-word', 'defragmented', 'full-mesh']],
     ['PUZZLES', ['first-try', 'locksmith', 'safecracker', 'master-key', 'pickpocket']],
     ['LEVELS AND DECRYPTOR RANKS', ['lv-40', 'maxed-out', 'rollover', 'triple-crown', 'full-spectrum']],
     ['THEMES, FONTS AND MUSIC', ['collector', 'chameleon', 'tech-support', 'insert-coin', 'bit-by-bit', 'bite-sized', 'in-orbit', 'dj', 'audiophile', 'theme-park', 'channel-surfer', 'silent-running']],
@@ -582,8 +583,10 @@ const Progress = (() => {
   // (code: CODE BREAKER's code broken, 12 less the tries it took: 11 in one, 2 in ten)
   // (arcade: the DAILY ARCADE's other games, won: TRACE's board clean, CHECKSUM valid, ROUTING all
   // routed; merge: MERGE's, by the best bit made: [7] 2, a BYTE 5, a WORD 8, a DWORD 12, a QWORD 20, past it 30, less 1)
+  // defrag: DEFRAG's, by its score: 3, then 5 from 2,000, 8 from 3,000, 11 from 4,000, 14 from 5,500, 18 from 7,500
   const KEY_PAY = { chain5: 2, chain7: 5, achievement: 10, level: 10, daily: 5, puzzle: { e: 2, n: 4, h: 6 }, code: (tries) => 12 - tries, arcade: { trace: 10, checksum: 15, routing: 12 },
-    merge: (top) => (top >= 12 ? 30 : { 7: 2, 8: 5, 9: 8, 10: 12, 11: 20 }[top] || 1) };
+    merge: (top) => (top >= 12 ? 30 : { 7: 2, 8: 5, 9: 8, 10: 12, 11: 20 }[top] || 1),
+    defrag: (score) => [[7500, 18], [5500, 14], [4000, 11], [3000, 8], [2000, 5]].find(([at]) => score >= at)?.[1] || 3 };
   function earn(n) {
     if (!(n > 0)) return;
     d.keys += n;
@@ -1187,6 +1190,18 @@ const Progress = (() => {
       st.best = Math.max(st.best || 0, score);
       st.top = Math.max(st.top || 0, top);
       const keys = KEY_PAY.merge(top);
+      earn(keys);
+      save();
+      return keys;
+    },
+    // ...and DEFRAG (arcade-defrag.js): over, with its score and its best chain. Returns the KEYS it paid
+    defragResult(score, chain) {
+      if (!d.arcadeStats || typeof d.arcadeStats !== 'object') d.arcadeStats = {};
+      const st = d.arcadeStats.defrag || (d.arcadeStats.defrag = { games: 0, best: 0, chain: 0 });
+      st.games++;
+      st.best = Math.max(st.best || 0, score);
+      st.chain = Math.max(st.chain || 0, chain);
+      const keys = KEY_PAY.defrag(score);
       earn(keys);
       save();
       return keys;
