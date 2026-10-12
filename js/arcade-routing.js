@@ -26,6 +26,10 @@ Arcade.register('routing', (() => {
   const rc = (i) => [Math.floor(i / N), i % N];
   const adjacent = (a, b) => { const [ra, ca] = rc(a); const [rb, cb] = rc(b); return Math.abs(ra - rb) + Math.abs(ca - cb) === 1; };
   const around = (i) => { const [r, c] = rc(i); return [[r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1]].filter(([y, x]) => y >= 0 && y < N && x >= 0 && x < N).map(([y, x]) => y * N + x); };
+  // (a line n squares long: its tick's pitch, higher with every square however long it gets: about a
+  // semitone a square at first, less as it goes, still near a third of one at 39, the longest a line
+  // can be; SFX.count's tick is 880 + 700p Hz)
+  const rise = (n) => (880 * Math.pow(2, (16 * Math.log(1 + n / 16)) / 12) - 880) / 700;
   // One path through every square: a snake back and forth, then shuffled by "backbites" (one end
   // stepping onto a square beside it and the path re-joined round it), many times over
   function wander(rand) {
@@ -263,7 +267,7 @@ Arcade.register('routing', (() => {
     const k = s.paths.findIndex((q, j) => j !== drag && q.includes(i));
     if (k >= 0) s.paths[k] = s.paths[k].slice(0, s.paths[k].indexOf(i)); // (crossing another line: cut there)
     p.push(i);
-    SFX.count(Math.min(1, p.length / 12));
+    SFX.count(rise(p.length));
     if (done(s, drag)) SFX.play('enter');
     return true;
   }

@@ -300,6 +300,23 @@ document.querySelectorAll('.exploit-row .exploit-icon').forEach((btn) => {
   startGridBackground(canvas, { defrag: false, active: gameShown });
 });
 
+// THE ARCADE: the starlight behind the whole card (its menu and round each game), and behind each game's
+// board, under its squares, as the board's is under the game's (a board is drawn over often: the canvas
+// is put back first whenever it's been swept out), while the card's up
+const arcadeCard = document.getElementById('arcade');
+if (arcadeCard) {
+  const arcadeUp = () => !lowFx() && !arcadeCard.hidden;
+  startGridBackground(document.getElementById('arcade-bg'), { defrag: false, active: arcadeUp });
+  arcadeCard.querySelectorAll('.arcade-game > [id$="-board"]').forEach((board) => {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'stat-bg';
+    canvas.setAttribute('aria-hidden', 'true');
+    board.prepend(canvas);
+    new MutationObserver(() => { if (canvas.parentNode !== board) board.prepend(canvas); }).observe(board, { childList: true });
+    startGridBackground(canvas, { defrag: false, active: () => arcadeUp() && !board.parentNode.hidden });
+  });
+}
+
 // Dev: TWINKLE BACKGROUND (dev tools, or ?twinkle): the starlight across the whole screen behind
 // the game card, in place of the plain gradient. Re-read on coming back from the dev page.
 const pageBg = document.getElementById('page-bg');
