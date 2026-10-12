@@ -3574,7 +3574,9 @@ body:not(.vs-mode) .hud-bits #time-stat .value { margin: 0; font-size: 14px; lin
 .daily-cards[hidden] { display: none; }
 .daily-cards button { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; padding: 8px 9px; text-align: left;
   font-family: inherit; color: var(--fg); background: rgba(var(--fg-rgb), 0.04); border: 1px solid var(--grid-line); border-radius: 5px; cursor: pointer; }
-.daily-cards .dc-name { font-size: 13px; letter-spacing: 2px; }
+.daily-cards .dc-name { font-size: 13px; letter-spacing: 2px; display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+/* (the game's own win streak, on its name's line) */
+.daily-cards .dc-streak { font-size: 9.5px; letter-spacing: 0.5px; color: var(--accent); text-shadow: none; white-space: nowrap; }
 .daily-cards .dc-rule { font-size: 10px; line-height: 1.35; color: var(--panel-text); letter-spacing: 0.3px; }
 .daily-cards .dc-status { margin-top: auto; padding-top: 2px; font-size: 9.5px; letter-spacing: 0.5px; color: var(--accent); }
 .daily-cards button.done .dc-status { color: var(--fg-dim); }
@@ -3616,6 +3618,7 @@ body.in-game.can-pause .records-btn svg { left: auto; right: 4px; } /* (hugging 
 .home .daily-cards .dc-name { font-size: 1.3em; }
 .home .daily-cards .dc-rule { font-size: 1em; }
 .home .daily-cards .dc-status { font-size: 0.95em; }
+.home .daily-cards .dc-streak { font-size: 0.73em; } /* (the status's size, under the name's 1.3em) */
 /* (the menu's top lines too: one line each, a set height) */
 .home .level-bar { height: 16px; padding-top: 0; padding-bottom: 0; max-width: 100%; white-space: nowrap; overflow: hidden; }
 .home .wallet { height: 14px; overflow: hidden; }
