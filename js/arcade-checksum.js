@@ -147,6 +147,7 @@ Arcade.register('checksum', (() => {
       c.className = cls;
       if (d) {
         fillBit(c, d);
+        kit.spin(c); // (SPECTRUM: each its own cycle)
         c.setAttribute('aria-label', `${d}${x.given[i] ? ', given' : ''}`);
       } else if (x.n[i]) {
         const box = document.createElement('span');

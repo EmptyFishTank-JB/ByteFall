@@ -4815,8 +4815,9 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 .ac-demo.out { opacity: 0; }
 .ac-demo :is(.cb-board, .tr-board, .ck-board, .mg-board, .rt-board) { flex: none; align-self: center; border-radius: 4px; }
 .ac-demo .cell { cursor: default; }
-.ac-demo .cb-board { padding: 6px; gap: 3px; --cb-cell: min(30px, calc((100cqh - 40px) / 8), calc((100cqw - 36px) / 5)); }
-.ac-demo .cb-row { grid-template-columns: repeat(4, var(--cb-cell)) auto; gap: 3px; }
+.ac-demo .cb-board { padding: 6px; gap: 3px; --cb-cell: min(44px, calc((100cqh - 40px) / 8), calc((100cqw - 32px) / 6.6)); }
+.ac-demo .cb-row { grid-template-columns: calc(var(--cb-cell) * 1.3) repeat(4, var(--cb-cell)) calc(var(--cb-cell) * 1.3); gap: 3px; }
+.ac-demo .cb-no { padding-right: 2px; font-size: calc(var(--cb-cell) * 0.3); letter-spacing: 0.5px; }
 .ac-demo .cb-pips { gap: 2px; padding-left: 2px; }
 .ac-demo .cb-pips i { width: calc(var(--cb-cell) * 0.24); height: calc(var(--cb-cell) * 0.24); }
 .ac-demo .tr-board { padding: 4px; gap: 2px; --tr-cell: min(calc((100cqw - 28px) / 9), calc((100cqh - 34px) / 12)); }

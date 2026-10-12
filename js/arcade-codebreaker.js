@@ -17,6 +17,10 @@ Arcade.register('codebreaker', (() => {
   let s = null; // (the game shown: { code, g (the guesses) } and the frame's own)
   let typed = []; // (the guess being keyed in)
   let busy = false; // (a guess's pips lighting)
+  // (SPECTRUM: each bit on the board cycling on its own, as the game's bits do, its cycle kept through
+  // the redraws: by its place, row and column)
+  const spins = {};
+  const spinAt = (k) => spins[k] || (spins[k] = {});
 
   // (a guess's pips: bits in the right place, and right bits in the wrong place, each bit of the
   // code matched once)
@@ -56,10 +60,10 @@ Arcade.register('codebreaker', (() => {
       rows.push(r);
       return r;
     };
-    const cell = (r, val, cls = '') => {
+    const cell = (r, val, cls = '', at = '') => {
       const c = document.createElement('span');
       c.className = `cell${cls ? ` ${cls}` : ''}`;
-      if (val) { c.classList.add('disc'); fillBit(c, val); }
+      if (val) { c.classList.add('disc'); fillBit(c, val); kit.spin(c, spinAt(at)); }
       r.appendChild(c);
       return c;
     };
@@ -78,8 +82,8 @@ Arcade.register('codebreaker', (() => {
       r.appendChild(p);
     };
     const code = row(`cb-code${done ? (broken() ? ' won' : ' lost') : ''}`, 'CODE');
-    for (const v of s.code) {
-      const c = cell(code, done ? v : 0, done ? '' : 'cb-hidden');
+    for (const [n, v] of s.code.entries()) {
+      const c = cell(code, done ? v : 0, done ? '' : 'cb-hidden', `c${n}`);
       if (!done) c.textContent = '?';
     }
     pips(code, null);
@@ -94,11 +98,11 @@ Arcade.register('codebreaker', (() => {
       if (guess) {
         const r = row(i === win && done ? 'won' : '', no);
         r.dataset.try = String(i);
-        for (const v of guess) cell(r, v);
+        guess.forEach((v, n) => cell(r, v, '', `${i}.${n}`));
         pips(r, mark(guess, s.code), i === reveal ? lit : CB_LEN);
       } else if (i === s.g.length && !done) { // (the row being keyed in)
         const r = row('cb-live', no);
-        for (let n = 0; n < CB_LEN; n++) cell(r, typed[n] || 0, typed[n] ? '' : n === typed.length ? 'cb-slot next' : 'cb-slot');
+        for (let n = 0; n < CB_LEN; n++) cell(r, typed[n] || 0, typed[n] ? '' : n === typed.length ? 'cb-slot next' : 'cb-slot', `${i}.${n}`);
         pips(r, null);
       } else {
         const r = row('cb-empty', no);
@@ -225,7 +229,13 @@ Arcade.register('codebreaker', (() => {
     } while (mark(tries[tries.length - 1], code).hit !== CB_LEN || tries.length < 3);
     const board = document.createElement('div');
     board.className = 'cb-board';
-    const row = (cls) => { const r = document.createElement('div'); r.className = cls; board.appendChild(r); return r; };
+    const row = (cls, no) => {
+      const r = document.createElement('div');
+      r.className = cls;
+      if (no) { const n = document.createElement('span'); n.className = 'cb-no'; n.textContent = no; r.appendChild(n); }
+      board.appendChild(r);
+      return r;
+    };
     const cellIn = (r, cls) => { const c = document.createElement('span'); c.className = cls; r.appendChild(c); return c; };
     const pipsIn = (r) => {
       const p = document.createElement('span');
@@ -233,13 +243,13 @@ Arcade.register('codebreaker', (() => {
       r.appendChild(p);
       return Array.from({ length: CB_LEN }, () => p.appendChild(document.createElement('i')));
     };
-    const top = row('cb-row cb-code');
+    const top = row('cb-row cb-code', 'CODE');
     const hidden = code.map(() => { const c = cellIn(top, 'cell cb-hidden'); c.textContent = '?'; return c; });
     pipsIn(top)[0].parentNode.style.visibility = 'hidden';
-    row('cb-rule');
+    board.appendChild(Object.assign(document.createElement('div'), { className: 'cb-rule' }));
     const rows = [];
     for (let i = DEMO_TRIES - 1; i >= 0; i--) {
-      const r = row('cb-row cb-empty');
+      const r = row('cb-row cb-empty', String(i + 1).padStart(2, '0'));
       rows[i] = { r, cells: Array.from({ length: CB_LEN }, () => cellIn(r, 'cell')), pips: pipsIn(r) };
     }
     host.replaceChildren(board);
@@ -251,6 +261,7 @@ Arcade.register('codebreaker', (() => {
       guess.forEach((v, n) => q.push([() => {
         cells[n].className = 'cell disc';
         fillBit(cells[n], v);
+        kit.spin(cells[n]);
         if (cells[n + 1]) cells[n + 1].classList.add('next');
       }, n < CB_LEN - 1 ? 190 : 300]));
       q.push([() => { r.className = 'cb-row'; }, PIP_MS]); // (ENTER)
@@ -259,7 +270,7 @@ Arcade.register('codebreaker', (() => {
     q.push([() => {
       top.classList.add('won');
       rows[tries.length - 1].r.classList.add('won');
-      hidden.forEach((c, n) => { c.className = 'cell disc'; fillBit(c, code[n]); });
+      hidden.forEach((c, n) => { c.className = 'cell disc'; fillBit(c, code[n]); kit.spin(c); });
     }, 0]);
     return kit.steps(q);
   }
