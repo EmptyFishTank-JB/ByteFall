@@ -81,6 +81,7 @@ const Progress = (() => {
     codeGames: 0, // CODE BREAKER games finished (the DAILY ARCADE on Mondays, arcade.js)
     codesBroken: 0, // ...and the codes broken
     bestCodeTries: 0, // the fewest tries a code was broken in (0: none yet)
+    arcadeStats: {}, // the DAILY ARCADE's other games (TRACE, CHECKSUM): id -> { games, wins, best (the fastest win, in seconds) }
     breaches: 0, // BREACH boards cleared
     sundaySolves: 0, // Sunday (hardest) daily puzzles solved
     dailyFirstTries: 0, // daily puzzles solved on the first try
@@ -379,6 +380,8 @@ const Progress = (() => {
     { id: 'sunday-best', name: 'SUNDAY BEST', desc: "Solve a Sunday daily puzzle (the week's hardest)", value: () => d.sundaySolves, goal: 1 },
     { id: 'code-breaker', name: 'CODE BREAKER', desc: "Break a Monday CODE BREAKER code (the DAILY ARCADE)", value: () => d.codesBroken, goal: 1 },
     { id: 'mind-reader', name: 'MIND READER', desc: 'Break a CODE BREAKER code in 4 tries or fewer', value: () => (d.bestCodeTries && d.bestCodeTries <= 4 ? 1 : 0), goal: 1 },
+    { id: 'clean-trace', name: 'CLEAN TRACE', desc: 'Clear a Tuesday TRACE board without touching an infected bit', value: () => ((d.arcadeStats || {}).trace || {}).wins || 0, goal: 1 },
+    { id: 'checksum-valid', name: 'CHECKSUM VALID', desc: 'Solve a Thursday CHECKSUM grid', value: () => ((d.arcadeStats || {}).checksum || {}).wins || 0, goal: 1 },
     { id: 'safecracker', name: 'SAFECRACKER', desc: 'Solve 30 puzzles', value: () => count(d.puzzles), goal: 30 },
     { id: 'century', name: 'CENTURY', desc: 'Play a Daily game 100 days in a row', value: currentStreak, goal: 100, note: 'Progress shows your current streak; a day\u2019s dailies missed (they change at 00:00 UTC) starts it over' },
     { id: 'triple-crown', name: 'TRIPLE CROWN', desc: 'Reach DECRYPTOR 3', value: () => d.decryptor, goal: 3 },
@@ -517,7 +520,7 @@ const Progress = (() => {
     ['ENCRYPTION LAYERS', ['layer-peeler', 'onion-router', 'onion-core', 'demolition', 'firewall-breach']],
     ['EXPLOITS', ['script-kiddie', 'black-hat', 'advanced-persistent-threat', 'full-toolkit', 'chained-exploits', 'arsenal', 'time-bomb', 'sting', 'wiretap', 'lateral-movement', 'overkill', 'double-trouble']],
     ['BLITZ AND ZEN', ['speed-run', 'blitzkrieg', 'lightspeed', 'zen-master', 'last-second']],
-    ['DAILY', ['daily-driver', 'daily-grind', 'streak', 'century', 'daily-sweep', 'perfect-daily', 'breached', 'one-shot', 'sunday-best', 'stubborn', 'so-close', 'code-breaker', 'mind-reader']],
+    ['DAILY', ['daily-driver', 'daily-grind', 'streak', 'century', 'daily-sweep', 'perfect-daily', 'breached', 'one-shot', 'sunday-best', 'stubborn', 'so-close', 'code-breaker', 'mind-reader', 'clean-trace', 'checksum-valid']],
     ['PUZZLES', ['first-try', 'locksmith', 'safecracker', 'master-key', 'pickpocket']],
     ['LEVELS AND DECRYPTOR RANKS', ['lv-40', 'maxed-out', 'rollover', 'triple-crown', 'full-spectrum']],
     ['THEMES, FONTS AND MUSIC', ['collector', 'chameleon', 'tech-support', 'insert-coin', 'bit-by-bit', 'bite-sized', 'in-orbit', 'dj', 'audiophile', 'theme-park', 'channel-surfer', 'silent-running']],
@@ -575,7 +578,8 @@ const Progress = (() => {
   const rankBoost = () => 1 + RANK_EARN * Math.min(RANK_CAP, d.decryptor || 0);
   const rankPrice = () => 1 + RANK_PRICE * Math.min(RANK_CAP, d.decryptor || 0);
   // (code: CODE BREAKER's code broken, 12 less the tries it took: 11 in one, 2 in ten)
-  const KEY_PAY = { chain5: 2, chain7: 5, achievement: 10, level: 10, daily: 5, puzzle: { e: 2, n: 4, h: 6 }, code: (tries) => 12 - tries };
+  // (arcade: the DAILY ARCADE's other games, won: TRACE's board clean, CHECKSUM valid)
+  const KEY_PAY = { chain5: 2, chain7: 5, achievement: 10, level: 10, daily: 5, puzzle: { e: 2, n: 4, h: 6 }, code: (tries) => 12 - tries, arcade: { trace: 10, checksum: 15 } };
   function earn(n) {
     if (!(n > 0)) return;
     d.keys += n;
@@ -1156,6 +1160,21 @@ const Progress = (() => {
       return keys;
     },
     codeStats: () => ({ games: d.codeGames, broken: d.codesBroken, best: d.bestCodeTries }),
+    // ...and the others (arcade-trace.js, arcade-checksum.js): over, won or not, in secs. Returns the KEYS it paid
+    arcadeResult(game, won, secs) {
+      if (!d.arcadeStats || typeof d.arcadeStats !== 'object') d.arcadeStats = {};
+      const st = d.arcadeStats[game] || (d.arcadeStats[game] = { games: 0, wins: 0, best: 0 });
+      st.games++;
+      const keys = won ? (KEY_PAY.arcade[game] || 0) : 0;
+      if (won) {
+        st.wins++;
+        st.best = st.best ? Math.min(st.best, secs) : secs;
+        earn(keys);
+      }
+      save();
+      return keys;
+    },
+    arcadeStats: (game) => ({ games: 0, wins: 0, best: 0, ...((d.arcadeStats || {})[game] || {}) }),
     // A live session thrown away with RESTART or a difficulty switch
     restarted() {
       if (run.mode === 'tutorial') return; // (the tutorial counts toward nothing)
