@@ -602,12 +602,14 @@ function openGoal() {
   requestAnimationFrame(() => fitText(document.getElementById('goal-note')));
   goalCardEl.classList.remove('closing');
   goalCardEl.hidden = false;
+  if (typeof Stories !== 'undefined') Stories.onCrack(goalBits(k), document.getElementById('goal-story'), goalCardEl); // (the story's next file)
   document.querySelector('.board-frame').classList.add('paused');
   Music.setIntensity(0);
   updateColumnButtons();
 }
 function closeGoal(then) {
   goalOpen = false;
+  if (typeof Stories !== 'undefined') Stories.stop();
   goalCardEl.classList.add('closing');
   setTimeout(() => { goalCardEl.hidden = true; goalCardEl.classList.remove('closing'); }, 150);
   then();
@@ -3919,6 +3921,7 @@ function updateHome() {
   document.getElementById('home-best').innerHTML = !key || (daily && kept == null) ? ''
     : `${daily ? 'TODAY' : 'BEST'} <b>${fmt(Number(kept) || 0)}</b>`;
   homePlayBtn.textContent = inAGame() && mode !== 'tutorial' ? 'RESUME' : 'PLAY';
+  if (typeof Stories !== 'undefined') Stories.refreshRow();
   refreshBoosterRow();
   refreshStarterRow();
   fitHome(); // (the words fitted to their boxes; again once the mode's rows have all settled)
@@ -5108,6 +5111,7 @@ function showKeys() {
     b.classList.toggle('has-drop', !!freeExploit.claimable);
     b.setAttribute('aria-label', freeExploit.claimable ? 'Store: the daily drop is ready' : 'Store');
   }
+  if (typeof Stories !== 'undefined') Stories.refreshRow();
   refreshBoosterRow();
   refreshStarterRow();
   refreshPuzzleTools();
@@ -7034,7 +7038,7 @@ function renderRecords() {
   }
 }
 
-// RULES & RECORDS (its two tabs), EXPLOITS and STORE: one card, opened on its own by each's
+// RULES & RECORDS (its tabs: RULES, RECORDS, NOTICES, ARCHIVE), EXPLOITS and STORE: one card, opened on its own by each's
 // button (main menu, pause screen); EXPLOITS and STORE show alone, under their own title
 const SOLO_PANES = { exploits: '// EXPLOITS', store: '// STORE', puzzles: '// PUZZLES' };
 let rulesPane = 'rules'; // (the RULES & RECORDS tab last open)
@@ -7050,6 +7054,7 @@ function showMenuPane(pane) {
   recordsEl.querySelectorAll('.menu-pane').forEach((el) => { el.hidden = el.dataset.pane !== pane; });
   if (pane === 'records') renderRecords();
   if (pane === 'notices') { renderNotices(); markNoticesRead(); } // (seen: the dots go)
+  if (pane === 'archive' && typeof Stories !== 'undefined') Stories.render();
   if (pane === 'puzzles') { puzzleListTier = puzzleTier; renderPuzzleSelect(); }
   if (typeof Store !== 'undefined') Store.render(); // (and the REMOVE ADS link, off on its own tab)
   const box = menuScroller();

@@ -24,7 +24,9 @@ const Tutorial = (() => {
   // BLACK MARKET; 'goal': CLASSIC's ENCRYPTION STRENGTH line and bar). focus: selectors left bright
   // (and pulsing) while the rest of the screen dims, as a tap step's target is; roomy: the pulsing
   // frame 8px out from what it frames; scroll: an element brought smoothly to the top of the card
-  // that scrolls it; home: the lesson goes on over the main menu (script.js's tutorialHome).
+  // that scrolls it; home: the lesson goes on over the main menu (script.js's tutorialHome); recTab:
+  // RECORDS' own tab to show (UNLOCKS, where the level is). Every step that's about a place opens
+  // it: its tab, its section scrolled to the top, what it names framed.
   const STEPS = [
     {
       text: 'Welcome to BYTEFALL! This tutorial shows you how the game is played and where everything is. Each card is short, and there’s no math needed as long as you can count to 7. Let’s begin!',
@@ -109,10 +111,11 @@ const Tutorial = (() => {
     { text: 'The pause screen has various buttons. Tap RULES & RECORDS.', paused: true, closeMenus: true, tap: '#pause-records', pass: true, float: true },
     { text: 'RULES & RECORDS opens this page with its tabs along the top.', paused: true, pane: 'rules', float: 'middle', next: true },
     { text: 'The RULES tab has everything you’re learning here, written down, with the TUTORIAL button to come back any time.', paused: true, pane: 'rules', focus: ['.menu-tabs [data-pane="rules"]'], float: 'middle', next: true },
-    { text: 'The RECORDS tab shows your level and DECRYPTOR rank, every unlock and its level, your achievements, HISTORY (your last 10 games) and your lifetime stats.', paused: true, pane: 'records', focus: ['.menu-tabs [data-pane="records"]'], float: 'middle', next: true },
-    { text: 'Every bit you decrypt is XP: 100 bits a level. At Lv 80 you can RANK UP: everything locks again to unlock once more, and each rank earns a little more.', paused: true, pane: 'records', focus: ['.rec-level'], float: true, next: true },
-    { text: 'NOTICES, the next tab, keeps a history of each notification the game has shown.', paused: true, pane: 'records', focus: ['.menu-tabs [data-pane="notices"]'], float: 'middle', next: true },
-    { text: 'Tap ← BACK, at the top left of the page.', paused: true, pane: 'records', tap: '.card-back[data-close="records"]', pass: true, float: 'middle' },
+    { text: 'The RECORDS tab has its own tabs: UNLOCKS (your level and every unlock), ACHIEVEMENTS, STATS (your lifetime numbers) and HISTORY (your last 10 games).', paused: true, pane: 'records', recTab: 'unlocks', focus: ['.menu-tabs [data-pane="records"]', '.records-tabs'], float: true, next: true },
+    { text: 'Every bit you decrypt is XP: 100 bits a level. At Lv 80 you can RANK UP: everything locks again to unlock once more, and each rank earns a little more.', paused: true, pane: 'records', recTab: 'unlocks', focus: ['.rec-level'], float: true, next: true },
+    { text: 'NOTICES keeps a history of each notification the game has shown, newest at the top.', paused: true, pane: 'notices', focus: ['.menu-tabs [data-pane="notices"]'], float: true, next: true },
+    { text: 'The ARCHIVE holds the STORIES. Every key you crack in CLASSIC recovers a file of the one you’re decrypting; read them all here, and pick which story to decrypt.', paused: true, pane: 'archive', focus: ['.menu-tabs [data-pane="archive"]', '.archive-story.on'], float: true, next: true },
+    { text: 'Tap ← BACK, at the top left of the page.', paused: true, pane: 'archive', tap: '.card-back[data-close="records"]', pass: true, float: 'middle' },
     { text: 'Now tap EXPLOITS.', paused: true, closeMenus: true, tap: '#pause-exploits', pass: true, float: true },
     { text: 'Here’s your EXPLOITS loadout. You can only earn exploits that are in an active slot during a game.', paused: true, pane: 'exploits', focus: ['#slot-info'], float: 'middle', next: true },
     { text: 'Tap a card to put it in a free slot, or tap it again to take it out. The loadout locks from a game’s first drop until it ends.', paused: true, pane: 'exploits', pulse: ['.hack-item'], float: true, next: true },
@@ -121,16 +124,23 @@ const Tutorial = (() => {
     { text: 'The STORE isn’t on the pause screen: it’s on the MAIN MENU. Here’s a look inside.', paused: true, pane: 'store', float: 'middle', next: true },
     { text: 'YOUR RESOURCES are at the top: KEYS, BUGS, CACHE, CRYPTO, ROOTKITS and MASTER KEYS, all earned by playing. The [i] shows how.', paused: true, pane: 'store', focus: ['#store-res'], float: 'middle', next: true },
     { text: 'Under them, PRICES TODAY: sales, holidays and busy days move the prices up and down.', paused: true, pane: 'store', focus: ['#price-gauge'], float: 'middle', next: true },
-    { text: 'Below that: the DAILY DROP (free once a day), PATCHES, EXPLOITS (TIER I, II and III), BLACK BOXES, and REMOVE ADS and FULL ACCESS.', paused: true, pane: 'store', float: true, next: true },
+    { text: 'The DAILY DROP: a free exploit, KEYS and resources, once a day. Every 7th day in a row you play, MASTER KEYS too.', paused: true, pane: 'store', scroll: '.store-daily', focus: ['.store-daily'], float: true, next: true },
+    { text: 'PATCHES, bought with KEYS, give a game an edge. Switch on up to two from the main menu before a game.', paused: true, pane: 'store', scroll: '.store-sub[data-sec="patches"]', focus: ['.store-sub[data-sec="patches"]'], float: true, next: true },
+    { text: 'EXPLOITS of your own, in TIER I, II and III, to bring into a game from the main menu, up to two.', paused: true, pane: 'store', scroll: '.store-sub[data-sec="starters"]', focus: ['.store-sub[data-sec="starters"]'], float: true, next: true },
+    { text: 'BLACK BOXES hold a random exploit for less, but some are INFECTED. The warning under them says what each infection does.', paused: true, pane: 'store', scroll: '.store-sub[data-sec="boxes"]', focus: ['.store-sub[data-sec="boxes"]'], float: true, next: true, mood: 'devious' },
+    { text: 'And at the bottom, REMOVE ADS and FULL ACCESS. Everything else can be earned by playing.', paused: true, pane: 'store', scroll: '#store-support', focus: ['#store-support'], float: true, next: true },
     { text: 'Tap ← BACK to close the STORE.', paused: true, pane: 'store', tap: '.card-back[data-close="records"]', pass: true, float: 'middle' },
     { text: 'We’re back at the PAUSE screen now. Tap SETTINGS.', paused: true, closeMenus: true, tap: '#pause-settings', pass: true, float: true },
-    { text: 'SETTINGS has SOUND (sound and music, the sound effects, what you’re listening on), the PLAYLIST and MUSIC PLAYER, and CONTROLS (where the drop buttons sit, vibration).', paused: true, settings: true, float: 'middle', next: true },
-    { text: 'DISPLAY has THEMES and FONTS (more unlock as you level up), the CRT DISPLAY, text size and REDUCED EFFECTS. EXTRAS has the wandering bots and the screen saver.', paused: true, settings: true, scroll: '#settings-display', float: 'middle', next: true },
+    { text: 'SETTINGS has SOUND (sound and music, the sound effects, what you’re listening on), the PLAYLIST and MUSIC PLAYER, and CONTROLS (where the drop buttons sit, vibration).', paused: true, settings: true, scroll: '#settings-panel', float: 'middle', next: true },
+    { text: 'DISPLAY has THEMES and FONTS (more unlock as you level up), the CRT DISPLAY, text size and REDUCED EFFECTS.', paused: true, settings: true, scroll: '#settings-display', focus: ['#settings-display'], float: true, next: true },
+    { text: 'EXTRAS has the wandering bots and the screen saver.', paused: true, settings: true, scroll: '#settings-extras', focus: ['#settings-extras'], float: true, next: true },
     { text: 'Tap ← BACK to close SETTINGS.', paused: true, settings: true, tap: '.card-back[data-close="settings"]', pass: true, float: 'middle' },
     { text: 'Tap RESUME to get back to the game.', paused: true, closeMenus: true, tap: '#pause-resume', pass: true, float: true },
     // CLASSIC'S GOAL
     { text: 'In CLASSIC, every game has a key to crack: its ENCRYPTION STRENGTH, shown under BYTEFALL. It starts at 128-BIT, cracked at 1,500 points on NORMAL.', closeMenus: true, demo: 'goal', focus: ['#game-mode-label'], roomy: true, next: true },
     { text: 'The bar along the bottom of SCORE fills toward it. Crack it for KEYS, then GO DEEPER for a stronger key and more KEYS, or DISCONNECT and end the game on a win.', demo: 'goal', focus: ['#goal-bar'], roomy: true, next: true, mood: 'happy' },
+    { text: 'Every key you crack also recovers a FILE of a STORY, typed out on the cracked card. Deeper chapters need deeper keys: 256-BIT, then 512-BIT.', demo: 'goal', focus: ['#game-mode-label'], roomy: true, next: true, mood: 'devious' },
+    { text: 'On the main menu, STORY shows the story you’re decrypting and how far you are. Tap it to read the files in the ARCHIVE.', home: true, focus: ['#story-row'], float: true, next: true },
     { text: 'Before a game, PATCHES and EXPLOITS on the main menu let you bring an edge in (up to two of each), once you have some.', home: true, focus: ['#booster-row', '#starter-row'], float: true, next: true },
     { text: 'That’s everything you need to know. Good luck, decryptor.', home: true, float: true, done: true, mood: 'happy' },
   ];
@@ -259,6 +269,17 @@ const Tutorial = (() => {
   let dimEl = null;
   let dimOn = null; // (the element left bright, while dimmed)
   let dimRaf = 0;
+  // (the openings and THE FRAMES share their size and corners: FRAME_PAD round what they frame, a
+  // roomy one ROOMY_PAD, both with the narration card's corner radius)
+  const FRAME_PAD = 4;
+  const ROOMY_PAD = 8;
+  const FRAME_R = 6;
+  const padOf = (el) => (el.classList.contains('tut-roomy') ? ROOMY_PAD : FRAME_PAD);
+  // (a rounded rectangle, for the dim's openings)
+  const roundRect = (L, T, R, B, r) => {
+    r = Math.min(r, (R - L) / 2, (B - T) / 2);
+    return `M${L + r} ${T}H${R - r}A${r} ${r} 0 0 1 ${R} ${T + r}V${B - r}A${r} ${r} 0 0 1 ${R - r} ${B}H${L + r}A${r} ${r} 0 0 1 ${L} ${B - r}V${T + r}A${r} ${r} 0 0 1 ${L + r} ${T}Z`;
+  };
   function dimPath() {
     // (from the dim's own corner: with the ad banner at the top the page sits under it, so the
     // window's numbers would put each opening a banner's height off)
@@ -273,12 +294,13 @@ const Tutorial = (() => {
       if (!el || !el.isConnected) continue;
       const r = el.getBoundingClientRect();
       if (!r.width) continue;
-      const pad = bright.includes(el) ? (el.classList.contains('tut-roomy') ? 12 : 4) : 0;
+      const framed = bright.includes(el);
+      const pad = framed ? padOf(el) : 0;
       const L = r.left - base.left - pad;
       const T = r.top - base.top - pad;
       const R = r.right - base.left + pad;
       const B = r.bottom - base.top + pad;
-      d += `M${L} ${T}H${R}V${B}H${L}Z`;
+      d += framed ? roundRect(L, T, R, B, FRAME_R) : `M${L} ${T}H${R}V${B}H${L}Z`;
     }
     dimEl.style.clipPath = `path(evenodd, '${d}')`;
     if (dimOn) dimRaf = requestAnimationFrame(dimPath);
@@ -296,8 +318,63 @@ const Tutorial = (() => {
     if (dimOn) dimPath();
     dimEl.classList.toggle('on', !!dimOn);
   }
+  // THE FRAMES: what a step points at (.tut-pulse: what it pulses, focuses on or asks to tap) gets a
+  // pulsing frame, all of them drawn in one layer over everything else (tut-frames, z-index over the
+  // dim and every panel), so nothing ever covers one; each FRAME_PAD out from what it frames, with
+  // the narration card's rounded corners, kept on it each frame (it can move, or scroll) and cut to
+  // what's in view of a box that scrolls or clips it
+  let framesEl = null;
+  let framesRaf = 0;
+  const clipCache = new WeakMap();
+  function clippers(el) { // (the boxes that cut what shows of it: scrolling or clipping ones)
+    if (clipCache.has(el)) return clipCache.get(el);
+    const list = [];
+    for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
+      const cs = getComputedStyle(a);
+      if (/auto|scroll|hidden|clip/.test(cs.overflowY + cs.overflowX)) list.push(a);
+    }
+    clipCache.set(el, list);
+    return list;
+  }
+  function drawFrames() {
+    framesRaf = 0;
+    const targets = [...document.querySelectorAll('.tut-pulse')];
+    if (!targets.length) { if (framesEl) framesEl.textContent = ''; return; }
+    if (!framesEl) {
+      framesEl = document.createElement('div');
+      framesEl.className = 'tut-frames';
+      framesEl.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(framesEl);
+    }
+    while (framesEl.children.length < targets.length) framesEl.appendChild(document.createElement('i'));
+    while (framesEl.children.length > targets.length) framesEl.lastChild.remove();
+    targets.forEach((el, i) => {
+      const f = framesEl.children[i];
+      const r = el.getBoundingClientRect();
+      const pad = padOf(el);
+      let L = r.left - pad;
+      let T = r.top - pad;
+      let R = r.right + pad;
+      let B = r.bottom + pad;
+      let seen = r.width > 0 && r.height > 0;
+      for (const c of clippers(el)) { // (only what's in view of its scrolling box)
+        const cr = c.getBoundingClientRect();
+        if (r.bottom <= cr.top || r.top >= cr.bottom || r.right <= cr.left || r.left >= cr.right) { seen = false; break; }
+      }
+      f.hidden = !seen;
+      if (!seen) return;
+      f.style.transform = `translate(${L}px, ${T}px)`;
+      f.style.width = `${R - L}px`;
+      f.style.height = `${B - T}px`;
+    });
+    framesRaf = requestAnimationFrame(drawFrames);
+  }
+  function frames() {
+    if (!framesRaf) framesRaf = requestAnimationFrame(drawFrames);
+  }
   function clearPulses() {
     document.querySelectorAll('.tut-pulse').forEach((el) => el.classList.remove('tut-pulse', 'tut-roomy'));
+    if (framesEl) framesEl.textContent = '';
     if (tapTarget) tapTarget.removeEventListener('click', onTap, true);
     tapTarget = null;
   }
@@ -316,6 +393,8 @@ const Tutorial = (() => {
     // (the pause screen, open or not as the step wants it)
     if (s.paused && !vsPaused) openPause();
     else if (!s.paused && vsPaused) resumeMatch();
+    if (s.recTab) recordsTab = s.recTab; // (RECORDS on its own tab, not the one last left open)
+    if (s.pane === 'archive' && typeof Stories !== 'undefined') Stories.toList(); // (its list of stories)
     if (s.pane) setRecordsOpen(true, s.pane);
     if (s.settings) setSettingsOpen(true);
     if (s.closeMenus) {
@@ -355,6 +434,8 @@ const Tutorial = (() => {
     if (el.parentNode !== home) home.appendChild(el);
     el.classList.toggle('float', !!s.float);
     el.classList.toggle('middle', s.float === 'middle');
+    el.classList.remove('anchored');
+    if (s.home) requestAnimationFrame(anchorHome);
     if (!s.holdMeter) resetStreak(); // (the chain lesson's meter stays lit until it's done)
     el.innerHTML = '';
     // The framed card (heading, BOT and what it says); BACK / NEXT go under it, outside the frame
@@ -407,6 +488,25 @@ const Tutorial = (() => {
     updateColumnButtons();
     SFX.play('punct');
   }
+  // (over the main menu: the card's top at the top of the EXPLOITS / STORE row, growing down from
+  // there, so it's clear of the mode's panel and not down at the screen's foot)
+  function anchorHome() {
+    const s = cur();
+    if (!s || !s.home || !bannerEl) return;
+    const row = document.getElementById('home-exploits');
+    const r = row && row.getBoundingClientRect();
+    if (!r || !r.height) return;
+    // (set on the banner itself, after pinTop's: the page can sit under the ad strip, its fixed things
+    // measured from there, so it's put right by however far off it lands)
+    bannerEl.classList.add('anchored');
+    bannerEl.style.bottom = 'auto';
+    bannerEl.style.top = `${Math.round(r.top)}px`;
+    const off = bannerEl.getBoundingClientRect().top - r.top;
+    const top = Math.round(r.top - off);
+    bannerEl.style.top = `${top}px`;
+    bannerEl.style.setProperty('--tut-top', `${top}px`);
+  }
+  addEventListener('resize', () => { if (step >= 0) anchorHome(); });
   // (a section brought to the top of the card that scrolls it, smoothly: SETTINGS' DISPLAY)
   function scrollTo(sel) {
     requestAnimationFrame(() => {
@@ -447,6 +547,7 @@ const Tutorial = (() => {
       }
     }
     if (s.line) document.querySelectorAll('#board .overflow-line').forEach((n) => n.classList.add('tut-pulse'));
+    frames();
   }
 
   function go(n) {
@@ -525,6 +626,10 @@ const Tutorial = (() => {
   }
 
   return {
+    // (for tools/tutorial-doc.js, which writes TUTORIAL.md from the lesson as it plays: the cards and
+    // which one is up)
+    steps: () => STEPS,
+    at: () => step,
     // Called by initGame when the mode is 'tutorial'
     begin() {
       snapshots = [];

@@ -46,8 +46,8 @@
   } catch (e) {}
 </script>
 <title>BYTEFALL // decryption terminal</title>
-<script src="js/fonts.js?v=589"></script>
-<link rel="stylesheet" href="css/style.css?v=589">
+<script src="js/fonts.js?v=590"></script>
+<link rel="stylesheet" href="css/style.css?v=590">
 </head>
 <body>
   <!-- Dev: TWINKLE BACKGROUND (grid-bg.js): the starlight behind the whole game, off by default -->
@@ -161,6 +161,10 @@
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 17 V11 A6 6 0 0 1 18 11 V17 L20 19 H4 Z M10 21.5 H14" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"/></svg>
             NOTICES
           </button>
+          <button type="button" role="tab" data-pane="archive">
+            <svg viewBox="0 0 24 24" aria-hidden="true"></svg>
+            ARCHIVE
+          </button>
           <button type="button" role="tab" data-pane="exploits">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 10-13h-7z" fill="currentColor"/></svg>
             EXPLOITS
@@ -227,6 +231,14 @@
             <h2>NOTICES</h2>
             <p class="notices-note">Newest at the top.</p>
             <div class="notices-body" id="notices-body"></div>
+          </section>
+        </div>
+        <!-- ARCHIVE (js/stories.js): the stories CLASSIC's GOAL recovers, their files to read again,
+             and the one being decrypted -->
+        <div class="menu-pane" data-pane="archive" hidden>
+          <section class="panel panel-archive">
+            <h2>ARCHIVE</h2>
+            <div class="archive-body" id="archive-body"></div>
           </section>
         </div>
         <div class="menu-pane" data-pane="exploits">
@@ -373,7 +385,7 @@
               </ul>
             </div>
             <div class="store-rule" aria-hidden="true">================================================================================</div>
-            <h3 class="store-sub">SUPPORT THE GAME</h3>
+            <h3 class="store-sub" id="store-support">SUPPORT THE GAME</h3>
             <p>Everything in BYTEFALL can be earned by playing. These are for playing without ads, or having it all now.</p>
             <p class="store-preview">PREVIEW // PURCHASES AREN'T OPEN YET</p>
             <div class="store-item" data-item="remove-ads">
@@ -467,7 +479,7 @@
         <p class="settings-note">REDUCED, for slower phones: the backgrounds hold still, the glows go, and exploded bits break into fewer, bigger pieces.</p>
         <button type="button" id="crt-btn" class="toggle-btn">CRT DISPLAY: OFF</button>
         <p class="settings-note">The whole screen as an old tube: scanlines, the glass darker toward its rounded corners. FULL adds the phosphor stripes, a faint flicker and a slow rolling band.</p>
-        <p class="settings-title settings-section">// EXTRAS</p>
+        <p class="settings-title settings-section" id="settings-extras">// EXTRAS</p>
         <button type="button" id="wanderers-btn" class="toggle-btn on">WANDERING BOTS: ON</button>
         <p class="settings-note">The CPUs strolling along the bottom of the game card. Tap one to poke it.</p>
         <button type="button" id="saver-btn" class="toggle-btn on">SCREEN SAVER: ON</button>
@@ -539,6 +551,7 @@
              card, #mode-settings (script.js) -->
         <div class="difficulty home-opts single" id="mode-settings-row" hidden><button type="button" id="mode-settings-btn"><span class="opt-text">NORMAL // GOAL: ON // INFECTIONS: ON</span></button></div>
         <!-- PATCHES and EXPLOITS (script.js), as VS's settings: a button each, NAME: what's on it, a card each -->
+        <div class="difficulty home-opts single" id="story-row" hidden></div>
         <div class="difficulty home-opts single" id="booster-row" hidden></div>
         <div class="difficulty home-opts single" id="starter-row" hidden></div>
         <p class="home-best" id="home-best"></p>
@@ -686,6 +699,8 @@
           <div class="vs-setup vs-pause goal-card" id="goal-card" hidden>
             <p class="vs-setup-title" id="goal-title">// 128-BIT CRACKED</p>
             <p class="goal-keys" id="goal-keys"></p>
+            <!-- (the story's file this key recovered: js/stories.js) -->
+            <div class="story-frag" id="goal-story" hidden></div>
             <p class="vs-setup-note" id="goal-note"></p>
             <button type="button" class="vs-start" id="goal-deeper">GO DEEPER</button>
             <button type="button" class="pause-menu" id="goal-out">DISCONNECT</button>
@@ -941,58 +956,60 @@
     </div>
   </div>
 
-  <script src="js/bot-svg.js?v=589"></script>
-  <script src="js/unlocks.js?v=589"></script>
-  <script src="js/progress.js?v=589"></script>
-  <script src="js/music/output.js?v=589"></script>
-  <script src="js/music/mixes.js?v=589"></script>
-  <script src="js/sfx.js?v=589"></script>
-  <script src="js/music/music-bytefall-theme.js?v=589"></script>
-  <script src="js/music/music-sleep-mode.js?v=589"></script>
-  <script src="js/music/music-brute-force.js?v=589"></script>
-  <script src="js/music/music-deep-web.js?v=589"></script>
-  <script src="js/music/music-zero-day.js?v=589"></script>
-  <script src="js/music/music-system-restore.js?v=589"></script>
-  <script src="js/music/music-night-drive.js?v=589"></script>
-  <script src="js/music/music-standby-mode.js?v=589"></script>
-  <script src="js/music/music-core-dump.js?v=589"></script>
-  <script src="js/music/music-handshake.js?v=589"></script>
-  <script src="js/music/music-stack-overflow.js?v=589"></script>
-  <script src="js/music/music-generated.js?v=589"></script>
-  <script src="js/music/music.js?v=589"></script>
-  <script src="js/data/puzzles.js?v=589"></script>
-  <script src="js/data/daily-puzzles.js?v=589"></script>
-  <script src="js/data/hint-riddles.js?v=589"></script>
-  <script src="js/cpu.js?v=589"></script>
-  <script src="js/fx.js?v=589"></script>
-  <script src="js/viz.js?v=589"></script>
-  <script src="js/pixel.js?v=589"></script>
-  <script src="js/minibot.js?v=589"></script>
-  <script src="js/seasons.js?v=589"></script>
-  <script src="js/bigart.js?v=589"></script>
-  <script src="js/scenes.js?v=589"></script>
-  <script src="js/weather.js?v=589"></script>
-  <script src="js/visitors.js?v=589"></script>
-  <script src="js/data/bot-anims.js?v=589"></script>
-<script src="js/wanderers.js?v=589"></script>
-  <script src="js/tutorial.js?v=589"></script>
-  <script src="js/puzzle-sim.js?v=589"></script>
-  <script src="js/led-banner.js?v=589"></script>
-  <script src="js/infections.js?v=589"></script>
-  <script src="js/script.js?v=589"></script>
-  <script src="js/grid-bg.js?v=589"></script>
-  <script src="js/lights.js?v=589"></script>
-  <script src="js/inf-test.js?v=589"></script>
-  <script src="js/sfx-test.js?v=589"></script>
-  <script src="js/extsource.js?v=589"></script>
-  <script src="js/player.js?v=589"></script>
-  <script src="js/billing.js?v=589"></script>
-  <script src="js/store.js?v=589"></script>
-  <script src="js/ads-config.js?v=589"></script>
-  <script src="js/ads.js?v=589"></script>
-  <script src="js/app-update.js?v=589"></script>
-  <script src="js/start.js?v=589"></script>
-  <script src="js/place.js?v=589"></script>
-  <script src="js/saver.js?v=589"></script>
+  <script src="js/bot-svg.js?v=590"></script>
+  <script src="js/unlocks.js?v=590"></script>
+  <script src="js/progress.js?v=590"></script>
+  <script src="js/music/output.js?v=590"></script>
+  <script src="js/music/mixes.js?v=590"></script>
+  <script src="js/sfx.js?v=590"></script>
+  <script src="js/music/music-bytefall-theme.js?v=590"></script>
+  <script src="js/music/music-sleep-mode.js?v=590"></script>
+  <script src="js/music/music-brute-force.js?v=590"></script>
+  <script src="js/music/music-deep-web.js?v=590"></script>
+  <script src="js/music/music-zero-day.js?v=590"></script>
+  <script src="js/music/music-system-restore.js?v=590"></script>
+  <script src="js/music/music-night-drive.js?v=590"></script>
+  <script src="js/music/music-standby-mode.js?v=590"></script>
+  <script src="js/music/music-core-dump.js?v=590"></script>
+  <script src="js/music/music-handshake.js?v=590"></script>
+  <script src="js/music/music-stack-overflow.js?v=590"></script>
+  <script src="js/music/music-generated.js?v=590"></script>
+  <script src="js/music/music.js?v=590"></script>
+  <script src="js/data/puzzles.js?v=590"></script>
+  <script src="js/data/daily-puzzles.js?v=590"></script>
+  <script src="js/data/hint-riddles.js?v=590"></script>
+  <script src="js/cpu.js?v=590"></script>
+  <script src="js/fx.js?v=590"></script>
+  <script src="js/viz.js?v=590"></script>
+  <script src="js/pixel.js?v=590"></script>
+  <script src="js/minibot.js?v=590"></script>
+  <script src="js/seasons.js?v=590"></script>
+  <script src="js/bigart.js?v=590"></script>
+  <script src="js/scenes.js?v=590"></script>
+  <script src="js/weather.js?v=590"></script>
+  <script src="js/visitors.js?v=590"></script>
+  <script src="js/data/bot-anims.js?v=590"></script>
+<script src="js/wanderers.js?v=590"></script>
+  <script src="js/tutorial.js?v=590"></script>
+  <script src="js/puzzle-sim.js?v=590"></script>
+  <script src="js/led-banner.js?v=590"></script>
+  <script src="js/infections.js?v=590"></script>
+  <script src="js/script.js?v=590"></script>
+  <script src="js/grid-bg.js?v=590"></script>
+  <script src="js/lights.js?v=590"></script>
+  <script src="js/inf-test.js?v=590"></script>
+  <script src="js/sfx-test.js?v=590"></script>
+  <script src="js/extsource.js?v=590"></script>
+  <script src="js/player.js?v=590"></script>
+  <script src="js/billing.js?v=590"></script>
+  <script src="js/store.js?v=590"></script>
+  <script src="js/data/stories.js?v=590"></script>
+  <script src="js/stories.js?v=590"></script>
+  <script src="js/ads-config.js?v=590"></script>
+  <script src="js/ads.js?v=590"></script>
+  <script src="js/app-update.js?v=590"></script>
+  <script src="js/start.js?v=590"></script>
+  <script src="js/place.js?v=590"></script>
+  <script src="js/saver.js?v=590"></script>
 </body>
 </html>

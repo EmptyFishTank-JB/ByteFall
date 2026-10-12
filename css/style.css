@@ -2445,6 +2445,8 @@ body:not(.vs-mode) .hud .stat:not(.cpu-stat):not(.cpu-face) > .label {
 .tut-dim { position: fixed; inset: 0; z-index: 250; background: rgba(0, 0, 0, 0.5); opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
 .tut-dim.on { opacity: 1; }
 .tut-banner.float.middle { top: 50%; bottom: auto; transform: translate(-50%, -50%); }
+/* (over the main menu: from the top of the EXPLOITS / STORE row, down) */
+.tut-banner.float.anchored { top: var(--tut-top); bottom: auto; max-height: calc(100dvh - var(--tut-top) - 16px); }
 /* The menu buttons are dim until opened: pulsing in the tutorial, they light up full */
 :is(.records-btn, .settings-btn).tut-pulse { opacity: 1; filter: drop-shadow(0 0 4px rgba(var(--fg-rgb), 0.6)); }
 .tut-banner.nudge { animation: tut-nudge 0.3s ease-out; }
@@ -2469,22 +2471,20 @@ body:not(.vs-mode) .hud .stat:not(.cpu-stat):not(.cpu-face) > .label {
 .tut-actions button:not(.tut-back) + button { background: var(--panel); color: var(--fg); }
 /* BACK: on the left, outlined */
 .tut-actions button.tut-back { margin-right: auto; background: var(--panel); color: var(--fg); border-color: var(--fg-dim); }
-.tut-pulse { z-index: 3; animation: tut-pulse 0.9s ease-in-out infinite !important; }
-/* (position only for the cells and drop buttons: the corner and top buttons keep theirs) */
-.cell.tut-pulse, .column-buttons button.tut-pulse { position: relative; }
+/* THE FRAMES (tutorial.js's drawFrames): what a step points at gets a pulsing frame, all of them in one
+   layer over everything (the dim, every panel and card), so nothing covers one; 4px out from what
+   it frames (a roomy one 8px: words or a thin bar never touching it), the narration card's 6px
+   corners, as the dim's openings have */
+.tut-frames { position: fixed; inset: 0; z-index: 1000; pointer-events: none; }
+.tut-frames i { position: absolute; left: 0; top: 0; border-radius: 6px; animation: tut-pulse 0.9s ease-in-out infinite; }
+.tut-frames i[hidden] { display: none; }
 @keyframes tut-pulse {
   0%, 100% { box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.9), 0 0 6px rgba(var(--accent-rgb), 0.5); }
   50% { box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 1), 0 0 16px rgba(var(--accent-rgb), 0.9); }
 }
-/* (roomy: the pulsing frame 8px out from what it frames, its words or a thin bar never touching it;
-   the line under BYTEFALL framed round its words, not the screen's width) */
+/* (the line under BYTEFALL framed round its words, not the screen's width) */
 #game-mode-label.tut-roomy { width: fit-content; margin-left: auto; margin-right: auto; }
-.tut-pulse.tut-roomy { border-radius: 4px; outline: 1px solid var(--accent); outline-offset: 8px; animation: tut-pulse-roomy 0.9s ease-in-out infinite !important; }
-@keyframes tut-pulse-roomy {
-  0%, 100% { outline-width: 1px; outline-color: rgba(var(--accent-rgb), 0.9); filter: drop-shadow(0 0 0 transparent); }
-  50% { outline-width: 2px; outline-color: rgba(var(--accent-rgb), 1); filter: drop-shadow(0 0 6px rgba(var(--accent-rgb), 0.6)); }
-}
-.overflow-line.tut-pulse { box-shadow: none; animation: warn-pulse 0.9s ease-in-out infinite !important; color: var(--accent); }
+.overflow-line.tut-pulse { animation: warn-pulse 0.9s ease-in-out infinite !important; color: var(--accent); }
 /* (the tutorial's drop buttons: full presence, as the rest of the screen, whether or not this card
    takes a drop; a tap it doesn't want gets BOT's -_- instead) */
 .column-buttons.tut-full button:disabled { opacity: 1; cursor: default; }
@@ -4519,6 +4519,48 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 .notices-empty { font-size: 13px; color: var(--fg-dim); }
 /* (a dot on RULES & RECORDS, the pause screen's and the NOTICES tab while some are unread) */
 :is(#home-records, #pause-records, .menu-tabs [data-pane="notices"]) { position: relative; }
+/* THE STORIES (js/stories.js). On the cracked card: the file the key recovered, typed out, or (a
+   dashed box) what the next one needs; it scrolls inside the card on a short screen */
+.goal-card .story-frag { align-self: stretch; flex: 0 1 auto; min-height: 0; overflow-y: auto; text-align: left; border: 1px solid rgba(var(--fg-rgb), 0.35); background: rgba(0, 0, 0, 0.35); padding: 8px; margin: 0; cursor: pointer; }
+.goal-card .story-frag[hidden] { display: none; }
+.goal-card .story-frag.locked { border-style: dashed; cursor: default; }
+.goal-card.tight #goal-note { display: none; }
+.story-frag .sf-head { margin: 0 0 4px; font-size: 11.5px; letter-spacing: 1px; color: var(--accent); }
+.story-frag.locked .sf-head { color: var(--fg-dim); }
+.story-frag .sf-doc { margin: 0 0 6px; font-size: 11.5px; letter-spacing: 1px; color: var(--fg-dim); }
+.story-frag .sf-body { margin: 0; font-size: 13px; line-height: 1.4; color: var(--panel-text); white-space: pre-line; }
+.story-frag .sf-noise, .archive-file .af-noise { margin: 0 0 6px; font-size: 13px; letter-spacing: 1px; color: rgba(var(--fg-rgb), 0.45); white-space: nowrap; overflow: hidden; }
+.story-frag .sf-caret { display: inline-block; width: 0.55em; height: 1em; margin-left: 2px; background: var(--fg); vertical-align: -0.15em; animation: sf-blink 1s steps(1) infinite; }
+@keyframes sf-blink { 50% { opacity: 0; } }
+.low-fx .story-frag .sf-caret { animation: none; }
+/* The ARCHIVE: the stories, then a story's files by chapter (recovered, NEW till read, or encrypted) */
+.panel-archive .archive-body { display: flex; flex-direction: column; gap: var(--gap); }
+.panel-archive .archive-note, .panel-archive .archive-blurb { font-size: 13px; line-height: 1.4; color: var(--fg-dim); margin: 0; }
+.archive-story { position: relative; display: flex; flex-direction: column; align-items: stretch; gap: 4px; width: 100%; padding: 8px 10px; text-align: left; border: 1px solid var(--grid-line); border-radius: 4px; background: transparent; color: var(--panel-text); font: inherit; cursor: pointer; }
+.archive-story.on { border-color: var(--fg); box-shadow: 0 0 8px rgba(var(--fg-rgb), 0.25); }
+.archive-story.locked { opacity: 0.5; }
+.archive-story .as-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.archive-story .as-title { font-size: 14.5px; letter-spacing: 2px; color: var(--fg); }
+.archive-story .as-blurb { font-size: 13px; line-height: 1.35; }
+.archive-story .as-state { font-size: 11.5px; letter-spacing: 1px; color: var(--fg-dim); }
+.archive-story.on .as-state { color: var(--fg); }
+.archive-new, .archive-file .af-head b { font-size: 11.5px; letter-spacing: 1px; font-weight: normal; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.6); }
+.archive-back { align-self: flex-start; padding: 4px 10px; font: inherit; font-size: 12px; letter-spacing: 1px; color: var(--fg); background: transparent; border: 1px solid var(--fg-dim); border-radius: 3px; cursor: pointer; }
+.panel-archive .archive-title { margin: 0; font-size: 15.5px; letter-spacing: 2px; color: var(--accent); }
+.archive-pick { padding: 8px; font: inherit; font-size: 13px; letter-spacing: 1px; color: var(--fg); background: transparent; border: 1px solid var(--fg); border-radius: 3px; cursor: pointer; }
+.archive-pick.on { background: var(--fg); color: var(--panel); font-weight: bold; cursor: default; }
+.panel-archive .archive-state { margin: 0; font-size: 13px; letter-spacing: 1px; color: var(--fg); }
+.panel-archive .archive-chapter { margin: 0; display: flex; justify-content: space-between; gap: 8px; font-size: 13px; letter-spacing: 1px; color: var(--accent); }
+.panel-archive .archive-chapter span { color: var(--fg-dim); font-size: 11.5px; }
+.archive-file { display: flex; flex-direction: column; gap: 4px; padding: 8px 10px; border: 1px solid var(--grid-line); border-radius: 4px; }
+.archive-file.new { border-color: var(--accent); }
+.archive-file.locked { border-style: dashed; }
+.panel-archive .archive-file p { margin: 0; }
+.archive-file .af-head { font-size: 11.5px; letter-spacing: 1px; color: var(--fg-dim); }
+.archive-file .af-body { font-size: 13px; line-height: 1.4; color: var(--panel-text); white-space: pre-line; }
+/* (the main menu's STORY button: its folder, as PATCHES' USB stick; its NEW dot in its own corner) */
+#story-row button { position: relative; }
+.opt-text .story-ico { width: 1em; height: 1em; vertical-align: -0.15em; margin-right: 0.35em; }
 .has-unread::after { content: ""; position: absolute; top: 5px; right: 6px; width: 6px; height: 6px; border-radius: 1px; background: var(--accent); box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.8); pointer-events: none; }
 /* THE RESULT SCREEN's EARNED: what the game held back, under the level meter */
 .overlay-earned { margin: var(--gap) 0 12px; max-height: 120px; overflow-y: auto; }
@@ -4622,8 +4664,8 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 .records .card-head { margin-bottom: var(--gap); }
 .records .menu-tabs { margin-bottom: 0; }
 .records .card-top { padding-bottom: var(--gap); }
-.records :is(.panel-rules, .panel-records, .panel-notices) h2 { margin: 0 0 var(--gap); }
-.records :is(.panel-rules, .panel-records, .panel-notices) p { margin: 0 0 var(--gap); }
+.records :is(.panel-rules, .panel-records, .panel-notices, .panel-archive) h2 { margin: 0 0 var(--gap); }
+.records :is(.panel-rules, .panel-records, .panel-notices, .panel-archive) p { margin: 0 0 var(--gap); }
 .records .panel-rules .rules-sub { margin: 0 0 var(--gap); }
 .records .records-tabs { gap: var(--gap); margin: 0; padding: 0 0 var(--gap); top: -1px; }
 .records .records-tabs button { flex: 1 1 auto; padding: 5px 6px; font-size: 11.5px; }

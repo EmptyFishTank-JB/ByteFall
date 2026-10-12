@@ -5,12 +5,13 @@ cracked card under its KEYS, typed out as the terminal would. The files read in 
 together, tell a story. It's written as found documents: messages, memos, chat logs, system
 logs. Each piece is 2 to 5 short lines, so it fits a phone card.
 
-Status: **draft for review**. Nothing here is in the game yet.
+Status: **in the game** (v590): the files are `js/data/stories.js`, the rules `js/stories.js`. THE FOUR and
+PATIENT ZERO, outlined below, are written in full there. Edit the files freely; this page is the plan.
 
 ## How it plays
 
-- **One story at a time.** The story being decrypted is picked in CLASSIC's GAME SETTINGS,
-  under GOAL. THE TRACE is open from the start; each story finished opens the next.
+- **One story at a time.** The story being decrypted is picked in the ARCHIVE (DECRYPT THIS
+  STORY). THE TRACE is open from the start; each story finished opens the next, picked at once.
 - **One file per crack.** Every key cracked, in any CLASSIC game with GOAL: ON, recovers the
   next unread file of the picked story. A game that goes deep recovers several, one per key.
 - **Chapters are gated by key depth.** Each story has 3 chapters of 4 files:
@@ -144,5 +145,5 @@ boxes that bite.
 1. Titles, names and tone: LATTICE, WARDEN, M., `dev_k` and `ines` are placeholders to change
    freely.
 2. Should a crack too shallow for the next file show the teaser line (above), or say nothing?
-3. RESET PROGRESS: keep or clear the stories recovered? (The draft keeps them: reading isn't
-   an advantage.)
+3. RESET PROGRESS: keep or clear the stories recovered? (For now they're in the save, so a reset starts
+   them over.)
