@@ -2372,22 +2372,25 @@ body.player-open { overflow: hidden; }
 .mp-note { margin: 0; font-size: 10px; line-height: 1.5; text-align: center; color: var(--panel-text); opacity: 0.8; }
 /* OPEN MUSIC PLAYER: the same gap above the visualizer as between the menu's other buttons */
 .settings #open-player-btn { margin-bottom: 6px; }
-/* The main HUD (not VS): the four small boxes one size (two equal rows), each its title 4px from its
-   top edge, its value 8px under the title and 8px over its foot, centered across (and down whatever
-   room a row has past that); CURRENT as tall as the two boxes beside it, its title 4px from its top
-   and its bit, its own size, centered in the room under the title. SCORE's story meter, along its
-   foot, takes no room of its own */
-body:not(.vs-mode) .hud { grid-template-rows: 1fr 1fr; }
+/* The main HUD (not VS): the four small boxes one size (two equal rows): each its title 4px from its
+   top edge, and its height that title, then 8px, its value (16px) and 8px (--hud-val, kept under the
+   title, so a value shrunk to fit never changes it); the value itself centered between the box's top
+   and bottom edges, across too. CURRENT as tall as the two boxes beside it, its title 4px from its
+   top and its bit, its own size, centered in the box the same way (never up under its title, in the
+   shorter box over NEXT or TIME). SCORE's story meter, along its foot, takes no room of its own */
+body:not(.vs-mode) .hud { grid-template-rows: 1fr 1fr; --hud-val: 32px; }
 body:not(.vs-mode) .hud > .stat:not(.cpu-stat):not(.cpu-face),
-body:not(.vs-mode) .hud-bits .stat { min-height: 0; padding: 4px 2px 8px; justify-content: flex-start; }
+body:not(.vs-mode) .hud-bits .stat { min-height: 0; padding: 4px 2px var(--hud-val); justify-content: flex-start; }
 body:not(.vs-mode) .hud .stat:not(.cpu-stat):not(.cpu-face) > .label {
-  position: static; flex: none; height: auto; line-height: 1; margin: 0 0 8px; text-align: center;
+  position: static; flex: none; height: auto; line-height: 1; margin: 0; text-align: center;
 }
 body:not(.vs-mode) .hud .stat:not(.cpu-stat):not(.cpu-face) > :is(.value, .bit-sq, .bit-row) {
-  position: static; transform: none; flex: none; margin: auto; max-width: calc(100% - 4px);
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; max-width: calc(100% - 4px);
 }
 body:not(.vs-mode) .hud-bits .stat-current { padding-bottom: 0; }
-body:not(.vs-mode) .hud .hud-bits .stat.stat-current:not(.cpu-stat):not(.cpu-face) > .label { margin-bottom: 0; } /* (no gap of its own: the bit centers in all the room under it) */
+/* (CURRENT's bit centered too, but never up under its title: 4px, the title's 10.5px line, 2px clear,
+   then half the bit's 42px) */
+body:not(.vs-mode) .hud .hud-bits .stat.stat-current:not(.cpu-stat):not(.cpu-face) > .bit-sq { top: max(50%, 37.5px); }
 /* (ENCRYPT IN's ===== in the band under its 8, taking no room either) */
 body:not(.vs-mode) .hud #pulse-stat > .layer-mark { top: auto; bottom: 0; height: 8px; line-height: 8px; font-size: 8px; }
 
@@ -4577,15 +4580,19 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 .daily-got { margin: 8px 0 0; font-size: 13px; letter-spacing: 1px; line-height: 1.35; color: var(--accent); }
 .daily-got[hidden] { display: none; }
 .daily-got.fresh { animation: alarm-in 0.25s ease-out, warn-pulse 1s ease-in-out 0.25s 2; }
-/* WHAT A DROP EARNED: in the CHAIN box (chains earn the resources), centered in the band under its
-   value, every resource on one line (shrunk to fit) */
+/* WHAT A DROP EARNED: in the CHAIN box (chains earn the resources), centered between the foot of its
+   value and its bottom edge (the value's centered: its foot 8px under the middle), every resource on
+   one line (shrunk to fit) */
 #chain-stat .res-pop {
-  position: absolute; left: 2px; right: 2px; bottom: 0; height: 8px; z-index: 2; display: flex; justify-content: center; align-items: center; gap: 5px;
-  white-space: nowrap; font-size: 8px; line-height: 1; letter-spacing: 0.5px; color: var(--fg); pointer-events: none;
+  position: absolute; left: 2px; right: 2px; bottom: 0; height: calc(50% - 8px); z-index: 2; display: flex; justify-content: center; align-items: center; gap: 5px;
+  white-space: nowrap; font-size: 10px; line-height: 1; letter-spacing: 0.5px; color: var(--fg); pointer-events: none;
   animation: pickup 1.7s ease-out forwards;
 }
 #chain-stat .res-pop .res-chip { gap: 2px; }
-#chain-stat .res-pop .key-ico { width: 1.15em; height: 1.15em; }
+#chain-stat .res-pop .key-ico { display: block; width: 1.15em; height: 1.15em; }
+/* (its number trimmed to its capitals, so the icon and the +1 line up by their middles whatever the
+   font's ascent and descent) */
+#chain-stat .res-pop .rc-n { display: block; line-height: 1; text-box: trim-both cap alphabetic; }
 @keyframes pickup { 0% { opacity: 0; transform: translateY(3px); } 12% { opacity: 1; transform: none; } 75% { opacity: 1; } 100% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { #chain-stat .res-pop { animation-name: res-pop-still; } }
 /* (NOTICES: which end is newest, under its head) */
