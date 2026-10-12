@@ -777,7 +777,12 @@ RESTART (two taps) is on the pause screen; there's no corner button for it.
 
 The HUD (not VS): BEST over SCORE on the left, CURRENT large in the middle (on Easy, NEXT in a
 short panel under it, its bit in full color as CURRENT's; TIME or BITS LEFT under it in the timed and counted modes), ENCRYPT IN
-over CHAIN on the right (CHAIN the whole column in ZEN).
+over CHAIN on the right (CHAIN the whole column in ZEN). It's one shape on every phone: laid out at
+368px (`HUD_DESIGN_W`, the S23 Ultra's) and zoomed to the grid card's width (script.js's `zoomHud`, from
+`fitBoard`, which works the board's size out twice, since the HUD's height follows the board's width), so
+its boxes, CURRENT and their words keep their proportions on a narrow phone (a Fold's cover screen) as on
+a wide one, and the grid under it the same; a screen wider than the game needs (a Fold open) keeps the
+game at its width, centered, empty either side. VS lays out its own squares.
 
 THE CHAIN METER, a streak: a 5-segment bar up each side of the grid, exactly as tall as
 the grid's squares (the top row's top to the bottom of row 1), set off from the grid by the
