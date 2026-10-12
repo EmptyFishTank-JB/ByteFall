@@ -4992,6 +4992,20 @@ window.dailyDrop = {
 // KEYS: on the main menu under the title, and in the STORE; the STORE buttons get a mark
 // while the DAILY DROP waits
 const KEY_SVG = '<svg class="key-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 4h6v8H1zM3 6v4h2V6zM7 7h8v2H7zM11 9h1.5v2H11zM13.5 9H15v3h-1.5z" fill="currentColor" fill-rule="evenodd"/></svg>';
+// PATCHES' own icon: a USB stick on its side, twice as wide as KEYS (its connector out of the body's
+// right side, the two locking holes one over the other), the USB trident cut out of the body with a
+// + in an open ring at its base. The cut is one mask (#usb-cut, put in the page once below), so every
+// copy draws the same and none needs ids of its own
+const USB_SVG = '<svg class="usb-ico" viewBox="0 0 24 12" aria-hidden="true"><path d="M0.5 1.5h16.5v9H0.5z" fill="currentColor" mask="url(#usb-cut)"/><path d="M17 3.5h6.5v5H17zM19.6 4.3h1.6v1.2h-1.6zM19.6 6.5h1.6v1.2h-1.6z" fill="currentColor" fill-rule="evenodd"/></svg>';
+document.body.insertAdjacentHTML('beforeend', `<svg width="0" height="0" style="position: absolute" aria-hidden="true" focusable="false"><mask id="usb-cut" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="12">
+  <path d="M0.5 1.5h16.5v9H0.5z" fill="#fff"/>
+  <g fill="none" stroke="#000"><circle cx="4.1" cy="6" r="1.7" stroke-width="0.8"/>
+    <path d="M3.05 6h2.1M4.1 4.95v2.1M5.8 6H13.4M7.6 6L9 4.1H11.2M9.4 6L10.8 7.9H11.6" stroke-width="1"/></g>
+  <path d="M13.2 4.5L15.4 6L13.2 7.5zM11.2 7.1h1.6v1.6h-1.6z" fill="#000"/><circle cx="11.4" cy="4.1" r="0.85" fill="#000"/>
+</mask></svg>`);
+// (the STORE's PATCHES heading and the PATCHES card's title wear it)
+document.querySelector('.store-sub[data-sec="patches"]').insertAdjacentHTML('afterbegin', USB_SVG);
+document.getElementById('booster-pick-title').innerHTML = `// ${USB_SVG}PATCHES`;
 // The RESOURCES (Progress, ECONOMY.md): a name and a small pixel icon each
 const resSvg = (d) => `<svg class="key-ico res-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="${d}" fill="currentColor" fill-rule="evenodd"/></svg>`;
 const RES_INFO = {
@@ -5213,7 +5227,7 @@ function refreshBoosterRow() {
   const b = document.createElement('button');
   b.type = 'button';
   b.className = on.length ? 'active' : ''; // (lit while one's on, as VS's LAYERS: ON)
-  b.innerHTML = `<span class="opt-text">PATCHES: ${!on.length ? 'NONE ON' : on.length === 1 ? `${BOOSTER_SVG[on[0]] || ''}${BOOSTERS[on[0]].name}` : `${on.map((id) => BOOSTER_SVG[id] || '').join('')}${on.length} ON`}</span>`;
+  b.innerHTML = `<span class="opt-text">${USB_SVG}PATCHES: ${!on.length ? 'NONE ON' : on.length === 1 ? `${BOOSTER_SVG[on[0]] || ''}${BOOSTERS[on[0]].name}` : `${on.map((id) => BOOSTER_SVG[id] || '').join('')}${on.length} ON`}</span>`;
   b.setAttribute('aria-label', `Patches: ${on.length ? on.map((id) => BOOSTERS[id].name).join(', ') : 'none on'}. Tap to choose`);
   b.addEventListener('click', openBoosterPick);
   row.appendChild(b);
