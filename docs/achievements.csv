@@ -102,6 +102,7 @@ DAILY,CLEAN TRACE,Clear a Tuesday TRACE board without touching an infected bit,1
 DAILY,CHECKSUM VALID,Solve a Thursday CHECKSUM grid,1,Standard,checksum-valid
 DAILY,DOUBLE WORD,Make a DWORD in a Wednesday MERGE,1,Standard,double-word
 DAILY,DEFRAGMENTED,Set off a chain of 5 in a Friday DEFRAG,1,Standard,defragmented
+DAILY,DECODED,Decode a Saturday DECODE picture,1,Standard,decoded
 DAILY,FULL MESH,Route every pair and fill a Sunday ROUTING grid,1,Standard,full-mesh
 PUZZLES,FIRST TRY,Solve a puzzle on your first attempt,1,Standard,first-try
 PUZZLES,LOCKSMITH,Solve 10 puzzles,10,Standard,locksmith
