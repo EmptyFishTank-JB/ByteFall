@@ -1135,7 +1135,7 @@ filling the screen with the starlight twinkling across it, the BYTEFALL title
 in the middle and START below it, a neon sign (its tube's core near white, the theme's color
 glowing round it), as far under the tagline as the tagline is under the title (measured letter to
 letter, in every font, and placed before the first paint by a small script in bytefall.html, so it's never
-seen anywhere else first; `js/start.js`). **On a launch the title plays an intro**, one of five picked at
+seen anywhere else first; `js/start.js`). **On a launch the title plays an intro** (and again each time BACK comes here from the main menu), one of five picked at
 random (never the same one twice running; `?intro=drop`, `bit`, `rain`, `decrypt` or `power` picks
 one): DROP, the title falling from the top, gathering speed, and landing hard (a squash, a jolt, and
 an amber band under it bursting into pixels and binary dust); BIT, the title falling as a bit does on

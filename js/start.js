@@ -3,7 +3,8 @@
 // over it: fitStart). A tap (or Enter / Space) fades what's on the card out, its border staying, and
 // the game card's contents in, within the same border: the first time the game is ever opened the
 // TUTORIAL (tutorial.js), after that the main menu. The tap also counts as the gesture that lets the music start.
-// BACK (the phone's back button, or the browser's) outside a game comes back here (showStart).
+// BACK (the phone's back button, or the browser's, or the main menu's ← BACK) outside a game comes back
+// here (showStart), and the title's intro plays again.
 (() => {
   const screen = document.getElementById('start-screen');
   const black = document.getElementById('start-black');
@@ -77,6 +78,13 @@
       document.documentElement.classList.remove('no-start');
       screen.classList.remove('starting');
       starting = false;
+      // (the title's intro again, as on a launch: the title and START unseen till it plays; not with
+      // less motion asked for)
+      const calm = document.documentElement.classList.contains('low-fx') || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+      if (!calm && !card.classList.contains('intro-run')) {
+        startBtn.classList.remove('neon');
+        card.classList.add('intro-wait');
+      }
       screen.hidden = false;
       try { sessionStorage.removeItem('bytefall-started'); } catch (e) {}
       window.startWalkers.start();
@@ -86,6 +94,7 @@
       card.classList.remove('entering');
       crt.classList.remove('card-out');
       startBtn.focus({ preventScroll: true });
+      requestAnimationFrame(intro);
     }, FADE_MS);
   }
   window.showStartScreen = showStart;
