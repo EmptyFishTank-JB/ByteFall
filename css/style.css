@@ -4791,6 +4791,9 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 #rt-clear { flex: none; height: 40px; padding: 0 16px; background: transparent; border: 1px solid var(--fg); border-radius: 4px; color: var(--fg); font-family: inherit; font-size: 13px; letter-spacing: 2px; cursor: pointer; }
 .rt-hint { flex: 1; margin: 0; text-align: center; font-size: 11.5px; letter-spacing: 1px; color: var(--fg-dim); }
 @media (hover: hover) { #rt-clear:hover { background: rgba(var(--fg-rgb), 0.12); } }
+/* (MONOCHROME: no colors here either; the pairs told apart by their numbers, the lines by where they run) */
+[data-theme="monochrome"] .rt-cell { --rt: var(--fg-rgb) !important; }
+[data-theme="monochrome"] .rt-lines polyline { stroke: var(--fg); }
 @media (prefers-reduced-motion: reduce) { .mg-tile { transition: none; } .mg-tile.mg-born, .mg-tile.mg-pop, .rt-board.rt-won .cell.rt-cell { animation: none; } }
 
 /* THE ARCADE MENU (the main menu's ARCADE; arcade.js): every game as a card in a row that slides
