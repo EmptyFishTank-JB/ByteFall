@@ -108,6 +108,7 @@ const Stories = (() => {
   function listView(el) {
     const pick = picked();
     el.innerHTML = '<p class="archive-note">Every key cracked in STORY (tap CLASSIC again on the main menu) recovers the next file of the story you\'re decrypting. Deeper chapters need deeper keys.</p>'
+      + '<button type="button" class="archive-back archive-intro" id="archive-intro">READ THE INTRO</button>'
       + STORIES.map((s, i) => {
         const open = isOpen(s);
         const state = !open ? `LOCKED // FINISH ${STORIES[i - 1].title}` : done(s) ? 'COMPLETE' : s === pick ? 'DECRYPTING' : `${got(s) ? 'PAUSED' : 'NOT STARTED'}`;
@@ -117,6 +118,8 @@ const Stories = (() => {
           + `<span class="as-blurb">${open ? esc(s.blurb) : 'Locked.'}</span>`
           + `<span class="as-state">${got(s)} / ${s.files.length} FILES // ${state}</span></button>`;
       }).join('');
+    // (STORY's intro card, to read again: over the ARCHIVE)
+    document.getElementById('archive-intro').addEventListener('click', () => { SFX.play('click'); if (typeof openStoryIntro === 'function') openStoryIntro(); });
     el.querySelectorAll('.archive-story').forEach((b) => b.addEventListener('click', () => {
       const s = byId(b.dataset.story);
       if (!isOpen(s)) {

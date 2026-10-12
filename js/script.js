@@ -2724,6 +2724,8 @@ function maybeStoryIntro() {
   storage.set('bytefall-story-intro', '1');
   storyIntroEl.classList.remove('hidden');
 }
+// (and again any time, from the ARCHIVE's READ THE INTRO)
+function openStoryIntro() { storyIntroEl.classList.remove('hidden'); }
 function closeStoryIntro() {
   if (!storyIntroOpen()) return;
   storyIntroEl.classList.add('hidden');
