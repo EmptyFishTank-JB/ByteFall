@@ -238,7 +238,7 @@ const BOOSTERS = {
   'firewall-delay': { name: 'FIREWALL DELAY', cost: 20, desc: 'The first encryption layer rises 4 drops later.', modes: ['classic', 'blitz'] },
   lookahead: { name: 'LOOKAHEAD', cost: 15, desc: 'See your next bit for the first 60 seconds (EASY always shows it).', modes: ['classic', 'blitz', 'zen'] },
   overtime: { name: 'OVERTIME', cost: 20, desc: '+15 seconds on the BLITZ clock.', modes: ['blitz'] },
-  antivirus: { name: 'ANTIVIRUS', cost: 25, desc: 'The next infection a BLACK BOX lets out is quarantined. Bought in a game, it clears any infection already running instead. Once a game.', modes: ['classic', 'blitz', 'zen'] },
+  antivirus: { name: 'ANTIVIRUS', cost: 25, desc: 'The next infection a BLACK BOX lets out is quarantined. Bought in a game, it clears any infection already running instead.', modes: ['classic', 'blitz', 'zen'] },
   'second-chance': { name: 'RESTORE POINT', cost: 40, desc: 'If the trace completes, the system rolls back: everything above the bottom 3 rows is wiped and you keep playing. Once a game.', modes: ['classic', 'blitz', 'zen'], adPerDay: 1 }, // (adPerDay: free for a rewarded ad that many times a day, the STORE's WATCH AD)
   hint: { name: 'HINT', cost: 10, desc: 'PUZZLE: lights up the column your next bit should go in.', modes: ['puzzle'], inGame: true },
   undo: { name: 'UNDO', cost: 8, desc: 'PUZZLE: takes back your last drop, even after your bits run out.', modes: ['puzzle'], inGame: true },
@@ -5016,6 +5016,8 @@ document.body.insertAdjacentHTML('beforeend', `<svg width="0" height="0" style="
 // (the STORE's PATCHES heading and the PATCHES card's title wear it)
 document.querySelector('.store-sub[data-sec="patches"]').insertAdjacentHTML('afterbegin', USB_SVG);
 document.getElementById('booster-pick-title').innerHTML = `// ${USB_SVG}PATCHES`;
+// (and the STORE's exploit tiers wear the terminal: TIER I here, II and III as store.js deals them)
+document.querySelector('.store-sub[data-sec="starters"]').insertAdjacentHTML('afterbegin', TERMINAL_SVG);
 document.querySelector('[role="tab"][data-pane="exploits"] svg').outerHTML = TERMINAL_SVG;
 document.querySelector('#hacks-panel .hacks-top h2').insertAdjacentHTML('afterbegin', TERMINAL_SVG);
 // The RESOURCES (Progress, ECONOMY.md): a name and a small pixel icon each
@@ -5105,9 +5107,9 @@ function showKeys() {
   refreshPuzzleTools();
 }
 
-// The main menu's PATCHES: one button, saying what's on (none or its name); a tap opens its card:
-// the ones owned for this mode, one of them switched on at a time (on: used up in the next game, at
-// its first drop), and GET PATCHES (the STORE's)
+// The main menu's PATCHES: one button, saying what's on (none, or their names); a tap opens its card:
+// the ones owned for this mode, up to two different ones switched on (on: used up in the next game,
+// at its first drop), and GET PATCHES (the STORE's)
 // THE STORE'S i: each resource, its icon, and how it's earned (ECONOMY.md has the numbers in full)
 const RES_HOW = {
   keys: 'The STORE\'s money. +1 for every 10 bits you decrypt. +2 when a chain reaches 5 links, +5 at 7. +10 for each level and achievement. +5 for your first daily game of the day. +2 / 4 / 6 the first time you solve an EASY / NORMAL / HARD puzzle. +25 in the DAILY DROP.',
@@ -5137,13 +5139,13 @@ const SECTION_INFO = {
     'The first three are yours as soon as they unlock. Past those, an unlocked exploit is bought once with resources, then it\'s yours to equip until your next RANK UP.']],
   boosters: ['// PATCHES', [
     'A patch gives your next game an edge.',
-    'Buy them with KEYS. Before a game, tap PATCHES on the main menu and switch one on.',
-    'One per game. It\'s used up when the game starts (RESTORE POINT only when it saves you).',
+    'Buy them with KEYS. Before a game, tap PATCHES on the main menu and switch on up to two different patches.',
+    'They\'re used up with the game\'s first drop (RESTORE POINT only when it saves you).',
     `In the game, the PATCH SLOTS at the two ends of the exploit row sell one more each (the left opens at Lv ${Progress.patchSlotLevel(0)}, the right at Lv ${Progress.patchSlotLevel(1)}): KEYS and resources, applied the moment you buy it.`,
     'Not in DAILY or VS.']],
   starters: ['// EXPLOITS FOR A GAME', [
     'An exploit you own and bring into a game, instead of waiting for the CHAIN METER to earn one. TIER I, II and III, each its own section.',
-    `Pick up to two on the main menu, from EXPLOITS. Each sits in an EXPLOIT SLOT next to the exploit button: the left slot opens at Lv ${Progress.sideSlotLevel(0)}, the right at Lv ${Progress.sideSlotLevel(1)}.`,
+    `Take up to two into a game from EXPLOITS on the main menu: two different exploits, or two of one you own twice. Each sits in an EXPLOIT SLOT next to the exploit button, the left one filled first: the left slot opens at Lv ${Progress.sideSlotLevel(0)}, the right at Lv ${Progress.sideSlotLevel(1)}.`,
     'In the game, tap one to use it as your next drop. Any you don\'t use stay yours.',
     'Short on resources? A MASTER KEY buys any exploit.',
     'An empty EXPLOIT SLOT turns into the BLACK MARKET once the first encryption layer rises: something for sale that changes every 4 drops. The pips under it count the drops left.',
@@ -7095,8 +7097,18 @@ recordsEl.querySelectorAll('.records-tabs button').forEach((b) => {
     renderRecords();
   });
 });
-// (a card of its own over the game card: BACK or Esc closes it, not a tap beside it)
+// (a card of its own over the game card: BACK or Esc closes it, not a tap beside it). A small card
+// open over it (an [i], the PATCHES or EXPLOITS card, GAME SETTINGS) is closed first: BACK, and the
+// phone's back (start.js), take it away and leave the panel or menu under it
+const OVER_CARDS = ['res-info', 'booster-pick', 'starter-pick', 'mode-settings'];
+window.closeOverCard = () => {
+  const open = OVER_CARDS.map((id) => document.getElementById(id)).find((el) => el && !el.classList.contains('hidden'));
+  if (!open) return false;
+  document.getElementById(`${open.id}-close`).click();
+  return true;
+};
 document.querySelectorAll('.card-back').forEach((b) => b.addEventListener('click', () => {
+  if (window.closeOverCard()) return;
   if (b.dataset.close === 'records') setRecordsOpen(false);
   else if (b.dataset.close === 'settings') setSettingsOpen(false);
 }));

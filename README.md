@@ -1159,8 +1159,10 @@ to confirm, CONFIRM?) ends the game, nothing kept, as RESTART, and goes to the m
 to the PUZZLES list). A pause pressed mid-drop opens once the drop finishes. The game over box
 has MAIN MENU under NEW SESSION.
 
-**BACK** (the phone's back button, or the browser's): an open panel (MENU, SETTINGS, the
-MUSIC PLAYER) closes first; in a game it goes to the main menu (a game under way pauses, for
+**BACK** (the phone's back button, or the browser's): a small card open over everything (an [i],
+the PATCHES or EXPLOITS card, GAME SETTINGS) closes first, leaving what's under it (the card's own
+← BACK does the same: `closeOverCard`); then an open panel (MENU, SETTINGS, the
+MUSIC PLAYER) closes; in a game it goes to the main menu (a game under way pauses, for
 RESUME); on the main menu it goes back to the start screen (through black, as it went in);
 from the start screen it leaves as usual. The tutorial stays put (it has its own EXIT)
 (`js/start.js`).

@@ -176,7 +176,7 @@ const Store = (() => {
     if (t !== shopTier) { // (the next tier: a ----- line and its own head, as the EXPLOITS menu's)
       shopTier = t;
       starterShop.insertAdjacentHTML('beforeend', '<div class="store-rule tier-rule" aria-hidden="true">--------------------------------------------------------------------------------</div>'
-        + `<h3 class="store-sub tier-shop-sub" data-sec="tier-${t + 1}">TIER ${TIER_NAMES[t]} EXPLOITS</h3>`);
+        + `<h3 class="store-sub tier-shop-sub" data-sec="tier-${t + 1}">${TERMINAL_SVG}TIER ${TIER_NAMES[t]} EXPLOITS</h3>`);
     }
     shopItem(id, starterShop);
   }
