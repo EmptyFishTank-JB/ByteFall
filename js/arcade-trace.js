@@ -100,30 +100,37 @@ Arcade.register('trace', (() => {
     boardEl.replaceChildren(...cells);
   }
   const FLAG_SVG = '<svg class="tr-flag" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6.5"/><path d="M12 2.5v5M12 16.5v5M2.5 12h5M16.5 12h5"/></svg>';
-  function render() {
-    const done = over(s);
-    cells.forEach((c, i) => {
+  // (its squares, sq, drawn from x: the game's, or the ARCADE menu's preview's)
+  function paint(x, sq) {
+    const done = over(x);
+    sq.forEach((c, i) => {
       let cls = 'cell';
       let html = '';
       let label = 'Encrypted block';
-      if (s.open[i]) {
-        const n = s.count[i];
+      if (x.open[i]) {
+        const n = x.count[i];
         cls += n ? ' disc tr-open' : ' tr-open tr-zero';
         label = n ? `${n} infected round it` : 'Clear';
         if (n) { c.className = cls; fillBit(c, n); c.setAttribute('aria-label', label); return; }
-      } else if (done && s.bad[i]) {
-        cls += ` tr-bad${i === s.hit ? ' tr-hit' : ''}${s.won ? ' tr-caught' : ''}`;
+      } else if (done && x.bad[i]) {
+        cls += ` tr-bad${i === x.hit ? ' tr-hit' : ''}${x.won ? ' tr-caught' : ''}`;
         html = VIRUS_SVG;
         label = 'Infected';
-      } else if (s.flag[i]) {
-        cls += ` firewall tr-flagged${done && !s.bad[i] ? ' tr-wrong' : ''}`;
+      } else if (x.flag[i]) {
+        cls += ` firewall tr-flagged${done && !x.bad[i] ? ' tr-wrong' : ''}`;
         html = FLAG_SVG;
         label = 'Flagged';
       } else cls += ' firewall tr-hidden';
+      if (c.className === cls && c.dataset.html === html) return; // (as it was: left alone)
       c.className = cls;
       c.innerHTML = html;
+      c.dataset.html = html;
       c.setAttribute('aria-label', label);
     });
+  }
+  function render() {
+    const done = over(s);
+    paint(s, cells);
     boardEl.classList.toggle('tr-over', done);
     actsEl.hidden = done;
     modeBtn.textContent = flagMode ? 'TAP: FLAG' : 'TAP: OPEN';
@@ -200,6 +207,41 @@ Arcade.register('trace', (() => {
     kit.finish();
   }
 
+  // THE ARCADE MENU's preview (arcade.js plays it): a board cleared a block at a time (one beside what's
+  // open, now and then a flag on an infected one by a bit), then the infected caught
+  function demo(host) {
+    const x = make(Math.random);
+    const board = document.createElement('div');
+    board.className = 'tr-board';
+    const sq = Array.from({ length: N }, () => { const c = document.createElement('span'); c.className = 'cell'; return c; });
+    board.replaceChildren(...sq);
+    host.replaceChildren(board);
+    paint(x, sq);
+    const pick = (a) => a[Math.floor(Math.random() * a.length)];
+    return {
+      step() {
+        if (x.won) return null;
+        const shut = [];
+        for (let i = 0; i < N; i++) if (!x.open[i] && !x.flag[i]) shut.push(i);
+        const bad = shut.filter((i) => x.bad[i] && around(i).some((j) => x.open[j]));
+        if (bad.length && Math.random() < 0.3) {
+          x.flag[pick(bad)] = 1;
+          paint(x, sq);
+          return 260;
+        }
+        const safe = shut.filter((i) => !x.bad[i]);
+        const edge = safe.filter((i) => around(i).some((j) => x.open[j]));
+        flood(x, pick(edge.length ? edge : safe));
+        if (!safeLeft(x)) {
+          x.won = true;
+          for (let i = 0; i < N; i++) if (x.bad[i]) { x.flag[i] = 1; sq[i].style.animationDelay = `${(Math.floor(i / COLS) + (i % COLS)) * 25}ms`; }
+        }
+        paint(x, sq);
+        return 280;
+      },
+    };
+  }
+
   // TAPS AND HOLDS: a tap opens (or flags, with FLAG on, or opens round a bit); a hold flags; a
   // right click flags too. A finger sliding off doesn't count
   boardEl.addEventListener('pointerdown', (e) => {
@@ -269,6 +311,7 @@ Arcade.register('trace', (() => {
     best: (x) => (x.won ? Math.floor(x.t / 1000) : null),
     bestText: (v) => kit.fmtTime(v * 1000),
     low: true,
+    demo,
     // SHARE: the result, and how much of the board was cleared, as a bar
     share(x) {
       const cleared = x.open.reduce((a, v) => a + v, 0);

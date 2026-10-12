@@ -20,8 +20,6 @@ Arcade.register('merge', (() => {
   const hintEl = el('mg-hint');
   const kit = Arcade.kit;
   let s = null; // (the game shown: { cells, score, moves, top, over, nextId, r, draws } and the frame's own)
-  let layer = null;
-  const tiles = new Map(); // (tile id -> its element)
   let pending = null; // (a move's second half, after the slide: merges shown, new bits in)
 
   // The board from the day's seed: each square a bit { id, v } (v: 1 to 7, 8 a BYTE ..., LOCK
@@ -130,17 +128,6 @@ Arcade.register('merge', (() => {
 
   // THE BOARD: sixteen empty squares under, and the bits over them, each its own box sliding from
   // square to square (--x, --y)
-  function build() {
-    tiles.clear();
-    layer = document.createElement('div');
-    layer.className = 'mg-tiles';
-    const slots = Array.from({ length: CELLS }, () => {
-      const c = document.createElement('span');
-      c.className = 'cell mg-slot';
-      return c;
-    });
-    boardEl.replaceChildren(...slots, layer);
-  }
   function face(elx, v) {
     elx.className = 'cell mg-tile';
     elx.removeAttribute('data-v');
@@ -162,29 +149,73 @@ Arcade.register('merge', (() => {
     elx.setAttribute('aria-label', name(v));
   }
   const place = (elx, i) => { elx.style.setProperty('--x', i % SIZE); elx.style.setProperty('--y', Math.floor(i / SIZE)); };
-  function tileEl(t, i, born) {
-    let elx = tiles.get(t.id);
-    if (!elx) {
-      elx = document.createElement('span');
-      tiles.set(t.id, elx);
-      face(elx, t.v);
-      place(elx, i);
-      if (born) elx.classList.add('mg-born');
-      layer.appendChild(elx);
+  // (a board's bits on screen: the game's, or the ARCADE menu's preview's)
+  function tileView(board) {
+    const tiles = new Map(); // (tile id -> its element)
+    let layer = null;
+    function tileEl(t, i, born) {
+      let elx = tiles.get(t.id);
+      if (!elx) {
+        elx = document.createElement('span');
+        tiles.set(t.id, elx);
+        face(elx, t.v);
+        place(elx, i);
+        if (born) elx.classList.add('mg-born');
+        layer.appendChild(elx);
+      }
+      return elx;
     }
-    return elx;
+    // (every bit where x has it, nothing sliding: on show, and after a move's slide)
+    function sync(x) {
+      const live = new Set();
+      x.cells.forEach((t, i) => {
+        if (!t) return;
+        live.add(t.id);
+        place(tileEl(t, i, t.born), i);
+      });
+      for (const [id, elx] of tiles) if (!live.has(id)) { elx.remove(); tiles.delete(id); }
+    }
+    return {
+      build() {
+        tiles.clear();
+        layer = document.createElement('div');
+        layer.className = 'mg-tiles';
+        const slots = Array.from({ length: CELLS }, () => {
+          const c = document.createElement('span');
+          c.className = 'cell mg-slot';
+          return c;
+        });
+        board.replaceChildren(...slots, layer);
+      },
+      sync,
+      // (a move's slide: each bit's box to its new square)
+      slide(res) {
+        for (const [t, at] of res.to) {
+          const elx = tiles.get(t.id);
+          if (elx) { elx.classList.remove('mg-pop', 'mg-born'); place(elx, at); }
+        }
+      },
+      // (the slide done: the merged-away bits gone, the ones they merged into a step up, popping; the
+      // cracked blocks gone (crack(elx) first); what dropped in shown)
+      settle(x, res, crack) {
+        for (const m of res.merged) {
+          const gone = tiles.get(m.gone.id);
+          if (gone) { gone.remove(); tiles.delete(m.gone.id); }
+          const kept = tiles.get(m.tile.id);
+          if (kept) { face(kept, m.tile.v); kept.classList.add('mg-pop'); }
+        }
+        for (const t of res.cracked) {
+          const elx = tiles.get(t.id);
+          if (!elx) continue;
+          if (crack) crack(elx);
+          elx.remove();
+          tiles.delete(t.id);
+        }
+        sync(x);
+      },
+    };
   }
-  // (every bit where the game has it, nothing sliding: on show, and after a move's slide)
-  function sync() {
-    const live = new Set();
-    s.cells.forEach((t, i) => {
-      if (!t) return;
-      live.add(t.id);
-      const elx = tileEl(t, i, t.born);
-      place(elx, i);
-    });
-    for (const [id, elx] of tiles) if (!live.has(id)) { elx.remove(); tiles.delete(id); }
-  }
+  const view = tileView(boardEl);
   function render() {
     boardEl.classList.toggle('mg-over', s.over);
     hintEl.hidden = s.over;
@@ -201,22 +232,9 @@ Arcade.register('merge', (() => {
   // what dropped in appears
   function finishSlide() {
     if (!pending) return;
-    const { merged, cracked } = pending;
+    const res = pending;
     pending = null;
-    for (const m of merged) {
-      const gone = tiles.get(m.gone.id);
-      if (gone) { gone.remove(); tiles.delete(m.gone.id); }
-      const kept = tiles.get(m.tile.id);
-      if (kept) { face(kept, m.tile.v); kept.classList.add('mg-pop'); }
-    }
-    for (const t of cracked) {
-      const elx = tiles.get(t.id);
-      if (!elx) continue;
-      if (typeof FX !== 'undefined') FX.burst([{ el: elx, type: 'firewall' }]);
-      elx.remove();
-      tiles.delete(t.id);
-    }
-    sync();
+    view.settle(s, res, (elx) => { if (typeof FX !== 'undefined') FX.burst([{ el: elx, type: 'firewall' }]); });
     render();
     if (s.over) {
       SFX.play('alert');
@@ -235,16 +253,48 @@ Arcade.register('merge', (() => {
     if (!res) { SFX.play('denied'); return; }
     kit.moved();
     kit.save();
-    for (const [t, at] of res.to) {
-      const elx = tiles.get(t.id);
-      if (elx) { elx.classList.remove('mg-pop', 'mg-born'); place(elx, at); }
-    }
+    view.slide(res);
     if (res.merged.length) SFX.play(res.merged.some((m) => m.tile.v >= 8) ? 'egg' : 'burst', 1 + Math.min(0.6, res.merged.length * 0.12));
     else SFX.play('click');
     if (res.cracked.length) kit.note(`ENCRYPTED BLOCK CRACKED${res.cracked.length > 1 ? ` x${res.cracked.length}` : ''}`, 1200);
     else if (res.merged.some((m) => m.tile.v === 8)) kit.note('BYTE!', 1000);
     pending = res;
     setTimeout(() => { if (pending === res) finishSlide(); }, SLIDE_MS);
+  }
+
+  // THE ARCADE MENU's preview (arcade.js plays it): a game playing itself for DEMO_MOVES moves, each
+  // the way that merges the most and keeps the board open, down and left first (the bits kept to a
+  // corner, as a good player keeps them)
+  const DEMO_MOVES = 28;
+  const DIRS = ['down', 'left', 'right', 'up'];
+  function demo(host) {
+    const x = make(Math.random);
+    const board = document.createElement('div');
+    board.className = 'mg-board';
+    host.replaceChildren(board);
+    const v = tileView(board);
+    v.build();
+    v.sync(x);
+    let res = null;
+    return {
+      step() {
+        if (res) { v.settle(x, res); res = null; return 280; }
+        if (x.over || x.moves >= DEMO_MOVES) return null;
+        let best = null;
+        let most = -Infinity;
+        DIRS.forEach((dir, k) => {
+          const c = { cells: x.cells.map((t) => t && { ...t }), score: 0, moves: x.moves, top: x.top, over: false, nextId: 0, r: Math.random };
+          const r = slide(c, dir);
+          if (!r) return;
+          const score = r.gained + c.cells.filter((t) => !t).length * 3 + (DIRS.length - 1 - k) * 2;
+          if (score > most) { most = score; best = dir; }
+        });
+        if (!best) return null;
+        res = slide(x, best);
+        v.slide(res);
+        return SLIDE_MS + 10;
+      },
+    };
   }
 
   // SWIPES on the board (and round it): the way the finger went, if it went far enough
@@ -276,8 +326,8 @@ Arcade.register('merge', (() => {
     line,
     show(x) {
       if (x !== s) { s = x; pending = null; }
-      build();
-      sync();
+      view.build();
+      view.sync(s);
       render();
     },
     key(e) {
@@ -300,6 +350,7 @@ Arcade.register('merge', (() => {
     best: (x) => x.score,
     bestText: (v) => `${fmt(v)} POINTS`,
     low: false,
+    demo,
     // SHARE: the score, the best bit and the moves, and the ladder climbed ([1] up to the best)
     share(x) {
       const rungs = Math.min(x.top, 11);
