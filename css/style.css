@@ -874,11 +874,11 @@ h1 span { color: var(--accent); text-shadow: 0 0 8px var(--accent); }
 }
 
 .overflow-line.hot { animation: line-hot 0.9s ease-in-out infinite; }
-/* The ==== line under the board: dim, flashing amber when the next drop brings a layer */
-.layer-line { grid-column: 1 / -1; overflow: hidden; white-space: nowrap; text-align: center; font-size: 12px; line-height: 12px; letter-spacing: 2px; color: var(--fg-dim); opacity: 0.55; }
-/* ENCRYPT IN's =====: the layer it counts down to, dim like the line under the board, flashing
+/* The ==== line under the board: full brightness, flashing amber when the next drop brings a layer */
+.layer-line { grid-column: 1 / -1; overflow: hidden; white-space: nowrap; text-align: center; font-size: 12px; line-height: 12px; letter-spacing: 2px; color: var(--fg); }
+/* ENCRYPT IN's =====: the layer it counts down to, as bright as the line under the board, flashing
    with it when the next drop brings one */
-.stat .layer-mark { display: none; font-size: 9px; line-height: 1; letter-spacing: 1px; margin-top: 3px; color: var(--fg-dim); opacity: 0.8; }
+.stat .layer-mark { display: none; font-size: 9px; line-height: 1; letter-spacing: 1px; margin-top: 3px; color: var(--fg); }
 #pulse-stat.counts-layers .layer-mark { display: block; }
 .hud #pulse-stat > .layer-mark { position: absolute; left: 0; right: 0; top: calc(50% + 11px); margin: 0; }
 body.vs-mode .hud #pulse-stat > .layer-mark { top: auto; bottom: 7px; } /* (VS: its number sits lower in the square) */
@@ -2392,7 +2392,13 @@ body:not(.vs-mode) .hud-bits .stat-current { padding-bottom: 0; }
    then half the bit's 42px) */
 body:not(.vs-mode) .hud .hud-bits .stat.stat-current:not(.cpu-stat):not(.cpu-face) > .bit-sq { top: max(50%, 37.5px); }
 /* (ENCRYPT IN's ===== in the band under its 8, taking no room either) */
-body:not(.vs-mode) .hud #pulse-stat > .layer-mark { top: auto; bottom: 0; height: 8px; line-height: 8px; font-size: 8px; }
+body:not(.vs-mode) .hud #pulse-stat > .layer-mark { top: auto; bottom: 0; height: calc(50% - 8px); align-items: center; justify-content: center; line-height: 1; font-size: 9px; } /* (centered between the foot of its count and the box's bottom edge) */
+body:not(.vs-mode) .hud #pulse-stat.counts-layers > .layer-mark { display: flex; }
+/* (NEXT and TIME's short panel under CURRENT: its words and value trimmed to their capitals, so they
+   center in it by what shows, whatever the font's ascent and descent) */
+body:not(.vs-mode) .hud-bits :is(#next-stat, #time-stat) > :is(.label, .value) { text-box: trim-both cap alphabetic; }
+/* (CLASSIC's ⇄: it flips to STORY, and back) */
+.modes .swap-ico { width: 0.9em; height: 0.9em; margin-left: 0.4em; vertical-align: -0.1em; flex: none; }
 
 /* VS: the drop clock, a bar along the bottom of CURRENT that runs down; red and pulsing for the
    last 2 seconds (the bit then drops by itself) */

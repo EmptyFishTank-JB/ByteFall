@@ -51,7 +51,8 @@ const NAMES = {
   '#settings-extras': 'EXTRAS',
   '#game-mode-label': 'the line under BYTEFALL',
   '#goal-bar': 'the bar along the bottom of SCORE',
-  '#story-row': 'STORY on the main menu',
+  '#story-row': 'the story button on the main menu',
+  '.modes button[data-mode="classic"]': 'CLASSIC / STORY on the main menu',
   '#booster-row': 'PATCHES on the main menu',
   '#starter-row': 'EXPLOITS on the main menu',
 };

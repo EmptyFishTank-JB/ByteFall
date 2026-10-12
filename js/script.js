@@ -163,7 +163,10 @@ const dailyNote = (date, what) => (dailyOfficial
 // `mode` is the game being played. The mode row picks CLASSIC, DAILY, BLITZ, ZEN or PUZZLE; under
 // DAILY (`daily`) the second row picks DECRYPT, PUZZLE, BLITZ or BREACH (BREACH daily only).
 const MODES = {
-  classic: { label: 'CLASSIC', info: () => `CLASSIC // No clock and no bit limit: keep your columns under the line as long as you can.${goalWanted ? ' Each game has a key to crack: reach its ENCRYPTION STRENGTH for KEYS, then go deeper or disconnect.' : ' GOAL: OFF plays it endless, no key to crack.'}` },
+  // (CLASSIC and STORY: one mode, CLASSIC's button flipping between them, goalWanted the switch)
+  classic: { label: 'CLASSIC', info: () => (goalWanted
+    ? 'STORY // CLASSIC with a story: every game has a key to crack, its ENCRYPTION STRENGTH. Crack it for KEYS and the next file of the story, then go deeper or disconnect. Tap STORY again for CLASSIC.'
+    : 'CLASSIC // No clock and no bit limit: keep your columns under the line as long as you can. Tap CLASSIC again for STORY.') },
   decrypt: {
     label: 'DAILY DECRYPT',
     info: (date) => dailyNote(date, `the same ${DAILY_BITS} bits for everyone.`),
@@ -574,8 +577,13 @@ const goalBits = (k) => (k < GOAL_BITS.length ? GOAL_BITS[k] : 4096 * 2 ** (k - 
 const goalTarget = (k) => Math.round((GOAL_BASE[difficulty] || 1500) * (1 + 0.5 * k) / 50) * 50;
 const goalKeys = (k) => Math.round(goalTarget(k) / 150);
 let goal = null; // this game's: k, the key being cracked now (0: 128-BIT); cracked, how many so far
-// GOAL: ON / OFF on the main menu (CLASSIC): OFF plays CLASSIC endless, as it was, no key to crack
-let goalWanted = storage.get('bytefall-goal') !== 'off';
+// STORY (CLASSIC's button, tapped again): CLASSIC with keys to crack, each recovering a story's next
+// file (js/stories.js); CLASSIC itself plays endless. CLASSIC at first (bytefall-goal: on is STORY)
+let goalWanted = storage.get('bytefall-goal') === 'on';
+// (the mode's name as the game shows it: CLASSIC's is STORY while that's on)
+const modeLabel = () => (mode === 'classic' && goalWanted ? 'STORY' : MODES[mode].label);
+// (the switch's mark on CLASSIC's button: two arrows, one each way)
+const SWAP_SVG = '<svg class="swap-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 5.5h10M9 2.5l3 3-3 3M14 10.5H4M7 7.5l-3 3 3 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>';
 let goalOpen = false;
 const goalCardEl = document.getElementById('goal-card');
 const goalBarEl = document.getElementById('goal-bar');
@@ -641,7 +649,7 @@ function initGame() {
   difficulty = mode === 'classic' ? classicDifficulty : mode === 'puzzle' && !daily ? puzzleTier
     : mode === 'vs' && CpuBoard.sizeFor(vsLevel) === 8 ? 'hard' : 'normal';
   dailyOfficial = daily && (mode === 'puzzle' ? dailyPuzzleOfficial() : !storage.get(dailyPlayedKey()));
-  goal = mode === 'classic' && !daily && goalWanted ? { k: 0, cracked: 0 } : null; // (ENCRYPTION STRENGTH: CLASSIC's key to crack, unless GOAL: OFF)
+  goal = mode === 'classic' && !daily && goalWanted ? { k: 0, cracked: 0 } : null; // (ENCRYPTION STRENGTH: STORY's key to crack)
   if (goalOpen || !goalCardEl.hidden) { goalOpen = false; goalCardEl.hidden = true; }
   if (!vsPaused) document.querySelector('.board-frame').classList.remove('paused'); // (a game that ended cracked faded its bits)
   setupDice();
@@ -792,7 +800,7 @@ const INFECT_GAP = 12;
 let infectedBit = null; // (the bit on the board now, its .infected the drop it came out on)
 let infectedAt = -Infinity; // (the drop the last one came out on)
 const infectModes = () => !daily && (mode === 'classic' || mode === 'blitz');
-// (INFECTIONS: ON / OFF on the main menu, beside GOAL: OFF, no infected bits; BLACK BOXES still can be)
+// (INFECTIONS: ON / OFF in GAME SETTINGS: OFF, no infected bits; BLACK BOXES still can be)
 let infectWanted = storage.get('bytefall-infections') !== 'off';
 function mayInfect() {
   if (!infectModes() || !infectWanted || gameOver || infectedBit) return false;
@@ -1666,7 +1674,7 @@ function updateHud() {
     if (spyHides(n + 1) && piece.type === 'number') { sq.textContent = '?'; sq.classList.remove('has-glyph'); } // (SPYWARE)
     nextEl.appendChild(sq);
   });
-  pulseCounterEl.textContent = mode === 'puzzle' ? queue.length : mode === 'breach' ? layersLeft() : mode === 'vs' && !vsLayers ? '-' : pulseInterval - dropsSinceLastPulse;
+  pulseCounterEl.textContent = mode === 'puzzle' ? queue.length : mode === 'breach' ? layersLeft() : (mode === 'vs' && !vsLayers) || mode === 'zen' ? '-' : pulseInterval - dropsSinceLastPulse;
   if (dealLimit() < Infinity) showClock();
   const layerNext = !gameOver && !MODES[mode].noLayers && pulseInterval - dropsSinceLastPulse === 1;
   pulseCounterEl.closest('.stat').classList.toggle('danger', layerNext);
@@ -2519,7 +2527,7 @@ function endGame(reason = 'trace') {
   note.hidden = mode === 'classic';
   note.textContent = daily
     ? (dailyOfficial ? `${DAILY_KINDS[mode]} // OFFICIAL SCORE // ${todayKey()}` : `${DAILY_KINDS[mode]} PRACTICE // OFFICIAL SCORE TODAY ${fmt(best)}`)
-    : `${MODES[mode].label} // BEST ${best}`;
+    : `${modeLabel()} // BEST ${best}`;
   if (daily) newBestEl.hidden = true;
   if (goal && goal.cracked) { // (a key cracked: how strong, on the result too)
     note.hidden = false;
@@ -2555,7 +2563,7 @@ function endGame(reason = 'trace') {
   }
   // (RECORDS' HISTORY: the game, what it earned and how it ended)
   Progress.logGame({
-    label: daily ? DAILY_KINDS[mode] : mode === 'vs' ? `VS // ${CpuBoard.BOTS[vsBot].label}` : MODES[mode].label,
+    label: daily ? DAILY_KINDS[mode] : mode === 'vs' ? `VS // ${CpuBoard.BOTS[vsBot].label}` : modeLabel(),
     score,
     result: { trace: 'TRACED', time: "TIME'S UP", daily: 'DONE', breached: 'BREACHED', win: 'WON', 'vs-lose': 'LOST', cracked: 'CRACKED' }[reason] || '',
     patches: patched,
@@ -2684,45 +2692,44 @@ restartBtn.addEventListener('click', () => {
   requestReset(restartBtn, 'TAP AGAIN TO RESTART');
 });
 
-// GOAL: ON / OFF (CLASSIC): mid-game it asks first, as a new difficulty does, and starts a new game
-const goalBtn = document.getElementById('goal-btn');
-function updateGoalBtn() {
-  goalBtn.querySelector('.opt-text').textContent = `GOAL: ${goalWanted ? 'ON' : 'OFF'}`;
-  goalBtn.classList.toggle('active', goalWanted); // (lit while it's on, as VS's LAYERS: ON)
-  goalBtn.setAttribute('aria-label', goalWanted ? 'Goal on: each game has a key to crack. Tap for endless' : 'Goal off: endless. Tap for a key to crack each game');
-}
-goalBtn.addEventListener('click', () => {
-  requestReset(goalBtn, 'CONFIRM?', () => {
+// CLASSIC ⇄ STORY: CLASSIC's button, tapped while it's the mode, flips it; mid-game it asks first, as a
+// new difficulty does, and starts a new game. The button says which it is, with its ⇄
+function toggleStory(btn) {
+  requestReset(btn, 'CONFIRM?', () => {
     goalWanted = !goalWanted;
     storage.set('bytefall-goal', goalWanted ? 'on' : 'off');
-    updateGoalBtn();
     SFX.play('punct');
   });
-});
+}
+function updateStoryBtn() {
+  const btn = document.querySelector('.modes button[data-mode="classic"]');
+  if (!btn || (armed && armed.btn === btn)) return;
+  btn.innerHTML = `${goalWanted ? 'STORY' : 'CLASSIC'}${SWAP_SVG}`;
+  btn.setAttribute('aria-label', goalWanted ? 'Story: CLASSIC with a story to recover. Tap again for CLASSIC' : 'Classic. Tap again for STORY');
+}
 // GAME SETTINGS: the picked mode's own settings in a card, on one button on the menu's panel that says
-// what's set (NORMAL // GOAL: ON // INFECTIONS: ON). CLASSIC: DIFFICULTY, GOAL, INFECTIONS in the card;
+// what's set (NORMAL // INFECTIONS: ON). CLASSIC (and STORY): DIFFICULTY and INFECTIONS in the card;
 // BLITZ: INFECTIONS alone, so its button just toggles it; the other modes have none. Each change,
 // mid-game, asks CONFIRM? and starts a new game
 const modeSettingsEl = document.getElementById('mode-settings');
 const modeSettingsBtn = document.getElementById('mode-settings-btn');
 const modeHasSettings = () => !daily && (mode === 'classic' || mode === 'blitz');
 function updateModeSettingsBtn() {
-  const parts = mode === 'classic' ? [classicDifficulty.toUpperCase(), `GOAL: ${goalWanted ? 'ON' : 'OFF'}`] : [];
+  const parts = mode === 'classic' ? [classicDifficulty.toUpperCase()] : [];
   parts.push(`INFECTIONS: ${infectWanted ? 'ON' : 'OFF'}`);
   modeSettingsBtn.querySelector('.opt-text').textContent = parts.join(' // ');
   // (BLITZ's one setting: the button toggles it, lit while it's on, as VS's LAYERS: ON)
   modeSettingsBtn.classList.toggle('active', mode === 'blitz' && infectWanted);
   modeSettingsBtn.setAttribute('aria-label', mode === 'blitz'
     ? `Infections ${infectWanted ? 'on' : 'off'}. Tap to turn them ${infectWanted ? 'off' : 'on'}`
-    : `${MODES[mode] ? MODES[mode].label : ''} settings: ${parts.join(', ')}. Tap to change`);
+    : `${MODES[mode] ? modeLabel() : ''} settings: ${parts.join(', ')}. Tap to change`);
   if (!modeSettingsEl.classList.contains('hidden')) fitHome();
 }
 const modeSettingsOpen = () => !modeSettingsEl.classList.contains('hidden');
 function openModeSettings() {
   if (!modeHasSettings()) return;
-  document.getElementById('mode-settings-title').textContent = `// ${MODES[mode].label} SETTINGS`;
+  document.getElementById('mode-settings-title').textContent = `// ${modeLabel()} SETTINGS`;
   document.getElementById('ms-difficulty').hidden = mode !== 'classic';
-  document.getElementById('ms-goal').hidden = mode !== 'classic';
   document.getElementById('ms-infect').hidden = !(mode === 'classic' || mode === 'blitz');
   modeSettingsEl.classList.remove('hidden');
   SFX.play('click');
@@ -2747,7 +2754,7 @@ modeSettingsBtn.addEventListener('click', () => {
 document.getElementById('mode-settings-close').addEventListener('click', () => { SFX.play('click'); closeModeSettings(); });
 modeSettingsEl.addEventListener('click', (e) => { if (e.target === modeSettingsEl) closeModeSettings(); }); // (a tap off the card)
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modeSettingsOpen()) { e.stopImmediatePropagation(); closeModeSettings(); } }, true);
-// INFECTIONS: ON / OFF (CLASSIC and BLITZ): the infected bits; mid-game it asks first, as GOAL does,
+// INFECTIONS: ON / OFF (CLASSIC and BLITZ): the infected bits; mid-game it asks first, as STORY does,
 // and starts a new game. Off, a BLACK BOX can still be infected
 const infectBtn = document.getElementById('infect-btn');
 function updateInfectBtn() {
@@ -2783,7 +2790,10 @@ document.querySelectorAll('#difficulty-row button').forEach((btn) => {
 document.querySelectorAll('.modes button').forEach((btn) => {
   btn.addEventListener('click', () => {
     const next = btn.dataset.mode;
-    if (next === topMode) return;
+    if (next === topMode) {
+      if (next === 'classic' && mode === 'classic') toggleStory(btn); // (CLASSIC again: STORY, and back)
+      return;
+    }
     requestReset(btn, 'CONFIRM?', () => {
       if (next === 'vs') storage.set('bytefall-before-vs', topMode); // QUIT comes back here
       topMode = next;
@@ -3107,7 +3117,7 @@ function applyModeUi() {
   document.getElementById('game-mode-label').textContent = mode === 'vs' ? `VS. CPU // ${VS_MODES[vsMode].label}` : `// ${modeLine()}${goalLine()}`;
   // (GAME SETTINGS: CLASSIC's and BLITZ's, on one button that says what's set)
   document.getElementById('mode-settings-row').hidden = !modeHasSettings();
-  updateGoalBtn();
+  updateStoryBtn();
   updateInfectBtn();
   updateModeSettingsBtn();
   document.getElementById('daily-kinds').hidden = !daily;
@@ -3118,11 +3128,11 @@ function applyModeUi() {
   vsExploitsBtn.innerHTML = `${TERMINAL_SVG}EXPLOITS: ${vsExploits ? 'ON' : 'OFF'}`;
   vsExploitsBtn.classList.toggle('active', vsExploits);
   document.body.classList.toggle('vs-mode', mode === 'vs'); // a slimmer header, room for the boards
-  // (VS keeps it with layers off, its count a -, so nothing shifts when the option changes)
-  document.getElementById('pulse-stat').hidden = !!MODES[mode].noLayers && mode !== 'puzzle' && mode !== 'breach' && mode !== 'vs' && mode !== 'tutorial';
+  // (ZEN and VS with layers off keep it, its count a -: the HUD the same in every mode)
+  document.getElementById('pulse-stat').hidden = false;
   document.getElementById('pulse-label').textContent = mode === 'puzzle' ? 'BITS LEFT' : mode === 'breach' ? 'LAYERS LEFT' : 'ENCRYPT IN';
   // (ENCRYPT IN: a ===== under the count, the layer it's counting down to, as [n] is a bit)
-  document.getElementById('pulse-stat').classList.toggle('counts-layers', mode !== 'puzzle' && mode !== 'breach');
+  document.getElementById('pulse-stat').classList.toggle('counts-layers', mode !== 'puzzle' && mode !== 'breach' && mode !== 'zen');
   updateVsChrome(); // (after ENCRYPT IN shows or hides: it counts the stat rows)
   if (mode === 'puzzle' && !daily) updatePuzzleNav();
   // The overlay goes back to its trace look until a puzzle result changes it
@@ -3924,13 +3934,13 @@ const homePlayBtn = document.getElementById('home-play');
 // The mode's name: on the menu's panel and under the title in a game
 function modeLine() {
   if (mode === 'tutorial') return 'TUTORIAL';
-  if (mode === 'classic') return `CLASSIC // ${DIFFICULTIES[classicDifficulty].label}`;
+  if (mode === 'classic') return `${modeLabel()} // ${DIFFICULTIES[classicDifficulty].label}`;
   if (mode === 'puzzle' && !daily) return `PUZZLE // ${tierLabel()} ${puzzleIndex + 1}`;
   if (daily) return `${DAILY_KINDS[mode]}${dailyOfficial ? '' : ' // PRACTICE'}`;
   return MODES[mode].label;
 }
 function updateHome() {
-  document.getElementById('home-mode-name').textContent = `// ${daily ? 'DAILY' : MODES[mode].label}`;
+  document.getElementById('home-mode-name').textContent = `// ${daily ? 'DAILY' : modeLabel()}`;
   // BEST: the mode's best (not for DAILY: its cards show today's official scores)
   const key = mode === 'vs' || mode === 'tutorial' || mode === 'puzzle' || daily ? null : bestKey(); // (DAILY: each card says how today stands)
   const kept = key ? storage.get(key) : null;
@@ -5222,7 +5232,7 @@ function openBoosterPick() {
   loadArmed();
   const owned = boosterIds().filter((id) => Progress.boosters(id) > 0);
   document.getElementById('booster-pick-note').textContent = owned.length
-    ? `Activate up to two starting patches to use in your next ${MODES[mode].label} game. Patches are activated with the first drop (RESTORE POINT only if it saves you).`
+    ? `Activate up to two starting patches to use in your next ${modeLabel()} game. Patches are activated with the first drop (RESTORE POINT only if it saves you).`
     : 'You don\'t have any patches for this mode yet.';
   const list = document.getElementById('booster-pick-list');
   list.textContent = '';

@@ -772,7 +772,7 @@ TOTAL +34
 
 **Says:**
 
-> The ARCHIVE holds the STORIES. Every key you crack in CLASSIC recovers a file of the one you’re decrypting; read them all here, and pick which story to decrypt.
+> The ARCHIVE holds the STORIES. Every key you crack in STORY recovers a file of the one you’re decrypting; read them all here, and pick which story to decrypt.
 
 - **Asks you to**: Tap NEXT.
 - **Lights up**: the ARCHIVE tab (in focus) and the story being decrypted (in focus)
@@ -1145,7 +1145,7 @@ TOTAL +34
 
 **Says:**
 
-> In CLASSIC, every game has a key to crack: its ENCRYPTION STRENGTH, shown under BYTEFALL. It starts at 128-BIT, cracked at 1,500 points on NORMAL.
+> In STORY, every game has a key to crack: its ENCRYPTION STRENGTH, shown under BYTEFALL. It starts at 128-BIT, cracked at 1,500 points on NORMAL.
 
 - **Asks you to**: Tap NEXT.
 - **Lights up**: the line under BYTEFALL (in focus) and a sample ENCRYPTION STRENGTH line and SCORE bar (for the lesson)
@@ -1194,10 +1194,10 @@ TOTAL +34
 
 **Says:**
 
-> On the main menu, STORY shows the story you’re decrypting and how far you are. Tap it to read the files in the ARCHIVE.
+> On the main menu, tap CLASSIC again to switch it to STORY (and again for CLASSIC). In STORY, the button under its settings shows the story you’re decrypting; tap it to read the files in the ARCHIVE.
 
 - **Asks you to**: Tap NEXT.
-- **Lights up**: STORY on the main menu (in focus)
+- **Lights up**: CLASSIC / STORY on the main menu (in focus)
 - **Notes**: No BACK on this card: the lesson's board is gone.
 
 ---

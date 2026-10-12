@@ -1,6 +1,6 @@
 # ByteFall stories (draft)
 
-CLASSIC's GOAL as a story. Every key cracked recovers one piece of a file, shown on the
+STORY: CLASSIC with a story (CLASSIC's button, tapped again). Every key cracked recovers one piece of a file, shown on the
 cracked card under its KEYS, typed out as the terminal would. The files read in order and,
 together, tell a story. It's written as found documents: messages, memos, chat logs, system
 logs. Each piece is 2 to 5 short lines, so it fits a phone card.
@@ -12,7 +12,7 @@ PATIENT ZERO, outlined below, are written in full there. Edit the files freely; 
 
 - **One story at a time.** The story being decrypted is picked in the ARCHIVE (DECRYPT THIS
   STORY). THE TRACE is open from the start; each story finished opens the next, picked at once.
-- **One file per crack.** Every key cracked, in any CLASSIC game with GOAL: ON, recovers the
+- **One file per crack.** Every key cracked, in any STORY game, recovers the
   next unread file of the picked story. A game that goes deep recovers several, one per key.
 - **Chapters are gated by key depth.** Each story has 3 chapters of 4 files:
 

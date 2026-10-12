@@ -117,7 +117,7 @@ const SOUND_LIST = [
     },
     uses: [
       'The last layer peels off and shows the bit under it (instead of the backspace)',
-      'SETTINGS: SOUND on (as confirmation), EFFECTS, CRT DISPLAY, SOUND OUTPUT; the GOAL and INFECTIONS switches',
+      'SETTINGS: SOUND on (as confirmation), EFFECTS, CRT DISPLAY, SOUND OUTPUT; CLASSIC ⇄ STORY and INFECTIONS',
       'The score landing on its total on the result screen',
       'PUZZLE\'s HINT',
       'The tutorial: each new card',

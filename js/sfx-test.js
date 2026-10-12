@@ -25,7 +25,7 @@
     'runHack:backspace': 'an exploit cracking layers', 'runHack:punct': 'an exploit peeling the last layers', 'runHack:enter': "an exploit's work done",
     scrambleBits: "RNG's flicker", meltBoard: 'the board melting at game over', 'endGame:denied': 'game over', 'endGame:dialup': 'DISCONNECT: the line hangs up',
     resetNow: 'a new run', armReset: 'RESTART / QUIT asking CONFIRM?', openGoal: 'the CLASSIC goal reached: its card and KEYS',
-    updateGoalBtn: 'GOAL switched', 'updateInfectBtn:punct': 'INFECTIONS switched', 'updateInfectBtn:denied': "a setting that can't change now",
+    toggleStory: 'CLASSIC / STORY switched', 'updateInfectBtn:punct': 'INFECTIONS switched', 'updateInfectBtn:denied': "a setting that can't change now",
     openModeSettings: 'GAME SETTINGS opening', closeModeSettings: 'GAME SETTINGS closing', cardNotice: "a card's notice: not now",
     stepVsGoal: 'the VS target stepped', 'releaseAttacks:punct': 'your VS attack going over', 'releaseAttacks:alert': "the CPU's attack crossing",
     'takeGarbage:click': "the CPU's blocks landing", 'takeGarbage:punct': "the CPU's blocks all landed", startMatch: 'a VS match starting',
