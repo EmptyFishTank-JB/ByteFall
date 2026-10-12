@@ -1104,9 +1104,9 @@ body.vs-mode .stat-best { display: none; }
   box-shadow: 0 0 10px rgba(var(--fg-rgb), 0.4);
 }
 
-.difficulty#daily-kinds, .difficulty#vs-levels { gap: 6px; }
-.difficulty#daily-kinds button, .difficulty#vs-levels button { padding-left: 10px; padding-right: 10px; }
-.difficulty#vs-levels button, #vs-layers-btn, #vs-exploits-btn { white-space: nowrap; padding-left: 8px; padding-right: 8px; }
+.difficulty#daily-kinds { gap: 6px; }
+.difficulty#daily-kinds button { padding-left: 10px; padding-right: 10px; }
+#vs-layers-btn, #vs-exploits-btn { white-space: nowrap; padding-left: 8px; padding-right: 8px; }
 /* VS CPU: the opponent's mini board, the incoming-garbage badge, and a slimmer header */
 /* The CPU's board: a small copy of the grid with its numbers */
 .cpu-stat { cursor: zoom-in; user-select: none; -webkit-user-select: none; touch-action: none; position: relative; }
@@ -1121,6 +1121,10 @@ body.vs-mode .stat-best { display: none; }
   pointer-events: none;
 }
 .cpu-desc[hidden] { display: none; }
+/* (before START the box is the bot's card alone, no board or score behind it, the same space all round) */
+.cpu-stat.pre-start > .label, .cpu-stat.pre-start > .cpu-grid { visibility: hidden; }
+.cpu-stat.pre-start .cpu-desc { inset: 6px; }
+.cpu-stat.pre-start { cursor: default; }
 .cpu-desc b { color: var(--accent); font-weight: normal; letter-spacing: 1px; white-space: nowrap; }
 .cpu-stat .sub { font-size: 10px; margin-top: 3px; }
 .cpu-stat.low .label { color: var(--danger); }
@@ -4439,9 +4443,15 @@ body.vs-setup-up #vs-setup { position: relative; inset: auto; }
 /* (the pickers in even columns: the game modes two by two, the bots and levels four across, the
    switches two across as the menu's rows under its card) */
 #vs-setup .difficulty { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--gap); width: 100%; max-width: none; margin: 0; }
-#vs-setup :is(.vs-modes, #vs-options-row) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+#vs-setup #vs-options-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+#vs-setup .difficulty.vs-one { grid-template-columns: minmax(0, 1fr); }
 #vs-setup .difficulty button { display: flex; align-items: center; justify-content: center; min-width: 0; height: 26px; padding: 0 4px; font-size: 13px; letter-spacing: 1px; white-space: nowrap; overflow: hidden; }
 #vs-setup #vs-options-row button { height: 32px; padding: 0 6px; font-size: 12px; }
+#vs-setup .vs-one button { height: 32px; }
+/* (LAYERS between a layer's [=]s, dimmed while it's OFF; EXPLOITS with their terminal) */
+#vs-layers-btn .lay-ico { margin: 0 0.6em; }
+#vs-layers-btn:not(.active) .lay-ico { opacity: 0.35; }
+#vs-exploits-btn .term-ico { width: 1em; height: 1em; margin-right: 0.45em; flex: none; }
 #vs-setup .vs-goal-row { gap: var(--gap); }
 #vs-setup .vs-goal-row button { width: 32px; height: 26px; }
 #vs-setup .vs-goal { font-size: 13px; }
