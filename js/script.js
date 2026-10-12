@@ -434,6 +434,9 @@ function setModeFromChoice() {
   daily = topMode === 'daily';
   mode = daily ? dailyKind : topMode;
 }
+// (?arcade=trace and the like, the dev page's practice links: the main menu on DAILY's ARCADE card,
+// PLAY playing that game; arcade.js)
+if (new URLSearchParams(location.search).get('arcade')) { topMode = 'daily'; dailyKind = 'arcade'; }
 setModeFromChoice();
 
 // PUZZLE: the archive puzzle picked, or today's daily one (daily-puzzles.js). The daily list
@@ -1364,6 +1367,8 @@ const GLYPHS = {
   6: '<polygon points="50.0,14.0 84.6,34.0 84.6,74.0 50.0,94.0 15.4,74.0 15.4,34.0"/>',
   7: '<polygon points="50.0,14.0 81.3,29.1 89.0,62.9 67.4,90.0 32.6,90.0 11.0,62.9 18.7,29.1"/>',
   8: '<polygon points="65.3,17.0 87.0,38.7 87.0,69.3 65.3,91.0 34.7,91.0 13.0,69.3 13.0,38.7 34.7,17.0"/>',
+  // (9: CHECKSUM's [9], the DAILY ARCADE's Thursday grid; nowhere else has a 9)
+  9: '<polygon points="50.0,14.0 75.7,23.4 89.4,47.1 84.6,74.0 63.7,91.6 36.3,91.6 15.4,74.0 10.6,47.1 24.3,23.4"/>',
 };
 const themeIs = (id) => document.documentElement.dataset.theme === id;
 const glyphSvg = (n) => `<svg class="glyph" viewBox="0 0 100 100" aria-hidden="true">${GLYPHS[n]}</svg>`;
@@ -4551,6 +4556,12 @@ function applyTheme() {
   const shown = themeAvailable(theme) ? theme : THEMES[0];
   const season = seasonTheme();
   const applied = shown.id === 'seasonal' ? season.theme : shown.id === 'terminal' ? null : shown.id;
+  // (switched to SPECTRUM: its page drift from a new random place in its cycle, not the one before)
+  if (applied === 'spectrum' && document.documentElement.dataset.theme !== 'spectrum') {
+    const hue = Math.random();
+    document.documentElement.style.setProperty('--page-hue-at', `${(-hue * 48).toFixed(2)}s`);
+    document.documentElement.style.setProperty('--page-hue-deg', `${Math.round(hue * 360)}deg`);
+  }
   if (!applied) delete document.documentElement.dataset.theme;
   else document.documentElement.dataset.theme = applied;
   themeMeta.content = getComputedStyle(document.documentElement).getPropertyValue('--bg-solid').trim();

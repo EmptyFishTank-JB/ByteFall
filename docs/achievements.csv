@@ -98,6 +98,8 @@ DAILY,STUBBORN,Try the same daily puzzle 10 times,1,Hidden,stubborn
 DAILY,SO CLOSE,End a BREACH with one layer left,1,Hidden,so-close
 DAILY,CODE BREAKER,Break a Monday CODE BREAKER code (the DAILY ARCADE),1,Standard,code-breaker
 DAILY,MIND READER,Break a CODE BREAKER code in 4 tries or fewer,1,Standard,mind-reader
+DAILY,CLEAN TRACE,Clear a Tuesday TRACE board without touching an infected bit,1,Standard,clean-trace
+DAILY,CHECKSUM VALID,Solve a Thursday CHECKSUM grid,1,Standard,checksum-valid
 PUZZLES,FIRST TRY,Solve a puzzle on your first attempt,1,Standard,first-try
 PUZZLES,LOCKSMITH,Solve 10 puzzles,10,Standard,locksmith
 PUZZLES,SAFECRACKER,Solve 30 puzzles,30,Standard,safecracker

@@ -759,16 +759,23 @@ h1 span { color: var(--accent); text-shadow: 0 0 8px var(--accent); }
   text-shadow: 0 0 6px hsl(var(--bit-h) 100% 64% / 0.6);
   animation: bit-hue var(--spin, 6s) linear var(--spin-delay, 0s) infinite var(--spin-dir, normal);
 }
+/* (the page's drift starts at a random point, not always on the palette's own red: --page-hue-at, a
+   random part of its cycle, set before the first paint and again on each switch to SPECTRUM; the
+   title screen drifts with the rest) */
 [data-theme="spectrum"] .cabinet,
 [data-theme="spectrum"] footer,
-[data-theme="spectrum"] .music-player :is(.mp-head, .mp-scroll > :not(.mp-viz)) { animation: page-hue 48s linear infinite; }
+[data-theme="spectrum"] .start-screen,
+[data-theme="spectrum"] .music-player :is(.mp-head, .mp-scroll > :not(.mp-viz)) { animation: page-hue 48s linear var(--page-hue-at, 0s) infinite; }
 [data-theme="spectrum"] .cell.pop { animation: pop-out 0.16s ease-out forwards; }
 
 @media (prefers-reduced-motion: reduce) {
   [data-theme="spectrum"] .cell.disc,
   [data-theme="spectrum"] .cabinet,
   [data-theme="spectrum"] footer,
+  [data-theme="spectrum"] .start-screen,
   [data-theme="spectrum"] .music-player :is(.mp-head, .mp-scroll > :not(.mp-viz)) { animation: none; }
+  /* (held still on a random hue instead, the same one --page-hue-at would start from) */
+  [data-theme="spectrum"] :is(.cabinet, footer, .start-screen, .music-player :is(.mp-head, .mp-scroll > :not(.mp-viz))) { filter: hue-rotate(var(--page-hue-deg, 0deg)); }
 }
 
 .cell.overflow {
@@ -4624,8 +4631,15 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 .arcade { position: absolute; inset: 0; z-index: 20; display: flex; flex-direction: column; gap: 8px; padding: 8px 8px 16px; background: var(--panel); overflow: hidden; }
 .arcade[hidden] { display: none; }
 .arcade .card-head { flex: none; margin-bottom: 0; }
-.cb-line { flex: none; margin: 0; min-height: 17px; text-align: center; font-size: 13px; line-height: 17px; letter-spacing: 1px; color: var(--fg); }
-.cb-line.note { color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+.arcade-line { flex: none; margin: 0; min-height: 17px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px; line-height: 17px; letter-spacing: 1px; color: var(--fg); }
+.arcade-line.note { color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+/* (the game's own part: the room under the line, its board taking what its buttons leave) */
+.arcade-game { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.arcade-game[hidden] { display: none; }
+/* (UNLOCK EVERYTHING: any game as practice) */
+.arcade-dev { flex: none; display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; font-size: 11.5px; letter-spacing: 1px; color: var(--fg-dim); }
+.arcade-dev[hidden] { display: none; }
+.arcade-dev button { padding: 4px 8px; background: transparent; border: 1px dashed var(--fg-dim); border-radius: 4px; color: var(--fg); font-family: inherit; font-size: 11.5px; letter-spacing: 1px; cursor: pointer; }
 /* (sized by script: arcade.js's fit sets --cb-cell, the squares as big as the room allows, 44px at most) */
 .cb-board { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px; background: var(--board-bg); border: 1px solid var(--grid-line); border-radius: 6px; }
 .cb-row { display: grid; grid-template-columns: 44px repeat(4, var(--cb-cell, 36px)) 44px; gap: 4px; align-items: center; }
@@ -4662,22 +4676,82 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 .cb-legend i:not(.hit):not(.near) { background: rgba(var(--fg-rgb), 0.22); }
 /* THE KEYPAD: the seven bits as the theme draws them, as the drop buttons are; DELETE and ENTER under */
 .cb-pad { flex: none; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
-.cb-pad[hidden], .cb-acts[hidden], .cb-over[hidden] { display: none; }
+.cb-pad[hidden], .cb-acts[hidden], .arcade-over[hidden] { display: none; }
 .cb-pad button { min-width: 0; height: 44px; padding: 0; display: flex; align-items: center; justify-content: center; background: rgba(var(--fg-rgb), 0.08); border: 1px solid var(--fg-dim); border-radius: 4px; color: var(--fg); font-family: var(--font); font-size: 15.5px; font-weight: bold; text-shadow: 0 0 6px rgba(var(--fg-rgb), 0.6); cursor: pointer; transition: background 0.15s, transform 0.1s; }
 .cb-pad button:active:not(:disabled) { background: rgba(var(--fg-rgb), 0.25); transform: translateY(1px); }
 .cb-pad button:disabled { opacity: 0.35; cursor: default; }
 .cb-face { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; }
 .cb-face .glyph { display: block; width: 100%; height: 100%; overflow: visible; }
 .cb-acts { flex: none; display: flex; gap: 8px; }
-.cb-acts button, #cb-share { flex: 1; height: 40px; background: transparent; border: 1px solid var(--fg); border-radius: 4px; color: var(--fg); font-family: inherit; font-size: 13px; letter-spacing: 2px; cursor: pointer; }
+.cb-acts button, #arcade-share { flex: 1; height: 40px; background: transparent; border: 1px solid var(--fg); border-radius: 4px; color: var(--fg); font-family: inherit; font-size: 13px; letter-spacing: 2px; cursor: pointer; }
 .cb-acts button:disabled { opacity: 0.35; cursor: default; }
-#cb-enter, #cb-share { border-color: var(--accent); color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+#cb-enter, #arcade-share { border-color: var(--accent); color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
 #cb-enter.ready { background: rgba(var(--accent-rgb), 0.15); box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.35); }
 @media (hover: hover) {
   .cb-pad button:hover:not(:disabled) { background: rgba(var(--fg-rgb), 0.2); }
-  :is(.cb-acts button, #cb-share):hover:not(:disabled) { background: rgba(var(--fg-rgb), 0.12); }
+  :is(.cb-acts button, #arcade-share):hover:not(:disabled) { background: rgba(var(--fg-rgb), 0.12); }
 }
-.cb-over { flex: none; display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
-.cb-over #cb-share { flex: none; }
-.cb-next { margin: 0; text-align: center; font-size: 12px; letter-spacing: 1px; color: var(--fg-dim); }
+.arcade-over { flex: none; display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
+.arcade-over #arcade-share { flex: none; }
+.arcade-next { margin: 0; text-align: center; font-size: 12px; letter-spacing: 1px; color: var(--fg-dim); }
 @media (prefers-reduced-motion: reduce) { .cb-slot.next, .cb-live.shake, :is(.cb-code.won, .cb-row.won) .cell.disc { animation: none; } }
+
+/* TRACE (arcade-trace.js): the board of encrypted blocks (the layers' own stripes), infected bits under
+   some; open ones a bit counting the infected round it, or nothing; a flag a crosshair on its block.
+   Once over: the infected showing, the one hit in red, wrong flags crossed (sized by arcade-trace.js's
+   fit: --tr-cell) */
+.tr-board { flex: none; align-self: center; display: grid; grid-template-columns: repeat(9, var(--tr-cell, 36px)); gap: 3px; padding: 7px; background: var(--board-bg); border: 1px solid var(--grid-line); border-radius: 6px; touch-action: manipulation; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.tr-board .cell { width: var(--tr-cell, 36px); height: var(--tr-cell, 36px); font-size: calc(var(--tr-cell, 36px) * 0.4); cursor: pointer; }
+.tr-board .cell.firewall { color: var(--layer-text); }
+.tr-board .cell.tr-zero { background: transparent; border-color: rgba(var(--fg-rgb), 0.12); }
+.tr-board .cell.tr-open { cursor: default; }
+.tr-board .tr-flag { width: 70%; height: 70%; fill: none; stroke: var(--accent); stroke-width: 2.4; stroke-linecap: round; filter: drop-shadow(0 0 3px rgba(var(--accent-rgb), 0.8)); }
+.tr-board .cell.tr-bad { background: rgba(var(--danger-rgb), 0.12); border: 1px solid rgba(var(--danger-rgb), 0.7); color: var(--danger); }
+.tr-board .cell.tr-bad .ico { width: 70%; height: 70%; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+.tr-board .cell.tr-hit { background: rgba(var(--danger-rgb), 0.5); box-shadow: 0 0 12px rgba(var(--danger-rgb), 0.8); color: #fff; }
+.tr-board .cell.tr-caught { background: rgba(var(--fg-rgb), 0.08); border-color: var(--fg); color: var(--fg); animation: tr-caught 0.5s ease-out both; }
+@keyframes tr-caught { from { transform: scale(0.6); opacity: 0; } }
+.tr-board .cell.tr-wrong::after { content: ''; position: absolute; inset: 15%; background: linear-gradient(45deg, transparent 45%, var(--danger) 45%, var(--danger) 55%, transparent 55%), linear-gradient(-45deg, transparent 45%, var(--danger) 45%, var(--danger) 55%, transparent 55%); }
+.tr-board .cell.tr-flagged { position: relative; }
+.tr-board.tr-over .cell { cursor: default; }
+.tr-acts { flex: none; display: flex; align-items: center; gap: 12px; }
+.tr-acts[hidden] { display: none; }
+#tr-mode { flex: none; height: 40px; padding: 0 16px; background: transparent; border: 1px solid var(--fg); border-radius: 4px; color: var(--fg); font-family: inherit; font-size: 13px; letter-spacing: 2px; cursor: pointer; }
+#tr-mode.on { border-color: var(--accent); color: var(--accent); background: rgba(var(--accent-rgb), 0.12); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+.tr-hint { flex: 1; margin: 0; text-align: center; font-size: 11.5px; letter-spacing: 1px; color: var(--fg-dim); }
+
+/* CHECKSUM (arcade-checksum.js): nine boxes of nine squares, the boxes set apart; a given bit as the
+   board's bits, one written in in the accent, notes small in a 3x3 in their square; the square picked
+   outlined, its row, column and box tinted, the same bit elsewhere lit. Under it the bits [1] to [9]
+   (one dimmed with all nine in) and NOTES, ERASE, CONFIRM (sized by arcade-checksum.js's fit: --ck-cell) */
+.ck-board { position: relative; flex: none; align-self: center; display: grid; grid-template-columns: repeat(3, auto); gap: 4px; padding: 7px; background: var(--board-bg); border: 1px solid var(--grid-line); border-radius: 6px; -webkit-user-select: none; user-select: none; }
+.ck-box { display: grid; grid-template-columns: repeat(3, var(--ck-cell, 36px)); gap: 2px; padding: 2px; border: 1px solid rgba(var(--fg-rgb), 0.35); border-radius: 3px; }
+.ck-cell { width: var(--ck-cell, 36px); height: var(--ck-cell, 36px); font-size: calc(var(--ck-cell, 36px) * 0.36); cursor: pointer; }
+.ck-cell.ck-mine { color: var(--accent); border-color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.6); background: rgba(var(--accent-rgb), 0.06); }
+.ck-cell.peer { background-color: rgba(var(--fg-rgb), 0.07); }
+.ck-cell.same { box-shadow: inset 0 0 0 1px var(--fg), 0 0 8px rgba(var(--fg-rgb), 0.5); }
+.ck-cell.sel { outline: 2px solid var(--accent); outline-offset: -1px; background-color: rgba(var(--accent-rgb), 0.14); }
+.ck-notes { display: grid; grid-template-columns: repeat(3, 1fr); width: 100%; height: 100%; font-size: calc(var(--ck-cell, 36px) * 0.26); font-weight: normal; line-height: 1; color: var(--fg-dim); text-shadow: none; }
+.ck-notes i { display: flex; align-items: center; justify-content: center; font-style: normal; }
+.ck-cell.ck-valid { animation: ck-valid 0.5s ease-out both; }
+@keyframes ck-valid { 40% { transform: scale(1.12); box-shadow: 0 0 14px var(--fg); } }
+.ck-board.shake { animation: cb-shake 0.3s ease-in-out 1; }
+/* (CONFIRM's word over the grid for a moment) */
+.ck-stamp { position: absolute; left: 50%; top: 50%; z-index: 3; margin: 0; padding: 8px 14px; transform: translate(-50%, -50%); white-space: nowrap; font-size: 17px; letter-spacing: 3px; background: var(--panel); border: 2px solid currentColor; border-radius: 6px; pointer-events: none; opacity: 0; }
+.ck-stamp.bad { color: var(--danger); text-shadow: 0 0 8px rgba(var(--danger-rgb), 0.7); }
+.ck-stamp.good { color: var(--fg); text-shadow: 0 0 10px var(--fg); }
+.ck-stamp.show { animation: ck-stamp 1.5s ease-out both; }
+@keyframes ck-stamp { 0% { opacity: 0; transform: translate(-50%, -50%) scale(1.4); } 12% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; } }
+.ck-pad { flex: none; display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 3px; }
+.ck-pad[hidden], .ck-acts[hidden] { display: none; }
+.ck-pad button { min-width: 0; height: 44px; padding: 0; display: flex; align-items: center; justify-content: center; background: rgba(var(--fg-rgb), 0.08); border: 1px solid var(--fg-dim); border-radius: 4px; color: var(--fg); font-family: var(--font); font-size: 14.5px; font-weight: bold; text-shadow: 0 0 6px rgba(var(--fg-rgb), 0.6); cursor: pointer; }
+.ck-pad button .cb-face { width: 26px; height: 26px; }
+.ck-pad button.full { opacity: 0.3; }
+.ck-pad.notes button { border-style: dashed; border-color: var(--accent); color: var(--accent); font-size: 12px; text-shadow: none; }
+.ck-pad button:active { background: rgba(var(--fg-rgb), 0.25); }
+.ck-acts { flex: none; display: flex; gap: 8px; }
+.ck-acts button { flex: 1; min-width: 0; height: 40px; padding: 0 4px; white-space: nowrap; background: transparent; border: 1px solid var(--fg); border-radius: 4px; color: var(--fg); font-family: inherit; font-size: 12px; letter-spacing: 1.5px; cursor: pointer; }
+#ck-notes.on { border-color: var(--accent); color: var(--accent); background: rgba(var(--accent-rgb), 0.12); }
+#ck-confirm { border-color: var(--accent); color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+@media (hover: hover) { :is(.ck-acts button, #tr-mode, .arcade-dev button):hover { background: rgba(var(--fg-rgb), 0.12); } }
+@media (prefers-reduced-motion: reduce) { .ck-cell.ck-valid, .ck-board.shake, .tr-board .cell.tr-caught { animation: none; } .ck-stamp.show { animation-duration: 0.01s; animation-delay: 1.4s; opacity: 1; } }
