@@ -70,6 +70,15 @@ function startGridBackground(canvas, { defrag = true, active } = {}) {
     pass.misplaced--;
   }
 
+  // (the whole canvas, in its own pixels: under the pixel ratio's scale, its size would clear only
+  // part of it when the ratio's under 1, a browser zoomed out, leaving old frames along its right and
+  // bottom edges)
+  function clearAll() {
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
+  }
   let cssW = 0;
   let cssH = 0;
   function resize() {
@@ -166,7 +175,7 @@ function startGridBackground(canvas, { defrag = true, active } = {}) {
 
   function draw() {
     if (!size) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      clearAll();
       return;
     }
     const { rainbow, anaglyph, festive } = gridTheme;
@@ -177,7 +186,7 @@ function startGridBackground(canvas, { defrag = true, active } = {}) {
       return;
     }
     shown = new Uint8Array(0); // (back to a plain theme: a full redraw)
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    clearAll();
     const offX = (cssW - cols * PITCH + GAP) / 2;
     const offY = (cssH - rows * PITCH + GAP) / 2;
     const { fg } = gridTheme;

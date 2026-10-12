@@ -121,13 +121,22 @@ const FX = (() => {
     }
   }
 
+  // (the whole canvas, in its own pixels: under the pixel ratio's scale, its size would clear only
+  // part of it when the ratio's under 1, a browser zoomed out, leaving old frames along its right and
+  // bottom edges)
+  function clearAll() {
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
+  }
   // Each frame: the live particles moved and drawn, the spent ones dropped in place (no new array
   // a frame); each one's color built once (its fade is the canvas's alpha), and the glyphs' font
   // set only when it changes
   function frame(now) {
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    clearAll();
     ctx.globalCompositeOperation = 'lighter';
     const fontFamily = fxTheme().font; // the chosen game font
     let font = '';
@@ -163,7 +172,7 @@ const FX = (() => {
     if (particles.length) requestAnimationFrame(frame);
     else {
       running = false;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      clearAll();
     }
   }
 
