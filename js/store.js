@@ -120,7 +120,7 @@ const Store = (() => {
     });
     shop.appendChild(item);
   }
-  // EXPLOITS (for a game, from EXPLOIT L or R) and BLACK BOXES: each with its icon, its price in KEYS
+  // EXPLOITS (for a game, from the main menu's EXPLOITS) and BLACK BOXES: each with its icon, its price in KEYS
   // and RESOURCES (Progress; ECONOMY.md), what's still short of it, how many are owned and BUY; an
   // exploit short of its price can take a MASTER KEY instead. The exploits by tier, each tier its own
   // section under a ----- line, in the order they unlock (a locked one: dimmed under a padlock, its
@@ -146,7 +146,7 @@ const Store = (() => {
       }
       Progress.addStarter(id);
       SFX.play('egg');
-      say(`BOUGHT // ${itemName(id)}${master ? ' WITH A MASTER KEY' : ''}: TAKE IT INTO A GAME FROM EXPLOIT L OR R ON THE MAIN MENU`);
+      say(`BOUGHT // ${itemName(id)}${master ? ' WITH A MASTER KEY' : ''}: TAKE IT INTO A GAME FROM EXPLOITS ON THE MAIN MENU`);
       if (typeof showKeys === 'function') showKeys();
       if (typeof refreshStarterRow === 'function') refreshStarterRow();
       render();

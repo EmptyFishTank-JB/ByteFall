@@ -375,8 +375,9 @@ const boosterFits = (id, m = mode) => !daily && BOOSTERS[id].modes.includes(m);
 // (switched on per mode: CLASSIC's choice isn't BLITZ's)
 const armedKey = () => `bytefall-boosters-on-${mode}`;
 let armedBoosts = new Set();
-// (one booster per game: an older save with several keeps the first)
-const loadArmed = () => { armedBoosts = new Set((storage.get(armedKey()) || '').split(',').filter((id) => BOOSTERS[id] && boosterFits(id)).slice(0, 1)); };
+// (up to BOOSTS_MAX patches a game)
+const BOOSTS_MAX = 2;
+const loadArmed = () => { armedBoosts = new Set((storage.get(armedKey()) || '').split(',').filter((id) => BOOSTERS[id] && boosterFits(id)).slice(0, BOOSTS_MAX)); };
 const saveArmed = () => storage.set(armedKey(), [...armedBoosts].join(','));
 const LOOKAHEAD_MS = 60000;
 let lookaheadLeft = 0; // LOOKAHEAD: the play time it has left (counted while the game is being played)
@@ -757,7 +758,7 @@ function initGame() {
   } else Tutorial.end();
 }
 
-// THE TUTORIAL's last cards go on over the main menu (CLASSIC's panel: PATCHES and EXPLOIT L / R): a
+// THE TUTORIAL's last cards go on over the main menu (CLASSIC's panel: PATCHES and EXPLOITS): a
 // fresh CLASSIC game behind it, the lesson's banner kept (Tutorial.end lets a home step be); its
 // MAIN MENU then earns HELLO, WORLD there
 window.tutorialHome = () => {
@@ -2511,7 +2512,7 @@ function endGame(reason = 'trace') {
     note.hidden = false;
     note.textContent += ` // PATCHED: ${patched.map((id) => BOOSTERS[id].name).join(', ')}`;
   }
-  if (usedStarters.length) note.textContent += ` // EXPLOIT L / R: ${usedStarters.map(itemName).join(', ')}`; // (and one that used side slots)
+  if (usedStarters.length) note.textContent += ` // EXPLOITS: ${usedStarters.map(itemName).join(' / ')}`; // (and one that used side slots)
   if (marketBought.length) {
     note.textContent += ` // BLACK MARKET: ${marketBought.map(itemName).join(', ')}`;
   }
@@ -5142,7 +5143,7 @@ const SECTION_INFO = {
     'Not in DAILY or VS.']],
   starters: ['// EXPLOITS FOR A GAME', [
     'An exploit you own and bring into a game, instead of waiting for the CHAIN METER to earn one. TIER I, II and III, each its own section.',
-    `Pick up to two on the main menu, in EXPLOIT L and EXPLOIT R. Each sits in an EXPLOIT SLOT next to the exploit button: the left slot opens at Lv ${Progress.sideSlotLevel(0)}, the right at Lv ${Progress.sideSlotLevel(1)}.`,
+    `Pick up to two on the main menu, from EXPLOITS. Each sits in an EXPLOIT SLOT next to the exploit button: the left slot opens at Lv ${Progress.sideSlotLevel(0)}, the right at Lv ${Progress.sideSlotLevel(1)}.`,
     'In the game, tap one to use it as your next drop. Any you don\'t use stay yours.',
     'Short on resources? A MASTER KEY buys any exploit.',
     'An empty EXPLOIT SLOT turns into the BLACK MARKET once the first encryption layer rises: something for sale that changes every 4 drops. The pips under it count the drops left.',
@@ -5195,7 +5196,7 @@ function openBoosterPick() {
   loadArmed();
   const owned = boosterIds().filter((id) => Progress.boosters(id) > 0);
   document.getElementById('booster-pick-note').textContent = owned.length
-    ? `Switch on one to use in your next ${MODES[mode].label} game (one per game). It's used up at its first drop (RESTORE POINT only if it saves you).`
+    ? `Activate up to two starting patches to use in your next ${MODES[mode].label} game. Patches are activated with the first drop (RESTORE POINT only if it saves you).`
     : 'You don\'t have any patches for this mode yet.';
   const list = document.getElementById('booster-pick-list');
   list.textContent = '';
@@ -5209,9 +5210,12 @@ function openBoosterPick() {
     b.querySelector('.starter-pick-name').textContent = BOOSTERS[id].name;
     b.title = BOOSTERS[id].desc;
     b.addEventListener('click', () => {
-      const was = armedBoosts.has(id);
-      armedBoosts.clear(); // (one per game: switching one on switches the other off)
-      if (!was) armedBoosts.add(id);
+      // (up to two: a third switched on takes the place of the first)
+      if (armedBoosts.has(id)) armedBoosts.delete(id);
+      else {
+        armedBoosts.add(id);
+        if (armedBoosts.size > BOOSTS_MAX) armedBoosts.delete([...armedBoosts][0]);
+      }
       boostersChanged();
       openBoosterPick(); // (redrawn in place)
     });
@@ -5238,20 +5242,19 @@ function refreshBoosterRow() {
   const b = document.createElement('button');
   b.type = 'button';
   b.className = on.length ? 'active' : ''; // (lit while one's on, as VS's LAYERS: ON)
-  b.innerHTML = `<span class="opt-text">${USB_SVG}PATCHES: ${!on.length ? 'NONE ON' : on.length === 1 ? `${BOOSTER_SVG[on[0]] || ''}${BOOSTERS[on[0]].name}` : `${on.map((id) => BOOSTER_SVG[id] || '').join('')}${on.length} ON`}</span>`;
+  b.innerHTML = `<span class="opt-text">${USB_SVG}PATCHES: ${on.length ? on.map((id) => BOOSTERS[id].name).join(' / ') : 'NONE ON'}</span>`;
   b.setAttribute('aria-label', `Patches: ${on.length ? on.map((id) => BOOSTERS[id].name).join(', ') : 'none on'}. Tap to choose`);
   b.addEventListener('click', openBoosterPick);
   row.appendChild(b);
   refitHome(); // (new words in set boxes)
 }
 
-// The main menu's EXPLOIT L and EXPLOIT R: the two side slots, what's in each (or EMPTY), as
-// VS's settings are: NAME: what's on it, lit while one's in it. A slot not open yet is locked (its
-// level; a tap says so in the card's title). A tap on an open slot opens its card (BUY EXPLOITS in it: the STORE's starters): every starter exploit
-// owned (and unlocked), how many, to put in that slot (two of one kind, if there are two; one each
-// of two), and EMPTY to take it out
+// The main menu's EXPLOITS: one button for the two side slots, the terminal and what's in them
+// (LEFT / RIGHT, or NONE), lit while one's in. A tap opens its card (BUY EXPLOITS in it: the STORE's
+// starters): every starter exploit and BLACK BOX owned (and unlocked), how many, ON / OFF / ON x2. A
+// tap puts one in (the left slot fills first; with both full it takes the other's place), a second
+// tap a second of it (two owned), the next tap takes them out. Slots not open yet: the card says when; none open, the button is locked (its level)
 const starterPickEl = document.getElementById('starter-pick');
-let starterPickSlot = 0;
 function setStarters(ids) {
   Progress.setStartersTaken(ids);
   // (a game not yet under way takes them now; one under way, from the next game)
@@ -5264,46 +5267,43 @@ function openStarterStore() {
   Store.show('starters');
 }
 function closeStarterPick() { starterPickEl.classList.add('hidden'); }
-function openStarterPick(slot) {
-  starterPickSlot = slot;
-  const taken = Progress.startersTaken();
-  const here = taken[slot] || null;
-  const other = taken[1 - slot] || null;
-  document.getElementById('starter-pick-title').textContent = `// ${slot ? 'RIGHT' : 'LEFT'} SLOT`;
+document.getElementById('starter-pick-title').innerHTML = `// ${TERMINAL_SVG}EXPLOITS`;
+function openStarterPick() {
+  const open = Math.min(STARTER_MAX, Progress.sideSlots());
+  const taken = Progress.startersTaken().slice(0, open).filter(Boolean);
   const owned = [...Progress.exploitOrder().filter((id) => Progress.starters(id) > 0 && Progress.exploitInfo(id).unlocked),
     ...Progress.boxIds().filter((id) => Progress.starters(id) > 0)];
+  const later = open < STARTER_MAX ? ` (a second at LV ${Progress.sideSlotLevel(1)})` : '';
   document.getElementById('starter-pick-note').textContent = owned.length
-    ? 'Pick an exploit or BLACK BOX for this side of the exploit button. It\'s used once in the game; the ones you don\'t use stay yours.'
+    ? `Bring ${open > 1 ? 'up to two' : 'one'} into your next game${later}. Each is used once; the ones you don't use stay yours.`
     : 'You don\'t have any exploits to bring in yet.';
   const list = document.getElementById('starter-pick-list');
   list.textContent = '';
   for (const id of owned) {
     const b = document.createElement('button');
     b.type = 'button';
-    // (all of them already in the other slot: none left for this one)
-    const free = Progress.starters(id) - (other === id ? 1 : 0);
-    b.className = `starter-pick-item${here === id ? ' on' : ''}`;
-    b.disabled = free <= 0;
-    b.innerHTML = `<span class="exploit-glyph bracketed">${bracketIcon(id)}</span><span class="starter-pick-name"></span><span class="starter-pick-count">\u00d7${Progress.starters(id)}</span>`;
+    const sides = taken.filter((t) => t === id); // (how many of it are in: one, or both slots)
+    b.className = `starter-pick-item${sides.length ? ' on' : ''}`;
+    b.setAttribute('aria-pressed', String(sides.length > 0));
+    b.innerHTML = `<span class="exploit-glyph bracketed">${bracketIcon(id)}</span><span class="starter-pick-name"></span><span class="starter-pick-count">×${Progress.starters(id)}</span><span class="booster-pick-state">${sides.length > 1 ? 'ON \u00d72' : sides.length ? 'ON' : 'OFF'}</span>`;
     b.querySelector('.starter-pick-name').textContent = itemName(id);
     b.addEventListener('click', () => {
-      const ids = taken.slice();
-      ids[slot] = id;
+      // (a tap puts one in; a second tap, with two owned, a second of it; the next takes them out.
+      // With both slots full, a new one takes the place of the other)
+      let ids = taken.slice();
+      if (sides.length < Math.min(Progress.starters(id), open)) {
+        ids.push(id);
+        if (ids.length > open) ids.splice(ids.findIndex((t) => t !== id), 1);
+      } else ids = ids.filter((t) => t !== id);
       setStarters(ids);
-      closeStarterPick();
+      openStarterPick(); // (redrawn in place)
     });
     list.appendChild(b);
   }
-  if (here) {
-    const e = document.createElement('button');
-    e.type = 'button';
-    e.className = 'starter-pick-item starter-pick-empty';
-    e.textContent = 'EMPTY THIS SLOT';
-    e.addEventListener('click', () => { const ids = taken.slice(); ids[slot] = null; setStarters(ids); closeStarterPick(); });
-    list.appendChild(e);
+  if (starterPickEl.classList.contains('hidden')) {
+    starterPickEl.classList.remove('hidden');
+    (list.querySelector('button') || document.getElementById('starter-pick-buy')).focus();
   }
-  starterPickEl.classList.remove('hidden');
-  (list.querySelector('button:not(:disabled)') || document.getElementById('starter-pick-buy')).focus();
 }
 document.getElementById('starter-pick-close').addEventListener('click', closeStarterPick);
 document.getElementById('starter-pick-buy').addEventListener('click', openStarterStore);
@@ -5314,27 +5314,23 @@ function refreshStarterRow() {
   if (!row) return;
   row.hidden = !starterFits() || mode === 'tutorial';
   if (row.hidden) return;
-  row.innerHTML = ''; // (a long name trails off in its slot)
-  const taken = Progress.startersTaken();
-  for (let i = 0; i < STARTER_MAX; i++) {
-    const b = document.createElement('button');
-    b.type = 'button';
-    const name = `EXPLOIT ${i ? 'R' : 'L'}`;
-    if (i >= Progress.sideSlots()) { // (not open yet: the level it opens at, behind a lock)
-      const lv = Progress.sideSlotLevel(i);
-      b.className = 'locked';
-      b.innerHTML = `<span class="opt-text">${name}: LV ${lv}</span>`;
-      b.setAttribute('aria-label', `EXPLOIT ${i ? 'R' : 'L'}: opens at level ${lv}`);
-      b.addEventListener('click', () => { SFX.play('denied'); homeNotice(`LOCKED // ${name} OPENS AT LV ${lv}`); });
-      row.appendChild(b);
-      continue;
-    }
-    b.className = taken[i] ? 'active' : '';
-    b.innerHTML = `<span class="opt-text">${name}: ${taken[i] ? `${itemIcon(taken[i])}${itemName(taken[i])}` : 'EMPTY'}</span>`; // (which side: where it sits)
-    b.setAttribute('aria-label', `${i ? 'Right' : 'Left'} starter slot: ${taken[i] ? itemName(taken[i]) : 'empty'}. Tap to choose`);
-    b.addEventListener('click', () => openStarterPick(i));
-    row.appendChild(b);
+  row.innerHTML = ''; // (long names trail off)
+  const b = document.createElement('button');
+  b.type = 'button';
+  if (!Progress.sideSlots()) { // (none open yet: the level the first opens at, behind a lock)
+    const lv = Progress.sideSlotLevel(0);
+    b.className = 'locked';
+    b.innerHTML = `<span class="opt-text">${TERMINAL_SVG}EXPLOITS: LV ${lv}</span>`;
+    b.setAttribute('aria-label', `Exploits: open at level ${lv}`);
+    b.addEventListener('click', () => { SFX.play('denied'); homeNotice(`LOCKED // EXPLOITS OPEN AT LV ${lv}`); });
+  } else {
+    const taken = Progress.startersTaken().slice(0, Progress.sideSlots()).filter(Boolean);
+    b.className = taken.length ? 'active' : '';
+    b.innerHTML = `<span class="opt-text">${TERMINAL_SVG}EXPLOITS: ${taken.length ? taken.map(itemName).join(' / ') : 'NONE'}</span>`;
+    b.setAttribute('aria-label', `Exploits: ${taken.length ? taken.map(itemName).join(', ') : 'none'}. Tap to choose`);
+    b.addEventListener('click', () => openStarterPick());
   }
+  row.appendChild(b);
   refitHome(); // (new words in set boxes)
 }
 
@@ -5566,7 +5562,7 @@ function renderStarters() {
       b.disabled = true;
       b.innerHTML = `${SLOT_LOCK_SVG}<span class="slot-lv">LV ${Progress.sideSlotLevel(i)}</span>`;
       b.dataset.key = '';
-      b.title = `EXPLOIT ${i ? 'R' : 'L'} // opens at Lv ${Progress.sideSlotLevel(i)}`;
+      b.title = `EXPLOIT SLOT // opens at Lv ${Progress.sideSlotLevel(i)}`;
       b.setAttribute('aria-label', b.title);
       return;
     }
@@ -5580,7 +5576,7 @@ function renderStarters() {
         b.dataset.key = key;
         b.innerHTML = `<span class="exploit-glyph">${sl.face || itemIcon(sl.id)}</span><span class="starter-tag">\u2713</span>`;
       }
-      b.title = `EXPLOIT ${i ? 'R' : 'L'} // ${itemName(sl.used || sl.id)} USED: a new offer after the next drop`;
+      b.title = `EXPLOIT SLOT // ${itemName(sl.used || sl.id)} USED: a new offer after the next drop`;
       b.setAttribute('aria-label', b.title);
       return;
     }
@@ -5605,13 +5601,13 @@ function renderStarters() {
       b.dataset.key = key;
       b.innerHTML = `<span class="exploit-glyph">${itemIcon(sl.id)}</span>`
         + (market && marketOpen ? PIPS_HTML : '')
-        + (market ? `<span class="slot-sale" aria-hidden="true">${CURRENCY_SVG}</span>` : sl.state === 'armed' ? '' : `<span class="starter-tag">${sl.state === 'starter' ? (i ? 'R' : 'L') : '✓'}</span>`);
+        + (market ? `<span class="slot-sale" aria-hidden="true">${CURRENCY_SVG}</span>` : sl.state === 'armed' || sl.state === 'starter' ? '' : '<span class="starter-tag">✓</span>');
     }
     setPips(b, market && marketOpen, left);
     const name = itemName(sl.id);
     b.title = sl.state === 'armed' ? `${itemName(sl.id)} // ARMED: drop it` : market ? `BLACK MARKET // ${name}: ${priceText(price)} (${marketOpen ? `tap to see it; a new one in ${left} drop${left === 1 ? '' : 's'}` : `opens in ${marketOpensIn()} drops`})`
-      : sealed ? `${sl.state === 'starter' ? `EXPLOIT ${i ? 'R' : 'L'}` : 'BOUGHT'} // ${name}: tap to open it`
-        : `${sl.state === 'starter' ? `EXPLOIT ${i ? 'R' : 'L'}` : sl.state === 'opened' ? 'BLACK BOX' : 'BOUGHT'} // ${name}: tap to arm it`;
+      : sealed ? `${sl.state === 'starter' ? 'YOURS' : 'BOUGHT'} // ${name}: tap to open it`
+        : `${sl.state === 'starter' ? 'YOURS' : sl.state === 'opened' ? 'BLACK BOX' : 'BOUGHT'} // ${name}: tap to arm it`;
     b.setAttribute('aria-label', b.title);
     if (!market && !sealed && armedHack) b.disabled = true;
   });
@@ -6271,7 +6267,7 @@ function armExploit(slot = null) {
     if (sl.state === 'starter') {
       if (!Progress.useStarter(sl.id)) return false;
       usedStarters.push(sl.id);
-      label = `EXPLOIT ${slot ? 'R' : 'L'}`;
+      label = 'YOUR EXPLOIT';
     } else label = sl.state === 'opened' ? 'BLACK BOX' : 'BLACK MARKET';
     id = sl.id;
     sl.state = 'armed'; // (it stays in its slot, lit, till it's dropped; then the slot opens to the market)

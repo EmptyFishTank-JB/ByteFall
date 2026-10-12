@@ -231,7 +231,7 @@ const Progress = (() => {
     { id: 'vs-insane', group: 'VS CPU', name: 'INSANE CPU', ...atLevel(40) },
     ...BOT_ORDER.map(([id, name, level]) => ({ id: `bot-${id}`, group: 'VS CPU', name: `BOT: ${name}`, ...atLevel(level) })),
     ...TRACK_LEVELS.map((level, i) => ({ id: `track-${i + 2}`, group: 'TRACKS', name: `TRACK ${String(i + 2).padStart(2, '0')}`, ...atLevel(level) })),
-    ...SIDE_SLOT_LEVELS.map((level, i) => ({ id: `side-slot-${i + 1}`, group: 'EXPLOIT SLOTS', name: `EXPLOIT ${i ? 'R' : 'L'}`, ...atLevel(level) })),
+    ...SIDE_SLOT_LEVELS.map((level, i) => ({ id: `side-slot-${i + 1}`, group: 'EXPLOIT SLOTS', name: `EXPLOIT SLOT ${i + 1}`, ...atLevel(level) })),
     ...PATCH_SLOT_LEVELS.map((level, i) => ({ id: `patch-slot-${i + 1}`, group: 'PATCH SLOTS', name: `PATCH SLOT: ${i ? 'RIGHT' : 'LEFT'}`, ...atLevel(level) })),
     ...THEME_ORDER.map(([id, name, level]) => ({ id: `theme-${id}`, group: 'THEMES', name, ...atLevel(level) })),
     ...FONT_ORDER.map(([id, name, level]) => ({ id: `font-${id}`, group: 'FONTS', name, ...atLevel(level) })),
