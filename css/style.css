@@ -4638,10 +4638,6 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 /* (the game's own part: the room under the line, its board taking what its buttons leave) */
 .arcade-game { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
 .arcade-game[hidden] { display: none; }
-/* (UNLOCK EVERYTHING: any game as practice) */
-.arcade-dev { flex: none; display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; font-size: 11.5px; letter-spacing: 1px; color: var(--fg-dim); }
-.arcade-dev[hidden] { display: none; }
-.arcade-dev button { padding: 4px 8px; background: transparent; border: 1px dashed var(--fg-dim); border-radius: 4px; color: var(--fg); font-family: inherit; font-size: 11.5px; letter-spacing: 1px; cursor: pointer; }
 /* (sized by script: arcade.js's fit sets --cb-cell, the squares as big as the room allows, 44px at most) */
 .cb-board { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px; background: var(--board-bg); border: 1px solid var(--grid-line); border-radius: 6px; }
 .cb-row { display: grid; grid-template-columns: 44px repeat(4, var(--cb-cell, 36px)) 44px; gap: 4px; align-items: center; }
@@ -4724,16 +4720,15 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 
 /* CHECKSUM (arcade-checksum.js): nine boxes of nine squares, the boxes set apart; a given bit as the
    board's bits, one written in in the accent, notes small in a 3x3 in their square; the square picked
-   outlined, its row, column and box tinted, the same bit elsewhere lit. Under it the bits [1] to [9]
+   outlined, its row, column and box tinted (the same bit elsewhere isn't lit). Under it the bits [1] to [9]
    (one dimmed with all nine in) and NOTES, ERASE, CONFIRM (sized by arcade-checksum.js's fit: --ck-cell) */
 .ck-board { position: relative; flex: none; align-self: center; display: grid; grid-template-columns: repeat(3, auto); gap: 4px; padding: 7px; background: var(--board-bg); border: 1px solid var(--grid-line); border-radius: 6px; -webkit-user-select: none; user-select: none; }
 .ck-box { display: grid; grid-template-columns: repeat(3, var(--ck-cell, 36px)); gap: 2px; padding: 2px; border: 1px solid rgba(var(--fg-rgb), 0.35); border-radius: 3px; }
 .ck-cell { width: var(--ck-cell, 36px); height: var(--ck-cell, 36px); font-size: calc(var(--ck-cell, 36px) * 0.36); cursor: pointer; }
 .ck-cell.ck-mine { color: var(--accent); border-color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.6); background: rgba(var(--accent-rgb), 0.06); }
 .ck-cell.peer { background-color: rgba(var(--fg-rgb), 0.07); }
-.ck-cell.same { box-shadow: inset 0 0 0 1px var(--fg), 0 0 8px rgba(var(--fg-rgb), 0.5); }
 .ck-cell.sel { outline: 2px solid var(--accent); outline-offset: -1px; background-color: rgba(var(--accent-rgb), 0.14); }
-.ck-notes { display: grid; grid-template-columns: repeat(3, 1fr); width: 100%; height: 100%; font-size: calc(var(--ck-cell, 36px) * 0.26); font-weight: normal; line-height: 1; color: var(--fg-dim); text-shadow: none; }
+.ck-notes { display: grid; grid-template-columns: repeat(3, 1fr); width: 100%; height: 100%; font-size: calc(var(--ck-cell, 36px) * 0.28); font-weight: bold; line-height: 1; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.6); } /* (as bright as a bit written in) */
 .ck-notes i { display: flex; align-items: center; justify-content: center; font-style: normal; }
 .ck-cell.ck-valid { animation: ck-valid 0.5s ease-out both; }
 @keyframes ck-valid { 40% { transform: scale(1.12); box-shadow: 0 0 14px var(--fg); } }
@@ -4755,7 +4750,7 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 .ck-acts button { flex: 1; min-width: 0; height: 40px; padding: 0 4px; white-space: nowrap; background: transparent; border: 1px solid var(--fg); border-radius: 4px; color: var(--fg); font-family: inherit; font-size: 12px; letter-spacing: 1.5px; cursor: pointer; }
 #ck-notes.on { border-color: var(--accent); color: var(--accent); background: rgba(var(--accent-rgb), 0.12); }
 #ck-confirm { border-color: var(--accent); color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
-@media (hover: hover) { :is(.ck-acts button, #tr-mode, .arcade-dev button):hover { background: rgba(var(--fg-rgb), 0.12); } }
+@media (hover: hover) { :is(.ck-acts button, #tr-mode):hover { background: rgba(var(--fg-rgb), 0.12); } }
 @media (prefers-reduced-motion: reduce) { .ck-cell.ck-valid, .ck-board.shake, .tr-board .cell.tr-caught { animation: none; } .ck-stamp.show { animation-duration: 0.01s; animation-delay: 1.4s; opacity: 1; } }
 
 /* MERGE (arcade-merge.js): the 4x4 board's empty squares under, the bits over them, each sliding from
@@ -4796,3 +4791,26 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 .rt-hint { flex: 1; margin: 0; text-align: center; font-size: 11.5px; letter-spacing: 1px; color: var(--fg-dim); }
 @media (hover: hover) { #rt-clear:hover { background: rgba(var(--fg-rgb), 0.12); } }
 @media (prefers-reduced-motion: reduce) { .mg-tile { transition: none; } .mg-tile.mg-born, .mg-tile.mg-pop, .rt-board.rt-won .cell.rt-cell { animation: none; } }
+
+/* THE ARCADE MENU (the main menu's ARCADE; arcade.js): every game as a card in a row that slides
+   sideways under the card's sides, as DAILY's do, the one in the middle in focus (the rest dimmed),
+   the pips under it lighting it; PLAY (RESUME, with NEW GAME beside it, when one's under way), and what
+   FREE PLAY is */
+.home-row[hidden] { display: none; }
+.arcade-menu { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: 16px; container-type: inline-size; }
+.arcade-menu[hidden] { display: none; }
+.daily-cards.arcade-cards { display: flex; gap: 8px; width: calc(100% + 16px); margin: 0 -8px; padding: 6px calc(14cqw + 8px); overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; }
+.arcade-cards::-webkit-scrollbar { display: none; }
+.arcade-cards button { flex: 0 0 72cqw; min-height: 128px; gap: 8px; padding: 12px; scroll-snap-align: center; scroll-snap-stop: always; opacity: 0.55; transition: opacity 0.25s ease-out, border-color 0.25s, background-color 0.25s, box-shadow 0.25s; }
+.arcade-cards button.focus { opacity: 1; border-color: var(--fg); background: rgba(var(--fg-rgb), 0.1); box-shadow: 0 0 10px rgba(var(--fg-rgb), 0.3); }
+.arcade-cards .dc-name { font-size: 15.5px; letter-spacing: 2px; }
+.arcade-cards button.focus .dc-name { text-shadow: 0 0 6px rgba(var(--fg-rgb), 0.6); }
+.arcade-cards .dc-rule { font-size: 12px; line-height: 1.4; }
+.arcade-cards .dc-status { font-size: 11.5px; line-height: 1.4; }
+.arcade-menu .daily-pips:not([hidden]) { display: flex; }
+.arcade-menu-acts { display: flex; justify-content: center; gap: 8px; }
+.arcade-menu-acts .vs-start { display: flex; align-items: center; justify-content: center; height: 40px; padding: 0 34px; }
+.arcade-new { height: 40px; padding: 0 16px; background: transparent; border: 1px solid var(--fg-dim); border-radius: 4px; color: var(--fg); font-family: inherit; font-size: 13px; letter-spacing: 2px; cursor: pointer; }
+.arcade-new[hidden] { display: none; }
+.arcade-menu-note { margin: 0 8px; text-align: center; font-size: 12px; line-height: 1.5; color: var(--fg-dim); }
+@media (hover: hover) { .arcade-new:hover { background: rgba(var(--fg-rgb), 0.12); } }

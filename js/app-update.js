@@ -13,7 +13,7 @@
   const toast = (text) => { if (typeof showToast === 'function') showToast(text); };
   function show(text, live = true) {
     btn.hidden = false;
-    row.classList.remove('home-row-single'); // (TUTORIAL and UPDATE, two across)
+    row.hidden = false; // (its own row, under ARCADE and TUTORIAL)
     btn.textContent = text;
     btn.disabled = !live;
     if (typeof fitHome === 'function') fitHome();

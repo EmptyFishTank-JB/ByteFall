@@ -297,6 +297,9 @@ Arcade.register('merge', (() => {
       boardEl.style.setProperty('--mg-cell', `${Math.max(36, size)}px`);
     },
     pay: (x) => Progress.mergeResult(x.score, x.top),
+    best: (x) => x.score,
+    bestText: (v) => `${fmt(v)} POINTS`,
+    low: false,
     // SHARE: the score, the best bit and the moves, and the ladder climbed ([1] up to the best)
     share(x) {
       const rungs = Math.min(x.top, 11);

@@ -252,6 +252,9 @@ Arcade.register('routing', (() => {
       boardEl.style.setProperty('--rt-cell', `${Math.max(20, size)}px`);
     },
     pay: (x) => Progress.arcadeResult('routing', true, Math.floor(x.t / 1000)),
+    best: (x) => Math.floor(x.t / 1000),
+    bestText: (v) => kit.fmtTime(v * 1000),
+    low: true,
     // SHARE: the time, and the seven colors linked
     share: (x) => [`All routed in ${kit.fmtTime(x.t)}`, '\u{1F7E5}\u{1F7E7}\u{1F7E8}\u{1F7E9}\u{1F7E6}\u{1F7EA}\u{1F7EB}'],
     wander, // (for testing)
