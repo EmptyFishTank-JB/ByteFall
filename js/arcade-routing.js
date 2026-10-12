@@ -1,18 +1,18 @@
-// ROUTING (THE DAILY ARCADE's Sunday game; the card around it is arcade.js): Flow's rules on the bits. A
-// 7x7 grid with seven pairs of bits on it, [1] to [7], each pair in its own color: route a line from
-// each bit to its twin, square to square (up, down, left, right), the lines never crossing, till every
-// pair is linked and every square has a line through it. Drag from a bit (or from a line's end, to
-// carry it on) through the squares; back over the line to take it back; across another line to cut
-// it there. The grid is the same for everyone that Sunday (made from the date: one path through every
-// square, shuffled about, then cut into seven runs, their ends the pairs; any routing that links them
-// all and fills the grid counts). The clock runs from the first line drawn.
+// ROUTING (THE ARCADE's Sunday game; the card around it is arcade.js): Flow's rules on the bits. A 7x7
+// grid with six to eight pairs of bits on it, [1] up, each pair in its own color: route a line from each
+// bit to its twin, square to square (up, down, left, right), the lines never crossing, till every pair
+// is linked and every square has a line through it. Drag from a bit (or from a line's end, to carry it
+// on) through the squares; back over the line to take it back; across another line to cut it there.
+// Every grid has one way through only, and it fills every square, and a pair's bits are never side
+// by side (corner to corner is fine): made from the date (one path through every square, shuffled
+// about, cut into runs that never run alongside themselves, their ends the pairs), each checked by a
+// solver and drawn again till it has one answer. The clock runs from the first line drawn.
 Arcade.register('routing', (() => {
   const N = 7;
-  const PAIRS = 7;
-  const MIN_LEN = 3; // (a run, in squares)
-  const MAX_LEN = 13;
-  // (each pair's color, [1] to [7]: red, orange, yellow, green, cyan, blue, violet)
-  const HUES = ['255, 90, 110', '255, 159, 67', '255, 217, 61', '61, 220, 132', '61, 214, 255', '107, 140, 255', '199, 125, 255'];
+  const MIN_PAIRS = 6;
+  const MAX_PAIRS = 8;
+  // (each pair's color, [1] to [8]: red, orange, yellow, green, cyan, blue, violet, pink)
+  const HUES = ['255, 90, 110', '255, 159, 67', '255, 217, 61', '61, 220, 132', '61, 214, 255', '107, 140, 255', '199, 125, 255', '255, 125, 200'];
   const el = (id) => document.getElementById(id);
   const boardEl = el('rt-board');
   const actsEl = el('rt-acts');
@@ -45,21 +45,107 @@ Arcade.register('routing', (() => {
     }
     return path;
   }
-  function make(rand, saved) {
-    const path = wander(rand);
-    const lens = Array(PAIRS).fill(MIN_LEN);
-    for (let rest = N * N - PAIRS * MIN_LEN; rest > 0;) {
-      const k = Math.floor(rand() * PAIRS);
-      if (lens[k] < MAX_LEN) { lens[k]++; rest--; }
+  // (cut along the path: a run ends where the next square would touch it anywhere but its end (so no
+  // line runs alongside itself, and a pair's bits are never side by side; corner to corner is fine),
+  // or at a length picked at random)
+  function cut(path, rand) {
+    const runs = [];
+    let run = [];
+    let len = 5 + Math.floor(rand() * 9);
+    for (const c of path) {
+      const touches = run.slice(0, -1).some((x) => adjacent(x, c));
+      if (run.length && (touches || run.length >= len)) { runs.push(run); run = []; len = 5 + Math.floor(rand() * 9); }
+      run.push(c);
     }
-    let from = 0;
-    const runs = lens.map((len) => { const run = path.slice(from, from + len); from += len; return [run[0], run[run.length - 1]].sort((a, b) => a - b); });
-    const ends = runs.sort((a, b) => a[0] - b[0]); // ([1] the pair whose first bit is nearest the top left, and on)
+    runs.push(run);
+    return runs;
+  }
+  // THE SOLVER (for making a grid, not playing it): how many ways it can be routed, every square filled,
+  // up to stop (n), and the first way found (lines: each pair's squares, bit to twin). Each pair's line grown from one bit, the line with the fewest squares to go to always
+  // next; given up on wherever an empty square has fewer than two ways in, a line can't reach its twin,
+  // or a patch of empty squares can't be crossed by any pair's line
+  function routings(ends, stop = 2) {
+    const K = ends.length;
+    const own = new Int8Array(N * N).fill(-1);
+    const head = ends.map((e) => e[0]);
+    const tgt = ends.map((e) => e[1]);
+    const done = new Uint8Array(K);
+    ends.forEach(([a, b], k) => { own[a] = k; own[b] = k; });
+    const comp = new Int16Array(N * N);
+    let found = 0;
+    let nodes = 0;
+    let first = null;
+    const trail = ends.map((e) => [e[0]]);
+    function ok() {
+      for (let i = 0; i < N * N; i++) {
+        if (own[i] >= 0) continue;
+        let open = 0;
+        for (const j of around(i)) { if (own[j] < 0) open++; else { const k = own[j]; if (!done[k] && (head[k] === j || tgt[k] === j)) open++; } }
+        if (open < 2) return false;
+      }
+      comp.fill(-1);
+      let nc = 0;
+      for (let i = 0; i < N * N; i++) {
+        if (own[i] >= 0 || comp[i] >= 0) continue;
+        const stack = [i];
+        comp[i] = nc;
+        while (stack.length) { const x = stack.pop(); for (const j of around(x)) if (own[j] < 0 && comp[j] < 0) { comp[j] = nc; stack.push(j); } }
+        nc++;
+      }
+      const usable = new Uint8Array(nc);
+      for (let k = 0; k < K; k++) {
+        if (done[k]) continue;
+        const hs = new Set(around(head[k]).filter((j) => own[j] < 0).map((j) => comp[j]));
+        let reach = adjacent(head[k], tgt[k]);
+        for (const j of around(tgt[k])) if (own[j] < 0 && hs.has(comp[j])) { usable[comp[j]] = 1; reach = true; }
+        if (!reach) return false;
+      }
+      for (let c = 0; c < nc; c++) if (!usable[c]) return false;
+      return true;
+    }
+    (function step() {
+      if (found >= stop || ++nodes > 200000) return;
+      let best = -1;
+      let moves = null;
+      for (let k = 0; k < K; k++) {
+        if (done[k]) continue;
+        const mv = around(head[k]).filter((j) => own[j] < 0 || j === tgt[k]);
+        if (!mv.length) return;
+        if (!moves || mv.length < moves.length) { best = k; moves = mv; if (mv.length === 1) break; }
+      }
+      if (best < 0) { if (!own.includes(-1)) { if (!found) first = trail.map((t) => t.slice()); found++; } return; }
+      const k = best;
+      const h = head[k];
+      for (const j of moves.sort((a, b) => (b === tgt[k]) - (a === tgt[k]))) {
+        trail[k].push(j);
+        if (j === tgt[k]) { done[k] = 1; if (ok()) step(); done[k] = 0; }
+        else { own[j] = k; head[k] = j; if (ok()) step(); own[j] = -1; head[k] = h; }
+        trail[k].pop();
+        if (found >= stop) return;
+      }
+    })();
+    return { n: nodes > 200000 ? stop : found, lines: first }; // (a search too long to finish: taken as not one answer)
+  }
+  // The grid from a seed: a path through every square, cut into runs that never touch themselves, 6 to 8
+  // of them; their ends the pairs, kept only if that's the one way to route them all (so every square
+  // fills, and no pair's bits sit side by side). Tried again, from the same seed, till one is
+  function grid(rand) {
+    let last = null;
+    for (let tries = 0; tries < 300; tries++) {
+      const runs = cut(wander(rand), rand);
+      if (runs.length < MIN_PAIRS || runs.length > MAX_PAIRS || runs.some((r) => r.length < 3)) continue;
+      last = runs.map((r) => [r[0], r[r.length - 1]]);
+      if (routings(last).n === 1) return last;
+    }
+    return last; // (never yet: a way through all the same, if not the only one)
+  }
+  function make(rand, saved) {
+    const ends = grid(rand).map((e) => e.slice().sort((a, b) => a - b)).sort((a, b) => a[0] - b[0]); // ([1] the pair whose first bit is nearest the top left, and on)
     const endAt = new Int8Array(N * N).fill(-1);
     ends.forEach(([a, b], k) => { endAt[a] = k; endAt[b] = k; });
     const x = { ends, endAt, paths: ends.map(() => []), won: false };
     // (what was drawn: each line kept if it still makes sense, from one of its pair's bits, square by square)
-    if (saved && Array.isArray(saved.p) && saved.p.length === PAIRS) {
+    if (saved && Array.isArray(saved.p) && saved.p.length === ends.length) {
       const used = new Set();
       saved.p.forEach((p, k) => {
         if (!Array.isArray(p) || !p.length || !ends[k].includes(p[0])) return;
@@ -80,7 +166,7 @@ Arcade.register('routing', (() => {
     return own;
   }
   const filled = (x) => { const own = new Set(); x.paths.forEach((p) => p.forEach((c) => own.add(c))); return own.size; };
-  const won = (x) => linked(x) === PAIRS && filled(x) === N * N;
+  const won = (x) => linked(x) === x.ends.length && filled(x) === N * N;
 
   // THE GRID: the squares (a pair's bits in its color; a square a line runs through tinted with it)
   // under the lines, drawn over them as one picture, a square to a unit
@@ -125,7 +211,7 @@ Arcade.register('routing', (() => {
     const time = kit.fmtTime(x.t);
     if (x.won) return `ALL ROUTED IN ${time}${x.k ? ` // +${x.k} KEYS` : ''}`;
     if (!x.moved) return `LINK EVERY PAIR // FILL EVERY SQUARE`;
-    return `TIME ${time} // ${linked(x)} OF ${PAIRS} LINKED // ${Math.round((filled(x) / (N * N)) * 100)}% FILLED`;
+    return `TIME ${time} // ${linked(x)} OF ${x.ends.length} LINKED // ${Math.round((filled(x) / (N * N)) * 100)}% FILLED`;
   }
 
   // DRAWING: a press on a bit starts its pair's line over from it; on a line, carries that line on from
@@ -195,7 +281,7 @@ Arcade.register('routing', (() => {
     }
     kit.save();
     render();
-    if (linked(s) === PAIRS) kit.note(`ALL LINKED // ${N * N - filled(s)} SQUARES EMPTY: FILL THEM`);
+    if (linked(s) === s.ends.length) kit.note(`ALL LINKED // ${N * N - filled(s)} SQUARES EMPTY: FILL THEM`);
   }
   const cellAt = (e) => { const t = document.elementFromPoint(e.clientX, e.clientY); const c = t && t.closest('.rt-cell'); return c && boardEl.contains(c) ? Number(c.dataset.i) : -1; };
   boardEl.addEventListener('pointerdown', (e) => {
@@ -231,7 +317,7 @@ Arcade.register('routing', (() => {
     status(saved) {
       const t = kit.fmtTime((saved && saved.t) || 0);
       if (saved && saved.w) return { done: true, text: `ROUTED IN ${t}` };
-      return { done: false, text: saved && saved.m ? `UNDER WAY // ${t}` : `ONE GAME TODAY // ${PAIRS} PAIRS` };
+      return { done: false, text: saved && saved.m ? `UNDER WAY // ${t}` : 'ONE GAME TODAY // TIMED' };
     },
     line,
     show(x) {
@@ -256,7 +342,8 @@ Arcade.register('routing', (() => {
     bestText: (v) => kit.fmtTime(v * 1000),
     low: true,
     // SHARE: the time, and the seven colors linked
-    share: (x) => [`All routed in ${kit.fmtTime(x.t)}`, '\u{1F7E5}\u{1F7E7}\u{1F7E8}\u{1F7E9}\u{1F7E6}\u{1F7EA}\u{1F7EB}'],
+    share: (x) => [`All routed in ${kit.fmtTime(x.t)} // ${x.ends.length} pairs`, ['\u{1F7E5}', '\u{1F7E7}', '\u{1F7E8}', '\u{1F7E9}', '\u{1F7E6}', '\u{1F7EA}', '\u{1F7EB}', '\u2B1C'].slice(0, x.ends.length).join('')],
     wander, // (for testing)
+    routings,
   };
 })());
