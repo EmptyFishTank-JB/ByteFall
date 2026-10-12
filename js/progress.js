@@ -81,7 +81,7 @@ const Progress = (() => {
     codeGames: 0, // CODE BREAKER games finished (the DAILY ARCADE on Mondays, arcade.js)
     codesBroken: 0, // ...and the codes broken
     bestCodeTries: 0, // the fewest tries a code was broken in (0: none yet)
-    arcadeStats: {}, // the DAILY ARCADE's other games (TRACE, CHECKSUM): id -> { games, wins, best (the fastest win, in seconds) }
+    arcadeStats: {}, // the DAILY ARCADE's other games (TRACE, CHECKSUM, ROUTING): id -> { games, wins, best (the fastest win, in seconds) }; MERGE's: { games, best (score), top (the best bit, 8 a BYTE) }
     breaches: 0, // BREACH boards cleared
     sundaySolves: 0, // Sunday (hardest) daily puzzles solved
     dailyFirstTries: 0, // daily puzzles solved on the first try
@@ -382,6 +382,8 @@ const Progress = (() => {
     { id: 'mind-reader', name: 'MIND READER', desc: 'Break a CODE BREAKER code in 4 tries or fewer', value: () => (d.bestCodeTries && d.bestCodeTries <= 4 ? 1 : 0), goal: 1 },
     { id: 'clean-trace', name: 'CLEAN TRACE', desc: 'Clear a Tuesday TRACE board without touching an infected bit', value: () => ((d.arcadeStats || {}).trace || {}).wins || 0, goal: 1 },
     { id: 'checksum-valid', name: 'CHECKSUM VALID', desc: 'Solve a Thursday CHECKSUM grid', value: () => ((d.arcadeStats || {}).checksum || {}).wins || 0, goal: 1 },
+    { id: 'double-word', name: 'DOUBLE WORD', desc: 'Make a DWORD in a Wednesday MERGE', value: () => (((d.arcadeStats || {}).merge || {}).top >= 10 ? 1 : 0), goal: 1 },
+    { id: 'full-mesh', name: 'FULL MESH', desc: 'Route every pair and fill a Sunday ROUTING grid', value: () => ((d.arcadeStats || {}).routing || {}).wins || 0, goal: 1 },
     { id: 'safecracker', name: 'SAFECRACKER', desc: 'Solve 30 puzzles', value: () => count(d.puzzles), goal: 30 },
     { id: 'century', name: 'CENTURY', desc: 'Play a Daily game 100 days in a row', value: currentStreak, goal: 100, note: 'Progress shows your current streak; a day\u2019s dailies missed (they change at 00:00 UTC) starts it over' },
     { id: 'triple-crown', name: 'TRIPLE CROWN', desc: 'Reach DECRYPTOR 3', value: () => d.decryptor, goal: 3 },
@@ -520,7 +522,7 @@ const Progress = (() => {
     ['ENCRYPTION LAYERS', ['layer-peeler', 'onion-router', 'onion-core', 'demolition', 'firewall-breach']],
     ['EXPLOITS', ['script-kiddie', 'black-hat', 'advanced-persistent-threat', 'full-toolkit', 'chained-exploits', 'arsenal', 'time-bomb', 'sting', 'wiretap', 'lateral-movement', 'overkill', 'double-trouble']],
     ['BLITZ AND ZEN', ['speed-run', 'blitzkrieg', 'lightspeed', 'zen-master', 'last-second']],
-    ['DAILY', ['daily-driver', 'daily-grind', 'streak', 'century', 'daily-sweep', 'perfect-daily', 'breached', 'one-shot', 'sunday-best', 'stubborn', 'so-close', 'code-breaker', 'mind-reader', 'clean-trace', 'checksum-valid']],
+    ['DAILY', ['daily-driver', 'daily-grind', 'streak', 'century', 'daily-sweep', 'perfect-daily', 'breached', 'one-shot', 'sunday-best', 'stubborn', 'so-close', 'code-breaker', 'mind-reader', 'clean-trace', 'checksum-valid', 'double-word', 'full-mesh']],
     ['PUZZLES', ['first-try', 'locksmith', 'safecracker', 'master-key', 'pickpocket']],
     ['LEVELS AND DECRYPTOR RANKS', ['lv-40', 'maxed-out', 'rollover', 'triple-crown', 'full-spectrum']],
     ['THEMES, FONTS AND MUSIC', ['collector', 'chameleon', 'tech-support', 'insert-coin', 'bit-by-bit', 'bite-sized', 'in-orbit', 'dj', 'audiophile', 'theme-park', 'channel-surfer', 'silent-running']],
@@ -578,8 +580,10 @@ const Progress = (() => {
   const rankBoost = () => 1 + RANK_EARN * Math.min(RANK_CAP, d.decryptor || 0);
   const rankPrice = () => 1 + RANK_PRICE * Math.min(RANK_CAP, d.decryptor || 0);
   // (code: CODE BREAKER's code broken, 12 less the tries it took: 11 in one, 2 in ten)
-  // (arcade: the DAILY ARCADE's other games, won: TRACE's board clean, CHECKSUM valid)
-  const KEY_PAY = { chain5: 2, chain7: 5, achievement: 10, level: 10, daily: 5, puzzle: { e: 2, n: 4, h: 6 }, code: (tries) => 12 - tries, arcade: { trace: 10, checksum: 15 } };
+  // (arcade: the DAILY ARCADE's other games, won: TRACE's board clean, CHECKSUM valid, ROUTING all
+  // routed; merge: MERGE's, by the best bit made: [7] 2, a BYTE 5, a WORD 8, a DWORD 12, a QWORD 20, past it 30, less 1)
+  const KEY_PAY = { chain5: 2, chain7: 5, achievement: 10, level: 10, daily: 5, puzzle: { e: 2, n: 4, h: 6 }, code: (tries) => 12 - tries, arcade: { trace: 10, checksum: 15, routing: 12 },
+    merge: (top) => (top >= 12 ? 30 : { 7: 2, 8: 5, 9: 8, 10: 12, 11: 20 }[top] || 1) };
   function earn(n) {
     if (!(n > 0)) return;
     d.keys += n;
@@ -1175,6 +1179,18 @@ const Progress = (() => {
       return keys;
     },
     arcadeStats: (game) => ({ games: 0, wins: 0, best: 0, ...((d.arcadeStats || {})[game] || {}) }),
+    // ...and MERGE (arcade-merge.js): over, with its score and the best bit made (8 a BYTE). Returns the KEYS it paid
+    mergeResult(score, top) {
+      if (!d.arcadeStats || typeof d.arcadeStats !== 'object') d.arcadeStats = {};
+      const st = d.arcadeStats.merge || (d.arcadeStats.merge = { games: 0, best: 0, top: 0 });
+      st.games++;
+      st.best = Math.max(st.best || 0, score);
+      st.top = Math.max(st.top || 0, top);
+      const keys = KEY_PAY.merge(top);
+      earn(keys);
+      save();
+      return keys;
+    },
     // A live session thrown away with RESTART or a difficulty switch
     restarted() {
       if (run.mode === 'tutorial') return; // (the tutorial counts toward nothing)

@@ -100,6 +100,8 @@ DAILY,CODE BREAKER,Break a Monday CODE BREAKER code (the DAILY ARCADE),1,Standar
 DAILY,MIND READER,Break a CODE BREAKER code in 4 tries or fewer,1,Standard,mind-reader
 DAILY,CLEAN TRACE,Clear a Tuesday TRACE board without touching an infected bit,1,Standard,clean-trace
 DAILY,CHECKSUM VALID,Solve a Thursday CHECKSUM grid,1,Standard,checksum-valid
+DAILY,DOUBLE WORD,Make a DWORD in a Wednesday MERGE,1,Standard,double-word
+DAILY,FULL MESH,Route every pair and fill a Sunday ROUTING grid,1,Standard,full-mesh
 PUZZLES,FIRST TRY,Solve a puzzle on your first attempt,1,Standard,first-try
 PUZZLES,LOCKSMITH,Solve 10 puzzles,10,Standard,locksmith
 PUZZLES,SAFECRACKER,Solve 30 puzzles,30,Standard,safecracker
