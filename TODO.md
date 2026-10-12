@@ -26,10 +26,12 @@ weekday on the bits and the board, not necessarily ByteFall's rules. Done: **Mon
 blocks, infected bits under them), **Wednesday MERGE** (2048's, [1] to BYTE to QWORD, an encrypted
 block every 10 moves), **Thursday CHECKSUM** (a timed 9x9 Sudoku with notes and CONFIRM), **Friday
 DEFRAG** (swap-and-match, below: 30 swaps, encrypted and infected bits) and **Sunday ROUTING** (Flow's,
-7 pairs on 7x7). Still to come for Saturday: DECODE (Picross: the bots and visitors as its pictures);
-other ideas: PURGE (below), a TETRIS-like one.
+7 pairs on 7x7), **Saturday DECODE** (Picross on 23 of the bots' and visitors' pictures, each checked
+to solve a line at a time): every day has its game. More ideas: PURGE (below), a TETRIS-like one.
+Now that every day has one, the ARCADE could count toward DAILY SWEEP (five games, not four): not done,
+as it makes the achievement harder; to decide.
 Later for these: CHECKSUM's twist (some squares under layers; sum cages on harder days), TRACE's (a
-bigger board on some days), ROUTING's (bigger grids, bridges), and RECORDS lines for their bests. Once every day has one, the ARCADE can count toward DAILY SWEEP (all five).
+bigger board on some days), ROUTING's (bigger grids, bridges), and RECORDS lines for their bests.
 
 ## The ARCADE (after the Android launch)
 

@@ -46,8 +46,8 @@
   } catch (e) {}
 </script>
 <title>BYTEFALL // decryption terminal</title>
-<script src="js/fonts.js?v=580"></script>
-<link rel="stylesheet" href="css/style.css?v=580">
+<script src="js/fonts.js?v=581"></script>
+<link rel="stylesheet" href="css/style.css?v=581">
 </head>
 <body>
   <!-- Dev: TWINKLE BACKGROUND (grid-bg.js): the starlight behind the whole game, off by default -->
@@ -471,6 +471,13 @@
         <div class="arcade-game" data-game="defrag" hidden>
           <div class="df-board" id="df-board" aria-label="Defrag board"></div>
           <p class="mg-hint" id="df-hint">SWIPE A BIT INTO ITS NEIGHBOR TO SWAP</p>
+        </div>
+        <!-- SATURDAY: DECODE (arcade-decode.js). The grid, its numbers over each column and at each row's
+             left; what a tap does (FILL or MARK) under it, and once it's decoded, the picture's name -->
+        <div class="arcade-game" data-game="decode" hidden>
+          <div class="dc-board" id="dc-board" aria-label="Decode grid"></div>
+          <div class="tr-acts" id="dc-acts"><button type="button" id="dc-mode" aria-pressed="false">TAP: FILL</button><p class="tr-hint">HOLD A SQUARE TO MARK IT // DRAG ALONG A LINE</p></div>
+          <p class="dc-name" id="dc-name" hidden></p>
         </div>
         <!-- SUNDAY: ROUTING (arcade-routing.js). The 7x7 grid, its pairs of bits and the lines drawn
              between them; CLEAR ALL under it -->
@@ -1014,65 +1021,66 @@
     </div>
   </div>
 
-  <script src="js/bot-svg.js?v=580"></script>
-  <script src="js/unlocks.js?v=580"></script>
-  <script src="js/progress.js?v=580"></script>
-  <script src="js/music/output.js?v=580"></script>
-  <script src="js/music/mixes.js?v=580"></script>
-  <script src="js/sfx.js?v=580"></script>
-  <script src="js/music/music-bytefall-theme.js?v=580"></script>
-  <script src="js/music/music-sleep-mode.js?v=580"></script>
-  <script src="js/music/music-brute-force.js?v=580"></script>
-  <script src="js/music/music-deep-web.js?v=580"></script>
-  <script src="js/music/music-zero-day.js?v=580"></script>
-  <script src="js/music/music-system-restore.js?v=580"></script>
-  <script src="js/music/music-night-drive.js?v=580"></script>
-  <script src="js/music/music-standby-mode.js?v=580"></script>
-  <script src="js/music/music-core-dump.js?v=580"></script>
-  <script src="js/music/music-handshake.js?v=580"></script>
-  <script src="js/music/music-stack-overflow.js?v=580"></script>
-  <script src="js/music/music-generated.js?v=580"></script>
-  <script src="js/music/music.js?v=580"></script>
-  <script src="js/data/puzzles.js?v=580"></script>
-  <script src="js/data/daily-puzzles.js?v=580"></script>
-  <script src="js/data/hint-riddles.js?v=580"></script>
-  <script src="js/cpu.js?v=580"></script>
-  <script src="js/fx.js?v=580"></script>
-  <script src="js/viz.js?v=580"></script>
-  <script src="js/pixel.js?v=580"></script>
-  <script src="js/minibot.js?v=580"></script>
-  <script src="js/seasons.js?v=580"></script>
-  <script src="js/bigart.js?v=580"></script>
-  <script src="js/scenes.js?v=580"></script>
-  <script src="js/weather.js?v=580"></script>
-  <script src="js/visitors.js?v=580"></script>
-  <script src="js/data/bot-anims.js?v=580"></script>
-<script src="js/wanderers.js?v=580"></script>
-  <script src="js/tutorial.js?v=580"></script>
-  <script src="js/puzzle-sim.js?v=580"></script>
-  <script src="js/led-banner.js?v=580"></script>
-  <script src="js/infections.js?v=580"></script>
-  <script src="js/arcade.js?v=580"></script>
-  <script src="js/arcade-codebreaker.js?v=580"></script>
-  <script src="js/arcade-trace.js?v=580"></script>
-  <script src="js/arcade-merge.js?v=580"></script>
-  <script src="js/arcade-checksum.js?v=580"></script>
-  <script src="js/arcade-defrag.js?v=580"></script>
-  <script src="js/arcade-routing.js?v=580"></script>
-  <script src="js/script.js?v=580"></script>
-  <script src="js/grid-bg.js?v=580"></script>
-  <script src="js/lights.js?v=580"></script>
-  <script src="js/inf-test.js?v=580"></script>
-  <script src="js/sfx-test.js?v=580"></script>
-  <script src="js/extsource.js?v=580"></script>
-  <script src="js/player.js?v=580"></script>
-  <script src="js/billing.js?v=580"></script>
-  <script src="js/store.js?v=580"></script>
-  <script src="js/ads-config.js?v=580"></script>
-  <script src="js/ads.js?v=580"></script>
-  <script src="js/app-update.js?v=580"></script>
-  <script src="js/start.js?v=580"></script>
-  <script src="js/place.js?v=580"></script>
-  <script src="js/saver.js?v=580"></script>
+  <script src="js/bot-svg.js?v=581"></script>
+  <script src="js/unlocks.js?v=581"></script>
+  <script src="js/progress.js?v=581"></script>
+  <script src="js/music/output.js?v=581"></script>
+  <script src="js/music/mixes.js?v=581"></script>
+  <script src="js/sfx.js?v=581"></script>
+  <script src="js/music/music-bytefall-theme.js?v=581"></script>
+  <script src="js/music/music-sleep-mode.js?v=581"></script>
+  <script src="js/music/music-brute-force.js?v=581"></script>
+  <script src="js/music/music-deep-web.js?v=581"></script>
+  <script src="js/music/music-zero-day.js?v=581"></script>
+  <script src="js/music/music-system-restore.js?v=581"></script>
+  <script src="js/music/music-night-drive.js?v=581"></script>
+  <script src="js/music/music-standby-mode.js?v=581"></script>
+  <script src="js/music/music-core-dump.js?v=581"></script>
+  <script src="js/music/music-handshake.js?v=581"></script>
+  <script src="js/music/music-stack-overflow.js?v=581"></script>
+  <script src="js/music/music-generated.js?v=581"></script>
+  <script src="js/music/music.js?v=581"></script>
+  <script src="js/data/puzzles.js?v=581"></script>
+  <script src="js/data/daily-puzzles.js?v=581"></script>
+  <script src="js/data/hint-riddles.js?v=581"></script>
+  <script src="js/cpu.js?v=581"></script>
+  <script src="js/fx.js?v=581"></script>
+  <script src="js/viz.js?v=581"></script>
+  <script src="js/pixel.js?v=581"></script>
+  <script src="js/minibot.js?v=581"></script>
+  <script src="js/seasons.js?v=581"></script>
+  <script src="js/bigart.js?v=581"></script>
+  <script src="js/scenes.js?v=581"></script>
+  <script src="js/weather.js?v=581"></script>
+  <script src="js/visitors.js?v=581"></script>
+  <script src="js/data/bot-anims.js?v=581"></script>
+<script src="js/wanderers.js?v=581"></script>
+  <script src="js/tutorial.js?v=581"></script>
+  <script src="js/puzzle-sim.js?v=581"></script>
+  <script src="js/led-banner.js?v=581"></script>
+  <script src="js/infections.js?v=581"></script>
+  <script src="js/arcade.js?v=581"></script>
+  <script src="js/arcade-codebreaker.js?v=581"></script>
+  <script src="js/arcade-trace.js?v=581"></script>
+  <script src="js/arcade-merge.js?v=581"></script>
+  <script src="js/arcade-checksum.js?v=581"></script>
+  <script src="js/arcade-defrag.js?v=581"></script>
+  <script src="js/arcade-decode.js?v=581"></script>
+  <script src="js/arcade-routing.js?v=581"></script>
+  <script src="js/script.js?v=581"></script>
+  <script src="js/grid-bg.js?v=581"></script>
+  <script src="js/lights.js?v=581"></script>
+  <script src="js/inf-test.js?v=581"></script>
+  <script src="js/sfx-test.js?v=581"></script>
+  <script src="js/extsource.js?v=581"></script>
+  <script src="js/player.js?v=581"></script>
+  <script src="js/billing.js?v=581"></script>
+  <script src="js/store.js?v=581"></script>
+  <script src="js/ads-config.js?v=581"></script>
+  <script src="js/ads.js?v=581"></script>
+  <script src="js/app-update.js?v=581"></script>
+  <script src="js/start.js?v=581"></script>
+  <script src="js/place.js?v=581"></script>
+  <script src="js/saver.js?v=581"></script>
 </body>
 </html>
