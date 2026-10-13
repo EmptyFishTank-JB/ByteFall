@@ -9,6 +9,9 @@ Ideas queued for later (not built yet).
 - **Sound themes**: more unlockable sets of game sound effects (like the color themes and fonts), each
   in the style of one of the tracks. Done: TERMINAL (the first, free) and HANDSHAKE (with TRACK 10).
 - **CPU customization**: simple things for the bots to wear, e.g. retro-futuristic glasses.
+- **A pre-registration theme**: a color theme (maybe a matching font or sound theme) given to everyone
+  who pre-registers on Google Play, as Play Console's pre-registration reward. Needs an in-app product
+  for it and the game granting purchases made outside the app (checked at launch and on resume).
 - **The walking tree** (October's haunted forest, and the pushed scary tree): to come back once its
   walking frames are drawn (the frame editor's TREE-, BARETREE- and PINE-WALKING are a start).
 
@@ -76,6 +79,17 @@ puzzles.
 ## Future games (separate from ByteFall)
 
 Ideas for games of their own, written down so they're not lost; nothing here is for ByteFall.
+
+### Two companion-app games, remade as games of their own
+
+Mechanics only, with new names, settings and art (nothing of the originals'):
+
+- **A tactical base game** (after the Star Wars Battlefront 2015 companion app's Base Command): a
+  short, simple turn-based board game against another player or the CPU. The exact rules to be
+  written down from memory before designing.
+- **A fleet game** (after Assassin's Creed IV's Kenway's Fleet): a fleet of ships of a few classes,
+  sent on real-time missions along routes on a map, risk shown up front, quick turn-based naval
+  battles to clear routes and capture ships, cargo and money coming back to grow the fleet.
 
 ### BYTERRIUM (working title; the ByteFall spin-off)
 
