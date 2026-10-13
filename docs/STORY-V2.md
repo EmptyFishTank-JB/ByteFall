@@ -102,6 +102,17 @@ A few short messages come outside the cracks, once each, when something happens:
 - **Back after 3 days or more** (after transmission 8). Voicemail from UNKNOWN NUMBER:
   `"You stopped. Good. Stay stopped."`
 
+## The intro card
+
+Shown the first time STORY is switched on, and again from the ARCHIVE's READ THE INTRO (its words are
+in `bytefall.html`'s `#story-intro`, not made from this doc):
+
+> **INCOMING // ENCRYPTED // SOURCE UNKNOWN**
+> Something slips into your terminal tonight. No alert, no handshake, just a quiet stream of encrypted files buried under stacked keys. Messages. Memos. Logs. Whoever sent this didn't want eyes on it.
+> Every key you crack opens the next layer: files, message chains, call records. Piece by piece, the story starts to form in the dark. Someone out there is talking to you, someone is hiding something, and someone is watching to see if you dig too deep.
+> The deeper the fragments, the heavier the encryption. Each key fights back harder than the last. Everything you pull out is locked away in the ARCHIVE.
+> KEY_01 sits at the top of the chain, waiting for someone curious enough to try it.
+
 ## The characters
 
 - **You.** A small-time hacker. No name in the story; MOTH calls you **ghost**, because you never
