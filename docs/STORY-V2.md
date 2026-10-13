@@ -1,8 +1,13 @@
 # ByteFall STORY v2: GHOSTS (draft for review)
 
-A rework of STORY, for review before any of it goes in the game. `docs/STORIES.md` is the
-preliminary version (three stories, files that reveal tools), and it's what the game runs now (v599);
-it's kept as it was, to compare.
+A rework of STORY, for review. `docs/STORIES.md` is the preliminary version (three stories, files
+that reveal tools), kept as it was, to compare.
+
+**Status: in the game** (the website and the test app; the Google Play release says COMING SOON).
+The words below are what the game shows: after an edit here, `node tools/story-from-md.js` puts them
+in (it reads the transmissions under THE STORY and the unprompted messages). Not in yet: the eight
+jobs in other game modes and THE CUSTODIAN's VS bot (those transmissions come from keys for now), and
+the STORE's marks for what STORY has introduced.
 
 **The idea in one line:** you're a hacker cracking an encrypted archive one key at a time, and the
 tools you crack it with come from people: an informant who teaches you exploits and patches over
