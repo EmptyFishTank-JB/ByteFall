@@ -279,15 +279,34 @@ const Stories = (() => {
   }
   function showDue() {
     if (!due) return false;
+    const x = due;
+    due = null;
+    return showCard(`// ${x.kind === 'call' ? 'VOICEMAIL' : 'IM'} // ${LABEL[x.from] || x.from.toUpperCase()}`, x);
+  }
+  // (a card over everything, its lines typed out: an unprompted message, or a story's first transmission)
+  function showCard(title, it) {
     const el = document.getElementById('story-msg');
     if (!el) return false;
-    document.getElementById('story-msg-title').textContent = `// ${due.kind === 'call' ? 'VOICEMAIL' : 'IM'} // ${LABEL[due.from] || due.from.toUpperCase()}`;
+    document.getElementById('story-msg-title').textContent = title;
     const body = document.getElementById('story-msg-body');
-    body.innerHTML = linesHtml(due);
-    due = null;
+    body.innerHTML = linesHtml(it);
     el.classList.remove('hidden');
-    typeLines(body);
+    play(body, it);
     SFX.play('click');
+    return true;
+  }
+  // THE FIRST ONE (a transmission marked atStart: GHOSTS' 1, MOTH's IM): it pops up over the board as
+  // the first STORY game starts, the files just landed, and is recovered then, not on a cracked card
+  function atStart() {
+    if (window.STORY_SOON) return false;
+    const s = picked();
+    if (!s || done(s)) return false;
+    const it = s.items[got(s)];
+    if (!it || !it.atStart) return false;
+    Progress.storyRecover(s.id);
+    showCard(`// ${kindLine(it)}`, it);
+    marks();
+    refreshRow();
     return true;
   }
   // (back after days away: on launch, three days or more since the last STORY game)
@@ -318,5 +337,5 @@ const Stories = (() => {
   marks();
   refreshRow();
 
-  return { onCrack, stop, render, refreshRow, openStory, introduced, introName, moment, showDue, toList: () => { view = null; }, picked: () => picked().id };
+  return { onCrack, stop, render, refreshRow, openStory, introduced, introName, moment, showDue, atStart, toList: () => { view = null; }, picked: () => picked().id };
 })();

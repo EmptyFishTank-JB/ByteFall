@@ -44,7 +44,11 @@ call. The IMs bring the tools, one or two at a time, and the story moves through
 
 ### Transmissions
 
-Each key cracked brings the next transmission, shown on the cracked card in its own form:
+**Where each one shows up.** Transmission 1 pops up over the board as your first STORY game starts
+(MOTH reaching you the moment the files land). Every one after it comes with a key cracked, on the
+cracked card. The three unprompted messages (below) come between games, as a card on the main menu.
+Each transmission's heading in the story says which: *pops up as your first STORY game starts*,
+*on the cracked card*, or a JOB. Each comes in its own form:
 
 - **FILE**: a document from the archive (memos, chat logs, records), as the files are now.
 - **IM**: a chat thread, the sender's handle and a time on each line (MOTH writes in lowercase,
@@ -133,20 +137,20 @@ in `bytefall.html`'s `#story-intro`, not made from this doc):
 
 ### Chapter 1: THE DROP (any key)
 
-**1 // IM // MOTH** · *introduces nothing*
+**1 // IM // MOTH** · *pops up as your first STORY game starts*
 > **moth** 02:14 · you're awake. good.
 > **moth** 02:14 · i sent you something. four gigs, encrypted, about two dozen keys deep.
 > **moth** 02:15 · don't brute force it. crack it a key at a time, the way you crack everything.
 > **you** 02:15 · who is this
 > **moth** 02:16 · someone who needs it read by someone who isn't me.
 
-**2 // FILE // HALCYON SYSTEMS // #corrections**
+**2 // FILE // HALCYON SYSTEMS // #corrections** · *on the cracked card*
 > `<ops.reyes>` queue's at 41 tonight. 38 standard, 3 full
 > `<dir.vance>` Fulls go first. The clients are waiting.
 > `<eng.okafor>` what's a "full"?
 > `<dir.vance>` Not your department.
 
-**3 // IM // MOTH** · *introduces BITFLIP (exploit)*
+**3 // IM // MOTH** · *introduces BITFLIP (exploit)* · *on the cracked card*
 > **moth** · watched you crack that last key. you fight the board too much.
 > **moth** · here. BITFLIP. it turns every column upside down. what was buried comes up top.
 > **moth** · chain your decrypts and the meter beside the board fills. full, it's yours to use.
@@ -155,12 +159,12 @@ in `bytefall.html`'s `#story-intro`, not made from this doc):
 
 *The chain meter appears; it earns BITFLIP.*
 
-**4 // FILE // HALCYON // THE LEDGER: PRICE SHEET** · **JOB: SEALED FILE (PUZZLE)**
+**4 // FILE // HALCYON // THE LEDGER: PRICE SHEET** · **JOB: SEALED FILE (PUZZLE)** · *on the cracked card for now (a JOB later)*
 > STANDARD CORRECTION (one debt, one record, one conviction): 40,000.
 > FULL CORRECTION: on request.
 > All corrections are permanent. HALCYON keeps no copies.
 
-**5 // IM // MOTH** · *introduces HEAD START (patch)*
+**5 // IM // MOTH** · *introduces HEAD START (patch)* · *on the cracked card*
 > **moth** · you start every key cold. stop doing that.
 > **moth** · HEAD START: your chain meter starts half full and holds until your first decrypt.
 > **moth** · i put two in your kit. PATCHES, beside your EXPLOIT button.
@@ -168,20 +172,20 @@ in `bytefall.html`'s `#story-intro`, not made from this doc):
 
 *The PATCHES button appears, with 2 HEAD STARTs.*
 
-**6 // FILE // HALCYON // #corrections**
+**6 // FILE // HALCYON // #corrections** · *on the cracked card*
 > `<eng.okafor>` pulled a "full" out of the queue to test the eraser. it's a person.
 > `<eng.okafor>` name, birth record, bank, lease, phone. all of it. gone.
 > `<dir.vance>` It's a correction. The client asked for it.
 > `<eng.okafor>` the person didn't.
 > `<dir.vance>` Log off, Okafor.
 
-**7 // IM // MOTH** · *introduces RNG and BUFFER OVERFLOW (exploits)*
+**7 // IM // MOTH** · *introduces RNG and BUFFER OVERFLOW (exploits)* · *on the cracked card*
 > **moth** · two more. they're messy. that's the point.
 > **moth** · RNG scrambles every bit on the board to a random number. use it when there's nothing left to lose.
 > **moth** · BUFFER OVERFLOW adds 1 to every bit. the top number spills over and gets re-encrypted, so watch your 7s.
 > **moth** · the meter picks which one you get. you don't.
 
-**8 // CALL // UNKNOWN NUMBER** · *the first warning; INFECTIONS begin*
+**8 // CALL // UNKNOWN NUMBER** · *the first warning; INFECTIONS begin* · *on the cracked card*
 > INCOMING CALL // UNKNOWN NUMBER
 > "Good evening. Please don't hang up. This is a courtesy."
 > "You've opened something that doesn't belong to you. You haven't read much of it. That's good. It means this can still end."
@@ -193,27 +197,27 @@ in `bytefall.html`'s `#story-intro`, not made from this doc):
 
 ### Chapter 2: THE LIST (256-BIT or deeper)
 
-**9 // FILE // HALCYON // #security** · **JOB: LIVE TRACE (BLITZ, 2:00)**
+**9 // FILE // HALCYON // #security** · **JOB: LIVE TRACE (BLITZ, 2:00)** · *on the cracked card for now (a JOB later)*
 > `<sec.hale>` someone's reading the okafor archive. slow. one key at a time.
 > `<dir.vance>` Trace them.
 > `<sec.hale>` tried. they drop the line every time we get close.
 > `<dir.vance>` Then call the Custodian.
 
-**10 // IM // MOTH** · *introduces LOOKAHEAD (patch) and TROJAN (exploit)*
+**10 // IM // MOTH** · *introduces LOOKAHEAD (patch) and TROJAN (exploit)* · *on the cracked card*
 > **moth** · he called you. calm voice. very polite.
 > **moth** · that's the Custodian. he doesn't hurt people. he corrects them. it's worse.
 > **moth** · LOOKAHEAD: see your next bit for a minute. two in your kit.
 > **moth** · TROJAN wipes out every block touching where it lands. for when it's piled up.
 > **moth** · you'll want to see them coming.
 
-**11 // FILE // HALCYON // THE LIST (excerpt)** · **JOB: FIREWALL (BREACH)**
+**11 // FILE // HALCYON // THE LIST (excerpt)** · **JOB: FIREWALL (BREACH)** · *on the cracked card for now (a JOB later)*
 > 0117 // MARSH, D. // STANDARD // DEBT // CORRECTED
 > 0118 // FLORES, I. // FULL // CORRECTED
 > 0119 // NAKASHIMA, R. // FULL // CORRECTED
 > 0120 // [ENCRYPTED DEEPER] // FULL // CORRECTED
 > 2,947 ENTRIES. 309 FULL.
 
-**12 // IM // MOTH** · *introduces the BLACK MARKET*
+**12 // IM // MOTH** · *introduces the BLACK MARKET* · *on the cracked card*
 > **moth** · i can't keep sending you tools. every package i send is a door they can follow back.
 > **moth** · there's a market. no names, no questions, everything has a price.
 > **moth** · ask for TOLL. say the moth sent you.
@@ -221,13 +225,13 @@ in `bytefall.html`'s `#story-intro`, not made from this doc):
 
 *The BLACK MARKET opens from the PATCHES and EXPLOITS buttons. It sells what's been introduced.*
 
-**13 // IM // TOLL** · *introduces BLACK BOX I* · **JOB: TOLL'S TEST (DECRYPT)**
+**13 // IM // TOLL** · *introduces BLACK BOX I* · **JOB: TOLL'S TEST (DECRYPT)** · *on the cracked card for now (a JOB later)*
 > **TOLL** · THE MOTH'S FRIEND. YOU PASSED. BARELY.
 > **TOLL** · STOCK TURNS OVER EVERY KEY YOU CRACK. PRICES ARE PRICES.
 > **TOLL** · NEW IN: BLACK BOX I. COULD BE ANYTHING. COULD BE SOMETHING THAT BITES.
 > **TOLL** · NO REFUNDS. NO NAMES. NO EXCEPTIONS.
 
-**14 // CALL // UNKNOWN NUMBER** · *the second call: a threat*
+**14 // CALL // UNKNOWN NUMBER** · *the second call: a threat* · *on the cracked card*
 > INCOMING CALL // UNKNOWN NUMBER
 > "You bought from TOLL. TOLL sells to everyone. Including us."
 > "I asked nicely. I won't again."
@@ -235,7 +239,7 @@ in `bytefall.html`'s `#story-intro`, not made from this doc):
 > "It's blinking now."
 > CALL ENDED // 0:22
 
-**15 // IM // MOTH** · *bring your own*
+**15 // IM // MOTH** · *bring your own* · *on the cracked card*
 > **moth** · you're still on. good. stubborn.
 > **moth** · stop waiting on me and toll. you can write your own tools.
 > **moth** · compile them at home, bring them in. anything you've seen work in here.
@@ -245,7 +249,7 @@ in `bytefall.html`'s `#story-intro`, not made from this doc):
 introduced: STORY's main menu gets PATCHES and EXPLOITS rows, and what you own shows in the in-game
 cards too. The STORE marks what STORY has introduced.*
 
-**16 // FILE // HALCYON // #corrections**
+**16 // FILE // HALCYON // #corrections** · *on the cracked card*
 > `<eng.okafor>` i'm taking the list out. all of it. every name. every "full."
 > `<dir.vance>` You built the eraser, Adaeze. You know what it can do.
 > `<eng.okafor>` i know. that's why it has to be me.
@@ -253,21 +257,21 @@ cards too. The STORE marks what STORY has introduced.*
 
 ### Chapter 3: CORRECTIONS (512-BIT or deeper)
 
-**17 // FILE // HALCYON // CORRECTION ORDER 0120** · **JOB: SEALED FILE (PUZZLE)**
+**17 // FILE // HALCYON // CORRECTION ORDER 0120** · **JOB: SEALED FILE (PUZZLE)** · *on the cracked card for now (a JOB later)*
 > SUBJECT: OKAFOR, ADAEZE. ENGINEER, HALCYON SYSTEMS.
 > TYPE: FULL.
 > REQUESTED BY: HALCYON SYSTEMS.
 > STATUS: CORRECTED.
 > NOTE: the archive she took was never recovered.
 
-**18 // IM // MOTH** · *introduces PIVOT, SWAP, BACKDOOR (exploits) and RESTORE POINT (patch)*
+**18 // IM // MOTH** · *introduces PIVOT, SWAP, BACKDOOR (exploits) and RESTORE POINT (patch)* · *on the cracked card*
 > **moth** · you read 0120.
 > **moth** · don't. not yet. finish it first.
 > **moth** · PIVOT swaps a column with its neighbor. SWAP trades any two bits. BACKDOOR deletes the bottom row, layers and all.
 > **moth** · and RESTORE POINT. if they finish the trace, the system rolls back and you keep going. once.
 > **moth** · you're going to need once.
 
-**19 // CALL // UNKNOWN NUMBER** · *your name on an order* · **JOB: LIVE TRACE (BLITZ, 1:30)**
+**19 // CALL // UNKNOWN NUMBER** · *your name on an order* · **JOB: LIVE TRACE (BLITZ, 1:30)** · *on the cracked card for now (a JOB later)*
 > INCOMING CALL // UNKNOWN NUMBER
 > "You got away from that trace. You won't twice."
 > "I've been patient."
@@ -276,32 +280,32 @@ cards too. The STORE marks what STORY has introduced.*
 > "No one will remember to miss you. That isn't a threat. It's what the job is."
 > CALL ENDED // 0:35
 
-**20 // IM // TOLL** · *introduces WORM VIRUS, KEYLOGGER, HONEYPOT (exploits), BLACK BOX II and III*
+**20 // IM // TOLL** · *introduces WORM VIRUS, KEYLOGGER, HONEYPOT (exploits), BLACK BOX II and III* · *on the cracked card*
 > **TOLL** · WORD IS YOU'RE ON A LIST.
 > **TOLL** · NOT MY BUSINESS. MONEY'S STILL MONEY.
 > **TOLL** · NEW IN: WORM VIRUS. KEYLOGGER. HONEYPOT, FOR WHOEVER'S FOLLOWING YOU. BOXES II AND III IF YOU FEEL LUCKY.
 > **TOLL** · PAY UP FRONT. CORRECTED PEOPLE DON'T PAY THEIR DEBTS.
 
-**21 // IM // MOTH** · *introduces ANTIVIRUS, FIREWALL DELAY (patches) and PACKET SNIFFER (exploit)*
+**21 // IM // MOTH** · *introduces ANTIVIRUS, FIREWALL DELAY (patches) and PACKET SNIFFER (exploit)* · *on the cracked card*
 > **moth** · toll's boxes bite. you knew that.
 > **moth** · ANTIVIRUS clears whatever's running and catches the next one. FIREWALL DELAY holds the next layer back four drops.
 > **moth** · PACKET SNIFFER lets you pick your next three bits. careful. it's addictive.
 > **moth** · they're the last clean tools i wrote. before.
 
-**22 // FILE // HALCYON // THE LIST (complete)** · **JOB: FIREWALL (BREACH)**
+**22 // FILE // HALCYON // THE LIST (complete)** · **JOB: FIREWALL (BREACH)** · *on the cracked card for now (a JOB later)*
 > 2,948 ENTRIES. 310 FULL.
 > 2,947 CORRECTED.
 > 1 PENDING. SUBJECT: [YOU].
 > REQUESTED BY: THE CUSTODIAN.
 
-**23 // IM // MOTH** · *introduces LOGIC BOMB, DICTIONARY ATTACK, RAINBOW TABLE, BLACK BOX (exploits)*
+**23 // IM // MOTH** · *introduces LOGIC BOMB, DICTIONARY ATTACK, RAINBOW TABLE, BLACK BOX (exploits)* · *on the cracked card*
 > **moth** · it was me. 0120.
 > **moth** · i built the eraser. when i tried to undo it, they ran it on me.
 > **moth** · no name. no records. a moth. you only see one when there's a light on.
 > **moth** · here's everything i have left. LOGIC BOMB, DICTIONARY ATTACK, RAINBOW TABLE, BLACK BOX.
 > **moth** · the eraser has an undo. it's under the last key. crack it.
 
-**24 // CALL // UNKNOWN NUMBER, then IM // MOTH** · *the end* · **JOB: THE CUSTODIAN (VS)**
+**24 // CALL // UNKNOWN NUMBER, then IM // MOTH** · *the end* · **JOB: THE CUSTODIAN (VS)** · *on the cracked card for now (a JOB later)*
 > (his program, beaten: THE CUSTODIAN // OVERFLOWED)
 > INCOMING CALL // UNKNOWN NUMBER
 > "You can't put people back."

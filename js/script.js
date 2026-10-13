@@ -4129,6 +4129,7 @@ function hideHome() {
   updateTopIcons();
   if (renderStale) render(); // (the grid, drawn now it shows)
   fitBoard();
+  if (goal && typeof Stories !== 'undefined') Stories.atStart(); // (STORY's first transmission, over the board as the first game starts)
 }
 window.showHome = showHome;
 window.homeIsOpen = () => homeOpen;

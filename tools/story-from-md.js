@@ -2,7 +2,8 @@
 // doc stays the one place the words are written. Edit the doc, then: node tools/story-from-md.js
 // What it reads, under "## THE STORY":
 //   ### Chapter N: NAME (gate)                     a chapter
-//   **N // KIND // SOURCE** · ... · **JOB: ...**    a transmission (KIND: FILE, IM or CALL; a JOB noted)
+//   **N // KIND // SOURCE** · ... · **JOB: ...**    a transmission (KIND: FILE, IM or CALL; a JOB noted;
+//                                                  "first STORY game starts": it pops up then, not on a card)
 //   > lines                                         its lines, each read by its look:
 //     **name** 02:14 · text   an IM line (time optional; **you** is the player)
 //     `<handle>` text         a chat log line in a file
@@ -55,7 +56,8 @@ for (let i = start + 1; i < md.length; i++) {
       if (!from.includes(id)) from.push(id);
     }
     const job = /\*\*JOB: ([^*(]+?)\s*\(([^)]+)\)\*\*/.exec(m[3]);
-    cur = { n: Number(m[1]), chapter: chapters.length - 1, kind, from, title: head.slice(head.indexOf(' // ') + 4), lines: [], ...(job ? { job: { name: job[1].trim(), mode: job[2].trim() } } : {}) };
+    const atStart = /first STORY game starts/i.test(m[3]); // (it pops up as the first STORY game starts, not on a cracked card)
+    cur = { n: Number(m[1]), chapter: chapters.length - 1, kind, from, title: head.slice(head.indexOf(' // ') + 4), lines: [], ...(atStart ? { atStart: true } : {}), ...(job ? { job: { name: job[1].trim(), mode: job[2].trim() } } : {}) };
     items.push(cur);
     continue;
   }
