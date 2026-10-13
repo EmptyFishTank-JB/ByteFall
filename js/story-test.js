@@ -10,6 +10,13 @@
 (() => {
   const q = new URLSearchParams(location.search);
   if (!q.has('storytest') || typeof STORIES === 'undefined' || typeof Stories === 'undefined') return;
+  if (window.STORY_SOON) { // (STORY still locked on this device: the tester too, till it's let in from the main menu)
+    const note = document.createElement('div');
+    note.id = 'story-test';
+    note.innerHTML = '<p class="st-count">STORY TESTER // LOCKED: STORY is COMING SOON on this device. Let it in from the main menu first.</p>';
+    document.body.appendChild(note);
+    return;
+  }
   const pad = (n) => String(n).padStart(2, '0');
   const LABEL = { moth: 'MOTH', toll: 'TOLL', unknown: 'UNKNOWN NUMBER', archive: 'THE ARCHIVE' };
   const list = [{ label: 'THE INTRO CARD', intro: true }];
