@@ -65,7 +65,7 @@ const BLAST_RADIUS = 2; // logic bomb and honeypot reach: a 5x5 area
 
 // The Daily Decrypt uses the same five exploits for everyone; elsewhere it's your equipped loadout.
 const DAILY_EXPLOITS = ['worm-virus', 'buffer-overflow', 'trojan', 'rng', 'bitflip'];
-const hackAvailable = (id) => (daily ? DAILY_EXPLOITS.includes(id) : goal ? storyRevealed().has(id) : Progress.isEquipped(id)); // (STORY: what it's revealed)
+const hackAvailable = (id) => (daily ? DAILY_EXPLOITS.includes(id) : goal ? storyIntro().has(id) : Progress.isEquipped(id)); // (STORY: what it's revealed)
 Progress.setExploitCount(Object.keys(HACKS).length);
 Progress.setExploitNames(Object.fromEntries(Object.entries(HACKS).map(([id, h]) => [id, h.name])));
 
@@ -314,7 +314,7 @@ function patchUseful(id) {
   if (id === 'head-start') return !exploitWaiting() && streak < Math.floor(streakCap() / 2);
   if (id === 'lookahead') return lookaheadLeft <= 0 && !DIFFICULTIES[difficulty].showNext;
   if (id === 'firewall-delay') return !MODES[mode].noLayers;
-  if (id === 'second-chance') return !secondChanceUsed && !restoreBought && (storyOn() || !(armedBoosts.has(id) && Progress.boosters(id) > 0));
+  if (id === 'second-chance') return !secondChanceUsed && !restoreBought && !(armedBoosts.has(id) && Progress.boosters(id) > 0 && (!storyOn() || storyIntro().has('bring')));
   if (id === 'antivirus') return !antivirusArmed;
   return true;
 }
@@ -376,7 +376,7 @@ const bracketIcon = (id) => `<span class="ico-br">[</span>${itemIcon(id)}<span c
 const itemIcon = (id) => (BOX_TIERS[id] ? `${ICON_SVG['black-box']}<span class="box-tier">${BOX_TIERS[id]}</span>` : ANTI[id] ? VIRUS_SVG : iconHtml(id));
 const boosterFits = (id, m = mode) => !daily && BOOSTERS[id].modes.includes(m);
 // (switched on per mode: CLASSIC's choice isn't BLITZ's)
-const armedKey = () => `bytefall-boosters-on-${mode}`;
+const armedKey = () => `bytefall-boosters-on-${storyOn() ? 'story' : mode}`; // (STORY's apart from CLASSIC's)
 let armedBoosts = new Set();
 // (up to BOOSTS_MAX patches a game)
 const BOOSTS_MAX = 2;
@@ -386,6 +386,7 @@ const LOOKAHEAD_MS = 60000;
 let lookaheadLeft = 0; // LOOKAHEAD: the play time it has left (counted while the game is being played)
 let runBoosts = new Set(); // this game's (switched on, owned, for this mode): used up at its first drop
 let boostsSpent = false;
+let runBrought = []; // (STORY: the exploits brought in this game, paid for at its first drop)
 let secondChanceUsed = false;
 let puzzleHistory = []; // PUZZLE: the board before each drop (UNDO)
 let hintCol = null; // PUZZLE: the column HINT lit, until the next drop
@@ -592,13 +593,14 @@ const storyOn = () => mode === 'classic' && !daily && goalWanted;
 // 7 at 192, 6 at 256 and 384, 5 at 512 and 1024, then 4), and infections get likelier, 4% up to 10%
 const STORY_INTERVALS = [8, 7, 6, 6, 5, 5, 4];
 const storyPace = (k) => ({ interval: STORY_INTERVALS[Math.min(k, STORY_INTERVALS.length - 1)], infect: Math.min(0.1, 0.04 + 0.015 * k) });
-// WHAT STORY LETS YOU USE: only what its files have revealed (Stories.revealed: exploits, BLACK BOXES,
-// patches and the BLACK MARKET), whatever's unlocked or owned elsewhere. In a STORY game no loadout comes
-// in with you: the side slots are the PATCHES and EXPLOITS buttons (each there once the story's revealed
-// one of its kind), a tap opening a card of what you own of those (bought in the STORE, or on the BLACK
-// MARKET once it's revealed, from the same card), up to STORY_USES of each a key; the chain meter's
-// exploits come from what's revealed too (none revealed: no meter)
-const storyRevealed = () => (typeof Stories !== 'undefined' ? Stories.revealed() : new Set());
+// WHAT STORY LETS YOU USE: only what GHOSTS has introduced (Stories.introduced: exploits, BLACK BOXES,
+// patches, and its stages, 'infections', 'market' and 'bring'), whatever's unlocked or owned elsewhere.
+// In a STORY game the side slots are the PATCHES and EXPLOITS buttons, a tap opening a card of what you
+// have of the introduced ones, up to STORY_USES of each a key: STORY's KIT (MOTH's gifted patches, the
+// BLACK MARKET's buys once it's introduced) and, once you can bring your own ('bring'), what you own
+// from the STORE; STORY's menu then has PATCHES and EXPLOITS again, to bring up to two of each in. The
+// chain meter's exploits are the introduced ones too (none yet: no meter)
+const storyIntro = () => (typeof Stories !== 'undefined' ? Stories.introduced() : new Set());
 const STORY_USES = 2;
 // (the drops between layers: VS on one pace for both boards, STORY on its key's, else the difficulty's)
 const layerInterval = (pts) => (mode === 'vs' ? BASE_INTERVAL : goal ? storyPace(goal.k).interval : DIFFICULTIES[difficulty].interval(pts));
@@ -680,6 +682,7 @@ function initGame() {
     : mode === 'vs' && CpuBoard.sizeFor(vsLevel) === 8 ? 'hard' : 'normal';
   dailyOfficial = daily && (mode === 'puzzle' ? dailyPuzzleOfficial() : !storage.get(dailyPlayedKey()));
   goal = storyOn() ? { k: 0, cracked: 0 } : null; // (ENCRYPTION STRENGTH: STORY's key to crack)
+  if (goal) Progress.storyPlayed(); // (for the message that comes after days away)
   if (goalOpen || !goalCardEl.hidden) { goalOpen = false; goalCardEl.hidden = true; }
   if (!vsPaused) document.querySelector('.board-frame').classList.remove('paused'); // (a game that ended cracked faded its bits)
   setupDice();
@@ -734,7 +737,11 @@ function initGame() {
     : `every ${BASE_INTERVAL} drops`;
   // (the boosters switched on for this mode, while there are any left: paid for at the first drop)
   loadArmed();
-  runBoosts = storyOn() ? new Set() : new Set([...armedBoosts].filter((id) => !BOOSTERS[id].inGame && id !== 'second-chance' && boosterFits(id) && Progress.boosters(id) > 0)); // (STORY: nothing brought in)
+  const bring = !storyOn() || storyIntro().has('bring'); // (STORY: nothing brought in till you can bring your own)
+  runBoosts = bring ? new Set([...armedBoosts].filter((id) => !BOOSTERS[id].inGame && id !== 'second-chance' && boosterFits(id) && Progress.boosters(id) > 0 && (!storyOn() || storyIntro().has(id)))) : new Set();
+  // (STORY's brought-in exploits: waiting in the EXPLOIT button from the start, paid for at the first drop)
+  runBrought = storyOn() && bring ? storyTaken() : [];
+  heldHacks.push(...runBrought);
   boostsSpent = false;
   secondChanceUsed = false;
   usedStarters = [];
@@ -834,7 +841,8 @@ const infectModes = () => !daily && (mode === 'classic' || mode === 'blitz');
 // (INFECTIONS: ON / OFF in GAME SETTINGS: OFF, no infected bits; BLACK BOXES still can be)
 let infectWanted = storage.get('bytefall-infections') !== 'off';
 function mayInfect() {
-  if (!infectModes() || !(infectWanted || storyOn()) || gameOver || infectedBit) return false; // (STORY: always on)
+  if (!infectModes() || !(infectWanted || storyOn()) || gameOver || infectedBit) return false; // (STORY: always on, once introduced)
+  if (storyOn() && !storyIntro().has('infections')) return false;
   if (Progress.runDrops() - infectedAt < INFECT_GAP) return false;
   return Math.random() < (goal ? storyPace(goal.k).infect : INFECT_ODDS[difficulty] || 0);
 }
@@ -1857,9 +1865,10 @@ async function attemptDrop(col) {
   }
   Progress.drop();
   started = true;
-  if (!boostsSpent && runBoosts.size) { // (the game's boosters, paid for now it's under way)
+  if (!boostsSpent && (runBoosts.size || runBrought.length)) { // (the game's boosters, and STORY's brought-in exploits, paid for now it's under way)
     boostsSpent = true;
     runBoosts.forEach((id) => Progress.useBooster(id));
+    runBrought.forEach((id) => { if (Progress.useStarter(id)) usedStarters.push(id); });
   }
   if (Progress.runDrops() === 1) refreshExploitCards(); // the loadout locks for this session
   if (mode === 'blitz') clockRunning = true;
@@ -2521,6 +2530,7 @@ function meltBoard(run) {
 
 // reason: 'trace' (something left above the line) or 'time' (BLITZ ran out)
 function endGame(reason = 'trace') {
+  if (goal && typeof Stories !== 'undefined' && (reason === 'trace' || reason === 'cracked')) Stories.moment(reason === 'cracked' ? 'disconnect' : 'traced'); // (STORY: an unprompted message's moment)
   gameOver = true;
   Infections.clear(); // (the infections' displays and pop-ups gone: the game-over card over a plain board)
   refreshExploitCards(); // the loadout can change again
@@ -2754,6 +2764,17 @@ function closeStoryIntro() {
   SFX.play('click');
 }
 document.getElementById('story-intro-close').addEventListener('click', closeStoryIntro);
+// (an unprompted message's card, stories.js's showDue: OK, a tap off it, Esc or back closes it)
+const storyMsgEl = document.getElementById('story-msg');
+function closeStoryMsg() {
+  if (storyMsgEl.classList.contains('hidden')) return;
+  if (typeof Stories !== 'undefined') Stories.stop();
+  storyMsgEl.classList.add('hidden');
+  SFX.play('click');
+}
+document.getElementById('story-msg-close').addEventListener('click', closeStoryMsg);
+storyMsgEl.addEventListener('click', (e) => { if (e.target === storyMsgEl) closeStoryMsg(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !storyMsgEl.classList.contains('hidden')) { e.stopImmediatePropagation(); closeStoryMsg(); } }, true);
 storyIntroEl.addEventListener('click', (e) => { if (e.target === storyIntroEl) closeStoryIntro(); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && storyIntroOpen()) { e.stopImmediatePropagation(); closeStoryIntro(); } }, true);
 // (RULES: STORY's section down to one line while it's coming soon)
@@ -4017,6 +4038,7 @@ function updateHome() {
   fitHome(); // (the words fitted to their boxes; again once the mode's rows have all settled)
   refitHome();
   maybeStoryIntro(); // (STORY's first time: the scene set)
+  if (homeOpen && !homeEl.hidden && !storyIntroOpen() && typeof Stories !== 'undefined') Stories.showDue(); // (an unprompted message waiting)
 }
 function updateTopIcons() {
   const inGame = !homeOpen; // (the tutorial too: PAUSE, as in a game)
@@ -5279,7 +5301,7 @@ resInfoEl.addEventListener('click', (e) => { if (e.target === resInfoEl) closeRe
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !resInfoEl.classList.contains('hidden')) { e.stopImmediatePropagation(); closeResInfo(); } }, true);
 
 const boosterPickEl = document.getElementById('booster-pick');
-const boosterIds = () => Object.keys(BOOSTERS).filter((id) => !BOOSTERS[id].inGame && boosterFits(id));
+const boosterIds = () => Object.keys(BOOSTERS).filter((id) => !BOOSTERS[id].inGame && boosterFits(id) && (!storyOn() || storyIntro().has(id))); // (STORY: the introduced ones)
 function boostersChanged() {
   saveArmed();
   // (a game not yet under way takes it now; one under way, from the next game)
@@ -5336,7 +5358,7 @@ function refreshBoosterRow() {
   if (!row) return;
   loadArmed(); // (this mode's)
   const ids = boosterIds();
-  row.hidden = !ids.length || mode === 'tutorial' || storyOn(); // (STORY: none brought in)
+  row.hidden = !ids.length || mode === 'tutorial' || (storyOn() && !storyIntro().has('bring')); // (STORY: once you can bring your own)
   if (row.hidden) return;
   row.innerHTML = '';
   const on = ids.filter((id) => armedBoosts.has(id) && Progress.boosters(id) > 0);
@@ -5356,8 +5378,22 @@ function refreshBoosterRow() {
 // tap puts one in (the left slot fills first; with both full it takes the other's place), a second
 // tap a second of it (two owned), the next tap takes them out. Slots not open yet: the card says when; none open, the button is locked (its level)
 const starterPickEl = document.getElementById('starter-pick');
+// (STORY's, apart from the other modes': up to two of the introduced exploits you own, BLACK BOXES left
+// out, kept on the device; both always open)
+const STORY_TAKEN_KEY = 'bytefall-story-taken';
+function storyTaken() {
+  const rv = storyIntro();
+  const out = [];
+  for (const id of (storage.get(STORY_TAKEN_KEY) || '').split(',')) {
+    if (HACKS[id] && rv.has(id) && out.filter((t) => t === id).length < Progress.starters(id)) out.push(id);
+  }
+  return out.slice(0, STARTER_MAX);
+}
+const takenNow = () => (storyOn() ? storyTaken() : Progress.startersTaken());
+const slotsOpenNow = () => (storyOn() ? STARTER_MAX : Math.min(STARTER_MAX, Progress.sideSlots()));
 function setStarters(ids) {
-  Progress.setStartersTaken(ids);
+  if (storyOn()) storage.set(STORY_TAKEN_KEY, ids.filter(Boolean).join(','));
+  else Progress.setStartersTaken(ids);
   // (a game not yet under way takes them now; one under way, from the next game)
   if (!started && !gameOver && !busy && !inAGame()) initGame();
   refreshStarterRow();
@@ -5370,14 +5406,17 @@ function openStarterStore() {
 function closeStarterPick() { starterPickEl.classList.add('hidden'); }
 document.getElementById('starter-pick-title').innerHTML = `// ${TERMINAL_SVG}EXPLOITS`;
 function openStarterPick() {
-  const open = Math.min(STARTER_MAX, Progress.sideSlots());
-  const taken = Progress.startersTaken().slice(0, open).filter(Boolean);
-  const owned = [...Progress.exploitOrder().filter((id) => Progress.starters(id) > 0 && Progress.exploitInfo(id).unlocked),
-    ...Progress.boxIds().filter((id) => Progress.starters(id) > 0)];
+  const open = slotsOpenNow();
+  const taken = takenNow().slice(0, open).filter(Boolean);
+  const rv = storyOn() ? storyIntro() : null;
+  const owned = storyOn() ? Progress.exploitOrder().filter((id) => Progress.starters(id) > 0 && rv.has(id)) // (STORY: introduced exploits, no boxes, unlocked or not)
+    : [...Progress.exploitOrder().filter((id) => Progress.starters(id) > 0 && Progress.exploitInfo(id).unlocked),
+      ...Progress.boxIds().filter((id) => Progress.starters(id) > 0)];
   const later = open < STARTER_MAX ? ` (a second at LV ${Progress.sideSlotLevel(1)})` : '';
-  document.getElementById('starter-pick-note').textContent = owned.length
-    ? `Bring ${open > 1 ? 'up to two' : 'one'} into your next game${later}. Each is used once; the ones you don't use stay yours.`
-    : 'You don\'t have any exploits to bring in yet.';
+  document.getElementById('starter-pick-note').textContent = !owned.length
+    ? (storyOn() ? 'You don\'t own any of the exploits STORY has introduced yet. The STORE sells them.' : 'You don\'t have any exploits to bring in yet.')
+    : storyOn() ? 'Bring up to two into your next STORY game: they wait in your EXPLOIT button from the start, and are used up once the game is under way.'
+      : `Bring ${open > 1 ? 'up to two' : 'one'} into your next game${later}. Each is used once; the ones you don't use stay yours.`;
   const list = document.getElementById('starter-pick-list');
   list.textContent = '';
   for (const id of owned) {
@@ -5413,19 +5452,19 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !starter
 function refreshStarterRow() {
   const row = document.getElementById('starter-row');
   if (!row) return;
-  row.hidden = !starterFits() || mode === 'tutorial' || storyOn(); // (STORY: none brought in)
+  row.hidden = !starterFits() || mode === 'tutorial' || (storyOn() && !storyIntro().has('bring')); // (STORY: once you can bring your own)
   if (row.hidden) return;
   row.innerHTML = ''; // (long names trail off)
   const b = document.createElement('button');
   b.type = 'button';
-  if (!Progress.sideSlots()) { // (none open yet: the level the first opens at, behind a lock)
+  if (!storyOn() && !Progress.sideSlots()) { // (none open yet: the level the first opens at, behind a lock)
     const lv = Progress.sideSlotLevel(0);
     b.className = 'locked';
     b.innerHTML = `<span class="opt-text">${TERMINAL_SVG}EXPLOITS: LV ${lv}</span>`;
     b.setAttribute('aria-label', `Exploits: open at level ${lv}`);
     b.addEventListener('click', () => { SFX.play('denied'); homeNotice(`LOCKED // EXPLOITS OPEN AT LV ${lv}`); });
   } else {
-    const taken = Progress.startersTaken().slice(0, Progress.sideSlots()).filter(Boolean);
+    const taken = takenNow().slice(0, slotsOpenNow()).filter(Boolean);
     b.className = taken.length ? 'active' : '';
     b.innerHTML = `<span class="opt-text">${TERMINAL_SVG}EXPLOITS: ${taken.length ? taken.map(itemName).join(' / ') : 'NONE'}</span>`;
     b.setAttribute('aria-label', `Exploits: ${taken.length ? taken.map(itemName).join(', ') : 'none'}. Tap to choose`);
@@ -5441,7 +5480,7 @@ const SECOND_CHANCE_KEEP = 3;
 function secondChance() {
   if (secondChanceUsed) return false;
   if (restoreBought) restoreBought = false; // (bought in this game, from a PATCH SLOT)
-  else if (storyOn() || !armedBoosts.has('second-chance') || !boosterFits('second-chance') || !Progress.useBooster('second-chance')) return false;
+  else if (!armedBoosts.has('second-chance') || !boosterFits('second-chance') || (storyOn() && !storyIntro().has('bring')) || !Progress.useBooster('second-chance')) return false;
   secondChanceUsed = true;
   renderStarters();
   FX.burst(cellsAt(columns.flatMap((c, col) => c.slice(SECOND_CHANCE_KEEP).map((_, k) => ({ row: SECOND_CHANCE_KEEP + k, col })))));
@@ -5724,20 +5763,32 @@ function renderStarters() {
 const STORY_STOCK = 3;
 let storyUses = { patch: 0, exploit: 0 };
 let storyStock = []; // (this key's offers: ids, a patch's as 'patch:<id>'; null once bought)
-const kitPatchIds = (rv = storyRevealed()) => [...rv].filter((id) => BOOSTERS[id] && !BOOSTERS[id].inGame && boosterFits(id, 'classic'));
-const kitExploitIds = (rv = storyRevealed()) => [...rv].filter((id) => HACKS[id] || Progress.isBox(id));
-const kitOwned = (id) => (BOOSTERS[id] ? Progress.boosters(id) : Progress.starters(id));
+const kitPatchIds = (rv = storyIntro()) => [...rv].filter((id) => BOOSTERS[id] && !BOOSTERS[id].inGame && boosterFits(id, 'classic'));
+const kitExploitIds = (rv = storyIntro()) => [...rv].filter((id) => HACKS[id] || Progress.isBox(id));
+// (what you have of one in STORY: the kit's, and once you can bring your own, what you own from the STORE)
+// (less what's brought in or switched on and not paid for yet: the first drop pays for those)
+const homeOwned = (id) => Math.max(0, (BOOSTERS[id] ? Progress.boosters(id) : Progress.starters(id))
+  - (boostsSpent ? 0 : BOOSTERS[id] ? (runBoosts.has(id) ? 1 : 0) : runBrought.filter((x) => x === id).length));
+const kitOwned = (id) => Progress.storyKit(id) + (storyIntro().has('bring') ? homeOwned(id) : 0);
+// (one used: the kit's first, then your own)
+function kitTake(id) {
+  if (Progress.storyKitUse(id)) return true;
+  if (!storyIntro().has('bring')) return false;
+  return BOOSTERS[id] ? Progress.useBooster(id) : Progress.useStarter(id);
+}
 function storyKitReset() {
   storyUses = { patch: 0, exploit: 0 };
   storyStock = [];
-  if (!storyOn() || !storyRevealed().has('market')) return;
+  if (!storyOn() || !storyIntro().has('market')) return;
   const pool = [...kitExploitIds().filter((id) => Progress.sellable(id) || Progress.isBox(id)), ...kitPatchIds().map((id) => `patch:${id}`)]
     .filter((id) => Object.keys(Progress.price(id)).length);
   for (let i = 0; i < STORY_STOCK && pool.length; i++) storyStock.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
 }
 function renderStoryKit() {
-  const rv = storyRevealed();
-  const has = [kitPatchIds(rv).length > 0, kitExploitIds(rv).length > 0];
+  const rv = storyIntro();
+  // (PATCHES once there's one to use; EXPLOITS once there's one, or the BLACK MARKET or bringing your own)
+  const open = rv.has('market') || rv.has('bring');
+  const has = [open || kitPatchIds(rv).some((id) => kitOwned(id) > 0), open || kitExploitIds(rv).some((id) => kitOwned(id) > 0)];
   const any = !gameOver && (has[0] || has[1]);
   sideSlotEls().forEach((b, i) => {
     const kind = i === 0 ? 'patch' : 'exploit';
@@ -5760,7 +5811,7 @@ const kitOpen = () => !storyKitEl.classList.contains('hidden');
 function openStoryKit(kind, market = false) {
   if (gameOver || !storyOn()) return;
   kitView = { kind, market };
-  const rv = storyRevealed();
+  const rv = storyIntro();
   const list = document.getElementById('story-kit-list');
   const note = document.getElementById('story-kit-note');
   const mkBtn = document.getElementById('story-kit-market');
@@ -5771,7 +5822,7 @@ function openStoryKit(kind, market = false) {
   if (market) {
     document.getElementById('story-kit-title').innerHTML = `// ${CURRENCY_SVG}BLACK MARKET`;
     mkBtn.textContent = `← ${name}`;
-    note.textContent = storyStock.some(Boolean) ? 'This key\'s stock, a new one after the next key you crack. What you buy is yours: use it from PATCHES or EXPLOITS.'
+    note.textContent = storyStock.some(Boolean) ? 'TOLL\'s stock for this key, new after the next key you crack. What you buy goes in your kit: use it from PATCHES or EXPLOITS.'
       : 'Sold out for this key: new stock after the next key you crack.';
     storyStock.forEach((sid, k) => {
       if (!sid) return;
@@ -5795,7 +5846,7 @@ function openStoryKit(kind, market = false) {
     const ids = (kind === 'patch' ? kitPatchIds(rv) : kitExploitIds(rv)).filter((id) => kitOwned(id) > 0);
     note.textContent = ids.length
       ? `Use up to ${STORY_USES} this key (${left} left).${kind === 'exploit' ? ' An exploit arms as your next drop.' : ' A patch applies at once.'}`
-      : `You don't own any of the ${name} the story has revealed yet. Buy them in the STORE${rv.has('market') ? ', or on the BLACK MARKET' : ''}.`;
+      : `Nothing to use yet. ${rv.has('bring') ? 'Bring your own (the STORE sells what STORY has introduced)' : rv.has('market') ? 'TOLL sells them on the BLACK MARKET' : 'MOTH sends what you need'}${rv.has('bring') && rv.has('market') ? ', or buy from TOLL' : ''}.`;
     for (const id of ids) {
       const patch = kind === 'patch';
       const useful = patch ? patchUseful(id) : !armedHack;
@@ -5829,7 +5880,7 @@ function closeStoryKit() {
 function kitUse(kind, id) {
   if (gameOver || storyUses[kind] >= STORY_USES || kitOwned(id) <= 0) { SFX.play('denied'); return; }
   if (kind === 'patch') {
-    if (!patchUseful(id) || !Progress.useBooster(id)) { SFX.play('denied'); return; }
+    if (!patchUseful(id) || !kitTake(id)) { SFX.play('denied'); return; }
     storyUses.patch++;
     closeStoryKit();
     patchesBought.push(id);
@@ -5840,7 +5891,7 @@ function kitUse(kind, id) {
   } else {
     if (armedHack || busy || pivotFrom !== null) { SFX.play('denied'); return; }
     if (Progress.isBox(id)) { closeStoryKit(); kitOpenBox(id); return; }
-    if (!Progress.useStarter(id)) { SFX.play('denied'); return; }
+    if (!kitTake(id)) { SFX.play('denied'); return; }
     storyUses.exploit++;
     usedStarters.push(id);
     closeStoryKit();
@@ -5851,7 +5902,7 @@ function kitUse(kind, id) {
 // A BLACK BOX from the card: opened on the EXPLOITS button, its reel landing on an exploit (armed at
 // once) or an INFECTION (ANTIVIRUS waiting quarantines it)
 function kitOpenBox(box) {
-  if (!Progress.useStarter(box)) { SFX.play('denied'); return; }
+  if (!kitTake(box)) { SFX.play('denied'); return; }
   storyUses.exploit++;
   usedStarters.push(box);
   Progress.openedBlackBox();
@@ -5893,8 +5944,7 @@ function kitBuy(k) {
   if (!Progress.payFor(sid)) { SFX.play('denied'); flashShort(storyKitEl.querySelector('.overlay-box')); return; }
   const patch = sid.startsWith('patch:');
   const id = patch ? sid.slice(6) : sid;
-  if (patch) Progress.addBooster(id);
-  else Progress.addStarter(id);
+  Progress.storyKitAdd(id); // (to STORY's kit)
   storyStock[k] = null;
   marketBought.push(id);
   SFX.play('egg');
@@ -7379,7 +7429,7 @@ recordsEl.querySelectorAll('.records-tabs button').forEach((b) => {
 // (a card of its own over the game card: BACK or Esc closes it, not a tap beside it). A small card
 // open over it (an [i], the PATCHES or EXPLOITS card, GAME SETTINGS) is closed first: BACK, and the
 // phone's back (start.js), take it away and leave the panel or menu under it
-const OVER_CARDS = ['res-info', 'booster-pick', 'starter-pick', 'mode-settings', 'story-intro', 'story-kit'];
+const OVER_CARDS = ['res-info', 'booster-pick', 'starter-pick', 'mode-settings', 'story-intro', 'story-kit', 'story-msg'];
 window.closeOverCard = () => {
   const open = OVER_CARDS.map((id) => document.getElementById(id)).find((el) => el && !el.classList.contains('hidden'));
   if (!open) return false;

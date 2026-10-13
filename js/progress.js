@@ -112,9 +112,11 @@ const Progress = (() => {
     // a row up to `last` (the UTC day of its last official run), `open` the day of an official run begun
     // and not yet ended
     kindStreaks: {},
-    // THE STORIES (js/stories.js): pick, the one being decrypted; got: story id -> files recovered;
-    // seen: story id -> files read in the ARCHIVE (the rest show as new)
-    stories: { pick: 'trace', got: {}, seen: {} },
+    // THE STORIES (js/stories.js): pick, the one being decrypted; got: story id -> transmissions
+    // recovered; seen: story id -> those read in the ARCHIVE (the rest show as new); kit: STORY's own
+    // patches and exploits (MOTH's gifts, the BLACK MARKET's buys: id -> how many); extra: the
+    // unprompted messages had (traced, disconnect, away); played: the last STORY game's start (ms)
+    stories: { pick: 'ghosts', got: {}, seen: {}, kit: {}, extra: {}, played: 0 },
   });
 
   let d = fresh();
@@ -987,11 +989,27 @@ const Progress = (() => {
     // THE STORIES (js/stories.js keeps the files and the rules): the story being decrypted, how many
     // of each one's files are recovered, and how many of those have been read
     stories() {
-      if (!d.stories || typeof d.stories !== 'object') d.stories = { pick: 'trace', got: {}, seen: {} };
+      if (!d.stories || typeof d.stories !== 'object') d.stories = { pick: 'ghosts', got: {}, seen: {} };
       d.stories.got = d.stories.got || {};
       d.stories.seen = d.stories.seen || {};
+      d.stories.kit = d.stories.kit || {};
+      d.stories.extra = d.stories.extra || {};
       return d.stories;
     },
+    // STORY's KIT: what came inside the story (MOTH's gifts, the BLACK MARKET's buys), used only there
+    storyKit(id) { return this.stories().kit[id] || 0; },
+    storyKitAdd(id, n = 1) { const k = this.stories().kit; k[id] = (k[id] || 0) + n; save(); },
+    storyKitUse(id) {
+      const k = this.stories().kit;
+      if (!k[id]) return false;
+      k[id]--;
+      save();
+      return true;
+    },
+    storyExtraHad(when) { return !!this.stories().extra[when]; },
+    storyExtraSet(when) { this.stories().extra[when] = 1; save(); },
+    storyPlayed() { this.stories().played = Date.now(); save(); },
+    storyLastPlayed() { return this.stories().played || 0; },
     storyPick(id) { this.stories().pick = id; save(); },
     storyRecover(id) {
       const st = this.stories();
