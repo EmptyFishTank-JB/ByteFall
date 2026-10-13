@@ -766,23 +766,6 @@ TOTAL +34
 ## Card 38
 
 - **Heading**: `// TUTORIAL`
-- **Card sits**: the bottom of the screen, over the open page; **BOT**: resting
-- **Buttons**: EXIT, BACK, NEXT
-- **Opens**: RULES & RECORDS, on its ARCHIVE tab (the list of stories)
-
-**Says:**
-
-> The ARCHIVE holds the STORIES. Every key you crack in STORY recovers a file of the one you’re decrypting; read them all here, and pick which story to decrypt.
-
-- **Asks you to**: Tap NEXT.
-- **Lights up**: the ARCHIVE tab (in focus) and the story being decrypted (in focus)
-- **Notes**: 
-
----
-
-## Card 39
-
-- **Heading**: `// TUTORIAL`
 - **Card sits**: the middle of the screen, over the open page; **BOT**: resting
 - **Buttons**: EXIT, BACK
 - **Opens**: RULES & RECORDS, on its ARCHIVE tab (the list of stories)
@@ -797,7 +780,7 @@ TOTAL +34
 
 ---
 
-## Card 40
+## Card 39
 
 - **Heading**: `// TUTORIAL`
 - **Card sits**: the bottom of the screen, over the open page; **BOT**: resting
@@ -814,7 +797,7 @@ TOTAL +34
 
 ---
 
-## Card 41
+## Card 40
 
 - **Heading**: `// TUTORIAL`
 - **Card sits**: the middle of the screen, over the open page; **BOT**: resting
@@ -831,7 +814,7 @@ TOTAL +34
 
 ---
 
-## Card 42
+## Card 41
 
 - **Heading**: `// TUTORIAL`
 - **Card sits**: the bottom of the screen, over the open page; **BOT**: resting
@@ -848,7 +831,7 @@ TOTAL +34
 
 ---
 
-## Card 43
+## Card 42
 
 - **Heading**: `// TUTORIAL`
 - **Card sits**: the bottom of the screen, over the open page; **BOT**: resting
@@ -865,7 +848,7 @@ TOTAL +34
 
 ---
 
-## Card 44
+## Card 43
 
 - **Heading**: `// TUTORIAL`
 - **Card sits**: the middle of the screen, over the open page; **BOT**: resting
@@ -882,7 +865,7 @@ TOTAL +34
 
 ---
 
-## Card 45
+## Card 44
 
 - **Heading**: `// TUTORIAL`
 - **Card sits**: the middle of the screen, over the open page; **BOT**: resting
@@ -899,7 +882,7 @@ TOTAL +34
 
 ---
 
-## Card 46
+## Card 45
 
 - **Heading**: `// TUTORIAL`
 - **Card sits**: the middle of the screen, over the open page; **BOT**: resting
@@ -916,7 +899,7 @@ TOTAL +34
 
 ---
 
-## Card 47
+## Card 46
 
 - **Heading**: `// TUTORIAL`
 - **Card sits**: the middle of the screen, over the open page; **BOT**: resting
@@ -933,7 +916,7 @@ TOTAL +34
 
 ---
 
-## Card 48
+## Card 47
 
 - **Heading**: `// TUTORIAL`
 - **Card sits**: the bottom of the screen, over the open page; **BOT**: resting
@@ -950,7 +933,7 @@ TOTAL +34
 
 ---
 
-## Card 49
+## Card 48
 
 - **Heading**: `// TUTORIAL`
 - **Card sits**: the bottom of the screen, over the open page; **BOT**: resting
@@ -967,7 +950,7 @@ TOTAL +34
 
 ---
 
-## Card 50
+## Card 49
 
 - **Heading**: `// TUTORIAL`
 - **Card sits**: the bottom of the screen, over the open page; **BOT**: resting
@@ -984,7 +967,7 @@ TOTAL +34
 
 ---
 
-## Card 51
+## Card 50
 
 - **Heading**: `// TUTORIAL`
 - **Card sits**: the bottom of the screen, over the open page; **BOT**: devious
@@ -1001,7 +984,7 @@ TOTAL +34
 
 ---
 
-## Card 52
+## Card 51
 
 - **Heading**: `// TUTORIAL`
 - **Card sits**: the bottom of the screen, over the open page; **BOT**: resting
@@ -1018,7 +1001,7 @@ TOTAL +34
 
 ---
 
-## Card 53
+## Card 52
 
 - **Heading**: `// TUTORIAL`
 - **Card sits**: the middle of the screen, over the open page; **BOT**: resting
@@ -1035,7 +1018,7 @@ TOTAL +34
 
 ---
 
-## Card 54
+## Card 53
 
 - **Heading**: `// TUTORIAL`
 - **Card sits**: the bottom of the screen, over the open page; **BOT**: resting
@@ -1052,7 +1035,7 @@ TOTAL +34
 
 ---
 
-## Card 55
+## Card 54
 
 - **Heading**: `// TUTORIAL`
 - **Card sits**: the middle of the screen, over the open page; **BOT**: resting
@@ -1069,7 +1052,7 @@ TOTAL +34
 
 ---
 
-## Card 56
+## Card 55
 
 - **Heading**: `// TUTORIAL`
 - **Card sits**: the bottom of the screen, over the open page; **BOT**: resting
@@ -1086,7 +1069,7 @@ TOTAL +34
 
 ---
 
-## Card 57
+## Card 56
 
 - **Heading**: `// TUTORIAL`
 - **Card sits**: the bottom of the screen, over the open page; **BOT**: resting
@@ -1103,7 +1086,7 @@ TOTAL +34
 
 ---
 
-## Card 58
+## Card 57
 
 - **Heading**: `// TUTORIAL`
 - **Card sits**: the middle of the screen, over the open page; **BOT**: resting
@@ -1120,7 +1103,7 @@ TOTAL +34
 
 ---
 
-## Card 59
+## Card 58
 
 - **Heading**: `// TUTORIAL`
 - **Card sits**: the bottom of the screen, over the open page; **BOT**: resting
@@ -1137,55 +1120,7 @@ TOTAL +34
 
 ---
 
-## Card 60
-
-- **Heading**: `// TUTORIAL`
-- **Card sits**: top of the board; **BOT**: resting
-- **Buttons**: EXIT, BACK, NEXT
-
-**Says:**
-
-> In STORY, every game has a key to crack: its ENCRYPTION STRENGTH, shown under BYTEFALL. It starts at 128-BIT, cracked at 1,500 points.
-
-- **Asks you to**: Tap NEXT.
-- **Lights up**: the line under BYTEFALL (in focus) and a sample ENCRYPTION STRENGTH line and SCORE bar (for the lesson)
-- **Notes**: 
-
----
-
-## Card 61
-
-- **Heading**: `// TUTORIAL`
-- **Card sits**: top of the board; **BOT**: happy
-- **Buttons**: EXIT, BACK, NEXT
-
-**Says:**
-
-> The bar along the bottom of SCORE fills toward it. Crack it for KEYS, then GO DEEPER for a stronger key and more KEYS (each one harder: its layers come sooner), or DISCONNECT and end the game on a win.
-
-- **Asks you to**: Tap NEXT.
-- **Lights up**: the bar along the bottom of SCORE (in focus) and a sample ENCRYPTION STRENGTH line and SCORE bar (for the lesson)
-- **Notes**: 
-
----
-
-## Card 62
-
-- **Heading**: `// TUTORIAL`
-- **Card sits**: top of the board; **BOT**: devious
-- **Buttons**: EXIT, BACK, NEXT
-
-**Says:**
-
-> Every key you crack also recovers a FILE of a STORY, typed out on the cracked card. Deeper chapters need deeper keys: 256-BIT, then 512-BIT. Some files reveal the exploits and patches you can use in STORY.
-
-- **Asks you to**: Tap NEXT.
-- **Lights up**: the line under BYTEFALL (in focus) and a sample ENCRYPTION STRENGTH line and SCORE bar (for the lesson)
-- **Notes**: 
-
----
-
-## Card 63
+## Card 59
 
 - **Heading**: `// TUTORIAL`
 - **Card sits**: over the main menu, from the top of the EXPLOITS / STORE row down; **BOT**: resting
@@ -1194,32 +1129,15 @@ TOTAL +34
 
 **Says:**
 
-> On the main menu, tap CLASSIC again to switch it to STORY (and again for CLASSIC). In STORY, the button under its settings shows the story you’re decrypting; tap it to read the files in the ARCHIVE.
-
-- **Asks you to**: Tap NEXT.
-- **Lights up**: CLASSIC / STORY on the main menu (in focus)
-- **Notes**: No BACK on this card: the lesson's board is gone.
-
----
-
-## Card 64
-
-- **Heading**: `// TUTORIAL`
-- **Card sits**: over the main menu, from the top of the EXPLOITS / STORE row down; **BOT**: resting
-- **Buttons**: EXIT, BACK, NEXT
-- **Opens**: the main menu (CLASSIC's panel)
-
-**Says:**
-
 > Before a game, PATCHES and EXPLOITS on the main menu let you bring an edge in (up to two of each), once you have some.
 
 - **Asks you to**: Tap NEXT.
 - **Lights up**: PATCHES on the main menu (in focus) and EXPLOITS on the main menu (in focus)
-- **Notes**: 
+- **Notes**: No BACK on this card: the lesson's board is gone.
 
 ---
 
-## Card 65
+## Card 60
 
 - **Heading**: `// TUTORIAL`
 - **Card sits**: over the main menu, from the top of the EXPLOITS / STORE row down; **BOT**: happy

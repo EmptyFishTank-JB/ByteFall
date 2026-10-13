@@ -119,6 +119,10 @@ const Stories = (() => {
   function render() {
     const el = bodyEl();
     if (!el) return;
+    if (window.STORY_SOON) { // (the Play release, till the story's done)
+      el.innerHTML = '<p class="archive-note"><b>STORY // COMING SOON.</b> A story to decrypt, one key at a time: every key you crack brings the next transmission, and they\'ll all be kept here.</p>';
+      return;
+    }
     const s = view && byId(view);
     if (!s || !isOpen(s)) { view = null; listView(el); } else storyView(el, s);
     marks();
@@ -187,6 +191,7 @@ const Stories = (() => {
   }
   // (new files: a dot on the ARCHIVE tab and the menu's STORY button)
   function marks() {
+    if (window.STORY_SOON) return;
     const any = STORIES.some((s) => isOpen(s) && fresh(s) > 0);
     for (const el of document.querySelectorAll('.menu-tabs [data-pane="archive"], #story-row button')) el.classList.toggle('has-unread', any);
   }
