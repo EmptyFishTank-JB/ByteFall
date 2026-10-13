@@ -548,6 +548,135 @@ const SFX = (() => {
         osc.start(t); osc.stop(t + 0.055);
       } catch (e) {}
     },
+    // STORY's transmissions (stories.js), the same in every theme. An IM landing: a soft two-note
+    // chime, up a fifth; one you send: a quick rising pip
+    incoming() {
+      if (muted && !forcing) return;
+      try {
+        const c = getCtx();
+        const t = c.currentTime;
+        [[1046.5, 0], [1568, 0.085]].forEach(([f, d]) => {
+          const o = c.createOscillator();
+          o.type = 'sine';
+          o.frequency.value = f;
+          const g = c.createGain();
+          g.gain.setValueAtTime(0, t + d);
+          g.gain.linearRampToValueAtTime(VOL * 0.5, t + d + 0.006);
+          g.gain.exponentialRampToValueAtTime(0.001, t + d + 0.28);
+          o.connect(g); g.connect(dest(c));
+          o.start(t + d); o.stop(t + d + 0.3);
+        });
+      } catch (e) {}
+    },
+    sent() {
+      if (muted && !forcing) return;
+      try {
+        const c = getCtx();
+        const t = c.currentTime;
+        const o = c.createOscillator();
+        o.type = 'sine';
+        o.frequency.setValueAtTime(620, t);
+        o.frequency.exponentialRampToValueAtTime(1240, t + 0.07);
+        o.connect(envelope(c, VOL * 0.3, t, 0.1));
+        o.start(t); o.stop(t + 0.11);
+      } catch (e) {}
+    },
+    // (a file printing out: a typewriter's key, never quite the same twice; 'return' the carriage
+    // ratcheting back at a line's end; 'bell' its bell, at the end of the file)
+    typewriter(what = 'key') {
+      if (muted && !forcing) return;
+      try {
+        const c = getCtx();
+        const t = c.currentTime;
+        const r = (a, b) => a + Math.random() * (b - a);
+        if (what === 'bell') {
+          const o = c.createOscillator();
+          o.type = 'sine';
+          o.frequency.value = 2093;
+          o.connect(envelope(c, VOL * 0.28, t, 0.6));
+          o.start(t); o.stop(t + 0.62);
+          return;
+        }
+        const ret = what === 'return';
+        const len = ret ? 0.12 : r(0.014, 0.022);
+        const hit = noiseBuffer(c, len, (i, n) => (ret ? (Math.floor(i / 180) % 2 ? 0.8 : 0.25) : 1) * Math.pow(1 - i / n, ret ? 1 : 3));
+        const bp = filter(c, 'bandpass', ret ? 1800 : r(2600, 3600), 1.2);
+        hit.connect(bp); bp.connect(envelope(c, VOL * (ret ? 0.35 : r(0.45, 0.6)), t, len));
+        hit.start(t); hit.stop(t + len);
+        const o = c.createOscillator(); // (the type bar striking the platen)
+        o.type = 'triangle';
+        o.frequency.setValueAtTime(r(170, 220), t);
+        o.frequency.exponentialRampToValueAtTime(90, t + 0.03);
+        o.connect(envelope(c, VOL * 0.35, t, 0.035));
+        o.start(t); o.stop(t + 0.04);
+      } catch (e) {}
+    },
+    // (a call: a voice down a phone line, a low murmur for each word, dur seconds; its pitch wanders
+    // a little and falls, as a voice does)
+    voice(dur = 0.2) {
+      if (muted && !forcing) return;
+      try {
+        const c = getCtx();
+        const t = c.currentTime;
+        const f = 118 + Math.random() * 34;
+        const o = c.createOscillator();
+        o.type = 'sawtooth';
+        o.frequency.setValueAtTime(f, t);
+        o.frequency.linearRampToValueAtTime(f * 0.86, t + dur);
+        const lo = filter(c, 'highpass', 320);
+        const hi = filter(c, 'lowpass', 1500);
+        const g = c.createGain();
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(VOL * 0.28, t + 0.025);
+        g.gain.setValueAtTime(VOL * 0.28, t + Math.max(0.03, dur - 0.04));
+        g.gain.linearRampToValueAtTime(0, t + dur);
+        o.connect(lo); lo.connect(hi); hi.connect(g); g.connect(dest(c));
+        o.start(t); o.stop(t + dur + 0.01);
+      } catch (e) {}
+    },
+    // (a call ringing: two bursts of a phone's two tones; and hung up: a click, then two short tones)
+    ring() {
+      if (muted && !forcing) return;
+      try {
+        const c = getCtx();
+        const t = c.currentTime;
+        [0, 0.6].forEach((d) => [440, 480].forEach((f) => {
+          const o = c.createOscillator();
+          o.type = 'sine';
+          o.frequency.value = f;
+          const g = c.createGain();
+          g.gain.setValueAtTime(0, t + d);
+          g.gain.linearRampToValueAtTime(VOL * 0.3, t + d + 0.01);
+          g.gain.setValueAtTime(VOL * 0.3, t + d + 0.39);
+          g.gain.linearRampToValueAtTime(0, t + d + 0.4);
+          o.connect(g); g.connect(dest(c));
+          o.start(t + d); o.stop(t + d + 0.41);
+        }));
+      } catch (e) {}
+    },
+    hangup() {
+      if (muted && !forcing) return;
+      try {
+        const c = getCtx();
+        const t = c.currentTime;
+        const k = noiseBuffer(c, 0.03, (i, n) => Math.pow(1 - i / n, 4));
+        const bp = filter(c, 'bandpass', 1200, 1);
+        k.connect(bp); bp.connect(envelope(c, VOL * 0.5, t, 0.03));
+        k.start(t); k.stop(t + 0.03);
+        [0.18, 0.42].forEach((d) => {
+          const o = c.createOscillator();
+          o.type = 'sine';
+          o.frequency.value = 425;
+          const g = c.createGain();
+          g.gain.setValueAtTime(0, t + d);
+          g.gain.linearRampToValueAtTime(VOL * 0.25, t + d + 0.01);
+          g.gain.setValueAtTime(VOL * 0.25, t + d + 0.15);
+          g.gain.linearRampToValueAtTime(0, t + d + 0.16);
+          o.connect(g); g.connect(dest(c));
+          o.start(t + d); o.stop(t + d + 0.17);
+        });
+      } catch (e) {}
+    },
     // THE LEVEL METER after a game: a rising square tone while it fills (from f0 to f1 of the level,
     // 0-1, over dur seconds), and a little fanfare at each LEVEL UP
     xpFill(f0, f1, dur) {
@@ -633,6 +762,6 @@ const SFX = (() => {
       return muted;
     },
   };
-  const OWN = ['blip', 'count', 'xpFill', 'levelUp'];
+  const OWN = ['blip', 'count', 'xpFill', 'levelUp', 'incoming', 'sent', 'typewriter', 'voice', 'ring', 'hangup'];
   return api;
 })();

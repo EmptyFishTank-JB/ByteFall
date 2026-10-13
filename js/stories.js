@@ -68,52 +68,123 @@ const Stories = (() => {
   const linesHtml = (it) => `<div class="sf-lines">${it.lines.map(lineHtml).join('')}</div>`;
   const kindLine = (it) => `${it.kind.toUpperCase()} // ${it.title}`;
 
-  // THE TYPING: the lines from `from` on, one after another, two letters a tick, a caret on the newest
+  // THE PLAYING: the lines from `from` on, one after another, each the way it would come in. A
+  // file's lines print out, two letters a tick, a typewriter's keys under them; an IM's messages land
+  // whole, a beat between them about as long as the other end would take to write the next (shorter
+  // for a second message from the same hand; "..." while they type), a chime as each lands; a call's
+  // words come at a speaking pace (about 150 a minute, a pause at each comma and stop), a low voice
+  // down the line; its end, a note, after a beat, at once. A tap shows the rest at once
   let typing = null;
+  let ringing = null; // (a call's ring, every few seconds till it's answered)
+  const TICK = 22; // (a file's printing: two letters a tick)
+  const imBeat = (x, prev) => { const same = prev && prev.who === x.who; return Math.min(2800, (same ? 450 : 900) + x.text.length * (same ? 14 : 20)); };
+  const wordMs = (w) => 80 + w.replace(/[^A-Za-z0-9']/g, '').length * 52 + (/[.?!]["']?$/.test(w) ? 380 : /[,;:\u2014-]["']?$/.test(w) ? 200 : 0);
   function finish(t) {
-    t.targets.forEach((x) => { x.p.classList.remove('tl-wait'); if (x.sp) x.sp.textContent = x.text; });
+    t.targets.forEach((x) => { x.p.classList.remove('tl-wait', 'tl-typing'); if (x.sp) x.sp.textContent = x.text; });
     const last = [...t.targets].reverse().find((x) => x.sp);
     if (last) last.sp.appendChild(t.caret);
   }
-  function stop() {
+  function skip() {
     if (!typing) return;
-    clearInterval(typing.timer);
+    clearTimeout(typing.timer);
     finish(typing);
     typing = null;
   }
+  function stop() {
+    if (ringing) { clearInterval(ringing); ringing = null; }
+    skip();
+  }
   function typeLines(host, from = 0) {
-    stop();
+    skip();
     const caret = document.createElement('span');
     caret.className = 'sf-caret';
-    const targets = [...host.querySelectorAll('.tl')].slice(from).map((p) => { const sp = p.querySelector('.tl-t'); return { p, sp, text: sp ? sp.textContent : '' }; });
+    const targets = [...host.querySelectorAll('.tl')].slice(from).map((p) => { const sp = p.querySelector('.tl-t'); return { p, sp, k: p.classList[1].slice(3), who: (p.querySelector('.tl-who') || {}).textContent, text: sp ? sp.textContent : '' }; });
     const t = { targets, caret, timer: 0 };
     if (lowFx()) { finish(t); return; }
     targets.forEach((x) => { x.p.classList.add('tl-wait'); if (x.sp) x.sp.textContent = ''; });
-    let i = 0;
-    let at = 0;
     typing = t;
-    t.timer = setInterval(() => {
-      while (i < targets.length && !(targets[i].sp && targets[i].text)) targets[i++].p.classList.remove('tl-wait'); // (gaps: at once)
-      if (i >= targets.length) { clearInterval(t.timer); if (typing === t) typing = null; return; }
-      const x = targets[i];
+    const later = (ms, f) => { t.timer = setTimeout(() => { if (typing === t) f(); }, ms); };
+    const show = (x) => {
       x.p.classList.remove('tl-wait');
-      at = Math.min(x.text.length, at + 2);
-      x.sp.textContent = x.text.slice(0, at);
-      x.sp.appendChild(caret);
       const below = x.p.offsetTop + x.p.offsetHeight - host.clientHeight; // (the newest line in view)
       if (below > host.scrollTop) host.scrollTop = below;
-      if (at >= x.text.length) { i++; at = 0; }
-    }, 22);
+    };
+    let first = true;
+    let prev = null; // (the last IM, for the beat before the next)
+    const next = (i) => {
+      if (i >= targets.length) { finish(t); typing = null; return; }
+      const x = targets[i];
+      const lead = first;
+      first = false;
+      if (!x.sp || !x.text) { show(x); next(i + 1); return; } // (a gap: at once)
+      if (x.k === 'im' || x.k === 'you') { // (a message, whole, after its beat)
+        const ms = lead ? 350 : imBeat(x, prev);
+        if (x.k === 'im' && ms > 600) { x.p.classList.add('tl-typing'); show(x); }
+        later(ms, () => {
+          x.p.classList.remove('tl-typing');
+          x.sp.textContent = x.text;
+          x.sp.appendChild(caret);
+          show(x);
+          if (x.k === 'you') SFX.sent(); else SFX.incoming();
+          prev = x;
+          next(i + 1);
+        });
+        return;
+      }
+      if (x.k === 'voice') { // (spoken, a word at a time)
+        const words = x.text.split(/(?<=\s)/);
+        let w = 0;
+        const say = () => {
+          const ms = wordMs(words[w].trim());
+          x.sp.textContent = words.slice(0, ++w).join('');
+          x.sp.appendChild(caret);
+          show(x);
+          SFX.voice(Math.min(0.32, (ms - 40) / 1000 * 0.7));
+          later(ms, w < words.length ? say : () => next(i + 1));
+        };
+        later(lead ? 300 : 450, say);
+        return;
+      }
+      if (x.k === 'chat' || x.k === 'line') { // (printed out)
+        let at = 0;
+        const tick = () => {
+          at = Math.min(x.text.length, at + 2);
+          x.sp.textContent = x.text.slice(0, at);
+          x.sp.appendChild(caret);
+          show(x);
+          if (/\S/.test(x.text.slice(at - 2, at)) && at % 4 < 2) SFX.typewriter();
+          if (at < x.text.length) { later(TICK, tick); return; }
+          const end = !targets.slice(i + 1).some((y) => y.text);
+          SFX.typewriter(end ? 'bell' : 'return');
+          later(TICK, () => next(i + 1));
+        };
+        tick();
+        return;
+      }
+      later(lead ? 0 : 600, () => { // (a call's end, a note: at once, after a beat)
+        x.sp.textContent = x.text;
+        show(x);
+        if (x.k === 'end') SFX.hangup();
+        next(i + 1);
+      });
+    };
+    next(0);
   }
-  // A call rings first: what comes before the ring and the ring at once, ANSWER on it, the rest once
-  // it's answered (or at once, with no ring)
+  // A call rings first (a voicemail doesn't: it's waiting): what comes before the ring and the ring
+  // at once, ANSWER on it, the rest once it's answered (or at once, with no ring)
   function play(host, it) {
+    stop();
     const ring = it.lines.findIndex((l) => l.k === 'ring');
     if (ring < 0) { typeLines(host); return; }
     const ps = [...host.querySelectorAll('.tl')];
     ps.slice(ring + 1).forEach((p) => p.classList.add('tl-wait'));
     const ringEl = ps[ring];
     ringEl.classList.add('ringing');
+    if (!/^VOICEMAIL/.test(it.lines[ring].t)) {
+      let rings = 0;
+      SFX.ring();
+      ringing = setInterval(() => { if (++rings >= 7 || !ringEl.isConnected) { clearInterval(ringing); ringing = null; } else SFX.ring(); }, 3000);
+    }
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'sf-answer';
@@ -122,6 +193,7 @@ const Stories = (() => {
       e.stopPropagation();
       b.remove();
       ringEl.classList.remove('ringing');
+      if (ringing) { clearInterval(ringing); ringing = null; }
       SFX.play('click');
       typeLines(host, ring + 1);
     });
@@ -154,7 +226,7 @@ const Stories = (() => {
     const it = s.items[n];
     for (const [id, k] of Object.entries(it.gifts || {})) Progress.storyKitAdd(id, k); // (MOTH's gifts, to the kit)
     host.innerHTML = `<p class="sf-head">RECOVERED // ${esc(s.title)} // ${unit(s)} ${n + 1} OF ${count(s)}</p><p class="sf-doc">${esc(kindLine(it))}</p>${linesHtml(it)}${footHtml(it)}`;
-    host.onclick = stop; // (a tap: the whole of it at once)
+    host.onclick = skip; // (a tap: the whole of it at once)
     if (card && host.scrollHeight > host.clientHeight + 1) card.classList.add('tight'); // (measured whole first)
     play(host, it);
     if (introLine(it)) {
@@ -283,13 +355,15 @@ const Stories = (() => {
     due = null;
     return showCard(`// ${x.kind === 'call' ? 'VOICEMAIL' : 'IM'} // ${LABEL[x.from] || x.from.toUpperCase()}`, x);
   }
-  // (a card over everything, its lines typed out: an unprompted message, or a story's first transmission)
-  function showCard(title, it) {
+  // (a card over everything, its lines typed out: an unprompted message, or a story's first transmission;
+  // foot: what it introduces and gives under it, as on the cracked card (?storytest's review))
+  function showCard(title, it, foot = false) {
     const el = document.getElementById('story-msg');
     if (!el) return false;
     document.getElementById('story-msg-title').textContent = title;
     const body = document.getElementById('story-msg-body');
-    body.innerHTML = linesHtml(it);
+    body.innerHTML = linesHtml(it) + (foot ? footHtml(it) : '');
+    body.onclick = skip; // (a tap: the whole of it at once)
     el.classList.remove('hidden');
     play(body, it);
     SFX.play('click');
@@ -337,5 +411,5 @@ const Stories = (() => {
   marks();
   refreshRow();
 
-  return { onCrack, stop, render, refreshRow, openStory, introduced, introName, moment, showDue, atStart, toList: () => { view = null; }, picked: () => picked().id };
+  return { onCrack, stop, showCard, kindLine, render, refreshRow, openStory, introduced, introName, moment, showDue, atStart, toList: () => { view = null; }, picked: () => picked().id };
 })();
