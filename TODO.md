@@ -9,6 +9,18 @@ Ideas queued for later (not built yet).
 - **Sound themes**: more unlockable sets of game sound effects (like the color themes and fonts), each
   in the style of one of the tracks. Done: TERMINAL (the first, free) and HANDSHAKE (with TRACK 10).
 - **CPU customization**: simple things for the bots to wear, e.g. retro-futuristic glasses.
+- **The tutorial becomes STORY's intro** (from a tester: the tutorial was too long, its first cards
+  forgotten by the end): the game's mechanics taught through the story, the person texting the player
+  (MOTH, an UNKNOWN CONTACT then) walking them through decrypting bits as they play, a few things at a
+  time and in context. It's the intro to STORY, before GHOSTS' chapter 1 (which stays as it is). The
+  narration cards (BOT) stay for specific topics, opened from RULES & RECORDS (layers, exploits,
+  patches, infections, the STORE...) rather than one long lesson.
+- **Lettered columns**: the drop buttons A to G (and A to H on the 8x8) instead of 1 to 7, as a tester
+  read the column numbers as part of the rule (a 4 and a 3 in column 7 to make 7). Bits keep their
+  numbers (no pips: numbers stay the most readable, for accessibility). The same tester found the
+  encrypted bits' [-] and [=] confusing: worth a clearer look or a word on what they are.
+- **Negative scoring**: the score can go down. Infected bits come up more often and take points for
+  every drop they're left on the grid, so clearing them matters.
 - **A pre-registration theme**: a color theme (maybe a matching font or sound theme) given to everyone
   who pre-registers on Google Play, as Play Console's pre-registration reward. Needs an in-app product
   for it and the game granting purchases made outside the app (checked at launch and on resume).
