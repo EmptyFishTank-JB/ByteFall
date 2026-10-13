@@ -2404,7 +2404,7 @@ body:not(.vs-mode) .hud #pulse-stat > .layer-mark { box-sizing: border-box; padd
 /* (NEXT and TIME's short panel under CURRENT: its words and value trimmed to their capitals, so they
    center in it by what shows, whatever the font's ascent and descent) */
 body:not(.vs-mode) .hud-bits :is(#next-stat, #time-stat) > :is(.label, .value) { text-box: trim-both cap alphabetic; }
-/* (CLASSIC's ⇄: it flips to STORY, and back) */
+/* (CLASSIC's cycle icon: it flips to STORY, and back) */
 .modes .swap-ico { width: 0.9em; height: 0.9em; margin-left: 0.4em; vertical-align: -0.1em; flex: none; }
 
 /* VS: the drop clock, a bar along the bottom of CURRENT that runs down; red and pulsing for the

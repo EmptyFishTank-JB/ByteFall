@@ -606,8 +606,9 @@ const STORY_USES = 2;
 const layerInterval = (pts) => (mode === 'vs' ? BASE_INTERVAL : goal ? storyPace(goal.k).interval : DIFFICULTIES[difficulty].interval(pts));
 // (the mode's name as the game shows it: CLASSIC's is STORY while that's on)
 const modeLabel = () => (mode === 'classic' && goalWanted ? 'STORY' : MODES[mode].label);
-// (the switch's mark on CLASSIC's button: two arrows, one each way)
-const SWAP_SVG = '<svg class="swap-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 5.5h10M9 2.5l3 3-3 3M14 10.5H4M7 7.5l-3 3 3 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>';
+// (the switch's mark on CLASSIC's button: two arrows chasing each other round a ring, a cycle; not
+// PIVOT's two straight arrows)
+const SWAP_SVG = '<svg class="swap-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M12.6 5.6A5.2 5.2 0 0 0 3.2 6.4M2.6 10.4A5.2 5.2 0 0 0 12 9.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M1 4.6l2.4 2.6 2.5-2.4zM14.9 11.4l-2.4-2.6-2.5 2.4z" fill="currentColor"/></svg>';
 let goalOpen = false;
 const goalCardEl = document.getElementById('goal-card');
 const goalBarEl = document.getElementById('goal-bar');
@@ -2734,7 +2735,7 @@ restartBtn.addEventListener('click', () => {
 });
 
 // CLASSIC ⇄ STORY: CLASSIC's button, tapped while it's the mode, flips it; mid-game it asks first, as a
-// new difficulty does, and starts a new game. The button says which it is, with its ⇄
+// new difficulty does, and starts a new game. The button says which it is, with its cycle icon
 function toggleStory(btn) {
   if (STORY_SOON) { // (not yet: says so, and stays CLASSIC)
     SFX.play('denied');
