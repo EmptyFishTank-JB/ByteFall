@@ -333,19 +333,22 @@ All 15 exploits, the 5 STORY patches (OVERTIME is BLITZ's), the 3 BLACK BOXES an
   DECRYPT or VS (a new STORY-only bot, THE CUSTODIAN), started from the story row on the menu.
 - **The ARCHIVE** is sorted by sender.
 
+## Decided
+
+- **The old stories stay, as later seasons.** GHOSTS is season 1; THE TRACE, THE FOUR and PATIENT
+  ZERO (`docs/STORIES.md`) open after it, with everything GHOSTS introduced usable from their start.
+- **Kit gifts: 2 of each patch** when it's introduced, none after.
+- **Jobs are worked out together.** The 8 above are a starting point, not settled.
+- **THE CUSTODIAN gets his own VS bot**, STORY only, with his own face, look and lines (calm, polite,
+  never raises his voice), not one of the four in disguise.
+- **The ending's key.** No 1024-BIT gate: chapter 3 stays at 512-BIT, and the finale is THE
+  CUSTODIAN's VS job, which is climb enough.
+
 ## Open questions
 
-1. **The old stories.** Retire THE TRACE, THE FOUR and PATIENT ZERO, or keep them as later
-   "seasons" that unlock after GHOSTS (with everything introduced from the start)?
-2. **The ending's key.** Should transmission 24 need a deeper key than 512-BIT (1024-BIT: "the
-   strongest key")? It would make the ending a real climb.
-3. **Kit gifts.** 2 of each patch when it's introduced, and none after: enough? Or should each key
-   cracked before the market add one introduced patch to the kit?
-4. **The STORE.** Mark items STORY has introduced (and those it hasn't), or leave the STORE as it is?
-5. **Calls.** ANSWER only, or also DECLINE (which leaves the same words as a voicemail)?
-6. **Jobs.** Which transmissions should be jobs, and how many? Should the ARCADE's games come in
-   as side jobs, or stay out of STORY?
-7. **THE CUSTODIAN in VS.** A new bot with his own face (calm, a tie, never smiles), or one of the
-   four bots in disguise?
-8. **Names.** MOTH, TOLL, the Custodian, HALCYON, Adaeze Okafor, `dir.vance`, `ops.reyes` and
+1. **The STORE.** Mark items STORY has introduced (and those it hasn't), or leave the STORE as it is?
+2. **Calls.** ANSWER only, or also DECLINE (which leaves the same words as a voicemail)?
+3. **Names.** MOTH, TOLL, the Custodian, HALCYON, Adaeze Okafor, `dir.vance`, `ops.reyes` and
    `sec.hale` are all placeholders to change freely.
+4. **A second story, branching.** A Telltale-style story with choices and several endings, as its
+   own season or its own mode (`docs/STORY-PROMPT.md` notes what it would need from the game).
