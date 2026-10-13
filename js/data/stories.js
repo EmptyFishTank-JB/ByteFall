@@ -12,7 +12,7 @@ const GHOSTS_RULES = {
   7: { introduces: ['rng', 'buffer-overflow'] },
   8: { introduces: ['infections'] },
   10: { introduces: ['lookahead', 'trojan'], gifts: { lookahead: 2 } },
-  12: { introduces: ['market'] },
+  12: { introduces: ['market'], names: ['moth'] }, // ("say the moth sent you": an UNKNOWN CONTACT till now)
   13: { introduces: ['box-1'] },
   15: { introduces: ['bring'] },
   18: { introduces: ['pivot', 'swap', 'backdoor', 'second-chance'], gifts: { 'second-chance': 2 } },
