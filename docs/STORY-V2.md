@@ -58,6 +58,34 @@ transmission pays its KEYS and the card says what it would take.
 **The ARCHIVE** keeps everything, sorted by who sent it: MOTH, TOLL, UNKNOWN NUMBER and THE ARCHIVE
 (the files), so a conversation reads as one thread.
 
+### Jobs: other game modes
+
+Most transmissions come from keys cracked in STORY's usual game (CLASSIC with keys to crack). Some
+come from a **job** instead: the archive, HALCYON or TOLL puts something in your way that's played
+as another game mode. When the next transmission is a job, keys cracked still pay their KEYS but
+the cracked card says `NEXT TRANSMISSION: A JOB`, and the main menu's story row turns into it
+(`JOB // SEALED FILE // PUZZLE`): PLAY starts it. Win it and the transmission comes in, with
+KEYS (15 in chapter 1, 30 in chapter 2, 45 in chapter 3); lose and try again, nothing lost. Jobs
+skip the key-depth gate (they get harder by chapter instead), keep STORY's tool rules (introduced
+ones only) and never touch BEST.
+
+| Job | Mode | In the story | How it's won |
+|---|---|---|---|
+| **SEALED FILE** | PUZZLE | a document locked under a fixed board | clear the board in its drops (a PUZZLE board, its tier rising each chapter); MOTH puts 1 HINT and 1 UNDO in the kit before the first |
+| **LIVE TRACE** | BLITZ | HALCYON tracing you while you work | reach the score before the clock runs out (2:00 in chapter 2, 1:30 in chapter 3) |
+| **FIREWALL** | BREACH | breaking into HALCYON's servers | break through the firewall with the bits you're given |
+| **TOLL'S TEST** | DECRYPT | TOLL won't sell to just anyone | reach the score with a fixed set of 40 bits |
+| **THE CUSTODIAN** | VS | his tracing program, head to head | beat it in VS CLASSIC: first to overflow loses (a STORY-only bot, THE CUSTODIAN: patient, never greedy, faster each chapter) |
+
+The jobs, in the story: **4** SEALED FILE, **9** LIVE TRACE, **11** FIREWALL, **13** TOLL'S TEST,
+**17** SEALED FILE, **19** LIVE TRACE, **22** FIREWALL, **24** THE CUSTODIAN (the finale). That's 8
+of the 24; the other 16 come from keys.
+
+**Side jobs (optional, later).** The ARCADE's games fit as extra jobs that pay KEYS and resources
+but aren't needed to finish: CODE BREAKER (the lock on one of TOLL's boxes), TRACE (tracing the
+unknown number back), ROUTING (bouncing your line so the trace loses you), DEFRAG (piecing together
+Okafor's damaged files) and DECODE (a picture hidden in the archive).
+
 ### Unprompted contact
 
 A few short messages come outside the cracks, once each, when something happens:
@@ -111,7 +139,7 @@ A few short messages come outside the cracks, once each, when something happens:
 
 *The chain meter appears; it earns BITFLIP.*
 
-**4 // FILE // HALCYON // THE LEDGER: PRICE SHEET**
+**4 // FILE // HALCYON // THE LEDGER: PRICE SHEET** · **JOB: SEALED FILE (PUZZLE)**
 > STANDARD CORRECTION (one debt, one record, one conviction): 40,000.
 > FULL CORRECTION: on request.
 > All corrections are permanent. HALCYON keeps no copies.
@@ -149,7 +177,7 @@ A few short messages come outside the cracks, once each, when something happens:
 
 ### Chapter 2: THE LIST (256-BIT or deeper)
 
-**9 // FILE // HALCYON // #security**
+**9 // FILE // HALCYON // #security** · **JOB: LIVE TRACE (BLITZ, 2:00)**
 > `<sec.hale>` someone's reading the okafor archive. slow. one key at a time.
 > `<dir.vance>` Trace them.
 > `<sec.hale>` tried. they drop the line every time we get close.
@@ -162,7 +190,7 @@ A few short messages come outside the cracks, once each, when something happens:
 > **moth** · TROJAN wipes out every block touching where it lands. for when it's piled up.
 > **moth** · you'll want to see them coming.
 
-**11 // FILE // HALCYON // THE LIST (excerpt)**
+**11 // FILE // HALCYON // THE LIST (excerpt)** · **JOB: FIREWALL (BREACH)**
 > 0117 // MARSH, D. // STANDARD // DEBT // CORRECTED
 > 0118 // FLORES, I. // FULL // CORRECTED
 > 0119 // NAKASHIMA, R. // FULL // CORRECTED
@@ -177,8 +205,8 @@ A few short messages come outside the cracks, once each, when something happens:
 
 *The BLACK MARKET opens from the PATCHES and EXPLOITS buttons. It sells what's been introduced.*
 
-**13 // IM // TOLL** · *introduces BLACK BOX I*
-> **TOLL** · THE MOTH'S FRIEND. FINE.
+**13 // IM // TOLL** · *introduces BLACK BOX I* · **JOB: TOLL'S TEST (DECRYPT)**
+> **TOLL** · THE MOTH'S FRIEND. YOU PASSED. BARELY.
 > **TOLL** · STOCK TURNS OVER EVERY KEY YOU CRACK. PRICES ARE PRICES.
 > **TOLL** · NEW IN: BLACK BOX I. COULD BE ANYTHING. COULD BE SOMETHING THAT BITES.
 > **TOLL** · NO REFUNDS. NO NAMES. NO EXCEPTIONS.
@@ -209,7 +237,7 @@ cards too. The STORE marks what STORY has introduced.*
 
 ### Chapter 3: CORRECTIONS (512-BIT or deeper)
 
-**17 // FILE // HALCYON // CORRECTION ORDER 0120**
+**17 // FILE // HALCYON // CORRECTION ORDER 0120** · **JOB: SEALED FILE (PUZZLE)**
 > SUBJECT: OKAFOR, ADAEZE. ENGINEER, HALCYON SYSTEMS.
 > TYPE: FULL.
 > REQUESTED BY: HALCYON SYSTEMS.
@@ -223,8 +251,9 @@ cards too. The STORE marks what STORY has introduced.*
 > **moth** · and RESTORE POINT. if they finish the trace, the system rolls back and you keep going. once.
 > **moth** · you're going to need once.
 
-**19 // CALL // UNKNOWN NUMBER** · *your name on an order*
+**19 // CALL // UNKNOWN NUMBER** · *your name on an order* · **JOB: LIVE TRACE (BLITZ, 1:30)**
 > INCOMING CALL // UNKNOWN NUMBER
+> "You got away from that trace. You won't twice."
 > "I've been patient."
 > "There's an order on my desk with your name on it. Your real one."
 > "Disconnect, and it stays on my desk. Keep reading, and I sign it."
@@ -243,7 +272,7 @@ cards too. The STORE marks what STORY has introduced.*
 > **moth** · PACKET SNIFFER lets you pick your next three bits. careful. it's addictive.
 > **moth** · they're the last clean tools i wrote. before.
 
-**22 // FILE // HALCYON // THE LIST (complete)**
+**22 // FILE // HALCYON // THE LIST (complete)** · **JOB: FIREWALL (BREACH)**
 > 2,948 ENTRIES. 310 FULL.
 > 2,947 CORRECTED.
 > 1 PENDING. SUBJECT: [YOU].
@@ -256,7 +285,8 @@ cards too. The STORE marks what STORY has introduced.*
 > **moth** · here's everything i have left. LOGIC BOMB, DICTIONARY ATTACK, RAINBOW TABLE, BLACK BOX.
 > **moth** · the eraser has an undo. it's under the last key. crack it.
 
-**24 // CALL // UNKNOWN NUMBER, then IM // MOTH** · *the end*
+**24 // CALL // UNKNOWN NUMBER, then IM // MOTH** · *the end* · **JOB: THE CUSTODIAN (VS)**
+> (his program, beaten: THE CUSTODIAN // OVERFLOWED)
 > INCOMING CALL // UNKNOWN NUMBER
 > "You can't put people back."
 > CALL ENDED // 0:04 (you hung up)
@@ -299,6 +329,8 @@ All 15 exploits, the 5 STORY patches (OVERTIME is BLITZ's), the 3 BLACK BOXES an
 - **The menu's PATCHES and EXPLOITS rows come back** in STORY at stage 4 (introduced ones only), so
   you can bring your own into a game, as in CLASSIC.
 - **Infections begin at transmission 8**, not from the first game.
+- **Jobs in other modes.** 8 transmissions come from a job played as PUZZLE, BLITZ, BREACH,
+  DECRYPT or VS (a new STORY-only bot, THE CUSTODIAN), started from the story row on the menu.
 - **The ARCHIVE** is sorted by sender.
 
 ## Open questions
@@ -311,5 +343,9 @@ All 15 exploits, the 5 STORY patches (OVERTIME is BLITZ's), the 3 BLACK BOXES an
    cracked before the market add one introduced patch to the kit?
 4. **The STORE.** Mark items STORY has introduced (and those it hasn't), or leave the STORE as it is?
 5. **Calls.** ANSWER only, or also DECLINE (which leaves the same words as a voicemail)?
-6. **Names.** MOTH, TOLL, the Custodian, HALCYON, Adaeze Okafor, `dir.vance`, `ops.reyes` and
+6. **Jobs.** Which transmissions should be jobs, and how many? Should the ARCADE's games come in
+   as side jobs, or stay out of STORY?
+7. **THE CUSTODIAN in VS.** A new bot with his own face (calm, a tie, never smiles), or one of the
+   four bots in disguise?
+8. **Names.** MOTH, TOLL, the Custodian, HALCYON, Adaeze Okafor, `dir.vance`, `ops.reyes` and
    `sec.hale` are all placeholders to change freely.
