@@ -4834,3 +4834,5 @@ body.storytest .phone-screen { height: min(600px, calc(100vh - 250px)); height: 
 #story-test .st-kinds button.on { color: var(--bg, #000); background: var(--accent); }
 #story-test :is(.st-title, .st-text) { width: 100%; box-sizing: border-box; padding: 6px; font: inherit; color: var(--fg); background: var(--bg, #000); border: 1px solid var(--fg-dim); border-radius: 3px; }
 #story-test .st-text { resize: vertical; max-height: 40vh; }
+/* (STORY picked while it's COMING SOON, the Play release: PLAY says so, dimmed) */
+#home-play.soon { color: var(--fg-dim); border-style: dashed; box-shadow: none; }

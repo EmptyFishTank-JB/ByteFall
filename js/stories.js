@@ -531,7 +531,7 @@ const Stories = (() => {
   function refreshRow() {
     const row = document.getElementById('story-row');
     if (!row) return;
-    row.hidden = mode !== 'classic' || daily || !goalWanted;
+    row.hidden = mode !== 'classic' || daily || !goalWanted || !!window.STORY_SOON; // (coming soon: no story named)
     if (row.hidden) return;
     const s = picked();
     row.innerHTML = '';
