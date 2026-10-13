@@ -21,7 +21,7 @@ const Tutorial = (() => {
   // face while it says the step / the explanation after the drop (idle when left out). intro:
   // the welcome ahead of the steps (not counted, no number; BEGIN starts step 1). demo: what the
   // game shows only for the lesson ('slots': the bottom row's slots, locked; 'market': one of them a
-  // BLACK MARKET; 'goal': STORY's ENCRYPTION STRENGTH line and bar). focus: selectors left bright
+  // BLACK MARKET). focus: selectors left bright
   // (and pulsing) while the rest of the screen dims, as a tap step's target is; roomy: the pulsing
   // frame 8px out from what it frames; scroll: an element brought smoothly to the top of the card
   // that scrolls it; home: the lesson goes on over the main menu (script.js's tutorialHome); recTab:
@@ -114,7 +114,6 @@ const Tutorial = (() => {
     { text: 'The RECORDS tab has its own tabs: UNLOCKS (your level and every unlock), ACHIEVEMENTS, STATS (your lifetime numbers) and HISTORY (your last 10 games).', paused: true, pane: 'records', recTab: 'unlocks', focus: ['.menu-tabs [data-pane="records"]', '.records-tabs'], float: true, next: true },
     { text: 'Every bit you decrypt is XP: 100 bits a level. At Lv 80 you can RANK UP: everything locks again to unlock once more, and each rank earns a little more.', paused: true, pane: 'records', recTab: 'unlocks', focus: ['.rec-level'], float: true, next: true },
     { text: 'NOTICES keeps a history of each notification the game has shown, newest at the top.', paused: true, pane: 'notices', focus: ['.menu-tabs [data-pane="notices"]'], float: true, next: true },
-    { text: 'The ARCHIVE holds the STORIES. Every key you crack in STORY recovers a file of the one you’re decrypting; read them all here, and pick which story to decrypt.', paused: true, pane: 'archive', focus: ['.menu-tabs [data-pane="archive"]', '.archive-story.on'], float: true, next: true },
     { text: 'Tap ← BACK, at the top left of the page.', paused: true, pane: 'archive', tap: '.card-back[data-close="records"]', pass: true, float: 'middle' },
     { text: 'Now tap EXPLOITS.', paused: true, closeMenus: true, tap: '#pause-exploits', pass: true, float: true },
     { text: 'Here’s your EXPLOITS loadout. You can only earn exploits that are in an active slot during a game.', paused: true, pane: 'exploits', focus: ['#slot-info'], float: 'middle', next: true },
@@ -136,11 +135,6 @@ const Tutorial = (() => {
     { text: 'EXTRAS has the wandering bots and the screen saver.', paused: true, settings: true, scroll: '#settings-extras', focus: ['#settings-extras'], float: true, next: true },
     { text: 'Tap ← BACK to close SETTINGS.', paused: true, settings: true, tap: '.card-back[data-close="settings"]', pass: true, float: 'middle' },
     { text: 'Tap RESUME to get back to the game.', paused: true, closeMenus: true, tap: '#pause-resume', pass: true, float: true },
-    // STORY
-    { text: 'In STORY, every game has a key to crack: its ENCRYPTION STRENGTH, shown under BYTEFALL. It starts at 128-BIT, cracked at 1,500 points.', closeMenus: true, demo: 'goal', focus: ['#game-mode-label'], roomy: true, next: true },
-    { text: 'The bar along the bottom of SCORE fills toward it. Crack it for KEYS, then GO DEEPER for a stronger key and more KEYS (each one harder: its layers come sooner), or DISCONNECT and end the game on a win.', demo: 'goal', focus: ['#goal-bar'], roomy: true, next: true, mood: 'happy' },
-    { text: 'Every key you crack also recovers a FILE of a STORY, typed out on the cracked card. Deeper chapters need deeper keys: 256-BIT, then 512-BIT. Some files reveal the exploits and patches you can use in STORY.', demo: 'goal', focus: ['#game-mode-label'], roomy: true, next: true, mood: 'devious' },
-    { text: 'On the main menu, tap CLASSIC again to switch it to STORY (and again for CLASSIC). In STORY, the button under its settings shows the story you’re decrypting; tap it to read the files in the ARCHIVE.', home: true, focus: ['.modes button[data-mode="classic"]'], float: true, next: true },
     { text: 'Before a game, PATCHES and EXPLOITS on the main menu let you bring an edge in (up to two of each), once you have some.', home: true, focus: ['#booster-row', '#starter-row'], float: true, next: true },
     { text: 'That’s everything you need to know. Good luck, decryptor.', home: true, float: true, done: true, mood: 'happy' },
   ];

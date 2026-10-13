@@ -166,7 +166,7 @@ const MODES = {
   // (CLASSIC and STORY: one mode, CLASSIC's button flipping between them, goalWanted the switch)
   classic: { label: 'CLASSIC', get noHacks() { return !!goal && !Object.keys(HACKS).some(hackAvailable); }, info: () => (goalWanted
     ? 'STORY // Uncover the story, one key at a time: every game has a key to crack, its ENCRYPTION STRENGTH. Crack it for KEYS and the next file, then go deeper (each key harder than the last) or disconnect. Tap STORY again for CLASSIC.'
-    : 'CLASSIC // No clock and no bit limit: keep your columns under the line as long as you can. Tap CLASSIC again for STORY.') },
+    : `CLASSIC // No clock and no bit limit: keep your columns under the line as long as you can.${STORY_SOON ? ' STORY is coming soon.' : ' Tap CLASSIC again for STORY.'}`) },
   decrypt: {
     label: 'DAILY DECRYPT',
     info: (date) => dailyNote(date, `the same ${DAILY_BITS} bits for everyone.`),
@@ -579,7 +579,12 @@ const goalKeys = (k) => Math.round(goalTarget(k) / 150);
 let goal = null; // this game's: k, the key being cracked now (0: 128-BIT); cracked, how many so far
 // STORY (CLASSIC's button, tapped again): CLASSIC with keys to crack, each recovering a story's next
 // file (js/stories.js); CLASSIC itself plays endless. CLASSIC at first (bytefall-goal: on is STORY)
-let goalWanted = storage.get('bytefall-goal') === 'on';
+// STORY: COMING SOON in the Google Play release, till its story's done (the website and the test app
+// keep it, to try out; ?storysoon previews it): CLASSIC's second tap says so instead of switching, and
+// the ARCHIVE, RULES and the tutorial leave it out
+const STORY_SOON = !!(window.BYTEFALL_APP && window.BYTEFALL_APP.release) || new URLSearchParams(location.search).has('storysoon');
+window.STORY_SOON = STORY_SOON;
+let goalWanted = !STORY_SOON && storage.get('bytefall-goal') === 'on';
 // (STORY: CLASSIC's mode with the switch on, not the daily. It has no settings: the 7x7 board, infections
 // on, and its keys set the pace instead of a difficulty, see storyPace; what it lets you use, below)
 const storyOn = () => mode === 'classic' && !daily && goalWanted;
@@ -2721,6 +2726,11 @@ restartBtn.addEventListener('click', () => {
 // CLASSIC ⇄ STORY: CLASSIC's button, tapped while it's the mode, flips it; mid-game it asks first, as a
 // new difficulty does, and starts a new game. The button says which it is, with its ⇄
 function toggleStory(btn) {
+  if (STORY_SOON) { // (not yet: says so, and stays CLASSIC)
+    SFX.play('denied');
+    homeNotice('STORY // COMING SOON');
+    return;
+  }
   requestReset(btn, 'CONFIRM?', () => {
     goalWanted = !goalWanted;
     storage.set('bytefall-goal', goalWanted ? 'on' : 'off');
@@ -2746,11 +2756,19 @@ function closeStoryIntro() {
 document.getElementById('story-intro-close').addEventListener('click', closeStoryIntro);
 storyIntroEl.addEventListener('click', (e) => { if (e.target === storyIntroEl) closeStoryIntro(); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && storyIntroOpen()) { e.stopImmediatePropagation(); closeStoryIntro(); } }, true);
+// (RULES: STORY's section down to one line while it's coming soon)
+if (STORY_SOON) {
+  const h = document.getElementById('rules-story');
+  if (h) {
+    for (let n = h.nextElementSibling; n && n.tagName === 'P';) { const next = n.nextElementSibling; n.remove(); n = next; }
+    h.insertAdjacentHTML('afterend', '<p><b>STORY</b> is coming soon: a story to decrypt, one key at a time.</p>');
+  }
+}
 function updateStoryBtn() {
   const btn = document.querySelector('.modes button[data-mode="classic"]');
   if (!btn || (armed && armed.btn === btn)) return;
   btn.innerHTML = `${goalWanted ? 'STORY' : 'CLASSIC'}${SWAP_SVG}`;
-  btn.setAttribute('aria-label', goalWanted ? 'Story: CLASSIC with a story to recover. Tap again for CLASSIC' : 'Classic. Tap again for STORY');
+  btn.setAttribute('aria-label', goalWanted ? 'Story: CLASSIC with a story to recover. Tap again for CLASSIC' : STORY_SOON ? 'Classic. STORY is coming soon' : 'Classic. Tap again for STORY');
 }
 // GAME SETTINGS: the picked mode's own settings in a card, on one button on the menu's panel that says
 // what's set (NORMAL // INFECTIONS: ON). CLASSIC: DIFFICULTY and INFECTIONS in the card (STORY: none);
@@ -5890,9 +5908,7 @@ storyKitEl.addEventListener('click', (e) => { if (e.target === storyKitEl) close
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && kitOpen()) { e.stopImmediatePropagation(); closeStoryKit(); } }, true);
 // THE TUTORIAL's look at the bottom row (tutorial.js, a card's demo): 'slots', the four slots shut,
 // each with its padlock and level; 'market', the left side slot a BLACK MARKET (a TROJAN for sale,
-// three drops left); 'goal', CLASSIC's ENCRYPTION STRENGTH line and a part-filled SCORE bar; null, back
-// as the tutorial has them (hidden)
-let demoLine = null;
+// three drops left); null, back as the tutorial has them (hidden)
 let demoSlots = null; // (the slots' demo while it's up: their usual drawing leaves them be)
 function tutorialDemo(kind) {
   demoSlots = kind === 'slots' || kind === 'market' ? kind : null;
@@ -5916,18 +5932,6 @@ function tutorialDemo(kind) {
     }
   } else if (mode === 'tutorial' || !kind) {
     [...ends, ...sides].forEach((b) => { if (mode === 'tutorial') { b.hidden = true; b.dataset.key = ''; } });
-  }
-  const label = document.getElementById('game-mode-label');
-  if (kind === 'goal') {
-    if (demoLine === null) demoLine = label.textContent;
-    label.textContent = '// STORY // 128-BIT: 1,500';
-    goalBarEl.hidden = false;
-    goalBarEl.firstElementChild.style.width = '40%';
-    goalBarEl.classList.remove('near');
-  } else if (demoLine !== null) {
-    label.textContent = demoLine;
-    demoLine = null;
-    updateGoal();
   }
 }
 // The PATCH SLOTS: built once, at the row's two ends, redrawn as they change
