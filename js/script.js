@@ -657,8 +657,16 @@ document.getElementById('goal-deeper').addEventListener('click', () => {
   SFX.play('click');
   closeGoal(() => {
     goal.k++;
-    // (a stronger key: its pace at once, the count to the next layer cut to it, never to nothing)
-    pulseInterval = Math.max(dropsSinceLastPulse + 1, layerInterval(score));
+    // (a clean slate for the new key: the board the last one was cracked on bursts away, layers,
+    // infected bits and all, any infection running cured; the next layer a full count away, at the
+    // stronger key's pace)
+    const all = columns.flatMap((c, col) => c.map((cell, row) => (cell ? { row, col } : null)).filter(Boolean));
+    if (all.length) { FX.burst(cellsAt(all)); SFX.play('burst'); }
+    columns = columns.map(() => []);
+    cureInfections();
+    dropsSinceLastPulse = 0;
+    pulseInterval = layerInterval(score);
+    render();
     storyKitReset(); // (a new key: STORY_USES of each again, the BLACK MARKET restocked)
     updateHud();
     updateFreeBtn(); // (and what the file just recovered revealed: the buttons, the chain meter)
