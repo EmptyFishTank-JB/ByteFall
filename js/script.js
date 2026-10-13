@@ -5571,7 +5571,9 @@ function puzzleUndo() {
 }
 document.getElementById('puzzle-hint').addEventListener('click', (e) => useTool('hint', e.currentTarget, puzzleHint));
 document.getElementById('puzzle-undo').addEventListener('click', (e) => useTool('undo', e.currentTarget, puzzleUndo));
-const freeAllowed = () => freeExploit.ready && !daily && mode !== 'puzzle' && mode !== 'vs' && mode !== 'tutorial';
+// (STORY: only once the story's introduced it; the free one isn't the story's otherwise)
+const freeAllowed = () => freeExploit.ready && !daily && mode !== 'puzzle' && mode !== 'vs' && mode !== 'tutorial'
+  && (!storyOn() || storyIntro().has(freeExploitId()));
 // Which one it'll be is picked once (so the button can show its icon), from the first five
 function freeExploitId() {
   const ids = Progress.exploitOrder().slice(0, 5);
