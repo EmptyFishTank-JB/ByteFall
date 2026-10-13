@@ -904,7 +904,7 @@ with a cached older script (GitHub Pages lets browsers cache for 10 minutes).
 - `assets/fonts/` — the unlockable fonts, Share Tech Mono (Carrois Type Design), Press Start 2P (CodeMan38), Bitcount Single (Petr van Blokland) and Bytesized (Baltdev), from Google Fonts, with their SIL Open Font License files
 - `js/cpu.js` — VS CPU: the computer opponent (a copy of the board rules with no animation, and a player that tries every column)
 - `js/progress.js` — lifetime stats, earnable unlocks and achievements
-- `docs/STORIES.md` — STORY's stories as the game has them now (the preliminary version); `docs/STORY-V2.md` — GHOSTS, the STORY rework draft for review (an informant's IMs, a black market and threatening calls introducing the tools; jobs played as PUZZLE, BLITZ, BREACH, DECRYPT and VS)
+- `docs/STORIES.md` — STORY's stories as the game has them now (the preliminary version); `docs/STORY-V2.md` — GHOSTS, the STORY rework draft for review (an informant's IMs, a black market and threatening calls introducing the tools; jobs played as PUZZLE, BLITZ, BREACH, DECRYPT and VS); `docs/STORY-PROMPT.md` — the brief for writing GHOSTS with other assistants, and notes for a branching story
 - `docs/achievements.csv` — every achievement grouped by what it's about (category, name, description, goal, and whether it's standard, hidden or impossible)
 - `manifest.webmanifest`, `assets/icons/` — the home-screen app view and icons
 - `js/data/puzzles.js` — the PUZZLE boards, generated and verified by brute force (1-3 solutions each, none solvable in fewer drops)
