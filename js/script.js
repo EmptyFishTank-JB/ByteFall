@@ -580,12 +580,12 @@ const goalKeys = (k) => Math.round(goalTarget(k) / 150);
 let goal = null; // this game's: k, the key being cracked now (0: 128-BIT); cracked, how many so far
 // STORY (CLASSIC's button, tapped again): CLASSIC with keys to crack, each recovering a story's next
 // file (js/stories.js); CLASSIC itself plays endless. CLASSIC at first (bytefall-goal: on is STORY)
-// STORY: COMING SOON in the Google Play release, till its story's done (the website and the test app
-// keep it, to try out; ?storysoon previews it): CLASSIC's second tap still switches to STORY, but its
-// PLAY says COMING SOON and starts nothing, and the ARCHIVE, RULES and the main menu's story row and
-// intro leave the story out. A device can be let in (bytefall-story-key, a secret tap sequence:
-// storyKeyTaps below), for testing it in the release without showing it to anyone else
-const STORY_GATED = !!(window.BYTEFALL_APP && window.BYTEFALL_APP.release) || new URLSearchParams(location.search).has('storysoon');
+// STORY: COMING SOON everywhere till its story's done (the Play release, the test app and the website
+// alike): CLASSIC's second tap still switches to STORY, but its PLAY says COMING SOON and starts
+// nothing, and the ARCHIVE, RULES, the main menu's story row and intro and the STORY TESTER leave the
+// story out. A device can be let in (bytefall-story-key, a secret tap sequence: THE STORY KEY below),
+// for testing it without showing it to anyone else
+const STORY_GATED = true;
 const STORY_SOON = STORY_GATED && storage.get('bytefall-story-key') !== 'open';
 window.STORY_SOON = STORY_SOON;
 let goalWanted = storage.get('bytefall-goal') === 'on';
@@ -4157,7 +4157,7 @@ homePlayBtn.addEventListener('click', () => {
   if (vsPaused) resumeMatch();
   SFX.play('static');
 });
-// THE STORY KEY (the Play release only): on the main menu, BYTEFALL's title tapped BYTE three times,
+// THE STORY KEY: on the main menu, BYTEFALL's title tapped BYTE three times,
 // then FALL three times, within 5 seconds, lets this device into STORY (bytefall-story-key), and the
 // same again locks it; the page reloads either way, so everything reads it afresh
 if (STORY_GATED) {
