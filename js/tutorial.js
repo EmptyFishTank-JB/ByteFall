@@ -361,6 +361,19 @@ const Tutorial = (() => {
       f.style.width = `${R - L}px`;
       f.style.height = `${B - T}px`;
     });
+    // (the narration card and its buttons stay on top: the layer cut round them, so a frame of what's
+    // under the card, as the EXPLOITS menu's cards are, never draws across it)
+    const base = framesEl.getBoundingClientRect();
+    let d = `M0 0H${base.width}V${base.height}H0Z`;
+    const card = bannerEl && !bannerEl.hidden && !targets.some((t) => bannerEl.contains(t)) && bannerEl.querySelector('.tut-card');
+    if (card) { // (the card and its row of buttons, as one: no frame showing between the buttons either)
+      const r = card.getBoundingClientRect();
+      const row = bannerEl.querySelector('.tut-actions');
+      const b = row && row.getBoundingClientRect().height ? row.getBoundingClientRect().bottom : r.bottom;
+      const m = 8; // (a frame round what's under it is wider than the card: cut that much more)
+      if (r.width) d += roundRect(r.left - base.left - m, r.top - base.top - m, r.right - base.left + m, b - base.top + m, FRAME_R);
+    }
+    framesEl.style.clipPath = `path(evenodd, '${d}')`;
     framesRaf = requestAnimationFrame(drawFrames);
   }
   function frames() {

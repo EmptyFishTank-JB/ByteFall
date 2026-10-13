@@ -2460,7 +2460,10 @@ body:not(.vs-mode) .hud-bits :is(#next-stat, #time-stat) > :is(.label, .value) {
 .tut-banner[hidden] { display: none; }
 .tut-banner.bottom { top: auto; bottom: 30%; max-height: calc(70% - 12px); } /* (long text scrolls in its card, never past the frame's top) */
 /* Over an open menu: fixed at the bottom of the screen, above the menus */
-.tut-banner.float { position: fixed; top: auto; left: 50%; right: auto; bottom: 16px; width: min(460px, calc(100% - 32px)); transform: translateX(-50%); z-index: 60; max-height: 45vh; }
+.tut-banner.float { position: fixed; top: auto; left: 50%; right: auto; bottom: 16px; width: min(460px, calc(100% - 32px)); transform: translateX(-50%); z-index: 1001; max-height: 45vh; }
+/* (a modal over the menus: on top of them, the dim and the pulsing frames, and solid, so nothing of
+   the menu under it shows through or draws across it) */
+.tut-banner.float .tut-card { background: var(--panel); }
 .tut-banner.float.nudge { animation: none; }
 /* The tutorial's dim (tutorial.js): the screen a little darker but for what to tap and the
    banner; see-through to taps, fading over 0.25s */
