@@ -3276,6 +3276,8 @@ html.pixel-mode .walker.skater.walking[data-look="left"] .bot { transform: none;
 .story-intro-box .starter-pick-foot { margin-top: 16px; }
 /* STORY's kit: the side slots as PATCHES and EXPLOITS, how many uses this key has left in the corner;
    used up, dimmed */
+/* (STORY: the EXPLOIT button not there till an exploit's introduced, its place kept) */
+.exploit-icon.story-hidden { visibility: hidden; }
 .exploit-icon.side-slot.story-kit { color: var(--fg); border-color: rgba(var(--fg-rgb), 0.6); }
 .exploit-icon.side-slot.story-kit .exploit-glyph { display: inline-flex; align-items: center; gap: 1px; font-size: 12px; opacity: 1; }
 .exploit-icon.side-slot.story-kit .exploit-glyph svg { width: 16px; height: auto; }

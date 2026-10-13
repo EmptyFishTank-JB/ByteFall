@@ -674,6 +674,9 @@ document.getElementById('goal-out').addEventListener('click', () => {
 });
 
 function initGame() {
+  revealSeen = new Set(); // (STORY: the bottom row as it is at the start, no reveals; any after, pixel by pixel)
+  revealArmed = false;
+  requestAnimationFrame(() => requestAnimationFrame(() => { revealArmed = true; }));
   if (pendingEarned.length) flushEarned(); // (a game left before its meter finished)
   runXp = Progress.levelInfo();
   xpHold = mode !== 'tutorial';
@@ -5600,6 +5603,37 @@ function nextExploit() {
   if (heldHacks.length) return heldHacks[0];
   return freeAllowed() ? freeExploitId() : null;
 }
+// STORY's bottom row: no button till it's of use (the EXPLOIT button once an exploit's introduced, PATCHES
+// and EXPLOITS once there's something in them), each then coming in pixel by pixel, a decay run backwards.
+// What's there when a game starts is just there; what turns up during one assembles (storyReveal)
+let revealSeen = new Set();
+let revealArmed = false;
+function storyReveal(el, shown) {
+  if (!shown) { revealSeen.delete(el); return; }
+  if (revealSeen.has(el) || (goalOpen && revealArmed)) return; // (under the cracked card: once it's closed)
+  revealSeen.add(el);
+  if (revealArmed && storyOn()) pixelIn(el);
+}
+// (an 8x8 mask, its squares let through in a random order over about half a second)
+function pixelIn(el) {
+  if (document.documentElement.classList.contains('low-fx') || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+  const N = 8;
+  const order = [...Array(N * N).keys()].sort(() => Math.random() - 0.5);
+  const FRAMES = 12;
+  const mask = (k) => `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${N} ${N}' preserveAspectRatio='none' shape-rendering='crispEdges'>${order.slice(0, k).map((i) => `<rect x='${i % N}' y='${Math.floor(i / N)}' width='1.02' height='1.02'/>`).join('')}</svg>`)}")`;
+  const set = (v) => { el.style.maskImage = v; el.style.webkitMaskImage = v; el.style.maskSize = '100% 100%'; el.style.webkitMaskSize = '100% 100%'; };
+  let f = 0;
+  set(mask(0));
+  el.style.filter = 'drop-shadow(0 0 6px rgba(var(--fg-rgb), 0.8))'; // (a glow while it assembles, on the element: redraws keep it)
+  el.dataset.pixelIn = '1';
+  const tick = () => {
+    f++;
+    if (f >= FRAMES) { set(''); el.style.filter = ''; delete el.dataset.pixelIn; return; }
+    set(mask(Math.round(N * N * f / FRAMES)));
+    setTimeout(tick, 45);
+  };
+  setTimeout(tick, 45);
+}
 function updateFreeBtn() {
   // (retired: RESTART is on the pause screen now; the button stays for its code paths)
   restartBtn.hidden = true;
@@ -5629,6 +5663,10 @@ function updateFreeBtn() {
     renderStarters();
     return;
   }
+  // (STORY, nothing introduced yet: no EXPLOIT button, its place kept)
+  const noExploits = storyOn() && MODES.classic.noHacks;
+  exploitBtn.classList.toggle('story-hidden', noExploits);
+  storyReveal(exploitBtn, !noExploits);
   const ready = nextExploit();
   const centerArmed = armedHack && armedSlot === null; // (one armed from a side slot shows there, not here)
   const shown = (centerArmed && armedHack) || ready;
@@ -5797,6 +5835,7 @@ function renderStoryKit() {
     const kind = i === 0 ? 'patch' : 'exploit';
     b.hidden = !any;
     b.dataset.key = '';
+    if (!any || !has[i]) storyReveal(b, false);
     if (!any) return;
     if (!has[i]) { b.className = 'exploit-icon side-slot closed'; b.innerHTML = ''; b.disabled = true; return; }
     const left = STORY_USES - storyUses[kind];
@@ -5806,6 +5845,7 @@ function renderStoryKit() {
     b.innerHTML = `<span class="exploit-glyph bracketed"><span class="ico-br">[</span>${i === 0 ? USB_SVG : TERMINAL_SVG}<span class="ico-br">]</span></span><span class="kit-left" aria-hidden="true">${left}</span>`; // (in brackets, as the lists show them: not the EXPLOIT button's own)
     b.title = `${i === 0 ? 'PATCHES' : 'EXPLOITS'} // ${left} of ${STORY_USES} left this key: tap to choose`;
     b.setAttribute('aria-label', b.title);
+    storyReveal(b, true); // (after it's drawn: newly there, it assembles)
   });
 }
 const storyKitEl = document.getElementById('story-kit');
