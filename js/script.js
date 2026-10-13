@@ -165,8 +165,8 @@ const dailyNote = (date, what) => (dailyOfficial
 const MODES = {
   // (CLASSIC and STORY: one mode, CLASSIC's button flipping between them, goalWanted the switch)
   classic: { label: 'CLASSIC', get noHacks() { return !!goal && !Object.keys(HACKS).some(hackAvailable); }, info: () => (goalWanted
-    ? 'STORY // Uncover the story, one key at a time: every game has a key to crack, its ENCRYPTION STRENGTH. Crack it for KEYS and the next file, then go deeper (each key harder than the last) or disconnect. Tap STORY again for CLASSIC.'
-    : `CLASSIC // No clock and no bit limit: keep your columns under the line as long as you can.${STORY_SOON ? ' STORY is coming soon.' : ' Tap CLASSIC again for STORY.'}`) },
+    ? `STORY // ${STORY_SOON ? 'COMING SOON. ' : ''}Uncover the story, one key at a time: every game has a key to crack, its ENCRYPTION STRENGTH. Crack it for KEYS and the next file, then go deeper (each key harder than the last) or disconnect. Tap STORY again for CLASSIC.`
+    : 'CLASSIC // No clock and no bit limit: keep your columns under the line as long as you can. Tap CLASSIC again for STORY.') },
   decrypt: {
     label: 'DAILY DECRYPT',
     info: (date) => dailyNote(date, `the same ${DAILY_BITS} bits for everyone.`),
@@ -581,14 +581,18 @@ let goal = null; // this game's: k, the key being cracked now (0: 128-BIT); crac
 // STORY (CLASSIC's button, tapped again): CLASSIC with keys to crack, each recovering a story's next
 // file (js/stories.js); CLASSIC itself plays endless. CLASSIC at first (bytefall-goal: on is STORY)
 // STORY: COMING SOON in the Google Play release, till its story's done (the website and the test app
-// keep it, to try out; ?storysoon previews it): CLASSIC's second tap says so instead of switching, and
-// the ARCHIVE, RULES and the tutorial leave it out
-const STORY_SOON = !!(window.BYTEFALL_APP && window.BYTEFALL_APP.release) || new URLSearchParams(location.search).has('storysoon');
+// keep it, to try out; ?storysoon previews it): CLASSIC's second tap still switches to STORY, but its
+// PLAY says COMING SOON and starts nothing, and the ARCHIVE, RULES and the main menu's story row and
+// intro leave the story out. A device can be let in (bytefall-story-key, a secret tap sequence:
+// storyKeyTaps below), for testing it in the release without showing it to anyone else
+const STORY_GATED = !!(window.BYTEFALL_APP && window.BYTEFALL_APP.release) || new URLSearchParams(location.search).has('storysoon');
+const STORY_SOON = STORY_GATED && storage.get('bytefall-story-key') !== 'open';
 window.STORY_SOON = STORY_SOON;
-let goalWanted = !STORY_SOON && storage.get('bytefall-goal') === 'on';
+let goalWanted = storage.get('bytefall-goal') === 'on';
 // (STORY: CLASSIC's mode with the switch on, not the daily. It has no settings: the 7x7 board, infections
 // on, and its keys set the pace instead of a difficulty, see storyPace; what it lets you use, below)
 const storyOn = () => mode === 'classic' && !daily && goalWanted;
+const storyLocked = () => STORY_SOON && storyOn(); // (picked, but COMING SOON: PLAY starts nothing)
 // STORY's pace: each key deeper is harder to crack. Its layers come sooner (every 8 drops at 128-BIT,
 // 7 at 192, 6 at 256 and 384, 5 at 512 and 1024, then 4), and infections get likelier, 4% up to 10%
 const STORY_INTERVALS = [8, 7, 6, 6, 5, 5, 4];
@@ -2740,11 +2744,6 @@ restartBtn.addEventListener('click', () => {
 // CLASSIC ⇄ STORY: CLASSIC's button, tapped while it's the mode, flips it; mid-game it asks first, as a
 // new difficulty does, and starts a new game. The button says which it is, with its cycle icon
 function toggleStory(btn) {
-  if (STORY_SOON) { // (not yet: says so, and stays CLASSIC)
-    SFX.play('denied');
-    homeNotice('STORY // COMING SOON');
-    return;
-  }
   requestReset(btn, 'CONFIRM?', () => {
     goalWanted = !goalWanted;
     storage.set('bytefall-goal', goalWanted ? 'on' : 'off');
@@ -2756,7 +2755,7 @@ function toggleStory(btn) {
 const storyIntroEl = document.getElementById('story-intro');
 const storyIntroOpen = () => !storyIntroEl.classList.contains('hidden');
 function maybeStoryIntro() {
-  if (storage.get('bytefall-story-intro') || !storyOn() || !homeOpen || homeEl.hidden || storyIntroOpen()) return;
+  if (STORY_SOON || storage.get('bytefall-story-intro') || !storyOn() || !homeOpen || homeEl.hidden || storyIntroOpen()) return;
   storage.set('bytefall-story-intro', '1');
   storyIntroEl.classList.remove('hidden');
 }
@@ -2793,7 +2792,7 @@ function updateStoryBtn() {
   const btn = document.querySelector('.modes button[data-mode="classic"]');
   if (!btn || (armed && armed.btn === btn)) return;
   btn.innerHTML = `${goalWanted ? 'STORY' : 'CLASSIC'}${SWAP_SVG}`;
-  btn.setAttribute('aria-label', goalWanted ? 'Story: CLASSIC with a story to recover. Tap again for CLASSIC' : STORY_SOON ? 'Classic. STORY is coming soon' : 'Classic. Tap again for STORY');
+  btn.setAttribute('aria-label', goalWanted ? `Story${STORY_SOON ? ', coming soon' : ': CLASSIC with a story to recover'}. Tap again for CLASSIC` : 'Classic. Tap again for STORY');
 }
 // GAME SETTINGS: the picked mode's own settings in a card, on one button on the menu's panel that says
 // what's set (NORMAL // INFECTIONS: ON). CLASSIC: DIFFICULTY and INFECTIONS in the card (STORY: none);
@@ -4035,7 +4034,8 @@ function updateHome() {
   const kept = key ? storage.get(key) : null;
   document.getElementById('home-best').innerHTML = !key || (daily && kept == null) ? ''
     : `${daily ? 'TODAY' : 'BEST'} <b>${fmt(Number(kept) || 0)}</b>`;
-  homePlayBtn.textContent = inAGame() && mode !== 'tutorial' ? 'RESUME' : 'PLAY';
+  homePlayBtn.textContent = storyLocked() ? 'COMING SOON' : inAGame() && mode !== 'tutorial' ? 'RESUME' : 'PLAY';
+  homePlayBtn.classList.toggle('soon', storyLocked());
   if (typeof Stories !== 'undefined') Stories.refreshRow();
   refreshBoosterRow();
   refreshStarterRow();
@@ -4134,6 +4134,11 @@ function hideHome() {
 window.showHome = showHome;
 window.homeIsOpen = () => homeOpen;
 homePlayBtn.addEventListener('click', () => {
+  if (storyLocked()) { // (STORY in the Play release: not yet)
+    SFX.play('denied');
+    homeNotice('STORY // COMING SOON');
+    return;
+  }
   if (busy && !gameOver) return; // (a mode switch still melting the old board)
   if (mode === 'puzzle' && !daily && !inAGame()) { // (PUZZLE: pick one first)
     setRecordsOpen(true, 'puzzles');
@@ -4144,6 +4149,24 @@ homePlayBtn.addEventListener('click', () => {
   if (vsPaused) resumeMatch();
   SFX.play('static');
 });
+// THE STORY KEY (the Play release only): on the main menu, BYTEFALL's title tapped BYTE three times,
+// then FALL three times, within 5 seconds, lets this device into STORY (bytefall-story-key), and the
+// same again locks it; the page reloads either way, so everything reads it afresh
+if (STORY_GATED) {
+  const homeTitle = document.querySelector('.home-head h1');
+  let taps = [];
+  if (homeTitle) homeTitle.addEventListener('click', (e) => {
+    const now = Date.now();
+    taps = taps.filter((t) => now - t.at < 5000).concat({ at: now, part: e.target.closest('span') ? 'F' : 'B' }).slice(-6);
+    if (taps.map((t) => t.part).join('') !== 'BBBFFF') return;
+    taps = [];
+    const open = !STORY_SOON;
+    storage.set('bytefall-story-key', open ? 'locked' : 'open');
+    SFX.play(open ? 'denied' : 'egg');
+    homeNotice(open ? 'STORY // LOCKED' : 'STORY // UNLOCKED');
+    setTimeout(() => location.reload(), 1200);
+  });
+}
 document.getElementById('overlay-menu-btn').addEventListener('click', () => {
   resetNow();
   showHome();
