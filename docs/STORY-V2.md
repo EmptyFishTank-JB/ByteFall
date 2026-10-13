@@ -51,11 +51,19 @@ Each transmission's heading in the story says which: *pops up as your first STOR
 *on the cracked card*, or a JOB. Each comes in its own form:
 
 - **FILE**: a document from the archive (memos, chat logs, records), as the files are now.
-- **IM**: a chat thread, the sender's handle and a time on each line (MOTH writes in lowercase,
-  TOLL in capitals); your replies are shown too, written for you.
+- **IM**: a thread on a phone screen that pops up over the game (always the same size, a phone's
+  shape): each message in a bubble, its sender and time above it on its side (theirs left, yours
+  right), each sender's own color, "..." in a bubble while they type, a beat between messages about
+  as long as the reply would take. MOTH writes in lowercase, TOLL in capitals; your replies are
+  shown too, written for you. Only that transmission's messages are on it, and a long thread
+  scrolls. The cracked card and the ARCHIVE show it as an inbox does (its last message, OPEN
+  THREAD). A time written in the story (`**moth** 02:14 ·`) is kept; the rest get late-night
+  times of their own. **MOTH is an UNKNOWN CONTACT** on your phone until transmission 12, where
+  they name themselves ("say the moth sent you"); that card says `CONTACT SAVED // MOTH`, and
+  every IM after it is from MOTH (`names` in `js/data/stories.js`'s GHOSTS_RULES).
 - **CALL**: the card rings first, `INCOMING CALL // UNKNOWN NUMBER`, with ANSWER. The call plays as
-  a typed transcript with a small voice waveform beside it, then `CALL ENDED // 0:41`. (No real
-  voice. Maybe a low, garbled blip under each line.)
+  a transcript at a speaking pace, a low murmur down the line for each word, then
+  `CALL ENDED // 0:41`. (Transmission 24's IMs after its call come on the phone once it's over.)
 
 A transmission that introduces something ends with what it gave you, and so does a NOTICE:
 `INTRODUCED // BITFLIP: from the chain meter in STORY`.
@@ -222,6 +230,9 @@ in `bytefall.html`'s `#story-intro`, not made from this doc):
 > **moth** · there's a market. no names, no questions, everything has a price.
 > **moth** · ask for TOLL. say the moth sent you.
 > **moth** · and ghost. don't trust the boxes.
+
+*Up to here MOTH's IMs come from an UNKNOWN CONTACT; this card says CONTACT SAVED // MOTH, and every
+IM after it is from MOTH.*
 
 *The BLACK MARKET opens from the PATCHES and EXPLOITS buttons. It sells what's been introduced.*
 

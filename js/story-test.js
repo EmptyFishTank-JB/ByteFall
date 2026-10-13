@@ -25,6 +25,7 @@
     + '<input class="st-title" type="text" placeholder="TITLE (e.g. MOTH)" aria-label="Title" autocomplete="off">'
     + '<textarea class="st-text" rows="8" aria-label="Message" spellcheck="false"></textarea><button type="button" class="st-play">PLAY IT</button></div>';
   document.body.appendChild(bar);
+  document.body.classList.add('storytest'); // (the cards kept clear of the bar)
   const sel = bar.querySelector('select');
   sel.innerHTML = list.map((x, i) => `<option value="${i}">${x.label.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]))}</option>`).join('');
   const count = bar.querySelector('.st-count');

@@ -5890,7 +5890,7 @@ function openStoryKit(kind, market = false) {
     const ids = (kind === 'patch' ? kitPatchIds(rv) : kitExploitIds(rv)).filter((id) => kitOwned(id) > 0);
     note.textContent = ids.length
       ? `Use up to ${STORY_USES} this key (${left} left).${kind === 'exploit' ? ' An exploit arms as your next drop.' : ' A patch applies at once.'}`
-      : `Nothing to use yet. ${rv.has('bring') ? 'Bring your own (the STORE sells what STORY has introduced)' : rv.has('market') ? 'TOLL sells them on the BLACK MARKET' : 'MOTH sends what you need'}${rv.has('bring') && rv.has('market') ? ', or buy from TOLL' : ''}.`;
+      : `Nothing to use yet. ${rv.has('bring') ? 'Bring your own (the STORE sells what STORY has introduced)' : rv.has('market') ? 'TOLL sells them on the BLACK MARKET' : 'Your UNKNOWN CONTACT sends what you need'}${rv.has('bring') && rv.has('market') ? ', or buy from TOLL' : ''}.`;
     for (const id of ids) {
       const patch = kind === 'patch';
       const useful = patch ? patchUseful(id) : !armedHack;
