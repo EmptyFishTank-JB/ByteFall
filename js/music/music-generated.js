@@ -44,6 +44,10 @@ const GEN_FORMS = [
   ['intro', 'A', 'B', 'C', 'B'],
   ['A', 'B', 'A', 'C', 'B'],
   ['intro', 'A', 'B', 'break', 'B'],
+  ['intro', 'B', 'A', 'B', 'A'],
+  ['A', 'A', 'B', 'A'],
+  ['intro', 'A', 'B', 'A', 'C', 'A'],
+  ['intro', 'A', 'A', 'B', 'B', 'break', 'A'],
 ];
 // The drum grooves: the 16ths of a bar each part plays on (k kick, s snare, g ghost snare, c clap,
 // h hats, o open hat, t tambourine / shaker). 3/4 and 6/8 bars are 12 16ths.
@@ -163,8 +167,8 @@ const GEN_NOTE_NAMES = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'B
 // createGenerated to composeGeneratedV<N> and createGeneratedV<N> (and its GEN_ constants, so they
 // don't clash), add N to GEN_FROZEN below, and raise GEN_VERSION here. music.js loads a frozen
 // version only when a code asks for it.
-const GEN_VERSION = 7;
-const GEN_FROZEN = { 1: 'music-generated-v1.js', 2: 'music-generated-v2.js', 3: 'music-generated-v3.js', 4: 'music-generated-v4.js', 5: 'music-generated-v5.js', 6: 'music-generated-v6.js' }; // (version: the frozen file, under js/music/)
+const GEN_VERSION = 8;
+const GEN_FROZEN = { 1: 'music-generated-v1.js', 2: 'music-generated-v2.js', 3: 'music-generated-v3.js', 4: 'music-generated-v4.js', 5: 'music-generated-v5.js', 6: 'music-generated-v6.js', 7: 'music-generated-v7.js' }; // (version: the frozen file, under js/music/)
 const GEN_SEASON_CODE = { default: 'D', halloween: 'H', harvest: 'N', winter: 'W', frost: 'F', valentine: 'V', spring: 'S', summer: 'U', autumn: 'A' };
 function generatedCode(season, seed, version = GEN_VERSION) {
   return `${GEN_SEASON_CODE[season] || 'D'}${version}-${(seed >>> 0).toString(36).toUpperCase().padStart(7, '0')}`;
