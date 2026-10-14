@@ -1024,6 +1024,14 @@ with a cached older script (GitHub Pages lets browsers cache for 10 minutes).
   a CALL rings without an INCOMING CALL line; an IM plays on the phone, its handles as written), the draft kept in this browser. Nothing's
   recovered or saved, and the RELEASE build leaves it out (the test app keeps it). Locked, as STORY is,
   on a device not let in: it says so and shows nothing
+- `dev-tools/composer.html` — the COMPOSER (DEV & TESTING's game testers, the sound & music section's
+  neighbour): makes and mixes generated songs with `composeGenerated` and `createGenerated`, the game's
+  own code. A seed (blank for a new one), season and style make the song, its plan (title, key, tempo,
+  form) shows, and PLAY schedules it the way the game's player does. Each instrument channel has MUTE,
+  SOLO and a gain slider; BUILD sets how far the layers have come in, and a layer solo plays just one.
+  LOAD CODE takes a ByteFall song code; the library keeps songs in this browser, exports and imports as
+  JSON. Nothing is saved to the game. Changing an instrument's sound itself (its waveform and envelope)
+  needs the generator's code changed, not this page.
 - `dev-tools/mixer.html?track=<id>` — the MIXER, one track per page (only that
   track's file loads): PLAY with a seekable position line and a visualizer; SOUND
   OUTPUT (PHONE / HEADPHONES / SPEAKERS, as in the game); the intensity slider and

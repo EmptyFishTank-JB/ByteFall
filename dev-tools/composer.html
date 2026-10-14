@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#020403">
+<title>Composer // BYTEFALL</title>
+<style>
+  :root { --bg: #020403; --panel: #0b1512; --line: #1c3d33; --green: #39ff8f; --dim: #1f7a52; --text: #c9f7dc; --amber: #ffd166; --red: #ff4d5e; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 13px/1.45 "Share Tech Mono", "Courier New", monospace; padding: 16px; }
+  a { color: var(--amber); }
+  h1 { font-size: 20px; letter-spacing: 3px; color: var(--green); margin: 0 0 4px; }
+  h2 { font-size: 12px; letter-spacing: 2px; color: var(--amber); margin: 18px 0 8px; font-weight: normal; }
+  p.note { color: var(--dim); margin: 4px 0 0; }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  .panel { border: 1px solid var(--line); background: var(--panel); border-radius: 6px; padding: 12px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 6px 0; }
+  label { color: var(--dim); min-width: 74px; }
+  input, select { background: #06100c; color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; font: inherit; }
+  input[type=text], input[type=number] { width: 140px; }
+  input[type=range] { width: 160px; }
+  button { background: transparent; color: var(--green); border: 1px solid var(--green); border-radius: 4px; padding: 6px 12px; font: inherit; letter-spacing: 1px; cursor: pointer; }
+  button.on { background: var(--green); color: var(--bg); }
+  button.warn { color: var(--red); border-color: var(--red); }
+  button:disabled { opacity: 0.4; cursor: default; }
+  .plan { white-space: pre-wrap; color: var(--text); margin: 0; }
+  .ch { display: grid; grid-template-columns: 1fr auto auto; gap: 6px 8px; align-items: center; padding: 6px 0; border-bottom: 1px dashed var(--line); }
+  .ch input[type=range] { grid-column: 1 / -1; width: 100%; }
+  select { max-width: 100%; }
+  .ch span.id { color: var(--dim); font-size: 11px; }
+  .lib { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; padding: 4px 0; border-bottom: 1px dashed var(--line); }
+  .bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin-top: 6px; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--green); }
+  .msg { color: var(--amber); min-height: 18px; }
+  .hint { color: var(--dim); font-size: 12px; }
+</style>
+<script src="../js/music/output.js?v=617"></script>
+<script src="../js/music/music-generated.js?v=617"></script>
+</head>
+<body>
+<div class="wrap">
+  <a href="index.html">&larr; DEV &amp; TESTING</a>
+  <h1>COMPOSER</h1>
+  <p class="note">Make and mix generated songs from the game's own code. Nothing here is saved to the game; your library stays in this browser until you export it. The official tracks open in the <a href="mixer.html">MIXER</a>.</p>
+
+  <h2>THE SONG</h2>
+  <div class="panel">
+    <div class="row"><label>Seed</label><input type="text" id="seed" placeholder="a number, or blank"><button id="random">RANDOM</button></div>
+    <div class="row"><label>Season</label><select id="season"></select></div>
+    <div class="row"><label>Style</label><select id="style"></select></div>
+    <div class="row"><label>Code</label><input type="text" id="code" placeholder="D01ABCDEFGH"><button id="load-code">LOAD CODE</button></div>
+    <p class="hint">A song's code (ByteFall's own format, the same one the MUSIC PLAYER's ENTER SONG CODE takes) is what you give me to reproduce it exactly.</p>
+    <div class="row"><button id="compose">COMPOSE</button></div>
+    <p class="plan" id="plan"></p>
+    <p class="msg" id="msg"></p>
+  </div>
+
+  <h2>PLAY</h2>
+  <div class="panel">
+    <div class="row">
+      <button id="play">PLAY</button><button id="stop" disabled>STOP</button>
+      <span class="hint" id="pos">stopped</span>
+    </div>
+    <div class="bar"><i id="bar"></i></div>
+    <div class="row"><label>Build</label><input type="range" id="intensity" min="0" max="1" step="0.01" value="1"><span id="intensity-v">100%</span></div>
+    <div class="row"><label>Layer solo</label><select id="solo-layer"><option value="">none</option></select></div>
+    <p class="hint">Build sets how far the layers have come in (the game raises it through a track); a layer solo plays just that layer.</p>
+  </div>
+
+  <h2>INSTRUMENTS</h2>
+  <div class="panel" id="channels"><p class="hint">Play a song to mix its instruments.</p></div>
+  <div class="row"><button id="reset-mix">RESET MIX</button></div>
+
+  <h2>LIBRARY</h2>
+  <div class="panel">
+    <div class="row"><label>Name</label><input type="text" id="name" placeholder="my song"><button id="save">SAVE</button></div>
+    <div id="library"></div>
+    <div class="row"><button id="export">EXPORT JSON</button><label class="file" style="min-width:0"><input type="file" id="import" accept="application/json"></label></div>
+    <p class="hint">Export the library as a file and send it to me; it holds each song's seed, season, style and mix.</p>
+  </div>
+</div>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const LIB_KEY = 'bytefall-composer-library';
+  const msg = (t) => { $('msg').textContent = t || ''; };
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  // The song's options, from the fields. A blank seed is a new random one.
+  let mix = { gains: {}, mutes: {}, solos: {} };
+  let gen = null, ctx = null, bus = null, timer = 0, step = 0, nextTime = 0;
+  let plan = null; // the composed song (composeGenerated's plan, with its code)
+  let shown = null; // the seed and settings the plan was made from
+
+  // Fill the season and style pickers from the game's own tables
+  Object.keys(GEN_POOLS).forEach((k) => $('season').add(new Option(k.toUpperCase(), k)));
+  $('season').value = 'default';
+  $('style').add(new Option('(season picks one)', ''));
+  Object.keys(GEN_STYLES).forEach((k) => $('style').add(new Option(k, k)));
+  const newSeed = () => String(Math.floor(Math.random() * 4294967295));
+  const opts = () => {
+    const seed = parseInt($('seed').value, 10);
+    return { season: $('season').value, style: $('style').value || undefined, seed: Number.isFinite(seed) && seed >= 0 ? seed >>> 0 : (Number(newSeed()) >>> 0) };
+  };
+
+  function describe(p) {
+    const d = p.describe();
+    return Object.entries(d).map(([k, v]) => `${k}: ${typeof v === 'object' ? JSON.stringify(v) : v}`).join('\n');
+  }
+  function compose(o) {
+    try {
+      plan = composeGenerated(o);
+    } catch (e) { msg('Could not compose: ' + e.message); return false; }
+    shown = o;
+    $('seed').value = String(o.seed);
+    $('season').value = o.season;
+    $('style').value = o.style || '';
+    const code = generatedCode(o.season, o.seed);
+    $('code').value = code;
+    $('plan').textContent = describe(plan) + `\nCODE: ${code}`;
+    return true;
+  }
+  function songOptions() { return opts(); } // (the fields as they are: edit the seed, then PLAY)
+
+  // Playback: the game's own generator, scheduled the way the game's player schedules it
+  function applyMix() {
+    if (!gen) return;
+    const anySolo = Object.values(mix.solos).some(Boolean);
+    gen.channels.forEach((c) => {
+      const audible = anySolo ? !!mix.solos[c.id] : !mix.mutes[c.id];
+      c.node.gain.value = audible ? (mix.gains[c.id] ?? 1) : 0;
+    });
+  }
+  function tick() {
+    if (!gen) return;
+    if (nextTime < ctx.currentTime) nextTime = ctx.currentTime + 0.02;
+    while (nextTime < ctx.currentTime + 0.2) {
+      gen.schedule(step, nextTime, Number($('intensity').value), $('solo-layer').value || null);
+      nextTime += gen.step;
+      step++;
+    }
+    $('bar').style.width = `${((step % gen.loopSteps) / gen.loopSteps) * 100}%`;
+    $('pos').textContent = `playing: bar ${Math.floor((step % gen.loopSteps) / 16) + 1} of ${gen.loopSteps / 16}`;
+  }
+  function stop() {
+    clearInterval(timer); timer = 0;
+    if (gen && ctx) { /* the nodes are left to finish; a new song is a new generator */ }
+    gen = null;
+    $('play').disabled = false; $('stop').disabled = true;
+    $('pos').textContent = 'stopped';
+    $('bar').style.width = '0';
+  }
+  function play() {
+    if (timer) stop();
+    if (!compose(songOptions())) return;
+    ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+    ctx.resume();
+    bus = ctx.createGain();
+    bus.gain.value = 0.7;
+    bus.connect(ctx.destination);
+    gen = createGenerated(ctx, bus, shown);
+    step = 0;
+    nextTime = ctx.currentTime + 0.1;
+    buildMixer();
+    applyMix();
+    timer = setInterval(tick, 25);
+    tick();
+    $('play').disabled = true; $('stop').disabled = false;
+    msg('');
+  }
+
+  // The instrument strips: each channel's gain, mute and solo
+  function buildMixer() {
+    const box = $('channels');
+    box.innerHTML = '';
+    gen.channels.forEach((c) => {
+      const row = document.createElement('div');
+      row.className = 'ch';
+      row.innerHTML = `<div>${esc(c.label)} <span class="id">${esc(c.id)}</span></div>`
+        + `<button data-mute="${c.id}" class="${mix.mutes[c.id] ? 'on' : ''}">MUTE</button>`
+        + `<button data-solo="${c.id}" class="${mix.solos[c.id] ? 'on' : ''}">SOLO</button>`
+        + `<input type="range" min="0" max="1.5" step="0.05" value="${mix.gains[c.id] ?? 1}" data-gain="${c.id}">`;
+      box.appendChild(row);
+    });
+    box.querySelectorAll('[data-mute]').forEach((b) => b.addEventListener('click', () => {
+      mix.mutes[b.dataset.mute] = !mix.mutes[b.dataset.mute]; b.classList.toggle('on', mix.mutes[b.dataset.mute]); applyMix();
+    }));
+    box.querySelectorAll('[data-solo]').forEach((b) => b.addEventListener('click', () => {
+      mix.solos[b.dataset.solo] = !mix.solos[b.dataset.solo]; b.classList.toggle('on', mix.solos[b.dataset.solo]); applyMix();
+    }));
+    box.querySelectorAll('[data-gain]').forEach((s) => s.addEventListener('input', () => {
+      mix.gains[s.dataset.gain] = Number(s.value); applyMix();
+    }));
+    const sel = $('solo-layer');
+    sel.innerHTML = '<option value="">none</option>' + gen.layers.map((l) => `<option value="${esc(l.id)}">${esc(l.label)}</option>`).join('');
+  }
+
+  // The library: songs with their seed, season, style and mix, kept in this browser
+  const library = () => { try { return JSON.parse(localStorage.getItem(LIB_KEY) || '[]'); } catch (e) { return []; } };
+  const saveLibrary = (list) => { try { localStorage.setItem(LIB_KEY, JSON.stringify(list)); } catch (e) {} };
+  function renderLibrary() {
+    const list = library();
+    $('library').innerHTML = list.length ? '' : '<p class="hint">Nothing saved yet.</p>';
+    list.forEach((s, i) => {
+      const row = document.createElement('div');
+      row.className = 'lib';
+      row.innerHTML = `<div>${esc(s.name)} <span class="id">${esc(s.code || '')}</span></div><button data-open="${i}">OPEN</button><button class="warn" data-del="${i}">DEL</button>`;
+      $('library').appendChild(row);
+    });
+    $('library').querySelectorAll('[data-open]').forEach((b) => b.addEventListener('click', () => {
+      const s = library()[Number(b.dataset.open)];
+      mix = s.mix || { gains: {}, mutes: {}, solos: {} };
+      $('seed').value = String(s.seed); $('season').value = s.season; $('style').value = s.style || '';
+      play();
+    }));
+    $('library').querySelectorAll('[data-del]').forEach((b) => b.addEventListener('click', () => {
+      const l = library(); l.splice(Number(b.dataset.del), 1); saveLibrary(l); renderLibrary();
+    }));
+  }
+
+  // Controls
+  $('random').addEventListener('click', () => { $('seed').value = newSeed(); compose({ ...opts(), seed: Number($('seed').value) }); });
+  $('compose').addEventListener('click', () => compose(opts()));
+  $('load-code').addEventListener('click', () => {
+    const c = parseGeneratedCode($('code').value);
+    if (!c) return msg('That is not a ByteFall song code.');
+    if (c.version !== GEN_VERSION) return msg(`That song is from version ${c.version}; this build writes version ${GEN_VERSION}.`);
+    compose({ season: c.season || 'default', seed: c.seed >>> 0, style: undefined });
+  });
+  $('play').addEventListener('click', play);
+  $('stop').addEventListener('click', stop);
+  $('intensity').addEventListener('input', () => { $('intensity-v').textContent = Math.round($('intensity').value * 100) + '%'; });
+  $('reset-mix').addEventListener('click', () => { mix = { gains: {}, mutes: {}, solos: {} }; if (gen) { buildMixer(); applyMix(); } });
+  $('save').addEventListener('click', () => {
+    const name = $('name').value.trim() || `song ${library().length + 1}`;
+    const o = songOptions();
+    const list = library();
+    list.push({ name, seed: o.seed, season: o.season, style: o.style || '', code: generatedCode(o.season, o.seed), mix });
+    saveLibrary(list); renderLibrary(); msg(`Saved “${name}”.`);
+  });
+  $('export').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(library(), null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'bytefall-songs.json'; a.click();
+  });
+  $('import').addEventListener('change', async (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    try {
+      const incoming = JSON.parse(await f.text());
+      if (!Array.isArray(incoming)) throw new Error('not a list');
+      saveLibrary([...library(), ...incoming]); renderLibrary(); msg(`Imported ${incoming.length} song(s).`);
+    } catch (err) { msg('Could not read that file: ' + err.message); }
+    e.target.value = '';
+  });
+
+  compose({ ...opts() });
+  renderLibrary();
+})();
+</script>
+</body>
+</html>
