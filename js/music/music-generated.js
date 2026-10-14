@@ -65,9 +65,11 @@ const GEN_GROOVES = {
   jig: { k: [[0, 6]], g: [4, 10], t: [0, 2, 4, 6, 8, 10], h: 0 }, // (6/8)
   carol: { k: [[0]], h: 0, sparse: true }, // (a timpani at the top of each part, no more)
 };
+// (the chiptune leads: pulses of two widths, a square, a triangle, and two pulses detuned against each other)
+const CHIP_LEADS = ['pulse', 'pulse12', 'square', 'triangle', 'duo'];
 const GEN_STYLES = {
   synthwave: { name: 'SYNTHWAVE', bpm: [92, 112], scales: ['minor', 'dorian'], sevenths: 0.2, hold: [2, 1], drums: ['backbeat'], kit: 'gated', bass: ['octave', 'pulse8'], bassInst: ['saw'], arp: ['up', 'updown', 'broken'], arpRate: [1, 2], arpInst: ['pluck'], arpOct: 1, pad: ['saw', 'strings'], lead: ['saw', 'square'], dens: [0.4, 0.55], lift: 0.3, harmony: 0.4, fill: ['toms', 'snare'] },
-  chiptune: { name: 'CHIPTUNE', bpm: [128, 150], scales: ['minor', 'major', 'dorian'], hold: [1, 2], drums: ['chip'], kit: 'chip', bass: ['chip8', 'octave'], bassInst: ['chip'], arp: ['chip'], arpRate: [1], arpInst: ['chip'], arpOct: 1, pad: ['none'], lead: ['pulse', 'pulse12'], leadOct: 1, dens: [0.45, 0.6], lift: 0.5, harmony: 0.3, fill: ['snare'] },
+  chiptune: { name: 'CHIPTUNE', bpm: [128, 150], scales: ['minor', 'major', 'dorian'], hold: [1, 2], drums: ['chip'], kit: 'chip', bass: ['chip8', 'octave'], bassInst: ['chip'], arp: ['chip'], arpRate: [1], arpInst: ['chip'], arpOct: 1, pad: ['none'], lead: CHIP_LEADS, leadOct: 1, dens: [0.45, 0.6], lift: 0.5, harmony: 0.3, fill: ['snare'] },
   dnb: { name: 'DRUM & BASS', bpm: [168, 176], scales: ['minor', 'dorian', 'phrygian'], sevenths: 0.4, hold: [2], drums: ['dnb'], kit: 'break', bass: ['reese'], bassInst: ['reese'], arp: ['pedal', 'up'], arpRate: [2], arpInst: ['bell'], arpOct: 1, pad: ['strings'], lead: ['saw', 'whistle'], dens: [0.2, 0.28], fill: ['snare'] },
   lofi: { name: 'LO-FI', bpm: [70, 86], swing: [0.16, 0.26], scales: ['dorian', 'major', 'minor'], sevenths: 1, hold: [1, 2], drums: ['boombap'], kit: 'lofi', bass: ['walk', 'root'], bassInst: ['upright', 'sub'], arp: ['none'], pad: ['rhodes'], lead: ['fm', 'whistle', 'flute'], dens: [0.25, 0.35], crackle: true, fill: ['none'] },
   techno: { name: 'TECHNO', bpm: [122, 130], scales: ['phrygian', 'minor'], sevenths: 0.2, hold: [2], drums: ['four'], kit: '909', bass: ['acid'], bassInst: ['acid'], arp: ['offstab'], arpInst: ['stab'], pad: ['saw'], lead: ['square', 'fm'], dens: [0.2, 0.3], fill: ['snare'] },
@@ -92,7 +94,7 @@ const GEN_STYLES = {
   // FROST (January 7 to February): the deep of winter, crystal and quiet
   aurora: { name: 'AURORA', bpm: [72, 86], scales: ['lydian', 'major'], sevenths: 0.8, hold: [2], drums: ['halftime'], kit: 'soft', bass: ['root'], bassInst: ['sub'], arp: ['updown'], arpRate: [2], arpInst: ['celesta', 'bell'], arpOct: 1, pad: ['choir', 'strings'], lead: ['whistle', 'fm'], dens: [0.2, 0.3], lift: 0.2, bells: true, fill: ['none'] },
   'ice-cave': { name: 'ICE CAVE', bpm: [96, 110], scales: ['minor', 'dorian'], sevenths: 0.4, hold: [2], drums: ['halftime', 'backbeat'], kit: 'gated', bass: ['octave'], bassInst: ['saw'], arp: ['up', 'pedal'], arpRate: [1], arpInst: ['bell'], arpOct: 1, pad: ['strings'], lead: ['fm', 'square'], dens: [0.25, 0.35], fill: ['toms'] },
-  'snow-day': { name: 'SNOW DAY', bpm: [132, 148], scales: ['major'], hold: [1, 2], drums: ['chip'], kit: 'chip', bass: ['chip8', 'octave'], bassInst: ['chip'], arp: ['chip'], arpRate: [1], arpInst: ['chip'], arpOct: 1, pad: ['none'], lead: ['pulse', 'pulse12'], leadOct: 1, dens: [0.45, 0.6], lift: 0.5, harmony: 0.3, bells: true, fill: ['snare'] },
+  'snow-day': { name: 'SNOW DAY', bpm: [132, 148], scales: ['major'], hold: [1, 2], drums: ['chip'], kit: 'chip', bass: ['chip8', 'octave'], bassInst: ['chip'], arp: ['chip'], arpRate: [1], arpInst: ['chip'], arpOct: 1, pad: ['none'], lead: CHIP_LEADS, leadOct: 1, dens: [0.45, 0.6], lift: 0.5, harmony: 0.3, bells: true, fill: ['snare'] },
   'fireside-lofi': { name: 'FIRESIDE LO-FI', bpm: [68, 80], swing: [0.16, 0.24], scales: ['dorian', 'minor'], sevenths: 1, hold: [1, 2], drums: ['boombap'], kit: 'lofi', bass: ['walk', 'root'], bassInst: ['upright'], arp: ['none'], pad: ['rhodes'], lead: ['flute', 'whistle'], dens: [0.25, 0.35], crackle: true, fill: ['none'] },
 
   // VALENTINE'S (February 7 to 14): sweet and slow
@@ -111,7 +113,7 @@ const GEN_STYLES = {
   'beach-surf': { name: 'BEACH SURF', bpm: [150, 168], scales: ['major', 'mixolydian'], hold: [2], drums: ['surf'], kit: 'garage', bass: ['walk'], bassInst: ['pluck'], arp: ['broken', 'up'], arpRate: [2], arpInst: ['twang'], pad: ['organ'], lead: ['twang', 'square'], dens: [0.4, 0.55], fill: ['toms'] },
   'island-breeze': { name: 'ISLAND BREEZE', bpm: [92, 106], swing: [0.08, 0.14], scales: ['major', 'mixolydian'], sevenths: 0.4, hold: [1, 2], drums: ['boomchick'], kit: 'soft', bass: ['boomchick', 'walk'], bassInst: ['upright'], arp: ['roll', 'broken'], arpRate: [2], arpInst: ['bell', 'twang'], pad: ['none', 'reed'], lead: ['whistle', 'flute'], dens: [0.35, 0.5], fill: ['none'] },
   'sunset-house': { name: 'SUNSET HOUSE', bpm: [118, 126], scales: ['dorian', 'major'], sevenths: 0.8, hold: [2], drums: ['four'], kit: '909', bass: ['octave'], bassInst: ['sub'], arp: ['offstab'], arpInst: ['stab'], pad: ['strings', 'rhodes'], lead: ['fm', 'whistle'], dens: [0.22, 0.32], lift: 0.3, fill: ['snare'] },
-  'arcade-summer': { name: 'ARCADE SUMMER', bpm: [136, 152], scales: ['major', 'mixolydian'], hold: [1, 2], drums: ['chip'], kit: 'chip', bass: ['chip8', 'octave'], bassInst: ['chip'], arp: ['chip'], arpRate: [1], arpInst: ['chip'], arpOct: 1, pad: ['none'], lead: ['pulse', 'pulse12'], leadOct: 1, dens: [0.5, 0.65], lift: 0.5, harmony: 0.3, fill: ['snare'] },
+  'arcade-summer': { name: 'ARCADE SUMMER', bpm: [136, 152], scales: ['major', 'mixolydian'], hold: [1, 2], drums: ['chip'], kit: 'chip', bass: ['chip8', 'octave'], bassInst: ['chip'], arp: ['chip'], arpRate: [1], arpInst: ['chip'], arpOct: 1, pad: ['none'], lead: CHIP_LEADS, leadOct: 1, dens: [0.5, 0.65], lift: 0.5, harmony: 0.3, fill: ['snare'] },
 
   // AUTUMN (September): back to school, golden evenings
   'back-to-school': { name: 'BACK TO SCHOOL', bpm: [124, 140], scales: ['major', 'mixolydian'], hold: [2, 1], drums: ['backbeat'], kit: 'garage', bass: ['pulse8', 'octave'], bassInst: ['pluck'], arp: ['strum'], arpInst: ['guitar'], pad: ['organ', 'none'], lead: ['square', 'twang'], dens: [0.4, 0.55], lift: 0.4, fill: ['toms', 'snare'] },
@@ -161,8 +163,8 @@ const GEN_NOTE_NAMES = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'B
 // createGenerated to composeGeneratedV<N> and createGeneratedV<N> (and its GEN_ constants, so they
 // don't clash), add N to GEN_FROZEN below, and raise GEN_VERSION here. music.js loads a frozen
 // version only when a code asks for it.
-const GEN_VERSION = 6;
-const GEN_FROZEN = { 1: 'music-generated-v1.js', 2: 'music-generated-v2.js', 3: 'music-generated-v3.js', 4: 'music-generated-v4.js', 5: 'music-generated-v5.js' }; // (version: the frozen file, under js/music/)
+const GEN_VERSION = 7;
+const GEN_FROZEN = { 1: 'music-generated-v1.js', 2: 'music-generated-v2.js', 3: 'music-generated-v3.js', 4: 'music-generated-v4.js', 5: 'music-generated-v5.js', 6: 'music-generated-v6.js' }; // (version: the frozen file, under js/music/)
 const GEN_SEASON_CODE = { default: 'D', halloween: 'H', harvest: 'N', winter: 'W', frost: 'F', valentine: 'V', spring: 'S', summer: 'U', autumn: 'A' };
 function generatedCode(season, seed, version = GEN_VERSION) {
   return `${GEN_SEASON_CODE[season] || 'D'}${version}-${(seed >>> 0).toString(36).toUpperCase().padStart(7, '0')}`;
@@ -621,6 +623,10 @@ function createGenerated(ctx, out, opts = {}) {
       vibrato(osc('square', f, t, end, held(t, 0.03 * lvl, 0.01, dur, 0.08, filt('lowpass', 3200, 0.7, both(CH.lead)))), t, end, 6, 10, 0.2);
     } else if (kind === 'pulse' || kind === 'pulse12') {
       vibrato(osc(PULSE[kind === 'pulse' ? 25 : 12], f, t, end, held(t, 0.038 * lvl, 0.004, dur, 0.03, both(CH.lead))), t, end, 6, 16, 0.18);
+    } else if (kind === 'triangle') {
+      vibrato(osc('triangle', f, t, end, held(t, 0.08 * lvl, 0.004, dur, 0.04, both(CH.lead))), t, end, 6, 12, 0.2);
+    } else if (kind === 'duo') {
+      for (const det of [-7, 7]) vibrato(osc(PULSE[25], f, t, end, held(t, 0.026 * lvl, 0.004, dur, 0.03, both(CH.lead)), det), t, end, 6, 14, 0.2);
     } else if (kind === 'theremin') {
       const o = osc('sine', f * 0.94, t, end, held(t, 0.085 * lvl, 0.06, dur, 0.15, both(CH.lead)));
       o.frequency.exponentialRampToValueAtTime(f, t + 0.09);
