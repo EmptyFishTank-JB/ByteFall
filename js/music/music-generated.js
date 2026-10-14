@@ -400,6 +400,9 @@ function createGenerated(ctx, out, opts = {}) {
   const halloween = P.season === 'halloween';
   const freq = (m) => 440 * Math.pow(2, (m - 69) / 12);
   const fold = (m, lo) => { while (m < lo) m += 12; while (m >= lo + 12) m -= 12; return m; };
+  // (each pitched note as it's scheduled, for the composer's picture of the song: it changes nothing that plays)
+  const emit = (ch, m, t, dur, part) => { if (opts.onNote) opts.onNote(ch, m, t, dur, part); };
+  const arpOn = (m, t, lv) => { pluck(m, t, lv); emit('arp', m, t, STEP * 2); };
 
   const LAYERS = [
     { id: 'bass', label: 'The bass', from: 0, span: 0.15 },
@@ -801,21 +804,21 @@ function createGenerated(ctx, out, opts = {}) {
 
       // the chords
       if (!solo) {
-        if (P.pad === 'rhodes') { if (P.comp.includes(s)) { const nx = P.comp.find((x) => x > s); keys(padNotes(b), tt, ((nx || BS) - s) * STEP * 0.95, 1); } }
-        else if (P.pad !== 'none' && b.start && s === 0) pad(padNotes(b), t, b.hold * BS * STEP * 0.98, 1);
+        if (P.pad === 'rhodes') { if (P.comp.includes(s)) { const nx = P.comp.find((x) => x > s); const dur = ((nx || BS) - s) * STEP * 0.95; keys(padNotes(b), tt, dur, 1); padNotes(b).forEach((m) => emit('pad', m, tt, dur)); } }
+        else if (P.pad !== 'none' && b.start && s === 0) { const dur = b.hold * BS * STEP * 0.98; pad(padNotes(b), t, dur, 1); padNotes(b).forEach((m) => emit('pad', m, t, dur)); }
       }
-      if (L.bass) { const n = bassAt(b, s, nb); if (n) bass(n.m, tt, n.dur * STEP, L.bass, n); }
+      if (L.bass) { const n = bassAt(b, s, nb); if (n) { bass(n.m, tt, n.dur * STEP, L.bass, n); emit('bass', n.m, tt, n.dur * STEP); } }
       if (L.arp && P.arp !== 'none') {
         const X = arpNotes(b);
         if (P.arp === 'strum') { // (down on the beat, up between)
           const at = P.meter === 6 ? [0, 4, 6, 10] : [0, 6, 8, 12];
           const k = at.indexOf(s);
-          if (k >= 0) X.slice(0, 4).forEach((m, i, a) => pluck(k % 2 ? a[a.length - 1 - i] : m, tt + i * 0.014, L.arp * (k % 2 ? 0.7 : 1)));
+          if (k >= 0) X.slice(0, 4).forEach((m, i, a) => arpOn(k % 2 ? a[a.length - 1 - i] : m, tt + i * 0.014, L.arp * (k % 2 ? 0.7 : 1)));
         } else if (P.arp === 'offstab') {
-          if (s % 4 === 2) X.slice(0, 3).forEach((m) => pluck(m, tt, L.arp));
+          if (s % 4 === 2) X.slice(0, 3).forEach((m) => arpOn(m, tt, L.arp));
         } else if (s % P.arpRate === 0) {
           const pat = ARPS[P.arp] || ARPS.up;
-          pluck(X[pat[(s / P.arpRate) % pat.length] % X.length], tt, L.arp);
+          arpOn(X[pat[(s / P.arpRate) % pat.length] % X.length], tt, L.arp);
         }
       }
       if (L.drums) {
@@ -838,7 +841,8 @@ function createGenerated(ctx, out, opts = {}) {
         if (n) {
           const m = n.m + 12 * P.leadOct;
           lead(m, tt, n.dur * STEP, L.lead);
-          if (P.harmony && b.role === 'B') lead(b.harm[s].m + 12 * P.leadOct, tt, n.dur * STEP, L.lead * 0.5);
+          emit('lead', m, tt, n.dur * STEP);
+          if (P.harmony && b.role === 'B') { const hm = b.harm[s].m + 12 * P.leadOct; lead(hm, tt, n.dur * STEP, L.lead * 0.5); emit('lead', hm, tt, n.dur * STEP, 'harm'); }
         }
       }
       if (L.shimmer) {
@@ -846,7 +850,7 @@ function createGenerated(ctx, out, opts = {}) {
         if (h && s % (h === 16 ? 1 : h === 8 ? 2 : 4) === 0) hat(tt, L.shimmer * (h === 16 && s % 2 ? 0.55 : 1), false);
         if (G.o && G.o.includes(s)) hat(tt, L.shimmer, true);
         if (G.t && G.t.includes(s)) tamb(tt, L.shimmer);
-        if (P.style.bells && s === 0 && (b.first || b.i % 4 === 0) && b.role !== 'intro') bell(fold(b.root, halloween ? 50 : 72), t, L.shimmer);
+        if (P.style.bells && s === 0 && (b.first || b.i % 4 === 0) && b.role !== 'intro') { const bm = fold(b.root, halloween ? 50 : 72); bell(bm, t, L.shimmer); emit('bell', bm, t, 1.6); }
         if (P.style.crackle) crackle(t, L.shimmer);
       }
     },
