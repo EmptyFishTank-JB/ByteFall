@@ -161,8 +161,8 @@ const GEN_NOTE_NAMES = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'B
 // createGenerated to composeGeneratedV<N> and createGeneratedV<N> (and its GEN_ constants, so they
 // don't clash), add N to GEN_FROZEN below, and raise GEN_VERSION here. music.js loads a frozen
 // version only when a code asks for it.
-const GEN_VERSION = 3;
-const GEN_FROZEN = { 1: 'music-generated-v1.js', 2: 'music-generated-v2.js' }; // (version: the frozen file, under js/music/)
+const GEN_VERSION = 4;
+const GEN_FROZEN = { 1: 'music-generated-v1.js', 2: 'music-generated-v2.js', 3: 'music-generated-v3.js' }; // (version: the frozen file, under js/music/)
 const GEN_SEASON_CODE = { default: 'D', halloween: 'H', harvest: 'N', winter: 'W', frost: 'F', valentine: 'V', spring: 'S', summer: 'U', autumn: 'A' };
 function generatedCode(season, seed, version = GEN_VERSION) {
   return `${GEN_SEASON_CODE[season] || 'D'}${version}-${(seed >>> 0).toString(36).toUpperCase().padStart(7, '0')}`;
@@ -248,8 +248,8 @@ function composeGenerated(opts = {}) {
   // THE HOOK. A rhythm a beat at a time (from patterns that sit well), the second bar often the
   // first's again; then moves mostly by step, rising then falling, a leap answered by a step back
   const BEATS = BEAT === 6
-    ? [[[0], 3], [[0, 2, 4], 3], [[0, 4], 2], [[0, 3], 1], [[], 1]]
-    : [[[0], 3], [[0, 2], 4], [[], 1.2], [[0, 3], 1.5], [[2], 1], [[0, 2, 3], 1], [[0, 1, 2, 3], bpm < 120 ? 0.8 : 0]];
+    ? [[[0], 3], [[0, 2, 4], 3], [[0, 4], 2], [[0, 3], 1], [[], 1], [[1, 3], 1], [[3], 1]]
+    : [[[0], 3], [[0, 2], 4], [[], 1.2], [[0, 3], 1.5], [[2], 1], [[0, 2, 3], 1], [[0, 1, 2, 3], bpm < 120 ? 0.8 : 0], [[1], 1.2], [[1, 3], 1], [[3], 1]];
   const beatPick = (dens) => {
     // (the busier the style, the fewer rests and the more the busy patterns weigh: a LO-FI line
     // breathes, a jig runs)
@@ -266,7 +266,9 @@ function composeGenerated(opts = {}) {
     for (let tries = 0; tries < 20; tries++) {
       const bar1 = [];
       for (let bt = 0; bt < beatsInBar; bt++) bar1.push(beatPick(dens));
-      bar1[0] = bar1[0].length && bar1[0][0] === 0 ? bar1[0] : [0]; // (the hook starts on the one)
+      // (a PICKUP now and then: the first bar rests and the hook comes in on its last beat)
+      if (chance(0.2)) for (let bt = 0; bt < beatsInBar - 1; bt++) bar1[bt] = [];
+      else bar1[0] = bar1[0].length && bar1[0][0] === 0 ? bar1[0] : [0]; // (the hook starts on the one)
       const bar2 = chance(0.5) ? bar1.slice(0, -1).concat([beatPick(dens * 0.6)]) : Array.from({ length: beatsInBar }, () => beatPick(dens));
       bar2[beatsInBar - 1] = chance(0.6) ? [] : [0]; // (a breath at the end)
       const on = [];
