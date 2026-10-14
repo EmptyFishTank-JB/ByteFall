@@ -38,6 +38,19 @@ const GEN_PROGS = {
   lydian: [[0, 1, 0, 1], [0, 1, 5, 4], [0, 1, 3, 4]],
 };
 const GEN_BRIDGES = { minor: [[3, 4, 5, 4], [5, 3, 0, 4], [3, 0, 5, 4], [5, 6, 3, 4], [3, 3, 4, 4]], major: [[3, 4, 5, 4], [5, 3, 1, 4], [3, 0, 1, 4], [5, 2, 3, 4], [3, 3, 4, 4]] };
+// THE ARPEGGIO PATTERNS: the chord's notes by index (0 to 2 the chord, 3 to 5 the same an octave up; null
+// is a rest). A chiptune arpeggio picks one of these per song; the others pick their base turned round or rotated
+const GEN_ARP_PATTERNS = { chip: [[0, 1, 2], [0, 2, 1], [2, 1, 0], [0, 1, 2, 1], [0, 2, 4, 2], [0, 3, 1, 4, 2, 5], [0, 1, null, 2], [0, null, 2, 1], [0, 1, 2, 3, 4, 5], [2, 4, 1, 3], [0, 4, 2, null], [5, 3, 4, 1, 2, 0]] };
+const GEN_ARP_BASE = { up: [0, 1, 2, 3], updown: [0, 1, 2, 3, 2, 1], broken: [0, 2, 1, 3], pedal: [3, 0, 3, 1, 3, 2, 3, 1], roll: [0, 2, 4, 0, 2, 4, 1, 3] };
+// THE ARPEGGIO IDIOMS: how a section's arpeggio goes, from a classical piece's broken chords to a shred guitar's
+// sweeps and tapped leaps. Each section of a song picks one (the song's own arpeggio is the GAME idiom), so the
+// arpeggio can change suddenly from one section to the next. tones: how many of the chord's notes it runs through
+const GEN_ARP_IDIOMS = {
+  classical: { tones: 4, rate: [2], pat: [[0, 2, 1, 2], [0, 2, 1, 3, 2, 1], [0, 1, 2, 1, 0, 2]], inst: ['harp', 'celesta', 'guitar'], oct: [0, 1] },
+  sweep: { tones: 4, rate: [1], pat: [[0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1], [0, 1, 2, 3, 4, 5, 6, 7]], inst: ['pluck', 'twang'], oct: [0] },
+  tapping: { tones: 4, rate: [1], pat: [[0, 4, 1, 5, 2, 6, 3, 7], [0, 7, 1, 6, 2, 5, 3, 4], [0, 5, 2, 7, 1, 6, 3, 4]], inst: ['pluck', 'twang'], oct: [0, 1] },
+  sparse: { tones: 4, rate: [2], pat: [[0, null, 2, null, 1, null, 3, null], [0, 2, null, 1, null, 3, null, 2]], inst: ['musicbox', 'bell'], oct: [1] },
+};
 const GEN_FORMS = [
   ['intro', 'A', 'A', 'B', 'A'],
   ['intro', 'A', 'B', 'A', 'B'],
@@ -57,6 +70,8 @@ const GEN_GROOVES = {
   dnb: { k: [[0, 10], [0, 10, 11]], s: [4, 12], g: [7, 15], h: 8 },
   boombap: { k: [[0, 7, 10], [0, 10, 11], [0, 3, 10]], s: [4, 12], h: 8 },
   chip: { k: [[0, 8], [0, 8, 10], [0, 6, 8]], s: [4, 12], h: 8 },
+  chip2: { k: [[0, 4, 8, 12]], s: [4, 12], h: 16 },
+  chip3: { k: [[0, 6, 8], [0, 8, 14]], s: [4, 12], g: [10], h: 8, o: [2, 10] },
   surf: { k: [[0, 6, 8], [0, 8, 10]], s: [4, 12], h: 8, t: [4, 12] },
   march: { k: [[0, 8]], s: [4, 12], g: [10, 11, 14, 15], h: 0 },
   halftime: { k: [[0, 10], [0, 6, 10]], s: [8], h: 8 },
@@ -73,7 +88,7 @@ const GEN_GROOVES = {
 const CHIP_LEADS = ['pulse', 'pulse12', 'square', 'triangle', 'duo'];
 const GEN_STYLES = {
   synthwave: { name: 'SYNTHWAVE', bpm: [92, 112], scales: ['minor', 'dorian'], sevenths: 0.2, hold: [2, 1], drums: ['backbeat'], kit: 'gated', bass: ['octave', 'pulse8'], bassInst: ['saw'], arp: ['up', 'updown', 'broken'], arpRate: [1, 2], arpInst: ['pluck'], arpOct: 1, pad: ['saw', 'strings'], lead: ['saw', 'square'], dens: [0.4, 0.55], lift: 0.3, harmony: 0.4, fill: ['toms', 'snare'] },
-  chiptune: { name: 'CHIPTUNE', bpm: [128, 150], scales: ['minor', 'major', 'dorian'], hold: [1, 2], drums: ['chip'], kit: 'chip', bass: ['chip8', 'octave'], bassInst: ['chip'], arp: ['chip'], arpRate: [1], arpInst: ['chip'], arpOct: 1, pad: ['none'], lead: CHIP_LEADS, leadOct: 1, dens: [0.45, 0.6], lift: 0.5, harmony: 0.3, fill: ['snare'] },
+  chiptune: { name: 'CHIPTUNE', bpm: [128, 150], scales: ['minor', 'major', 'dorian'], hold: [1, 2], drums: ['chip', 'chip2', 'chip3'], kit: ['chip', 'chip2'], bass: ['chip8', 'octave'], bassInst: ['chip', 'pulsebass'], arp: ['chip'], arpRate: [1, 2], arpInst: ['chip'], arpOct: [0, 1], pad: ['none', 'pulse'], lead: CHIP_LEADS, leadOct: 1, dens: [0.45, 0.6], lift: 0.5, harmony: 0.3, fill: ['snare'] },
   dnb: { name: 'DRUM & BASS', bpm: [168, 176], scales: ['minor', 'dorian', 'phrygian'], sevenths: 0.4, hold: [2], drums: ['dnb'], kit: 'break', bass: ['reese'], bassInst: ['reese'], arp: ['pedal', 'up'], arpRate: [2], arpInst: ['bell'], arpOct: 1, pad: ['strings'], lead: ['saw', 'whistle'], dens: [0.2, 0.28], fill: ['snare'] },
   lofi: { name: 'LO-FI', bpm: [70, 86], swing: [0.16, 0.26], scales: ['dorian', 'major', 'minor'], sevenths: 1, hold: [1, 2], drums: ['boombap'], kit: 'lofi', bass: ['walk', 'root'], bassInst: ['upright', 'sub'], arp: ['none'], pad: ['rhodes'], lead: ['fm', 'whistle', 'flute'], dens: [0.25, 0.35], crackle: true, fill: ['none'] },
   techno: { name: 'TECHNO', bpm: [122, 130], scales: ['phrygian', 'minor'], sevenths: 0.2, hold: [2], drums: ['four'], kit: '909', bass: ['acid'], bassInst: ['acid'], arp: ['offstab'], arpInst: ['stab'], pad: ['saw'], lead: ['square', 'fm'], dens: [0.2, 0.3], fill: ['snare'] },
@@ -98,7 +113,7 @@ const GEN_STYLES = {
   // FROST (January 7 to February): the deep of winter, crystal and quiet
   aurora: { name: 'AURORA', bpm: [72, 86], scales: ['lydian', 'major'], sevenths: 0.8, hold: [2], drums: ['halftime'], kit: 'soft', bass: ['root'], bassInst: ['sub'], arp: ['updown'], arpRate: [2], arpInst: ['celesta', 'bell'], arpOct: 1, pad: ['choir', 'strings'], lead: ['whistle', 'fm'], dens: [0.2, 0.3], lift: 0.2, bells: true, fill: ['none'] },
   'ice-cave': { name: 'ICE CAVE', bpm: [96, 110], scales: ['minor', 'dorian'], sevenths: 0.4, hold: [2], drums: ['halftime', 'backbeat'], kit: 'gated', bass: ['octave'], bassInst: ['saw'], arp: ['up', 'pedal'], arpRate: [1], arpInst: ['bell'], arpOct: 1, pad: ['strings'], lead: ['fm', 'square'], dens: [0.25, 0.35], fill: ['toms'] },
-  'snow-day': { name: 'SNOW DAY', bpm: [132, 148], scales: ['major'], hold: [1, 2], drums: ['chip'], kit: 'chip', bass: ['chip8', 'octave'], bassInst: ['chip'], arp: ['chip'], arpRate: [1], arpInst: ['chip'], arpOct: 1, pad: ['none'], lead: CHIP_LEADS, leadOct: 1, dens: [0.45, 0.6], lift: 0.5, harmony: 0.3, bells: true, fill: ['snare'] },
+  'snow-day': { name: 'SNOW DAY', bpm: [132, 148], scales: ['major'], hold: [1, 2], drums: ['chip', 'chip2', 'chip3'], kit: ['chip', 'chip2'], bass: ['chip8', 'octave'], bassInst: ['chip', 'pulsebass'], arp: ['chip'], arpRate: [1, 2], arpInst: ['chip'], arpOct: [0, 1], pad: ['none', 'pulse'], lead: CHIP_LEADS, leadOct: 1, dens: [0.45, 0.6], lift: 0.5, harmony: 0.3, bells: true, fill: ['snare'] },
   'fireside-lofi': { name: 'FIRESIDE LO-FI', bpm: [68, 80], swing: [0.16, 0.24], scales: ['dorian', 'minor'], sevenths: 1, hold: [1, 2], drums: ['boombap'], kit: 'lofi', bass: ['walk', 'root'], bassInst: ['upright'], arp: ['none'], pad: ['rhodes'], lead: ['flute', 'whistle'], dens: [0.25, 0.35], crackle: true, fill: ['none'] },
 
   // VALENTINE'S (February 7 to 14): sweet and slow
@@ -117,7 +132,7 @@ const GEN_STYLES = {
   'beach-surf': { name: 'BEACH SURF', bpm: [150, 168], scales: ['major', 'mixolydian'], hold: [2], drums: ['surf'], kit: 'garage', bass: ['walk'], bassInst: ['pluck'], arp: ['broken', 'up'], arpRate: [2], arpInst: ['twang'], pad: ['organ'], lead: ['twang', 'square'], dens: [0.4, 0.55], fill: ['toms'] },
   'island-breeze': { name: 'ISLAND BREEZE', bpm: [92, 106], swing: [0.08, 0.14], scales: ['major', 'mixolydian'], sevenths: 0.4, hold: [1, 2], drums: ['boomchick'], kit: 'soft', bass: ['boomchick', 'walk'], bassInst: ['upright'], arp: ['roll', 'broken'], arpRate: [2], arpInst: ['bell', 'twang'], pad: ['none', 'reed'], lead: ['whistle', 'flute'], dens: [0.35, 0.5], fill: ['none'] },
   'sunset-house': { name: 'SUNSET HOUSE', bpm: [118, 126], scales: ['dorian', 'major'], sevenths: 0.8, hold: [2], drums: ['four'], kit: '909', bass: ['octave'], bassInst: ['sub'], arp: ['offstab'], arpInst: ['stab'], pad: ['strings', 'rhodes'], lead: ['fm', 'whistle'], dens: [0.22, 0.32], lift: 0.3, fill: ['snare'] },
-  'arcade-summer': { name: 'ARCADE SUMMER', bpm: [136, 152], scales: ['major', 'mixolydian'], hold: [1, 2], drums: ['chip'], kit: 'chip', bass: ['chip8', 'octave'], bassInst: ['chip'], arp: ['chip'], arpRate: [1], arpInst: ['chip'], arpOct: 1, pad: ['none'], lead: CHIP_LEADS, leadOct: 1, dens: [0.5, 0.65], lift: 0.5, harmony: 0.3, fill: ['snare'] },
+  'arcade-summer': { name: 'ARCADE SUMMER', bpm: [136, 152], scales: ['major', 'mixolydian'], hold: [1, 2], drums: ['chip', 'chip2', 'chip3'], kit: ['chip', 'chip2'], bass: ['chip8', 'octave'], bassInst: ['chip', 'pulsebass'], arp: ['chip'], arpRate: [1, 2], arpInst: ['chip'], arpOct: [0, 1], pad: ['none', 'pulse'], lead: CHIP_LEADS, leadOct: 1, dens: [0.5, 0.65], lift: 0.5, harmony: 0.3, fill: ['snare'] },
 
   // AUTUMN (September): back to school, golden evenings
   'back-to-school': { name: 'BACK TO SCHOOL', bpm: [124, 140], scales: ['major', 'mixolydian'], hold: [2, 1], drums: ['backbeat'], kit: 'garage', bass: ['pulse8', 'octave'], bassInst: ['pluck'], arp: ['strum'], arpInst: ['guitar'], pad: ['organ', 'none'], lead: ['square', 'twang'], dens: [0.4, 0.55], lift: 0.4, fill: ['toms', 'snare'] },
@@ -167,8 +182,8 @@ const GEN_NOTE_NAMES = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'B
 // createGenerated to composeGeneratedV<N> and createGeneratedV<N> (and its GEN_ constants, so they
 // don't clash), add N to GEN_FROZEN below, and raise GEN_VERSION here. music.js loads a frozen
 // version only when a code asks for it.
-const GEN_VERSION = 8;
-const GEN_FROZEN = { 1: 'music-generated-v1.js', 2: 'music-generated-v2.js', 3: 'music-generated-v3.js', 4: 'music-generated-v4.js', 5: 'music-generated-v5.js', 6: 'music-generated-v6.js', 7: 'music-generated-v7.js' }; // (version: the frozen file, under js/music/)
+const GEN_VERSION = 9;
+const GEN_FROZEN = { 1: 'music-generated-v1.js', 2: 'music-generated-v2.js', 3: 'music-generated-v3.js', 4: 'music-generated-v4.js', 5: 'music-generated-v5.js', 6: 'music-generated-v6.js', 7: 'music-generated-v7.js', 8: 'music-generated-v8.js' }; // (version: the frozen file, under js/music/)
 const GEN_SEASON_CODE = { default: 'D', halloween: 'H', harvest: 'N', winter: 'W', frost: 'F', valentine: 'V', spring: 'S', summer: 'U', autumn: 'A' };
 function generatedCode(season, seed, version = GEN_VERSION) {
   return `${GEN_SEASON_CODE[season] || 'D'}${version}-${(seed >>> 0).toString(36).toUpperCase().padStart(7, '0')}`;
@@ -379,11 +394,25 @@ function composeGenerated(opts = {}) {
   const title = chance(0.2) ? `THE ${w1} ${w2}` : `${w1} ${w2}`;
   const P = {
     season, styleId, style: S, title, meter, BS, BEAT, bpm, step: 60 / bpm / BEAT, KEY, SC, scaleId, minorish, swing, sevenths, form, bars, lift,
-    groove: { ...G, k: pick(G.k) }, fill: pick(S.fill || ['snare']),
-    bass: pick(S.bass), bassInst: pick(S.bassInst), arp: pick(S.arp), arpRate: pick(S.arpRate || [2]), arpInst: pick(S.arpInst || ['pluck']), arpOct: S.arpOct || 0,
+    groove: { ...G, k: pick(G.k) }, fill: pick(S.fill || ['snare']), kit: pick(Array.isArray(S.kit) ? S.kit : [S.kit]),
+    bass: pick(S.bass), bassInst: pick(S.bassInst), arp: pick(S.arp), arpRate: pick(S.arpRate || [2]), arpInst: pick(S.arpInst || ['pluck']), arpOct: Array.isArray(S.arpOct) ? pick(S.arpOct) : S.arpOct || 0,
     pad: pick(S.pad), lead: pick(S.lead), leadOct: S.leadOct || 0, harmony: chance(S.harmony || 0), acid,
     comp: pick(meter === 4 ? [[0, 6], [0, 10], [0, 7], [0, 6, 10]] : [[0], [0, 6]]),
   };
+  // (the song's own sound: its arpeggio's pattern, the pulse width of the chiptune voices, how long the
+  // notes ring, and the bass's register; each song picks its own)
+  P.arpPat = P.arp === 'chip' ? pick(GEN_ARP_PATTERNS.chip) : (() => { const b = GEN_ARP_BASE[P.arp] || GEN_ARP_BASE.up; return pick([b, b.slice().reverse(), b.slice(1).concat(b.slice(0, 1))]); })();
+  P.arpDefault = { tones: P.arpInst === 'chip' ? 3 : 4, rate: P.arpRate, pat: P.arpPat, inst: P.arpInst, oct: P.arpOct };
+  const sectionArps = form.map(() => pick(['game', 'game', 'classical', 'sweep', 'tapping', 'sparse']));
+  const arpPerSection = !(P.arp === 'strum' || P.arp === 'offstab' || P.arp === 'none');
+  P.arpIdioms = arpPerSection ? sectionArps.map((name) => {
+    if (name === 'game') return P.arpDefault;
+    const I = GEN_ARP_IDIOMS[name];
+    return { tones: I.tones, rate: pick(I.rate), pat: pick(I.pat), inst: pick(I.inst), oct: pick(I.oct) };
+  }) : null;
+  P.duty = pick([25, 25, 37, 50]);
+  P.decay = rf(0.75, 1.35);
+  P.bassOct = pick([0, 0, 12]);
   P.describe = () => ({
     title, style: S.name, season, bpm, meter: meter === 4 ? '4/4' : meter === 3 ? '3/4' : '6/8',
     key: `${GEN_NOTE_NAMES[KEY % 12]} ${GEN_SCALES[scaleId].name}`, form: form.join(' '), seconds: Math.round(N * BS * P.step),
@@ -402,7 +431,7 @@ function createGenerated(ctx, out, opts = {}) {
   const fold = (m, lo) => { while (m < lo) m += 12; while (m >= lo + 12) m -= 12; return m; };
   // (each pitched note as it's scheduled, for the composer's picture of the song: it changes nothing that plays)
   const emit = (ch, m, t, dur, part) => { if (opts.onNote) opts.onNote(ch, m, t, dur, part); };
-  const arpOn = (m, t, lv) => { pluck(m, t, lv); emit('arp', m, t, STEP * 2); };
+  const arpOn = (m, t, lv, inst) => { pluck(m, t, lv, inst); emit('arp', m, t, STEP * 2); };
 
   const LAYERS = [
     { id: 'bass', label: 'The bass', from: 0, span: 0.15 },
@@ -456,14 +485,14 @@ function createGenerated(ctx, out, opts = {}) {
     for (let k = 1; k < n; k++) re[k] = (2 / (k * Math.PI)) * Math.sin(k * Math.PI * duty);
     return ctx.createPeriodicWave(re, im);
   };
-  const PULSE = { 25: pulseWave(0.25), 12: pulseWave(0.125) };
+  const PULSE = { 12: pulseWave(0.125), 25: pulseWave(0.25), 37: pulseWave(0.375), 50: pulseWave(0.5) };
 
   // (a struck note: up in a, dying away over d)
   const env = (t, peak, a, d, ...dests) => {
     const g = ctx.createGain();
     g.gain.setValueAtTime(0.0001, t);
     g.gain.linearRampToValueAtTime(peak, t + a);
-    g.gain.exponentialRampToValueAtTime(0.0005, t + a + d);
+    g.gain.exponentialRampToValueAtTime(0.0005, t + a + d * P.decay);
     for (const x of dests.flat()) g.connect(x);
     return g;
   };
@@ -473,7 +502,7 @@ function createGenerated(ctx, out, opts = {}) {
     g.gain.setValueAtTime(0.0001, t);
     g.gain.linearRampToValueAtTime(peak, t + a);
     g.gain.setTargetAtTime(peak * 0.75, t + a, Math.max(0.05, dur * 0.4));
-    g.gain.setTargetAtTime(0.0001, t + Math.max(dur, a + 0.01), r / 4);
+    g.gain.setTargetAtTime(0.0001, t + Math.max(dur, a + 0.01), (r / 4) * P.decay);
     for (const x of dests.flat()) g.connect(x);
     return g;
   };
@@ -522,6 +551,9 @@ function createGenerated(ctx, out, opts = {}) {
       } else if (kind === 'reed') { // (an accordion: two reeds a little apart)
         const g = held(t, 0.014 * lvl, 0.05, dur, 0.15, filt('lowpass', 2400, 0.7, CH.pad.in));
         osc('square', f, t, end, g, -7); osc('sawtooth', f, t, end, g, 7);
+      } else if (kind === 'pulse') {
+        const g = held(t, 0.016 * lvl, 0.02, dur, 0.1, CH.pad.in);
+        osc(PULSE[P.duty], f, t, end, g, -6); osc(PULSE[P.duty], f, t, end, g, 6);
       } else if (kind === 'saw') {
         const g = held(t, 0.024 * lvl, 0.35, dur, 0.7, filt('lowpass', 1300, 1, CH.pad.in));
         osc('sawtooth', f, t, end, g, -7); osc('sawtooth', f, t, end, g, 7);
@@ -565,6 +597,9 @@ function createGenerated(ctx, out, opts = {}) {
       lp.frequency.setValueAtTime(o.acc ? 2800 : 1300, t); lp.frequency.exponentialRampToValueAtTime(240, t + STEP * 1.6);
       const x = osc('sawtooth', o.slide && lastBassF ? lastBassF : f, t, end, lp);
       if (o.slide && lastBassF) x.frequency.exponentialRampToValueAtTime(f, t + STEP * 0.6);
+    } else if (kind === 'pulsebass') {
+      const lp = filt('lowpass', 1100, 1.2, held(t, 0.16 * lvl, 0.004, dur, 0.05, CH.bass.in));
+      osc(PULSE[P.duty], f, t, end, lp);
     } else if (kind === 'chip') {
       osc('triangle', f, t, end, held(t, 0.3 * lvl, 0.002, dur * 0.9, 0.02, CH.bass.in));
     } else if (kind === 'upright') {
@@ -597,7 +632,7 @@ function createGenerated(ctx, out, opts = {}) {
       osc('sine', f * 2, t, t + 1.1, env(t, 0.055 * lvl, 0.002, 1, both(CH.arp)));
       osc('sine', f * 8, t, t + 0.2, env(t, 0.008 * lvl, 0.002, 0.15, both(CH.arp)));
     } else if (kind === 'chip') {
-      osc(PULSE[25], f, t, t + STEP + 0.05, held(t, 0.03 * lvl, 0.002, STEP * 0.8, 0.02, both(CH.arp)));
+      osc(PULSE[P.duty], f, t, t + STEP + 0.05, held(t, 0.03 * lvl, 0.002, STEP * 0.8, 0.02, both(CH.arp)));
     } else if (kind === 'guitar') {
       const g = env(t, 0.045 * lvl, 0.003, 0.7, filt('lowpass', 1900, 0.8, CH.arp.in));
       osc('triangle', f, t, t + 0.8, g); osc('sawtooth', f, t, t + 0.8, gain(0.35, g));
@@ -679,6 +714,7 @@ function createGenerated(ctx, out, opts = {}) {
   const KITS = {
     gated: { kick: [150, 46, 0.3, 0.7], snare: [1700, 0.8, 0.24, 185, 0.26], hat: [9000, 0.035, 0.045] },
     chip: { chip: true, kick: [130, 40, 0.12, 0.45], snare: [2600, 0.6, 0.11, 0, 0.2], hat: [11000, 0.025, 0.035] },
+    chip2: { chip: true, kick: [140, 36, 0.09, 0.3], snare: [3800, 0.45, 0.07, 0, 0.14], hat: [12500, 0.018, 0.025] },
     break: { kick: [165, 50, 0.22, 0.7], snare: [2100, 0.9, 0.17, 210, 0.28], hat: [8500, 0.03, 0.04] },
     lofi: { kick: [115, 45, 0.28, 0.55], snare: [1400, 0.8, 0.2, 180, 0.17], hat: [6500, 0.05, 0.028], dull: true },
     909: { kick: [170, 44, 0.42, 0.75], snare: [1300, 1.2, 0.2, 0, 0.2], hat: [9500, 0.035, 0.035], open: 0.18 },
@@ -688,7 +724,7 @@ function createGenerated(ctx, out, opts = {}) {
     sleigh: { kick: [110, 50, 0.25, 0.45], snare: [2500, 0.6, 0.18, 0, 0.13], hat: [8000, 0.04, 0.03], sleigh: true },
     soft: { kick: [100, 50, 0.3, 0.42], snare: [2800, 0.5, 0.22, 0, 0.09], hat: [8000, 0.04, 0.02] },
   };
-  const K = KITS[P.style.kit] || KITS.gated;
+  const K = KITS[P.kit] || KITS.gated;
   function noiseHit(t, peak, type, f, q, decay, dest, a = 0.002) {
     const src = ctx.createBufferSource();
     src.buffer = noise;
@@ -773,10 +809,9 @@ function createGenerated(ctx, out, opts = {}) {
     }
   }
   // The arpeggio's notes: the chord's close above its octave, and again an octave up
-  const ARPS = { up: [0, 1, 2, 3], updown: [0, 1, 2, 3, 2, 1], broken: [0, 2, 1, 3], pedal: [3, 0, 3, 1, 3, 2, 3, 1], chip: [0, 1, 2], roll: [0, 2, 4, 0, 2, 4, 1, 3] };
-  function arpNotes(b) {
-    const base = P.KEY + b.lift + 12 * P.arpOct;
-    const tones = b.notes.slice(0, P.arpInst === 'chip' ? 3 : 4).map((m) => fold(m, base)).sort((x, y) => x - y);
+  function arpNotes(b, I) {
+    const base = P.KEY + b.lift + 12 * I.oct;
+    const tones = b.notes.slice(0, I.tones).map((m) => fold(m, base)).sort((x, y) => x - y);
     return [...tones, ...tones.map((m) => m + 12)];
   }
   // The pad's voicing: the chord's notes in one octave around the key (close, so it moves smoothly)
@@ -807,18 +842,19 @@ function createGenerated(ctx, out, opts = {}) {
         if (P.pad === 'rhodes') { if (P.comp.includes(s)) { const nx = P.comp.find((x) => x > s); const dur = ((nx || BS) - s) * STEP * 0.95; keys(padNotes(b), tt, dur, 1); padNotes(b).forEach((m) => emit('pad', m, tt, dur)); } }
         else if (P.pad !== 'none' && b.start && s === 0) { const dur = b.hold * BS * STEP * 0.98; pad(padNotes(b), t, dur, 1); padNotes(b).forEach((m) => emit('pad', m, t, dur)); }
       }
-      if (L.bass) { const n = bassAt(b, s, nb); if (n) { bass(n.m, tt, n.dur * STEP, L.bass, n); emit('bass', n.m, tt, n.dur * STEP); } }
+      if (L.bass) { const n = bassAt(b, s, nb); if (n) { const bm = n.m + P.bassOct; bass(bm, tt, n.dur * STEP, L.bass, n); emit('bass', bm, tt, n.dur * STEP); } }
       if (L.arp && P.arp !== 'none') {
-        const X = arpNotes(b);
+        const I = P.arpIdioms ? P.arpIdioms[b.sec] : P.arpDefault;
+        const X = arpNotes(b, I);
         if (P.arp === 'strum') { // (down on the beat, up between)
           const at = P.meter === 6 ? [0, 4, 6, 10] : [0, 6, 8, 12];
           const k = at.indexOf(s);
           if (k >= 0) X.slice(0, 4).forEach((m, i, a) => arpOn(k % 2 ? a[a.length - 1 - i] : m, tt + i * 0.014, L.arp * (k % 2 ? 0.7 : 1)));
         } else if (P.arp === 'offstab') {
           if (s % 4 === 2) X.slice(0, 3).forEach((m) => arpOn(m, tt, L.arp));
-        } else if (s % P.arpRate === 0) {
-          const pat = ARPS[P.arp] || ARPS.up;
-          arpOn(X[pat[(s / P.arpRate) % pat.length] % X.length], tt, L.arp);
+        } else if (s % I.rate === 0) {
+          const k = I.pat[(s / I.rate) % I.pat.length];
+          if (k !== null) arpOn(X[k % X.length], tt, L.arp, I.inst);
         }
       }
       if (L.drums) {
