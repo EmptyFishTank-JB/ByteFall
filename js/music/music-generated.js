@@ -85,6 +85,21 @@ const GEN_GROOVES = {
   carol: { k: [[0]], h: 0, sparse: true }, // (a timpani at the top of each part, no more)
 };
 // (the chiptune leads: pulses of two widths, a square, a triangle, and two pulses detuned against each other)
+// THE VOICES: each style's family, and the instruments it adds to a song's own: a song's melody, pad, bass
+// and kit are picked from its style's own and its family's (the chiptune styles keep their own, which vary already;
+// a style whose pad is 'none' keeps it)
+const GEN_VOICE_FAMILIES = {
+  synth: { lead: ['saw', 'square', 'fm', 'triangle'], pad: ['saw', 'strings', 'choir', 'organ'], bass: ['saw', 'sub', 'pluck'], kit: ['gated', '909', 'garage'] },
+  lush: { lead: ['whistle', 'flute', 'fm', 'bells', 'triangle'], pad: ['strings', 'choir', 'rhodes', 'reed'], bass: ['sub', 'upright', 'pluck', 'saw'], kit: ['soft', 'gated', 'lofi'] },
+  lofi: { lead: ['flute', 'whistle', 'fm', 'bells', 'triangle'], pad: ['rhodes', 'strings', 'reed', 'organ'], bass: ['upright', 'sub', 'pluck'], kit: ['lofi', 'soft'] },
+  folk: { lead: ['fiddle', 'flute', 'whistle', 'brass'], pad: ['reed', 'organ', 'strings'], bass: ['upright', 'pluck', 'sub'], kit: ['folk', 'soft', 'garage'] },
+  waltz: { lead: ['bells', 'flute', 'fiddle', 'musicbox', 'theremin'], pad: ['strings', 'choir', 'organ', 'reed'], bass: ['upright', 'pluck', 'sub', 'tuba'], kit: ['orchestral', 'soft', 'sleigh'] },
+  gothic: { lead: ['theremin', 'bells', 'fiddle', 'musicbox', 'brass', 'fm'], pad: ['choir', 'organ', 'strings', 'saw'], bass: ['tuba', 'sub', 'pluck', 'saw'], kit: ['orchestral', 'gated', 'soft'] },
+  surf: { lead: ['twang', 'square', 'saw', 'whistle', 'brass'], pad: ['organ', 'reed', 'strings'], bass: ['pluck', 'sub', 'saw', 'upright'], kit: ['garage', 'gated', 'folk'] },
+  dnb: { lead: ['saw', 'whistle', 'fm', 'square'], pad: ['strings', 'saw', 'choir'], bass: ['reese', 'saw', 'sub'], kit: ['break', 'gated', '909'] },
+  techno: { lead: ['square', 'fm', 'saw', 'triangle'], pad: ['saw', 'strings', 'organ'], bass: ['acid', 'saw', 'sub'], kit: ['909', 'gated', 'garage'] },
+};
+const GEN_FAMILY_OF = { synthwave: 'synth', 'ice-cave': 'synth', 'synth-crush': 'synth', 'sunset-house': 'synth', dnb: 'dnb', lofi: 'lofi', 'autumn-lofi': 'lofi', 'cozy-lofi': 'lofi', 'fireside-lofi': 'lofi', 'slow-jam': 'lofi', 'equinox-lofi': 'lofi', techno: 'techno', dreamwave: 'lush', aurora: 'lush', 'love-ballad': 'lush', 'april-showers': 'lush', bloom: 'lush', 'golden-hour': 'lush', 'haunted-waltz': 'gothic', 'horror-synth': 'gothic', 'graveyard-march': 'gothic', 'music-box': 'gothic', 'monster-surf': 'surf', 'beach-surf': 'surf', 'back-to-school': 'surf', 'harvest-jig': 'folk', campfire: 'folk', hoedown: 'folk', 'meadow-folk': 'folk', 'island-breeze': 'folk', 'porch-swing': 'folk', 'sleigh-ride': 'waltz', 'snow-waltz': 'waltz', carol: 'waltz', 'sweetheart-waltz': 'waltz', 'garden-waltz': 'waltz' };
 const CHIP_LEADS = ['pulse', 'pulse12', 'square', 'triangle', 'duo'];
 const GEN_STYLES = {
   synthwave: { name: 'SYNTHWAVE', bpm: [92, 112], scales: ['minor', 'dorian'], sevenths: 0.2, hold: [2, 1], drums: ['backbeat'], kit: 'gated', bass: ['octave', 'pulse8'], bassInst: ['saw'], arp: ['up', 'updown', 'broken'], arpRate: [1, 2], arpInst: ['pluck'], arpOct: 1, pad: ['saw', 'strings'], lead: ['saw', 'square'], dens: [0.4, 0.55], lift: 0.3, harmony: 0.4, fill: ['toms', 'snare'] },
@@ -182,8 +197,8 @@ const GEN_NOTE_NAMES = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'B
 // createGenerated to composeGeneratedV<N> and createGeneratedV<N> (and its GEN_ constants, so they
 // don't clash), add N to GEN_FROZEN below, and raise GEN_VERSION here. music.js loads a frozen
 // version only when a code asks for it.
-const GEN_VERSION = 9;
-const GEN_FROZEN = { 1: 'music-generated-v1.js', 2: 'music-generated-v2.js', 3: 'music-generated-v3.js', 4: 'music-generated-v4.js', 5: 'music-generated-v5.js', 6: 'music-generated-v6.js', 7: 'music-generated-v7.js', 8: 'music-generated-v8.js' }; // (version: the frozen file, under js/music/)
+const GEN_VERSION = 10;
+const GEN_FROZEN = { 1: 'music-generated-v1.js', 2: 'music-generated-v2.js', 3: 'music-generated-v3.js', 4: 'music-generated-v4.js', 5: 'music-generated-v5.js', 6: 'music-generated-v6.js', 7: 'music-generated-v7.js', 8: 'music-generated-v8.js', 9: 'music-generated-v9.js' }; // (version: the frozen file, under js/music/)
 const GEN_SEASON_CODE = { default: 'D', halloween: 'H', harvest: 'N', winter: 'W', frost: 'F', valentine: 'V', spring: 'S', summer: 'U', autumn: 'A' };
 function generatedCode(season, seed, version = GEN_VERSION) {
   return `${GEN_SEASON_CODE[season] || 'D'}${version}-${(seed >>> 0).toString(36).toUpperCase().padStart(7, '0')}`;
@@ -392,11 +407,13 @@ function composeGenerated(opts = {}) {
   let w2 = pick(words[1]);
   if (w1 === w2) w2 = words[1][(words[1].indexOf(w2) + 1) % words[1].length];
   const title = chance(0.2) ? `THE ${w1} ${w2}` : `${w1} ${w2}`;
+  const family = GEN_VOICE_FAMILIES[GEN_FAMILY_OF[styleId]];
+  const voices = (own, role) => (family && family[role] && !own.includes('none') ? [...new Set([...own, ...family[role]])] : own);
   const P = {
     season, styleId, style: S, title, meter, BS, BEAT, bpm, step: 60 / bpm / BEAT, KEY, SC, scaleId, minorish, swing, sevenths, form, bars, lift,
-    groove: { ...G, k: pick(G.k) }, fill: pick(S.fill || ['snare']), kit: pick(Array.isArray(S.kit) ? S.kit : [S.kit]),
-    bass: pick(S.bass), bassInst: pick(S.bassInst), arp: pick(S.arp), arpRate: pick(S.arpRate || [2]), arpInst: pick(S.arpInst || ['pluck']), arpOct: Array.isArray(S.arpOct) ? pick(S.arpOct) : S.arpOct || 0,
-    pad: pick(S.pad), lead: pick(S.lead), leadOct: S.leadOct || 0, harmony: chance(S.harmony || 0), acid,
+    groove: { ...G, k: pick(G.k) }, fill: pick(S.fill || ['snare']), kit: pick(voices(Array.isArray(S.kit) ? S.kit : [S.kit], 'kit')),
+    bass: pick(S.bass), bassInst: pick(voices(S.bassInst, 'bass')), arp: pick(S.arp), arpRate: pick(S.arpRate || [2]), arpInst: pick(S.arpInst || ['pluck']), arpOct: Array.isArray(S.arpOct) ? pick(S.arpOct) : S.arpOct || 0,
+    pad: pick(voices(S.pad, 'pad')), lead: pick(voices(S.lead, 'lead')), leadOct: S.leadOct || 0, harmony: chance(S.harmony || 0), acid,
     comp: pick(meter === 4 ? [[0, 6], [0, 10], [0, 7], [0, 6, 10]] : [[0], [0, 6]]),
   };
   // (the song's own sound: its arpeggio's pattern, the pulse width of the chiptune voices, how long the
