@@ -22,14 +22,15 @@ const Unlocks = (() => {
   const release = !!(window.BYTEFALL_APP && window.BYTEFALL_APP.release);
   try {
     if (!release) {
-      dev = new URLSearchParams(location.search).has('unlockall') || localStorage.getItem('bytefall-dev-unlockall') === 'on';
+      dev = new URLSearchParams(location.search).has('unlockall') || localStorage.getItem('bytefall-dev-unlockall') === 'on' || localStorage.getItem('bytefall-unlock-key') === 'open';
       const pretend = window.BYTEFALL_APP ? JSON.parse(localStorage.getItem(PRETEND_KEY) || '{}') : {};
       full = dev || !!pretend.full;
       devNoAds = localStorage.getItem('bytefall-dev-noads') === 'on';
       noAds = devNoAds || !!pretend.noAds;
     } else {
       const owned = JSON.parse(localStorage.getItem(OWNED_KEY) || '{}');
-      full = !!owned.full;
+      dev = localStorage.getItem('bytefall-unlock-key') === 'open'; // (the secret tap: script.js's THE STORY KEY)
+      full = !!owned.full || dev;
       noAds = !!owned.noAds;
       purchased = full || noAds;
     }
