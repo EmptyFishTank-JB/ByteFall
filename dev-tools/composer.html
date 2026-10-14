@@ -34,9 +34,14 @@
   .bar i { display: block; height: 100%; width: 0; background: var(--green); }
   .msg { color: var(--amber); min-height: 18px; }
   .hint { color: var(--dim); font-size: 12px; }
+  #roll { display: block; width: 100%; height: 300px; background: #030806; border-radius: 4px; }
+  @media (max-width: 480px) { #roll { height: 240px; } }
+  .legend { margin: 8px 0 0; color: var(--dim); font-size: 12px; }
+  .legend span { margin-right: 12px; white-space: nowrap; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
 </style>
-<script src="../js/music/output.js?v=624"></script>
-<script src="../js/music/music-generated.js?v=624"></script>
+<script src="../js/music/output.js?v=625"></script>
+<script src="../js/music/music-generated.js?v=625"></script>
 </head>
 <body>
 <div class="wrap">
@@ -66,6 +71,13 @@
     <div class="row"><label>Build</label><input type="range" id="intensity" min="0" max="1" step="0.01" value="1"><span id="intensity-v">100%</span></div>
     <div class="row"><label>Layer solo</label><select id="solo-layer"><option value="">none</option></select></div>
     <p class="hint">Build sets how far the layers have come in (the game raises it through a track); a layer solo plays just that layer.</p>
+  </div>
+
+  <h2>THE NOTES</h2>
+  <div class="panel">
+    <canvas id="roll" role="img" aria-label="The song's notes falling onto a keyboard"></canvas>
+    <p class="legend" id="roll-legend"></p>
+    <p class="hint">The notes fall to the keys as they're played, and a key lights while its note sounds. Muted or unsoloed instruments are dimmed; BUILD and the layer solo change which notes are there.</p>
   </div>
 
   <h2>INSTRUMENTS</h2>
@@ -119,12 +131,15 @@
     const code = generatedCode(o.season, o.seed);
     $('code').value = code;
     $('plan').textContent = describe(plan) + `\nCODE: ${code}`;
+    lastAt = 0;
+    rebuildRoll();
     return true;
   }
   function songOptions() { return opts(); } // (the fields as they are: edit the seed, then PLAY)
 
   // Playback: the game's own generator, scheduled the way the game's player schedules it
   function applyMix() {
+    if (roll) drawRoll(lastAt);
     if (!gen) return;
     const anySolo = Object.values(mix.solos).some(Boolean);
     gen.channels.forEach((c) => {
@@ -150,6 +165,8 @@
     $('play').disabled = false; $('stop').disabled = true;
     $('pos').textContent = 'stopped';
     $('bar').style.width = '0';
+    cancelAnimationFrame(anim);
+    drawRoll(0);
   }
   function play() {
     if (timer) stop();
@@ -162,13 +179,118 @@
     gen = createGenerated(ctx, bus, shown);
     step = 0;
     nextTime = ctx.currentTime + 0.1;
+    playStart = nextTime;
     buildMixer();
     applyMix();
     timer = setInterval(tick, 25);
     tick();
+    cancelAnimationFrame(anim); anim = requestAnimationFrame(frame);
     $('play').disabled = true; $('stop').disabled = false;
     msg('');
   }
+
+  // THE NOTES: the song's pitched notes falling onto a keyboard, Synthesia-style. The notes come from the
+  // generator's own schedule, run ahead on an offline context (nothing is heard), so they are what plays.
+  // A key lights while its note sounds; a muted or unsoloed instrument's notes are dimmed.
+  const LOOK = 3; // (seconds of the song shown above the keys)
+  const NOTE_COLORS = { pad: '#5fd3c4', bass: '#ffb347', arp: '#ff7ad9', lead: '#39ff8f', harm: '#b6ffd3', bell: '#ffd166' };
+  const WHITE_PCS = [0, 2, 4, 5, 7, 9, 11];
+  const canvas = $('roll');
+  const cx = canvas.getContext('2d');
+  let roll = null; // { notes: [{ ch, m, t, dur, part }], loop (seconds), lo, hi (the keyboard's first and last C) }
+  let playStart = 0, anim = 0, lastAt = 0;
+  $('roll-legend').innerHTML = Object.entries({ pad: 'PAD', bass: 'BASS', arp: 'ARPEGGIO', lead: 'MELODY', harm: 'HARMONY', bell: 'BELLS' })
+    .map(([k, v]) => `<span><i style="background:${NOTE_COLORS[k]}"></i>${v}</span>`).join('');
+
+  function buildRoll() {
+    const Offline = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    if (!Offline || !shown) return null;
+    const notes = [];
+    const off = new Offline(2, 44100, 44100);
+    const g = createGenerated(off, off.createGain(), { ...shown, onNote: (ch, m, t, dur, part) => notes.push({ ch, m, t, dur, part }) });
+    const solo = $('solo-layer').value || null;
+    for (let s = 0; s < g.loopSteps; s++) g.schedule(s, s * g.step, Number($('intensity').value), solo);
+    let lo = 60, hi = 84; // (the keyboard: the song's own range, whole octaves, at least two)
+    if (notes.length) {
+      lo = Math.floor(notes.reduce((a, n) => Math.min(a, n.m), Infinity) / 12) * 12;
+      hi = Math.floor(notes.reduce((a, n) => Math.max(a, n.m), -Infinity) / 12) * 12 + 12;
+      if (hi - lo < 24) hi = lo + 24;
+    }
+    return { notes, loop: g.loopSteps * g.step, lo, hi };
+  }
+  function rebuildRoll() { roll = buildRoll(); drawRoll(lastAt); }
+  const audibleNote = (n) => {
+    const id = n.part === 'harm' ? 'lead' : n.ch;
+    const anySolo = Object.values(mix.solos).some(Boolean);
+    return anySolo ? !!mix.solos[id] : !mix.mutes[id];
+  };
+  // at: the seconds into the song (0 when stopped: the song's start)
+  function drawRoll(at) {
+    lastAt = at;
+    const dpr = window.devicePixelRatio || 1;
+    const W = canvas.clientWidth, H = canvas.clientHeight;
+    if (!W || !H) return;
+    if (canvas.width !== Math.round(W * dpr) || canvas.height !== Math.round(H * dpr)) {
+      canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+    }
+    cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cx.globalAlpha = 1;
+    cx.fillStyle = '#030806';
+    cx.fillRect(0, 0, W, H);
+    if (!roll || !roll.notes.length) {
+      cx.fillStyle = '#1f7a52';
+      cx.font = '12px "Courier New", monospace';
+      cx.fillText(roll ? 'no notes in this song' : 'the notes need a browser with Web Audio', 12, 20);
+      return;
+    }
+    const KB = Math.round(H * 0.22), top = H - KB, pps = top / LOOK;
+    const whites = [];
+    for (let p = roll.lo; p <= roll.hi; p++) if (WHITE_PCS.includes(p % 12)) whites.push(p);
+    const wW = W / whites.length, bW = wW * 0.62;
+    const whiteAt = new Map(whites.map((p, i) => [p, i]));
+    // a key's left edge and width: a white key in its place; a black key on the line between its two white neighbours
+    const keyAt = (p) => (whiteAt.has(p)
+      ? { x: whiteAt.get(p) * wW, w: wW }
+      : { x: (whiteAt.get(p - 1) + 1) * wW - bW / 2, w: bW });
+    const sounding = new Map(); // (pitch -> colour: the keys lit now)
+    const L = roll.loop;
+    for (const n of roll.notes) {
+      const dt = ((n.t - at + L / 2) % L + L) % L - L / 2; // (seconds from now to the note's start)
+      if (dt <= -n.dur || dt >= LOOK) continue;
+      const color = NOTE_COLORS[n.part === 'harm' ? 'harm' : n.ch] || '#ffffff';
+      const on = audibleNote(n);
+      const yTop = Math.max(0, top - (dt + n.dur) * pps), yBot = Math.min(top, top - dt * pps);
+      const k = keyAt(n.m);
+      cx.globalAlpha = on ? 0.9 : 0.16;
+      cx.fillStyle = color;
+      cx.fillRect(k.x + 1, yTop, k.w - 2, Math.max(2, yBot - yTop));
+      if (on && dt <= 0 && dt + n.dur > 0) sounding.set(n.m, color);
+    }
+    cx.globalAlpha = 1;
+    for (const p of whites) {
+      const k = keyAt(p);
+      cx.fillStyle = sounding.get(p) || '#d8efe3';
+      cx.fillRect(k.x, top, k.w, KB);
+      cx.fillStyle = '#0b1512';
+      cx.fillRect(k.x, top, 1, KB);
+      if (p % 12 === 0) {
+        cx.font = `${Math.round(Math.min(12, Math.max(9, wW * 0.8)))}px "Courier New", monospace`;
+        cx.fillText(`C${Math.floor(p / 12) - 1}`, k.x + 3, H - 4);
+      }
+    }
+    for (let p = roll.lo; p <= roll.hi; p++) {
+      if (WHITE_PCS.includes(p % 12)) continue;
+      const k = keyAt(p);
+      cx.fillStyle = sounding.get(p) || '#0a1410';
+      cx.fillRect(k.x, top, k.w, KB * 0.62);
+    }
+  }
+  function frame() {
+    if (!gen || !ctx || !roll) return;
+    drawRoll(((ctx.currentTime - playStart) % roll.loop + roll.loop) % roll.loop);
+    anim = requestAnimationFrame(frame);
+  }
+  window.addEventListener('resize', () => drawRoll(lastAt));
 
   // The instrument strips: each channel's gain, mute and solo
   function buildMixer() {
@@ -231,6 +353,8 @@
   $('play').addEventListener('click', play);
   $('stop').addEventListener('click', stop);
   $('intensity').addEventListener('input', () => { $('intensity-v').textContent = Math.round($('intensity').value * 100) + '%'; });
+  $('intensity').addEventListener('change', rebuildRoll);
+  $('solo-layer').addEventListener('change', rebuildRoll);
   $('reset-mix').addEventListener('click', () => { mix = { gains: {}, mutes: {}, solos: {} }; if (gen) { buildMixer(); applyMix(); } });
   $('save').addEventListener('click', () => {
     const name = $('name').value.trim() || `song ${library().length + 1}`;
