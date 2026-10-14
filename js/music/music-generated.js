@@ -161,8 +161,8 @@ const GEN_NOTE_NAMES = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'B
 // createGenerated to composeGeneratedV<N> and createGeneratedV<N> (and its GEN_ constants, so they
 // don't clash), add N to GEN_FROZEN below, and raise GEN_VERSION here. music.js loads a frozen
 // version only when a code asks for it.
-const GEN_VERSION = 2;
-const GEN_FROZEN = { 1: 'music-generated-v1.js' }; // (version: the frozen file, under js/music/)
+const GEN_VERSION = 3;
+const GEN_FROZEN = { 1: 'music-generated-v1.js', 2: 'music-generated-v2.js' }; // (version: the frozen file, under js/music/)
 const GEN_SEASON_CODE = { default: 'D', halloween: 'H', harvest: 'N', winter: 'W', frost: 'F', valentine: 'V', spring: 'S', summer: 'U', autumn: 'A' };
 function generatedCode(season, seed, version = GEN_VERSION) {
   return `${GEN_SEASON_CODE[season] || 'D'}${version}-${(seed >>> 0).toString(36).toUpperCase().padStart(7, '0')}`;
@@ -285,6 +285,11 @@ function composeGenerated(opts = {}) {
     return { notes: [{ s: 0, mv: 0, strong: true }, { s: BEAT, mv: 1, strong: true }, { s: BS, mv: -1, strong: true }, { s: BS + BEAT, mv: -1, strong: true }], start: 2 };
   }
   const dens = rf(S.dens[0], S.dens[1]);
+  // THE PHRASE PLAN: the hook's four phrases (the figure, its answer, the figure again, the cadence)
+  // go one of four ways: as they were; the repeat of the figure a third higher (a SEQUENCE); the
+  // repeat with its motion turned round (a TURN); or the answer a third higher (a CLIMB)
+  const PHRASES = { hook: [0, 1, 0, 3], sequence: [0, 1, 2, 3], turn: [0, 1, 4, 3], climb: [0, 2, 1, 3] };
+  const phrase = pick(['hook', 'hook', 'sequence', 'turn', 'climb']);
   const cells = { A: makeCell(dens), B: makeCell(Math.min(0.85, dens * 1.25)), C: makeCell(dens * 0.6) };
   const nearest = (cands, x) => cands.reduce((a, c) => (Math.abs(c - x) < Math.abs(a - x) || (Math.abs(c - x) === Math.abs(a - x) && c < a) ? c : a));
   const toneNear = (b, x, only) => {
@@ -298,14 +303,16 @@ function composeGenerated(opts = {}) {
   function realize(cell, b0, center, variant) {
     const lo = center - 4;
     const hi = center + 5;
+    const shift = variant === 2 ? 2 : 0; // (a third higher: a SEQUENCE's repeat or a CLIMB's answer)
     const list = variant === 3 ? cell.notes.filter((n) => n.s <= BS + (BEAT === 6 ? 0 : BEAT)) : cell.notes;
     const out = [];
-    let d = toneNear(bars[b0], center + cell.start - 2);
+    let d = toneNear(bars[b0], center + cell.start - 2 + shift);
     list.forEach((n, i) => {
       const b = bars[(b0 + Math.floor(n.s / BS)) % N];
       if (i > 0) {
         let mv = n.mv;
         if (variant === 1 && i >= list.length - 3) mv = -mv;
+        if (variant === 4) mv = -mv; // (a TURN: the repeat's motion reversed)
         d += mv;
         if (d > hi) d -= Math.abs(mv) * 2 || 2;
         if (d < lo) d += Math.abs(mv) * 2 || 2;
@@ -329,7 +336,7 @@ function composeGenerated(opts = {}) {
     if (len === 8) {
       const cell = cells[role] || cells.A;
       const center = 7 + (role === 'B' ? 2 : role === 'C' ? -1 : 0);
-      [0, 1, 0, 3].forEach((variant, p) => {
+      PHRASES[phrase].forEach((variant, p) => {
         for (const n of realize(cell, at + p * 2, center, variant)) {
           const b = bars[(at + p * 2 + Math.floor(n.s / BS)) % N];
           b.lead[n.s % BS] = { m: dm(n.d, b), dur: n.dur };
