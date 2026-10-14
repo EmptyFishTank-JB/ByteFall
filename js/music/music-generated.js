@@ -161,8 +161,8 @@ const GEN_NOTE_NAMES = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'B
 // createGenerated to composeGeneratedV<N> and createGeneratedV<N> (and its GEN_ constants, so they
 // don't clash), add N to GEN_FROZEN below, and raise GEN_VERSION here. music.js loads a frozen
 // version only when a code asks for it.
-const GEN_VERSION = 5;
-const GEN_FROZEN = { 1: 'music-generated-v1.js', 2: 'music-generated-v2.js', 3: 'music-generated-v3.js', 4: 'music-generated-v4.js' }; // (version: the frozen file, under js/music/)
+const GEN_VERSION = 6;
+const GEN_FROZEN = { 1: 'music-generated-v1.js', 2: 'music-generated-v2.js', 3: 'music-generated-v3.js', 4: 'music-generated-v4.js', 5: 'music-generated-v5.js' }; // (version: the frozen file, under js/music/)
 const GEN_SEASON_CODE = { default: 'D', halloween: 'H', harvest: 'N', winter: 'W', frost: 'F', valentine: 'V', spring: 'S', summer: 'U', autumn: 'A' };
 function generatedCode(season, seed, version = GEN_VERSION) {
   return `${GEN_SEASON_CODE[season] || 'D'}${version}-${(seed >>> 0).toString(36).toUpperCase().padStart(7, '0')}`;
@@ -282,7 +282,7 @@ function composeGenerated(opts = {}) {
         up = size >= 3 ? dir : 0;
         return { s, mv: size * dir, strong: s % BEAT === 0 };
       });
-      return { notes, start: pick([0, 2, 4, 2]) };
+      return { notes, start: pick([0, 1, 2, 3, 4, 6]) };
     }
     return { notes: [{ s: 0, mv: 0, strong: true }, { s: BEAT, mv: 1, strong: true }, { s: BS, mv: -1, strong: true }, { s: BS + BEAT, mv: -1, strong: true }], start: 2 };
   }
@@ -292,6 +292,7 @@ function composeGenerated(opts = {}) {
   // repeat with its motion turned round (a TURN); or the answer a third higher (a CLIMB)
   const PHRASES = { hook: [0, 1, 0, 3], sequence: [0, 1, 2, 3], turn: [0, 1, 4, 3], climb: [0, 2, 1, 3] };
   const phrase = pick(['hook', 'hook', 'sequence', 'turn', 'climb']);
+  const LENGTHS = pick([[2, 2, 2, 2], [2, 2, 2, 2], [1, 3, 2, 2], [2, 2, 3, 1], [3, 1, 2, 2], [1, 1, 3, 3]]); // (each section's four phrases, in bars: eight in all)
   // THE CONTOUR AND THE PALETTE: each song has its own shape (an arch, a slide down or up, a wander)
   // and its own moves (mostly steps; thirds and fourths; or wide moves up to a sixth and an octave)
   // (each contour's bias, where its register starts, and how far it drifts over the song: a slide down
@@ -310,12 +311,12 @@ function composeGenerated(opts = {}) {
   };
   // A phrase of two bars from bar b0: 0 the hook, 1 its answer (its end turned), 3 the cadence (cut
   // short, home to the key's chord's root and held)
-  function realize(cell, b0, center, variant) {
+  function realize(cell, b0, center, variant, len = 2) {
     const drift = Math.round(contour.drift * b0 / N); // (the song's slope: the register moves with it)
     const lo = center - 4 + drift;
     const hi = center + 5 + drift;
     const shift = variant === 2 ? 2 : 0; // (a third higher: a SEQUENCE's repeat or a CLIMB's answer)
-    const list = variant === 3 ? cell.notes.filter((n) => n.s <= BS + (BEAT === 6 ? 0 : BEAT)) : cell.notes;
+    const list = (variant === 3 ? cell.notes.filter((n) => n.s <= BS + (BEAT === 6 ? 0 : BEAT)) : cell.notes).filter((n) => n.s < len * BS); // (a phrase of len bars)
     const out = [];
     let d = toneNear(bars[b0], center + cell.start - 2 + shift + drift);
     list.forEach((n, i) => {
@@ -333,8 +334,9 @@ function composeGenerated(opts = {}) {
       else if (i === list.length - 1 && variant === 1) d = toneNear(b, d, [2, 4]);
       out.push({ s: n.s, d, b0 });
     });
+    if (len === 3 && variant !== 3) out.push(...out.filter((n) => n.s < BS).map((n) => ({ s: n.s + BS * 2, d: n.d, b0 }))); // (a 3-bar phrase: its first bar again, two bars on)
     out.forEach((n, i) => {
-      const next = out[i + 1] ? out[i + 1].s : BS * 2;
+      const next = out[i + 1] ? out[i + 1].s : len * BS;
       const cap = i === out.length - 1 ? (variant === 3 ? BS + BEAT : BEAT * 2) : BEAT * 2;
       n.dur = Math.max(1, Math.min(next - n.s, cap));
     });
@@ -347,12 +349,14 @@ function composeGenerated(opts = {}) {
     if (len === 8) {
       const cell = cells[role] || cells.A;
       const center = 7 + contour.start + (role === 'B' ? 2 : role === 'C' ? -1 : 0);
+      let pb = at; // (each phrase starts where the last ended)
       PHRASES[phrase].forEach((variant, p) => {
-        for (const n of realize(cell, at + p * 2, center, variant)) {
-          const b = bars[(at + p * 2 + Math.floor(n.s / BS)) % N];
+        for (const n of realize(cell, pb, center, variant, LENGTHS[p])) {
+          const b = bars[(pb + Math.floor(n.s / BS)) % N];
           b.lead[n.s % BS] = { m: dm(n.d, b), dur: n.dur };
           b.harm[n.s % BS] = { m: dm(n.d - 2, b), dur: n.dur };
         }
+        pb += LENGTHS[p];
       });
     }
     at += len;
