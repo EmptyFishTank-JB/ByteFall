@@ -161,8 +161,8 @@ const GEN_NOTE_NAMES = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'B
 // createGenerated to composeGeneratedV<N> and createGeneratedV<N> (and its GEN_ constants, so they
 // don't clash), add N to GEN_FROZEN below, and raise GEN_VERSION here. music.js loads a frozen
 // version only when a code asks for it.
-const GEN_VERSION = 4;
-const GEN_FROZEN = { 1: 'music-generated-v1.js', 2: 'music-generated-v2.js', 3: 'music-generated-v3.js' }; // (version: the frozen file, under js/music/)
+const GEN_VERSION = 5;
+const GEN_FROZEN = { 1: 'music-generated-v1.js', 2: 'music-generated-v2.js', 3: 'music-generated-v3.js', 4: 'music-generated-v4.js' }; // (version: the frozen file, under js/music/)
 const GEN_SEASON_CODE = { default: 'D', halloween: 'H', harvest: 'N', winter: 'W', frost: 'F', valentine: 'V', spring: 'S', summer: 'U', autumn: 'A' };
 function generatedCode(season, seed, version = GEN_VERSION) {
   return `${GEN_SEASON_CODE[season] || 'D'}${version}-${(seed >>> 0).toString(36).toUpperCase().padStart(7, '0')}`;
@@ -276,8 +276,8 @@ function composeGenerated(opts = {}) {
       if (on.length < 4 || on.length > BS * 1.2) continue;
       let up = 0;
       const notes = on.map((s, i) => {
-        const bias = i < on.length / 2 ? 0.65 : 0.35; // (an arch: up, then down)
-        const size = up ? 1 : pick([1, 1, 1, 1, 2, 2, 0, 3, 4]);
+        const bias = CONTOUR[i < on.length / 2 ? 0 : 1]; // (the song's contour: an arch goes up, then down)
+        const size = up ? 1 : pick(PALETTE);
         const dir = up ? -Math.sign(up) : (rnd() < bias ? 1 : -1);
         up = size >= 3 ? dir : 0;
         return { s, mv: size * dir, strong: s % BEAT === 0 };
@@ -292,6 +292,14 @@ function composeGenerated(opts = {}) {
   // repeat with its motion turned round (a TURN); or the answer a third higher (a CLIMB)
   const PHRASES = { hook: [0, 1, 0, 3], sequence: [0, 1, 2, 3], turn: [0, 1, 4, 3], climb: [0, 2, 1, 3] };
   const phrase = pick(['hook', 'hook', 'sequence', 'turn', 'climb']);
+  // THE CONTOUR AND THE PALETTE: each song has its own shape (an arch, a slide down or up, a wander)
+  // and its own moves (mostly steps; thirds and fourths; or wide moves up to a sixth and an octave)
+  // (each contour's bias, where its register starts, and how far it drifts over the song: a slide down
+  // starts high and ends low, a rise the other way; each phrase starts further along the drift)
+  const CONTOURS = { arch: { bias: [0.65, 0.35], start: 0, drift: 0 }, fall: { bias: [0.4, 0.2], start: 2, drift: -8 }, rise: { bias: [0.8, 0.6], start: -2, drift: 8 }, wander: { bias: [0.5, 0.5], start: 0, drift: 0 } };
+  const contour = CONTOURS[pick(['arch', 'arch', 'fall', 'rise', 'wander'])];
+  const CONTOUR = contour.bias;
+  const PALETTE = pick([[1, 1, 1, 1, 2, 2, 0, 3, 4], [1, 2, 2, 2, 3, 3, 4, 0], [1, 1, 2, 3, 4, 5, 7]]);
   const cells = { A: makeCell(dens), B: makeCell(Math.min(0.85, dens * 1.25)), C: makeCell(dens * 0.6) };
   const nearest = (cands, x) => cands.reduce((a, c) => (Math.abs(c - x) < Math.abs(a - x) || (Math.abs(c - x) === Math.abs(a - x) && c < a) ? c : a));
   const toneNear = (b, x, only) => {
@@ -303,12 +311,13 @@ function composeGenerated(opts = {}) {
   // A phrase of two bars from bar b0: 0 the hook, 1 its answer (its end turned), 3 the cadence (cut
   // short, home to the key's chord's root and held)
   function realize(cell, b0, center, variant) {
-    const lo = center - 4;
-    const hi = center + 5;
+    const drift = Math.round(contour.drift * b0 / N); // (the song's slope: the register moves with it)
+    const lo = center - 4 + drift;
+    const hi = center + 5 + drift;
     const shift = variant === 2 ? 2 : 0; // (a third higher: a SEQUENCE's repeat or a CLIMB's answer)
     const list = variant === 3 ? cell.notes.filter((n) => n.s <= BS + (BEAT === 6 ? 0 : BEAT)) : cell.notes;
     const out = [];
-    let d = toneNear(bars[b0], center + cell.start - 2 + shift);
+    let d = toneNear(bars[b0], center + cell.start - 2 + shift + drift);
     list.forEach((n, i) => {
       const b = bars[(b0 + Math.floor(n.s / BS)) % N];
       if (i > 0) {
@@ -337,7 +346,7 @@ function composeGenerated(opts = {}) {
     const len = role === 'intro' || role === 'break' ? 4 : 8;
     if (len === 8) {
       const cell = cells[role] || cells.A;
-      const center = 7 + (role === 'B' ? 2 : role === 'C' ? -1 : 0);
+      const center = 7 + contour.start + (role === 'B' ? 2 : role === 'C' ? -1 : 0);
       PHRASES[phrase].forEach((variant, p) => {
         for (const n of realize(cell, at + p * 2, center, variant)) {
           const b = bars[(at + p * 2 + Math.floor(n.s / BS)) % N];
