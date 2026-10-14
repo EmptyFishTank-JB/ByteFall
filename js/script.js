@@ -4159,14 +4159,26 @@ homePlayBtn.addEventListener('click', () => {
 });
 // THE STORY KEY: on the main menu, BYTEFALL's title tapped BYTE three times,
 // then FALL three times, within 5 seconds, lets this device into STORY (bytefall-story-key), and the
-// same again locks it; the page reloads either way, so everything reads it afresh
+// same again locks it; FALL three times then BYTE three times unlocks everything on this device
+// (bytefall-unlock-key, js/unlocks.js), and the same again locks it back. The page reloads either way,
+// so everything reads it afresh
 if (STORY_GATED) {
   const homeTitle = document.querySelector('.home-head h1');
   let taps = [];
   if (homeTitle) homeTitle.addEventListener('click', (e) => {
     const now = Date.now();
     taps = taps.filter((t) => now - t.at < 5000).concat({ at: now, part: e.target.closest('span') ? 'F' : 'B' }).slice(-6);
-    if (taps.map((t) => t.part).join('') !== 'BBBFFF') return;
+    const seq = taps.map((t) => t.part).join('');
+    if (seq === 'FFFBBB') { // (everything unlocked, or locked back)
+      taps = [];
+      const all = storage.get('bytefall-unlock-key') === 'open';
+      storage.set('bytefall-unlock-key', all ? 'locked' : 'open');
+      SFX.play(all ? 'denied' : 'egg');
+      homeNotice(all ? 'UNLOCK ALL // OFF' : 'UNLOCK ALL // ON');
+      setTimeout(() => location.reload(), 1200);
+      return;
+    }
+    if (seq !== 'BBBFFF') return;
     taps = [];
     const open = !STORY_SOON;
     storage.set('bytefall-story-key', open ? 'locked' : 'open');

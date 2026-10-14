@@ -21,6 +21,8 @@ Ideas queued for later (not built yet).
   encrypted bits' [-] and [=] confusing: worth a clearer look or a word on what they are.
 - **Negative scoring**: the score can go down. Infected bits come up more often and take points for
   every drop they're left on the grid, so clearing them matters.
+- **CPUs reacting to the gameplay**: the bots (wandering, and VS's) reacting to what happens in a game.
+  Exactly how, to be worked out.
 - **A pre-registration theme**: a color theme (maybe a matching font or sound theme) given to everyone
   who pre-registers on Google Play, as Play Console's pre-registration reward. Needs an in-app product
   for it and the game granting purchases made outside the app (checked at launch and on resume).
