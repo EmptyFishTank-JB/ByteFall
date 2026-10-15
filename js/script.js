@@ -4158,7 +4158,7 @@ homePlayBtn.addEventListener('click', () => {
   SFX.play('static');
 });
 // THE STORY KEY: on the main menu, BYTEFALL's title tapped BYTE three times,
-// then FALL three times, within 5 seconds, lets this device into STORY (bytefall-story-key), and the
+// then FALL three times, each tap within 2 seconds of the last, lets this device into STORY (bytefall-story-key), and the
 // same again locks it; FALL three times then BYTE three times unlocks everything on this device
 // (bytefall-unlock-key, js/unlocks.js), and the same again locks it back. The page reloads either way,
 // so everything reads it afresh
@@ -4167,7 +4167,9 @@ if (STORY_GATED) {
   let taps = [];
   if (homeTitle) homeTitle.addEventListener('click', (e) => {
     const now = Date.now();
-    taps = taps.filter((t) => now - t.at < 5000).concat({ at: now, part: e.target.closest('span') ? 'F' : 'B' }).slice(-6);
+    // (each tap within 2 seconds of the last, so a steady pace works; a pause starts the count again)
+    if (taps.length && now - taps[taps.length - 1].at >= 2000) taps = [];
+    taps = taps.concat({ at: now, part: e.target.closest('span') ? 'F' : 'B' }).slice(-6);
     const seq = taps.map((t) => t.part).join('');
     if (seq === 'FFFBBB') { // (everything unlocked, or locked back)
       taps = [];
