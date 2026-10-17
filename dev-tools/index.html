@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="../js/fonts.js?v=630"></script>
+<script src="../js/fonts.js?v=631"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#020403">
@@ -14,7 +14,7 @@
     if (font) document.documentElement.style.setProperty('--game-font', font + ", 'Courier New', Courier, monospace");
   } catch (e) {}
 </script>
-<link rel="stylesheet" href="dev.css?v=630">
+<link rel="stylesheet" href="dev.css?v=631">
 </head>
 <body>
 <div class="wrap">
@@ -68,7 +68,7 @@
   <div class="switch-group">
     <h3>PROGRESS &amp; PURCHASES</h3>
     <div class="switches">
-      <button type="button" id="dev-unlock">UNLOCK EVERYTHING: OFF</button>
+      <button type="button" id="dev-unlock">DEV MODE: OFF</button>
       <button type="button" id="dev-noads">OWN REMOVE ADS: OFF</button>
       <button type="button" id="dev-lv80">JUMP TO LV 80</button>
       <button type="button" id="dev-levels">+10 LEVELS</button>
@@ -121,13 +121,17 @@
     const status = document.getElementById('dev-status');
     const get = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
     const set = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+    // (DEV MODE: this switch's flag or the secret tap's; off here switches both off, as the game does)
+    const devOn = () => get(FLAG) === 'on' || get('bytefall-unlock-key') === 'open';
     const show = () => {
-      const on = get(FLAG) === 'on';
-      btn.textContent = `UNLOCK EVERYTHING: ${on ? 'ON' : 'OFF'}`;
+      const on = devOn();
+      btn.textContent = `DEV MODE: ${on ? 'ON' : 'OFF'}`;
       btn.classList.toggle('on', on);
     };
     btn.addEventListener('click', () => {
-      set(FLAG, get(FLAG) === 'on' ? 'off' : 'on');
+      const on = devOn();
+      set(FLAG, on ? 'off' : 'on');
+      set('bytefall-unlock-key', on ? 'locked' : 'open');
       show();
       status.textContent = 'Saved. Reload the game to see it.';
     });

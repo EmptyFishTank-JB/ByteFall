@@ -4,8 +4,9 @@
 // (billing.js) tells own() what the account owns, at each launch and each purchase;
 // what it last said is kept (bytefall-purchases), so the game opens as it was before
 // Google Play answers (no banner flashing up for a FULL ACCESS owner). For testing,
-// ?unlockall in the URL or the dev page's UNLOCK EVERYTHING switch (a flag in this
-// browser) preview everything unlocked. REMOVE ADS is the other purchase (the STORE,
+// ?unlockall in the URL or DEV MODE (the dev page's switch, a flag in this browser; the test app's
+// padlock; or the secret tap on the main menu's title, which the Play release keeps too) preview
+// everything unlocked. REMOVE ADS is the other purchase (the STORE,
 // store.js): no ads, nothing unlocked; Full Access includes it. The dev page's OWN
 // REMOVE ADS switch previews owning it. In ByteFall Test with test ads, the STORE's BUY
 // pretends (pretend(), kept in bytefall-test-purchases) and SETTINGS' TEST PURCHASES resets it.
@@ -60,6 +61,14 @@ const Unlocks = (() => {
     },
     onChange(fn) {
       listeners.push(fn);
+    },
+    // (DEV MODE switched on or off from wherever it is (the secret tap, the test app's padlock, the dev
+    // page): both of its flags at once, so switching it off from one never leaves the other on)
+    setDevUnlock(on) {
+      try {
+        localStorage.setItem('bytefall-unlock-key', on ? 'open' : 'locked');
+        localStorage.setItem('bytefall-dev-unlockall', on ? 'on' : 'off');
+      } catch (e) {}
     },
     // (ByteFall Test's pretend purchases: owned or not, nothing charged, kept for the next launch)
     pretend(nowFull, nowNoAds) {

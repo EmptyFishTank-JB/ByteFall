@@ -4159,8 +4159,9 @@ homePlayBtn.addEventListener('click', () => {
 });
 // THE STORY KEY: on the main menu, BYTEFALL's title tapped BYTE three times,
 // then FALL three times, each tap within 2 seconds of the last, lets this device into STORY (bytefall-story-key), and the
-// same again locks it; FALL three times then BYTE three times unlocks everything on this device
-// (bytefall-unlock-key, js/unlocks.js), and the same again locks it back. The page reloads either way,
+// same again locks it; FALL three times then BYTE three times switches DEV MODE on for this device
+// (everything unlocked, and three taps on an exploit's name arming it: js/unlocks.js), and the same again
+// switches it off, whichever switch turned it on. The page reloads either way,
 // so everything reads it afresh
 if (STORY_GATED) {
   const homeTitle = document.querySelector('.home-head h1');
@@ -4171,12 +4172,12 @@ if (STORY_GATED) {
     if (taps.length && now - taps[taps.length - 1].at >= 2000) taps = [];
     taps = taps.concat({ at: now, part: e.target.closest('span') ? 'F' : 'B' }).slice(-6);
     const seq = taps.map((t) => t.part).join('');
-    if (seq === 'FFFBBB') { // (everything unlocked, or locked back)
+    if (seq === 'FFFBBB') { // (DEV MODE on, or off again)
       taps = [];
-      const all = storage.get('bytefall-unlock-key') === 'open';
-      storage.set('bytefall-unlock-key', all ? 'locked' : 'open');
-      SFX.play(all ? 'denied' : 'egg');
-      homeNotice(all ? 'UNLOCK ALL // OFF' : 'UNLOCK ALL // ON');
+      const on = Unlocks.isDevUnlock();
+      Unlocks.setDevUnlock(!on);
+      SFX.play(on ? 'denied' : 'egg');
+      homeNotice(on ? 'DEV MODE // OFF' : 'DEV MODE // ON');
       setTimeout(() => location.reload(), 1200);
       return;
     }
@@ -7610,52 +7611,52 @@ function refreshExploitCards() {
     el.querySelector('.lock-tag').textContent = tag;
   }
 }
-// DEV (the dev page's UNLOCK EVERYTHING switch): press and hold any exploit card for 2 seconds
-// to make it your next drop, slotted or not, to try it out.
-const DEV_HOLD_MS = 2000;
-let devHold = null; // { card, timer }
-let devHoldFired = false; // swallow the click that ends a successful hold
-function cancelDevHold() {
-  if (!devHold) return;
-  clearTimeout(devHold.timer);
-  devHold.card.classList.remove('dev-holding');
-  devHold = null;
+// DEV MODE (the secret tap, the test app's padlock, the dev page's switch): three quick taps on an
+// exploit's name (its card's title line) make it your next drop, slotted or not, to try it out. A tap on
+// the name waits a moment for more first; one or two then do what a tap always does (equip, unequip, buy),
+// and a tap anywhere else on the card does it at once
+const ARM_TAPS = 3;
+const ARM_TAP_GAP = 350; // (ms the next tap may come in)
+let armTaps = null; // { card, n, timer }
+function flushArmTaps() {
+  if (!armTaps) return;
+  const { card, n, timer } = armTaps;
+  clearTimeout(timer);
+  armTaps = null;
+  for (let i = 0; i < n; i++) exploitCardTap(card);
 }
-hacksPanelEl.addEventListener('pointerdown', (e) => {
-  const card = e.target.closest('.hack-item');
-  if (!card || !Unlocks.isDevUnlock()) return;
-  cancelDevHold();
-  devHoldFired = false;
-  card.classList.add('dev-holding');
-  devHold = {
-    card,
-    timer: setTimeout(() => {
-      const id = card.dataset.hack;
-      cancelDevHold();
-      devHoldFired = true;
-      if (gameOver || busy || pivotFrom !== null) {
-        SFX.play('denied');
-        return;
-      }
-      queue.unshift({ type: 'hack', id });
-      setMessage(`DEV // ${HACKS[id].name} READY`);
-      SFX.play('egg');
-      updateHud();
-    }, DEV_HOLD_MS),
-  };
-});
-for (const type of ['pointerup', 'pointerleave', 'pointercancel']) hacksPanelEl.addEventListener(type, cancelDevHold);
-hacksPanelEl.addEventListener('contextmenu', (e) => {
-  if (Unlocks.isDevUnlock() && e.target.closest('.hack-item')) e.preventDefault(); // long-press menu on phones
-});
-
-hacksPanelEl.addEventListener('click', (e) => {
-  if (devHoldFired) {
-    devHoldFired = false;
+function devArm(id) {
+  if (gameOver || busy || pivotFrom !== null) {
+    SFX.play('denied');
     return;
   }
+  queue.unshift({ type: 'hack', id });
+  setMessage(`DEV // ${HACKS[id].name} READY`);
+  SFX.play('egg');
+  updateHud();
+}
+hacksPanelEl.addEventListener('click', (e) => {
   const card = e.target.closest('.hack-item');
-  if (!card || daily || !Progress.exploitInfo(card.dataset.hack).unlocked) return;
+  if (!card) return;
+  if (!Unlocks.isDevUnlock() || !e.target.closest('.hack-item h3')) {
+    flushArmTaps();
+    exploitCardTap(card);
+    return;
+  }
+  if (armTaps && armTaps.card.dataset.hack !== card.dataset.hack) flushArmTaps(); // (another name: the last one's taps first)
+  if (!armTaps) armTaps = { card, n: 0, timer: 0 };
+  clearTimeout(armTaps.timer);
+  armTaps.card = card;
+  armTaps.n++;
+  if (armTaps.n >= ARM_TAPS) {
+    armTaps = null;
+    devArm(card.dataset.hack);
+    return;
+  }
+  armTaps.timer = setTimeout(flushArmTaps, ARM_TAP_GAP);
+});
+function exploitCardTap(card) {
+  if (daily || !Progress.exploitInfo(card.dataset.hack).unlocked) return;
   if (!Progress.isOwned(card.dataset.hack)) { buyExploitTap(card); return; }
   ownConfirm = null;
   if (!loadoutEditable()) {
@@ -7674,7 +7675,7 @@ hacksPanelEl.addEventListener('click', (e) => {
     cardNotice(Progress.slotInfo().slots ? 'SLOTS FULL // REMOVE ONE TO SWAP' : 'NO LOADOUT SLOTS YET');
   }
   refreshExploitCards();
-});
+}
 
 // An exploit unlocked but not owned: a first tap lights it for a second to buy it (with resources,
 // for good); short of the price, what's short pulses red
@@ -7727,8 +7728,8 @@ function applyUnlocks() {
 Unlocks.onChange(applyUnlocks);
 applyUnlocks();
 document.getElementById('dev-badge').hidden = !Unlocks.isDevUnlock();
-// UNLOCK EVERYTHING in the Android TEST app, where the web's DEV link is (the dev page's switch,
-// the same flag): the padlock lit while it's on; the game starts over with it. (The RELEASE app
+// DEV MODE in the Android TEST app, where the web's DEV link is (the dev page's switch and the secret
+// tap's, the same flags): the padlock lit while it's on; the game starts over with it. (The RELEASE app
 // has no padlock: tools/build-app.js takes it out)
 const unlockBtn = document.getElementById('dev-unlock-btn');
 if (window.BYTEFALL_APP && !window.BYTEFALL_APP.release && unlockBtn) {
@@ -7740,7 +7741,7 @@ if (window.BYTEFALL_APP && !window.BYTEFALL_APP.release && unlockBtn) {
   unlockBtn.setAttribute('aria-pressed', String(on));
   document.getElementById('dev-unlock-state').textContent = on ? 'ON' : 'OFF';
   unlockBtn.addEventListener('click', () => {
-    storage.set('bytefall-dev-unlockall', on ? 'off' : 'on');
+    Unlocks.setDevUnlock(!on);
     location.reload();
   });
 }

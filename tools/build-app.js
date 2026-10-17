@@ -53,8 +53,8 @@ html = html.slice(0, first) + boot + html.slice(first);
 if (RELEASE) {
   // (the padlock, its note and all; and the infection, sound and story testers, which only ?inftest,
   // ?sfxtest and ?storytest wake)
-  const padlock = /\s*<!-- \(the Android test app: UNLOCK EVERYTHING[^>]*-->\s*<button type="button" class="dev-link dev-unlock-btn"[\s\S]*?<\/button>/;
-  if (!padlock.test(html)) throw new Error('build-app: the UNLOCK EVERYTHING padlock was not found in index.html');
+  const padlock = /\s*<!-- \(the Android test app: DEV MODE[^>]*-->\s*<button type="button" class="dev-link dev-unlock-btn"[\s\S]*?<\/button>/;
+  if (!padlock.test(html)) throw new Error('build-app: the DEV MODE padlock was not found in index.html');
   html = html.replace(padlock, '');
   for (const file of ['inf-test', 'sfx-test', 'story-test']) {
     const tester = new RegExp(`\\s*<script src="js\\/${file}\\.js[^"]*"><\\/script>`);
