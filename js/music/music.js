@@ -411,6 +411,8 @@ const Music = (() => {
             document.head.appendChild(s);
           });
         } catch (e) { return 'COULDN\'T LOAD THAT VERSION'; }
+        // (loaded but not run, a script error: never another song in its place)
+        if (!window[`createGeneratedV${c.version}`]) return 'COULDN\'T LOAD THAT VERSION';
       }
       genFixed = c;
       this.play('generated', true);
