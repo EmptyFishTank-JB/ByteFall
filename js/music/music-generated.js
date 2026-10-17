@@ -198,8 +198,8 @@ const GEN_NOTE_NAMES = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'B
 // don't clash), add N to GEN_FROZEN below, and raise GEN_VERSION here. music.js loads a frozen
 // version only when a code asks for it, into the page beside this file: so every top-level name here
 // is a GEN_ one or one of the four functions (any other would be declared twice, and the copy not run).
-const GEN_VERSION = 10;
-const GEN_FROZEN = { 1: 'music-generated-v1.js', 2: 'music-generated-v2.js', 3: 'music-generated-v3.js', 4: 'music-generated-v4.js', 5: 'music-generated-v5.js', 6: 'music-generated-v6.js', 7: 'music-generated-v7.js', 8: 'music-generated-v8.js', 9: 'music-generated-v9.js' }; // (version: the frozen file, under js/music/)
+const GEN_VERSION = 11;
+const GEN_FROZEN = { 1: 'music-generated-v1.js', 2: 'music-generated-v2.js', 3: 'music-generated-v3.js', 4: 'music-generated-v4.js', 5: 'music-generated-v5.js', 6: 'music-generated-v6.js', 7: 'music-generated-v7.js', 8: 'music-generated-v8.js', 9: 'music-generated-v9.js', 10: 'music-generated-v10.js' }; // (version: the frozen file, under js/music/)
 const GEN_SEASON_CODE = { default: 'D', halloween: 'H', harvest: 'N', winter: 'W', frost: 'F', valentine: 'V', spring: 'S', summer: 'U', autumn: 'A' };
 function generatedCode(season, seed, version = GEN_VERSION) {
   return `${GEN_SEASON_CODE[season] || 'D'}${version}-${(seed >>> 0).toString(36).toUpperCase().padStart(7, '0')}`;
@@ -402,6 +402,45 @@ function composeGenerated(opts = {}) {
   // The bass and arpeggio shapes, the groove, the fill, the acid line's 16 steps
   const grooveId = pick(S.drums);
   const G = GEN_GROOVES[grooveId];
+  // THE BEAT: the style's groove as a skeleton (its kicks on the beat, its backbeat, its hats' pace) and each
+  // song's own beat built on it: kicks dropped, nudged and added off the beat, ghost snares, a pickup snare or
+  // a clap, the hats' pace and a few left out, open hats, a shaker. Then the parts their own takes on it (B,
+  // the bridge, A coming back after B). A gentle groove (a lullaby, a heartbeat, a jig) gets a light touch, and
+  // a carol's lone timpani stays as it is
+  const steps = [...Array(BS).keys()];
+  const gentle = !G.s && !G.c;
+  const take = (list, n) => { const out = []; for (let i = 0; i < n && list.length; i++) out.push(list.splice(Math.floor(rnd() * list.length), 1)[0]); return out; };
+  function makeBeat(base, amount) {
+    if (base.sparse) return { ...base, k: Array.isArray(base.k[0]) ? pick(base.k) : base.k };
+    const backbeat = new Set([...(base.s || []), ...(base.c || [])]);
+    const k = new Set([0]);
+    for (const x of Array.isArray(base.k[0]) ? pick(base.k) : base.k) {
+      if (x % BEAT === 0 || !chance(0.35 * amount)) k.add(x); // (a kick on the beat stays; one off it now and then goes)
+      else if (chance(0.5)) { const y = x + pick([-1, 1]); if (y > 0 && y < BS && !backbeat.has(y)) k.add(y); } // (or moves a 16th)
+    }
+    const offs = steps.filter((x) => x % BEAT !== 0 && !backbeat.has(x) && !k.has(x));
+    take(offs, gentle ? (chance(0.5 * amount) ? 1 : 0) : pick([0, 1, 1, 2, 2, 3].slice(0, 3 + Math.round(3 * amount)))).forEach((x) => k.add(x));
+    const beat = { ...base, k: [...k].sort((a, b) => a - b) };
+    if (gentle) {
+      if (base.t && chance(0.6 * amount)) { const t = [...base.t]; take(t, pick([1, 2])); beat.t = t; } // (a few of the shaker's hits left out)
+      if (base.g && chance(0.5 * amount)) beat.g = [...new Set([...base.g, ...take(steps.filter((x) => x % 2 === 1 && !k.has(x)), 1)])].sort((a, b) => a - b);
+      return beat;
+    }
+    const ghosts = new Set(base.g || []);
+    take(steps.filter((x) => x % 2 === 1 && !k.has(x) && !backbeat.has(x)), pick([0, 0, 1, 2, 3].slice(0, 2 + Math.round(3 * amount)))).forEach((x) => ghosts.add(x));
+    if (base.s && chance(0.3 * amount)) ghosts.add(BS - 1); // (a pickup into the next bar)
+    beat.g = [...ghosts].sort((a, b) => a - b);
+    if (base.s && !base.c && chance(0.25 * amount)) beat.c = [pick(base.s)]; // (a clap on one backbeat)
+    if (base.h && chance(0.45 * amount)) beat.h = pick([4, 8, 16].filter((h) => h !== base.h)); // (the hats' pace)
+    if (beat.h) {
+      const every = beat.h === 16 ? 1 : beat.h === 8 ? 2 : 4;
+      beat.hs = take(steps.filter((x) => x > 0 && x % every === 0 && x % BEAT !== 0), beat.h >= 8 && chance(0.5 * amount) ? pick([1, 2]) : 0); // (hats left out)
+    }
+    if (!base.o && chance(0.35 * amount)) beat.o = take(steps.filter((x) => x % BEAT !== 0 && x % 2 === 0 && !k.has(x)), pick([1, 2])).sort((a, b) => a - b);
+    if (!base.t && chance(0.25 * amount)) beat.t = steps.filter((x) => x % 2 === 0 && (meter === 4 ? x % 4 === 2 : x % BEAT !== 0)); // (a shaker on the off-beats)
+    return beat;
+  }
+  const beat = makeBeat(G, 1);
   const acid = Array.from({ length: 16 }, (_, i) => ({ on: i === 0 || chance(0.62), oct: chance(0.22), acc: chance(0.3), slide: chance(0.2), five: chance(0.1) }));
   const words = GEN_WORDS[Object.keys(GEN_POOLS).find((k) => GEN_POOLS[k].includes(styleId)) || season];
   let w1 = pick(words[0]);
@@ -412,7 +451,7 @@ function composeGenerated(opts = {}) {
   const voices = (own, role) => (family && family[role] && !own.includes('none') ? [...new Set([...own, ...family[role]])] : own);
   const P = {
     season, styleId, style: S, title, meter, BS, BEAT, bpm, step: 60 / bpm / BEAT, KEY, SC, scaleId, minorish, swing, sevenths, form, bars, lift,
-    groove: { ...G, k: pick(G.k) }, fill: pick(S.fill || ['snare']), kit: pick(voices(Array.isArray(S.kit) ? S.kit : [S.kit], 'kit')),
+    groove: beat, fill: pick(S.fill || ['snare']), kit: pick(voices(Array.isArray(S.kit) ? S.kit : [S.kit], 'kit')),
     bass: pick(S.bass), bassInst: pick(voices(S.bassInst, 'bass')), arp: pick(S.arp), arpRate: pick(S.arpRate || [2]), arpInst: pick(S.arpInst || ['pluck']), arpOct: Array.isArray(S.arpOct) ? pick(S.arpOct) : S.arpOct || 0,
     pad: pick(voices(S.pad, 'pad')), lead: pick(voices(S.lead, 'lead')), leadOct: S.leadOct || 0, harmony: chance(S.harmony || 0), acid,
     comp: pick(meter === 4 ? [[0, 6], [0, 10], [0, 7], [0, 6, 10]] : [[0], [0, 6]]),
@@ -428,6 +467,12 @@ function composeGenerated(opts = {}) {
     const I = GEN_ARP_IDIOMS[name];
     return { tones: I.tones, rate: pick(I.rate), pat: pick(I.pat), inst: pick(I.inst), oct: pick(I.oct) };
   }) : null;
+  // (each part's beat: B and the bridge their own takes on the song's, A after a B another)
+  const beatB = makeBeat(beat, 0.6);
+  const beatC = makeBeat(beat, 0.6);
+  const beatA2 = makeBeat(beat, 0.4);
+  let pastB = false;
+  P.sectionGrooves = form.map((role) => { if (role === 'B') pastB = true; return role === 'B' ? beatB : role === 'C' ? beatC : role === 'A' && pastB ? beatA2 : beat; });
   P.duty = pick([25, 25, 37, 50]);
   P.decay = rf(0.75, 1.35);
   P.bassOct = pick([0, 0, 12]);
@@ -442,6 +487,7 @@ function composeGenerated(opts = {}) {
 function createGenerated(ctx, out, opts = {}) {
   const P = composeGenerated(opts);
   const { BS, BEAT, bars, groove: G } = P;
+  const beatOf = (b) => (P.sectionGrooves ? P.sectionGrooves[b.sec] : G); // (the beat of the part a bar is in)
   const STEP = P.step;
   const N = bars.length;
   const halloween = P.season === 'halloween';
@@ -804,7 +850,7 @@ function createGenerated(ctx, out, opts = {}) {
     const fifth = fold(b.notes[2], R);
     const nextR = fold(nb.root, 33);
     switch (P.bass) {
-      case 'root': { const k = G.k.includes(s) ? G.k : (s === 0 ? [0] : null); if (!k) return null; const nx = k.find((x) => x > s); return { m: R, dur: (nx || BS) - s }; }
+      case 'root': { const K = beatOf(b).k; const k = K.includes(s) ? K : (s === 0 ? [0] : null); if (!k) return null; const nx = k.find((x) => x > s); return { m: R, dur: (nx || BS) - s }; }
       case 'pulse8': return s % 2 === 0 ? { m: R, dur: 1.6 } : null;
       case 'octave': return s % 2 === 0 ? { m: R + ((s / 2) % 2 ? 12 : 0), dur: 1.6 } : null;
       case 'chip8': return s % 2 === 0 ? { m: s === 12 ? fifth : s === 14 ? R + 12 : R, dur: 1.8 } : null;
@@ -851,6 +897,7 @@ function createGenerated(ctx, out, opts = {}) {
       const nb = bars[(bi + 1) % N];
       const s = pos % BS;
       const M = MASK[b.role];
+      const D = beatOf(b);
       const L = {};
       for (const { id, from, span } of LAYERS) L[id] = solo ? Number(id === solo) : Math.max(0, Math.min(1, (intensity - from) / span)) * M[id];
       const tt = t + swingAt(s);
@@ -880,13 +927,13 @@ function createGenerated(ctx, out, opts = {}) {
         if (fill && P.fill === 'timp') { if (s % 2 === 0) tom(tt, L.drums * (0.5 + (s - BS / 2) / BS), (s / 2) % 4); }
         else if (fill && P.fill === 'toms') { if (s % 2 === 0) tom(tt, L.drums, Math.floor((s - BS / 2) / 2)); }
         else if (fill && P.fill === 'snare') { snare(tt, L.drums * (0.45 + 0.55 * (s - BS / 2) / (BS / 2))); }
-        else if (G.sparse) { if (s === 0 && b.first) kick(tt, L.drums); }
+        else if (D.sparse) { if (s === 0 && b.first) kick(tt, L.drums); }
         else if (b.role === 'C') { if (s === 0) kick(tt, L.drums); } // (the bridge: the beat drops out)
         else {
-          if (G.k.includes(s)) kick(tt, L.drums);
-          if (G.s && G.s.includes(s)) snare(tt, L.drums);
-          if (G.g && G.g.includes(s)) snare(tt, L.drums * 0.3);
-          if (G.c && G.c.includes(s)) clap(tt, L.drums);
+          if (D.k.includes(s)) kick(tt, L.drums);
+          if (D.s && D.s.includes(s)) snare(tt, L.drums);
+          if (D.g && D.g.includes(s)) snare(tt, L.drums * 0.3);
+          if (D.c && D.c.includes(s)) clap(tt, L.drums);
         }
         if (s === 0 && b.first && (b.role === 'B' || (bars[(bi + N - 1) % N].role !== b.role && b.role === 'A' && bi > 0))) crash(t, L.drums);
       }
@@ -900,10 +947,10 @@ function createGenerated(ctx, out, opts = {}) {
         }
       }
       if (L.shimmer) {
-        const h = G.h;
-        if (h && s % (h === 16 ? 1 : h === 8 ? 2 : 4) === 0) hat(tt, L.shimmer * (h === 16 && s % 2 ? 0.55 : 1), false);
-        if (G.o && G.o.includes(s)) hat(tt, L.shimmer, true);
-        if (G.t && G.t.includes(s)) tamb(tt, L.shimmer);
+        const h = D.h;
+        if (h && s % (h === 16 ? 1 : h === 8 ? 2 : 4) === 0 && !(D.hs && D.hs.includes(s))) hat(tt, L.shimmer * (h === 16 && s % 2 ? 0.55 : 1), false);
+        if (D.o && D.o.includes(s)) hat(tt, L.shimmer, true);
+        if (D.t && D.t.includes(s)) tamb(tt, L.shimmer);
         if (P.style.bells && s === 0 && (b.first || b.i % 4 === 0) && b.role !== 'intro') { const bm = fold(b.root, halloween ? 50 : 72); bell(bm, t, L.shimmer); emit('bell', bm, t, 1.6); }
         if (P.style.crackle) crackle(t, L.shimmer);
       }
