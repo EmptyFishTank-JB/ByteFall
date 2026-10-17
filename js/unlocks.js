@@ -15,6 +15,7 @@ const Unlocks = (() => {
   let noAds = false;
   let devNoAds = false; // (the dev page's OWN REMOVE ADS switch)
   let purchased = false; // (a real purchase, reported by Google Play: not a dev preview)
+  let paidFull = false; // (FULL ACCESS as Google Play says it's owned: the secret tap's unlock apart)
   const OWNED_KEY = 'bytefall-purchases';
   // (ByteFall Test with test ads: the STORE's BUY pretends, nothing charged, kept here; js/store.js)
   const PRETEND_KEY = 'bytefall-test-purchases';
@@ -30,9 +31,10 @@ const Unlocks = (() => {
     } else {
       const owned = JSON.parse(localStorage.getItem(OWNED_KEY) || '{}');
       dev = localStorage.getItem('bytefall-unlock-key') === 'open'; // (the secret tap: script.js's THE STORY KEY)
-      full = !!owned.full || dev;
+      paidFull = !!owned.full;
+      full = paidFull || dev;
       noAds = !!owned.noAds;
-      purchased = full || noAds;
+      purchased = paidFull || noAds; // (the secret unlock isn't a purchase: no INDIE SUPPORTER for it)
     }
   } catch (e) {}
   const listeners = [];
@@ -42,15 +44,19 @@ const Unlocks = (() => {
     hasNoAds: () => full || noAds,
     hasPurchase: () => purchased,
     isDevUnlock: () => dev,
-    owned: () => ({ full, noAds }),
-    // (Google Play's word on what's owned: FULL ACCESS, REMOVE ADS; kept for the next launch)
+    owned: () => ({ full: release ? paidFull : full, noAds }),
+    // (Google Play's word on what's owned: FULL ACCESS, REMOVE ADS; kept for the next launch. It comes
+    // at every launch, so the secret tap's unlock is kept whatever it says: without that, the reload
+    // after the tap brought Google Play's "not owned" and locked everything again)
     own(nowFull, nowNoAds) {
-      const changed = full !== !!nowFull || noAds !== !!nowNoAds;
-      full = !!nowFull;
+      const wasFull = full;
+      const wasNoAds = noAds;
+      paidFull = !!nowFull;
+      full = paidFull || dev;
       noAds = !!nowNoAds;
-      purchased = purchased || full || noAds;
-      try { localStorage.setItem(OWNED_KEY, JSON.stringify({ full, noAds })); } catch (e) {}
-      if (changed) listeners.forEach((fn) => fn(full));
+      purchased = purchased || paidFull || noAds;
+      try { localStorage.setItem(OWNED_KEY, JSON.stringify({ full: paidFull, noAds })); } catch (e) {}
+      if (full !== wasFull || noAds !== wasNoAds) listeners.forEach((fn) => fn(full));
     },
     onChange(fn) {
       listeners.push(fn);
