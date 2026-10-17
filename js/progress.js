@@ -927,7 +927,8 @@ const Progress = (() => {
     delete d.ownedSeeded;
     save();
   }
-  if (!d.equipped.length) fillLoadout(); // first load, or a new Full Access / dev unlock
+  tidyLoadout(); // (what an ended DEV MODE or Full Access had equipped drops: the loadout refills below)
+  if (!d.equipped.length) fillLoadout(); // first load, a new Full Access or DEV MODE, or one just ended
   check(true); // seed from existing best scores without announcing anything
 
   return {

@@ -111,8 +111,9 @@ has the DEV link, as the site does. **bundled** has its own copy, as players wou
 what the Play Store builds will be (updated through the store). Either one installs over the other;
 only a change to the Android side itself (`tools/android/`, the Capacitor setup) needs a new APK.
 The game knows it's in the app from its user agent (`ByteFallApp`, `capacitor.config.json`).
-In the TEST app, SETTINGS' footer has a padlock where the web has the DEV link: **UNLOCK EVERYTHING**
-(the dev page's switch, the same `bytefall-dev-unlockall` flag; the game reloads with it). It's
+In the TEST app, SETTINGS' footer has a padlock where the web has the DEV link: **DEV MODE**
+(the dev page's switch, and the secret tap's: FALL three times then BYTE three times on the main menu's title,
+which the Play release keeps too; switched off from any of them, it's off; the game reloads with it). It's
 for testing, kept through launches. The RELEASE edition (below) has no padlock.
 
 To build it locally instead: `npm ci && node tools/build-app.js && npx cap add
@@ -595,10 +596,11 @@ plugin out: `includePlugins: []` in `visualizer/capacitor.config.json`.)
 `js/progress.js` holds the stats, levels, unlocks and achievements; `js/script.js`
 reports each drop, decrypt, peel, byte, exploit and point to it.
 
-**Dev switches.** The `</>` dev page has UNLOCK EVERYTHING (like owning Full
+**Dev switches.** The `</>` dev page has DEV MODE (everything unlocked, like owning Full
 Access, for this browser; the game shows a DEV badge, a label only, level with the corner buttons and behind the wanderers, while it's on), JUMP TO
-LV 80 and +10 LEVELS for testing DECRYPTOR ranks, slots and exploit unlocks. With UNLOCK EVERYTHING on,
-press and hold any exploit card for 2 seconds to make it your next drop.
+LV 80 and +10 LEVELS for testing DECRYPTOR ranks, slots and exploit unlocks (real progress: what they open
+stays open with DEV MODE off, till RESET PROGRESS). In DEV MODE, three quick taps on any exploit's name make it
+your next drop; switched off, everything not earned or bought locks again and the loadout keeps only what's yours.
 AD BANNER PREVIEW (off by default; tap to step through 50, 60 and 90px, or add
 `?adpreview=60` to the URL) holds a gray strip at the top of the screen (AD
 BANNER SPOT switches it to the bottom, or add `?adpos=bottom`) where a phone's
