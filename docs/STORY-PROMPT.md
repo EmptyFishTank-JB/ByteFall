@@ -71,7 +71,7 @@ THE VOICES
 - TOLL: runs the black market. ALL CAPITALS, transactional, sells to anyone.
 - THE CUSTODIAN (UNKNOWN NUMBER): HALCYON's fixer. Calls, never writes. Polite full sentences, never
   raises his voice, threatens by implication. He doesn't hurt people; he "corrects" them.
-- HALCYON's people in the files (dir.vance, ops.reyes, sec.hale, eng.okafor): corporate chat,
+- HALCYON's people in the files (dir.vance, ops.reyes, sec.hale, eng.luna): corporate chat,
   each with their own way of typing.
 
 TONE AND LIMITS
@@ -93,7 +93,7 @@ WHAT TO SEND BACK
    devious. (The other bots' lines, for scale: BUNKER says STEADY, HOLD, BRACE, BREACH, SECURE.)
 3. Job ideas for the 8 job transmissions (which mode, what it is in the story, how it's won), as
    proposals.
-4. Three alternatives for each placeholder name (MOTH, TOLL, THE CUSTODIAN, HALCYON, Adaeze Okafor).
+4. Three alternatives for each placeholder name (MOTH, TOLL, THE CUSTODIAN, HALCYON, Elena Luna).
 5. A short list of what you changed and why, and any Suggestions about mechanics, kept separate.
 
 THE CURRENT DRAFT

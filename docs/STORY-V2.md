@@ -101,7 +101,7 @@ of the 24; the other 16 come from keys.
 **Side jobs (optional, later).** The ARCADE's games fit as extra jobs that pay KEYS and resources
 but aren't needed to finish: CODE BREAKER (the lock on one of TOLL's boxes), TRACE (tracing the
 unknown number back), ROUTING (bouncing your line so the trace loses you), DEFRAG (piecing together
-Okafor's damaged files) and DECODE (a picture hidden in the archive).
+Luna's damaged files) and DECODE (a picture hidden in the archive).
 
 ### Unprompted contact
 
@@ -169,7 +169,7 @@ theirs), and a chapter's name stays ENCRYPTED till one of its transmissions is i
 - **HALCYON SYSTEMS.** The company in the archive. It keeps a city's records (identity, credit,
   leases, phones) and quietly sells "corrections": a debt or a conviction erased for a price, and,
   for the right client, a whole person erased (a "full correction"). In the files: `dir.vance`
-  (director), `ops.reyes` (operations), `sec.hale` (security) and `eng.okafor` (the engineer who
+  (director), `ops.reyes` (operations), `sec.hale` (security) and `eng.luna` (the engineer who
   built the eraser).
 
 ## THE STORY: GHOSTS
@@ -188,7 +188,7 @@ theirs), and a chapter's name stays ENCRYPTED till one of its transmissions is i
 **2 // FILE // HALCYON SYSTEMS // #corrections** · *on the cracked card*
 > `<ops.reyes>` queue's at 41 tonight. 38 standard, 3 full
 > `<dir.vance>` Fulls go first. The clients are waiting.
-> `<eng.okafor>` what's a "full"?
+> `<eng.luna>` what's a "full"?
 > `<dir.vance>` Not your department.
 
 **3 // IM // MOTH** · *introduces BITFLIP (exploit)* · *on the cracked card*
@@ -214,11 +214,11 @@ theirs), and a chapter's name stays ENCRYPTED till one of its transmissions is i
 *The PATCHES button appears, with 2 HEAD STARTs.*
 
 **6 // FILE // HALCYON // #corrections** · *on the cracked card*
-> `<eng.okafor>` pulled a "full" out of the queue to test the eraser. it's a person.
-> `<eng.okafor>` name, birth record, bank, lease, phone. all of it. gone.
+> `<eng.luna>` pulled a "full" out of the queue to test the eraser. it's a person.
+> `<eng.luna>` name, birth record, bank, lease, phone. all of it. gone.
 > `<dir.vance>` It's a correction. The client asked for it.
-> `<eng.okafor>` the person didn't.
-> `<dir.vance>` Log off, Okafor.
+> `<eng.luna>` the person didn't.
+> `<dir.vance>` Log off, Luna.
 
 **7 // IM // MOTH** · *introduces RNG and BUFFER OVERFLOW (exploits)* · *on the cracked card*
 > **moth** · Two more. They're messy. That's the point
@@ -239,7 +239,7 @@ theirs), and a chapter's name stays ENCRYPTED till one of its transmissions is i
 ### Chapter 2: THE LIST (256-BIT or deeper)
 
 **9 // FILE // HALCYON // #security** · **JOB: LIVE TRACE (BLITZ, 2:00)** · *on the cracked card for now (a JOB later)*
-> `<sec.hale>` someone's reading the okafor archive. slow. one key at a time.
+> `<sec.hale>` someone's reading the luna archive. slow. one key at a time.
 > `<dir.vance>` Trace them.
 > `<sec.hale>` tried. they drop the line every time we get close.
 > `<dir.vance>` Then call the Custodian.
@@ -294,15 +294,15 @@ introduced: STORY's main menu gets PATCHES and EXPLOITS rows, and what you own s
 cards too. The STORE marks what STORY has introduced.*
 
 **16 // FILE // HALCYON // #corrections** · *on the cracked card*
-> `<eng.okafor>` i'm taking the list out. all of it. every name. every "full."
-> `<dir.vance>` You built the eraser, Adaeze. You know what it can do.
-> `<eng.okafor>` i know. that's why it has to be me.
-> USER eng.okafor HAS LEFT THE CHANNEL
+> `<eng.luna>` i'm taking the list out. all of it. every name. every "full."
+> `<dir.vance>` You built the eraser, Elena. You know what it can do.
+> `<eng.luna>` i know. that's why it has to be me.
+> USER eng.luna HAS LEFT THE CHANNEL
 
 ### Chapter 3: CORRECTIONS (512-BIT or deeper)
 
 **17 // FILE // HALCYON // CORRECTION ORDER 0120** · **JOB: SEALED FILE (PUZZLE)** · *on the cracked card for now (a JOB later)*
-> SUBJECT: OKAFOR, ADAEZE. ENGINEER, HALCYON SYSTEMS.
+> SUBJECT: LUNA, ELENA. ENGINEER, HALCYON SYSTEMS.
 > TYPE: FULL.
 > REQUESTED BY: HALCYON SYSTEMS.
 > STATUS: CORRECTED.
@@ -358,7 +358,7 @@ cards too. The STORE marks what STORY has introduced.*
 > RESTORE QUEUE // 309 FULL CORRECTIONS // REVERSING...
 > ORDER // [YOU] // VOID
 >
-> **moth** · My name is Adaeze Okafor
+> **moth** · My name is Elena Luna
 > **moth** · Say it once. So it's written down somewhere
 
 *STORY complete. Every transmission stays in the ARCHIVE. STORY games go on (keys still pay KEYS),
@@ -412,7 +412,7 @@ All 15 exploits, the 5 STORY patches (OVERTIME is BLITZ's), the 3 BLACK BOXES an
 
 1. **The STORE.** Mark items STORY has introduced (and those it hasn't), or leave the STORE as it is?
 2. **Calls.** ANSWER only, or also DECLINE (which leaves the same words as a voicemail)?
-3. **Names.** MOTH, TOLL, the Custodian, HALCYON, Adaeze Okafor, `dir.vance`, `ops.reyes` and
+3. **Names.** MOTH, TOLL, the Custodian, HALCYON, Elena Luna, `dir.vance`, `ops.reyes` and
    `sec.hale` are all placeholders to change freely.
 4. **A second story, branching.** A Telltale-style story with choices and several endings, as its
    own season or its own mode (`docs/STORY-PROMPT.md` notes what it would need from the game).
