@@ -83,6 +83,7 @@
       const calm = document.documentElement.classList.contains('low-fx') || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
       if (!calm && !card.classList.contains('intro-run')) {
         startBtn.classList.remove('neon');
+        if (live) live.classList.remove('neon');
         card.classList.add('intro-wait');
       }
       screen.hidden = false;
@@ -174,6 +175,44 @@
   //   RAIN     its letters fall one by one, like bits down their columns, each landing in a puff
   //   DECRYPT  scrambled glyphs, locking into its letters one by one
   //   POWER    an old CRT switching on: a bright line opening out into the title
+  // START and LIVE (the live test app's sign) flickering on as the intro ends, together but never quite
+  // in step: one a beat behind the other (either one first, 0.12 to 0.75s), now and then both at once;
+  // each unseen (.neon-wait) till its own flicker starts
+  const live = document.getElementById('live-sign');
+  const liveOn = () => live && !live.hidden;
+  function neonOn() {
+    const lag = 120 + Math.random() * 630;
+    const together = Math.random() < 0.2;
+    const liveFirst = Math.random() < 0.5;
+    const light = (el, ms) => {
+      el.classList.add('neon-wait');
+      setTimeout(() => {
+        if (!el.classList.contains('neon-wait')) return;
+        el.classList.remove('neon-wait');
+        el.classList.add('neon');
+      }, ms);
+    };
+    if (live) live.querySelectorAll('.stutter').forEach((l) => l.classList.remove('stutter'));
+    light(startBtn, together ? 0 : liveFirst ? lag : 0);
+    if (liveOn()) light(live, together ? Math.random() * 80 : liveFirst ? 0 : lag);
+  }
+  // (lit, now and then a letter of LIVE stutters, as an old tube does: every 3 to 11 seconds, one
+  // letter, now and then two; only while the start screen's up, and not with less motion asked for)
+  if (liveOn()) {
+    const stutter = () => {
+      setTimeout(stutter, 3000 + Math.random() * 8000);
+      const calm = document.documentElement.classList.contains('low-fx') || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+      if (calm || screen.hidden || card.classList.contains('intro-wait') || card.classList.contains('intro-run') || live.classList.contains('neon-wait')) return;
+      const ls = [...live.querySelectorAll('.ls-l')];
+      for (let n = Math.random() < 0.25 ? 2 : 1; n > 0; n--) {
+        const l = ls[Math.floor(Math.random() * ls.length)];
+        l.classList.remove('stutter');
+        void l.getBoundingClientRect();
+        l.classList.add('stutter');
+      }
+    };
+    setTimeout(stutter, 4000);
+  }
   const INTROS = ['drop', 'bit', 'rain', 'decrypt', 'power'];
   const INTRO_LAST = 'bytefall-intro-last';
   const FALL_STEP = 46; // (px a step: about a row of the board)
@@ -223,7 +262,7 @@
       anims.forEach((a) => a.cancel());
       ov.remove();
       card.classList.remove('intro-run');
-      if (!skipped) startBtn.classList.add('neon');
+      if (!skipped) neonOn();
       screen.removeEventListener('pointerdown', skip, true);
       document.removeEventListener('keydown', skip, true);
       introSkip = introAlign = null;

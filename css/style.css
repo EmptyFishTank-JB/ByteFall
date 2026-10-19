@@ -2611,6 +2611,55 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
    width: no scroll bar flickering on as it goes; open above and below, for what they say) */
 :is(.start-walkers, .game-walkers, .saver-lane) { overflow-x: clip; overflow-y: visible; }
 .start-title { position: relative; z-index: 1; } /* (the spider drops behind the title) */
+/* LIVE (the live test app): a neon bar sign hung over the title on two chains from out of sight above,
+   swaying a touch. Its own red whatever the theme (it's a thing in the room, not the screen's): the
+   glass tubes dark and dull till lit, then a near white core in a red glow, the light spilling round it
+   (.ls-halo). It flickers on after the title's intro (.neon, start.js), the frame catching on its own
+   beat; lit, now and then a letter stutters (start.js). Unseen till then, as START is */
+.live-sign {
+  position: absolute; left: 50%; top: 11%; z-index: 1; width: min(76%, 320px); margin-left: calc(min(76%, 320px) / -2);
+  transform-origin: 50% -320px; transform: rotate(-0.4deg); animation: live-sway 7s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+.live-sign[hidden] { display: none; }
+.live-sign svg { position: relative; display: block; width: 100%; height: auto; overflow: visible; }
+@keyframes live-sway { to { transform: rotate(0.4deg); } }
+.live-sign .ls-chain {
+  position: absolute; bottom: calc(100% - 6px); width: 4px; height: 340px; left: 9%;
+  background: repeating-linear-gradient(to bottom, #4a5058 0 5px, #23272c 5px 7px, #6a7078 7px 9px, #23272c 9px 10px);
+  border-radius: 2px; opacity: 0.85;
+}
+.live-sign .ls-chain + .ls-chain { left: auto; right: 9%; }
+.ls-plate { fill: #0a0c0f; stroke: #20252c; stroke-width: 2; }
+.ls-bolts { fill: #3a4048; }
+.ls-blockout { fill: none; stroke: #120609; stroke-width: 4; stroke-linecap: round; }
+.ls-glass, .ls-lit { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.ls-glass { stroke: #3d1019; stroke-width: 7.5; }
+.ls-lit { stroke: #ffe1e7; stroke-width: 4.2; filter: drop-shadow(0 0 1.5px #ff2d55) drop-shadow(0 0 5px #ff2d55) drop-shadow(0 0 13px rgba(255, 30, 70, 0.85)); }
+.ls-lit .ls-frame { stroke-width: 3; }
+.ls-glass rect { stroke-width: 6; }
+.live-sign .ls-halo {
+  position: absolute; inset: -40% -18%; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 40, 80, 0.34), rgba(255, 40, 80, 0.12) 55%, transparent);
+}
+/* (flickering on: the tubes catching, dropping out and catching again; the frame on its own beat) */
+.live-sign.neon :is(.ls-l, .ls-halo, .ls-wash) { animation: live-on 1.7s steps(1, end) both; }
+.live-sign.neon .ls-frame { animation: live-on-frame 2.1s steps(1, end) both; }
+@keyframes live-on {
+  0% { opacity: 0; } 6% { opacity: 0.8; } 9% { opacity: 0; } 22% { opacity: 1; } 25% { opacity: 0.1; } 31% { opacity: 0; }
+  40% { opacity: 1; } 43% { opacity: 0.25; } 47% { opacity: 1; } 58% { opacity: 0.4; } 61%, 100% { opacity: 1; }
+}
+@keyframes live-on-frame {
+  0%, 18% { opacity: 0; } 21% { opacity: 1; } 24% { opacity: 0; } 46% { opacity: 0.7; } 49% { opacity: 0; } 62% { opacity: 1; } 66% { opacity: 0.3; } 70%, 100% { opacity: 1; }
+}
+/* (a letter's stutter, now and then: start.js puts it on one) */
+.live-sign .ls-l.stutter { animation: live-stutter 0.5s steps(1, end); }
+@keyframes live-stutter { 0% { opacity: 0.15; } 12% { opacity: 1; } 30% { opacity: 0.05; } 44% { opacity: 0.9; } 52% { opacity: 0.2; } 64%, 100% { opacity: 1; } }
+.start-card:is(.intro-wait, .intro-run) .live-sign:not(.neon) { visibility: hidden; }
+.start-btn.neon-wait, .live-sign.neon-wait { visibility: hidden; } /* (the intro over: waiting on its own beat to flicker on) */
+.start-card.intro-wait .live-sign { animation: intro-failsafe 0s linear 5s forwards; }
+@media (prefers-reduced-motion: reduce) { .live-sign, .live-sign * { animation: none !important; } }
+html.low-fx .live-sign { animation: none; }
 .start-btn { z-index: 2; } /* (START over October's forest too: the trees' own layer, the HOLLOW's, sits under it) */
 :is(.start-walkers, .game-walkers) .walker { position: absolute; left: 0; bottom: 0; width: 34px; will-change: transform; }
 .walker.walking .bot { animation: bot-hop 0.28s steps(2) infinite; }

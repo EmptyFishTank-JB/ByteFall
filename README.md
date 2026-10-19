@@ -679,6 +679,29 @@ CHASER (a thunderstorm, a blizzard and hail) and STARGAZER (the aurora, a meteor
 fireflies). The dev page's WEATHER brings it OFTEN, in a chosen season, or one kind to stay; the
 BOT SANDBOX has a button for each.
 
+**THE CYBERPUNK STREET** (`js/cyberstreet.js`, the scene CYBER; **the bot sandbox's only, for now**:
+not one the game picks yet, only the sandbox's CYBERPUNK STREET buttons or `?scene=cyber` where the
+file's loaded): a long street at night, about four cards long, that the wanderers walk along. Always
+night, a neon haze for a sky, rain and storms suiting it. Far off, black MEGATOWERS (a few windows,
+light strips, masts with red lights blinking); nearer, tall blocks with window grids and HOLO
+BILLBOARDS playing (BYTEFALL, a counting bit, an eye looking about, a beat, scrolling words;
+scanlined, glitching now and then); then the street's own fronts behind the sidewalk: shops (lit
+windows, doors, awnings, a neon word over each: RAMEN, SOBA, ARCADE, DECRYPT ...), the floors above
+(windows, AC units, fire escapes, drain pipes), neon banners of glyphs hanging off them, cables and
+lanterns strung between the roofs, alleys with a dumpster and steam; a few signs are faulty and
+flicker. The sidewalk is wet, the signs' colors broken in it, puddles; in front, bollards, grates
+(steam rising), bags, a cone. **THE PAN**: every minute or two the view drifts along the street, left
+or right as far as it goes, slowly (about 7px a second, easing in and out): the street and everyone
+on it pan with it, the bots carried along (one carried off the card walks on off it; wanderers.js's
+`shift`), the middle at about half the speed and the towers at a fifth (parallax). **ITS CROWD**,
+behind the bots, smaller and darker so the four CPUs stay the ones you see: HOODED figures (eyes
+glowing in the hood), one under a neon UMBRELLA, boxy chrome ROBOTS (a red light on the antenna), tall
+ANDROIDS (an LED strip down the front), hovering DROIDS (a glow under them), and DRONES flying over
+with parcels; they come in, cross, now and then stop under a sign a while, and go. Flying cars cross
+between the towers, headlights and tail lights. What's still is drawn once, the whole street, and
+slid; only what changes is redrawn. REDUCED EFFECTS: no flicker, no steam. Meant to become the
+lane's usual place, the other scenes the occasional ones, once it's ready.
+
 **SCENES** (`js/scenes.js`): now and then (a few times an hour, 10-20 minutes each) the lane
 becomes a place, by the time of year: MEADOW (spring, summer), BEACH (summer: the sea's waves
 moving, a parasol), CITY (any time: a skyline, more windows lit at night, a sidewalk, a hydrant),
@@ -1173,7 +1196,14 @@ the board, a row at a time, a fading ghost of it left at each row it passes, lan
 bump, a puff and a ghost swelling out from where it landed; RAIN, its letters falling one by one
 like bits down their columns, each landing in a puff; DECRYPT, scrambled glyphs locking into its
 letters one by one; POWER, an old CRT switching on, a bright line opening out into the title. Then the
-tagline types in behind a block cursor and START flickers on like a neon tube catching. The intro
+tagline types in behind a block cursor and START flickers on like a neon tube catching. **LIVE** (the
+live test app only, `BYTEFALL_APP.live`, where the game loads from the site and so is always the newest
+push; `?live` shows it anywhere): a neon bar sign hanging over the title on two chains, swaying a touch,
+its own red whatever the theme (dark glass tubes till lit, then a near white core in a red glow, a wash
+on its plate and a halo round it). It flickers on with START as the intro ends, never quite in step:
+one of the two a beat behind the other (either first, 0.12 to 0.75s; now and then both at once), each
+unseen till its own flicker starts, the frame catching on its own beat. Lit, every 3 to 11 seconds a
+letter stutters as an old tube does (now and then two). Skipped, it's simply lit. The intro
 plays on a copy of the title laid over the real one (which never moves), and nothing of it shows
 before it plays. A tap, or a key, skips to the end; there's none on a refresh after START, coming back
 with BACK, or with REDUCED EFFECTS or the system's reduce motion on, and no sound (browsers play none

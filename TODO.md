@@ -251,3 +251,8 @@ the Play Store, Steam and a trademark search before settling on it.
   own maze theme: Pac-Man is Bandai Namco's.)
 
 - Once the app is live on the Play Store: take out the main menu title's secret tap sequences (BYTE×3 then FALL×3 for the STORY key, FALL×3 then BYTE×3 for DEV MODE; `js/script.js`'s THE STORY KEY, and the release branch of `js/unlocks.js` that reads `bytefall-unlock-key`). Till then anyone who learns the DEV MODE sequence gets everything unlocked for free. (The test app's DEV MODE padlock is already stripped from the release build by `tools/build-app.js`.)
+- **The CYBERPUNK STREET as the lane's usual place**: in the bot sandbox now (`js/cyberstreet.js`).
+  Before it goes in the game: the bots reacting to the crowd (a look at a hooded figure passing, a
+  wave to a droid), more of the crowd (a big mech, a street vendor's stall), the street at other
+  sizes and on the screen saver, and how often it pans. Then the game's lane starts there, the other
+  scenes coming now and then.

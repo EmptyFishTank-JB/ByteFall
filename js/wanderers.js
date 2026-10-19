@@ -1022,6 +1022,19 @@ function createWanderers(lane, active = () => true, suspended = () => false) {
     face: (w, x) => { w.look = x > w.x + SIZE / 2 ? 1 : -1; place(w); },
     // (LIGHTS OUT: one somewhere else when they come back on; and the POSSESSED bot)
     move: (w, x) => { w.x = Math.max(0, Math.min(laneW() - SIZE, x)); w.target = w.x; place(w); },
+    // (THE CYBERPUNK STREET's view panning along it, scenes.js: everyone on the street carried with it,
+    // as the street is; one carried off the card walks on off it. Not one pushing scenery, nor one a
+    // scene has taken)
+    shift: (dx) => {
+      for (const w of walkers) {
+        if (w.gone || w.claimed || w.pushing || w.pushed) continue;
+        const was = inside(w);
+        w.x += dx;
+        if (typeof w.target === 'number') w.target += dx;
+        if (was && !inside(w) && !w.leaving && ['walk', 'idle', 'meet'].includes(w.state)) leave(w);
+        place(w);
+      }
+    },
     possess: (w) => possess(w),
     // (a scene's errand, scenes.js: a bot taken for it (onPoke: how a poke lands while it's busy),
     // walked somewhere (onArrive when it's there), raised (onto the dock), and let go again)

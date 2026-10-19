@@ -549,6 +549,7 @@ function createVisitors(api) {
     if (what === 'countdown') return countdown();
     if (what === 'sc-fish') return scenes && (scenes.current() === 'lake' || scenes.current() === 'beach' || scenes.start('lake'), scenes.fish());
     if (typeof what === 'string' && what.startsWith('sc-')) return scenes && (what === 'sc-clear' ? scenes.clear() : scenes.start(what.slice(3)));
+    if (typeof what === 'string' && what.startsWith('cy-')) return scenes && scenes.cyber(what.slice(3)); // (THE CYBERPUNK STREET's: cy-pan-left, cy-spawn-hood ...)
     if (typeof what === 'string' && what.startsWith('wx-')) return weather && (what === 'wx-clear' ? weather.clear() : weather.start(what.slice(3)));
     if (what === 'fog') return startFog();
     if (what === 'overcast') return startClouds();
@@ -2597,6 +2598,7 @@ function createVisitors(api) {
     // (GONE FISHING: a bot taken for it, walked out on the dock, and let go)
     walkers: api.walkers, say: (w, m, text) => api.say(w, m, text),
     claim: api.claim, go: api.go, lift: api.lift, turn: api.turn, release: api.release,
+    shift: api.shift, // (THE CYBERPUNK STREET panning: everyone on it carried along)
   }) : null;
   function frame(now, dt) {
     const W = api.laneW();

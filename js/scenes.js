@@ -10,10 +10,11 @@
 //   SNOWFIELD  winter           snowy hills and pines; packed snow; drifts and twigs
 //   DESERT     summer           dunes and a mesa; sand; a little cactus, pebbles
 //   FARM       autumn           furrowed fields and a red barn; soil and straw; pumpkins
+//   CYBER      (sandbox only)   THE CYBERPUNK STREET (cyberstreet.js): a long street at night, panning
 // Not while the fog or OCTOBER's HAUNTED FOREST is out (they have their own). Pixels in the bots'
 // own size; darker at night. The dev page's SCENE (or ?scene=) brings them OFTEN or keeps one.
-const SCENE_KINDS = ['meadow', 'beach', 'city', 'woodland', 'snowfield', 'desert', 'farm', 'lake'];
-const SCENE_NAMES = { meadow: 'MEADOW', beach: 'BEACH', city: 'CITY', woodland: 'WOODLAND', snowfield: 'SNOWFIELD', desert: 'DESERT', farm: 'FARM', lake: 'LAKE' };
+const SCENE_KINDS = ['meadow', 'beach', 'city', 'woodland', 'snowfield', 'desert', 'farm', 'lake', 'cyber'];
+const SCENE_NAMES = { meadow: 'MEADOW', beach: 'BEACH', city: 'CITY', woodland: 'WOODLAND', snowfield: 'SNOWFIELD', desert: 'DESERT', farm: 'FARM', lake: 'LAKE', cyber: 'CYBERPUNK STREET' };
 // (the weather each suits, which comes more while it's out; and what never comes with it)
 const SCENE_FITS = {
   lake: { fits: ['sunny', 'sunrise', 'sunset', 'drizzle', 'overcast', 'fireflies', 'moon', 'wind', 'fluff', 'pollen', 'meteors'], never: ['duststorm', 'blizzard', 'thundersnow'] },
@@ -24,7 +25,9 @@ const SCENE_FITS = {
   snowfield: { fits: ['snow', 'flurries', 'blizzard', 'diamonddust', 'aurora', 'moon', 'sunny', 'sunrise'], never: ['pollen', 'fluff', 'heatwave', 'duststorm', 'fireflies', 'rain', 'storm'] },
   desert: { fits: ['duststorm', 'heatwave', 'sunny', 'meteors', 'sunset', 'wind'], never: ['snow', 'flurries', 'blizzard', 'sleet', 'thundersnow', 'diamonddust', 'pollen'] },
   farm: { fits: ['overcast', 'drizzle', 'wind', 'sunset', 'moon', 'rain', 'flurries'], never: ['duststorm', 'heatwave'] },
+  cyber: { fits: ['rain', 'drizzle', 'storm', 'overcast', 'heatlightning'], never: ['sunny', 'sunrise', 'sunset', 'rainbow', 'pollen', 'fluff', 'heatwave', 'duststorm', 'aurora', 'fireflies', 'diamonddust'] },
 };
+// (CYBER isn't in SCENE_SEASONS: the game never picks it yet, only the bot sandbox and ?scene=cyber)
 const SCENE_SEASONS = {
   winter: [['snowfield', 3], ['city', 2]],
   spring: [['meadow', 3], ['woodland', 2], ['lake', 2], ['city', 1.5]],
@@ -82,9 +85,14 @@ function createScenes(api) {
   function start(kind, ms) {
     if (sc) end(true);
     if (!SCENE_KINDS.includes(kind)) return;
+    if (kind === 'cyber' && typeof createCyberStreet !== 'function') return; // (THE CYBERPUNK STREET: only where cyberstreet.js is loaded, the bot sandbox for now)
     const now = performance.now();
     const keep = placeLayout(kind); // (the same place each visit)
-    sc = { dockSide: keep.dockSide, kind, at: now, until: worldMode() ? Infinity : now + (ms || rand(600000, 1200000)), seed: keep.seed, els: { far: canvas('scene-far'), ground: canvas('scene-ground'), near: canvas('scene-near') }, drawnW: 0, wave: 0, night: night() };
+    const cy = kind === 'cyber' && typeof createCyberStreet === 'function' ? createCyberStreet({
+      lane: api.lane, laneW: api.laneW, laneH: api.laneH, P, game, botEvent: api.botEvent,
+      shift: (dx) => { if (api.shift) api.shift(dx); }, // (the street panning: the bots on it carried along)
+    }) : null;
+    sc = { dockSide: keep.dockSide, kind, at: now, until: worldMode() ? Infinity : now + (ms || rand(600000, 1200000)), seed: keep.seed, els: cy ? cy.els : { far: canvas('scene-far'), ground: canvas('scene-ground'), near: canvas('scene-near') }, cy, drawnW: 0, wave: 0, night: night() };
     draw(true);
     requestAnimationFrame(() => requestAnimationFrame(() => { if (sc) Object.values(sc.els).forEach((e) => { e.style.opacity = '1'; }); }));
     api.botEvent(`scene-${kind}`);
@@ -125,6 +133,7 @@ function createScenes(api) {
   function draw(full) {
     const W = api.laneW();
     if (!W || !sc) return;
+    if (sc.cy) { sc.cy.draw(full, sc.seed); return; } // (THE CYBERPUNK STREET draws its own)
     const H = api.laneH();
     const farCells = Math.round((game() ? H * 0.42 : worldMode() ? Math.min(H * 0.32, 300) : Math.min(H * 0.17, 140)) / P); // (BYTERRIUM's: the place fills more of its world)
     const N = sc.night ? 0.45 : 0;
@@ -929,6 +938,7 @@ function createScenes(api) {
   const hexRgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
   const mix = (a, b, k) => { const A = hexRgb(a); const B = hexRgb(b); return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * k)).join(', ')})`; };
   function skyNow() {
+    if (sc && sc.cy) return 'linear-gradient(to top, #3d1446, #1d0c36 30%, #0b0820 70%, #05040f)'; // (THE CYBERPUNK STREET: a neon haze, always night)
     const h = new Date().getHours();
     const wxk = api.weatherNow ? api.weatherNow() : null;
     let time = h >= 20 || h < 5 ? 'night' : h < 8 ? 'dawn' : h < 17 ? 'day' : 'dusk';
@@ -970,9 +980,18 @@ function createScenes(api) {
     }
     if (!sc) return;
     if (!worldMode() && (api.foggy() || now > sc.until)) { end(); nextCheck = now + rand(300000, 600000); return; } // (the fog has its own; or its time's up; in BYTERRIUM a place stays)
+    if (sc.cy) { // (THE CYBERPUNK STREET: always night, its own life)
+      if (now - (sc.drawn || 0) > 1000) { sc.drawn = now; draw(false); }
+      sc.cy.frame(now);
+      skyTick(now);
+      return;
+    }
     if (sc.night !== night()) { sc.night = night(); draw(true); }
     if (now - (sc.drawn || 0) > (sc.kind === 'beach' || sc.kind === 'lake' ? 350 : 1000)) { sc.drawn = now; draw(false); }
     if (sc) { fishTick(now); lifeTick(now); nearTick(now); skyTick(now); }
   }
-  return { frame, clear: () => end(true), start: (k) => start(k), current: () => (sc ? sc.kind : null), fish: () => { if (sc && sc.dock && !fish) fishStart(); return !!fish; } };
+  return {
+    frame, clear: () => end(true), start: (k) => start(k), current: () => (sc ? sc.kind : null), fish: () => { if (sc && sc.dock && !fish) fishStart(); return !!fish; },
+    cyber: (c) => { if (!sc || !sc.cy) start('cyber'); return sc && sc.cy ? sc.cy.cmd(c) : false; }, // (the sandbox's: a pan, someone on the street)
+  };
 }
