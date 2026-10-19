@@ -25,7 +25,9 @@ const SCENE_FITS = {
   snowfield: { fits: ['snow', 'flurries', 'blizzard', 'diamonddust', 'aurora', 'moon', 'sunny', 'sunrise'], never: ['pollen', 'fluff', 'heatwave', 'duststorm', 'fireflies', 'rain', 'storm'] },
   desert: { fits: ['duststorm', 'heatwave', 'sunny', 'meteors', 'sunset', 'wind'], never: ['snow', 'flurries', 'blizzard', 'sleet', 'thundersnow', 'diamonddust', 'pollen'] },
   farm: { fits: ['overcast', 'drizzle', 'wind', 'sunset', 'moon', 'rain', 'flurries'], never: ['duststorm', 'heatwave'] },
-  cyber: { fits: ['rain', 'drizzle', 'storm', 'overcast', 'heatlightning'], never: ['sunny', 'sunrise', 'sunset', 'rainbow', 'pollen', 'fluff', 'heatwave', 'duststorm', 'aurora', 'fireflies', 'diamonddust'] },
+  // (THE CYBERPUNK STREET: only what a city's night has; nothing else comes at all while it's out, and a
+  // gloomy place: no cheer on the bots' faces, wanderers.js)
+  cyber: { fits: ['rain', 'drizzle', 'storm', 'overcast', 'heatlightning', 'fog', 'moon', 'snow', 'flurries'], only: ['rain', 'drizzle', 'storm', 'overcast', 'heatlightning', 'fog', 'moon', 'snow', 'flurries', 'sleet'], never: [], gloomy: true },
 };
 // (CYBER isn't in SCENE_SEASONS: the game never picks it yet, only the bot sandbox and ?scene=cyber)
 const SCENE_SEASONS = {
@@ -92,7 +94,12 @@ function createScenes(api) {
       lane: api.lane, laneW: api.laneW, laneH: api.laneH, P, game, botEvent: api.botEvent,
       shift: (dx) => { if (api.shift) api.shift(dx); }, // (the street panning: the bots on it carried along)
       walkers: api.walkers, say: api.say, turn: api.turn, // (the bots noticing what's on it; THE CLOSE-UP's bot)
+      weather: api.weatherNow, moon: api.moonNow, // (what falls in the close-up; the moon, behind its towers)
     }) : null;
+    // (the lane says what's up, for the CSS: the street's clouds and October moons behind its towers;
+    // and for the bots' faces)
+    api.lane.classList.toggle('cy-on', !!cy);
+    api.lane.classList.toggle('gloomy', !!SCENE_FITS[kind].gloomy);
     sc = { dockSide: keep.dockSide, kind, at: now, until: worldMode() ? Infinity : now + (ms || rand(600000, 1200000)), seed: keep.seed, els: cy ? cy.els : { far: canvas('scene-far'), ground: canvas('scene-ground'), near: canvas('scene-near') }, cy, drawnW: 0, wave: 0, night: night() };
     draw(true);
     requestAnimationFrame(() => requestAnimationFrame(() => { if (sc) Object.values(sc.els).forEach((e) => { e.style.opacity = '1'; }); }));
@@ -105,6 +112,7 @@ function createScenes(api) {
     if (fish) fishEnd(true); // (packed up: the place is going)
     lifeEnd();
     nearEnd();
+    api.lane.classList.remove('cy-on', 'gloomy');
     const els = Object.values(sc.els);
     sc = null;
     if (now) { els.forEach((e) => e.remove()); return; }

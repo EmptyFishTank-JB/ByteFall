@@ -61,6 +61,10 @@ function createWeather(api) {
   // (HALLOWEEN, or the HAUNTED FOREST up, or THE CYBERPUNK STREET (always night): no rainbow after the rain)
   const spooky = () => (typeof Season !== 'undefined' && Season.is('halloween')) || (typeof hauntedForest !== 'undefined' && hauntedForest);
   const noRainbow = () => spooky() || (api.scene && api.scene() === 'cyber');
+  // (THE CYBERPUNK STREET draws the moon behind its towers itself, moonNow; no stars over its glow)
+  const cyber = () => api.scene && api.scene() === 'cyber';
+  // (a scene with its own short list of weather, SCENE_FITS's only: nothing else comes while it's out)
+  const sceneOnly = () => { const s = api.scene && api.scene(); const f = s && typeof SCENE_FITS !== 'undefined' && SCENE_FITS[s]; return f && f.only ? f.only : null; };
   const hour = () => new Date().getHours();
   const isDay = () => hour() >= 7 && hour() < 19;
   const isNight = () => hour() >= 20 || hour() < 6;
@@ -118,6 +122,7 @@ function createWeather(api) {
     const s = api.scene && api.scene();
     const fit = s && typeof SCENE_FITS !== 'undefined' && SCENE_FITS[s];
     if (!fit) return 1;
+    if (fit.only && !fit.only.includes(k)) return 0;
     return fit.never.includes(k) ? 0 : fit.fits.includes(k) ? 3 : 0.6;
   }
   function choose() {
@@ -190,8 +195,10 @@ function createWeather(api) {
   const areaK = () => { const { W, H } = size(); return Math.max(0.4, Math.min(3, (W * H) / (360 * 240))); };
 
   function start(kind, ms) {
-    if (wx) end(true);
     if (!kind) return;
+    const only = sceneOnly();
+    if (only && !only.includes(kind)) return; // (not with this scene out: it never comes, a button's or the season's)
+    if (wx) end(true);
     if (kind === 'fog') { api.fog(); api.botEvent('weather-fog'); return; }
     const k = KIND[kind];
     if (!k) return;
@@ -613,8 +620,8 @@ function createWeather(api) {
     const L = wx ? wx.level : 0;
     const t = now / 1000;
     // the night sky: stars
-    if (wx && wx.moon) drawMoon(back, W, H, now, L);
-    if (wx && wx.k.night && stars.length) {
+    if (wx && wx.moon && !cyber()) drawMoon(back, W, H, now, L);
+    if (wx && wx.k.night && stars.length && !cyber()) {
       for (const s of stars) {
         const a = (0.35 + 0.35 * Math.sin(t * s.sp + s.tw)) * L;
         back.fillStyle = `rgba(240, 240, 255, ${a.toFixed(2)})`;
@@ -801,11 +808,17 @@ function createWeather(api) {
   // season's and the hour's; and what can't be out with it, cleared)
   function fit(kinds) {
     const s = api.scene && api.scene();
-    if (wx && s && SCENE_FITS[s] && SCENE_FITS[s].never.includes(wx.kind)) end();
+    const only = sceneOnly();
+    if (wx && s && SCENE_FITS[s] && (SCENE_FITS[s].never.includes(wx.kind) || (only && !only.includes(wx.kind)))) end();
     if (wx || Math.random() < 0.5 || WEATHER_KINDS.includes(weatherForced())) return;
     const season = weatherSeason();
     const opts = TABLE[season].filter(([k, , when]) => kinds.includes(k) && (!when || WHEN[when]()) && !(light() && KIND[k] && KIND[k].night));
     if (opts.length) start(pick(opts)[0]);
   }
-  return { frame, clear, fit, start: (kind) => start(kind), stop: () => end(), current: () => (wx ? wx.kind : null), dir: () => (wx ? wx.dir : 0), moon: () => moonPhaseName() };
+  return {
+    frame, clear, fit, start: (kind) => start(kind), stop: () => end(), current: () => (wx ? wx.kind : null), dir: () => (wx ? wx.dir : 0), moon: () => moonPhaseName(),
+    // (the moon up now, for THE CYBERPUNK STREET to draw behind its towers: where, how far risen, how
+    // bright, its phase)
+    moonNow: () => (wx && wx.moon ? { side: wx.moon.side, rise: wx.moon.rise, level: wx.level, phase: moonPhase() } : null),
+  };
 }

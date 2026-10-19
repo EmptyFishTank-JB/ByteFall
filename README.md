@@ -704,12 +704,35 @@ flicker. The sidewalk is wet, the shops' light and the signs' colors spilled in 
 bollards, grates (steam rising), bags, a cone. **THE PAN**: every minute or two the view drifts along
 the street, left or right as far as it goes, slowly (about 7px a second, easing in and out): the street
 and everyone on it pan with it, the bots carried along (one carried off the card walks on off it;
-wanderers.js's `shift`), the city at half the speed and the towers at a fifth. **ITS CROWD**, behind the
-bots, at the bots' own pixel size and taller than them, dark (the four CPUs stay the ones you see),
-their eyes and lights glowing: HOODED figures in long coats, one under a neon UMBRELLA, chrome ROBOTS
-(a red light on the antenna), tall ANDROIDS (an LED strip down the coat), hovering DROIDS, DRONES flying
-over with parcels; they come in, cross, now and then stop at a window, a stall or the metro a while,
-and go. Flying cars cross between the towers. **BYTEFALL** stands in neon on a far tower's roof, on its
+wanderers.js's `shift`), the city at half the speed and the towers at a fifth. **FOUR STREETS**, one each
+visit (the sandbox's VIEW picks): MARKET STREET (all of the above, and an ARCADE: ARCADE in big neon,
+bulbs along its fascia, rows of cabinets in the dark, their marquees lit and their screens playing, a
+claw machine; a CLINIC: a green cross, a cold-lit window, an x-ray of a hand on a light box, the chair
+under its lamp; VENDING machines in a row, a capsule-toy machine; a NOODLE bar: its cloth curtain over
+the door, a glyph on each flap, the cook behind the counter, bowls steaming, stools, red lanterns), UNDER
+THE TRACKS (a viaduct right over the street on concrete pillars, graffiti and posters on them, sodium
+lamps under its deck, water dripping off it, its train thundering along on top, sparks off the
+pantographs; in its arches noodle bars, vending machines, chain-link GATES with barbed wire, a hazard
+sign and a scooter behind, a BARREL FIRE with embers rising and a robot warming itself, shutters,
+stalls), NIGHT MARKET (stall after stall under lower roofs, strings of lanterns everywhere overhead,
+cloth banners off them, a bigger crowd, vendors pushing carts) and CORPORATE PLAZA (glass towers, their
+lobbies lit cold: the company's name over the door, its mark on the back wall, turnstiles, a guard mech;
+a HOLO column between glowing planters, a koi turning in its beam; a VIDEO WALL a building high;
+polished tiles with light strips in them). The street is laid out in bot pixels, the same at any RES,
+each building's details from its own seed, and drawn at the RES (so the close-up can draw any spot of it
+again, finer, exactly as it stands). **ITS CROWD**, behind the bots, at the bots' own pixel size and
+taller than them, dark (the four CPUs stay the ones you see), their eyes and lights glowing: HOODED
+figures in long coats, one under a neon UMBRELLA, chrome ROBOTS (a red light on the antenna), tall
+ANDROIDS (an LED strip down the coat), hovering DROIDS, DRONES flying over with parcels, CYBORGS (a red
+implant for an eye, a metal arm), security MECHS (big, slow, a red visor), COURIERS on hover bikes (fast,
+a light trail), VENDORS pushing steaming carts, stray CATS (eyes shining; they sit a while); each street
+its own mix. They come in, cross, now and then stop at a window, a stall or the metro a while, and go.
+Flying cars cross between the towers. **THE MOON** (weather.js's, its real phase) is drawn behind the
+towers, a haze round it; the clouds, a storm's dark and flashes and October's moons sit behind them too;
+no stars over the city's glow. **ITS WEATHER**: only what a city's night has comes while it's up (rain,
+drizzle, storms, heat lightning, overcast, fog, snow, flurries, sleet, a clear night with the moon;
+`SCENE_FITS.cyber.only`); anything else already out clears when it arrives, and nothing else starts, the
+season's or a button's. No rainbow (always night). **BYTEFALL** stands in neon on a far tower's roof, on its
 scaffold (BYTE in the game's green, FALL in its amber; a faulty tube, now and then), the tallest one
 about the middle of the street, so it's in sight most of the time. **DRAWN FINER THAN THE BOTS**: the
 street's pixels are a half or a third of a bot's (RES: 2x on a plain screen, 3x on a sharp one, where a
@@ -718,24 +741,32 @@ measured in bot pixels so they stand as tall, the finer pixels spent on detail: 
 glints, brickwork or panel seams, the goods on the shelves, hanging lamps, a scalloped canopy, ribbed
 lanterns, neon tubes with a hot white core. The crowd is scaled up the pixel artist's way (Scale2x /
 Scale3x: smooth diagonals, still pixels), each pose drawn once and kept, a sheen along its top edges.
+**A GLOOMY PLACE**: no cheer on the bots' faces while the street is up (the lane gets 'gloomy',
+wanderers.js): happy turns skeptic, love worried, laugh smug, no cheery emotes (^^, <3, haha), meetings
+drawn from a gloomy set (no grins), and EASY's resting smile shows as a flat look (style.css).
 **THE BOTS NOTICE IT**: one passed close behind by a figure turns to look and reacts in a bubble (a
-hooded one: wary; a robot: hi!; a droid zipping by: startled; the umbrella: a smile), looks up at a
-drone or the train going over, at a sign over it sputtering out, flinches at a grate's steam under it,
-admires a lit shop window it's stopped at; one bot at a time, each a while before it notices anything
-again (`cyber-notice-*` events). **THE CLOSE-UP**: every two to four minutes (not while panning; the
-sandbox's CLOSE-UP for one now), the view cuts in on one of the CPUs, anime style, for about six
-seconds: letterbox bars sliding in, a white flash at the cut, the bot two thirds of the frame tall and
-drawn at four times its pixels (its own art as it is that moment, read off its page element: mood,
-face, headphones and all; Scale2x twice), lit: a neon rim on the sign's side and its glow past the
-edge, shadow and a dither on the other, lighter up top and darker to its feet, the night's blue in it,
-rain's sheen on top, a shine in each eye, its face glowing. Behind it a brick wall in the dark, its
-NAME in neon (flickering), a second tube, lights blurred to bokeh, the wet ground with the light in it,
-its reflection rippling there; rain streaking past in front, a slow push in, a breath. Then the cut
-back. In the game card it fills the whole scene; on the start screen, the lower part, under START. No
-rainbow over the street (always night). What's still is drawn once, the whole street, and slid; only
-what changes is redrawn (a flicker redraws that sign, and only the part of its neighbors under it, on
-its own layer). REDUCED EFFECTS: no flicker, no steam, no push in or breath, no rain in the close-up.
-Meant to become the lane's usual place, the other scenes the occasional ones, once it's ready.
+mech: scared; a hooded one: wary; a courier zipping by: startled; a robot: beep?), looks up at a drone
+or a train going over (the viaduct's, right overhead: scared), at a sign over it sputtering out,
+flinches at a grate's steam under it, warms itself at a barrel fire, eyes a lit shop window it's stopped
+at; one bot at a time, each a while before it notices anything again (`cyber-notice-*` events). **THE
+CLOSE-UP**: every two to four minutes (not while panning; the sandbox's ▶ CLOSE-UP for one now, which
+brings a CPU in first if none is on the street), the view cuts in on one of the CPUs, anime style, for
+about six seconds, **where it stands**: the street right there drawn again at four times the bot's
+pixels, each layer from where it shows behind the bot at its own parallax (the shop or the arch behind
+it, its signs lit, the city through the gaps, darker as it's farther), the wet sidewalk, then a curb and
+the road in front, the signs' and shops' colors streaking down its wet, what's in front at the curb;
+whoever's walking by there walking by, four times finer too (no one about? someone comes past behind
+it). The bot under half the frame tall and drawn at four times its pixels (its own art as it is that
+moment, read off its page element: mood, face, headphones and all; Scale2x twice), lit by the nearest
+sign: a neon rim on the sign's side and its glow past the edge, shadow and a dither on the other,
+lighter up top and darker to its feet, the night's blue in it, rain's sheen on top, a shine in each eye,
+its face glowing; its reflection rippling in the wet. Rain streaking past (or snow drifting, by the
+weather; lightning in a storm), a stepped vignette, letterbox bars, a white flash at the cut, a slow push
+in, a breath. Then the cut back. In the game card it fills the whole scene; on the start screen, the
+lower part, under START. What's still is drawn once, the whole street, and slid; only what changes is
+redrawn (a flicker redraws that sign, and only the part of its neighbors under it, on its own layer).
+REDUCED EFFECTS: no flicker, no steam or embers or drips, no push in or breath, nothing falling in the
+close-up. Meant to become the lane's usual place, the other scenes the occasional ones, once it's ready.
 
 **SCENES** (`js/scenes.js`): now and then (a few times an hour, 10-20 minutes each) the lane
 becomes a place, by the time of year: MEADOW (spring, summer), BEACH (summer: the sea's waves

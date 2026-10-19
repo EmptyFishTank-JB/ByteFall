@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" class="sandbox">
 <head>
-<script src="../js/fonts.js?v=646"></script>
+<script src="../js/fonts.js?v=647"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#020403">
 <title>Bot Sandbox // BYTEFALL</title>
-<link rel="stylesheet" href="../css/style.css?v=646">
+<link rel="stylesheet" href="../css/style.css?v=647">
 <!-- BOT SANDBOX: the wandering bots and everything around them (visitors, viruses, seasons, the fog,
      headphones and the music) running on the game's own code, with every behavior on a button.
      Progress is stubbed: nothing here touches the saved game (no achievements, no unlocks). -->
@@ -164,8 +164,12 @@
 
       <div class="grp">
         <h2>CYBERPUNK STREET (WORK IN PROGRESS)</h2>
-        <p>A long street at night, seen close up, far longer than the card: the view pans along it now and then on its own (every minute or two), the bots carried with it, the city beyond (through the gaps, the windows, over the low roofs) panning slower, BYTEFALL in neon on a far roof. Its own crowd walks it behind the bots, and the bots notice what's around them: a figure passing, a drone or the train going over, a sign sputtering, steam, a lit window. STREET brings it up; PAN starts a pan now; the figures send someone along it; TRAIN sends one along the elevated line; CLOSE-UP cuts in on one of the CPUs (anime style, at four times its pixels: they come on their own every few minutes). RES: the street's pixels against a bot's (AUTO: 2x, 3x on a sharp screen). RAIN suits it.</p>
+        <p>A long street at night, seen close up, far longer than the card: the view pans along it now and then on its own (every minute or two), the bots carried with it, the city beyond panning slower, BYTEFALL in neon on a far roof, the moon behind the towers. Four streets, one each visit (VIEW picks): MARKET STREET, UNDER THE TRACKS (a viaduct overhead, its train thundering over), NIGHT MARKET (lanterns everywhere), CORPORATE PLAZA (glass lobbies, a holo column). Its own crowd walks it behind the bots, and the bots notice what's around them, gloomily (no smiles on this street): a figure passing, a drone or a train going over, a sign sputtering, steam, a barrel fire, a lit window. Only a city night's weather comes while it's up (rain, drizzle, storms, overcast, fog, snow, the moon).</p>
+        <p>CLOSE-UP cuts in on one of the CPUs where it stands, anime style: the street right there drawn again at four times the bot's pixels, whoever's walking by in it, the bot lit by the nearest sign (no CPU on the street? it brings one in first). They also come on their own every few minutes. RES: the street's pixels against a bot's (AUTO: 2x, 3x on a sharp screen).</p>
+        <div class="row"><button type="button" class="go" id="cy-closeup">&#9654; CLOSE-UP</button></div>
         <div class="row" id="cyber"></div>
+        <div class="row" id="cyber-views"><b>VIEW</b></div>
+        <div class="row" id="cyber-figs"><b>SEND ALONG IT</b></div>
         <div class="row" id="cyber-res"><b>RES</b></div>
       </div>
 
@@ -185,34 +189,34 @@
 <canvas id="board-fx" aria-hidden="true"></canvas>
 <div class="stat cpu-face" id="cpu-face" hidden aria-hidden="true"></div>
 
-<script src="../js/bot-svg.js?v=646"></script>
-<script src="../js/music/output.js?v=646"></script>
-<script src="../js/music/mixes.js?v=646"></script>
-<script src="../js/sfx.js?v=646"></script>
-<script src="../js/music/music-bytefall-theme.js?v=646"></script>
-<script src="../js/music/music-sleep-mode.js?v=646"></script>
-<script src="../js/music/music-brute-force.js?v=646"></script>
-<script src="../js/music/music-deep-web.js?v=646"></script>
-<script src="../js/music/music-zero-day.js?v=646"></script>
-<script src="../js/music/music-system-restore.js?v=646"></script>
-<script src="../js/music/music-night-drive.js?v=646"></script>
-<script src="../js/music/music-standby-mode.js?v=646"></script>
-<script src="../js/music/music-core-dump.js?v=646"></script>
-<script src="../js/music/music-handshake.js?v=646"></script>
-<script src="../js/music/music-stack-overflow.js?v=646"></script>
-<script src="../js/music/music.js?v=646"></script>
-<script src="../js/fx.js?v=646"></script>
-<script src="../js/pixel.js?v=646"></script>
-<script src="../js/minibot.js?v=646"></script>
-<script src="../js/seasons.js?v=646"></script>
-<script src="../js/bigart.js?v=646"></script>
-<script src="../js/cyberstreet.js?v=646"></script>
-<script src="../js/scenes.js?v=646"></script>
-<script src="../js/weather.js?v=646"></script>
-<script src="../js/visitors.js?v=646"></script>
-<script src="../js/data/bot-anims.js?v=646"></script>
-<script src="../js/wanderers.js?v=646"></script>
-<script src="../js/grid-bg.js?v=646"></script>
+<script src="../js/bot-svg.js?v=647"></script>
+<script src="../js/music/output.js?v=647"></script>
+<script src="../js/music/mixes.js?v=647"></script>
+<script src="../js/sfx.js?v=647"></script>
+<script src="../js/music/music-bytefall-theme.js?v=647"></script>
+<script src="../js/music/music-sleep-mode.js?v=647"></script>
+<script src="../js/music/music-brute-force.js?v=647"></script>
+<script src="../js/music/music-deep-web.js?v=647"></script>
+<script src="../js/music/music-zero-day.js?v=647"></script>
+<script src="../js/music/music-system-restore.js?v=647"></script>
+<script src="../js/music/music-night-drive.js?v=647"></script>
+<script src="../js/music/music-standby-mode.js?v=647"></script>
+<script src="../js/music/music-core-dump.js?v=647"></script>
+<script src="../js/music/music-handshake.js?v=647"></script>
+<script src="../js/music/music-stack-overflow.js?v=647"></script>
+<script src="../js/music/music.js?v=647"></script>
+<script src="../js/fx.js?v=647"></script>
+<script src="../js/pixel.js?v=647"></script>
+<script src="../js/minibot.js?v=647"></script>
+<script src="../js/seasons.js?v=647"></script>
+<script src="../js/bigart.js?v=647"></script>
+<script src="../js/cyberstreet.js?v=647"></script>
+<script src="../js/scenes.js?v=647"></script>
+<script src="../js/weather.js?v=647"></script>
+<script src="../js/visitors.js?v=647"></script>
+<script src="../js/data/bot-anims.js?v=647"></script>
+<script src="../js/wanderers.js?v=647"></script>
+<script src="../js/grid-bg.js?v=647"></script>
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -360,12 +364,33 @@
     b.addEventListener('click', () => W().visit(`sc-${k}`));
     $('scenes').appendChild(b);
   }
-  // (THE CYBERPUNK STREET, cyberstreet.js: the street, a pan, someone on it, a close-up, rain; its RES)
-  for (const [label, what] of [['STREET', 'sc-cyber'], ['PAN \u2190', 'cy-pan-left'], ['PAN \u2192', 'cy-pan-right'], ['HOODED', 'cy-spawn-hood'], ['UMBRELLA', 'cy-spawn-umbrella'], ['ROBOT', 'cy-spawn-robot'], ['ANDROID', 'cy-spawn-android'], ['DROID', 'cy-spawn-droid'], ['DRONE', 'cy-spawn-drone'], ['TRAIN', 'cy-train'], ['CLOSE-UP', 'cy-closeup'], ['RAIN', 'wx-rain'], ['CLEAR', 'sc-clear']]) {
+  // (THE CYBERPUNK STREET, cyberstreet.js: the street, a pan, the trains, its weather; a street to view,
+  // someone along it, a close-up; its RES)
+  for (const [label, what] of [['STREET', 'sc-cyber'], ['PAN \u2190', 'cy-pan-left'], ['PAN \u2192', 'cy-pan-right'], ['TRAIN', 'cy-train'], ['RAIN', 'wx-rain'], ['SNOW', 'wx-snow'], ['MOON', 'wx-moon'], ['FOG', 'wx-fog'], ['CLEAR', 'sc-clear']]) {
     const b = el('button', { type: 'button' }, label);
     b.addEventListener('click', () => W().visit(what));
     $('cyber').appendChild(b);
   }
+  for (const [label, v] of [['MARKET STREET', 'market'], ['UNDER THE TRACKS', 'underpass'], ['NIGHT MARKET', 'nightmarket'], ['CORPORATE PLAZA', 'plaza']]) {
+    const b = el('button', { type: 'button' }, label);
+    b.addEventListener('click', () => { W().visit(`cy-view-${v}`); radio($('cyber-views'), b); });
+    $('cyber-views').appendChild(b);
+  }
+  for (const k of ['hood', 'umbrella', 'robot', 'android', 'droid', 'drone', 'cyborg', 'mech', 'courier', 'vendor', 'cat']) {
+    const b = el('button', { type: 'button' }, k === 'hood' ? 'HOODED' : k.toUpperCase());
+    b.addEventListener('click', () => W().visit(`cy-spawn-${k}`));
+    $('cyber-figs').appendChild(b);
+  }
+  // (CLOSE-UP: the street up first if it isn't; no CPU on it, one brought in and given a moment to walk on)
+  $('cy-closeup').addEventListener('click', () => {
+    const w = W();
+    if (w.scene() !== 'cyber') w.visit('sc-cyber');
+    if (w.visit('cy-closeup')) return;
+    if (!w.list().some((o) => !o.leaving)) $('spawn').click(); // (the SPAWN group's bot, as picked there)
+    let tries = 0;
+    const again = () => { if (!w.visit('cy-closeup') && ++tries < 14) setTimeout(again, 600); }; // (as soon as it's walked on)
+    setTimeout(again, 600);
+  });
   for (const [label, res] of [['AUTO', 'auto'], ['2X', '2'], ['3X', '3'], ['4X', '4']]) {
     const b = el('button', { type: 'button', className: res === 'auto' ? 'on' : '' }, label);
     b.addEventListener('click', () => { W().visit(`cy-res-${res}`); radio($('cyber-res'), b); });

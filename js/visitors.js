@@ -2595,6 +2595,7 @@ function createVisitors(api) {
     foggy: () => !!fog || hauntedForest,
     fitWeather: (kinds) => weather.fit(kinds),
     weatherNow: () => (weather ? weather.current() : null),
+    moonNow: () => (weather && weather.moonNow ? weather.moonNow() : null), // (THE CYBERPUNK STREET draws the moon itself, behind its towers)
     // (GONE FISHING: a bot taken for it, walked out on the dock, and let go)
     walkers: api.walkers, say: (w, m, text) => api.say(w, m, text),
     claim: api.claim, go: api.go, lift: api.lift, turn: api.turn, release: api.release,

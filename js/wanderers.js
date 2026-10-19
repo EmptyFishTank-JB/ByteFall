@@ -167,6 +167,11 @@ function createWanderers(lane, active = () => true, suspended = () => false) {
   };
   // Faces each bot won't make, and what it makes instead (GLITCH is never happy or smitten)
   const NEVER = { glitch: { happy: 'smug', love: 'devious', laugh: 'smug' } };
+  // A gloomy place (the lane 'gloomy', scenes.js: THE CYBERPUNK STREET): no cheer on anyone's face there,
+  // the cheery faces a shade darker, no cheery words, gloomy meetings (no grins in them either), and
+  // EASY's resting smile a flat look (style.css)
+  const GLOOM = { happy: 'skeptic', love: 'worried', laugh: 'smug' };
+  const GLOOMY_MEETINGS = [['smug', 'annoyed'], ['skeptic', 'worried'], ['annoyed', 'annoyed'], ['surprised', 'surprised'], ['skeptic', 'skeptic'], ['worried', 'worried'], ['annoyed', 'skeptic'], ['tired', 'smug']];
   const NEVER_LEVEL = { glitch: ['easy'] }; // (EASY's resting face is a smile)
   // The mad ones (HARD's angry and INSANE's red-eyed resting faces) and GLITCH: never cheery
   const MAD = ['hard', 'insane'];
@@ -561,9 +566,11 @@ function createWanderers(lane, active = () => true, suspended = () => false) {
   const inside = (w) => w.x >= 0 && w.x <= laneW() - SIZE;
 
   // emote: text to show, or true to pick one that fits the face (and the bot)
+  const gloomy = () => lane.classList.contains('gloomy');
   function mood(w, m, emote = '') {
     if (!canFeel(w, m)) m = (NEVER[w.bot] && NEVER[w.bot][m]) || 'smug';
-    const allowed = (e) => !(cheerless(w) && CHEERY.includes(e));
+    if (GLOOM[m] && gloomy()) m = GLOOM[m];
+    const allowed = (e) => !((cheerless(w) || gloomy()) && CHEERY.includes(e));
     if (emote === true) emote = pick((MOOD_EMOTES[m] || ['!']).filter(allowed)) || '!';
     else if (emote && !allowed(emote)) emote = '!';
     w.el.dataset.mood = m;
@@ -1229,8 +1236,9 @@ function createWanderers(lane, active = () => true, suspended = () => false) {
         // (as likely as they want company; a cross one isn't in the mood)
         const want = a.mind && b.mind ? ((1 - a.mind.social) * persona(a).social + (1 - b.mind.social) * persona(b).social) / 2 : 0.45;
         if (Math.random() > Math.min(0.85, 0.15 + want * 1.4)) continue;
-        let pair = pick(MEETINGS);
-        for (let k = 0; k < 12 && !pairFits(a, b, pair); k++) pair = pick(MEETINGS);
+        const meetings = gloomy() ? GLOOMY_MEETINGS : MEETINGS;
+        let pair = pick(meetings);
+        for (let k = 0; k < 12 && !pairFits(a, b, pair); k++) pair = pick(meetings);
         if (!pairFits(a, b, pair)) pair = ['surprised', 'surprised'];
         if (a.possessed || b.possessed) pair = [a.possessed ? 'devious' : 'scared', b.possessed ? 'devious' : 'scared']; // (one of them isn't itself)
         if (a.mind && a.mind.temper > 0.6 && !a.possessed && !b.possessed) pair = ['annoyed', pair[1]]; // (a cross one's cross)

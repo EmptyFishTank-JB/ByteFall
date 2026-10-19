@@ -2074,6 +2074,9 @@ body.vs-mode .cpu-face:not(.mini-bot):not([hidden]) { display: flex; flex-direct
 .cpu-face:is([data-mood="idle"], [data-mood="think"]):not([data-variant])[data-level="insane"] :is(.eyes-angry, .mouth-teeth, .teeth) { display: inline; }
 .cpu-face[data-level="insane"] .eyes-angry { fill: var(--danger); filter: drop-shadow(0 0 1px var(--danger)); }
 .cpu-face[data-level="insane"][data-bot="glitch"] .eyes-angry { fill: var(--alarm-text); filter: drop-shadow(0 0 1px var(--alarm-text)); } /* (red on its red body) */
+/* A gloomy place (the lane 'gloomy', scenes.js: THE CYBERPUNK STREET): EASY's resting smile a flat look there */
+.gloomy .cpu-face:is([data-mood="idle"], [data-mood="think"]):not([data-variant])[data-level="easy"] :is(.eyes-happy, .mouth-smile) { display: none; }
+.gloomy .cpu-face:is([data-mood="idle"], [data-mood="think"]):not([data-variant])[data-level="easy"] :is(.eyes-open, .mouth-flat) { display: inline; }
 /* Moments and endings */
 .cpu-face[data-mood="happy"] :is(.eyes-happy, .mouth-open),
 .cpu-face[data-mood="hit"] :is(.eyes-hit, .mouth-open),
@@ -4429,6 +4432,10 @@ html, body { overflow-x: clip; }
 :is(.start-walkers, .game-walkers) .scene-sky { position: absolute; left: 0; right: 0; bottom: 0; height: 55%; z-index: -6; pointer-events: none; opacity: 0; transition: opacity 5s ease;
   -webkit-mask-image: linear-gradient(to top, #000 45%, transparent); mask-image: linear-gradient(to top, #000 45%, transparent); }
 .game-walkers .scene-sky { top: calc(-1 * var(--feather)); height: auto; }
+/* (THE CYBERPUNK STREET, cyberstreet.js: the lane 'cy-on'. Its sky under its moon; the clouds, the
+   storm's dark and flashes and October's moons behind its towers, as its moon is) */
+:is(.start-walkers, .game-walkers).cy-on .scene-sky { z-index: -7; }
+:is(.start-walkers, .game-walkers).cy-on :is(.cloud-layer, .cloud-dark, .cloud-flash, .moon-sky) { z-index: -6; }
 
 /* INFECTIONS (infections.js): each in its own little display, LED or ASCII, within the bits it takes up */
 .board-wrap { position: relative; }
