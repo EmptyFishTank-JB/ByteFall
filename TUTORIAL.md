@@ -1,6 +1,6 @@
 # ByteFall tutorial: every card, for review
 
-The TUTORIAL as it is in the game now (v641), and RULES' own lessons, recorded by playing each through:
+The TUTORIAL as it is in the game now (v642), and RULES' own lessons, recorded by playing each through:
 what each card says (word for word), what it opens, what it asks, what lights up, the board and bits it
 sets up, and after a drop its explanation and the points it shows. Write anything you'd change on a
 card's **Notes** line.
@@ -19,6 +19,8 @@ changing a card, and this page matches the game again (this intro is kept as it 
   going on to the loadout), and what came out of the TUTORIAL: THE BOTTOM ROW, RULES & RECORDS, THE STORE
   and SETTINGS. Each ends on a card whose RULES button goes back to its page. They're listed after the
   TUTORIAL's cards, under **RULES' own lessons**.
+- **The columns are lettered** A to G, as their drop buttons are now: every card names its column by
+  its letter (column D or G; C, D or E), so a column is never read as a bit's number.
 - **LAYERS AND THE LINE** on its own starts with the CHAIN METER at 3 bars, as the chain lesson leaves it,
   so the layer's two links still fill it.
 
@@ -34,7 +36,7 @@ changing a card, and this page matches the game again (this intro is kept as it 
 - Set boards and bits, no rising layers, nothing earned (no XP, KEYS or resources). The CHAIN METER keeps
   its charge from the chain lesson through the WORM VIRUS.
 
-Columns are numbered 1 to 7 from the left. Boards are drawn top row first; `[=]` is an ENCRYPTION LAYER,
+Columns are lettered A to G from the left, as their buttons are. Boards are drawn top row first; `[=]` is an ENCRYPTION LAYER,
 `[-]` a cracked one.
 
 
@@ -134,10 +136,10 @@ Columns are numbered 1 to 7 from the left. Boards are drawn top row first; `[=]`
 
 **Says:**
 
-> Drop a bit by tapping a number button below, or the column itself. Drop the [3] into column 4 or 7, next to the [3] and [5].
+> Drop a bit by tapping a lettered button below, or the column itself. Drop the [3] into column D or G, next to the [3] and [5].
 
-- **Asks you to**: Drop into column 4 or 7.
-- **Lights up**: the block in column 5, 1st from the bottom, the block in column 6, 1st from the bottom and the drop buttons for column 4 or 7
+- **Asks you to**: Drop into column D or G.
+- **Lights up**: the block in column E, 1st from the bottom, the block in column F, 1st from the bottom and the drop buttons for column D or G
 
 **After the drop, says:**
 
@@ -161,10 +163,10 @@ Columns are numbered 1 to 7 from the left. Boards are drawn top row first; `[=]`
 
 **Says:**
 
-> Now a column. Drop the [2] on top of the [5] in column 6.
+> Now a column. Drop the [2] on top of the [5] in column F.
 
-- **Asks you to**: Drop into column 6.
-- **Lights up**: the block in column 6, 1st from the bottom and the drop button for column 6
+- **Asks you to**: Drop into column F.
+- **Lights up**: the block in column F, 1st from the bottom and the drop button for column F
 
 **After the drop, says:**
 
@@ -245,10 +247,10 @@ Columns are numbered 1 to 7 from the left. Boards are drawn top row first; `[=]`
 
 **Says:**
 
-> The first link scores normal points, the second link doubles (2x), the third triples (3x), and so on. Drop the [2] into column 6.
+> The first link scores normal points, the second link doubles (2x), the third triples (3x), and so on. Drop the [2] into column F.
 
-- **Asks you to**: Drop into column 6.
-- **Lights up**: the block in column 6, 1st from the bottom, the block in column 4, 2nd from the bottom, the block in column 7, 2nd from the bottom and the drop button for column 6
+- **Asks you to**: Drop into column F.
+- **Lights up**: the block in column F, 1st from the bottom, the block in column D, 2nd from the bottom, the block in column G, 2nd from the bottom and the drop button for column F
 
 **After the drop, says:**
 
@@ -353,7 +355,7 @@ TOTAL +132
 > This [=] is an ENCRYPTION LAYER. Decrypt a bit right next to it to peel it.
 
 - **Asks you to**: Tap NEXT.
-- **Lights up**: the block in column 4, 1st from the bottom
+- **Lights up**: the block in column D, 1st from the bottom
 - **Notes**: 
 
 ---
@@ -366,10 +368,10 @@ TOTAL +132
 
 **Says:**
 
-> Drop the [2] into column 3, 4 or 5: beside the layer or on top of it, the two of them make a line of 2.
+> Drop the [2] into column C, D or E: beside the layer or on top of it, the two of them make a line of 2.
 
-- **Asks you to**: Drop into column 3 or 4 or 5.
-- **Lights up**: the block in column 4, 1st from the bottom and the drop buttons for column 3 or 4 or 5
+- **Asks you to**: Drop into column C or D or E.
+- **Lights up**: the block in column D, 1st from the bottom and the drop buttons for column C or D or E
 
 **After the drop, says:**
 
@@ -393,10 +395,10 @@ TOTAL +132
 
 **Says:**
 
-> Drop the next [2] into column 3, 4 or 5 to peel the layer a second time.
+> Drop the next [2] into column C, D or E to peel the layer a second time.
 
-- **Asks you to**: Drop into column 3 or 4 or 5.
-- **Lights up**: the block in column 4, 1st from the bottom and the drop buttons for column 3 or 4 or 5
+- **Asks you to**: Drop into column C or D or E.
+- **Lights up**: the block in column D, 1st from the bottom and the drop buttons for column C or D or E
 
 **After the drop, says:**
 
@@ -511,10 +513,10 @@ TOTAL +34
 
 **Says:**
 
-> The WORM VIRUS is armed as your CURRENT, and it drops like a bit. Drop it into column 3, the tall one: it wipes out every block in that column.
+> The WORM VIRUS is armed as your CURRENT, and it drops like a bit. Drop it into column C, the tall one: it wipes out every block in that column.
 
-- **Asks you to**: Drop into column 3.
-- **Lights up**: the block in column 3, 1st from the bottom, the block in column 3, 2nd from the bottom, the block in column 3, 3rd from the bottom, the block in column 3, 4th from the bottom and the drop button for column 3
+- **Asks you to**: Drop into column C.
+- **Lights up**: the block in column C, 1st from the bottom, the block in column C, 2nd from the bottom, the block in column C, 3rd from the bottom, the block in column C, 4th from the bottom and the drop button for column C
 
 **After the drop, says:**
 
@@ -646,10 +648,10 @@ Each section's page in RULES has its own TUTORIAL button (where it has one): the
 
 **Says:**
 
-> Drop a bit by tapping a number button below, or the column itself. Drop the [3] into column 4 or 7, next to the [3] and [5].
+> Drop a bit by tapping a lettered button below, or the column itself. Drop the [3] into column D or G, next to the [3] and [5].
 
-- **Asks you to**: Drop into column 4 or 7.
-- **Lights up**: the block in column 5, 1st from the bottom, the block in column 6, 1st from the bottom and the drop buttons for column 4 or 7
+- **Asks you to**: Drop into column D or G.
+- **Lights up**: the block in column E, 1st from the bottom, the block in column F, 1st from the bottom and the drop buttons for column D or G
 
 **After the drop, says:**
 
@@ -673,10 +675,10 @@ Each section's page in RULES has its own TUTORIAL button (where it has one): the
 
 **Says:**
 
-> Now a column. Drop the [2] on top of the [5] in column 6.
+> Now a column. Drop the [2] on top of the [5] in column F.
 
-- **Asks you to**: Drop into column 6.
-- **Lights up**: the block in column 6, 1st from the bottom and the drop button for column 6
+- **Asks you to**: Drop into column F.
+- **Lights up**: the block in column F, 1st from the bottom and the drop button for column F
 
 **After the drop, says:**
 
@@ -775,10 +777,10 @@ Each section's page in RULES has its own TUTORIAL button (where it has one): the
 
 **Says:**
 
-> The first link scores normal points, the second link doubles (2x), the third triples (3x), and so on. Drop the [2] into column 6.
+> The first link scores normal points, the second link doubles (2x), the third triples (3x), and so on. Drop the [2] into column F.
 
-- **Asks you to**: Drop into column 6.
-- **Lights up**: the block in column 6, 1st from the bottom, the block in column 4, 2nd from the bottom, the block in column 7, 2nd from the bottom and the drop button for column 6
+- **Asks you to**: Drop into column F.
+- **Lights up**: the block in column F, 1st from the bottom, the block in column D, 2nd from the bottom, the block in column G, 2nd from the bottom and the drop button for column F
 
 **After the drop, says:**
 
@@ -901,7 +903,7 @@ TOTAL +132
 > This [=] is an ENCRYPTION LAYER. Decrypt a bit right next to it to peel it.
 
 - **Asks you to**: Tap NEXT.
-- **Lights up**: the block in column 4, 1st from the bottom
+- **Lights up**: the block in column D, 1st from the bottom
 - **Notes**: 
 
 ---
@@ -914,10 +916,10 @@ TOTAL +132
 
 **Says:**
 
-> Drop the [2] into column 3, 4 or 5: beside the layer or on top of it, the two of them make a line of 2.
+> Drop the [2] into column C, D or E: beside the layer or on top of it, the two of them make a line of 2.
 
-- **Asks you to**: Drop into column 3 or 4 or 5.
-- **Lights up**: the block in column 4, 1st from the bottom and the drop buttons for column 3 or 4 or 5
+- **Asks you to**: Drop into column C or D or E.
+- **Lights up**: the block in column D, 1st from the bottom and the drop buttons for column C or D or E
 
 **After the drop, says:**
 
@@ -941,10 +943,10 @@ TOTAL +132
 
 **Says:**
 
-> Drop the next [2] into column 3, 4 or 5 to peel the layer a second time.
+> Drop the next [2] into column C, D or E to peel the layer a second time.
 
-- **Asks you to**: Drop into column 3 or 4 or 5.
-- **Lights up**: the block in column 4, 1st from the bottom and the drop buttons for column 3 or 4 or 5
+- **Asks you to**: Drop into column C or D or E.
+- **Lights up**: the block in column D, 1st from the bottom and the drop buttons for column C or D or E
 
 **After the drop, says:**
 
@@ -1077,10 +1079,10 @@ TOTAL +34
 
 **Says:**
 
-> The WORM VIRUS is armed as your CURRENT, and it drops like a bit. Drop it into column 3, the tall one: it wipes out every block in that column.
+> The WORM VIRUS is armed as your CURRENT, and it drops like a bit. Drop it into column C, the tall one: it wipes out every block in that column.
 
-- **Asks you to**: Drop into column 3.
-- **Lights up**: the block in column 3, 1st from the bottom, the block in column 3, 2nd from the bottom, the block in column 3, 3rd from the bottom, the block in column 3, 4th from the bottom and the drop button for column 3
+- **Asks you to**: Drop into column C.
+- **Lights up**: the block in column C, 1st from the bottom, the block in column C, 2nd from the bottom, the block in column C, 3rd from the bottom, the block in column C, 4th from the bottom and the drop button for column C
 
 **After the drop, says:**
 

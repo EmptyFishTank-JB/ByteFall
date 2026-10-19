@@ -17,10 +17,9 @@ Ideas queued for later (not built yet).
   time and in context. It's the intro to STORY, before GHOSTS' chapter 1 (which stays as it is). The
   narration cards (BOT) stay for specific topics, opened from RULES & RECORDS (layers, exploits,
   patches, infections, the STORE...) rather than one long lesson.
-- **Lettered columns**: the drop buttons A to G (and A to H on the 8x8) instead of 1 to 7, as a tester
-  read the column numbers as part of the rule (a 4 and a 3 in column 7 to make 7). Bits keep their
-  numbers (no pips: numbers stay the most readable, for accessibility). The same tester found the
-  encrypted bits' [-] and [=] confusing: worth a clearer look or a word on what they are.
+- **The layers' look**: a tester found the encrypted bits' [-] and [=] confusing: worth a clearer
+  look or a word on what they are. (The same tester's other note, the column numbers read as part of
+  the rule, is done: the columns are lettered A to G now.)
 - **Negative scoring**: the score can go down. Infected bits come up more often and take points for
   every drop they're left on the grid, so clearing them matters.
 - **CPUs reacting to the gameplay**: the bots (wandering, and VS's) reacting to what happens in a game.

@@ -43,12 +43,12 @@ const Tutorial = (() => {
     },
     { text: 'A bit clears when its number matches the exact number of bits in the row or column it sits in. Clearing bits is called DECRYPTING.', next: true },
     {
-      text: 'Drop a bit by tapping a number button below, or the column itself. Drop the [3] into column 4 or 7, next to the [3] and [5].',
+      text: 'Drop a bit by tapping a lettered button below, or the column itself. Drop the [3] into column D or G, next to the [3] and [5].',
       drop: [3, 6], cells: [[0, 4], [0, 5]],
       explain: () => 'BOOM! Both [3]s were DECRYPTED: the row was made 3 bits long. The [5] stays, since it isn’t in a row or column 5 bits long.',
     },
     {
-      text: 'Now a column. Drop the [2] on top of the [5] in column 6.',
+      text: 'Now a column. Drop the [2] on top of the [5] in column F.',
       drop: 5, cells: [[0, 5]],
       explain: () => 'Nice! The column was made 2 bits tall, so the [2] was DECRYPTED.',
     },
@@ -62,7 +62,7 @@ const Tutorial = (() => {
       board: [[], [], [6, 6], [7, 5, 2, 7], [3, 4], [2], [6, 5]], bits: [2], next: true, holdMeter: true,
     },
     {
-      text: 'The first link scores normal points, the second link doubles (2x), the third triples (3x), and so on. Drop the [2] into column 6.',
+      text: 'The first link scores normal points, the second link doubles (2x), the third triples (3x), and so on. Drop the [2] into column F.',
       drop: 5, cells: [[0, 5], [1, 3], [1, 6]], explainMood: 'happy', holdMeter: true,
       explain: () => 'Nice one! That was a 3x CHAIN:\n1. The [2]s cleared in a column of 2, and the [5]s in a row of 5.\n2. The [3] cleared in a row of 3.\n3. The [2] cleared in a row of 2.',
     },
@@ -78,12 +78,12 @@ const Tutorial = (() => {
       board: [[], [], [], ['L2:1'], [], [], []], bits: [2, 2], cells: [[0, 3]], next: true, holdMeter: true, meter: 3,
     },
     {
-      text: 'Drop the [2] into column 3, 4 or 5: beside the layer or on top of it, the two of them make a line of 2.',
+      text: 'Drop the [2] into column C, D or E: beside the layer or on top of it, the two of them make a line of 2.',
       drop: [2, 3, 4], cells: [[0, 3]], holdMeter: true,
       explain: () => 'The [2] decrypted and peeled the layer once: [=] is cracked now, [-]. That was one more link for the CHAIN METER: 4 bars lit.',
     },
     {
-      text: 'Drop the next [2] into column 3, 4 or 5 to peel the layer a second time.',
+      text: 'Drop the next [2] into column C, D or E to peel the layer a second time.',
       drop: [2, 3, 4], cells: [[0, 3]], holdMeter: true, explainMood: 'happy',
       explain: () => 'The second peel broke the layer open and revealed the bit under it: a [1], alone in a line of 1, so it decrypted too, as the chain’s second link.',
     },
@@ -102,7 +102,7 @@ const Tutorial = (() => {
     },
     { text: 'Tap the EXPLOIT button to use yours. It’s a WORM VIRUS!', tap: '#exploit-btn', pass: true, mood: 'devious', holdMeter: true },
     {
-      text: 'The WORM VIRUS is armed as your CURRENT, and it drops like a bit. Drop it into column 3, the tall one: it wipes out every block in that column.',
+      text: 'The WORM VIRUS is armed as your CURRENT, and it drops like a bit. Drop it into column C, the tall one: it wipes out every block in that column.',
       drop: 2, cells: [[0, 2], [1, 2], [2, 2], [3, 2]], mood: 'devious', explainMood: 'happy', holdMeter: true,
       explain: () => 'The WORM VIRUS wiped out the whole column. Blocks wiped out by an exploit score a flat 10 each.',
     },

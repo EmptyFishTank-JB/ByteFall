@@ -190,7 +190,7 @@ function sits(s) {
     if (s.meter !== undefined) out += `- **CHAIN METER**: ${s.meter} bars lit as it begins\n`;
     if (s.board && s.board.some((col) => col.length)) out += `- **Board**:\n\n\`\`\`\n${boardText(s.board)}\n\`\`\`\n`;
     out += `\n**Says:**\n\n> ${s.text.replace(/\n/g, '\n> ')}\n\n`;
-    const drops = s.drop === undefined ? [] : [].concat(s.drop).map((d) => d + 1);
+    const drops = s.drop === undefined ? [] : [].concat(s.drop).map((d) => String.fromCharCode(65 + d)); // (the columns' letters)
     const asks = s.intro ? 'Tap BEGIN.' : s.done === 'rules' ? 'Tap RULES (back to its page in RULES).' : s.done ? 'Tap MAIN MENU (out to the main menu).'
       : drops.length ? `Drop into column ${drops.join(' or ')}.`
       : s.tap ? `Tap ${name(s.tap)}.` : 'Tap NEXT.';
@@ -199,7 +199,7 @@ function sits(s) {
     for (const sel of s.focus || []) lit.push(`${name(sel)} (in focus)`);
     for (const sel of s.pulse || []) lit.push(name(sel));
     if (s.tap && !(s.focus || []).includes(s.tap)) lit.push(`${name(s.tap)} (in focus)`);
-    for (const [r, col] of s.cells || []) lit.push(`the block in column ${col + 1}, ${ord(r + 1)} from the bottom`);
+    for (const [r, col] of s.cells || []) lit.push(`the block in column ${String.fromCharCode(65 + col)}, ${ord(r + 1)} from the bottom`);
     if (drops.length) lit.push(`the drop button${drops.length > 1 ? 's' : ''} for column ${drops.join(' or ')}`);
     if (s.line) lit.push('the ======== line');
     if (s.demo) lit.push({ slots: 'the bottom row\'s slots, shown locked (for the lesson)', market: 'a sample BLACK MARKET slot (for the lesson)', goal: 'a sample ENCRYPTION STRENGTH line and SCORE bar (for the lesson)' }[s.demo]);

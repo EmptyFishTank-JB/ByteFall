@@ -10,6 +10,9 @@
 let COLS = 7;
 let ROWS = 7;
 let MAX_ROWS = ROWS + 1; // top row holds overflow; anything left there after clears ends the run
+// The columns are lettered left to right (A to G, HARD's to H), so a column's name is never mistaken
+// for a bit's number: their buttons, and everywhere a column is named
+const colName = (c) => String.fromCharCode(65 + c);
 const STEP_MS = 35; // per-row fall speed
 const HACK_COMBO = 5;
 
@@ -798,7 +801,7 @@ function initGame() {
     el.querySelector('.combo').textContent = '';
   });
   document.getElementById('overflow-top').textContent = COLS;
-  document.getElementById('rules-keys').textContent = `Tap a column or its button, or press 1\u2013${COLS}, to drop`;
+  document.getElementById('rules-keys').textContent = `Tap a column or its button (A\u2013${colName(COLS - 1)}), or press 1\u2013${COLS} on a keyboard, to drop`;
   document.getElementById('rules-pulse').textContent = difficulty === 'hard'
     ? `every ${BASE_INTERVAL} drops, tightening to every ${HARD_MIN_INTERVAL} as your score climbs`
     : `every ${BASE_INTERVAL} drops`;
@@ -1446,7 +1449,8 @@ function buildColumnButtons() {
   columnButtonsEl.innerHTML = '';
   for (let c = 0; c < COLS; c++) {
     const btn = document.createElement('button');
-    btn.textContent = c + 1;
+    btn.textContent = colName(c);
+    btn.setAttribute('aria-label', `Drop into column ${colName(c)}`);
     btn.addEventListener('click', () => attemptDrop(c));
     columnButtonsEl.appendChild(btn);
   }
@@ -1473,7 +1477,7 @@ function updateColumnButtons() {
     btn.disabled = gameOver || busy || vsPaused || (pivotFrom !== null ? !target : columns[c].length >= MAX_ROWS); // (paused: off, dimmed, till RESUME)
     btn.classList.toggle('pivot-from', c === pivotFrom);
     btn.classList.toggle('pivot-target', target);
-    btn.textContent = target ? (c < pivotFrom ? '\u2190' : '\u2192') : String(c + 1);
+    btn.textContent = target ? (c < pivotFrom ? '\u2190' : '\u2192') : colName(c);
     const crossed = hintCross.includes(c); // (a DAILY PUZZLE hint: not this column)
     btn.classList.toggle('crossed', crossed);
     if (crossed) { btn.disabled = true; btn.textContent = '\u2715'; }
@@ -1818,7 +1822,7 @@ function burstMessage(type) {
 // Once picked, the player is committed: only the two neighbors are accepted.
 function choosePivot(col) {
   pivotFrom = col;
-  setMessage(`PIVOT // SWAP COLUMN ${col + 1} WITH \u2190 ${col} OR ${col + 2} \u2192`);
+  setMessage(`PIVOT // SWAP COLUMN ${colName(col)} WITH \u2190 ${colName(col - 1)} OR ${colName(col + 1)} \u2192`);
   SFX.play('click');
   render(); // (the buttons and the top row's arrows)
 }
@@ -1837,7 +1841,7 @@ async function attemptDrop(col) {
   // (with every other column full, the pop-up gives way)
   if (adware && adware.col === col && pivotFrom === null) {
     if (columns.some((c, n) => n !== col && c.length < MAX_ROWS)) {
-      setMessage(`${ANTI.adware.name} // COLUMN ${col + 1} BLOCKED FOR ${adware.left} MORE DROP${adware.left === 1 ? '' : 'S'}`, 'alarm');
+      setMessage(`${ANTI.adware.name} // COLUMN ${colName(col)} BLOCKED FOR ${adware.left} MORE DROP${adware.left === 1 ? '' : 'S'}`, 'alarm');
       SFX.play('denied');
       const btn = columnButtonsEl.querySelectorAll('button')[col];
       if (btn) { btn.classList.remove('ad-shake'); void btn.offsetWidth; btn.classList.add('ad-shake'); }
@@ -1880,7 +1884,7 @@ async function attemptDrop(col) {
   }
   if (hintCross.includes(col)) { // (a DAILY PUZZLE hint crossed it out)
     SFX.play('denied');
-    setMessage(`HINT // NOT COLUMN ${col + 1}`);
+    setMessage(`HINT // NOT COLUMN ${colName(col)}`);
     return;
   }
 
@@ -5792,7 +5796,7 @@ function puzzleHint() {
   }
   showHint(r.solutions[0][0]);
   SFX.play('punct');
-  setMessage(`HINT // COLUMN ${r.solutions[0][0] + 1}`);
+  setMessage(`HINT // COLUMN ${colName(r.solutions[0][0])}`);
   return true;
 }
 function puzzleUndo() {
@@ -7034,13 +7038,13 @@ function useDailyHint() {
   const kind = window.devHintKind || pickOne(fresh.length ? fresh : kinds); // (window.devHintKind: tests pick one)
   hintKindsThisDrop.push(kind);
   let text = '';
-  if (kind === 'riddle') text = `THE ${bit}'S COLUMN: ${hintRiddle(col + 1, val)}`;
+  if (kind === 'riddle') text = `THE ${bit}'S COLUMN, COUNTING FROM THE LEFT: ${hintRiddle(col + 1, val)}`; // (the riddles' answers are numbers: the column's place)
   else if (kind === 'spot') {
     const top = columns[col][columns[col].length - 1];
     text = `THE ${bit} GOES ${!top ? 'IN AN EMPTY COLUMN' : top.type === 'number' ? `ON A [${top.val}]` : 'ON AN ENCRYPTED BLOCK'}`;
   } else if (kind === 'side') {
     const from = Math.max(0, Math.min(COLS - 3, col - Math.floor(Math.random() * 3)));
-    text = `THE ${bit} GOES IN COLUMN ${from + 1}, ${from + 2} OR ${from + 3}`;
+    text = `THE ${bit} GOES IN COLUMN ${colName(from)}, ${colName(from + 1)} OR ${colName(from + 2)}`;
   } else if (kind === 'outcome') { // (the right drop played out on a copy of the board)
     const before = PuzzleSim.parse(board);
     const after = PuzzleSim.drop(before, col, val, ROWS);
@@ -7054,11 +7058,11 @@ function useDailyHint() {
   } else if (kind === 'cross') {
     const out = wrong.sort(() => Math.random() - 0.5).slice(0, Math.min(3, wrong.length)).sort((x, y) => x - y);
     hintCross.push(...out);
-    const names = out.map((c) => c + 1);
+    const names = out.map(colName);
     text = `NOT COLUMN${names.length === 1 ? '' : 'S'} ${names.length === 1 ? names[0] : `${names.slice(0, -1).join(', ')} OR ${names[names.length - 1]}`}`;
   } else {
     showHint(col);
-    text = `THE ${bit} GOES IN COLUMN ${col + 1}`;
+    text = `THE ${bit} GOES IN COLUMN ${colName(col)}`;
   }
   dailyHintsUsed++;
   if (dailyOfficial) {
