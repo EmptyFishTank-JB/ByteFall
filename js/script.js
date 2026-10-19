@@ -2784,7 +2784,6 @@ function storyTerminal(game = false, onBlack = null) {
   termOut.textContent = '';
   termOut.classList.remove('dark');
   termEnter.hidden = true;
-  termEnter.classList.remove('hit');
   termEl.appendChild(termEnter);
   termEl.classList.remove('hidden', 'on', 'lift');
   document.body.classList.add('term-on');
@@ -2843,12 +2842,12 @@ function termAll(t) {
   });
   termPrompt(t);
 }
-// (the message out: > ENTER, the cursor blinking after it)
+// (the message out: PRESS ENTER TO CONTINUE, the cursor blinking after it)
 function termPrompt(t) {
   t.stage = 'prompt';
   const p = document.createElement('p');
   p.className = 'term-prompt';
-  p.append('>', termEnter, t.caret);
+  p.append(termEnter, t.caret);
   t.caret.classList.add('blink');
   termEnter.hidden = false;
   termOut.appendChild(p);
@@ -2862,7 +2861,9 @@ function termHit() {
   if (t.stage !== 'prompt') return;
   t.stage = 'enter';
   SFX.termEnter();
-  termEnter.classList.add('hit'); // (pressed, as a picked command)
+  const p = document.createElement('p'); // (ENTER: the cursor down a line, as a terminal takes it)
+  p.appendChild(t.caret);
+  termOut.appendChild(p);
   t.caret.classList.remove('blink');
   termLater(t, TERM.dark, () => {
     termOut.classList.add('dark'); // (the terminal gone dark)

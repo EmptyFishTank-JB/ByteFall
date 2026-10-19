@@ -126,7 +126,7 @@ again from the ARCHIVE's READ THE INTRO (without the phone after it). Its words 
    speaking pace (about 150 words a minute, a breath after each sentence), a key click for each
    letter (the key sounds of ECHOES' SHIP SYSTEM TERMINAL 426; the tutorial BOT's blips stay for
    narration). A tap shows the rest at once.
-4. `> [ENTER]`: the player hits ENTER (the key, the button, or a tap). A second later the terminal
+4. `PRESS ENTER TO CONTINUE`, plain text with the cursor after it: the player hits ENTER (the key, or a tap anywhere), and the cursor drops a line. A second later the terminal
    goes dark; a second more and the phone lights up with transmission 1, its messages coming in.
 5. The phone put down, the black lifts off the board: KEY_01, the first game.
 
@@ -134,7 +134,7 @@ again from the ARCHIVE's READ THE INTRO (without the phone after it). Its words 
 >
 > If you're reading this, good, it got through.
 >
-> I've sent you something. Attached is an archive. You'll find memos, chat logs, and call records. Every file is locked under a key, and each one is harder to crack than the one before.
+> I've sent you something. Check your inbox for an archive. You'll find memos, chat logs, and call records. Every file is locked under a key, and each one is harder to crack than the one before.
 >
 > The people responsible for these files think they've deleted them. They're wrong.
 >
