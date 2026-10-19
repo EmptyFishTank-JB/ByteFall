@@ -141,13 +141,15 @@ const Stories = (() => {
   const SIGNAL_SVG = '<svg viewBox="0 0 16 12" aria-hidden="true"><path d="M1 11h2V8H1zM5 11h2V6H5zM9 11h2V3H9zM13 11h2V0h-2z" fill="currentColor"/></svg>';
   const WIFI_SVG = '<svg viewBox="0 0 16 12" aria-hidden="true"><path d="M8 11.5 L1 3.5 A10 10 0 0 1 15 3.5 Z" fill="currentColor"/></svg>';
   const BATTERY_SVG = '<svg viewBox="0 0 22 12" aria-hidden="true"><rect x="0.5" y="0.5" width="18" height="11" rx="2" fill="none" stroke="currentColor"/><rect x="2" y="2" width="11" height="8" rx="1" fill="currentColor"/><rect x="19.5" y="4" width="2" height="4" rx="1" fill="currentColor"/></svg>';
+  const statusHtml = (clock) => `<div class="ph-status"><span class="ph-clock">${clock || ''}</span><span class="ph-icons">${SIGNAL_SVG}${WIFI_SVG}${BATTERY_SVG}</span></div>`;
+  const avatarHtml = (who, name) => `<span class="ph-avatar" data-who="${esc(who)}">${name === 'UNKNOWN CONTACT' ? '?' : esc(name[0])}</span>`;
   function phoneHtml(it) {
     const times = stamps(it).filter(Boolean);
     const other = it.lines.find((l) => l.k === 'im');
     const name = other ? contact(other.who.toLowerCase(), it) : 'UNKNOWN CONTACT';
     return '<div class="phone-screen">'
-      + `<div class="ph-status"><span class="ph-clock">${times[0] || ''}</span><span class="ph-icons">${SIGNAL_SVG}${WIFI_SVG}${BATTERY_SVG}</span></div>`
-      + `<div class="ph-bar"><button type="button" class="ph-back" aria-label="Close">&larr;</button><span class="ph-avatar" data-who="${esc(other ? other.who.toLowerCase() : '')}">${name === 'UNKNOWN CONTACT' ? '?' : esc(name[0])}</span><span class="ph-name">${esc(name)}</span></div>`
+      + statusHtml(times[0])
+      + `<div class="ph-bar"><button type="button" class="ph-back" aria-label="Messages">&larr;</button><span class="ph-avatar" data-who="${esc(other ? other.who.toLowerCase() : '')}">${name === 'UNKNOWN CONTACT' ? '?' : esc(name[0])}</span><span class="ph-name">${esc(name)}</span></div>`
       + linesHtml(it, 'ph-msgs')
       + '<div class="ph-input"><span class="ph-plus" aria-hidden="true">+</span><span class="ph-field">Text message</span></div>'
       + '<div class="ph-home" aria-hidden="true"></div></div>';
@@ -407,21 +409,27 @@ const Stories = (() => {
     const seen = Math.min(n, st().seen[s.id] || 0);
     const pickBtn = done(s) ? '<p class="archive-state">COMPLETE: EVERY TRANSMISSION RECOVERED</p>'
       : `<button type="button" class="archive-pick${s === pick ? ' on' : ''}" id="archive-pick"${s === pick ? ' aria-pressed="true"' : ''}>${s === pick ? 'DECRYPTING THIS STORY' : 'DECRYPT THIS STORY'}</button>`;
-    const senders = [...new Set(s.items.flatMap((it) => it.from))];
+    // (who's been heard from: a sender still to come, as a button, would give the story away)
+    const heard = [...s.items.slice(0, n), ...(s.extras || []).filter((x) => Progress.storyExtraHad(x.when))];
+    const senders = [...new Set(heard.flatMap((it) => [].concat(it.from)))];
     if (!senders.includes(filter)) filter = 'all';
     const chips = senders.length > 1 ? `<div class="archive-filter" role="group" aria-label="Whose">${['all', ...senders].map((f) => `<button type="button" data-from="${f}" class="${f === filter ? 'on' : ''}"${f === filter ? ' aria-pressed="true"' : ''}>${f === 'all' ? 'ALL' : knownAt(s, f, n + 0.5) ? LABEL[f] || f.toUpperCase() : 'UNKNOWN CONTACT'}</button>`).join('')}</div>` : '';
     let html = `<button type="button" class="archive-back" id="archive-back">&larr; ALL STORIES</button>`
       + `<h3 class="archive-title">SEASON ${s.season} // ${esc(s.title)}</h3><p class="archive-blurb">${esc(s.blurb)}</p>${pickBtn}${chips}`;
+    // (a chapter's name once one of its transmissions is in; one sender's: only what's come in, no
+    // ENCRYPTED ones saying which are theirs, and no chapter with nothing of theirs yet)
     s.chapters.forEach((name, c) => {
-      html += '<div class="store-rule" aria-hidden="true">================================================================================</div>'
-        + `<p class="archive-chapter">// CHAPTER ${c + 1}: ${esc(name)} <span>${gateText(STORY_GATES[c])}</span></p>`;
+      let files = '';
       for (let i = c * s.perChapter; i < Math.min(count(s), (c + 1) * s.perChapter); i++) {
         const it = s.items[i];
-        if (filter !== 'all' && !it.from.includes(filter)) continue;
-        html += i < n
+        if (filter !== 'all' && (i >= n || !it.from.includes(filter))) continue;
+        files += i < n
           ? `<div class="archive-file${i >= seen ? ' new' : ''}" data-i="${i}"><p class="af-head">${unit(s)} ${i + 1} // ${esc(kindLine(it))}${i >= seen ? ' <b>NEW</b>' : ''}</p>${it.kind === 'im' ? threadHtml(it, 'af') : splitIm(it) ? linesHtml(splitIm(it).before) + threadHtml(splitIm(it).thread, 'af') : linesHtml(it)}${footHtml(it).replace(/sf-reveal/g, 'af-reveal')}</div>`
           : `<div class="archive-file locked"><p class="af-head">${unit(s)} ${i + 1} // ENCRYPTED // ${gateText(gateOf(s, i))}</p><p class="af-noise">${noise(`${s.id}:${i}`)}</p></div>`;
       }
+      if (!files && filter !== 'all') return;
+      html += '<div class="store-rule" aria-hidden="true">================================================================================</div>'
+        + `<p class="archive-chapter">// CHAPTER ${c + 1}: ${n > c * s.perChapter ? esc(name) : 'ENCRYPTED'} <span>${gateText(STORY_GATES[c])}</span></p>${files}`;
     });
     const had = (s.extras || []).filter((x) => Progress.storyExtraHad(x.when) && (filter === 'all' || x.from === filter));
     if (had.length) {
@@ -481,13 +489,14 @@ const Stories = (() => {
   // (a card over everything, its lines played: an IM on the phone, a voicemail typed out; foot: what
   // it introduces and gives under it, as on the cracked card (?storytest's review); whole: at once,
   // as when a thread's opened again)
-  function showCard(title, it, foot = false, whole = false) {
+  function showCard(title, it, foot = false, whole = false, nav = false) {
     const el = document.getElementById('story-msg');
     if (!el) return false;
     const phone = it.kind === 'im';
     const sp = !whole && splitIm(it); // (a call ending in IMs: the call, then the phone)
     if (sp) it = sp.before;
     el.querySelector('.story-msg-box').classList.toggle('phone', phone);
+    el.querySelector('.story-msg-box').classList.toggle('nav', nav); // (moving about the phone: it isn't raised again)
     document.getElementById('story-msg-title').textContent = title;
     const body = document.getElementById('story-msg-body');
     body.innerHTML = (phone ? phoneHtml(it) : linesHtml(it)) + (foot ? footHtml(it) : '');
@@ -500,7 +509,7 @@ const Stories = (() => {
       lines.addEventListener('scroll', () => { if (lines.scrollHeight - lines.scrollTop - lines.clientHeight < 8) delete lines.dataset.held; }, { passive: true });
     }
     const back = body.querySelector('.ph-back');
-    if (back) back.addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('story-msg-close').click(); });
+    if (back) back.addEventListener('click', (e) => { e.stopPropagation(); openInbox(); }); // (the conversations)
     el.classList.remove('hidden');
     let seq = -1;
     play(lines, it, whole, sp ? () => setTimeout(() => { if (seq === phoneSeq && !el.classList.contains('hidden')) showCard(sp.title, sp.thread, foot); }, 900) : null);
@@ -544,19 +553,59 @@ const Stories = (() => {
   }
   const whoOf = (it) => { const l = it.lines.find((x) => x.k === 'im'); return l ? l.who.toLowerCase() : ''; };
   const hasThread = () => !window.STORY_SOON && phonePieces().some((p) => whoOf(p.it));
-  function openPhone() {
-    const all = phonePieces().filter((p) => whoOf(p.it));
+  const ims = () => phonePieces().filter((p) => whoOf(p.it));
+  const asNow = (p) => ({ kind: 'im', lines: [], n: p.at, of: p.s }); // (names as you know them now: as of the newest)
+  // (a contact's thread: who, or the newest IM's contact; nav: from the inbox)
+  function openPhone(who = null, nav = false) {
+    const all = ims();
     if (!all.length) return false;
-    const last = all[all.length - 1];
-    const who = whoOf(last.it);
+    const now = asNow(all[all.length - 1]);
+    who = who || whoOf(all[all.length - 1].it);
     const mine = all.filter((p) => whoOf(p.it) === who);
+    if (!mine.length) return false;
     const lines = [];
     mine.forEach((p, i) => {
       const times = stamps(p.it);
       if (i) lines.push({ k: 'gap' });
       p.it.lines.forEach((l, j) => lines.push(times[j] ? { ...l, time: times[j] } : l));
     });
-    return showCard(`// IM // ${contact(who, last.it)}`, { kind: 'im', lines, n: last.at, of: last.s }, false, true);
+    return showCard(`// IM // ${contact(who, now)}`, { ...now, lines }, false, true, nav);
+  }
+  // THE INBOX (the phone's back arrow, wherever the phone's up): every conversation, the newest first,
+  // its last message and time; a tap opens it. In GHOSTS, MOTH's alone till TOLL writes (the calls and
+  // voicemails aren't messages). OK closes the phone
+  function inboxHtml() {
+    const all = ims();
+    const now = all.length ? asNow(all[all.length - 1]) : null;
+    const convos = [];
+    [...all].reverse().forEach((p) => { const who = whoOf(p.it); if (!convos.some((c) => c.who === who)) convos.push({ who, p }); });
+    const rows = convos.map(({ who, p }) => {
+      const said = p.it.lines.filter((l) => l.k === 'im' || l.k === 'you');
+      const last = said[said.length - 1];
+      const times = stamps(p.it).filter(Boolean);
+      const name = contact(who, now);
+      return `<button type="button" class="ph-convo" data-who="${esc(who)}">${avatarHtml(who, name)}`
+        + `<span class="ph-convo-text"><span class="ph-convo-top"><span class="ph-name">${esc(name)}</span><span class="ph-convo-time">${times[times.length - 1] || ''}</span></span>`
+        + `<span class="ph-convo-last">${last.k === 'you' ? 'You: ' : ''}${esc(last.t)}</span></span></button>`;
+    }).join('');
+    const clock = convos.length ? stamps(convos[0].p.it).filter(Boolean).pop() : '';
+    return '<div class="phone-screen">' + statusHtml(clock)
+      + '<div class="ph-bar ph-bar-inbox"><span class="ph-title">MESSAGES</span></div>'
+      + `<div class="ph-list">${rows || '<span class="ph-empty">No messages.</span>'}</div>`
+      + '<div class="ph-home" aria-hidden="true"></div></div>';
+  }
+  function openInbox() {
+    const el = document.getElementById('story-msg');
+    if (!el) return;
+    stop(); // (a thread still coming in: all of it, now)
+    const box = el.querySelector('.story-msg-box');
+    box.classList.add('phone', 'nav');
+    document.getElementById('story-msg-title').textContent = '// MESSAGES';
+    const body = document.getElementById('story-msg-body');
+    body.innerHTML = inboxHtml();
+    body.querySelectorAll('.ph-convo').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); openPhone(b.dataset.who, true); }));
+    el.classList.remove('hidden');
+    SFX.play('click');
   }
 
   // (back after days away: on launch, three days or more since the last STORY game)
@@ -587,5 +636,5 @@ const Stories = (() => {
   marks();
   refreshRow();
 
-  return { onCrack, stop, showCard, kindLine, render, refreshRow, openStory, introduced, introName, moment, showDue, firstDue: () => !!firstDue(), atStart, hasThread, openPhone, toList: () => { view = null; }, picked: () => picked().id };
+  return { onCrack, stop, showCard, kindLine, render, refreshRow, openStory, introduced, introName, moment, showDue, firstDue: () => !!firstDue(), atStart, hasThread, openPhone, openInbox, toList: () => { view = null; }, picked: () => picked().id };
 })();

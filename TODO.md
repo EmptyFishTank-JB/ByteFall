@@ -2,6 +2,8 @@
 
 Ideas queued for later (not built yet).
 
+- **THE ARCADE on STORY's phone** (a maybe, for later): an app on the phone (a home screen, or beside
+  MESSAGES) opening the ARCADE's games, so they can be played from the story's phone.
 - **New tracks**, in the spirit of (not copies of): Cutting Crew's *(I Just) Died in Your Arms*,
   a-ha's *Take On Me*, Starship's *We Built This City*, Duran Duran's *Hungry Like the Wolf*, Paula
   Abdul's *Straight Up* (its funky bass line, not the tapping intro), Sonic Spinball's *Toxic Caves*

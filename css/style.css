@@ -3385,6 +3385,21 @@ body.panel-open .phone-btn { visibility: hidden; }
 .ph-plus { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; font-size: 15px; color: var(--fg-dim); border: 1px solid rgba(var(--fg-rgb), 0.3); }
 .ph-field { flex: 1; padding: 6px 12px; border-radius: 16px; font-size: 11.5px; color: var(--fg-dim); background: rgba(var(--fg-rgb), 0.08); }
 .ph-home { flex: 0 0 auto; width: 36%; height: 4px; margin: 6px auto 6px; border-radius: 2px; background: rgba(var(--fg-rgb), 0.45); }
+/* THE INBOX (the phone's back arrow, stories.js's openInbox): the conversations, the newest first, each
+   its avatar, name, time and last message; moving about the phone doesn't raise it again */
+.ph-bar-inbox { padding: 10px 14px; }
+.ph-title { font-size: 13px; letter-spacing: 2px; color: var(--panel-text); }
+.ph-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
+.ph-list::-webkit-scrollbar { display: none; }
+.ph-convo { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; font: inherit; text-align: left; color: inherit; background: none; border: 0; border-bottom: 1px solid rgba(var(--fg-rgb), 0.12); cursor: pointer; }
+.ph-convo .ph-avatar { width: 34px; height: 34px; font-size: 14px; }
+.ph-convo-text { display: flex; flex-direction: column; gap: 3px; flex: 1 1 auto; min-width: 0; }
+.ph-convo-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.ph-convo-time { flex: none; font-size: 10.5px; color: var(--fg-dim); }
+.ph-convo-last { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 11.5px; color: var(--fg-dim); }
+@media (hover: hover) { .ph-convo:hover { background: rgba(var(--fg-rgb), 0.06); } }
+.ph-empty { display: block; margin: 24px 14px; font-size: 12px; color: var(--fg-dim); text-align: center; }
+.story-msg-box.phone.nav .phone-screen { animation: none; }
 /* (the cracked card and the ARCHIVE: a thread as an inbox shows it, its last message, OPEN THREAD) */
 :is(.sf-snippet, .af-snippet) { margin: 0 0 6px; overflow: hidden; font-size: 13px; line-height: 1.4; white-space: nowrap; text-overflow: ellipsis; color: var(--panel-text); }
 :is(.sf-snippet, .af-snippet) span { color: var(--fg); letter-spacing: 1px; }

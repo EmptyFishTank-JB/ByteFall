@@ -132,24 +132,29 @@ again from the ARCHIVE's READ THE INTRO (without the phone after it). Its words 
 
 > INCOMING // ENCRYPTED // SOURCE UNKNOWN
 >
-> if you're reading this, it got through.
+> If you're reading this, good, it got through.
 >
-> what you've got is an archive. memos, chat logs, call records. every file's locked under its own key, and every key is harder than the one before.
+> I've sent you something. Attached is an archive. You'll find memos, chat logs, and call records. Every file is locked under a key, and each one is harder to crack than the one before.
 >
-> the people who wrote these think they're gone. they're not.
+> The people responsible for these files think they've deleted them. They're wrong.
 >
-> open them one at a time. whatever you crack, you keep.
+> Open the files one at a time. Back up whatever you manage to crack.
 >
-> don't go looking for me. i'll find you.
+> I'll contact you soon.
 >
 > KEY_01 is waiting.
 
-It's MOTH's note, unsigned: lowercase, as MOTH writes, so the IM that follows it reads as the same
-hand. ("i'll find you" is answered a second later by the phone.)
+It's MOTH's note, unsigned; "I'll contact you soon" is kept a moment later, when the phone lights up.
 
 **The phone button.** In a STORY game, once a message has come in, a button top left (across from
 PAUSE, its size and shape, a little phone in it) brings the phone up to read your messages again: the
-newest contact's thread, everything from them so far, as a phone keeps it.
+newest contact's thread, everything from them so far, as a phone keeps it. The phone's back arrow
+(wherever the phone's up) opens MESSAGES, the list of conversations, the newest first: MOTH's alone
+till TOLL writes (13). A tap opens one.
+
+**The ARCHIVE gives nothing away.** Its buttons for one sender's transmissions only name senders
+you've heard from; one sender's shows only what's come in (no ENCRYPTED ones saying which are
+theirs), and a chapter's name stays ENCRYPTED till one of its transmissions is in.
 
 ## The characters
 
