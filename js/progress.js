@@ -995,6 +995,7 @@ const Progress = (() => {
       d.stories.seen = d.stories.seen || {};
       d.stories.kit = d.stories.kit || {};
       d.stories.extra = d.stories.extra || {};
+      d.stories.known = d.stories.known || {};
       return d.stories;
     },
     // STORY's KIT: what came inside the story (MOTH's gifts, the BLACK MARKET's buys), used only there
@@ -1008,6 +1009,9 @@ const Progress = (() => {
       return true;
     },
     storyExtraHad(when) { return !!this.stories().extra[when]; },
+    // (STORY's keys whose strength you've found out, by a 5-chain or cracking them: by file, 'ghosts:4', or 'filler')
+    storyKnown(id) { return !!this.stories().known[id]; },
+    storyKnow(id) { const st = this.stories(); if (!st.known[id]) { st.known[id] = 1; save(); } },
     storyExtraSet(when) { this.stories().extra[when] = 1; save(); },
     storyPlayed() { this.stories().played = Date.now(); save(); },
     storyLastPlayed() { return this.stories().played || 0; },

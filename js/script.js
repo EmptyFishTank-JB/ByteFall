@@ -568,16 +568,43 @@ function refillQueue() {
 // DECRYPT, BREACH: bits still to drop (dealt-but-waiting plus not yet dealt)
 const dailyBitsLeft = () => dealLimit() - dealt + queue.filter((p) => p.type === 'number').length;
 
-// ENCRYPTION STRENGTH (CLASSIC, not its daily): every game has a key to crack, a score to reach,
-// GOAL_BASE's on its difficulty. Reach it and the game holds on a card: KEYS for the crack, then GO
-// DEEPER (the next key, stronger: the first's points again, and more KEYS) or DISCONNECT (the
-// game ends there, cracked). Traced after a crack, the KEYS it paid are kept
-const GOAL_BASE = { easy: 1000, normal: 1500, hard: 2000 };
+// ENCRYPTION STRENGTH (STORY): every game has a key to crack, a score to reach. Reach it and the game
+// holds on a card: KEYS for the crack, then GO DEEPER (the next key, deeper) or DISCONNECT (the game ends
+// there, cracked). Traced after a crack, the KEYS it paid are kept.
+// EACH FILE ITS OWN KEY: the key being cracked is for the story's next file, its STRENGTH that file's
+// (Stories.nextKey: staggered through the story, mostly rising), on top of the last key's target; a key
+// too shallow for the next file's chapter is a FILLER, GOAL_FILLER strong. Its strength is ENCRYPTED till
+// found out: a 5-chain from one drop decrypts it (GOAL_REVEAL_CHAIN), or cracking it; found out, it stays
+// known (Progress.storyKnow), and the meter under SCORE fills then, not before
+const GOAL_FILLER = 1500;
+const GOAL_REVEAL_CHAIN = 5;
 const GOAL_BITS = [128, 192, 256, 384, 512, 1024, 2048, 4096];
 const goalBits = (k) => (k < GOAL_BITS.length ? GOAL_BITS[k] : 4096 * 2 ** (k - GOAL_BITS.length + 1));
-const goalTarget = (k) => Math.round((GOAL_BASE[difficulty] || 1500) * (1 + k) / 50) * 50; // (1,500, 3,000, 4,500...)
-const goalKeys = (k) => Math.round(goalTarget(k) / 150);
-let goal = null; // this game's: k, the key being cracked now (0: 128-BIT); cracked, how many so far
+const goalKeys = (target) => Math.round(target / 150);
+let goal = null; // this game's: k, the key being cracked now (0: 128-BIT); cracked, how many so far; id, base, strength and target, the key's
+// (the key at goal.k: its file's, its strength on top of the last key's target)
+function nextGoalKey(k, base) {
+  const key = typeof Stories !== 'undefined' ? Stories.nextKey(goalBits(k)) : null;
+  const strength = key ? key.strength : GOAL_FILLER;
+  return { id: key ? key.id : 'filler', base, strength, target: base + strength };
+}
+function setGoalKey() { Object.assign(goal, nextGoalKey(goal.k, goal.base || 0)); }
+// (the first key again before a drop's been made: the game's set up at launch, before js/stories.js,
+// which calls this once it's loaded; and PLAY, the story picked then)
+function refreshGoalKey() {
+  if (!goal || goal.k || Progress.runDrops() > 0) return;
+  setGoalKey();
+  document.getElementById('game-mode-label').textContent = `// ${modeLine()}${goalLine()}`;
+  updateGoal();
+}
+const goalKnown = () => !!goal && Progress.storyKnown(goal.id);
+// (a strength still ENCRYPTED: five glyphs of noise, the same for the key every time)
+function goalNoise() {
+  const r = seeded(hashString(`bytefall:goal:${goal.id}:${goal.k}`));
+  let out = '';
+  for (let i = 0; i < 5; i++) out += '0123456789ABCDEF░▒▓'[Math.floor(r() * 19)];
+  return out;
+}
 // STORY (CLASSIC's button, tapped again): CLASSIC with keys to crack, each recovering a story's next
 // file (js/stories.js); CLASSIC itself plays endless. CLASSIC at first (bytefall-goal: on is STORY)
 // STORY: COMING SOON everywhere till its story's done (the Play release, the test app and the website
@@ -616,17 +643,33 @@ const SWAP_SVG = '<svg class="swap-ico" viewBox="0 0 16 16" aria-hidden="true"><
 let goalOpen = false;
 const goalCardEl = document.getElementById('goal-card');
 const goalBarEl = document.getElementById('goal-bar');
-const goalLine = () => (goal ? ` // ${goalBits(goal.k)}-BIT: ${fmt(goalTarget(goal.k))}` : '');
+const goalLine = () => (goal ? ` // ${goalBits(goal.k)}-BIT: ${goalKnown() ? fmt(goal.target) : goalNoise()}` : '');
+// (the meter under SCORE: this key's way from the last one's target to its own; empty while its strength's ENCRYPTED)
 function updateGoal() {
   goalBarEl.hidden = !goal;
   if (!goal) return;
-  const t = goalTarget(goal.k);
-  goalBarEl.firstElementChild.style.width = `${Math.min(100, (score / t) * 100).toFixed(1)}%`;
-  goalBarEl.classList.toggle('near', score >= t * 0.8);
+  const known = goalKnown();
+  const p = known ? Math.max(0, Math.min(1, (score - goal.base) / goal.strength)) : 0;
+  goalBarEl.firstElementChild.style.width = `${(p * 100).toFixed(1)}%`;
+  goalBarEl.classList.toggle('near', known && p >= 0.8);
+  goalBarEl.classList.toggle('enc', !known);
+}
+// (found out, by a 5-chain from one drop: the strength decrypted under BYTEFALL, the meter filling to
+// where the score's got to)
+function revealGoal() {
+  if (!goal || goalKnown()) return;
+  Progress.storyKnow(goal.id);
+  document.getElementById('game-mode-label').textContent = `// ${modeLine()}${goalLine()}`;
+  goalBarEl.classList.add('reveal');
+  updateGoal();
+  setTimeout(() => goalBarEl.classList.remove('reveal'), 1400);
+  SFX.play('punct');
+  setMessage(`${goalBits(goal.k)}-BIT // STRENGTH DECRYPTED // CRACK IT AT ${fmt(goal.target)}`, 'warn');
 }
 function openGoal() {
   const k = goal.k;
-  const keys = goalKeys(k);
+  const keys = goalKeys(goal.target);
+  Progress.storyKnow(goal.id); // (cracked: its strength known from now on)
   goal.cracked = k + 1;
   goalOpen = true;
   busy = true;
@@ -635,12 +678,16 @@ function openGoal() {
   SFX.play('egg');
   document.getElementById('goal-title').textContent = `// ${goalBits(k)}-BIT CRACKED`;
   document.getElementById('goal-keys').innerHTML = `+${keys} ${KEY_SVG}`;
-  const faster = storyPace(k + 1).interval < storyPace(k).interval ? ` Its layers come every ${storyPace(k + 1).interval} drops.` : '';
-  document.getElementById('goal-note').textContent = `Next: ${goalBits(k + 1)}-BIT at ${fmt(goalTarget(k + 1))}, for +${goalKeys(k + 1)} KEYS.${faster} Or disconnect now and end the game cracked.`;
-  requestAnimationFrame(() => fitText(document.getElementById('goal-note')));
+  document.getElementById('game-mode-label').textContent = `// ${modeLine()}${goalLine()}`;
   goalCardEl.classList.remove('closing');
   goalCardEl.hidden = false;
   if (typeof Stories !== 'undefined') Stories.onCrack(goalBits(k), document.getElementById('goal-story'), goalCardEl); // (the story's next file)
+  // (what it was cracked at, known now; the next key's strength only if it's been found out before)
+  const next = nextGoalKey(k + 1, goal.target);
+  const faster = storyPace(k + 1).interval < storyPace(k).interval ? ` Its layers come every ${storyPace(k + 1).interval} drops.` : '';
+  const ahead = Progress.storyKnown(next.id) ? `${goalBits(k + 1)}-BIT at ${fmt(next.target)}, for +${goalKeys(next.target)} KEYS` : `${goalBits(k + 1)}-BIT, its strength ENCRYPTED`;
+  document.getElementById('goal-note').textContent = `Cracked at ${fmt(goal.target)}. Next: ${ahead}.${faster} Or disconnect now and end the game cracked.`;
+  requestAnimationFrame(() => fitText(document.getElementById('goal-note')));
   document.querySelector('.board-frame').classList.add('paused');
   Music.setIntensity(0);
   updateColumnButtons();
@@ -657,6 +704,8 @@ document.getElementById('goal-deeper').addEventListener('click', () => {
   SFX.play('click');
   closeGoal(() => {
     goal.k++;
+    goal.base = goal.target;
+    setGoalKey(); // (the next file's key, on top of this one)
     // (a clean slate for the new key: the board the last one was cracked on bursts away, layers,
     // infected bits and all, any infection running cured; the next layer a full count away, at the
     // stronger key's pace)
@@ -675,9 +724,10 @@ document.getElementById('goal-deeper').addEventListener('click', () => {
     updateGoal();
     busy = false;
     updateColumnButtons();
+    const at = goalKnown() ? `CRACK IT AT ${fmt(goal.target)}` : 'STRENGTH ENCRYPTED';
     setMessage(storyPace(goal.k).interval < storyPace(goal.k - 1).interval
-      ? `${goalBits(goal.k)}-BIT // LAYERS EVERY ${storyPace(goal.k).interval} DROPS // CRACK IT AT ${fmt(goalTarget(goal.k))}`
-      : `ENCRYPTION // ${goalBits(goal.k)}-BIT // CRACK IT AT ${fmt(goalTarget(goal.k))}`, 'warn');
+      ? `${goalBits(goal.k)}-BIT // LAYERS EVERY ${storyPace(goal.k).interval} DROPS // ${at}`
+      : `ENCRYPTION // ${goalBits(goal.k)}-BIT // ${at}`, 'warn');
   });
 });
 document.getElementById('goal-out').addEventListener('click', () => {
@@ -697,7 +747,8 @@ function initGame() {
   difficulty = mode === 'classic' ? (storyOn() ? 'normal' : classicDifficulty) : mode === 'puzzle' && !daily ? puzzleTier
     : mode === 'vs' && CpuBoard.sizeFor(vsLevel) === 8 ? 'hard' : 'normal';
   dailyOfficial = daily && (mode === 'puzzle' ? dailyPuzzleOfficial() : !storage.get(dailyPlayedKey()));
-  goal = storyOn() ? { k: 0, cracked: 0 } : null; // (ENCRYPTION STRENGTH: STORY's key to crack)
+  goal = storyOn() ? { k: 0, cracked: 0, base: 0 } : null; // (ENCRYPTION STRENGTH: STORY's key to crack)
+  if (goal) setGoalKey();
   if (goal) Progress.storyPlayed(); // (for the message that comes after days away)
   if (goalOpen || !goalCardEl.hidden) { goalOpen = false; goalCardEl.hidden = true; }
   if (!vsPaused) document.querySelector('.board-frame').classList.remove('paused'); // (a game that ended cracked faded its bits)
@@ -1958,7 +2009,7 @@ function finishTurn() {
   else if (breached) endGame('breached');
   else if (dealLimit() < Infinity && !queue.length) endGame('daily');
   else if (mode === 'puzzle') checkPuzzle();
-  else if (goal && score >= goalTarget(goal.k)) openGoal(); // (the key's cracked: GO DEEPER or DISCONNECT)
+  else if (goal && score >= goal.target) openGoal(); // (the key's cracked, found out or not: GO DEEPER or DISCONNECT)
   // One drop until a firewall row: warn until the player drops (unless a hack message is showing)
   else if (!MODES[mode].noLayers && pulseInterval - dropsSinceLastPulse === 1 && messageEl.classList.contains('hidden')) {
     setMessage('ENCRYPTION // NEW LAYER NEXT DROP', 'warn');
@@ -2224,6 +2275,7 @@ async function resolveChains() {
     if (chain >= 2) stealPts += linkPoints; // (VS ATTRITION takes these from the CPU too)
     chainEl.textContent = `${chain}x`;
     setChainMeter(exploitWaiting() ? 0 : chain); // (an exploit waiting: the meter doesn't charge)
+    if (chain === GOAL_REVEAL_CHAIN) revealGoal(); // (STORY: a 5-chain from one drop finds the key's strength out)
 
     // (no waiting on the burst: its pieces hold the bits' place on the effects layer until they fly
     // (fx.js), so the board moves on at once and the next drop is free sooner)
@@ -4281,6 +4333,7 @@ function hideHome() {
   updateTopIcons();
   if (renderStale) render(); // (the grid, drawn now it shows)
   fitBoard();
+  refreshGoalKey();
   if (goal && !term && typeof Stories !== 'undefined') Stories.atStart(); // (STORY's first transmission, over the board as the first game starts; after the terminal intro, its own)
 }
 window.showHome = showHome;

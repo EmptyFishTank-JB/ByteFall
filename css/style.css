@@ -4831,6 +4831,8 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 .goal-bar[hidden] { display: none; }
 .goal-bar b { display: block; height: 100%; width: 0; background: var(--fg-dim); transition: width 0.3s ease-out; }
 .goal-bar.near b { background: var(--accent); box-shadow: 0 0 5px rgba(var(--accent-rgb), 0.8); }
+.goal-bar.enc { background: repeating-linear-gradient(90deg, rgba(var(--fg-rgb), 0.15) 0 3px, transparent 3px 6px); } /* (its key's strength ENCRYPTED: an empty, broken line) */
+.goal-bar.reveal b { transition: width 1.2s ease-out; } /* (found out: it fills to where the score's got to) */
 .goal-card .goal-keys { margin: 0; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: 17px; letter-spacing: 2px; color: var(--accent); text-shadow: 0 0 8px rgba(var(--accent-rgb), 0.6); }
 .goal-card .goal-keys .key-ico { width: 17px; height: 17px; }
 .goal-card #goal-out { margin-top: 0; }

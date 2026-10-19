@@ -33,7 +33,7 @@ const Stories = (() => {
     return STORIES.find((s) => isOpen(s) && !done(s)) || STORIES[0];
   }
   const ghosts = () => STORIES[0];
-  const unit = (s) => (s.id === 'ghosts' ? 'TRANSMISSION' : 'FILE');
+  const unit = () => 'FILE'; // (in the ARCHIVE every piece is a file: GHOSTS' IMs and calls too)
   const gateOf = (s, n) => STORY_GATES[Math.min(STORY_GATES.length - 1, Math.floor(n / s.perChapter))];
   const gateText = (bits) => (bits <= STORY_GATES[0] ? 'ANY KEY' : `${bits}-BIT OR DEEPER`);
   const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -318,13 +318,11 @@ const Stories = (() => {
     const n = got(s);
     const gate = gateOf(s, n);
     host.hidden = false;
-    if (bits < gate) { // (too shallow for the next one: what it would take)
-      let k = 0;
-      while (goalBits(k) < gate) k++;
+    if (bits < gate) { // (too shallow for the next one: a deeper key, how deep and how strong not given away)
       host.classList.add('locked');
       host.innerHTML = `<p class="sf-head">${esc(s.title)} // ${unit(s)} ${n + 1} OF ${count(s)} // ENCRYPTED DEEPER</p>`
         + `<p class="sf-noise">${noise(`${s.id}:${n}`)}</p>`
-        + `<p class="sf-body">CHAPTER ${Math.floor(n / s.perChapter) + 1} is under ${gate}-BIT keys. GO DEEPER and crack ${gate}-BIT at ${fmt(goalTarget(k))} to recover it.</p>`;
+        + `<p class="sf-body">${unit(s)} ${n + 1} is under a deeper key than this one. GO DEEPER to recover it.</p>`;
       return;
     }
     Progress.storyRecover(s.id);
@@ -371,7 +369,7 @@ const Stories = (() => {
     const el = bodyEl();
     if (!el) return;
     if (window.STORY_SOON) { // (the Play release, till the story's done)
-      el.innerHTML = '<p class="archive-note"><b>STORY // COMING SOON.</b> A story to decrypt, one key at a time: every key you crack brings the next transmission, and they\'ll all be kept here.</p>';
+      el.innerHTML = '<p class="archive-note"><b>STORY // COMING SOON.</b> A story to decrypt, one key at a time: every key you crack brings the next file, and they\'ll all be kept here.</p>';
       return;
     }
     const s = view && byId(view);
@@ -380,7 +378,7 @@ const Stories = (() => {
   }
   function listView(el) {
     const pick = picked();
-    el.innerHTML = '<p class="archive-note">Every key cracked in STORY (tap CLASSIC again on the main menu) brings the next transmission of the story you\'re decrypting. Deeper chapters need deeper keys.</p>'
+    el.innerHTML = '<p class="archive-note">Every key cracked in STORY (tap CLASSIC again on the main menu) brings the next file of the story you\'re decrypting. Deeper chapters need deeper keys.</p>'
       + '<button type="button" class="archive-back archive-intro" id="archive-intro">READ THE INTRO</button>'
       + STORIES.map((s) => {
         const open = isOpen(s);
@@ -414,7 +412,7 @@ const Stories = (() => {
     const pick = picked();
     const n = got(s);
     const seen = Math.min(n, st().seen[s.id] || 0);
-    const pickBtn = done(s) ? '<p class="archive-state">COMPLETE: EVERY TRANSMISSION RECOVERED</p>'
+    const pickBtn = done(s) ? '<p class="archive-state">COMPLETE: EVERY FILE RECOVERED</p>'
       : `<button type="button" class="archive-pick${s === pick ? ' on' : ''}" id="archive-pick"${s === pick ? ' aria-pressed="true"' : ''}>${s === pick ? 'DECRYPTING THIS STORY' : 'DECRYPT THIS STORY'}</button>`;
     // (who's been heard from: a sender still to come, as a button, would give the story away)
     const heard = [...s.items.slice(0, n), ...(s.extras || []).filter((x) => Progress.storyExtraHad(x.when))];
@@ -431,12 +429,12 @@ const Stories = (() => {
         const it = s.items[i];
         if (filter !== 'all' && (i >= n || !it.from.includes(filter))) continue;
         files += i < n
-          ? `<div class="archive-file${i >= seen ? ' new' : ''}" data-i="${i}"><p class="af-head">${unit(s)} ${i + 1} // ${esc(kindLine(it))}${i >= seen ? ' <b>NEW</b>' : ''}</p>${it.kind === 'im' ? threadHtml(it, 'af') : splitIm(it) ? linesHtml(splitIm(it).before) + threadHtml(splitIm(it).thread, 'af') : linesHtml(it)}${footHtml(it).replace(/sf-reveal/g, 'af-reveal')}</div>`
-          : `<div class="archive-file locked"><p class="af-head">${unit(s)} ${i + 1} // ENCRYPTED // ${gateText(gateOf(s, i))}</p><p class="af-noise">${noise(`${s.id}:${i}`)}</p></div>`;
+          ? `<div class="archive-file${i >= seen ? ' new' : ''}" data-i="${i}"><p class="af-head">${unit(s)} ${i + 1} // ${esc(kindLine(it).replace(/^FILE \/\/ /, ''))}${i >= seen ? ' <b>NEW</b>' : ''}</p>${it.kind === 'im' ? threadHtml(it, 'af') : splitIm(it) ? linesHtml(splitIm(it).before) + threadHtml(splitIm(it).thread, 'af') : linesHtml(it)}${footHtml(it).replace(/sf-reveal/g, 'af-reveal')}</div>`
+          : `<div class="archive-file locked"><p class="af-head">${unit(s)} ${i + 1} // ENCRYPTED // <span class="af-enc">${noise(`${s.id}:gate:${i}`, 9)}</span></p><p class="af-noise">${noise(`${s.id}:${i}`)}</p></div>`;
       }
       if (!files && filter !== 'all') return;
       html += '<div class="store-rule" aria-hidden="true">================================================================================</div>'
-        + `<p class="archive-chapter">// CHAPTER ${c + 1}: ${n > c * s.perChapter ? esc(name) : 'ENCRYPTED'} <span>${gateText(STORY_GATES[c])}</span></p>${files}`;
+        + `<p class="archive-chapter">// CHAPTER ${c + 1}: ${n > c * s.perChapter ? `${esc(name)} <span>${gateText(STORY_GATES[c])}</span>` : `ENCRYPTED <span class="af-enc">${noise(`${s.id}:chapter:${c}`, 9)}</span>`}</p>${files}`;
     });
     const had = (s.extras || []).filter((x) => Progress.storyExtraHad(x.when) && (filter === 'all' || x.from === filter));
     if (had.length) {
@@ -523,6 +521,38 @@ const Stories = (() => {
     seq = phoneSeq;
     SFX.play('click');
     return true;
+  }
+  // EACH FILE ITS OWN KEY (script.js's ENCRYPTION STRENGTH): a file's strength, the points its key takes,
+  // staggered through its story, the same every time: mostly a little higher than the last (now and then
+  // level, or a touch lower), now and then a jump of 250 to 600, the one after a jump 100 to 250 lower;
+  // from 1,250 at the start to about 2,500 to 3,000 at the end.
+  // nextKey: the key for the next file at this depth (the first one, MOTH's, skipped: it comes with the
+  // files), null when the key's too shallow for the next file's chapter or every story's read
+  const strengthsOf = {};
+  function strengths(s) {
+    if (strengthsOf[s.id]) return strengthsOf[s.id];
+    const r = seeded(hashString(`bytefall:keys:${s.id}`));
+    const step = 900 / count(s);
+    const out = [];
+    let v = 1250;
+    let jumped = false;
+    for (let i = 0; i < count(s); i++) {
+      if (jumped) { v -= 100 + r() * 150; jumped = false; } // (after a jump: a little lower)
+      else if (i > 1 && r() < 0.2) { v += 250 + r() * 350; jumped = true; } // (now and then a jump)
+      else if (i > 1) v += step * (-0.4 + r() * 2.4); // (mostly: a little higher)
+      out.push(Math.round(v / 50) * 50);
+    }
+    strengthsOf[s.id] = out;
+    return out;
+  }
+  function nextKey(bits) {
+    if (window.STORY_SOON) return null;
+    const s = picked();
+    if (!s || done(s)) return null;
+    let n = got(s);
+    if (s.items[n] && s.items[n].atStart) n++;
+    if (n >= count(s) || bits < gateOf(s, n)) return null;
+    return { id: `${s.id}:${n}`, strength: strengths(s)[n] };
   }
   // THE FIRST ONE (a transmission marked atStart: GHOSTS' 1, MOTH's IM): it pops up over the board as
   // the first STORY game starts, the files just landed, and is recovered then, not on a cracked card.
@@ -643,5 +673,7 @@ const Stories = (() => {
   marks();
   refreshRow();
 
-  return { onCrack, stop, showCard, kindLine, render, refreshRow, openStory, introduced, introName, moment, showDue, firstDue: () => !!firstDue(), atStart, hasThread, openPhone, openInbox, toList: () => { view = null; }, picked: () => picked().id };
+  return { onCrack, stop, showCard, kindLine, render, refreshRow, openStory, introduced, introName, moment, showDue, firstDue: () => !!firstDue(), atStart, nextKey, hasThread, openPhone, openInbox, toList: () => { view = null; }, picked: () => picked().id };
 })();
+// (the game was set up at launch, before this: its first key, the next file's, now it can be told)
+if (typeof refreshGoalKey === 'function') refreshGoalKey();

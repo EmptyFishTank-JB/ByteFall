@@ -39,8 +39,15 @@ call. The IMs bring the tools, one or two at a time, and the story moves through
   STORE.
 - **Infections start when you're noticed.** No INFECTED BITS until the first call (transmission 8):
   from then on, every STORY game has them. The Custodian's people are pushing back.
-- **Difficulty** stays as it is now: each key 1,500 more points to crack, layers sooner, infections
-  likelier (v599).
+- **Each file has its own key.** The key being cracked is for the next file, its strength (the points
+  it takes) that file's: staggered through the story, mostly a little higher than the last, now and
+  then a jump, the one after a jump a little lower (GHOSTS: 1,250 to about 3,000). Deeper keys still
+  bring layers sooner and infections likelier (v599); a key too shallow for the next file's chapter is
+  a filler, 1,500 strong.
+- **A key's strength is ENCRYPTED** till you find it out: noise under BYTEFALL and an empty meter,
+  till a 5-chain from one drop decrypts it (the meter then fills to where the score's got to), or
+  you crack the key anyway. Found out, it stays known. The ARCHIVE doesn't say how deep an encrypted
+  file's key is, nor the cracked card how deep or strong the next one is.
 
 ### Transmissions
 
