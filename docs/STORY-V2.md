@@ -177,12 +177,13 @@ theirs), and a chapter's name stays ENCRYPTED till one of its transmissions is i
 ### Chapter 1: THE DROP (any key)
 
 **1 // IM // MOTH** · *pops up as your first STORY game starts*
-> **moth** 02:14 · you're awake. good.
-> **moth** 02:14 · i sent you something. four gigs, encrypted, about two dozen keys deep.
-> **moth** 02:15 · don't brute force it. crack it a key at a time, the way you crack everything.
-> **you** 02:15 · who is this
-> **moth** 02:16 · nobody. not anymore.
-> **moth** 02:16 · keep reading. you'll see what i mean.
+> **moth** 02:14 · Hey, it's me
+> **moth** 02:14 · You're not a hard person to find you know?
+> **moth** 02:15 · Anyway, that archive I sent you is around four gigs, all encrypted, about two dozen to go through
+> **moth** 02:15 · Don't try to brute force it. Crack each key a few bits at a time
+> **you** 02:15 · Who is this?
+> **moth** 02:16 · Don't worry about that right now
+> **moth** 02:16 · Start with that first file. I'll message you again later
 
 **2 // FILE // HALCYON SYSTEMS // #corrections** · *on the cracked card*
 > `<ops.reyes>` queue's at 41 tonight. 38 standard, 3 full
