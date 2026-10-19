@@ -1,11 +1,11 @@
-// DECODE (THE ARCADE's Saturday game; the card around it is arcade.js): Picross's rules on the bots and the
+// DECODE (THE ARCADE's; the card around it is arcade.js): Picross's rules on the bots and the
 // visitors. A grid of squares with a picture hidden in it; the numbers at each row's left and over each
 // column are the runs of filled squares in that line, in order (3 1: three filled, then a gap of one or
 // more, then one). Fill the squares they call for (a tap; a drag fills along its row or column), and
 // mark the ones that can't be (a hold, or TAP: MARK, an X). Every row and column as its numbers say and
 // the picture's decoded: in its own colors, with its name. Every picture has one answer only, found a
 // line at a time with no guessing (the line solver below says so of each: test it after any change to
-// the pictures). The day's picture is the same for everyone that Saturday; the clock runs from the first
+// the pictures). A picture at random each game; the clock runs from the first
 // square.
 Arcade.register('decode', (() => {
   // THE PICTURES: the bots (bot-svg.js's art, a face each) and the visitors (visitors.js's sprites, their
@@ -378,12 +378,6 @@ Arcade.register('decode', (() => {
     pack: (x) => ({ p: x.pic.id, g: [...x.g].join(''), s: x.solved ? 1 : 0 }),
     over: (x) => x.solved,
     timed: 'move',
-    status(saved, day) {
-      const x = make(seeded(hashString(`bytefall:${day}:decode`)), saved);
-      const t = kit.fmtTime((saved && saved.t) || 0);
-      if (x.solved) return { done: true, text: `DECODED IN ${t}` };
-      return { done: false, text: saved && saved.m ? `UNDER WAY // ${t}` : `ONE GAME TODAY // ${x.W}x${x.H}` };
-    },
     line,
     show(x) {
       if (x !== s) { s = x; markMode = false; }
@@ -407,8 +401,6 @@ Arcade.register('decode', (() => {
     bestText: (v) => kit.fmtTime(v * 1000),
     low: true,
     demo,
-    // SHARE: the time and the picture's size (not what it is: that's for each to find)
-    share: (x) => [`Decoded in ${kit.fmtTime(x.t)}`, `A ${x.W}x${x.H} picture`],
     pictures: PICS, puzzle, solveAll, // (for testing)
   };
 })());

@@ -21,14 +21,6 @@ function seeded(seed) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
-function hashString(str) {
-  let h = 2166136261;
-  for (let i = 0; i < str.length; i++) h = Math.imul(h ^ str.charCodeAt(i), 16777619);
-  return h >>> 0;
-}
-const todayKey = () => new Date().toISOString().slice(0, 10); // UTC, so the day's game is the same worldwide
-const WEEKDAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
-const utcWeekday = () => (new Date().getUTCDay() + 6) % 7; // Monday = 0
 const fmt = (n) => Number(n).toLocaleString('en-US'); // 12,345
 
 // THE BITS as the theme draws them: [n], or in GLYPH a shape with one corner per point of its number
@@ -70,13 +62,3 @@ function spinBit(el, cell) {
   el.style.setProperty('--bit-h', String(Math.round(phase * 360))); // still hue under reduced motion
 }
 const VIRUS_SVG = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 7V3M12 21v-4M7 12H3M21 12h-4M8.5 8.5 5.5 5.5M18.5 18.5l-3-3M8.5 15.5l-3 3M18.5 5.5l-3 3"/></svg>';
-function copyText(text) {
-  if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
-  const area = document.createElement('textarea');
-  area.value = text;
-  document.body.appendChild(area);
-  area.select();
-  document.execCommand('copy');
-  area.remove();
-  return Promise.resolve();
-}

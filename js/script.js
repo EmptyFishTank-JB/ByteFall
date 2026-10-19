@@ -1287,7 +1287,7 @@ function fitVsSetup() {
 // the lines of text above buttons (notes, descriptions): each keeps the height it has in
 // Courier, so a wider font wrapping onto another line can't push the buttons below it down.
 // Re-measured when the layout changes (fitBoard), a text changes, or one comes into view.
-const LOCKED_BUTTONS = '.card-back, #records-btn, .modes button, .difficulty button, #vs-layers-btn, #vs-exploits-btn, #vs-start, #pause-resume, #pause-menu, #home-play, #overlay-restart-btn, #overlay-replay-btn, #overlay-menu-btn, #overlay-share-btn, .records-tabs button, #vs-goal, .menu-tabs button, .store-buy, .store-restore, .store-shortcut';
+const LOCKED_BUTTONS = '.card-back, #records-btn, .modes button, .difficulty button, #vs-layers-btn, #vs-exploits-btn, #vs-start, #pause-resume, #pause-menu, #home-play, #overlay-restart-btn, #overlay-replay-btn, #overlay-menu-btn, #overlay-share-btn, .records-tabs button, #vs-goal, .menu-tabs button, .store-buy, .store-restore';
 const LOCKED_TEXT = '#mode-info, .settings-note, .vs-setup-note, .vs-setup-msg, #overlay-note, footer p, .panel-store p';
 function unfitButton(b) {
   if (!('fitLs' in b.dataset)) return;
@@ -7663,7 +7663,7 @@ function showMenuPane(pane) {
   if (pane === 'notices') { renderNotices(); markNoticesRead(); } // (seen: the dots go)
   if (pane === 'archive' && typeof Stories !== 'undefined') Stories.render();
   if (pane === 'puzzles') { puzzleListTier = puzzleTier; renderPuzzleSelect(); }
-  if (typeof Store !== 'undefined') Store.render(); // (and the REMOVE ADS link, off on its own tab)
+  if (typeof Store !== 'undefined') Store.render();
   const box = menuScroller();
   if (box) box.scrollTop = 0;
 }

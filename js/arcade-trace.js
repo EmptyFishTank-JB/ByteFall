@@ -1,5 +1,5 @@
-// TRACE (THE DAILY ARCADE's Tuesday game; the card around it is arcade.js): a board of encrypted blocks,
-// INFECTED bits hidden under some, the same board for everyone that Tuesday, a patch of it already open
+// TRACE (THE ARCADE's; the card around it is arcade.js): a board of encrypted blocks,
+// INFECTED bits hidden under some, a new board each game, a patch of it already open
 // to start from. Tap a block to decrypt it: under it, a bit counting the infected bits touching it
 // (the 8 round it), or nothing, and then the blocks round it open by themselves. Tap an infected one
 // and the trace fails. Hold a block (or switch the tap to FLAG) to flag it, a quarantine marker that
@@ -36,7 +36,7 @@ Arcade.register('trace', (() => {
     }
     return out;
   };
-  // The board from the day's seed: the infected blocks, each block's count, and the start (a block
+  // The board from the game's seed: the infected blocks, each block's count, and the start (a block
   // with nothing round it, opened before the first tap, so nobody's first tap is a guess: of those,
   // the one that opens the least, so it's a foothold, not half the board)
   function make(rand, saved) {
@@ -283,12 +283,6 @@ Arcade.register('trace', (() => {
     pack: (x) => ({ o: x.open.join(''), f: x.flag.join(''), h: x.hit, w: x.won ? 1 : 0 }),
     over,
     timed: 'move',
-    status(saved) {
-      const t = kit.fmtTime((saved && saved.t) || 0);
-      if (saved && saved.w) return { done: true, text: `CLEAN IN ${t}` };
-      if (saved && saved.h >= 0) return { done: true, text: `INFECTED AT ${t}` };
-      return { done: false, text: saved && saved.m ? `UNDER WAY // ${t}` : `ONE GAME TODAY // ${INFECTED} INFECTED` };
-    },
     line,
     show(x) {
       if (x !== s) { s = x; flagMode = false; }
@@ -311,12 +305,5 @@ Arcade.register('trace', (() => {
     bestText: (v) => kit.fmtTime(v * 1000),
     low: true,
     demo,
-    // SHARE: the result, and how much of the board was cleared, as a bar
-    share(x) {
-      const cleared = x.open.reduce((a, v) => a + v, 0);
-      const pct = Math.round((cleared / (N - INFECTED)) * 100);
-      const bar = '\u{1F7E9}'.repeat(Math.round(pct / 10)) + '⬛'.repeat(10 - Math.round(pct / 10));
-      return [x.won ? `Board clean in ${kit.fmtTime(x.t)}` : `Infected at ${kit.fmtTime(x.t)} // ${pct}% cleared`, bar];
-    },
   };
 })());

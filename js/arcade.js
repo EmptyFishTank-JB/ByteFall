@@ -1,26 +1,23 @@
 // THE ARCADE (arcade.html; its own page, on its way to its own app): games of their own on the bits:
 // CODE BREAKER (arcade-codebreaker.js), TRACE (arcade-trace.js), MERGE (arcade-merge.js), CHECKSUM
 // (arcade-checksum.js), DEFRAG (arcade-defrag.js), DECODE (arcade-decode.js) and ROUTING
-// (arcade-routing.js), on a card that opens on the ARCADE MENU:
-//   TODAY: the day's game, MONDAY CODE BREAKER, TUESDAY TRACE, WEDNESDAY MERGE, THURSDAY CHECKSUM,
-//     FRIDAY DEFRAG, SATURDAY DECODE, SUNDAY ROUTING. One game a day, the same for everyone (seeded by
-//     the date, UTC), saved as it goes; SHARE once it's over.
-//   THE CARDS: every game in a row that slides sideways; PLAY plays the one in the middle, FREE PLAY: a
-//     new game each time (its own random seed), as many as you like, the one under way kept (BACK, or
-//     closing the page, keeps it), your best kept (bytefall-arcade-free-stats).
+// (arcade-routing.js), on a card that opens on the ARCADE MENU: every game in a row that slides
+// sideways; PLAY plays the one in the middle, FREE PLAY: a new game each time (its own random seed), as
+// many as you like, the one under way kept (BACK, or closing the page, keeps it), your best kept
+// (bytefall-arcade-free-stats). No daily game: the base games only.
 // BACK in a game goes back to the menu; in the menu, back to the landing page. This is the frame the
 // games share: the card, its title and line (the clock, what's left, the result, a passing note), the
-// game's own part under them, and SHARE (or NEW GAME) once it's over. What it needs of ByteFall's
-// (storage, todayKey, seeded, fillBit ...) is arcade-shell.js; SFX, FX and the themes are ByteFall's own
-// files. ?game=trace puts that one in the middle of the menu; ?today opens the day's game.
+// game's own part under them, and NEW GAME once it's over. What it needs of ByteFall's (storage,
+// seeded, fillBit ...) is arcade-shell.js; SFX, FX and the themes are ByteFall's own files. ?game=trace
+// puts that one in the middle of the menu.
 // ?phone: on STORY's phone (bytefall.html, the phone's GAMES, in a frame): straight into the game (?game,
-// FREE PLAY; or ?today), no menu and no BACK of its own: the phone's BACK (a message, 'back') leaves it,
-// saved, and the phone's told ('exit').
+// FREE PLAY), no menu and no BACK of its own: the phone's BACK (a message, 'back') leaves it, saved, and
+// the phone's told ('exit').
 //
 // A game (Arcade.register(id, game)): name, rule() (its line on the cards), make(rand, saved) (its
-// state from a seed, with what was saved), pack(s) (what to save), over(s), status(saved) (TODAY's:
-// { done, text }), line(s), show(s) (its part drawn, for s), key(e) (a key: true if taken), fit(),
-// share(s) (SHARE's lines), leave() (the card closing, or another game on it), best(s) (a finished
+// state from a seed, with what was saved), pack(s) (what to save), over(s), line(s), show(s) (its part
+// drawn, for s), key(e) (a key: true if taken), fit(), leave() (the card closing, or another game on
+// it), best(s) (a finished
 // game's result for FREE PLAY's best, or null), bestText(v), low (a lower best is better), timed (a
 // clock: 'open', running whenever the card's up, or 'move', from the first move), and demo(host) (the
 // menu card's preview: a game playing itself, drawn into host; its step() plays the next bit of it and
@@ -31,20 +28,18 @@ const Arcade = (() => {
   const titleEl = el('arcade-title');
   const lineEl = el('arcade-line');
   const overEl = el('arcade-over');
-  const shareBtn = el('arcade-share');
+  const newBtn = el('arcade-share'); // (NEW GAME, once one's over)
   const nextEl = el('arcade-next');
   const menuEl = el('arcade-menu');
   const cardsEl = el('arcade-cards');
   const pipsEl = el('arcade-pips');
   const menuPlay = el('arcade-play');
   const menuNew = el('arcade-new');
-  const todayBtn = el('arcade-today');
   const GAMES = {};
-  const ORDER = []; // (as registered: the week's order)
-  const DAYS = ['codebreaker', 'trace', 'merge', 'checksum', 'defrag', 'decode', 'routing']; // (UTC weekdays, Monday first)
+  const ORDER = []; // (as registered)
   const PICK_KEY = 'bytefall-arcade-pick';
   const STATS_KEY = 'bytefall-arcade-free-stats';
-  let g = null; // the game on the card: { id, day, free, seed, played, paid (counted), t (ms on the clock), moved, ...its own }
+  let g = null; // the game on the card: { id, seed, paid (counted), t (ms on the clock), moved, ...its own }
   let view = 'game'; // ('menu': the ARCADE menu's cards)
   let pick = null; // (the ARCADE menu's card in the middle)
   let noteUntil = 0;
@@ -56,73 +51,33 @@ const Arcade = (() => {
 
   const PHONE = new URLSearchParams(location.search).has('phone');
   if (PHONE) document.body.classList.add('in-phone');
-  const today = () => DAYS[utcWeekday()];
   const read = (key) => {
     try {
       const s = JSON.parse(storage.get(key));
       return s && typeof s === 'object' ? s : null;
     } catch (e) { return null; }
   };
-  const saveKey = (id, day) => `bytefall-arcade-${id}-${day}`;
   const freeKey = (id) => `bytefall-arcade-free-${id}`;
-  // (the day's game, as far as it's gone)
-  function load(id, day) {
-    const s = read(saveKey(id, day));
-    const st = GAMES[id].make(seeded(hashString(`bytefall:${day}:${id}`)), s);
-    return Object.assign(st, { id, day, free: false, played: !!(s && s.played), paid: !!(s && s.paid), k: (s && s.k) || 0, t: (s && s.t) || 0, moved: !!(s && (s.played || s.m)) });
-  }
   // (FREE PLAY: the one under way, or a new one, from a seed of its own)
   function free(id, fresh) {
     const s = fresh ? null : read(freeKey(id));
     const seed = s && Number.isInteger(s.seed) ? s.seed : Math.floor(Math.random() * 2 ** 31);
     const st = GAMES[id].make(seeded(seed), s);
-    return Object.assign(st, { id, day: todayKey(), free: true, seed, played: false, paid: !!(s && s.paid), k: 0, t: (s && s.t) || 0, moved: !!(s && s.m) });
+    return Object.assign(st, { id, free: true, seed, paid: !!(s && s.paid), k: 0, t: (s && s.t) || 0, moved: !!(s && s.m) });
   }
   function save() {
     if (!g) return;
     const data = { ...GAMES[g.id].pack(g), paid: g.paid ? 1 : 0, t: Math.round(g.t), m: g.moved ? 1 : 0 };
-    if (g.free) storage.set(freeKey(g.id), JSON.stringify({ ...data, seed: g.seed }));
-    else storage.set(saveKey(g.id, g.day), JSON.stringify({ ...data, played: g.played ? 1 : 0 }));
+    storage.set(freeKey(g.id), JSON.stringify({ ...data, seed: g.seed }));
   }
   const over = () => !!g && GAMES[g.id].over(g);
   const stats = () => read(STATS_KEY) || {};
   const underWay = (id) => { const s = read(freeKey(id)); return !!(s && s.m && !s.paid); };
 
-  // (the next day with a game, k days from today, and the time till it starts, 00:00 UTC)
-  function nextGame() {
-    for (let k = 1; k <= 7; k++) {
-      const id = DAYS[(utcWeekday() + k) % 7];
-      if (id) return { id, k };
-    }
-    return null;
-  }
-  function until(k) {
-    const now = new Date();
-    const at = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + k);
-    const mins = Math.max(1, Math.ceil((at - now) / 60000));
-    const h = Math.floor(mins / 60);
-    return h >= 24 ? `${Math.floor(h / 24)}D ${h % 24}H` : h ? `${h}H ${mins % 60}M` : `${mins}M`;
-  }
   const fmtTime = (ms) => {
     const secs = Math.floor(ms / 1000);
     return `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
   };
-
-  // THE DAILY menu's ARCADE card: today's game in a line, and how it stands (or the next one's day)
-  function rule() {
-    const id = today();
-    if (id) return `${GAMES[id].name}: ${GAMES[id].rule()}`;
-    const n = nextGame();
-    return `No daily game today: next, ${GAMES[n.id].name} on ${WEEKDAYS[(utcWeekday() + n.k) % 7]}. PLAY opens the ARCADE.`;
-  }
-  function status() {
-    const id = today();
-    if (!id) {
-      const n = nextGame();
-      return { done: false, text: `${GAMES[n.id].name} IN ${until(n.k)}` };
-    }
-    return GAMES[id].status(read(saveKey(id, todayKey())), todayKey());
-  }
 
   // THE LINE over the game: its own (the clock, what's left, the result), or a passing note
   function showLine() {
@@ -160,69 +115,46 @@ const Arcade = (() => {
     clockAt = performance.now();
     clockTimer = setInterval(tick, 250);
   }
-  // (how it stands, after any change: the line, SHARE (or NEW GAME) once it's over, the clock)
+  // (how it stands, after any change: the line, NEW GAME once it's over, the clock)
   function refresh() {
     const done = over() && view === 'game';
-    if (overEl.hidden === done && g) requestAnimationFrame(() => { if (!card.hidden && view === 'game') GAMES[g.id].fit(); }); // (SHARE showing or going: the board sized to the room it leaves)
+    if (overEl.hidden === done && g) requestAnimationFrame(() => { if (!card.hidden && view === 'game') GAMES[g.id].fit(); }); // (NEW GAME showing or going: the board sized to the room it leaves)
     overEl.hidden = !done;
     if (done) {
-      shareBtn.textContent = g.free ? 'NEW GAME' : 'SHARE';
-      const n = nextGame();
+      newBtn.textContent = 'NEW GAME';
       const st = stats()[g.id];
-      nextEl.textContent = g.free ? `${g.newBest ? 'NEW BEST! ' : ''}${st && st.best != null ? `BEST ${GAMES[g.id].bestText(st.best)} // ` : ''}FREE PLAY`
-        : n ? `NEXT: ${GAMES[n.id].name} IN ${until(n.k)}` : '';
+      nextEl.textContent = `${g.newBest ? 'NEW BEST! ' : ''}${st && st.best != null ? `BEST ${GAMES[g.id].bestText(st.best)} // ` : ''}FREE PLAY`;
     }
     showLine();
     clock();
   }
-  // A move (a passing note gone with it): the first makes it the day's daily game (and starts a
-  // 'move' clock)
+  // A move (a passing note gone with it): the first starts a 'move' clock
   function moved() {
     if (!g) return;
     clearTimeout(noteTimer);
     noteUntil = 0;
     const first = !g.moved;
     g.moved = true;
-    if (!g.free && !g.played) {
-      g.played = true;
-      save();
-    }
     if (first) clock();
   }
-  // Over: counted once (a free one's toward its best; the day's is kept as it ended)
+  // Over: counted once, toward its best
   function finish() {
     stopClock();
     if (!g.paid) {
-      if (g.free) {
-        const all = stats();
-        const st = all[g.id] || { games: 0, best: null };
-        const v = GAMES[g.id].best(g);
-        st.games++;
-        if (v != null && (st.best == null || (GAMES[g.id].low ? v < st.best : v > st.best))) { st.best = v; g.newBest = true; }
-        all[g.id] = st;
-        storage.set(STATS_KEY, JSON.stringify(all));
-      }
+      const all = stats();
+      const st = all[g.id] || { games: 0, best: null };
+      const v = GAMES[g.id].best(g);
+      st.games++;
+      if (v != null && (st.best == null || (GAMES[g.id].low ? v < st.best : v > st.best))) { st.best = v; g.newBest = true; }
+      all[g.id] = st;
+      storage.set(STATS_KEY, JSON.stringify(all));
       g.paid = true;
       save();
     }
     refresh();
   }
-  // SHARE: the game's lines under its name and the day (FREE PLAY's button: another game)
-  shareBtn.addEventListener('click', async () => {
-    if (g.free) { play(g.id, true); return; }
-    const text = [`BYTEFALL ARCADE // ${GAMES[g.id].name} ${g.day}`, ...GAMES[g.id].share(g), location.href.split(/[?#]/)[0]].join('\n');
-    try {
-      if (navigator.share) {
-        await navigator.share({ text });
-        return;
-      }
-      await copyText(text);
-      shareBtn.textContent = 'COPIED';
-    } catch (e) {
-      if (e && e.name === 'AbortError') return; // (the share sheet closed)
-      shareBtn.textContent = 'COPY FAILED';
-    }
-  });
+  // NEW GAME: another of the same
+  newBtn.addEventListener('click', () => play(g.id, true));
 
   function leaveGame() {
     stopClock();
@@ -230,18 +162,18 @@ const Arcade = (() => {
     save();
     if (GAMES[g.id].leave) GAMES[g.id].leave();
   }
-  // A game on the card: its part shown, the others hidden. fresh given: FREE PLAY's (true: a new one,
-  // false: the one under way, or a new one), or with freePlay false, today's; not given: g as it is
-  function play(id, fresh, freePlay = true) {
+  // A game on the card: its part shown, the others hidden. fresh given: true, a new one; false, the one
+  // under way, or a new one; not given: g as it is
+  function play(id, fresh) {
     if (fresh !== undefined) {
       leaveGame();
-      g = freePlay ? free(id, fresh) : load(id, todayKey());
+      g = free(id, fresh);
     }
     view = 'game';
     menuEl.hidden = true;
     demoTick();
     card.querySelectorAll('.arcade-game').forEach((sec) => { sec.hidden = sec.dataset.game !== g.id; });
-    titleEl.textContent = `// ${GAMES[g.id].name}${g.free ? ': FREE PLAY' : ''}`;
+    titleEl.textContent = `// ${GAMES[g.id].name}`;
     card.setAttribute('aria-label', `Arcade: ${GAMES[g.id].name}`);
     noteUntil = 0;
     GAMES[g.id].show(g);
@@ -254,23 +186,8 @@ const Arcade = (() => {
     card.hidden = false;
     SFX.play('static');
   }
-  // TODAY: the day's game (on a day with none, the menu)
-  function open() {
-    const id = today();
-    if (!id) {
-      openMenu();
-      const n = nextGame();
-      note(`NO DAILY GAME TODAY // ${GAMES[n.id].name} ON ${WEEKDAYS[(utcWeekday() + n.k) % 7]}`, 2600);
-      return;
-    }
-    const day = todayKey();
-    showCard();
-    if (g && g.id === id && g.day === day && !g.free) play(id);
-    else play(id, false, false);
-  }
-
-  // THE ARCADE MENU: a card for each game (its name, its rule, your best or a game under way, its day
-  // on DAILY), in a row that slides sideways; the one in the middle in focus, the pips under the row
+  // THE ARCADE MENU: a card for each game (its name, its rule, your best or a game under way), in a row
+  // that slides sideways; the one in the middle in focus, the pips under the row
   // lighting it. PLAY plays it (RESUME, with NEW GAME beside it, when one's under way); a tap on a card
   // beside the middle slides it in, on the one in the middle plays it
   function menuCards() {
@@ -280,13 +197,12 @@ const Arcade = (() => {
     cardsEl.replaceChildren(...ORDER.map((id) => {
       const G = GAMES[id];
       const st = all[id];
-      const day = DAYS.indexOf(id);
       const b = document.createElement('button');
       b.type = 'button';
       b.dataset.game = id;
       const rule = G.rule();
       b.innerHTML = `<span class="dc-name">${G.name}</span><span class="dc-rule">${rule[0].toUpperCase()}${rule.slice(1)}</span>`
-        + `<span class="dc-status">${underWay(id) ? 'A GAME UNDER WAY' : st && st.best != null ? `BEST ${G.bestText(st.best)}` : 'NOT PLAYED YET'}${day >= 0 ? ` // DAILY ON ${WEEKDAYS[day]}S` : ''}</span>`;
+        + `<span class="dc-status">${underWay(id) ? 'A GAME UNDER WAY' : st && st.best != null ? `BEST ${G.bestText(st.best)}` : 'NOT PLAYED YET'}</span>`;
       const pre = document.createElement('span');
       pre.className = 'ac-demo';
       pre.setAttribute('aria-hidden', 'true');
@@ -391,21 +307,11 @@ const Arcade = (() => {
     titleEl.textContent = '// ARCADE';
     card.setAttribute('aria-label', 'Arcade');
     menuCards();
-    showToday();
     showLine();
     const at = GAMES[pick] ? pick : ORDER[0];
     slideTo(at, false);
     requestAnimationFrame(() => slideTo(at, false)); // (again once it's laid out)
     demoTick();
-  }
-  // (TODAY's button over the cards: the day's game and how it stands)
-  function showToday() {
-    const id = today();
-    const st = status();
-    todayBtn.innerHTML = id ? `<span class="at-day">TODAY // ${WEEKDAYS[utcWeekday()]}</span><span class="at-name">${GAMES[id].name}</span><span class="at-status">${st.done ? '&check; ' : ''}${st.text}</span>`
-      : `<span class="at-day">TODAY</span><span class="at-status">${st.text}</span>`;
-    todayBtn.classList.toggle('done', !!st.done);
-    todayBtn.disabled = !id;
   }
   // The page opening: the menu
   function openMenu() {
@@ -417,15 +323,13 @@ const Arcade = (() => {
   }
   window.addEventListener('load', () => setTimeout(() => {
     const q = new URLSearchParams(location.search);
-    if (PHONE) { // (on the phone: the game at once)
-      if (q.has('today') || !GAMES[q.get('game')]) open();
-      else { showCard(); play(q.get('game'), false); }
+    if (PHONE && GAMES[q.get('game')]) { // (on the phone: the game at once)
+      showCard();
+      play(q.get('game'), false);
       return;
     }
     openMenu();
-    if (q.has('today')) open();
   }, 0));
-  todayBtn.addEventListener('click', () => { SFX.play('button'); open(); });
   let scrollFrame = 0;
   cardsEl.addEventListener('scroll', () => {
     if (scrollFrame) return;
@@ -479,5 +383,5 @@ const Arcade = (() => {
   }
   // (what the games use of the frame)
   const kit = { save, moved, finish, refresh, note, fmtTime, steps, spin, game: () => g, isOpen: () => !card.hidden };
-  return { register, open, openMenu, close, back, rule, status, isOpen: () => !card.hidden, kit, games: GAMES };
+  return { register, openMenu, close, back, isOpen: () => !card.hidden, kit, games: GAMES };
 })();

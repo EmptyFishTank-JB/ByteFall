@@ -1,4 +1,4 @@
-// MERGE (THE DAILY ARCADE's Wednesday game; the card around it is arcade.js): 2048's rules on the bits.
+// MERGE (THE ARCADE's; the card around it is arcade.js): 2048's rules on the bits.
 // A 4x4 board; swipe (or the arrows, or WASD) and every bit slides that way as far as it goes, and two
 // the same that meet merge into the next: two [1]s make a [2] ... two [7]s a BYTE, two BYTEs a WORD,
 // then a DWORD, a QWORD (2048's own tile) and on. Each merge scores the new bit's worth (a [2] 4, a
@@ -22,7 +22,7 @@ Arcade.register('merge', (() => {
   let s = null; // (the game shown: { cells, score, moves, top, over, nextId, r, draws } and the frame's own)
   let pending = null; // (a move's second half, after the slide: merges shown, new bits in)
 
-  // The board from the day's seed: each square a bit { id, v } (v: 1 to 7, 8 a BYTE ..., LOCK
+  // The board from the game's seed: each square a bit { id, v } (v: 1 to 7, 8 a BYTE ..., LOCK
   // encrypted) or empty; draws: the seed's numbers used so far (saved, so a game picks up where it
   // left off, the same bits still to come)
   function make(rand, saved) {
@@ -320,10 +320,6 @@ Arcade.register('merge', (() => {
     pack: (x) => ({ c: x.cells.map((t) => (t ? t.v : 0)), d: x.draws(), s: x.score, n: x.moves, b: x.top, o: x.over ? 1 : 0 }),
     over: (x) => x.over,
     timed: null,
-    status(saved) {
-      if (saved && saved.o) return { done: true, text: `SCORE ${fmt(saved.s || 0)} // BEST ${name(saved.b || 1)}` };
-      return { done: false, text: saved && saved.n ? `UNDER WAY // SCORE ${fmt(saved.s || 0)}` : 'ONE GAME TODAY // 4x4' };
-    },
     line,
     show(x) {
       if (x !== s) { s = x; pending = null; }
@@ -351,11 +347,6 @@ Arcade.register('merge', (() => {
     bestText: (v) => `${fmt(v)} POINTS`,
     low: false,
     demo,
-    // SHARE: the score, the best bit and the moves, and the ladder climbed ([1] up to the best)
-    share(x) {
-      const rungs = Math.min(x.top, 11);
-      return [`Score ${fmt(x.score)} // best: ${name(x.top)}`, `${x.moves} moves`, '\u{1F7E9}'.repeat(rungs) + '⬛'.repeat(11 - rungs) + (x.top >= 11 ? ' QWORD' : '')];
-    },
     slide, // (for testing)
   };
 })());

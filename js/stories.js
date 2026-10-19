@@ -661,7 +661,7 @@ const Stories = (() => {
     { id: 'weather', name: 'WEATHER', icon: '<path d="M7 18h10a4 4 0 0 0 .5-8 5.5 5.5 0 0 0-10.6 1.5A3.3 3.3 0 0 0 7 18z"/>', note: ['NO CONNECTION', 'Try again later.'] },
   ];
   const appOf = (id) => APPS.find((a) => a.id === id);
-  const GAMES = [['today', 'TODAY', '&#9654;'], ['codebreaker', 'CODE BREAKER', 'CB'], ['trace', 'TRACE', 'TR'], ['merge', 'MERGE', 'MG'], ['checksum', 'CHECKSUM', 'CK'], ['defrag', 'DEFRAG', 'DF'], ['decode', 'DECODE', 'DC'], ['routing', 'ROUTING', 'RT']];
+  const GAMES = [['codebreaker', 'CODE BREAKER', 'CB'], ['trace', 'TRACE', 'TR'], ['merge', 'MERGE', 'MG'], ['checksum', 'CHECKSUM', 'CK'], ['defrag', 'DEFRAG', 'DF'], ['decode', 'DECODE', 'DC'], ['routing', 'ROUTING', 'RT']];
   const SIGNAL_SVG = '<svg viewBox="0 0 16 12" aria-hidden="true"><path d="M1 11h2V8H1zM5 11h2V6H5zM9 11h2V3H9zM13 11h2V0h-2z" fill="currentColor"/></svg>';
   const WIFI_SVG = '<svg viewBox="0 0 16 12" aria-hidden="true"><path d="M8 11.5 L1 3.5 A10 10 0 0 1 15 3.5 Z" fill="currentColor"/></svg>';
   const BATTERY_SVG = '<svg viewBox="0 0 22 12" aria-hidden="true"><rect x="0.5" y="0.5" width="18" height="11" rx="2" fill="none" stroke="currentColor"/><rect x="2" y="2" width="11" height="8" rx="1" fill="currentColor"/><rect x="19.5" y="4" width="2" height="4" rx="1" fill="currentColor"/></svg>';
@@ -827,7 +827,7 @@ const Stories = (() => {
       const f = document.createElement('iframe');
       f.className = 'ph-game';
       f.title = (GAMES.find((g) => g[0] === r.game) || [0, 'GAME'])[1];
-      f.src = `arcade.html?phone${r.game === 'today' ? '&today' : `&game=${r.game}`}`;
+      f.src = `arcade.html?phone&game=${r.game}`;
       f.style.width = `${W}px`;
       f.style.height = `${Math.round((h * W) / w)}px`;
       f.style.transform = `scale(${w / W})`;

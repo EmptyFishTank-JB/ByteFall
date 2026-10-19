@@ -5,7 +5,6 @@
 // difference), plus RESTORE PURCHASES. In the app's RELEASE edition they're Google Play's
 // (billing.js), at its prices; on the website a preview: BUY and RESTORE say the store isn't open
 // and charge nothing. In ByteFall Test (with test ads) BUY pretends: TEST PURCHASES, below.
-// A REMOVE ADS link sits at the foot of the menu's other tabs while there are ads.
 const Store = (() => {
   // (the preview's prices; the RELEASE edition shows Google Play's, in the player's currency)
   const ITEMS = {
@@ -19,7 +18,6 @@ const Store = (() => {
   const NAMES = { [Billing.REMOVE_ADS]: 'REMOVE ADS', [Billing.FULL]: 'FULL ACCESS', [Billing.UPGRADE]: 'FULL ACCESS' };
   const menu = document.getElementById('records');
   const msgEl = document.getElementById('store-msg');
-  const link = document.getElementById('store-shortcut');
   let msgTimer = 0;
 
   // (a section brought into view at the top of the STORE's list: patches, starters, boxes)
@@ -254,7 +252,6 @@ const Store = (() => {
     }
     upgradeNote.hidden = deal('full-access') !== UPGRADE;
     renderBuyTest();
-    link.hidden = Unlocks.hasNoAds() || menuPane === 'store';
   }
   const upgradeNote = document.getElementById('store-upgrade');
   const preview = menu.querySelector('.store-preview');
@@ -319,15 +316,6 @@ const Store = (() => {
 
   menu.querySelectorAll('[data-buy]').forEach((b) => b.addEventListener('click', () => buy(b.dataset.buy)));
   document.getElementById('store-restore').addEventListener('click', restore);
-  // REMOVE ADS (the other tabs): over to the STORE, the item lit up for a moment
-  link.addEventListener('click', () => {
-    showMenuPane('store');
-    const item = menu.querySelector('.store-item[data-item="remove-ads"]');
-    requestAnimationFrame(() => item.scrollIntoView({ block: 'center' }));
-    item.classList.remove('flash');
-    void item.offsetWidth;
-    item.classList.add('flash');
-  });
   // A purchase (or a restore) redraws the store and earns INDIE SUPPORTER
   Unlocks.onChange(() => {
     render();

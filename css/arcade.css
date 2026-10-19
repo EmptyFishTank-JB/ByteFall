@@ -1,7 +1,7 @@
 /* THE ARCADE (arcade.html): its own styles, over ByteFall's (css/style.css: the themes, the bits, the
    cards' heads, the starlight). Moved here from style.css when the arcade left ByteFall for a page of its own */
 
-/* THE DAILY ARCADE (arcade.js): a card of its own covering the game card, as SETTINGS does, its top
+/* THE ARCADE (arcade.js): a card of its own covering the game card, as SETTINGS does, its top
    as PUZZLES' (BACK in the corner, BYTEFALL, // CODE BREAKER under it). CODE BREAKER: the line, the
    board (the code, a ===== line, the ten tries from the bottom up, each row's number at its left and
    its pips at its right), what the pips mean, then the keypad (the seven bits, DELETE, ENTER) or,
@@ -270,18 +270,10 @@
 @media (hover: hover) { .arcade-new:hover { background: rgba(var(--fg-rgb), 0.12); } }
 
 /* THE PAGE (arcade.html): the card on its own, the whole height of the screen and as wide as ByteFall's
-   game card at most, framed as it is; TODAY over the menu's cards: the day's game, how it stands, a tap
-   to play it (done: its result, in the dim) */
+   game card at most, framed as it is */
 body.arcade-page { justify-content: flex-start; }
 .arcade-app { position: relative; width: 100%; max-width: 480px; height: 100vh; height: 100dvh; }
 .arcade-page .arcade { border-left: 1px solid var(--grid-line); border-right: 1px solid var(--grid-line); }
 @media (min-width: 520px) { .arcade-page .arcade { border: 1px solid var(--grid-line); border-radius: 8px; } .arcade-app { height: min(100dvh, 900px); margin: auto 0; } }
-.arcade-today { flex: none; display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 0 8px; padding: 10px 12px; font-family: inherit; color: var(--fg); background: rgba(var(--accent-rgb), 0.08); border: 1px solid var(--accent); border-radius: 6px; box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.25); cursor: pointer; }
-.arcade-today .at-day { font-size: 11.5px; letter-spacing: 2px; color: var(--accent); }
-.arcade-today .at-name { font-size: 17px; letter-spacing: 3px; color: var(--fg); text-shadow: 0 0 6px rgba(var(--fg-rgb), 0.6); }
-.arcade-today .at-status { font-size: 12px; letter-spacing: 1px; color: var(--fg-dim); }
-.arcade-today.done { border-color: var(--grid-line); background: transparent; box-shadow: none; }
-.arcade-today.done .at-day { color: var(--fg-dim); }
-@media (hover: hover) { .arcade-today:hover:not(:disabled) { background: rgba(var(--accent-rgb), 0.15); } }
 /* ON STORY's PHONE (?phone, in a frame): the game alone, the phone's BACK its way out */
 body.in-phone .arcade .card-back { visibility: hidden; }

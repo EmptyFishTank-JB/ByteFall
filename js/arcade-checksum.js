@@ -1,5 +1,5 @@
-// CHECKSUM (THE ARCADE's Thursday game; the card around it is arcade.js): a 9x9 grid in nine 3x3 boxes,
-// some bits given, the same for everyone that Thursday (made from the date: a full grid, then bits
+// CHECKSUM (THE ARCADE's; the card around it is arcade.js): a 9x9 grid in nine 3x3 boxes,
+// some bits given, a new grid each game (made from its seed: a full grid, then bits
 // taken out in pairs, opposite each other, as long as it still has one answer only, down to GIVENS).
 // Fill it so every row, column and box holds [1] to [9] once. Tap a square, then a bit in the row under
 // the board to write it in (the same bit again takes it out); with NOTES on, the bits are pencil marks
@@ -69,7 +69,7 @@ Arcade.register('checksum', (() => {
     }
     return a;
   }
-  // The day's grid: a full one, then pairs of squares (opposite each other through the middle) taken
+  // The game's grid: a full one, then pairs of squares (opposite each other through the middle) taken
   // out, in a random order, each pair only if the grid keeps one answer, till GIVENS are left
   function generate(rand) {
     const sol = solve(new Uint8Array(81), 1, (ds) => shuffle(ds, rand)).first;
@@ -337,11 +337,6 @@ Arcade.register('checksum', (() => {
     pack: (x) => ({ v: [...x.v].map((d, i) => (x.given[i] ? 0 : d)).join(''), n: [...x.n], x: x.fails, s: x.solved ? 1 : 0 }),
     over: (x) => x.solved,
     timed: 'open',
-    status(saved) {
-      const t = kit.fmtTime((saved && saved.t) || 0);
-      if (saved && saved.s) return { done: true, text: `VALID IN ${t}` };
-      return { done: false, text: saved && saved.t ? `UNDER WAY // ${t}` : 'ONE GAME TODAY // TIMED' };
-    },
     line,
     show(x) {
       if (x !== s) { s = x; sel = -1; notesOn = false; }
@@ -378,11 +373,6 @@ Arcade.register('checksum', (() => {
     bestText: (v) => kit.fmtTime(v * 1000),
     low: true,
     demo,
-    // SHARE: the time and the failed checks, over the nine boxes, all green
-    share(x) {
-      const box = '\u{1F7E9}\u{1F7E9}\u{1F7E9}';
-      return [`Valid in ${kit.fmtTime(x.t)}`, x.fails ? `${x.fails} failed check${x.fails === 1 ? '' : 's'}` : 'No failed checks', box, box, box];
-    },
     solve, // (for testing)
   };
 })());

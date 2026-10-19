@@ -1,4 +1,4 @@
-// ROUTING (THE ARCADE's Sunday game; the card around it is arcade.js): Flow's rules on the bits. A 7x7
+// ROUTING (THE ARCADE's; the card around it is arcade.js): Flow's rules on the bits. A 7x7
 // grid with six to eight pairs of bits on it, [1] up, each pair in its own color: route a line from each
 // bit to its twin, square to square (up, down, left, right), the lines never crossing, till every pair
 // is linked and every square has a line through it. Drag from a bit (or from a line's end, to carry it
@@ -243,7 +243,7 @@ Arcade.register('routing', (() => {
   }
 
   // THE ARCADE MENU's preview (arcade.js plays it): a grid routed a line at a time, square by square,
-  // from one of its pair's bits to the other, till every square's filled (made as the day's are, but
+  // from one of its pair's bits to the other, till every square's filled (made as a game's are, but
   // not checked for one answer only: it's only watched)
   function demo(host) {
     const rand = Math.random;
@@ -392,11 +392,6 @@ Arcade.register('routing', (() => {
     pack: (x) => ({ p: x.paths.map((p) => p.slice()), w: x.won ? 1 : 0, r: x.routes, l: x.last }),
     over: (x) => x.won,
     timed: 'move',
-    status(saved) {
-      const t = kit.fmtTime((saved && saved.t) || 0);
-      if (saved && saved.w) return { done: true, text: `ROUTED IN ${t} // ${routesText(saved.r || 0)}` };
-      return { done: false, text: saved && saved.m ? `UNDER WAY // ${t}` : 'ONE GAME TODAY // TIMED' };
-    },
     line,
     show(x) {
       if (x !== s) { s = x; drag = null; pending = null; }
@@ -419,8 +414,6 @@ Arcade.register('routing', (() => {
     bestText: (v) => kit.fmtTime(v * 1000),
     low: true,
     demo,
-    // SHARE: the time, and the seven colors linked
-    share: (x) => [`All routed in ${kit.fmtTime(x.t)} // ${x.routes} route${x.routes === 1 ? '' : 's'} for ${x.ends.length} pairs${perfect(x) ? ': perfect' : ''}`, ['\u{1F7E5}', '\u{1F7E7}', '\u{1F7E8}', '\u{1F7E9}', '\u{1F7E6}', '\u{1F7EA}', '\u{1F7EB}', '\u2B1C'].slice(0, x.ends.length).join('')],
     wander, // (for testing)
     routings,
   };

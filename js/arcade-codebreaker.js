@@ -1,5 +1,5 @@
-// CODE BREAKER (THE DAILY ARCADE's Monday game; the card around it is arcade.js): a code of CB_LEN
-// bits, each [1] to [7] (repeats allowed), the same for everyone that Monday, to break in CB_TRIES
+// CODE BREAKER (THE ARCADE's; the card around it is arcade.js): a code of CB_LEN
+// bits, each [1] to [7] (repeats allowed), a new code each game, to break in CB_TRIES
 // tries. Each guess takes the next row up, from the bottom as bits stack, with CB_LEN pips at its
 // right: lit, a bit in the right place; hollow, a right bit in the wrong place; dark, no match. The lit
 // come first, then the hollow, so they say how many, not which. A code already tried isn't taken:
@@ -289,12 +289,6 @@ Arcade.register('codebreaker', (() => {
     pack: (x) => ({ g: x.g }),
     over: (x) => over(x),
     timed: null,
-    status(saved, day) {
-      const x = make(seeded(hashString(`bytefall:${day}:codebreaker`)), saved);
-      if (broken(x)) return { done: true, text: `BROKEN IN ${x.g.length}/${CB_TRIES}` };
-      if (over(x)) return { done: true, text: `NOT BROKEN // ${CB_TRIES}/${CB_TRIES} TRIES USED` };
-      return { done: false, text: x.g.length ? `${CB_TRIES - x.g.length} OF ${CB_TRIES} TRIES LEFT` : `ONE GAME TODAY // ${CB_TRIES} TRIES` };
-    },
     line,
     show(x) {
       if (x !== s) { s = x; typed = []; busy = false; }
@@ -325,13 +319,5 @@ Arcade.register('codebreaker', (() => {
     bestText: (v) => `${v} ${v === 1 ? 'TRY' : 'TRIES'}`,
     low: true,
     demo,
-    // SHARE: a line of squares per try, as the pips (green, yellow, black), under the result
-    share(x) {
-      const lines = x.g.map((guess) => {
-        const m = mark(guess, x.code);
-        return '\u{1F7E9}'.repeat(m.hit) + '\u{1F7E8}'.repeat(m.near) + '⬛'.repeat(CB_LEN - m.hit - m.near);
-      });
-      return [broken(x) ? `Broken in ${x.g.length}/${CB_TRIES}` : `Not broken // ${CB_TRIES}/${CB_TRIES} tries used`, ...lines];
-    },
   };
 })());

@@ -2774,23 +2774,12 @@ html.page-twinkle .page-bg { display: block; }
 .store-item.owned { border-style: solid; border-color: var(--fg-dim); }
 .store-item.owned .store-price { color: var(--fg); }
 .store-buy:disabled { cursor: default; color: var(--fg); border-color: var(--fg-dim); background: none; }
-.store-item.flash { animation: store-flash 1.2s ease-out; }
-@keyframes store-flash { 0%, 30% { border-color: var(--accent); box-shadow: 0 0 14px rgba(var(--accent-rgb), 0.5); } 100% { box-shadow: none; } }
 /* (room for a message, so RESTORE PURCHASES never moves) */
 .store-msg { min-height: 2lh; margin: 10px 0 6px !important; font-size: 14.5px; letter-spacing: 1px; color: var(--accent); text-align: center; }
 .store-restore { display: block; width: 100%; color: var(--fg); border-color: var(--fg-dim); background: none; }
 .panel-store .store-restore { margin: var(--gap) 0; } /* (the one gap above and below it, as between the cards) */
 .panel-store .store-note { margin: 8px 0 0; font-size: 13px; color: var(--fg-dim); }
-/* REMOVE ADS: a quiet link at the foot of the menu's other tabs */
-.store-shortcut {
-  display: flex; align-items: center; justify-content: center; gap: 6px; margin: 10px auto 0; padding: 5px 12px;
-  font-family: inherit; font-size: 11px; letter-spacing: 2px; cursor: pointer;
-  background: none; color: var(--accent); border: 1px dashed rgba(var(--accent-rgb), 0.6); border-radius: 4px;
-}
-.store-shortcut svg { width: 15px; height: 15px; }
-.store-buy, .store-restore, .store-shortcut, .menu-tabs button { white-space: nowrap; }
-@media (hover: hover) { .store-shortcut:hover { background: rgba(var(--accent-rgb), 0.1); } }
-.store-shortcut[hidden] { display: none; }
+.store-buy, .store-restore, .menu-tabs button { white-space: nowrap; }
 
 /* START SCREEN credits: the studio at the top, the copyright above the wanderers */
 .start-studio {
@@ -3126,7 +3115,7 @@ body:not(.vs-mode) .hud-bits #next-stat .bit-sq { width: 20px; height: 20px; mar
 /* RULES & RECORDS: the card stays put and each tab's dashed box scrolls inside its border;
    RECORDS' own tabs stick to the box's top */
 .records:not([hidden]) { display: flex; flex-direction: column; overflow: hidden; padding-bottom: 14px; }
-.records .card-top, .records .store-shortcut { flex: none; }
+.records .card-top { flex: none; }
 .records .menu-pane:not([hidden]) { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
 .records .menu-pane > .panel {
   flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
@@ -4897,6 +4886,9 @@ body.noticing :is(header .tagline, .home-tagline) { visibility: hidden !importan
 .records :is(.panel-rules, .panel-records, .panel-notices, .panel-archive) p { margin: 0 0 var(--gap); }
 .records .panel-rules .rules-sub { margin: 0 0 var(--gap); }
 .records .records-tabs { gap: var(--gap); margin: 0; padding: 0 0 var(--gap); top: -1px; }
+/* (stuck, they reach right up to the dashed border: their own background over the box's 10px of
+   padding above them, so nothing scrolled shows between them and it; unstuck, where they always were) */
+.records .panel-records .records-tabs { top: -10px; margin-top: -10px; padding-top: 10px; }
 .records .records-tabs button { flex: 1 1 auto; padding: 5px 6px; font-size: 11.5px; }
 .records .rec-level, .records .rec-summary, .records .rec-group { margin: 0 0 var(--gap); }
 .records .rec-sep + .rec-group, .records .rec-group:first-child { margin-top: 0; }

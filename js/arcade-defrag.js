@@ -1,4 +1,4 @@
-// DEFRAG (THE ARCADE's Friday game; the card around it is arcade.js): swap-and-match on the bits. A 7x7
+// DEFRAG (THE ARCADE's; the card around it is arcade.js): swap-and-match on the bits. A 7x7
 // board full of bits, [1] to [6], each number its own color (MONOCHROME: none; the numbers tell them apart). Swap two side by side (a swipe from one
 // into the other, or a tap on each) and 4 or more of a number touching (up, down, left, right: a line,
 // an L, a T, a square) decrypt; the bits above fall, new ones drop in, and whatever the fall puts
@@ -7,8 +7,8 @@
 // ENCRYPTED bits can't be swapped or matched till a match beside them cracks them; INFECTED bits spread
 // to a bit beside them every SPREAD_EVERY swaps, till a match on or beside one cleans it, and each one
 // left at the end costs points. No swap left: the bits are dealt again, free. SWAPS swaps for the best
-// score. Made from the date: the same board, and the same bits dropping in (in order, wherever they
-// land), for everyone that Friday.
+// score. Made from the game's seed: its board, and the bits dropping in (in order, wherever they
+// land).
 Arcade.register('defrag', (() => {
   const SIZE = 7;
   const CELLS = SIZE * SIZE;
@@ -445,10 +445,6 @@ Arcade.register('defrag', (() => {
     pack: (x) => ({ c: x.cells.map((t) => t.v | (t.lock ? 8 : 0) | (t.inf ? 16 : 0)), d: x.draws(), s: x.score, n: x.swaps, b: x.best, k: x.cracked, e: x.cleaned, l: x.left, o: x.over ? 1 : 0 }),
     over: (x) => x.over,
     timed: null,
-    status(saved) {
-      if (saved && saved.o) return { done: true, text: `SCORE ${fmt(saved.s || 0)} // CHAIN x${Math.max(1, saved.b || 0)}` };
-      return { done: false, text: saved && saved.n ? `UNDER WAY // ${SWAPS - saved.n} SWAPS LEFT` : `ONE GAME TODAY // ${SWAPS} SWAPS` };
-    },
     line,
     show(x) {
       if (x !== s) { s = x; sel = -1; }
@@ -475,10 +471,6 @@ Arcade.register('defrag', (() => {
     bestText: (v) => `${fmt(v)} POINTS`,
     low: false,
     demo,
-    // SHARE: the score and best chain, what was cracked and what was left infected
-    share(x) {
-      return [`Score ${fmt(x.score)} // best chain x${Math.max(1, x.best)}`, `${x.cracked}/${LOCKS} encrypted cracked // ${x.left ? `${x.left} infected left` : 'no infection left'}`];
-    },
     swap, swapsFor, // (for testing)
   };
 })());
