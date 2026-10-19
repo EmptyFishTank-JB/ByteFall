@@ -3259,13 +3259,50 @@ html.pixel-mode .walker.skater.walking[data-look="left"] .bot { transform: none;
 #mode-settings #difficulty-row button { height: 32px; }
 .mode-settings-box .ms-note { margin: var(--gap) 0 0; font-size: 13px; line-height: 1.4; color: var(--fg-dim); }
 .mode-settings-box .starter-pick-foot { margin-top: 16px; }
-/* STORY's intro: a terminal's incoming message, its head in the accent color as a recovered file's */
+/* STORY's message cards (#story-msg: an unprompted message, a thread opened again) */
 .story-intro-box p { margin: var(--gap) 0 0; font-size: 13px; line-height: 1.4; text-align: left; color: var(--panel-text); }
-.story-intro-box .si-head { margin: 4px 0 0; font-size: 11.5px; letter-spacing: 1px; color: var(--accent); }
-.story-intro-box .si-last { color: var(--fg); }
 .story-intro-box .sf-caret { display: inline-block; width: 0.55em; height: 1em; margin-left: 2px; background: var(--fg); vertical-align: -0.15em; animation: sf-blink 1s steps(1) infinite; }
 .low-fx .story-intro-box .sf-caret { animation: none; }
 .story-intro-box .starter-pick-foot { margin-top: 16px; }
+/* STORY's intro (script.js's storyTerminal): a terminal over the whole screen. The screen fades slowly
+   to black, a cursor blinks top left and the message types out; ENTER, and it goes dark again. Black
+   in every theme, in the theme's own color (a light theme's ink would be lost on it: a phosphor green
+   there). The phone comes up over it (#story-msg raised while it's on) */
+.story-term { --term-rgb: var(--fg-rgb); position: fixed; inset: 0; z-index: 9000; box-sizing: border-box; padding: calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom)); overflow-y: auto; scrollbar-width: none;
+  background: #000; opacity: 0; transition: opacity 2.6s ease-in; font-family: 'Courier New', monospace; color: rgb(var(--term-rgb)); text-align: left; cursor: default; }
+.story-term::-webkit-scrollbar { display: none; }
+:is([data-theme="paper"], [data-theme="daylight"]) .story-term { --term-rgb: 51, 255, 153; }
+.story-term.hidden { display: none; }
+.story-term.on { opacity: 1; }
+.story-term.lift { opacity: 0; transition: opacity 1.4s ease-out; } /* (back to the board, or the menu) */
+.low-fx .story-term, .low-fx .term-out { transition: none; }
+@media (prefers-reduced-motion: reduce) { .story-term, .term-out { transition: none; } }
+.term-out { max-width: 64ch; font-size: 15px; line-height: 1.5; text-shadow: 0 0 6px rgba(var(--term-rgb), 0.5); transition: opacity 0.4s ease-out; }
+@media (min-width: 700px) { .term-out { font-size: 18px; } }
+.term-out.dark { opacity: 0; }
+.term-out p { margin: 0 0 1em; white-space: pre-wrap; overflow-wrap: anywhere; }
+.term-out .term-head { font-size: 0.86em; letter-spacing: 0.5px; } /* (the terminal's own line: on one line on a phone) */
+.term-caret { display: inline-block; width: 0.6em; height: 1.05em; margin-left: 1px; vertical-align: -0.18em; background: rgb(var(--term-rgb)); box-shadow: 0 0 6px rgba(var(--term-rgb), 0.6); }
+.term-caret.blink { animation: sf-blink 1.06s steps(1) infinite; }
+.term-enter { margin: 0 0 0 1ch; padding: 1px 10px; font: inherit; letter-spacing: 1px; color: rgb(var(--term-rgb)); background: transparent; border: 1px solid rgb(var(--term-rgb)); border-radius: 4px; cursor: pointer; text-shadow: inherit; box-shadow: 0 0 6px rgba(var(--term-rgb), 0.35); }
+.term-enter[hidden] { display: none; }
+.term-enter:focus { outline: none; } /* (focused for ENTER, the cursor beside it is the only mark) */
+.term-enter:active, .term-enter.hit { color: #000; background: rgb(var(--term-rgb)); text-shadow: none; } /* (pressed: inverted, as a picked command in TERMINAL 426) */
+@media (hover: hover) { .term-enter:hover { background: rgba(var(--term-rgb), 0.16); } }
+body.term-on #story-msg { z-index: 9001; }
+/* (the phone raised into view as a thread comes in) */
+.story-msg-box.phone .phone-screen { animation: phone-rise 0.42s cubic-bezier(0.2, 0.8, 0.25, 1) both; }
+@keyframes phone-rise { from { opacity: 0; transform: translateY(48px) scale(0.96); } }
+.low-fx .story-msg-box.phone .phone-screen { animation: none; }
+/* THE PHONE BUTTON, in a STORY game: top left across from PAUSE, its size and shape (script.js matches
+   its width to PAUSE's), a little phone in the middle; it opens your messages to read again */
+.phone-btn { position: absolute; top: 8px; left: 8px; height: 26px; width: 79px; padding: 0; display: none; align-items: center; justify-content: center;
+  border: 1px solid var(--fg); border-radius: 4px; background: transparent; color: var(--fg); cursor: pointer; }
+.phone-btn svg { width: 10px; height: 16px; display: block; }
+.phone-btn::before { content: ""; position: absolute; inset: -12px -16px -14px -10px; } /* (a fingertip-sized target, as PAUSE has) */
+body.in-game.can-pause .phone-btn:not([hidden]) { display: flex; }
+body.panel-open .phone-btn { visibility: hidden; }
+@media (hover: hover) { .phone-btn:hover { background: rgba(var(--fg-rgb), 0.12); } }
 /* STORY's kit: the side slots as PATCHES and EXPLOITS, how many uses this key has left in the corner;
    used up, dimmed */
 /* (STORY: the EXPLOIT button not there till an exploit's introduced, its place kept) */

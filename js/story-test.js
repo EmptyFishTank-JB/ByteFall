@@ -1,7 +1,7 @@
 // ?storytest: a bar at the bottom to review STORY's messages one by one, each played in the
 // message card as the game plays it (its timing and sounds; what it introduces and gives under it).
 // Nothing's recovered or saved: the stories' progress stays as it is. Every season's transmissions,
-// each story's unprompted messages and the intro card are on its list. ?storytest=8 opens on GHOSTS 8.
+// each story's unprompted messages and the terminal intro are on its list. ?storytest=8 opens on GHOSTS 8.
 // WRITE: a message of your own, typed in and played as the real thing, as a FILE, an IM or a CALL. Its
 // lines are written as in docs/STORY-V2.md (pasted from it as they are, the "> " or not):
 //   **moth** 02:14 · text   an IM line (**you** the player); in an IM, moth: text does too
@@ -19,7 +19,7 @@
   }
   const pad = (n) => String(n).padStart(2, '0');
   const LABEL = { moth: 'MOTH', toll: 'TOLL', unknown: 'UNKNOWN NUMBER', archive: 'THE ARCHIVE' };
-  const list = [{ label: 'THE INTRO CARD', intro: true }];
+  const list = [{ label: 'THE INTRO // TERMINAL', intro: true }];
   STORIES.forEach((s) => {
     s.items.forEach((it, i) => list.push({ label: `S${s.season} ${s.title} ${pad(i + 1)} // ${Stories.kindLine(it)}`, it, title: `${s.title} // ${pad(i + 1)} OF ${s.items.length}`, shows: it.atStart ? 'pops up as the first STORY game starts' : it.job ? `a JOB later (${it.job.mode}), the cracked card for now` : 'on the cracked card' }));
     (s.extras || []).forEach((x) => list.push({ label: `S${s.season} ${s.title} OFF THE RECORD // ${x.title}`, it: x, title: `// ${x.kind === 'call' ? 'VOICEMAIL' : 'IM'} // ${LABEL[x.from] || x.from.toUpperCase()}`, shows: `unprompted, on the main menu (after transmission ${x.after})` }));
@@ -50,9 +50,9 @@
     try { localStorage.setItem('bytefall-storytest', String(at)); } catch (e) {}
     Stories.stop();
     document.getElementById('story-msg').classList.add('hidden');
-    document.getElementById('story-intro').classList.add('hidden');
+    if (typeof stopStoryTerminal === 'function') stopStoryTerminal();
     if (x.intro) {
-      count.textContent = `${at + 1} OF ${list.length} // shows once, the first time STORY is picked`;
+      count.textContent = `${at + 1} OF ${list.length} // plays once, on the first STORY game's PLAY (the phone's first IM after it)`;
       if (typeof openStoryIntro === 'function') openStoryIntro();
       return;
     }
@@ -114,7 +114,7 @@
     if (kind === 'call' && !lines.some((l) => l.k === 'ring')) lines.unshift({ k: 'ring', t: `INCOMING CALL // ${name}` });
     const ss = document.getElementById('start-screen');
     if (ss) ss.hidden = true;
-    document.getElementById('story-intro').classList.add('hidden');
+    if (typeof stopStoryTerminal === 'function') stopStoryTerminal();
     count.textContent = `YOURS // ${lines.length} lines, ${lines.reduce((a, l) => a + (l.t || '').length, 0)} characters`;
     Stories.showCard(`${kind.toUpperCase()} // ${name}`, { kind, lines });
   });

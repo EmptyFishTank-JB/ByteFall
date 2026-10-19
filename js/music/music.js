@@ -113,6 +113,8 @@ const Music = (() => {
   let outputId = savedSoundOutput();
   let outChain = null;
   let session = null; // per-play gain so stopped notes can't bleed into the next start
+  let hushGain = null; // (hush(): the music faded out for a while, STORY's terminal intro, and back)
+  let hushed = false;
   let engine = null;
   let timer = null;
   let step = 0;
@@ -214,7 +216,10 @@ const Music = (() => {
         analyser.smoothingTimeConstant = 0.72;
         analyser.minDecibels = -90;
         analyser.maxDecibels = -34;
-        analyser.connect(ctx.destination);
+        hushGain = ctx.createGain();
+        hushGain.gain.value = hushed ? 0 : 1;
+        analyser.connect(hushGain);
+        hushGain.connect(ctx.destination);
         outChain = createSoundOutput(ctx, outputId);
         outChain.output.connect(analyser);
         // Left and right on their own, for the vectorscope (a mono signal is copied to both
@@ -277,6 +282,15 @@ const Music = (() => {
 
   return {
     isEnabled: () => enabled,
+    // (faded out over secs, and back: the setting left as it is. STORY's terminal intro, script.js)
+    hush(on, secs = 2) {
+      hushed = on;
+      if (!hushGain) return;
+      const t = ctx.currentTime;
+      hushGain.gain.cancelScheduledValues(t);
+      hushGain.gain.setValueAtTime(hushGain.gain.value, t);
+      hushGain.gain.linearRampToValueAtTime(on ? 0 : 1, t + secs);
+    },
     toggle() {
       setEnabled(!enabled);
       return enabled;

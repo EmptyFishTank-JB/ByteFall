@@ -114,16 +114,42 @@ A few short messages come outside the cracks, once each, when something happens:
 - **Back after 3 days or more** (after transmission 8). Voicemail from UNKNOWN NUMBER:
   `"You stopped. Good. Stay stopped."`
 
-## The intro card
+## The intro: a terminal
 
-Shown the first time STORY is switched on, and again from the ARCHIVE's READ THE INTRO (its words are
-in `bytefall.html`'s `#story-intro`, not made from this doc):
+Played on the first STORY game's PLAY (transmission 1 still to come), not when STORY is switched on;
+again from the ARCHIVE's READ THE INTRO (without the phone after it). Its words are in
+`bytefall.html`'s `#story-term-text`, not made from this doc:
 
-> **INCOMING // ENCRYPTED // SOURCE UNKNOWN**
-> Something slips into your terminal tonight. No alert, no handshake, just a quiet stream of encrypted files buried under stacked keys. Messages. Memos. Logs. Whoever sent this didn't want eyes on it.
-> Every key you crack opens the next layer: files, message chains, call records. Piece by piece, the story starts to form in the dark. Someone out there is talking to you, someone is hiding something, and someone is watching to see if you dig too deep.
-> The deeper the fragments, the heavier the encryption. Each key fights back harder than the last. Everything you pull out is locked away in the ARCHIVE.
-> KEY_01 sits at the top of the chain, waiting for someone curious enough to try it.
+1. The screen fades slowly to black (the music fades out with it); the game is set up underneath.
+2. A few seconds of black, then a terminal cursor pops in top left and blinks a few times.
+3. The message types out: the terminal's own line at a terminal's pace, then the message at a
+   speaking pace (about 150 words a minute, a breath after each sentence), a key click for each
+   letter (the key sounds of ECHOES' SHIP SYSTEM TERMINAL 426; the tutorial BOT's blips stay for
+   narration). A tap shows the rest at once.
+4. `> [ENTER]`: the player hits ENTER (the key, the button, or a tap). A second later the terminal
+   goes dark; a second more and the phone lights up with transmission 1, its messages coming in.
+5. The phone put down, the black lifts off the board: KEY_01, the first game.
+
+> INCOMING // ENCRYPTED // SOURCE UNKNOWN
+>
+> if you're reading this, it got through.
+>
+> what you've got is an archive. memos, chat logs, call records. every file's locked under its own key, and every key is harder than the one before.
+>
+> the people who wrote these think they're gone. they're not.
+>
+> open them one at a time. whatever you crack, you keep.
+>
+> don't go looking for me. i'll find you.
+>
+> KEY_01 is waiting.
+
+It's MOTH's note, unsigned: lowercase, as MOTH writes, so the IM that follows it reads as the same
+hand. ("i'll find you" is answered a second later by the phone.)
+
+**The phone button.** In a STORY game, once a message has come in, a button top left (across from
+PAUSE, its size and shape, a little phone in it) brings the phone up to read your messages again: the
+newest contact's thread, everything from them so far, as a phone keeps it.
 
 ## The characters
 
@@ -150,7 +176,8 @@ in `bytefall.html`'s `#story-intro`, not made from this doc):
 > **moth** 02:14 · i sent you something. four gigs, encrypted, about two dozen keys deep.
 > **moth** 02:15 · don't brute force it. crack it a key at a time, the way you crack everything.
 > **you** 02:15 · who is this
-> **moth** 02:16 · someone who needs it read by someone who isn't me.
+> **moth** 02:16 · nobody. not anymore.
+> **moth** 02:16 · keep reading. you'll see what i mean.
 
 **2 // FILE // HALCYON SYSTEMS // #corrections** · *on the cracked card*
 > `<ops.reyes>` queue's at 41 tonight. 38 standard, 3 full

@@ -64,7 +64,7 @@ const Stories = (() => {
 
   // THE CONTACTS: who an IM's from, as your phone shows them (its story's names: an UNKNOWN CONTACT
   // till the transmission naming them is behind you). One of the STORY TESTER's own: as written
-  const storyOf = (it) => STORIES.find((x) => x.items.includes(it) || (x.extras || []).includes(it));
+  const storyOf = (it) => it.of || STORIES.find((x) => x.items.includes(it) || (x.extras || []).includes(it)); // (of: the phone's thread, its story)
   const whereOf = (it) => it.n || (storyOf(it) ? got(storyOf(it)) : 0) + 0.5; // (an unprompted one: as far as you've got, when it comes)
   function knownAt(s, who, at) {
     const named = s && s.items.find((x) => (x.names || []).includes(who));
@@ -352,6 +352,7 @@ const Stories = (() => {
           : it.introduces.includes('infections') ? 'STORY games have INFECTED BITS from now on.'
             : `Usable in STORY from now on.${giftLine(it) ? ` ${giftLine(it)}.` : ''}`);
     }
+    if (typeof refreshPhoneBtn === 'function') refreshPhoneBtn(); // (a thread to read again: the phone button)
     if (done(s)) { // (the last one: the next season opens, and is picked)
       const next = STORIES[STORIES.indexOf(s) + 1];
       logNotice(`STORY // ${s.title} COMPLETE`, false, next ? `SEASON ${next.season}, ${next.title}, is open in the ARCHIVE, and it's the one you're decrypting now.` : 'Every story is in the ARCHIVE.');
@@ -508,19 +509,56 @@ const Stories = (() => {
     return true;
   }
   // THE FIRST ONE (a transmission marked atStart: GHOSTS' 1, MOTH's IM): it pops up over the board as
-  // the first STORY game starts, the files just landed, and is recovered then, not on a cracked card
-  function atStart() {
-    if (window.STORY_SOON) return false;
+  // the first STORY game starts, the files just landed, and is recovered then, not on a cracked card.
+  // (firstDue: still to come, so STORY's PLAY plays the terminal intro before it, script.js's storyTerminal)
+  function firstDue() {
+    if (window.STORY_SOON) return null;
     const s = picked();
-    if (!s || done(s)) return false;
+    if (!s || done(s)) return null;
     const it = s.items[got(s)];
-    if (!it || !it.atStart) return false;
-    Progress.storyRecover(s.id);
+    return it && it.atStart ? it : null;
+  }
+  function atStart() {
+    const it = firstDue();
+    if (!it) return false;
+    Progress.storyRecover(picked().id);
     showCard(`// ${kindLine(it)}`, it);
     marks();
     refreshRow();
+    if (typeof refreshPhoneBtn === 'function') refreshPhoneBtn(); // (a thread to read again: the phone button)
     return true;
   }
+  // THE PHONE (the phone button in a STORY game, script.js): your messages to read again, as a phone
+  // keeps them. The newest IM's contact, every message from them so far in one thread (the IMs that
+  // close a call too, and the unprompted ones), each at its own time, named as you know them now
+  function phonePieces() {
+    const out = [];
+    STORIES.forEach((s) => {
+      s.items.slice(0, got(s)).forEach((it) => {
+        const t = it.kind === 'im' ? it : splitIm(it) && splitIm(it).thread;
+        if (t) out.push({ it: t, at: it.n, s });
+      });
+      (s.extras || []).forEach((x) => { if (x.kind === 'im' && Progress.storyExtraHad(x.when)) out.push({ it: x, at: x.after + 0.5, s }); });
+    });
+    return out.sort((a, b) => a.at - b.at);
+  }
+  const whoOf = (it) => { const l = it.lines.find((x) => x.k === 'im'); return l ? l.who.toLowerCase() : ''; };
+  const hasThread = () => !window.STORY_SOON && phonePieces().some((p) => whoOf(p.it));
+  function openPhone() {
+    const all = phonePieces().filter((p) => whoOf(p.it));
+    if (!all.length) return false;
+    const last = all[all.length - 1];
+    const who = whoOf(last.it);
+    const mine = all.filter((p) => whoOf(p.it) === who);
+    const lines = [];
+    mine.forEach((p, i) => {
+      const times = stamps(p.it);
+      if (i) lines.push({ k: 'gap' });
+      p.it.lines.forEach((l, j) => lines.push(times[j] ? { ...l, time: times[j] } : l));
+    });
+    return showCard(`// IM // ${contact(who, last.it)}`, { kind: 'im', lines, n: last.at, of: last.s }, false, true);
+  }
+
   // (back after days away: on launch, three days or more since the last STORY game)
   const AWAY_MS = 3 * 24 * 3600 * 1000;
   const last = Progress.storyLastPlayed();
@@ -549,5 +587,5 @@ const Stories = (() => {
   marks();
   refreshRow();
 
-  return { onCrack, stop, showCard, kindLine, render, refreshRow, openStory, introduced, introName, moment, showDue, atStart, toList: () => { view = null; }, picked: () => picked().id };
+  return { onCrack, stop, showCard, kindLine, render, refreshRow, openStory, introduced, introName, moment, showDue, firstDue: () => !!firstDue(), atStart, hasThread, openPhone, toList: () => { view = null; }, picked: () => picked().id };
 })();

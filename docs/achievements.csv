@@ -99,7 +99,7 @@ DAILY,SO CLOSE,End a BREACH with one layer left,1,Hidden,so-close
 PUZZLES,FIRST TRY,Solve a puzzle on your first attempt,1,Standard,first-try
 PUZZLES,LOCKSMITH,Solve 10 puzzles,10,Standard,locksmith
 PUZZLES,SAFECRACKER,Solve 30 puzzles,30,Standard,safecracker
-PUZZLES,MASTER KEY,Solve every puzzle,60,Standard,master-key
+PUZZLES,SKELETON KEY,Solve every puzzle,60,Standard,master-key
 PUZZLES,PICKPOCKET,Solve 5 puzzles in a row without failing one,5,Standard,pickpocket
 LEVELS AND DECRYPTOR RANKS,LV 40,Reach level 40,40,Standard,lv-40
 LEVELS AND DECRYPTOR RANKS,MAXED OUT,Reach Lv 80 as DECRYPTOR 9,1,Standard,maxed-out
@@ -170,11 +170,16 @@ BOTS,MONSTER MASH,"Meet all eight Halloween visitors: the monster, the mummy, th
 BOTS,UPROOTED,Watch a bot push a scary tree onto the card,1,Hidden,uprooted
 BOTS,GOBBLE GOBBLE,Meet the November turkey,1,Hidden,gobble-gobble
 BOTS,SNOW DAY,Poke a snowman a bot pushed onto the card,1,Hidden,snow-day
+BOTS,FULL BYTE,See the bots push out every BIT from 1 to 8,8,Hidden,full-byte
 BOTS,BELLY SLIDE,Poke the winter penguin and send it sliding,1,Hidden,belly-slide
 BOTS,RED NOSE,See the reindeer with the glowing red nose,1,Hidden,red-nose
 BOTS,EIGHT NIGHTS,Watch a bot push a menorah onto the card during Hanukkah,1,Hidden,eight-nights
 BOTS,GIMEL,See the Hanukkah dreidel land on GIMEL,1,Hidden,gimel
 BOTS,SEVEN CANDLES,Watch a bot push a kinara onto the card during Kwanzaa,1,Hidden,seven-candles
+BOTS,STORM CHASER,"See a thunderstorm, a blizzard and hail roll over the bots",3,Hidden,storm-chaser
+BOTS,STARGAZER,"See the northern lights, a meteor shower and fireflies over the bots",3,Hidden,stargazer
+BOTS,GONE FISHING,Watch a bot reel in a fish off the dock,1,Hidden,gone-fishing
+BOTS,THE ONE THAT GOT AWAY,Tap a fishing bot's bobber and scare off its fish,1,Hidden,the-one-that-got-away
 BOTS,MIDNIGHT,Be there when the bots count down to the new year,1,Hidden,midnight
 BOTS,DEVELOPER OPTIONS,Tap the VS CPU seven times in a row,1,Hidden,developer-options
 INFECTIONS,PAID IN FULL,Pay an infection's demand in full,1,Standard,paid-in-full

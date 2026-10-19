@@ -1078,7 +1078,7 @@ const measureCtx = document.createElement('canvas').getContext('2d');
 function clearOfCorners(el, min) {
   el.style.fontSize = '';
   el.style.letterSpacing = '';
-  const btns = [...crtEl.querySelectorAll(':scope > :is(.records-btn, .settings-btn)')].filter((b) => b.offsetWidth && getComputedStyle(b).visibility !== 'hidden');
+  const btns = [...crtEl.querySelectorAll(':scope > :is(.records-btn, .settings-btn, .phone-btn)')].filter((b) => b.offsetWidth && getComputedStyle(b).visibility !== 'hidden');
   const range = document.createRange();
   range.selectNodeContents(el);
   const hits = () => {
@@ -2758,23 +2758,151 @@ function toggleStory(btn) {
     SFX.play('punct');
   });
 }
-// STORY's intro: the first time STORY's on with the main menu up, a card setting the scene (once:
-// bytefall-story-intro). BEGIN, a tap off the card, Esc or back closes it
-const storyIntroEl = document.getElementById('story-intro');
-const storyIntroOpen = () => !storyIntroEl.classList.contains('hidden');
-function maybeStoryIntro() {
-  if (STORY_SOON || storage.get('bytefall-story-intro') || !storyOn() || !homeOpen || homeEl.hidden || storyIntroOpen()) return;
-  storage.set('bytefall-story-intro', '1');
-  storyIntroEl.classList.remove('hidden');
+// STORY's intro, a terminal: the first STORY game's PLAY (GHOSTS' first transmission still to come:
+// Stories.firstDue) fades the screen slowly to black, the music with it, and the game is set up under
+// it. A few seconds on, a cursor pops in top left and blinks, then a message comes through (its words in
+// bytefall.html's #story-term-text): the terminal's own line at a terminal's pace, the message as it's
+// spoken, about 150 words a minute with a breath after each sentence, a key's click for each letter
+// (SFX.termKey, as ECHOES' TERMINAL 426 types). ENTER (the key, the button or a tap) and a second later
+// it goes dark; a second more and the phone lights up with the first IM (Stories.atStart). The phone put
+// down, the black lifts off the board. A tap, Space or back while it types shows the rest at once
+// (REDUCED EFFECTS: all of it at once). The ARCHIVE's READ THE INTRO plays it over the menu, no phone
+const termEl = document.getElementById('story-term');
+const termOut = document.getElementById('story-term-out');
+const termEnter = document.getElementById('story-term-close');
+const TERM = { fade: 2600, hold: 2600, blinks: 3200, head: 34, letter: 62, comma: 240, stop: 640, line: 600, opened: 1200, dark: 1000, phone: 1000, lift: 1400 };
+let term = null; // (the intro under way: its stage, lines and timers)
+const termLow = () => document.documentElement.classList.contains('low-fx') || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+function termLater(t, ms, f) {
+  const id = setTimeout(() => { t.timers.delete(id); if (term === t) f(); }, ms);
+  t.timers.add(id);
 }
-// (and again any time, from the ARCHIVE's READ THE INTRO)
-function openStoryIntro() { storyIntroEl.classList.remove('hidden'); }
-function closeStoryIntro() {
-  if (!storyIntroOpen()) return;
-  storyIntroEl.classList.add('hidden');
-  SFX.play('click');
+function storyTerminal(game = false, onBlack = null) {
+  if (term) return;
+  const t = term = { game, stage: 'fade', timers: new Set(), low: termLow(), caret: null, node: null };
+  t.lines = [...document.getElementById('story-term-text').content.querySelectorAll('p')].map((p) => ({ cls: p.className, text: p.textContent.replace(/\s+/g, ' ').trim() }));
+  termOut.textContent = '';
+  termOut.classList.remove('dark');
+  termEnter.hidden = true;
+  termEnter.classList.remove('hit');
+  termEl.appendChild(termEnter);
+  termEl.classList.remove('hidden', 'on', 'lift');
+  document.body.classList.add('term-on');
+  void termEl.offsetWidth; // (from clear, so it fades in)
+  termEl.classList.add('on');
+  if (typeof Music !== 'undefined' && Music.hush) Music.hush(true, t.low ? 0.3 : TERM.fade / 1000);
+  termLater(t, t.low ? 300 : TERM.fade, () => {
+    if (onBlack) onBlack(); // (the game set up under the black)
+    termLater(t, t.low ? 300 : TERM.hold, () => { // (a cursor, top left, blinking a few times)
+      t.stage = 'cursor';
+      t.caret = document.createElement('span');
+      t.caret.className = 'term-caret blink';
+      const p = document.createElement('p');
+      p.appendChild(t.caret);
+      termOut.appendChild(p);
+      if (t.low) termAll(t);
+      else termLater(t, TERM.blinks, () => termType(t, 0, 0, p));
+    });
+  });
 }
-document.getElementById('story-intro-close').addEventListener('click', closeStoryIntro);
+// (line li from its letter ci on, a letter at a time: the terminal's line quick, the message spoken)
+function termType(t, li, ci, p) {
+  t.stage = 'type';
+  const line = t.lines[li];
+  if (!line) { termPrompt(t); return; }
+  if (!p) { p = document.createElement('p'); termOut.appendChild(p); }
+  if (ci === 0) {
+    p.className = line.cls;
+    t.node = document.createTextNode('');
+    p.textContent = '';
+    p.append(t.node, t.caret);
+    t.caret.classList.remove('blink'); // (steady while it types)
+  }
+  const ch = line.text[ci];
+  t.node.data += ch;
+  if (ch !== ' ') SFX.termKey(ch);
+  termEl.scrollTop = termEl.scrollHeight; // (a small screen: kept at the newest line)
+  const own = /\bterm-head\b/.test(line.cls); // (the terminal's own line)
+  let ms = (own ? TERM.head : TERM.letter) * (0.7 + Math.random() * 0.6);
+  const end = ci + 1 >= line.text.length;
+  if (!own && (end || line.text[ci + 1] === ' ')) ms += /[.?!]/.test(ch) ? TERM.stop : /[,;:]/.test(ch) ? TERM.comma : 0;
+  if (!end) termLater(t, ms, () => termType(t, li, ci + 1, p));
+  else termLater(t, ms + (own ? TERM.opened : TERM.line), () => termType(t, li + 1, 0, null));
+}
+// (all of it at once: a tap, Space or back while it types, or REDUCED EFFECTS)
+function termAll(t) {
+  t.timers.forEach(clearTimeout);
+  t.timers.clear();
+  if (!t.caret) { t.caret = document.createElement('span'); t.caret.className = 'term-caret'; }
+  termOut.textContent = '';
+  t.lines.forEach((l) => {
+    const p = document.createElement('p');
+    p.className = l.cls;
+    p.textContent = l.text;
+    termOut.appendChild(p);
+  });
+  termPrompt(t);
+}
+// (the message out: > ENTER, the cursor blinking after it)
+function termPrompt(t) {
+  t.stage = 'prompt';
+  const p = document.createElement('p');
+  p.className = 'term-prompt';
+  p.append('>', termEnter, t.caret);
+  t.caret.classList.add('blink');
+  termEnter.hidden = false;
+  termOut.appendChild(p);
+  termEl.scrollTop = termEl.scrollHeight;
+  try { termEnter.focus({ preventScroll: true }); } catch (e) {}
+}
+function termHit() {
+  const t = term;
+  if (!t) return;
+  if (t.stage === 'cursor' || t.stage === 'type') { termAll(t); return; }
+  if (t.stage !== 'prompt') return;
+  t.stage = 'enter';
+  SFX.termEnter();
+  termEnter.classList.add('hit'); // (pressed, as a picked command)
+  t.caret.classList.remove('blink');
+  termLater(t, TERM.dark, () => {
+    termOut.classList.add('dark'); // (the terminal gone dark)
+    termLater(t, TERM.phone, () => {
+      if (t.game && typeof Stories !== 'undefined' && Stories.atStart()) { t.stage = 'phone'; return; } // (the phone lit up: closeStoryMsg lifts the black)
+      termLift();
+    });
+  });
+}
+// (the black lifted off the board, or the menu; the music back)
+function termLift() {
+  const t = term;
+  if (!t) return;
+  t.timers.forEach(clearTimeout);
+  term = null;
+  if (typeof Music !== 'undefined' && Music.hush) Music.hush(false, 2);
+  document.body.classList.remove('term-on');
+  termEl.classList.add('lift');
+  setTimeout(() => { if (!term) { termEl.classList.add('hidden'); termEl.classList.remove('on', 'lift'); } }, t.low ? 0 : TERM.lift);
+}
+// (at once, nothing after it: the STORY TESTER's next message)
+function stopStoryTerminal() {
+  if (!term) return;
+  term.timers.forEach(clearTimeout);
+  term = null;
+  if (typeof Music !== 'undefined' && Music.hush) Music.hush(false, 0.5);
+  document.body.classList.remove('term-on');
+  termEl.classList.add('hidden');
+  termEl.classList.remove('on', 'lift');
+}
+// (again any time, from the ARCHIVE's READ THE INTRO)
+function openStoryIntro() { storyTerminal(false); }
+termEnter.addEventListener('click', (e) => { e.stopPropagation(); termHit(); });
+termEl.addEventListener('click', termHit);
+// (nothing reaches the game under it while it's up: ENTER, Space and Esc are the terminal's)
+document.addEventListener('keydown', (e) => {
+  if (!term || term.stage === 'phone') return;
+  e.stopImmediatePropagation();
+  if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') { e.preventDefault(); termHit(); }
+}, true);
 // (an unprompted message's card, stories.js's showDue: OK, a tap off it, Esc or back closes it)
 const storyMsgEl = document.getElementById('story-msg');
 function closeStoryMsg() {
@@ -2782,12 +2910,11 @@ function closeStoryMsg() {
   if (typeof Stories !== 'undefined') Stories.stop();
   storyMsgEl.classList.add('hidden');
   SFX.play('click');
+  if (term && term.stage === 'phone') termLift(); // (STORY's intro: the phone put down, the black lifts off the board)
 }
 document.getElementById('story-msg-close').addEventListener('click', closeStoryMsg);
 storyMsgEl.addEventListener('click', (e) => { if (e.target === storyMsgEl) closeStoryMsg(); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !storyMsgEl.classList.contains('hidden')) { e.stopImmediatePropagation(); closeStoryMsg(); } }, true);
-storyIntroEl.addEventListener('click', (e) => { if (e.target === storyIntroEl) closeStoryIntro(); });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && storyIntroOpen()) { e.stopImmediatePropagation(); closeStoryIntro(); } }, true);
 // (RULES: STORY's section down to one line while it's coming soon)
 if (STORY_SOON) {
   const h = document.getElementById('rules-story');
@@ -4049,8 +4176,7 @@ function updateHome() {
   refreshStarterRow();
   fitHome(); // (the words fitted to their boxes; again once the mode's rows have all settled)
   refitHome();
-  maybeStoryIntro(); // (STORY's first time: the scene set)
-  if (homeOpen && !homeEl.hidden && !storyIntroOpen() && typeof Stories !== 'undefined') Stories.showDue(); // (an unprompted message waiting)
+  if (homeOpen && !homeEl.hidden && !term && typeof Stories !== 'undefined') Stories.showDue(); // (an unprompted message waiting)
 }
 function updateTopIcons() {
   const inGame = !homeOpen; // (the tutorial too: PAUSE, as in a game)
@@ -4063,7 +4189,24 @@ function updateTopIcons() {
     alignHeader();
   }
   document.getElementById('records-btn').setAttribute('aria-label', !inGame ? 'Menu: rules, exploits and records' : vsPaused ? 'Resume' : canPause() ? 'Pause' : 'Back to the main menu');
+  refreshPhoneBtn();
 }
+// THE PHONE BUTTON (a STORY game, once a message has come in): top left across from PAUSE, PAUSE's
+// size and shape (its width matched here), a little phone in it; your messages to read again, on the
+// phone (Stories.openPhone). Shown only with PAUSE (style.css)
+function refreshPhoneBtn() {
+  const btn = document.getElementById('phone-btn');
+  const show = storyOn() && !homeOpen && typeof Stories !== 'undefined' && Stories.hasThread();
+  const changed = btn.hidden === show;
+  btn.hidden = !show;
+  const pause = document.getElementById('records-btn');
+  if (show && document.body.classList.contains('can-pause') && pause.offsetWidth) btn.style.width = `${pause.offsetWidth}px`;
+  if (changed && show && !homeOpen) alignHeader(); // (the title kept clear of it)
+}
+document.getElementById('phone-btn').addEventListener('click', () => {
+  if (typeof Stories !== 'undefined' && Stories.openPhone()) return;
+  SFX.play('denied');
+});
 // Fixed boxes, fitted words: the main menu's buttons and panel keep one size in every mode, font
 // and TEXT SIZE (style.css); what's written in them shrinks, when it must, to fit. Each element's own
 // size is the start (its CSS), so a smaller font or TEXT SIZE never shrinks it past that
@@ -4137,7 +4280,7 @@ function hideHome() {
   updateTopIcons();
   if (renderStale) render(); // (the grid, drawn now it shows)
   fitBoard();
-  if (goal && typeof Stories !== 'undefined') Stories.atStart(); // (STORY's first transmission, over the board as the first game starts)
+  if (goal && !term && typeof Stories !== 'undefined') Stories.atStart(); // (STORY's first transmission, over the board as the first game starts; after the terminal intro, its own)
 }
 window.showHome = showHome;
 window.homeIsOpen = () => homeOpen;
@@ -4150,6 +4293,11 @@ homePlayBtn.addEventListener('click', () => {
   if (busy && !gameOver) return; // (a mode switch still melting the old board)
   if (mode === 'puzzle' && !daily && !inAGame()) { // (PUZZLE: pick one first)
     setRecordsOpen(true, 'puzzles');
+    return;
+  }
+  if (storyOn() && !inAGame() && typeof Stories !== 'undefined' && Stories.firstDue()) { // (STORY's very first game: the terminal intro, the game set up under its black)
+    SFX.play('click');
+    storyTerminal(true, () => { if (gameOver) resetNow(); hideHome(); });
     return;
   }
   if (gameOver) resetNow();
@@ -7519,7 +7667,7 @@ recordsEl.querySelectorAll('.records-tabs button').forEach((b) => {
 // (a card of its own over the game card: BACK or Esc closes it, not a tap beside it). A small card
 // open over it (an [i], the PATCHES or EXPLOITS card, GAME SETTINGS) is closed first: BACK, and the
 // phone's back (start.js), take it away and leave the panel or menu under it
-const OVER_CARDS = ['res-info', 'booster-pick', 'starter-pick', 'mode-settings', 'story-intro', 'story-kit', 'story-msg'];
+const OVER_CARDS = ['res-info', 'booster-pick', 'starter-pick', 'mode-settings', 'story-kit', 'story-msg', 'story-term']; // (the phone before the terminal under it)
 window.closeOverCard = () => {
   const open = OVER_CARDS.map((id) => document.getElementById(id)).find((el) => el && !el.classList.contains('hidden'));
   if (!open) return false;

@@ -249,4 +249,4 @@ the Play Store, Steam and a trademark search before settling on it.
   tunnels, a PAC-MAN JUGGERNAUT variant, a lights-out maze. (As a game for sale it would need its
   own maze theme: Pac-Man is Bandai Namco's.)
 
-- Before the Play Store build: take out the app's UNLOCK EVERYTHING padlock (SETTINGS footer; `js/script.js`, `index.html` `#dev-unlock-btn`, `tools/build-app.js` keeps its flag).
+- Once the app is live on the Play Store: take out the main menu title's secret tap sequences (BYTE×3 then FALL×3 for the STORY key, FALL×3 then BYTE×3 for DEV MODE; `js/script.js`'s THE STORY KEY, and the release branch of `js/unlocks.js` that reads `bytefall-unlock-key`). Till then anyone who learns the DEV MODE sequence gets everything unlocked for free. (The test app's DEV MODE padlock is already stripped from the release build by `tools/build-app.js`.)

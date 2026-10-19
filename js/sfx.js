@@ -611,6 +611,40 @@ const SFX = (() => {
         o.start(t); o.stop(t + 0.04);
       } catch (e) {}
     },
+    // (STORY's intro, a terminal (script.js's storyTerminal): a key for each letter as it types, a
+    // duller knock for punctuation, and ENTER, as ECHOES' SHIP SYSTEM TERMINAL 426 sounds them
+    // (echoes-boardgame/terminal.html: playClick, playPunctClick, playEnter). The BOT's blips stay
+    // the tutorial's: they're a voice, for narration)
+    termKey(ch = '') {
+      if (muted && !forcing) return;
+      try {
+        const c = getCtx();
+        const t = c.currentTime;
+        if (/^[.,:;!?\-/_>]$/.test(ch)) {
+          const o = c.createOscillator();
+          o.type = 'triangle';
+          o.frequency.value = 200;
+          o.connect(envelope(c, VOL * 0.55, t, 0.04));
+          o.start(t); o.stop(t + 0.04);
+          return;
+        }
+        const k = noiseBuffer(c, 0.025, (i, n) => 1 - i / n);
+        const bp = filter(c, 'bandpass', 3000 + Math.random() * 1000, 0.8);
+        k.connect(bp); bp.connect(envelope(c, VOL, t, 0.025));
+        k.start(t); k.stop(t + 0.025);
+      } catch (e) {}
+    },
+    termEnter() {
+      if (muted && !forcing) return;
+      try {
+        const c = getCtx();
+        const t = c.currentTime;
+        const k = noiseBuffer(c, 0.055, (i, n) => Math.exp(-i / (n * 0.25)));
+        const lp = filter(c, 'lowpass', 800);
+        k.connect(lp); lp.connect(envelope(c, VOL * 1.2, t, 0.055));
+        k.start(t); k.stop(t + 0.055);
+      } catch (e) {}
+    },
     // (a call: a voice down a phone line, a low murmur for each word, dur seconds; its pitch wanders
     // a little and falls, as a voice does)
     voice(dur = 0.2) {
@@ -762,6 +796,6 @@ const SFX = (() => {
       return muted;
     },
   };
-  const OWN = ['blip', 'count', 'xpFill', 'levelUp', 'incoming', 'sent', 'typewriter', 'voice', 'ring', 'hangup'];
+  const OWN = ['blip', 'count', 'xpFill', 'levelUp', 'incoming', 'sent', 'typewriter', 'termKey', 'termEnter', 'voice', 'ring', 'hangup'];
   return api;
 })();
