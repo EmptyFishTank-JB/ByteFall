@@ -73,7 +73,7 @@
   const text = bar.querySelector('.st-text');
   const title = bar.querySelector('.st-title');
   let kind = 'im';
-  const SAMPLE = { file: '`<dir.vance>` this stays in the room.\n`<ops.reyes>` understood.\nRECORD SEALED // HALCYON', im: '**moth** · you there, ghost?\n**you** · here.\n**moth** · good. listen.', call: '"Good evening. Please don\'t hang up."\n"I\'ll be brief."\nCALL ENDED // 0:12' };
+  const SAMPLE = { file: '`<dir.vance>` this stays in the room.\n`<ops.reyes>` understood.\nRECORD SEALED // HALCYON', im: '**moth** · You there, ghost?\n**you** · Here\n**moth** · Good. Listen', call: '"Good evening. Please don\'t hang up."\n"I\'ll be brief."\nCALL ENDED // 0:12' };
   try { const d = JSON.parse(localStorage.getItem(DRAFT) || 'null'); if (d) { kind = d.kind; text.value = d.text; title.value = d.title; } } catch (e) {}
   if (!text.value) text.value = SAMPLE[kind];
   const kinds = () => bar.querySelectorAll('.st-kinds button').forEach((b) => b.classList.toggle('on', b.dataset.kind === kind));

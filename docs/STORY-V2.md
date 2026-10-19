@@ -54,12 +54,12 @@ Each transmission's heading in the story says which: *pops up as your first STOR
 - **IM**: a thread on a phone screen that pops up over the game (always the same size, a phone's
   shape): each message in a bubble, its sender and time above it on its side (theirs left, yours
   right), each sender's own color, "..." in a bubble while they type, a beat between messages about
-  as long as the reply would take. MOTH writes in lowercase, TOLL in capitals; your replies are
+  as long as the reply would take. MOTH texts as a phone types (a capital at each sentence, full stops between them, none at the end of a message), TOLL in capitals; your replies are
   shown too, written for you. Only that transmission's messages are on it, and a long thread
   scrolls. The cracked card and the ARCHIVE show it as an inbox does (its last message, OPEN
   THREAD). A time written in the story (`**moth** 02:14 ·`) is kept; the rest get late-night
   times of their own. **MOTH is an UNKNOWN CONTACT** on your phone until transmission 12, where
-  they name themselves ("say the moth sent you"); that card says `CONTACT SAVED // MOTH`, and
+  they name themselves ("Say the moth sent you"); that card says `CONTACT SAVED // MOTH`, and
   every IM after it is from MOTH (`names` in `js/data/stories.js`'s GHOSTS_RULES).
 - **CALL**: the card rings first, `INCOMING CALL // UNKNOWN NUMBER`, with ANSWER. The call plays as
   a transcript at a speaking pace, a low murmur down the line for each word, then
@@ -108,7 +108,7 @@ Okafor's damaged files) and DECODE (a picture hidden in the archive).
 A few short messages come outside the cracks, once each, when something happens:
 
 - **Traced in STORY for the first time** (after transmission 3). IM from MOTH:
-  `they nearly had you. you stack too high when you're nervous.`
+  `They nearly had you. You stack too high when you're nervous`
 - **DISCONNECT after a crack** (after transmission 13). IM from TOLL:
   `NICE HAUL. MARKET'S OPEN WHEN YOU ARE.`
 - **Back after 3 days or more** (after transmission 8). Voicemail from UNKNOWN NUMBER:
@@ -160,7 +160,7 @@ theirs), and a chapter's name stays ENCRYPTED till one of its transmissions is i
 
 - **You.** A small-time hacker. No name in the story; MOTH calls you **ghost**, because you never
   stay on a line long enough to be traced.
-- **MOTH.** The informant. IM only, lowercase, dry, careful. Sent you the archive, teaches you
+- **MOTH.** The informant. IM only, typed as a phone types (a capital at each sentence, no full stop to end a message), dry, careful. Sent you the archive, teaches you
   your tools, knows far too much about HALCYON. "You only see a moth when there's a light on."
 - **TOLL.** Runs the BLACK MARKET. All capitals, all business. Sells to anyone, including the
   people looking for you.
@@ -192,11 +192,11 @@ theirs), and a chapter's name stays ENCRYPTED till one of its transmissions is i
 > `<dir.vance>` Not your department.
 
 **3 // IM // MOTH** · *introduces BITFLIP (exploit)* · *on the cracked card*
-> **moth** · watched you crack that last key. you fight the board too much.
-> **moth** · here. BITFLIP. it turns every column upside down. what was buried comes up top.
-> **moth** · chain your decrypts and the meter beside the board fills. full, it's yours to use.
-> **you** · why are you helping me
-> **moth** · because they'll notice you soon. you should be faster by then.
+> **moth** · Watched you crack that last key. You fight the board too much
+> **moth** · Here. BITFLIP. It turns every column upside down. What was buried comes up top
+> **moth** · Chain your decrypts and the meter beside the board fills. Full, it's yours to use
+> **you** · Why are you helping me?
+> **moth** · Because they'll notice you soon. You should be faster by then
 
 *The chain meter appears; it earns BITFLIP.*
 
@@ -206,10 +206,10 @@ theirs), and a chapter's name stays ENCRYPTED till one of its transmissions is i
 > All corrections are permanent. HALCYON keeps no copies.
 
 **5 // IM // MOTH** · *introduces HEAD START (patch)* · *on the cracked card*
-> **moth** · you start every key cold. stop doing that.
-> **moth** · HEAD START: your chain meter starts half full and holds until your first decrypt.
-> **moth** · i put two in your kit. PATCHES, beside your EXPLOIT button.
-> **moth** · when they're gone they're gone. for now, ghost.
+> **moth** · You start every key cold. Stop doing that
+> **moth** · HEAD START: your chain meter starts half full and holds until your first decrypt
+> **moth** · I put two in your kit. PATCHES, beside your EXPLOIT button
+> **moth** · When they're gone they're gone. For now, ghost
 
 *The PATCHES button appears, with 2 HEAD STARTs.*
 
@@ -221,10 +221,10 @@ theirs), and a chapter's name stays ENCRYPTED till one of its transmissions is i
 > `<dir.vance>` Log off, Okafor.
 
 **7 // IM // MOTH** · *introduces RNG and BUFFER OVERFLOW (exploits)* · *on the cracked card*
-> **moth** · two more. they're messy. that's the point.
-> **moth** · RNG scrambles every bit on the board to a random number. use it when there's nothing left to lose.
-> **moth** · BUFFER OVERFLOW adds 1 to every bit. the top number spills over and gets re-encrypted, so watch your 7s.
-> **moth** · the meter picks which one you get. you don't.
+> **moth** · Two more. They're messy. That's the point
+> **moth** · RNG scrambles every bit on the board to a random number. Use it when there's nothing left to lose
+> **moth** · BUFFER OVERFLOW adds 1 to every bit. The top number spills over and gets re-encrypted, so watch your 7s
+> **moth** · The meter picks which one you get. You don't
 
 **8 // CALL // UNKNOWN NUMBER** · *the first warning; INFECTIONS begin* · *on the cracked card*
 > INCOMING CALL // UNKNOWN NUMBER
@@ -245,11 +245,11 @@ theirs), and a chapter's name stays ENCRYPTED till one of its transmissions is i
 > `<dir.vance>` Then call the Custodian.
 
 **10 // IM // MOTH** · *introduces LOOKAHEAD (patch) and TROJAN (exploit)* · *on the cracked card*
-> **moth** · he called you. calm voice. very polite.
-> **moth** · that's the Custodian. he doesn't hurt people. he corrects them. it's worse.
-> **moth** · LOOKAHEAD: see your next bit for a minute. two in your kit.
-> **moth** · TROJAN wipes out every block touching where it lands. for when it's piled up.
-> **moth** · you'll want to see them coming.
+> **moth** · He called you. Calm voice. Very polite
+> **moth** · That's the Custodian. He doesn't hurt people. He corrects them. It's worse
+> **moth** · LOOKAHEAD: see your next bit for a minute. Two in your kit
+> **moth** · TROJAN wipes out every block touching where it lands. For when it's piled up
+> **moth** · You'll want to see them coming
 
 **11 // FILE // HALCYON // THE LIST (excerpt)** · **JOB: FIREWALL (BREACH)** · *on the cracked card for now (a JOB later)*
 > 0117 // MARSH, D. // STANDARD // DEBT // CORRECTED
@@ -259,10 +259,10 @@ theirs), and a chapter's name stays ENCRYPTED till one of its transmissions is i
 > 2,947 ENTRIES. 309 FULL.
 
 **12 // IM // MOTH** · *introduces the BLACK MARKET* · *on the cracked card*
-> **moth** · i can't keep sending you tools. every package i send is a door they can follow back.
-> **moth** · there's a market. no names, no questions, everything has a price.
-> **moth** · ask for TOLL. say the moth sent you.
-> **moth** · and ghost. don't trust the boxes.
+> **moth** · I can't keep sending you tools. Every package I send is a door they can follow back
+> **moth** · There's a market. No names, no questions, everything has a price
+> **moth** · Ask for Toll. Say the moth sent you
+> **moth** · And ghost. Don't trust the boxes
 
 *Up to here MOTH's IMs come from an UNKNOWN CONTACT; this card says CONTACT SAVED // MOTH, and every
 IM after it is from MOTH.*
@@ -284,10 +284,10 @@ IM after it is from MOTH.*
 > CALL ENDED // 0:22
 
 **15 // IM // MOTH** · *bring your own* · *on the cracked card*
-> **moth** · you're still on. good. stubborn.
-> **moth** · stop waiting on me and toll. you can write your own tools.
-> **moth** · compile them at home, bring them in. anything you've seen work in here.
-> **moth** · only what you've seen. untested code gets people traced.
+> **moth** · You're still on. Good. Stubborn
+> **moth** · Stop waiting on me and Toll. You can write your own tools
+> **moth** · Compile them at home, bring them in. Anything you've seen work in here
+> **moth** · Only what you've seen. Untested code gets people traced
 
 *From now on, exploits and patches you own (the STORE's) can be brought into STORY, if they've been
 introduced: STORY's main menu gets PATCHES and EXPLOITS rows, and what you own shows in the in-game
@@ -309,11 +309,11 @@ cards too. The STORE marks what STORY has introduced.*
 > NOTE: the archive she took was never recovered.
 
 **18 // IM // MOTH** · *introduces PIVOT, SWAP, BACKDOOR (exploits) and RESTORE POINT (patch)* · *on the cracked card*
-> **moth** · you read 0120.
-> **moth** · don't. not yet. finish it first.
-> **moth** · PIVOT swaps a column with its neighbor. SWAP trades any two bits. BACKDOOR deletes the bottom row, layers and all.
-> **moth** · and RESTORE POINT. if they finish the trace, the system rolls back and you keep going. once.
-> **moth** · you're going to need once.
+> **moth** · You read 0120
+> **moth** · Don't. Not yet. Finish it first
+> **moth** · PIVOT swaps a column with its neighbor. SWAP trades any two bits. BACKDOOR deletes the bottom row, layers and all
+> **moth** · And RESTORE POINT. If they finish the trace, the system rolls back and you keep going. Once
+> **moth** · You're going to need once
 
 **19 // CALL // UNKNOWN NUMBER** · *your name on an order* · **JOB: LIVE TRACE (BLITZ, 1:30)** · *on the cracked card for now (a JOB later)*
 > INCOMING CALL // UNKNOWN NUMBER
@@ -331,10 +331,10 @@ cards too. The STORE marks what STORY has introduced.*
 > **TOLL** · PAY UP FRONT. CORRECTED PEOPLE DON'T PAY THEIR DEBTS.
 
 **21 // IM // MOTH** · *introduces ANTIVIRUS, FIREWALL DELAY (patches) and PACKET SNIFFER (exploit)* · *on the cracked card*
-> **moth** · toll's boxes bite. you knew that.
-> **moth** · ANTIVIRUS clears whatever's running and catches the next one. FIREWALL DELAY holds the next layer back four drops.
-> **moth** · PACKET SNIFFER lets you pick your next three bits. careful. it's addictive.
-> **moth** · they're the last clean tools i wrote. before.
+> **moth** · Toll's boxes bite. You knew that
+> **moth** · ANTIVIRUS clears whatever's running and catches the next one. FIREWALL DELAY holds the next layer back four drops
+> **moth** · PACKET SNIFFER lets you pick your next three bits. Careful. It's addictive
+> **moth** · They're the last clean tools I wrote. Before
 
 **22 // FILE // HALCYON // THE LIST (complete)** · **JOB: FIREWALL (BREACH)** · *on the cracked card for now (a JOB later)*
 > 2,948 ENTRIES. 310 FULL.
@@ -343,11 +343,11 @@ cards too. The STORE marks what STORY has introduced.*
 > REQUESTED BY: THE CUSTODIAN.
 
 **23 // IM // MOTH** · *introduces LOGIC BOMB, DICTIONARY ATTACK, RAINBOW TABLE, BLACK BOX (exploits)* · *on the cracked card*
-> **moth** · it was me. 0120.
-> **moth** · i built the eraser. when i tried to undo it, they ran it on me.
-> **moth** · no name. no records. a moth. you only see one when there's a light on.
-> **moth** · here's everything i have left. LOGIC BOMB, DICTIONARY ATTACK, RAINBOW TABLE, BLACK BOX.
-> **moth** · the eraser has an undo. it's under the last key. crack it.
+> **moth** · It was me. 0120
+> **moth** · I built the eraser. When I tried to undo it, they ran it on me
+> **moth** · No name. No records. A moth. You only see one when there's a light on
+> **moth** · Here's everything I have left. LOGIC BOMB, DICTIONARY ATTACK, RAINBOW TABLE, BLACK BOX
+> **moth** · The eraser has an undo. It's under the last key. Crack it
 
 **24 // CALL // UNKNOWN NUMBER, then IM // MOTH** · *the end* · **JOB: THE CUSTODIAN (VS)** · *on the cracked card for now (a JOB later)*
 > (his program, beaten: THE CUSTODIAN // OVERFLOWED)
@@ -358,8 +358,8 @@ cards too. The STORE marks what STORY has introduced.*
 > RESTORE QUEUE // 309 FULL CORRECTIONS // REVERSING...
 > ORDER // [YOU] // VOID
 >
-> **moth** · my name is adaeze okafor.
-> **moth** · say it once. so it's written down somewhere.
+> **moth** · My name is Adaeze Okafor
+> **moth** · Say it once. So it's written down somewhere
 
 *STORY complete. Every transmission stays in the ARCHIVE. STORY games go on (keys still pay KEYS),
 with everything introduced.*

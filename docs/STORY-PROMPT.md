@@ -67,7 +67,7 @@ THE STRUCTURE TO KEEP
 
 THE VOICES
 - The player: a small-time hacker with no name. MOTH calls them "ghost".
-- MOTH: the informant. IM only, all lowercase, terse, dry, warm underneath, knows too much.
+- MOTH: the informant. IM only, typed as a phone types (a capital at each sentence, no full stop to end a message), terse, dry, warm underneath, knows too much.
 - TOLL: runs the black market. ALL CAPITALS, transactional, sells to anyone.
 - THE CUSTODIAN (UNKNOWN NUMBER): HALCYON's fixer. Calls, never writes. Polite full sentences, never
   raises his voice, threatens by implication. He doesn't hurt people; he "corrects" them.
