@@ -709,10 +709,33 @@ bots, at the bots' own pixel size and taller than them, dark (the four CPUs stay
 their eyes and lights glowing: HOODED figures in long coats, one under a neon UMBRELLA, chrome ROBOTS
 (a red light on the antenna), tall ANDROIDS (an LED strip down the coat), hovering DROIDS, DRONES flying
 over with parcels; they come in, cross, now and then stop at a window, a stall or the metro a while,
-and go. Flying cars cross between the towers. What's still is drawn once, the whole street, and slid;
-only what changes is redrawn (a flicker redraws that sign, and only the part of its neighbors under
-it). REDUCED EFFECTS: no flicker, no steam. Meant to become the lane's usual place, the other scenes the
-occasional ones, once it's ready.
+and go. Flying cars cross between the towers. **BYTEFALL** stands in neon on a far tower's roof, on its
+scaffold (BYTE in the game's green, FALL in its amber; a faulty tube, now and then), the tallest one
+about the middle of the street, so it's in sight most of the time. **DRAWN FINER THAN THE BOTS**: the
+street's pixels are a half or a third of a bot's (RES: 2x on a plain screen, 3x on a sharp one, where a
+third is still a whole pixel of the screen; the sandbox's RES buttons pick 2x, 3x or 4x), its parts
+measured in bot pixels so they stand as tall, the finer pixels spent on detail: window frames, sills and
+glints, brickwork or panel seams, the goods on the shelves, hanging lamps, a scalloped canopy, ribbed
+lanterns, neon tubes with a hot white core. The crowd is scaled up the pixel artist's way (Scale2x /
+Scale3x: smooth diagonals, still pixels), each pose drawn once and kept, a sheen along its top edges.
+**THE BOTS NOTICE IT**: one passed close behind by a figure turns to look and reacts in a bubble (a
+hooded one: wary; a robot: hi!; a droid zipping by: startled; the umbrella: a smile), looks up at a
+drone or the train going over, at a sign over it sputtering out, flinches at a grate's steam under it,
+admires a lit shop window it's stopped at; one bot at a time, each a while before it notices anything
+again (`cyber-notice-*` events). **THE CLOSE-UP**: every two to four minutes (not while panning; the
+sandbox's CLOSE-UP for one now), the view cuts in on one of the CPUs, anime style, for about six
+seconds: letterbox bars sliding in, a white flash at the cut, the bot two thirds of the frame tall and
+drawn at four times its pixels (its own art as it is that moment, read off its page element: mood,
+face, headphones and all; Scale2x twice), lit: a neon rim on the sign's side and its glow past the
+edge, shadow and a dither on the other, lighter up top and darker to its feet, the night's blue in it,
+rain's sheen on top, a shine in each eye, its face glowing. Behind it a brick wall in the dark, its
+NAME in neon (flickering), a second tube, lights blurred to bokeh, the wet ground with the light in it,
+its reflection rippling there; rain streaking past in front, a slow push in, a breath. Then the cut
+back. In the game card it fills the whole scene; on the start screen, the lower part, under START. No
+rainbow over the street (always night). What's still is drawn once, the whole street, and slid; only
+what changes is redrawn (a flicker redraws that sign, and only the part of its neighbors under it, on
+its own layer). REDUCED EFFECTS: no flicker, no steam, no push in or breath, no rain in the close-up.
+Meant to become the lane's usual place, the other scenes the occasional ones, once it's ready.
 
 **SCENES** (`js/scenes.js`): now and then (a few times an hour, 10-20 minutes each) the lane
 becomes a place, by the time of year: MEADOW (spring, summer), BEACH (summer: the sea's waves

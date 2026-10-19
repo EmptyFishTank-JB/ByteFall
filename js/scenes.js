@@ -91,6 +91,7 @@ function createScenes(api) {
     const cy = kind === 'cyber' && typeof createCyberStreet === 'function' ? createCyberStreet({
       lane: api.lane, laneW: api.laneW, laneH: api.laneH, P, game, botEvent: api.botEvent,
       shift: (dx) => { if (api.shift) api.shift(dx); }, // (the street panning: the bots on it carried along)
+      walkers: api.walkers, say: api.say, turn: api.turn, // (the bots noticing what's on it; THE CLOSE-UP's bot)
     }) : null;
     sc = { dockSide: keep.dockSide, kind, at: now, until: worldMode() ? Infinity : now + (ms || rand(600000, 1200000)), seed: keep.seed, els: cy ? cy.els : { far: canvas('scene-far'), ground: canvas('scene-ground'), near: canvas('scene-near') }, cy, drawnW: 0, wave: 0, night: night() };
     draw(true);

@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" class="sandbox">
 <head>
-<script src="../js/fonts.js?v=645"></script>
+<script src="../js/fonts.js?v=646"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#020403">
 <title>Bot Sandbox // BYTEFALL</title>
-<link rel="stylesheet" href="../css/style.css?v=645">
+<link rel="stylesheet" href="../css/style.css?v=646">
 <!-- BOT SANDBOX: the wandering bots and everything around them (visitors, viruses, seasons, the fog,
      headphones and the music) running on the game's own code, with every behavior on a button.
      Progress is stubbed: nothing here touches the saved game (no achievements, no unlocks). -->
@@ -22,25 +22,43 @@
 </script>
 <style>
   html.sandbox, html.sandbox body { min-height: 100%; }
+  /* (overflow-x: clip, not hidden: hidden would make the body a scroll box of its own, one that never
+     scrolls, and nothing in it could stick) */
   html.sandbox body {
-    display: block; margin: 0; padding: 24px 16px 60px; overflow-x: hidden;
+    display: block; margin: 0; padding: 0; overflow-x: clip;
     background: radial-gradient(ellipse at top, #0d1b16 0%, #020403 70%) fixed; background-color: #020403;
     color: var(--fg); font-family: var(--game-font, 'Courier New', Courier, monospace);
   }
-  .sb { max-width: 980px; margin: 0 auto; }
+  .sb { max-width: 980px; margin: 0 auto; padding: 0 16px; box-sizing: border-box; }
   .sb-back { color: var(--fg-dim); text-decoration: none; font-size: 12px; letter-spacing: 2px; }
   .sb-back:hover { color: var(--fg); }
   .sb h1 { font-size: 20px; letter-spacing: 3px; margin: 14px 0 4px; color: var(--accent); }
-  .sb .lede { font-size: 12px; color: var(--fg-dim); margin: 0 0 18px; line-height: 1.5; }
-  .sb-grid { display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 20px; align-items: start; }
-  @media (max-width: 860px) { .sb-grid { grid-template-columns: minmax(0, 1fr); } }
-  .sb-stage { position: sticky; top: 12px; }
+  .sb .lede { font-size: 12px; color: var(--fg-dim); margin: 0 0 18px; line-height: 1.5; max-width: 420px; }
+  /* THE PREVIEW STAYS PUT, THE CONTROLS SCROLL. Wide: two columns of the screen's height, each scrolling
+     on its own (the preview's only when zoomed past it). Narrow: the page scrolls, the stage sticking at
+     the top over the controls going by under it, a little shorter so there's room for them */
+  @media (min-width: 861px) {
+    html.sandbox body { height: 100vh; height: 100dvh; overflow: hidden; }
+    .sb { height: 100%; display: grid; grid-template-columns: 420px minmax(0, 1fr); gap: 20px; }
+    .sb-stage, .sb-controls { min-height: 0; overflow-y: auto; padding: 24px 0 40px; }
+    .sb-stage { scrollbar-width: none; }
+    .sb-stage::-webkit-scrollbar { display: none; }
+    .sb-controls { scrollbar-width: thin; scrollbar-color: var(--fg-dim) transparent; }
+  }
+  @media (max-width: 860px) {
+    .sb { padding: 24px 16px 60px; }
+    .sb-stage { display: contents; } /* (so the view sticks over the whole page, the controls too) */
+    .sb-view { position: sticky; top: 0; z-index: 40; background: #020403; padding: 8px 0; margin: 0 -16px; padding-left: 16px; padding-right: 16px; border-bottom: 1px solid var(--grid-line); }
+    .sb-log { height: 70px !important; margin-bottom: 12px; }
+    .sb-controls { margin-top: 12px; }
+  }
   /* The three stages, as in the game: the game card's lane, the start screen, the screen saver */
   .stage { display: none; position: relative; width: 100%; max-width: 420px; }
   .stage.on { display: block; }
   .stage-game .crt { height: 230px; padding: 0; display: block; max-width: none; }
   .stage-game .sb-board { position: absolute; left: 22px; right: 22px; top: 16px; height: 120px; border: 1px dashed var(--grid-line); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; letter-spacing: 2px; color: var(--fg-dim); }
   .stage-start .start-card { height: 600px; position: relative; }
+  @media (max-width: 860px) { .stage-start .start-card { height: min(600px, 52vh); } .stage-saver .saver { height: min(420px, 45vh) !important; } }
   .stage-start .start-title { position: absolute; top: 36%; left: 0; right: 0; }
   .stage-saver .saver { position: relative; inset: auto; z-index: auto; height: 420px; border-radius: 10px; cursor: default; }
   .stage-saver .saver-lane { --y: 70%; }
@@ -65,12 +83,13 @@
 </head>
 <body>
 <div class="sb">
-  <a class="sb-back" href="./">&larr; DEV &amp; TESTING</a>
-  <h1>// BOT SANDBOX</h1>
-  <p class="lede">The wandering bots on the game's own code: spawn any bot at any level, call up any visitor, season, virus or the fog, play the music for the headphones, and set every mood and reaction off on a button. Tap a bot or visitor to poke it, as in the game. Nothing here touches your saved game.</p>
-
-  <div class="sb-grid">
     <div class="sb-stage">
+      <div class="sb-head">
+        <a class="sb-back" href="./">&larr; DEV &amp; TESTING</a>
+        <h1>// BOT SANDBOX</h1>
+        <p class="lede">The wandering bots on the game's own code: spawn any bot at any level, call up any visitor, season, virus or the fog, play the music for the headphones, and set every mood and reaction off on a button. Tap a bot or visitor to poke it, as in the game. Nothing here touches your saved game.</p>
+      </div>
+      <div class="sb-view">
       <div class="stage stage-game on" id="stage-game">
         <div class="crt"><div class="sb-board">// THE GRID</div><div class="game-walkers" id="lane-game"></div></div>
       </div>
@@ -84,6 +103,7 @@
         <div class="saver"><div class="start-walkers saver-lane" id="lane-saver"></div></div>
       </div>
       <div class="sb-zoom">ZOOM <button type="button" data-zoom="1" class="on">1x</button><button type="button" data-zoom="2">2x</button><button type="button" data-zoom="3">3x</button></div>
+      </div>
       <div class="sb-log" id="sb-log">// events (what the bots and visitors set off) show here</div>
     </div>
 
@@ -144,8 +164,9 @@
 
       <div class="grp">
         <h2>CYBERPUNK STREET (WORK IN PROGRESS)</h2>
-        <p>A long street at night, seen close up, far longer than the card: the view pans along it now and then on its own (every minute or two), the bots carried with it, the city beyond (through the gaps, the windows, over the low roofs) panning slower. Its own crowd walks it behind the bots. STREET brings it up; PAN starts a pan now; the figures send someone along it; TRAIN sends one along the elevated line. RAIN suits it.</p>
+        <p>A long street at night, seen close up, far longer than the card: the view pans along it now and then on its own (every minute or two), the bots carried with it, the city beyond (through the gaps, the windows, over the low roofs) panning slower, BYTEFALL in neon on a far roof. Its own crowd walks it behind the bots, and the bots notice what's around them: a figure passing, a drone or the train going over, a sign sputtering, steam, a lit window. STREET brings it up; PAN starts a pan now; the figures send someone along it; TRAIN sends one along the elevated line; CLOSE-UP cuts in on one of the CPUs (anime style, at four times its pixels: they come on their own every few minutes). RES: the street's pixels against a bot's (AUTO: 2x, 3x on a sharp screen). RAIN suits it.</p>
         <div class="row" id="cyber"></div>
+        <div class="row" id="cyber-res"><b>RES</b></div>
       </div>
 
       <div class="grp">
@@ -160,39 +181,38 @@
         <div class="row"><b>STACK HEIGHT (INTENSITY)</b><input type="range" id="intensity" min="0" max="100" value="40" style="width: 100%;"></div>
       </div>
     </div>
-  </div>
 </div>
 <canvas id="board-fx" aria-hidden="true"></canvas>
 <div class="stat cpu-face" id="cpu-face" hidden aria-hidden="true"></div>
 
-<script src="../js/bot-svg.js?v=645"></script>
-<script src="../js/music/output.js?v=645"></script>
-<script src="../js/music/mixes.js?v=645"></script>
-<script src="../js/sfx.js?v=645"></script>
-<script src="../js/music/music-bytefall-theme.js?v=645"></script>
-<script src="../js/music/music-sleep-mode.js?v=645"></script>
-<script src="../js/music/music-brute-force.js?v=645"></script>
-<script src="../js/music/music-deep-web.js?v=645"></script>
-<script src="../js/music/music-zero-day.js?v=645"></script>
-<script src="../js/music/music-system-restore.js?v=645"></script>
-<script src="../js/music/music-night-drive.js?v=645"></script>
-<script src="../js/music/music-standby-mode.js?v=645"></script>
-<script src="../js/music/music-core-dump.js?v=645"></script>
-<script src="../js/music/music-handshake.js?v=645"></script>
-<script src="../js/music/music-stack-overflow.js?v=645"></script>
-<script src="../js/music/music.js?v=645"></script>
-<script src="../js/fx.js?v=645"></script>
-<script src="../js/pixel.js?v=645"></script>
-<script src="../js/minibot.js?v=645"></script>
-<script src="../js/seasons.js?v=645"></script>
-<script src="../js/bigart.js?v=645"></script>
-<script src="../js/cyberstreet.js?v=645"></script>
-<script src="../js/scenes.js?v=645"></script>
-<script src="../js/weather.js?v=645"></script>
-<script src="../js/visitors.js?v=645"></script>
-<script src="../js/data/bot-anims.js?v=645"></script>
-<script src="../js/wanderers.js?v=645"></script>
-<script src="../js/grid-bg.js?v=645"></script>
+<script src="../js/bot-svg.js?v=646"></script>
+<script src="../js/music/output.js?v=646"></script>
+<script src="../js/music/mixes.js?v=646"></script>
+<script src="../js/sfx.js?v=646"></script>
+<script src="../js/music/music-bytefall-theme.js?v=646"></script>
+<script src="../js/music/music-sleep-mode.js?v=646"></script>
+<script src="../js/music/music-brute-force.js?v=646"></script>
+<script src="../js/music/music-deep-web.js?v=646"></script>
+<script src="../js/music/music-zero-day.js?v=646"></script>
+<script src="../js/music/music-system-restore.js?v=646"></script>
+<script src="../js/music/music-night-drive.js?v=646"></script>
+<script src="../js/music/music-standby-mode.js?v=646"></script>
+<script src="../js/music/music-core-dump.js?v=646"></script>
+<script src="../js/music/music-handshake.js?v=646"></script>
+<script src="../js/music/music-stack-overflow.js?v=646"></script>
+<script src="../js/music/music.js?v=646"></script>
+<script src="../js/fx.js?v=646"></script>
+<script src="../js/pixel.js?v=646"></script>
+<script src="../js/minibot.js?v=646"></script>
+<script src="../js/seasons.js?v=646"></script>
+<script src="../js/bigart.js?v=646"></script>
+<script src="../js/cyberstreet.js?v=646"></script>
+<script src="../js/scenes.js?v=646"></script>
+<script src="../js/weather.js?v=646"></script>
+<script src="../js/visitors.js?v=646"></script>
+<script src="../js/data/bot-anims.js?v=646"></script>
+<script src="../js/wanderers.js?v=646"></script>
+<script src="../js/grid-bg.js?v=646"></script>
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -340,11 +360,16 @@
     b.addEventListener('click', () => W().visit(`sc-${k}`));
     $('scenes').appendChild(b);
   }
-  // (THE CYBERPUNK STREET, cyberstreet.js: the street, a pan, someone on it, rain)
-  for (const [label, what] of [['STREET', 'sc-cyber'], ['PAN \u2190', 'cy-pan-left'], ['PAN \u2192', 'cy-pan-right'], ['HOODED', 'cy-spawn-hood'], ['UMBRELLA', 'cy-spawn-umbrella'], ['ROBOT', 'cy-spawn-robot'], ['ANDROID', 'cy-spawn-android'], ['DROID', 'cy-spawn-droid'], ['DRONE', 'cy-spawn-drone'], ['TRAIN', 'cy-train'], ['RAIN', 'wx-rain'], ['CLEAR', 'sc-clear']]) {
+  // (THE CYBERPUNK STREET, cyberstreet.js: the street, a pan, someone on it, a close-up, rain; its RES)
+  for (const [label, what] of [['STREET', 'sc-cyber'], ['PAN \u2190', 'cy-pan-left'], ['PAN \u2192', 'cy-pan-right'], ['HOODED', 'cy-spawn-hood'], ['UMBRELLA', 'cy-spawn-umbrella'], ['ROBOT', 'cy-spawn-robot'], ['ANDROID', 'cy-spawn-android'], ['DROID', 'cy-spawn-droid'], ['DRONE', 'cy-spawn-drone'], ['TRAIN', 'cy-train'], ['CLOSE-UP', 'cy-closeup'], ['RAIN', 'wx-rain'], ['CLEAR', 'sc-clear']]) {
     const b = el('button', { type: 'button' }, label);
     b.addEventListener('click', () => W().visit(what));
     $('cyber').appendChild(b);
+  }
+  for (const [label, res] of [['AUTO', 'auto'], ['2X', '2'], ['3X', '3'], ['4X', '4']]) {
+    const b = el('button', { type: 'button', className: res === 'auto' ? 'on' : '' }, label);
+    b.addEventListener('click', () => { W().visit(`cy-res-${res}`); radio($('cyber-res'), b); });
+    $('cyber-res').appendChild(b);
   }
   for (const v of VISITS) {
     const b = el('button', { type: 'button' }, v.toUpperCase());

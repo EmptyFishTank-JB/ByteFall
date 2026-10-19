@@ -58,8 +58,9 @@ function createWeather(api) {
   const lowFx = () => document.documentElement.classList.contains('low-fx');
   const light = () => ['paper', 'daylight'].includes(document.documentElement.dataset.theme);
   const calm = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  // (HALLOWEEN, or the HAUNTED FOREST up: no rainbow after the rain)
+  // (HALLOWEEN, or the HAUNTED FOREST up, or THE CYBERPUNK STREET (always night): no rainbow after the rain)
   const spooky = () => (typeof Season !== 'undefined' && Season.is('halloween')) || (typeof hauntedForest !== 'undefined' && hauntedForest);
+  const noRainbow = () => spooky() || (api.scene && api.scene() === 'cyber');
   const hour = () => new Date().getHours();
   const isDay = () => hour() >= 7 && hour() < 19;
   const isNight = () => hour() >= 20 || hour() < 6;
@@ -217,7 +218,7 @@ function createWeather(api) {
     if (!now) { wx.phase = 'out'; wx.at = performance.now(); return; }
     if (wx.k.clouds) api.releaseClouds();
     umbrellasDown();
-    if (wx.k.rainbow && Math.random() < wx.k.rainbow && isDay() && !light() && !spooky()) rainbowIn(performance.now(), rand(40000, 60000));
+    if (wx.k.rainbow && Math.random() < wx.k.rainbow && isDay() && !light() && !noRainbow()) rainbowIn(performance.now(), rand(40000, 60000));
     wx = null;
   }
   function clear() {
@@ -435,6 +436,7 @@ function createWeather(api) {
 
   // RAINBOW: drawn once (bands of pixels) and faded in and out
   function rainbowIn(now, ms) {
+    if (api.scene && api.scene() === 'cyber') return;
     ensureLayers();
     rainbow = { at: now, until: now + ms, canvas: null };
   }
@@ -568,7 +570,7 @@ function createWeather(api) {
     for (const h of haze) h.age += dt;
     haze = haze.filter((h) => h.age < 2.2);
     if (!wx || !wx.k.settle) for (let i = 0; i < ground.length; i++) ground[i] = Math.max(0, ground[i] - dt * 0.04);
-    if (rainbow && now > rainbow.until + 6000) rainbow = null;
+    if (rainbow && (now > rainbow.until + 6000 || (api.scene && api.scene() === 'cyber'))) rainbow = null;
 
     // (overlays: the sun's warmth, the night sky, the whiteout)
     const L = wx ? wx.level : 0;
