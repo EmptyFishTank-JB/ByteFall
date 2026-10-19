@@ -124,6 +124,10 @@
       history.pushState({ bytefall: 'game' }, '');
       return;
     }
+    if (window.rulesPageBack && window.rulesPageBack()) { // (a RULES page: back to the folders)
+      history.pushState({ bytefall: 'game' }, '');
+      return;
+    }
     if (panel || !homeOpen) {
       setRecordsOpen(false);
       setSettingsOpen(false);

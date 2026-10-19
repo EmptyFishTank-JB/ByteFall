@@ -7708,6 +7708,13 @@ rulesPanel.querySelectorAll('.rules-sec').forEach((sec) => {
   if (tut) tut.addEventListener('click', () => startTutorial(tut, tut.dataset.lesson));
 });
 rulesBack.addEventListener('click', () => { SFX.play('click'); showRulesSec(null); });
+// (BACK, Esc and the phone's back on a section's page: back to the folders, RULES & RECORDS kept open)
+window.rulesPageBack = () => {
+  if (recordsEl.hidden || menuPane !== 'rules' || !document.getElementById('rules-panel').dataset.sec) return false;
+  SFX.play('click');
+  showRulesSec(null);
+  return true;
+};
 // (a section's lesson over: back on its page)
 window.openRules = (id) => {
   setRecordsOpen(true, 'rules');
@@ -7758,11 +7765,12 @@ window.closeOverCard = () => {
 };
 document.querySelectorAll('.card-back').forEach((b) => b.addEventListener('click', () => {
   if (window.closeOverCard()) return;
+  if (b.dataset.close === 'records' && window.rulesPageBack()) return; // (a RULES page: back to the folders)
   if (b.dataset.close === 'records') setRecordsOpen(false);
   else if (b.dataset.close === 'settings') setSettingsOpen(false);
 }));
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && !recordsEl.hidden) setRecordsOpen(false);
+  if (e.key === 'Escape' && !recordsEl.hidden && !window.rulesPageBack()) setRecordsOpen(false);
 });
 
 // Locked exploits dim with their points tracker (this rank); DAILY shows its fixed five.
