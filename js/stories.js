@@ -382,13 +382,20 @@ const Stories = (() => {
     const pick = picked();
     el.innerHTML = '<p class="archive-note">Every key cracked in STORY (tap CLASSIC again on the main menu) brings the next transmission of the story you\'re decrypting. Deeper chapters need deeper keys.</p>'
       + '<button type="button" class="archive-back archive-intro" id="archive-intro">READ THE INTRO</button>'
-      + STORIES.map((s, i) => {
+      + STORIES.map((s) => {
         const open = isOpen(s);
-        const state = !open ? `LOCKED // FINISH ${STORIES[i - 1].title}` : done(s) ? 'COMPLETE' : s === pick ? 'DECRYPTING' : `${got(s) ? 'PAUSED' : 'NOT STARTED'}`;
-        const news = open && fresh(s) ? `<span class="archive-new">${fresh(s)} NEW</span>` : '';
-        return `<button type="button" class="archive-story${open ? '' : ' locked'}${s === pick && open ? ' on' : ''}" data-story="${s.id}">`
+        if (!open) { // (a season still to come: every line ENCRYPTED, noise as long as what it covers: its name, what it's about, how far)
+          const enc = (k, len) => `<span class="as-enc">${noise(`${s.id}:${k}`, len)}</span>`;
+          return `<button type="button" class="archive-story locked" data-story="${s.id}" aria-label="Season ${s.season}: encrypted">`
+            + `<span class="as-top"><span class="as-title">SEASON ${s.season} // ${enc('title', s.title.length)}</span></span>`
+            + `<span class="as-blurb">${enc('blurb', s.blurb.length)}</span>`
+            + `<span class="as-state">${enc('state', `0 / ${count(s)} ${unit(s)}S // NOT STARTED`.length)}</span></button>`;
+        }
+        const state = done(s) ? 'COMPLETE' : s === pick ? 'DECRYPTING' : `${got(s) ? 'PAUSED' : 'NOT STARTED'}`;
+        const news = fresh(s) ? `<span class="archive-new">${fresh(s)} NEW</span>` : '';
+        return `<button type="button" class="archive-story${s === pick ? ' on' : ''}" data-story="${s.id}">`
           + `<span class="as-top"><span class="as-title">SEASON ${s.season} // ${esc(s.title)}</span>${news}</span>`
-          + `<span class="as-blurb">${open ? esc(s.blurb) : 'Locked.'}</span>`
+          + `<span class="as-blurb">${esc(s.blurb)}</span>`
           + `<span class="as-state">${got(s)} / ${count(s)} ${unit(s)}S // ${state}</span></button>`;
       }).join('');
     document.getElementById('archive-intro').addEventListener('click', () => { SFX.play('click'); if (typeof openStoryIntro === 'function') openStoryIntro(); });
@@ -396,7 +403,7 @@ const Stories = (() => {
       const s = byId(b.dataset.story);
       if (!isOpen(s)) {
         SFX.play('denied');
-        cardNotice(`LOCKED // FINISH ${STORIES[STORIES.indexOf(s) - 1].title}`);
+        cardNotice('ENCRYPTED');
         return;
       }
       SFX.play('click');
