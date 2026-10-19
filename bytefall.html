@@ -47,8 +47,8 @@
   } catch (e) {}
 </script>
 <title>BYTEFALL // decryption terminal</title>
-<script src="js/fonts.js?v=640"></script>
-<link rel="stylesheet" href="css/style.css?v=640">
+<script src="js/fonts.js?v=641"></script>
+<link rel="stylesheet" href="css/style.css?v=641">
 </head>
 <body>
   <!-- Dev: TWINKLE BACKGROUND (grid-bg.js): the starlight behind the whole game, off by default -->
@@ -186,41 +186,80 @@
         <div class="menu-pane" data-pane="rules">
           <aside class="panel panel-rules" id="rules-panel">
             <h2 class="rules-head">RULES <button type="button" class="tut-open" id="tutorial-btn">TUTORIAL</button></h2>
-            <p>Encrypted bits fall into the terminal. Drop each one into a column.</p>
-            <p>A bit decrypts when its number matches the length of the unbroken line it sits in, across or down. Decrypting can bring more bits down into new matches for a chain.</p>
-            <div class="store-rule" aria-hidden="true">================================================================================</div>
-            <h3 class="rules-sub">// SCORING</h3>
-            <p>A decrypted bit scores 10 plus its number (a <b>[4]</b> is 14), multiplied by the chain: the second link doubles, the third triples, and so on. Blocks wiped out by exploits score a flat 10.</p>
-            <p>On <b>Easy</b> and <b>Normal</b>, every 4 bits a single drop decrypts make a <b>NIBBLE</b>, worth 16 bonus points.</p>
-            <div class="store-rule" aria-hidden="true">================================================================================</div>
-            <h3 class="rules-sub">// LAYERS AND THE LINE</h3>
-            <p>Encryption layers <b>[=]</b> rise from below <span id="rules-pulse">every 8 drops</span>. Decrypt a bit beside one to peel a layer off; the second peel (<b>[-]</b>) reveals the bit hidden underneath.</p>
-            <p>Keep your columns below the <b>========</b> line. If anything is still above it once the decrypting stops, the trace completes and you're caught.</p>
-            <div class="store-rule" aria-hidden="true">================================================================================</div>
-            <h3 class="rules-sub">// EXPLOITS</h3>
-            <p>Each chain link lights a bar of the <b>CHAIN METER</b> beside the grid; fill all 5 for an <b>EXPLOIT</b> from your loadout. Tap the EXPLOIT button and it becomes your next drop.</p>
-            <p>The first three exploits are yours as they unlock; the rest are bought once with resources in EXPLOITS and kept until you <b>RANK UP</b>.</p>
-            <div class="store-rule" aria-hidden="true">================================================================================</div>
-            <h3 class="rules-sub">// THE BOTTOM ROW</h3>
-            <p>Either side of the EXPLOIT button, an <b>EXPLOIT SLOT</b> holds an exploit you bring in from the main menu's EXPLOITS (the left one fills first). An empty one is the <b>BLACK MARKET</b> once the first layer rises: something for sale, a new one every 4 drops (each slot's pips count its own). Once what you bought is used, its slot sits out the next drop, then shuffles to a new offer.</p>
-            <p>At each end, a <b>PATCH SLOT</b> sells a patch mid-game, applied the moment you buy it. It keeps the slot while it works; used up, the slot sits out the next drop, then sells another. The slots open as you level up.</p>
-            <p><b>BLACK BOXES</b> open into a random exploit, but some are <b>INFECTED</b>.</p>
-            <p>In CLASSIC and BLITZ, a bit freed from its last layer is now and then an <b>INFECTED BIT</b>: red, with a virus in its corner. Decrypt it with your next drop and it's quarantined for a ROOTKIT; leave it, and it goes off as an infection. <b>INFECTIONS: OFF</b> in the mode's settings on the main menu turns them off.</p>
-            <div class="store-rule" aria-hidden="true">================================================================================</div>
-            <h3 class="rules-sub" id="rules-story">// STORY</h3>
-            <p>Tap <b>CLASSIC</b> again on the main menu for <b>STORY</b> (and again for CLASSIC). In STORY every game has a key to crack, and every file of the story its own key: its <b>ENCRYPTION STRENGTH</b>, the points it takes, stays ENCRYPTED till a 5-chain from one drop finds it out, or you crack it anyway. Crack it for KEYS and the story's next file (a document, a message or a call), then <b>GO DEEPER</b> for a stronger key or <b>DISCONNECT</b> to end the game on a win. Deeper chapters need deeper keys; the <b>ARCHIVE</b> keeps everything.</p>
-            <p>STORY has no settings: it's played on the 7x7 board (with INFECTIONS, once someone's noticed you), and each key is harder than the last: 1,500 more points to crack, its layers sooner (every 8 drops at 128-BIT, 7 at 192, 6 at 256 and 384, 5 at 512 and 1024, then 4), and infections likelier.</p>
-            <p>You start STORY with nothing, and the story decides what you can use: the people in it introduce exploits and patches as it goes, and only those count in STORY, whatever you own or have unlocked elsewhere. Your chains earn the introduced exploits; the patches you're sent go in your kit, used from the <b>PATCHES</b> button beside your EXPLOIT button (up to 2 patches and 2 exploits a key). Later the <b>BLACK MARKET</b> opens from the same buttons, and later still you can bring your own from the STORE, chosen on STORY's main menu.</p>
-            <div class="store-rule" aria-hidden="true">================================================================================</div>
-            <h3 class="rules-sub">// DIFFICULTY</h3>
-            <p><b>Easy</b> shows the next bit, and a drop that clears nothing only takes one bar off the CHAIN METER (on <b>Normal</b> it empties it).</p>
-            <p><b>Hard</b> is a full byte: an 8&times;8 terminal with bits up to 8, and new layers come faster as your score climbs. Every 8 bits a single drop decrypts make a <b>BYTE</b>, worth 256 bonus points, and 4 more a <b>NIBBLE</b>, worth 16. Its CHAIN METER empties after every chain: the 5 links have to come in one.</p>
-            <div class="store-rule" aria-hidden="true">================================================================================</div>
-            <h3 class="rules-sub">// RESOURCES AND LEVELS</h3>
-            <p>Decrypting earns <b>KEYS</b> and resources (the STORE's [i] says how), spent in the STORE, the BLACK MARKET and the PATCH SLOTS. <b>PATCHES</b> bought there are switched on from the main menu before a game.</p>
-            <p>Every bit you decrypt is XP, 100 bits a level. Exploits, slots, themes, fonts and tracks unlock by level; at Lv 80 you can <b>RANK UP</b> to start again, earning a little more each rank.</p>
-            <div class="store-rule" aria-hidden="true">================================================================================</div>
-            <p class="keys" id="rules-keys">Tap a column or its button, or press 1&ndash;7, to drop</p>
+            <!-- RULES: a folder for each section (script.js's rules pages); tapped, its page: what it says,
+                 and the section's own TUTORIAL (tutorial.js's LESSONS) where it has one -->
+            <div class="rules-list" id="rules-list"></div>
+            <button type="button" class="archive-back rules-back" id="rules-back" hidden>&larr; ALL RULES</button>
+            <section class="rules-sec" data-sec="basics" hidden>
+              <h3 class="rules-sub">// THE BASICS <button type="button" class="tut-open" data-lesson="basics">TUTORIAL</button></h3>
+              <p>Encrypted bits fall into the terminal. Drop each one into a column.</p>
+              <p>A bit decrypts when its number matches the length of the unbroken line it sits in, across or down. Decrypting can bring more bits down into new matches for a chain.</p>
+              <p class="keys" id="rules-keys">Tap a column or its button, or press 1&ndash;7, to drop</p>
+            </section>
+            <section class="rules-sec" data-sec="scoring" hidden>
+              <h3 class="rules-sub">// SCORING <button type="button" class="tut-open" data-lesson="scoring">TUTORIAL</button></h3>
+              <p>A decrypted bit scores 10 plus its number (a <b>[4]</b> is 14), multiplied by the chain: the second link doubles, the third triples, and so on. Blocks wiped out by exploits score a flat 10.</p>
+              <p>On <b>Easy</b> and <b>Normal</b>, every 4 bits a single drop decrypts make a <b>NIBBLE</b>, worth 16 bonus points.</p>
+            </section>
+            <section class="rules-sec" data-sec="layers" hidden>
+              <h3 class="rules-sub">// LAYERS AND THE LINE <button type="button" class="tut-open" data-lesson="layers">TUTORIAL</button></h3>
+              <p>Encryption layers <b>[=]</b> rise from below <span id="rules-pulse">every 8 drops</span>. Decrypt a bit beside one to peel a layer off; the second peel (<b>[-]</b>) reveals the bit hidden underneath.</p>
+              <p>Keep your columns below the <b>========</b> line. If anything is still above it once the decrypting stops, the trace completes and you're caught.</p>
+            </section>
+            <section class="rules-sec" data-sec="exploits" hidden>
+              <h3 class="rules-sub">// EXPLOITS <button type="button" class="tut-open" data-lesson="exploits">TUTORIAL</button></h3>
+              <p>Each chain link lights a bar of the <b>CHAIN METER</b> beside the grid; fill all 5 for an <b>EXPLOIT</b> from your loadout. Tap the EXPLOIT button and it becomes your next drop.</p>
+              <p>Your <b>LOADOUT</b> is in EXPLOITS: you only earn exploits that are in an active slot. Tap a card to put it in a free slot, or again to take it out; the loadout locks from a game's first drop until it ends.</p>
+              <p>The first three exploits are yours as they unlock; the rest are bought once with resources in EXPLOITS and kept until you <b>RANK UP</b>.</p>
+            </section>
+            <section class="rules-sec" data-sec="bottom" hidden>
+              <h3 class="rules-sub">// THE BOTTOM ROW <button type="button" class="tut-open" data-lesson="bottom">TUTORIAL</button></h3>
+              <p>Either side of the EXPLOIT button, an <b>EXPLOIT SLOT</b> holds an exploit you bring in from the main menu's EXPLOITS (the left one fills first). An empty one is the <b>BLACK MARKET</b> once the first layer rises: something for sale, a new one every 4 drops (each slot's pips count its own). Once what you bought is used, its slot sits out the next drop, then shuffles to a new offer.</p>
+              <p>At each end, a <b>PATCH SLOT</b> sells a patch mid-game, applied the moment you buy it. It keeps the slot while it works; used up, the slot sits out the next drop, then sells another. The slots open as you level up.</p>
+              <p><b>BLACK BOXES</b> open into a random exploit, but some are <b>INFECTED</b>.</p>
+              <p>In CLASSIC and BLITZ, a bit freed from its last layer is now and then an <b>INFECTED BIT</b>: red, with a virus in its corner. Decrypt it with your next drop and it's quarantined for a ROOTKIT; leave it, and it goes off as an infection. <b>INFECTIONS: OFF</b> in the mode's settings on the main menu turns them off.</p>
+            </section>
+            <!-- (STORY: COMING SOON for now, its rules kept under it for when it opens: script.js) -->
+            <section class="rules-sec" data-sec="story" hidden>
+              <h3 class="rules-sub">// STORY</h3>
+              <p class="rules-soon">COMING SOON</p>
+              <div class="rules-later" hidden>
+              <p>Tap <b>CLASSIC</b> again on the main menu for <b>STORY</b> (and again for CLASSIC). In STORY every game has a key to crack, and every file of the story its own key: its <b>ENCRYPTION STRENGTH</b>, the points it takes, stays ENCRYPTED till a 5-chain from one drop finds it out, or you crack it anyway. Crack it for KEYS and the story's next file (a document, a message or a call), then <b>GO DEEPER</b> for a stronger key or <b>DISCONNECT</b> to end the game on a win. Deeper chapters need deeper keys; the <b>ARCHIVE</b> keeps everything.</p>
+              <p>STORY has no settings: it's played on the 7x7 board (with INFECTIONS, once someone's noticed you), and each key is harder than the last: 1,500 more points to crack, its layers sooner (every 8 drops at 128-BIT, 7 at 192, 6 at 256 and 384, 5 at 512 and 1024, then 4), and infections likelier.</p>
+              <p>You start STORY with nothing, and the story decides what you can use: the people in it introduce exploits and patches as it goes, and only those count in STORY, whatever you own or have unlocked elsewhere. Your chains earn the introduced exploits; the patches you're sent go in your kit, used from the <b>PATCHES</b> button beside your EXPLOIT button (up to 2 patches and 2 exploits a key). Later the <b>BLACK MARKET</b> opens from the same buttons, and later still you can bring your own from the STORE, chosen on STORY's main menu.</p>
+              </div>
+            </section>
+            <section class="rules-sec" data-sec="difficulty" hidden>
+              <h3 class="rules-sub">// DIFFICULTY</h3>
+              <p><b>Easy</b> shows the next bit, and a drop that clears nothing only takes one bar off the CHAIN METER (on <b>Normal</b> it empties it).</p>
+              <p><b>Hard</b> is a full byte: an 8&times;8 terminal with bits up to 8, and new layers come faster as your score climbs. Every 8 bits a single drop decrypts make a <b>BYTE</b>, worth 256 bonus points, and 4 more a <b>NIBBLE</b>, worth 16. Its CHAIN METER empties after every chain: the 5 links have to come in one.</p>
+            </section>
+            <section class="rules-sec" data-sec="resources" hidden>
+              <h3 class="rules-sub">// RESOURCES AND LEVELS</h3>
+              <p>Decrypting earns <b>KEYS</b> and resources (the STORE's [i] says how), spent in the STORE, the BLACK MARKET and the PATCH SLOTS. <b>PATCHES</b> bought there are switched on from the main menu before a game.</p>
+              <p>Every bit you decrypt is XP, 100 bits a level. Exploits, slots, themes, fonts and tracks unlock by level; at Lv 80 you can <b>RANK UP</b> to start again, earning a little more each rank.</p>
+            </section>
+            <section class="rules-sec" data-sec="store" hidden>
+              <h3 class="rules-sub">// THE STORE <button type="button" class="tut-open" data-lesson="store">TUTORIAL</button></h3>
+              <p>The <b>STORE</b> is on the main menu. <b>YOUR RESOURCES</b> are at its top: KEYS, BUGS, CACHE, CRYPTO, ROOTKITS and MASTER KEYS, all earned by playing (the [i] shows how). Under them, <b>PRICES TODAY</b>: sales, holidays and busy days move the prices up and down.</p>
+              <p>The <b>DAILY DROP</b> is a free exploit, KEYS and resources, once a day; every 7th day in a row you play, MASTER KEYS too.</p>
+              <p><b>PATCHES</b>, bought with KEYS, give a game an edge, and <b>EXPLOITS</b> of your own come in TIER I, II and III. Before a game, switch on up to two of each from the main menu's PATCHES and EXPLOITS.</p>
+              <p><b>BLACK BOXES</b> hold a random exploit for less, but some are INFECTED: the warning under them says what each infection does.</p>
+              <p>At the bottom, <b>REMOVE ADS</b> and <b>FULL ACCESS</b>. Everything else can be earned by playing.</p>
+            </section>
+            <section class="rules-sec" data-sec="records" hidden>
+              <h3 class="rules-sub">// RULES &amp; RECORDS <button type="button" class="tut-open" data-lesson="records">TUTORIAL</button></h3>
+              <p>Open it from the main menu or the pause screen, its tabs along the top. <b>RULES</b> is these pages.</p>
+              <p><b>RECORDS</b> has its own tabs: UNLOCKS (your level and every unlock), ACHIEVEMENTS, STATS (your lifetime numbers) and HISTORY (your last 10 games).</p>
+              <p><b>NOTICES</b> keeps every notification the game has shown, newest at the top.</p>
+            </section>
+            <section class="rules-sec" data-sec="settings" hidden>
+              <h3 class="rules-sub">// SETTINGS <button type="button" class="tut-open" data-lesson="settings">TUTORIAL</button></h3>
+              <p>Open it from the main menu or the pause screen.</p>
+              <p><b>SOUND</b>: sound and music, the sound effects and what you're listening on, then the <b>PLAYLIST</b> and <b>MUSIC PLAYER</b>. <b>CONTROLS</b>: where the drop buttons sit, and vibration.</p>
+              <p><b>DISPLAY</b>: THEMES and FONTS (more unlock as you level up), the CRT DISPLAY, text size and REDUCED EFFECTS.</p>
+              <p><b>EXTRAS</b>: the wandering bots and the screen saver.</p>
+            </section>
           </aside>
         </div>
         <div class="menu-pane" data-pane="records">
@@ -1000,62 +1039,62 @@
     </div>
   </div>
 
-  <script src="js/bot-svg.js?v=640"></script>
-  <script src="js/unlocks.js?v=640"></script>
-  <script src="js/progress.js?v=640"></script>
-  <script src="js/music/output.js?v=640"></script>
-  <script src="js/music/mixes.js?v=640"></script>
-  <script src="js/sfx.js?v=640"></script>
-  <script src="js/music/music-bytefall-theme.js?v=640"></script>
-  <script src="js/music/music-sleep-mode.js?v=640"></script>
-  <script src="js/music/music-brute-force.js?v=640"></script>
-  <script src="js/music/music-deep-web.js?v=640"></script>
-  <script src="js/music/music-zero-day.js?v=640"></script>
-  <script src="js/music/music-system-restore.js?v=640"></script>
-  <script src="js/music/music-night-drive.js?v=640"></script>
-  <script src="js/music/music-standby-mode.js?v=640"></script>
-  <script src="js/music/music-core-dump.js?v=640"></script>
-  <script src="js/music/music-handshake.js?v=640"></script>
-  <script src="js/music/music-stack-overflow.js?v=640"></script>
-  <script src="js/music/music-generated.js?v=640"></script>
-  <script src="js/music/music.js?v=640"></script>
-  <script src="js/data/puzzles.js?v=640"></script>
-  <script src="js/data/daily-puzzles.js?v=640"></script>
-  <script src="js/data/hint-riddles.js?v=640"></script>
-  <script src="js/cpu.js?v=640"></script>
-  <script src="js/fx.js?v=640"></script>
-  <script src="js/viz.js?v=640"></script>
-  <script src="js/pixel.js?v=640"></script>
-  <script src="js/minibot.js?v=640"></script>
-  <script src="js/seasons.js?v=640"></script>
-  <script src="js/bigart.js?v=640"></script>
-  <script src="js/scenes.js?v=640"></script>
-  <script src="js/weather.js?v=640"></script>
-  <script src="js/visitors.js?v=640"></script>
-  <script src="js/data/bot-anims.js?v=640"></script>
-<script src="js/wanderers.js?v=640"></script>
-  <script src="js/tutorial.js?v=640"></script>
-  <script src="js/puzzle-sim.js?v=640"></script>
-  <script src="js/led-banner.js?v=640"></script>
-  <script src="js/infections.js?v=640"></script>
-  <script src="js/script.js?v=640"></script>
-  <script src="js/grid-bg.js?v=640"></script>
-  <script src="js/lights.js?v=640"></script>
-  <script src="js/inf-test.js?v=640"></script>
-  <script src="js/sfx-test.js?v=640"></script>
-  <script src="js/extsource.js?v=640"></script>
-  <script src="js/player.js?v=640"></script>
-  <script src="js/billing.js?v=640"></script>
-  <script src="js/store.js?v=640"></script>
-  <script src="js/data/story-ghosts.js?v=640"></script>
-  <script src="js/data/stories.js?v=640"></script>
-  <script src="js/stories.js?v=640"></script>
-  <script src="js/story-test.js?v=640"></script>
-  <script src="js/ads-config.js?v=640"></script>
-  <script src="js/ads.js?v=640"></script>
-  <script src="js/app-update.js?v=640"></script>
-  <script src="js/start.js?v=640"></script>
-  <script src="js/place.js?v=640"></script>
-  <script src="js/saver.js?v=640"></script>
+  <script src="js/bot-svg.js?v=641"></script>
+  <script src="js/unlocks.js?v=641"></script>
+  <script src="js/progress.js?v=641"></script>
+  <script src="js/music/output.js?v=641"></script>
+  <script src="js/music/mixes.js?v=641"></script>
+  <script src="js/sfx.js?v=641"></script>
+  <script src="js/music/music-bytefall-theme.js?v=641"></script>
+  <script src="js/music/music-sleep-mode.js?v=641"></script>
+  <script src="js/music/music-brute-force.js?v=641"></script>
+  <script src="js/music/music-deep-web.js?v=641"></script>
+  <script src="js/music/music-zero-day.js?v=641"></script>
+  <script src="js/music/music-system-restore.js?v=641"></script>
+  <script src="js/music/music-night-drive.js?v=641"></script>
+  <script src="js/music/music-standby-mode.js?v=641"></script>
+  <script src="js/music/music-core-dump.js?v=641"></script>
+  <script src="js/music/music-handshake.js?v=641"></script>
+  <script src="js/music/music-stack-overflow.js?v=641"></script>
+  <script src="js/music/music-generated.js?v=641"></script>
+  <script src="js/music/music.js?v=641"></script>
+  <script src="js/data/puzzles.js?v=641"></script>
+  <script src="js/data/daily-puzzles.js?v=641"></script>
+  <script src="js/data/hint-riddles.js?v=641"></script>
+  <script src="js/cpu.js?v=641"></script>
+  <script src="js/fx.js?v=641"></script>
+  <script src="js/viz.js?v=641"></script>
+  <script src="js/pixel.js?v=641"></script>
+  <script src="js/minibot.js?v=641"></script>
+  <script src="js/seasons.js?v=641"></script>
+  <script src="js/bigart.js?v=641"></script>
+  <script src="js/scenes.js?v=641"></script>
+  <script src="js/weather.js?v=641"></script>
+  <script src="js/visitors.js?v=641"></script>
+  <script src="js/data/bot-anims.js?v=641"></script>
+<script src="js/wanderers.js?v=641"></script>
+  <script src="js/tutorial.js?v=641"></script>
+  <script src="js/puzzle-sim.js?v=641"></script>
+  <script src="js/led-banner.js?v=641"></script>
+  <script src="js/infections.js?v=641"></script>
+  <script src="js/script.js?v=641"></script>
+  <script src="js/grid-bg.js?v=641"></script>
+  <script src="js/lights.js?v=641"></script>
+  <script src="js/inf-test.js?v=641"></script>
+  <script src="js/sfx-test.js?v=641"></script>
+  <script src="js/extsource.js?v=641"></script>
+  <script src="js/player.js?v=641"></script>
+  <script src="js/billing.js?v=641"></script>
+  <script src="js/store.js?v=641"></script>
+  <script src="js/data/story-ghosts.js?v=641"></script>
+  <script src="js/data/stories.js?v=641"></script>
+  <script src="js/stories.js?v=641"></script>
+  <script src="js/story-test.js?v=641"></script>
+  <script src="js/ads-config.js?v=641"></script>
+  <script src="js/ads.js?v=641"></script>
+  <script src="js/app-update.js?v=641"></script>
+  <script src="js/start.js?v=641"></script>
+  <script src="js/place.js?v=641"></script>
+  <script src="js/saver.js?v=641"></script>
 </body>
 </html>

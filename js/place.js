@@ -1,6 +1,6 @@
 // PLACE: a refresh puts you back where you were. As the page goes, what's open is kept for this
 // tab: the MAIN MENU, the MENU (and its tab, RECORDS' sub-tab and how far it's scrolled), SETTINGS, the MUSIC
-// PLAYER, or the TUTORIAL at the step it's on (tutorial.js). The start screen does its own part:
+// PLAYER, or the TUTORIAL (or a RULES section's lesson) at the step it's on (tutorial.js). The start screen does its own part:
 // it shows again on a refresh until START is pressed (bytefall.html's head script, start.js).
 (() => {
   const KEY = 'bytefall-place';
@@ -9,7 +9,7 @@
     const place = {};
     if (!player.hidden) Object.assign(place, { panel: 'player', scroll: player.scrollTop });
     else if (!settingsEl.hidden) Object.assign(place, { panel: 'settings', scroll: (document.getElementById('settings-panel') || settingsEl).scrollTop });
-    else if (!recordsEl.hidden) Object.assign(place, { panel: 'menu', pane: menuPane, tab: recordsTab, scroll: (menuScroller() || recordsEl).scrollTop });
+    else if (!recordsEl.hidden) Object.assign(place, { panel: 'menu', pane: menuPane, tab: recordsTab, rules: document.getElementById('rules-panel').dataset.sec || '', scroll: (menuScroller() || recordsEl).scrollTop });
     if (mode === 'tutorial') place.tutorial = Tutorial.state();
     else if (homeOpen) place.home = true;
     try { sessionStorage.setItem(KEY, JSON.stringify(place)); } catch (e) {}
@@ -30,6 +30,7 @@
   if (place.panel === 'menu') {
     if (place.tab) recordsTab = place.tab;
     setRecordsOpen(true, place.pane);
+    if (place.pane === 'rules' && place.rules) showRulesSec(place.rules); // (RULES on the page it was on)
     scrollTo(menuScroller() || recordsEl);
   } else if (place.panel === 'settings') {
     setSettingsOpen(true);

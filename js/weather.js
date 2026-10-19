@@ -58,6 +58,8 @@ function createWeather(api) {
   const lowFx = () => document.documentElement.classList.contains('low-fx');
   const light = () => ['paper', 'daylight'].includes(document.documentElement.dataset.theme);
   const calm = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // (HALLOWEEN, or the HAUNTED FOREST up: no rainbow after the rain)
+  const spooky = () => (typeof Season !== 'undefined' && Season.is('halloween')) || (typeof hauntedForest !== 'undefined' && hauntedForest);
   const hour = () => new Date().getHours();
   const isDay = () => hour() >= 7 && hour() < 19;
   const isNight = () => hour() >= 20 || hour() < 6;
@@ -215,7 +217,7 @@ function createWeather(api) {
     if (!now) { wx.phase = 'out'; wx.at = performance.now(); return; }
     if (wx.k.clouds) api.releaseClouds();
     umbrellasDown();
-    if (wx.k.rainbow && Math.random() < wx.k.rainbow && isDay() && !light()) rainbowIn(performance.now(), rand(40000, 60000));
+    if (wx.k.rainbow && Math.random() < wx.k.rainbow && isDay() && !light() && !spooky()) rainbowIn(performance.now(), rand(40000, 60000));
     wx = null;
   }
   function clear() {

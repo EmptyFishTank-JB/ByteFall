@@ -2426,6 +2426,21 @@ body:not(.vs-mode) .hud-bits :is(#next-stat, #time-stat) > :is(.label, .value) {
 /* RULES' sections, each under a ===== line, a head as EXPLOITS' tiers have */
 .panel-rules .rules-sub { margin: 0 0 4px; font-size: 15.5px; letter-spacing: 2px; color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
 .panel-rules .store-rule + .rules-sub { margin-top: 0; }
+/* RULES' folders: each section's title alone, a button to its page (script.js's showRulesSec); on
+   the page, its title with its own TUTORIAL beside it, ← ALL RULES above */
+.rules-list { display: flex; flex-direction: column; gap: var(--gap, 8px); }
+.rules-list[hidden], .rules-back[hidden], .panel h2.rules-head[hidden] { display: none; }
+.rules-folder {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; padding: 10px 12px;
+  font: inherit; font-size: 14.5px; letter-spacing: 2px; text-align: left; cursor: pointer;
+  color: var(--accent); background: transparent; border: 1px solid var(--grid-line); border-radius: 4px;
+  text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5);
+}
+.rules-folder > span:first-child { flex: 1; }
+.rules-folder .rf-go { color: var(--fg-dim); font-size: 18px; line-height: 1; }
+.rules-back { margin: 0 0 var(--gap, 8px); }
+.panel-rules .rules-sec h3.rules-sub { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.rules-soon { color: var(--fg); letter-spacing: 3px; }
 .tut-open {
   font-family: inherit; font-size: 11px; letter-spacing: 1px; padding: 4px 10px; cursor: pointer; text-shadow: none;
   background: transparent; color: var(--accent); border: 1px solid var(--accent); border-radius: 4px;

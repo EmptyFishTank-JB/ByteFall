@@ -1,6 +1,7 @@
 // TUTORIAL.md's cards, written from the lesson as it plays: every card's words, what it opens and
 // frames, the board and bits it sets up, and after a drop what it says and the points it shows.
-// Plays the TUTORIAL through in a headless browser (Playwright), card by card, as a player would
+// Plays the TUTORIAL through in a headless browser (Playwright), card by card, as a player would, then
+// each RULES section's own lesson (from its page's TUTORIAL button), the same way
 // (NEXT, the framed thing to tap, the framed column to drop in), and replaces everything in
 // TUTORIAL.md from its "## Welcome" heading on. The intro above it is kept, to write by hand.
 //   node tools/tutorial-doc.js   (Playwright installed; PW_CHROMIUM=path to use a given Chromium)
@@ -102,58 +103,78 @@ function sits(s) {
   });
   await page.goto(`file://${path.join(ROOT, 'bytefall.html')}?season=off&weather=sunny`);
   await page.waitForTimeout(1500);
-  await page.evaluate(() => window.showHome());
-  await page.click('#home-tutorial');
-  await page.waitForTimeout(1200);
-  const steps = await page.evaluate(() => Tutorial.steps().map((s) => ({ ...s, explain: s.explain ? true : false })));
-  const cards = [];
-  for (let guard = 0; guard < steps.length * 3; guard++) {
-    await page.evaluate(() => { const c = document.querySelector('#tut-banner .tut-card'); if (c) c.click(); }); // (the words said)
-    await page.waitForTimeout(200);
-    const at = await page.evaluate(() => Tutorial.at());
-    if (at < 0) break;
-    const s = steps[at];
-    const live = await page.evaluate(() => ({
-      buttons: [...document.querySelectorAll('#tut-banner .tut-actions button')].map((b) => b.textContent),
-    }));
-    const card = { at, s, buttons: live.buttons };
-    cards[at] = card;
-    if (live.buttons.includes('MAIN MENU')) break;
-    const next = live.buttons.find((t) => t === 'NEXT' || t === 'BEGIN');
-    if (next) {
-      await page.click(`#tut-banner .tut-actions button:has-text("${next}")`);
-      await page.waitForTimeout(600);
-      continue;
+  // One lesson played through, card by card: 'main' (the main menu's TUTORIAL) or a RULES section's
+  async function play(lesson) {
+    if (lesson === 'main') {
+      await page.evaluate(() => window.showHome());
+      await page.click('#home-tutorial');
+    } else {
+      await page.evaluate((id) => { window.showHome(); window.openRules(id); }, lesson);
+      await page.click(`.rules-sec[data-sec="${lesson}"] [data-lesson]`);
     }
-    const did = await page.evaluate(() => {
-      const col = document.querySelector('#column-buttons button.tut-pulse');
-      if (col) { col.click(); return 'drop'; }
-      const t = [...document.querySelectorAll('.tut-pulse')].find((e) => e.getClientRects().length && !e.classList.contains('cell'));
-      if (t) { t.click(); return 'tap'; }
-      return null;
-    });
-    if (!did) throw new Error(`stuck on card ${at}`);
-    if (did === 'drop') { // (what it says after, and the points)
-      await page.waitForFunction(() => [...document.querySelectorAll('#tut-banner .tut-actions button')].some((b) => b.textContent === 'NEXT'), null, { timeout: 15000 });
-      await page.evaluate(() => { const c = document.querySelector('#tut-banner .tut-card'); if (c) c.click(); });
-      await page.waitForTimeout(300);
-      Object.assign(card, await page.evaluate(() => ({
-        after: document.querySelector('#tut-banner .tut-text').getAttribute('aria-label') || document.querySelector('#tut-banner .tut-text').textContent,
-        points: [...document.querySelectorAll('#tut-banner .tut-points > div')].map((d) => d.textContent),
-        scoreAfter: document.getElementById('score').textContent,
-      })));
-      await page.click('#tut-banner .tut-actions button:has-text("NEXT")');
+    await page.waitForTimeout(1200);
+    const steps = await page.evaluate(() => Tutorial.steps().map((s) => ({ ...s, explain: s.explain ? true : false })));
+    const cards = [];
+    for (let guard = 0; guard < steps.length * 3; guard++) {
+      await page.evaluate(() => { const c = document.querySelector('#tut-banner .tut-card'); if (c) c.click(); }); // (the words said)
+      await page.waitForTimeout(200);
+      const at = await page.evaluate(() => Tutorial.at());
+      if (at < 0) break;
+      const s = steps[at];
+      const live = await page.evaluate(() => ({
+        buttons: [...document.querySelectorAll('#tut-banner .tut-actions button')].map((b) => b.textContent),
+      }));
+      const card = { at, s, buttons: live.buttons };
+      cards[at] = card;
+      if (s.done) { // (out: its MAIN MENU, or RULES back to the section's page)
+        await page.click(`#tut-banner .tut-actions button:has-text("${s.done === 'rules' ? 'RULES' : 'MAIN MENU'}")`);
+        await page.waitForTimeout(800);
+        if (s.done === 'rules' && !(await page.evaluate((id) => !document.getElementById('records').hidden && document.getElementById('rules-panel').dataset.sec === id, lesson))) throw new Error(`${lesson}: RULES didn't open its page`);
+        break;
+      }
+      const next = live.buttons.find((t) => t === 'NEXT' || t === 'BEGIN');
+      if (next) {
+        await page.click(`#tut-banner .tut-actions button:has-text("${next}")`);
+        await page.waitForTimeout(600);
+        continue;
+      }
+      const did = await page.evaluate(() => {
+        const col = document.querySelector('#column-buttons button.tut-pulse');
+        if (col) { col.click(); return 'drop'; }
+        const t = [...document.querySelectorAll('.tut-pulse')].find((e) => e.getClientRects().length && !e.classList.contains('cell'));
+        if (t) { t.click(); return 'tap'; }
+        return null;
+      });
+      if (!did) throw new Error(`${lesson}: stuck on card ${at}`);
+      if (did === 'drop') { // (what it says after, and the points)
+        await page.waitForFunction(() => [...document.querySelectorAll('#tut-banner .tut-actions button')].some((b) => b.textContent === 'NEXT'), null, { timeout: 15000 });
+        await page.evaluate(() => { const c = document.querySelector('#tut-banner .tut-card'); if (c) c.click(); });
+        await page.waitForTimeout(300);
+        Object.assign(card, await page.evaluate(() => ({
+          after: document.querySelector('#tut-banner .tut-text').getAttribute('aria-label') || document.querySelector('#tut-banner .tut-text').textContent,
+          points: [...document.querySelectorAll('#tut-banner .tut-points > div')].map((d) => d.textContent),
+          scoreAfter: document.getElementById('score').textContent,
+        })));
+        await page.click('#tut-banner .tut-actions button:has-text("NEXT")');
+      }
+      await page.waitForTimeout(800);
     }
-    await page.waitForTimeout(800);
+    cards.forEach((c, i) => { if (!c) throw new Error(`${lesson}: card ${i} never came up`); });
+    if (cards.length !== steps.length) throw new Error(`${lesson}: ${cards.length} of ${steps.length} cards came up`);
+    return { steps, cards };
   }
+  const lessons = await page.evaluate(() => Tutorial.lessons());
+  const played = {};
+  for (const id of lessons) played[id] = await play(id);
+  const titles = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll('.rules-sec')].map((el) => [el.dataset.sec, el.querySelector('.rules-sub').firstChild.textContent.replace(/^\/\/\s*/, '').trim()])));
   await browser.close();
   if (errors.length) throw new Error(errors.join('\n'));
 
-  let out = '';
-  cards.forEach((c, i) => {
-    if (!c) throw new Error(`card ${i} never came up`);
+  // A card in the doc: h, its heading's level; first, the lesson's welcome (the main one's)
+  function cardText({ steps, cards }, i, h, welcome) {
+    const c = cards[i];
     const s = c.s;
-    out += `${i ? `## Card ${i}` : '## Welcome'}\n\n- **Heading**: \`// TUTORIAL\`\n`;
+    let out = `${h} ${welcome && !i ? 'Welcome' : `Card ${welcome ? i : i + 1}`}\n\n- **Heading**: \`// TUTORIAL\`\n`;
     out += `- **Card sits**: ${sits(s)}; **BOT**: ${s.mood || 'resting'}${s.explain ? `, then ${s.explainMood || 'resting'} after the drop` : ''}\n`;
     out += `- **Buttons**: ${['EXIT', ...c.buttons.filter((b) => b !== 'NEXT' || !s.explain)].join(', ')}\n`;
     const opens = [];
@@ -165,11 +186,12 @@ function sits(s) {
     if (s.scroll) opens.push(`scrolled to ${name(s.scroll)}`);
     if (opens.length) out += `- **Opens**: ${opens.join(', ')}\n`;
     if (s.bits && s.bits.length) out += `- **Bits**: CURRENT [${s.bits[0]}]${s.bits.length > 1 ? `, then ${s.bits.slice(1).map((b) => `[${b}]`).join(' ')}` : ''}\n`;
-    if (s.held) out += `- **Waiting in the EXPLOIT button**: ${s.held.map((h) => h.toUpperCase().replace(/-/g, ' ')).join(', ')}\n`;
+    if (s.held) out += `- **Waiting in the EXPLOIT button**: ${s.held.map((x) => x.toUpperCase().replace(/-/g, ' ')).join(', ')}\n`;
+    if (s.meter !== undefined) out += `- **CHAIN METER**: ${s.meter} bars lit as it begins\n`;
     if (s.board && s.board.some((col) => col.length)) out += `- **Board**:\n\n\`\`\`\n${boardText(s.board)}\n\`\`\`\n`;
     out += `\n**Says:**\n\n> ${s.text.replace(/\n/g, '\n> ')}\n\n`;
     const drops = s.drop === undefined ? [] : [].concat(s.drop).map((d) => d + 1);
-    const asks = s.intro ? 'Tap BEGIN.' : s.done ? 'Tap MAIN MENU (out to the main menu).'
+    const asks = s.intro ? 'Tap BEGIN.' : s.done === 'rules' ? 'Tap RULES (back to its page in RULES).' : s.done ? 'Tap MAIN MENU (out to the main menu).'
       : drops.length ? `Drop into column ${drops.join(' or ')}.`
       : s.tap ? `Tap ${name(s.tap)}.` : 'Tap NEXT.';
     out += `- **Asks you to**: ${asks}\n`;
@@ -188,12 +210,21 @@ function sits(s) {
       out += `- **Score after**: ${c.scoreAfter}\n`;
     }
     const notes = [];
-    if (s.home && !(steps[i - 1] || {}).home) notes.push('No BACK on this card: the lesson\'s board is gone.');
-    if (s.done) notes.push('MAIN MENU ends the lesson and earns HELLO, WORLD (an achievement, +10 KEYS).');
+    if (s.home && i && !steps[i - 1].home) notes.push('No BACK on this card: the lesson\'s board is gone.');
+    if (s.done === 'rules') notes.push('RULES ends the lesson and opens its section\'s page in RULES (EXIT does too).');
+    else if (s.done) notes.push('MAIN MENU ends the lesson and earns HELLO, WORLD (an achievement, +10 KEYS).');
     out += `- **Notes**: ${notes.join(' ')}\n\n---\n\n`;
-  });
+    return out;
+  }
+  let out = '';
+  played.main.cards.forEach((c, i) => { out += cardText(played.main, i, '##', true); });
+  out += "# RULES' own lessons\n\nEach section's page in RULES has its own TUTORIAL button (where it has one): the lesson below, then RULES back to that page.\n\n";
+  for (const id of lessons.filter((l) => l !== 'main')) {
+    out += `## ${titles[id] || id.toUpperCase()}\n\n`;
+    played[id].cards.forEach((c, i) => { out += cardText(played[id], i, '###', false); });
+  }
   const doc = fs.readFileSync(DOC, 'utf8');
   const head = doc.slice(0, doc.indexOf('## Welcome'));
   fs.writeFileSync(DOC, head + out.replace(/\n---\n\n$/, '\n'));
-  console.log(`TUTORIAL.md: the welcome and ${cards.length - 1} cards`);
+  console.log(`TUTORIAL.md: ${lessons.map((id) => `${id} ${played[id].cards.length}`).join(', ')}`);
 })().catch((e) => { console.error(e); process.exit(1); });

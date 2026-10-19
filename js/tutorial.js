@@ -17,7 +17,8 @@ const Tutorial = (() => {
   // menu open on that tab; closeMenus: the menus shut; held: exploits waiting in the button;
   // float: the banner at the bottom of the screen, over any open menu ('middle': in the middle of
   // the screen). holdMeter: the chain meter keeps its charge into and through the step (steps 6
-  // to 13: the chain lesson, then the carry-over filling it at step 9 and the exploit it earns). mood / explainMood: BOT's
+  // to 13: the chain lesson, then the carry-over filling it at step 9 and the exploit it earns); meter:
+  // its charge set as the card begins (LAYERS' own lesson starts where the chain lesson leaves it). mood / explainMood: BOT's
   // face while it says the step / the explanation after the drop (idle when left out). intro:
   // the welcome ahead of the steps (not counted, no number; BEGIN starts step 1). demo: what the
   // game shows only for the lesson ('slots': the bottom row's slots, locked; 'market': one of them a
@@ -27,12 +28,13 @@ const Tutorial = (() => {
   // that scrolls it; home: the lesson goes on over the main menu (script.js's tutorialHome); recTab:
   // RECORDS' own tab to show (UNLOCKS, where the level is). Every step that's about a place opens
   // it: its tab, its section scrolled to the top, what it names framed.
-  const STEPS = [
-    {
-      text: 'Welcome to BYTEFALL! This tutorial shows you how the game is played and where everything is. Each card is short, and there’s no math needed as long as you can count to 7. Let’s begin!',
-      board: EMPTY, bits: [], intro: true, place: 'bottom', mood: 'happy',
-    },
-    // THE BASICS
+  // THE LESSONS: the TUTORIAL itself (main: how the game is played, nothing more), and RULES' own
+  // short ones, each a section's (its page's TUTORIAL button): the main one's parts on their own, and
+  // the menus' tours (the bottom row, RULES & RECORDS, EXPLOITS' loadout, the STORE, SETTINGS)
+  const PAUSE = { text: 'The button at the top right PAUSES the game. Tap it now!', closeMenus: true, tap: '#records-btn', pass: true };
+  const RESUME = { text: 'Tap RESUME to get back to the game.', paused: true, closeMenus: true, tap: '#pause-resume', pass: true, float: true };
+  // THE BASICS
+  const BASICS = [
     { text: 'This grid is called the TERMINAL. You’ll be dropping encrypted bits into its columns.', board: EMPTY, bits: [], next: true, place: 'bottom' },
     { text: 'Encrypted bits are the numbered blocks with brackets: [1] [2] [3] [4] [5] [6] [7]', next: true, place: 'bottom' },
     {
@@ -50,7 +52,9 @@ const Tutorial = (() => {
       drop: 5, cells: [[0, 5]],
       explain: () => 'Nice! The column was made 2 bits tall, so the [2] was DECRYPTED.',
     },
-    // SCORING AND CHAINS
+  ];
+  // SCORING AND CHAINS
+  const SCORING = [
     { text: 'Each decrypted bit scores 10 points plus its number: a [1] is worth 11, a [2] 12, and a [7] 17.', next: true },
     { text: 'Your SCORE is at the left of the panels up top, under your BEST. Tap SCORE!', tap: '#score-stat' },
     {
@@ -66,10 +70,12 @@ const Tutorial = (() => {
     { text: 'CHAIN, at the right of the panels up top, shows how long your last chain was. Tap CHAIN.', tap: '#chain-stat', holdMeter: true },
     { text: 'The bars on each side of the grid are the CHAIN METER. Each link lights a bar, and the meter stays charged from one drop to the next.', pulse: ['.chain-meter'], next: true, holdMeter: true },
     { text: 'Fill all 5 bars to earn an EXPLOIT. A drop that clears nothing ends the streak, and the meter resets.', pulse: ['.chain-meter'], next: true, holdMeter: true },
-    // LAYERS AND THE LINE
+  ];
+  // LAYERS AND THE LINE (the meter at 3 bars, as the chain lesson leaves it: on its own too)
+  const LAYERS = [
     {
       text: 'This [=] is an ENCRYPTION LAYER. Decrypt a bit right next to it to peel it.',
-      board: [[], [], [], ['L2:1'], [], [], []], bits: [2, 2], cells: [[0, 3]], next: true, holdMeter: true,
+      board: [[], [], [], ['L2:1'], [], [], []], bits: [2, 2], cells: [[0, 3]], next: true, holdMeter: true, meter: 3,
     },
     {
       text: 'Drop the [2] into column 3, 4 or 5: beside the layer or on top of it, the two of them make a line of 2.',
@@ -87,7 +93,9 @@ const Tutorial = (() => {
       board: EMPTY, bits: [], line: true, next: true, place: 'bottom', mood: 'worried', holdMeter: true,
     },
     { text: 'A new row of layers rises from the bottom every 8 drops, pushing everything up. ENCRYPT IN, just above CHAIN, counts down the drops to the next one. Tap it.', tap: '#pulse-stat', holdMeter: true },
-    // EXPLOITS
+  ];
+  // EXPLOITS: using one
+  const EXPLOITS = [
     {
       text: 'EXPLOITS change the board in different ways, depending on where you drop them. While you have one waiting, the CHAIN METER pulses.',
       board: [[], [], [6, 2, 7, 3], [], [], [], []], bits: [], held: ['worm-virus'], next: true, mood: 'devious', holdMeter: true,
@@ -99,27 +107,40 @@ const Tutorial = (() => {
       explain: () => 'The WORM VIRUS wiped out the whole column. Blocks wiped out by an exploit score a flat 10 each.',
     },
     { text: 'Other exploits do different things. Each one has a card in the EXPLOITS menu.', next: true },
-    // THE BOTTOM ROW
+  ];
+  // (EXPLOITS' own lesson goes on to the loadout)
+  const LOADOUT = [
+    PAUSE,
+    { text: 'The pause screen has various buttons. Tap EXPLOITS.', paused: true, closeMenus: true, tap: '#pause-exploits', pass: true, float: true },
+    { text: 'Here’s your EXPLOITS loadout. You can only earn exploits that are in an active slot during a game.', paused: true, pane: 'exploits', focus: ['#slot-info'], float: 'middle', next: true },
+    { text: 'Tap a card to put it in a free slot, or tap it again to take it out. The loadout locks from a game’s first drop until it ends.', paused: true, pane: 'exploits', pulse: ['.hack-item'], float: true, next: true },
+    { text: 'The first three exploits are yours as they unlock. The rest are bought once with resources and kept until you RANK UP.', paused: true, pane: 'exploits', float: true, next: true },
+    { text: 'Tap ← BACK.', paused: true, pane: 'exploits', tap: '.card-back[data-close="records"]', pass: true, float: 'middle' },
+    RESUME,
+  ];
+  // THE BOTTOM ROW
+  const BOTTOM = [
     { text: 'The row under the drop buttons holds more than the EXPLOIT button: an EXPLOIT SLOT on each side of it, and a PATCH SLOT at each end.', board: EMPTY, bits: [], demo: 'slots', focus: ['.exploit-row'], next: true },
     { text: 'They open as you level up. Until then, each one shows a padlock and the level it opens at.', demo: 'slots', pulse: ['.side-slot'], next: true },
     { text: 'A PATCH SLOT sells a patch during a game, for KEYS and a resource or two, and the patch works the moment you buy it.', demo: 'slots', focus: ['.patch-slot'], next: true },
     { text: 'The left and right EXPLOIT SLOTS can bring in a purchased EXPLOIT from the STORE. An empty slot becomes the BLACK MARKET once the first layer rises.', demo: 'market', focus: ['.side-slot:not(.patch-slot)'], next: true },
     { text: 'There, you can buy an EXPLOIT or a BLACK BOX. Each one is swapped for another every 4 drops. The pips in each button count down how many drops until the next one.', demo: 'market', pulse: ['.side-slot.market'], next: true },
     { text: 'BLACK BOXES are cheap, but some of them are INFECTED!', demo: 'market', mood: 'devious', next: true },
-    // THE MENUS
-    { text: 'The button at the top right PAUSES the game. Tap it now!', closeMenus: true, tap: '#records-btn', pass: true },
+  ];
+  // RULES & RECORDS
+  const RECORDS = [
+    PAUSE,
     { text: 'The pause screen has various buttons. Tap RULES & RECORDS.', paused: true, closeMenus: true, tap: '#pause-records', pass: true, float: true },
     { text: 'RULES & RECORDS opens this page with its tabs along the top.', paused: true, pane: 'rules', float: 'middle', next: true },
-    { text: 'The RULES tab has everything you’re learning here, written down, with the TUTORIAL button to come back any time.', paused: true, pane: 'rules', focus: ['.menu-tabs [data-pane="rules"]'], float: 'middle', next: true },
+    { text: 'The RULES tab has a page for each part of the game, written down. Most have a short TUTORIAL of their own.', paused: true, pane: 'rules', focus: ['.menu-tabs [data-pane="rules"]'], float: 'middle', next: true },
     { text: 'The RECORDS tab has its own tabs: UNLOCKS (your level and every unlock), ACHIEVEMENTS, STATS (your lifetime numbers) and HISTORY (your last 10 games).', paused: true, pane: 'records', recTab: 'unlocks', focus: ['.menu-tabs [data-pane="records"]', '.records-tabs'], float: true, next: true },
     { text: 'Every bit you decrypt is XP: 100 bits a level. At Lv 80 you can RANK UP: everything locks again to unlock once more, and each rank earns a little more.', paused: true, pane: 'records', recTab: 'unlocks', focus: ['.rec-level'], float: true, next: true },
     { text: 'NOTICES keeps a history of each notification the game has shown, newest at the top.', paused: true, pane: 'notices', focus: ['.menu-tabs [data-pane="notices"]'], float: true, next: true },
-    { text: 'Tap ← BACK, at the top left of the page.', paused: true, pane: 'archive', tap: '.card-back[data-close="records"]', pass: true, float: 'middle' },
-    { text: 'Now tap EXPLOITS.', paused: true, closeMenus: true, tap: '#pause-exploits', pass: true, float: true },
-    { text: 'Here’s your EXPLOITS loadout. You can only earn exploits that are in an active slot during a game.', paused: true, pane: 'exploits', focus: ['#slot-info'], float: 'middle', next: true },
-    { text: 'Tap a card to put it in a free slot, or tap it again to take it out. The loadout locks from a game’s first drop until it ends.', paused: true, pane: 'exploits', pulse: ['.hack-item'], float: true, next: true },
-    { text: 'The first three exploits are yours as they unlock. The rest are bought once with resources and kept until you RANK UP.', paused: true, pane: 'exploits', float: true, next: true },
-    { text: 'Tap ← BACK.', paused: true, pane: 'exploits', tap: '.card-back[data-close="records"]', pass: true, float: 'middle' },
+    { text: 'Tap ← BACK, at the top left of the page.', paused: true, pane: 'notices', tap: '.card-back[data-close="records"]', pass: true, float: 'middle' },
+    RESUME,
+  ];
+  // THE STORE (and bringing what's bought into a game, on the main menu)
+  const STORE = [
     { text: 'The STORE isn’t on the pause screen: it’s on the MAIN MENU. Here’s a look inside.', paused: true, pane: 'store', float: 'middle', next: true },
     { text: 'YOUR RESOURCES are at the top: KEYS, BUGS, CACHE, CRYPTO, ROOTKITS and MASTER KEYS, all earned by playing. The [i] shows how.', paused: true, pane: 'store', focus: ['#store-res'], float: 'middle', next: true },
     { text: 'Under them, PRICES TODAY: sales, holidays and busy days move the prices up and down.', paused: true, pane: 'store', focus: ['#price-gauge'], float: 'middle', next: true },
@@ -129,15 +150,43 @@ const Tutorial = (() => {
     { text: 'BLACK BOXES hold a random exploit for less, but some are INFECTED. The warning under them says what each infection does.', paused: true, pane: 'store', scroll: '.store-sub[data-sec="boxes"]', focus: ['.store-sub[data-sec="boxes"]'], float: true, next: true, mood: 'devious' },
     { text: 'And at the bottom, REMOVE ADS and FULL ACCESS. Everything else can be earned by playing.', paused: true, pane: 'store', scroll: '#store-support', focus: ['#store-support'], float: true, next: true },
     { text: 'Tap ← BACK to close the STORE.', paused: true, pane: 'store', tap: '.card-back[data-close="records"]', pass: true, float: 'middle' },
-    { text: 'We’re back at the PAUSE screen now. Tap SETTINGS.', paused: true, closeMenus: true, tap: '#pause-settings', pass: true, float: true },
+    RESUME,
+    { text: 'Before a game, PATCHES and EXPLOITS on the main menu let you bring an edge in (up to two of each), once you have some.', home: true, focus: ['#booster-row', '#starter-row'], float: true, next: true },
+  ];
+  // SETTINGS
+  const SETTINGS = [
+    PAUSE,
+    { text: 'The pause screen has various buttons. Tap SETTINGS.', paused: true, closeMenus: true, tap: '#pause-settings', pass: true, float: true },
     { text: 'SETTINGS has SOUND (sound and music, the sound effects, what you’re listening on), the PLAYLIST and MUSIC PLAYER, and CONTROLS (where the drop buttons sit, vibration).', paused: true, settings: true, scroll: '#settings-panel', float: 'middle', next: true },
     { text: 'DISPLAY has THEMES and FONTS (more unlock as you level up), the CRT DISPLAY, text size and REDUCED EFFECTS.', paused: true, settings: true, scroll: '#settings-display', focus: ['#settings-display'], float: true, next: true },
     { text: 'EXTRAS has the wandering bots and the screen saver.', paused: true, settings: true, scroll: '#settings-extras', focus: ['#settings-extras'], float: true, next: true },
     { text: 'Tap ← BACK to close SETTINGS.', paused: true, settings: true, tap: '.card-back[data-close="settings"]', pass: true, float: 'middle' },
-    { text: 'Tap RESUME to get back to the game.', paused: true, closeMenus: true, tap: '#pause-resume', pass: true, float: true },
-    { text: 'Before a game, PATCHES and EXPLOITS on the main menu let you bring an edge in (up to two of each), once you have some.', home: true, focus: ['#booster-row', '#starter-row'], float: true, next: true },
-    { text: 'That’s everything you need to know. Good luck, decryptor.', home: true, float: true, done: true, mood: 'happy' },
+    RESUME,
   ];
+  // (a section's lesson ends with a card of its own: RULES takes you back to its page; the last card
+  // of one over the main menu stays there)
+  const sectionEnd = (name, home = false) => ({ text: `That’s ${name}. Its page in RULES has it all written down.`, done: 'rules', mood: 'happy', ...(home ? { home: true, float: true } : {}) });
+  const LESSONS = {
+    main: [
+      {
+        text: 'Welcome to BYTEFALL! This tutorial shows you how the game is played. Each card is short, and there’s no math needed as long as you can count to 7. Let’s begin!',
+        board: EMPTY, bits: [], intro: true, place: 'bottom', mood: 'happy',
+      },
+      ...BASICS, ...SCORING, ...LAYERS, ...EXPLOITS,
+      { text: 'That’s how BYTEFALL is played. RULES has a page for everything else, most with a short TUTORIAL of their own. Good luck, decryptor.', done: true, mood: 'happy' },
+    ],
+    basics: [...BASICS, sectionEnd('THE BASICS')],
+    scoring: [...SCORING, sectionEnd('SCORING')],
+    layers: [...LAYERS, sectionEnd('LAYERS AND THE LINE')],
+    exploits: [...EXPLOITS, ...LOADOUT, sectionEnd('EXPLOITS')],
+    bottom: [...BOTTOM, sectionEnd('THE BOTTOM ROW')],
+    records: [...RECORDS, sectionEnd('RULES & RECORDS')],
+    store: [...STORE, sectionEnd('THE STORE', true)],
+    settings: [...SETTINGS, sectionEnd('SETTINGS')],
+  };
+  let lesson = 'main';
+  let STEPS = LESSONS.main;
+  const useLesson = (id) => { lesson = LESSONS[id] ? id : 'main'; STEPS = LESSONS[lesson]; };
 
   // The column(s) a step's drop may go in (drop: an index, or a list of them)
   const drops = (s) => (s.drop === undefined ? [] : [].concat(s.drop));
@@ -412,17 +461,25 @@ const Tutorial = (() => {
 
   // Sets the board and bits of a step that has them
   function setUp(s) {
-    if (s.board) {
-      columns = s.board.map((col) => col.map((block) => {
+    // (a lesson's first card starts clean: an empty board and no bits, unless it sets its own)
+    const board = s.board || (step === 0 ? EMPTY : null);
+    const bits = s.bits || (step === 0 ? [] : null);
+    if (board) {
+      columns = board.map((col) => col.map((block) => {
         if (typeof block === 'number') return { type: 'number', val: block };
         const [level, hidden] = block.slice(1).split(':').map(Number);
         return { type: 'firewall', level, hidden };
       }));
     }
-    if (s.bits) queue = s.bits.map((val) => ({ type: 'number', val }));
+    if (bits) queue = bits.map((val) => ({ type: 'number', val }));
     if (s.held) {
       heldHacks = [...s.held];
       armedHack = null;
+    }
+    if (s.meter !== undefined) { // (the CHAIN METER's charge as the card needs it)
+      streak = s.meter;
+      chainLit = 0;
+      showChainMeter();
     }
     menus(s);
     render();
@@ -475,7 +532,7 @@ const Tutorial = (() => {
     if (step > 0 && !(s.home && !STEPS[step - 1].home)) addButton('BACK', back, 'tut-back'); // (not back out of the main menu into the lesson)
     if (s.intro) addButton('BEGIN', () => go(step + 1));
     if (s.next) addButton('NEXT', () => go(step + 1));
-    if (s.done) addButton('MAIN MENU', () => leave('done'));
+    if (s.done) addButton(s.done === 'rules' ? 'RULES' : 'MAIN MENU', () => leave(s.done === 'rules' ? 'rules' : 'done'));
     pinTop(text, s.text);
     say(text, s.text);
     if (typeof tutorialDemo === 'function') tutorialDemo(s.demo || null);
@@ -563,7 +620,7 @@ const Tutorial = (() => {
     setUp(cur());
     snapshots[step] = {
       columns: copyCells(columns), queue: queue.map((b) => ({ ...b })), score, chain: chainEl.textContent,
-      held: [...heldHacks], armed: armedHack,
+      held: [...heldHacks], armed: armedHack, streak,
     };
     show();
   }
@@ -588,6 +645,7 @@ const Tutorial = (() => {
     chainEl.textContent = snap.chain;
     heldHacks = [...snap.held];
     armedHack = snap.armed;
+    if (snap.streak !== undefined) { streak = snap.streak; chainLit = 0; showChainMeter(); }
     menus(STEPS[step]);
     render();
     updateHud();
@@ -595,9 +653,12 @@ const Tutorial = (() => {
   let resumeFrom = null; // (set by resumeAt: the next begin() picks up there)
 
   // Leaves the tutorial for the mode picked before it (or CLASSIC); 'done': its last card's MAIN
-  // MENU, for HELLO, WORLD once it's out
+  // MENU, for HELLO, WORLD once it's out. A section's lesson goes back to its page in RULES (its last
+  // card's RULES, or EXIT)
   function leave(to) {
     const done = to === 'done';
+    const section = lesson !== 'main' ? lesson : null;
+    useLesson('main');
     stopTyping(false);
     clearPulses();
     dim(null);
@@ -615,6 +676,7 @@ const Tutorial = (() => {
     resetNow();
     showHome(); // (out to the main menu)
     if (done && typeof tutorialFinished === 'function') tutorialFinished();
+    if (section && typeof openRules === 'function') openRules(section);
   }
 
   // What the last drop decrypted, link by link, each part in its own color: the bits, what each
@@ -637,11 +699,15 @@ const Tutorial = (() => {
     // which one is up)
     steps: () => STEPS,
     at: () => step,
+    lessons: () => Object.keys(LESSONS),
+    // Which lesson the next begin() plays: 'main' (the TUTORIAL), or a RULES section's
+    use: useLesson,
     // Called by initGame when the mode is 'tutorial'
     begin() {
       snapshots = [];
       const saved = resumeFrom;
       resumeFrom = null;
+      if (saved) useLesson(saved.lesson || 'main');
       if (saved && Array.isArray(saved.snapshots) && saved.snapshots[saved.step] && saved.step < STEPS.length) {
         snapshots = saved.snapshots;
         restore(saved.step);
@@ -652,7 +718,7 @@ const Tutorial = (() => {
     },
     // A refresh mid-lesson (place.js): where it stood, and how each step so far began (for BACK)
     state() {
-      return step < 0 ? null : { step, snapshots: snapshots.slice(0, step + 1) };
+      return step < 0 ? null : { lesson, step, snapshots: snapshots.slice(0, step + 1) };
     },
     resumeAt(saved) {
       resumeFrom = saved;

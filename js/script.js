@@ -2968,14 +2968,6 @@ function closeStoryMsg() {
 document.getElementById('story-msg-close').addEventListener('click', closeStoryMsg);
 storyMsgEl.addEventListener('click', (e) => { if (e.target === storyMsgEl) closeStoryMsg(); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !storyMsgEl.classList.contains('hidden')) { e.stopImmediatePropagation(); closeStoryMsg(); } }, true);
-// (RULES: STORY's section down to one line while it's coming soon)
-if (STORY_SOON) {
-  const h = document.getElementById('rules-story');
-  if (h) {
-    for (let n = h.nextElementSibling; n && n.tagName === 'P';) { const next = n.nextElementSibling; n.remove(); n = next; }
-    h.insertAdjacentHTML('afterend', '<p><b>STORY</b> is coming soon: a story to decrypt, one key at a time.</p>');
-  }
-}
 function updateStoryBtn() {
   const btn = document.querySelector('.modes button[data-mode="classic"]');
   if (!btn || (armed && armed.btn === btn)) return;
@@ -7662,6 +7654,7 @@ function showMenuPane(pane) {
     b.setAttribute('aria-selected', String(b.dataset.pane === pane));
   });
   recordsEl.querySelectorAll('.menu-pane').forEach((el) => { el.hidden = el.dataset.pane !== pane; });
+  if (pane === 'rules') showRulesSec(null); // (RULES opens on its folders)
   if (pane === 'records') renderRecords();
   if (pane === 'notices') { renderNotices(); markNoticesRead(); } // (seen: the dots go)
   if (pane === 'archive' && typeof Stories !== 'undefined') Stories.render();
@@ -7675,16 +7668,51 @@ const menuScroller = () => recordsEl.querySelector('.menu-pane:not([hidden]) > .
 // pane: which tab to show (the last one shown if left out)
 // RULES → TUTORIAL: the guided lesson (tutorial.js). A live session asks first, as a restart does.
 const tutorialBtn = document.getElementById('tutorial-btn');
-// (from RULES, or the main menu's TUTORIAL; a game under way asks first, CONFIRM?)
-function startTutorial(btn) {
+// (from RULES, or the main menu's TUTORIAL; a game under way asks first, CONFIRM?). lesson: which one
+// (tutorial.js's LESSONS): the TUTORIAL itself, or a RULES section's own
+function startTutorial(btn, lesson = 'main') {
   if (vsStarted && !gameOver && !homeOpen) return; // (not mid-match: PAUSE → EXIT first)
   requestReset(btn, 'CONFIRM?', () => {
+    Tutorial.use(lesson);
     mode = 'tutorial';
     daily = false;
     setRecordsOpen(false);
   });
 }
 tutorialBtn.addEventListener('click', () => startTutorial(tutorialBtn));
+// RULES' PAGES: a folder for each section (bytefall.html's .rules-sec), its title alone; tapped, the
+// section's page by itself (what it says, and its own TUTORIAL where it has one), ← ALL RULES back
+// (the page open is kept on the panel, data-sec: showMenuPane can come here before these lines have run)
+const rulesPanel = document.getElementById('rules-panel');
+const rulesList = document.getElementById('rules-list');
+const rulesBack = document.getElementById('rules-back');
+function showRulesSec(id = null) {
+  const panel = document.getElementById('rules-panel');
+  const sec = id && panel.querySelector(`.rules-sec[data-sec="${id}"]`) ? id : '';
+  panel.dataset.sec = sec;
+  panel.querySelector('.rules-head').hidden = !!sec;
+  document.getElementById('rules-list').hidden = !!sec;
+  document.getElementById('rules-back').hidden = !sec;
+  panel.querySelectorAll('.rules-sec').forEach((el) => { el.hidden = el.dataset.sec !== sec; });
+  const box = menuScroller();
+  if (box) box.scrollTop = 0;
+}
+rulesPanel.querySelectorAll('.rules-sec').forEach((sec) => {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'rules-folder';
+  b.innerHTML = `<span>${sec.querySelector('.rules-sub').firstChild.textContent.trim()}</span><span class="rf-go" aria-hidden="true">&rsaquo;</span>`;
+  b.addEventListener('click', () => { SFX.play('click'); showRulesSec(sec.dataset.sec); });
+  rulesList.appendChild(b);
+  const tut = sec.querySelector('[data-lesson]');
+  if (tut) tut.addEventListener('click', () => startTutorial(tut, tut.dataset.lesson));
+});
+rulesBack.addEventListener('click', () => { SFX.play('click'); showRulesSec(null); });
+// (a section's lesson over: back on its page)
+window.openRules = (id) => {
+  setRecordsOpen(true, 'rules');
+  showRulesSec(id);
+};
 document.getElementById('home-tutorial').addEventListener('click', (e) => startTutorial(e.currentTarget));
 
 function setRecordsOpen(open, pane = menuPane) {

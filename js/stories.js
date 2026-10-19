@@ -876,8 +876,7 @@ const Stories = (() => {
     b.setAttribute('aria-label', `Story: ${s.title}, ${got(s)} of ${count(s)} recovered. Tap to read it in the archive`);
     b.addEventListener('click', () => {
       SFX.play('click');
-      if (openPhone('archive', { story: s.id })) return;
-      view = s.id;
+      view = s.id; // (RULES & RECORDS' ARCHIVE: the phone only comes out in a STORY game)
       setRecordsOpen(true, 'archive');
     });
     row.appendChild(b);
