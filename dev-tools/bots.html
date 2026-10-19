@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" class="sandbox">
 <head>
-<script src="../js/fonts.js?v=644"></script>
+<script src="../js/fonts.js?v=645"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#020403">
 <title>Bot Sandbox // BYTEFALL</title>
-<link rel="stylesheet" href="../css/style.css?v=644">
+<link rel="stylesheet" href="../css/style.css?v=645">
 <!-- BOT SANDBOX: the wandering bots and everything around them (visitors, viruses, seasons, the fog,
      headphones and the music) running on the game's own code, with every behavior on a button.
      Progress is stubbed: nothing here touches the saved game (no achievements, no unlocks). -->
@@ -144,7 +144,7 @@
 
       <div class="grp">
         <h2>CYBERPUNK STREET (WORK IN PROGRESS)</h2>
-        <p>A long street at night, far longer than the card: the view pans along it now and then on its own (every minute or two), the bots carried with it, the far towers and the middle panning slower. Its own crowd walks it behind the bots. STREET brings it up; PAN starts a pan now; the rest send someone along it. RAIN suits it.</p>
+        <p>A long street at night, seen close up, far longer than the card: the view pans along it now and then on its own (every minute or two), the bots carried with it, the city beyond (through the gaps, the windows, over the low roofs) panning slower. Its own crowd walks it behind the bots. STREET brings it up; PAN starts a pan now; the figures send someone along it; TRAIN sends one along the elevated line. RAIN suits it.</p>
         <div class="row" id="cyber"></div>
       </div>
 
@@ -165,34 +165,34 @@
 <canvas id="board-fx" aria-hidden="true"></canvas>
 <div class="stat cpu-face" id="cpu-face" hidden aria-hidden="true"></div>
 
-<script src="../js/bot-svg.js?v=644"></script>
-<script src="../js/music/output.js?v=644"></script>
-<script src="../js/music/mixes.js?v=644"></script>
-<script src="../js/sfx.js?v=644"></script>
-<script src="../js/music/music-bytefall-theme.js?v=644"></script>
-<script src="../js/music/music-sleep-mode.js?v=644"></script>
-<script src="../js/music/music-brute-force.js?v=644"></script>
-<script src="../js/music/music-deep-web.js?v=644"></script>
-<script src="../js/music/music-zero-day.js?v=644"></script>
-<script src="../js/music/music-system-restore.js?v=644"></script>
-<script src="../js/music/music-night-drive.js?v=644"></script>
-<script src="../js/music/music-standby-mode.js?v=644"></script>
-<script src="../js/music/music-core-dump.js?v=644"></script>
-<script src="../js/music/music-handshake.js?v=644"></script>
-<script src="../js/music/music-stack-overflow.js?v=644"></script>
-<script src="../js/music/music.js?v=644"></script>
-<script src="../js/fx.js?v=644"></script>
-<script src="../js/pixel.js?v=644"></script>
-<script src="../js/minibot.js?v=644"></script>
-<script src="../js/seasons.js?v=644"></script>
-<script src="../js/bigart.js?v=644"></script>
-<script src="../js/cyberstreet.js?v=644"></script>
-<script src="../js/scenes.js?v=644"></script>
-<script src="../js/weather.js?v=644"></script>
-<script src="../js/visitors.js?v=644"></script>
-<script src="../js/data/bot-anims.js?v=644"></script>
-<script src="../js/wanderers.js?v=644"></script>
-<script src="../js/grid-bg.js?v=644"></script>
+<script src="../js/bot-svg.js?v=645"></script>
+<script src="../js/music/output.js?v=645"></script>
+<script src="../js/music/mixes.js?v=645"></script>
+<script src="../js/sfx.js?v=645"></script>
+<script src="../js/music/music-bytefall-theme.js?v=645"></script>
+<script src="../js/music/music-sleep-mode.js?v=645"></script>
+<script src="../js/music/music-brute-force.js?v=645"></script>
+<script src="../js/music/music-deep-web.js?v=645"></script>
+<script src="../js/music/music-zero-day.js?v=645"></script>
+<script src="../js/music/music-system-restore.js?v=645"></script>
+<script src="../js/music/music-night-drive.js?v=645"></script>
+<script src="../js/music/music-standby-mode.js?v=645"></script>
+<script src="../js/music/music-core-dump.js?v=645"></script>
+<script src="../js/music/music-handshake.js?v=645"></script>
+<script src="../js/music/music-stack-overflow.js?v=645"></script>
+<script src="../js/music/music.js?v=645"></script>
+<script src="../js/fx.js?v=645"></script>
+<script src="../js/pixel.js?v=645"></script>
+<script src="../js/minibot.js?v=645"></script>
+<script src="../js/seasons.js?v=645"></script>
+<script src="../js/bigart.js?v=645"></script>
+<script src="../js/cyberstreet.js?v=645"></script>
+<script src="../js/scenes.js?v=645"></script>
+<script src="../js/weather.js?v=645"></script>
+<script src="../js/visitors.js?v=645"></script>
+<script src="../js/data/bot-anims.js?v=645"></script>
+<script src="../js/wanderers.js?v=645"></script>
+<script src="../js/grid-bg.js?v=645"></script>
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -341,7 +341,7 @@
     $('scenes').appendChild(b);
   }
   // (THE CYBERPUNK STREET, cyberstreet.js: the street, a pan, someone on it, rain)
-  for (const [label, what] of [['STREET', 'sc-cyber'], ['PAN \u2190', 'cy-pan-left'], ['PAN \u2192', 'cy-pan-right'], ['HOODED', 'cy-spawn-hood'], ['UMBRELLA', 'cy-spawn-umbrella'], ['ROBOT', 'cy-spawn-robot'], ['ANDROID', 'cy-spawn-android'], ['DROID', 'cy-spawn-droid'], ['DRONE', 'cy-spawn-drone'], ['RAIN', 'wx-rain'], ['CLEAR', 'sc-clear']]) {
+  for (const [label, what] of [['STREET', 'sc-cyber'], ['PAN \u2190', 'cy-pan-left'], ['PAN \u2192', 'cy-pan-right'], ['HOODED', 'cy-spawn-hood'], ['UMBRELLA', 'cy-spawn-umbrella'], ['ROBOT', 'cy-spawn-robot'], ['ANDROID', 'cy-spawn-android'], ['DROID', 'cy-spawn-droid'], ['DRONE', 'cy-spawn-drone'], ['TRAIN', 'cy-train'], ['RAIN', 'wx-rain'], ['CLEAR', 'sc-clear']]) {
     const b = el('button', { type: 'button' }, label);
     b.addEventListener('click', () => W().visit(what));
     $('cyber').appendChild(b);

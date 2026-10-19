@@ -681,26 +681,38 @@ BOT SANDBOX has a button for each.
 
 **THE CYBERPUNK STREET** (`js/cyberstreet.js`, the scene CYBER; **the bot sandbox's only, for now**:
 not one the game picks yet, only the sandbox's CYBERPUNK STREET buttons or `?scene=cyber` where the
-file's loaded): a long street at night, about four cards long, that the wanderers walk along. Always
-night, a neon haze for a sky, rain and storms suiting it. Far off, black MEGATOWERS (a few windows,
-light strips, masts with red lights blinking); nearer, tall blocks with window grids and HOLO
-BILLBOARDS playing (BYTEFALL, a counting bit, an eye looking about, a beat, scrolling words;
-scanlined, glitching now and then); then the street's own fronts behind the sidewalk: shops (lit
-windows, doors, awnings, a neon word over each: RAMEN, SOBA, ARCADE, DECRYPT ...), the floors above
-(windows, AC units, fire escapes, drain pipes), neon banners of glyphs hanging off them, cables and
-lanterns strung between the roofs, alleys with a dumpster and steam; a few signs are faulty and
-flicker. The sidewalk is wet, the signs' colors broken in it, puddles; in front, bollards, grates
-(steam rising), bags, a cone. **THE PAN**: every minute or two the view drifts along the street, left
-or right as far as it goes, slowly (about 7px a second, easing in and out): the street and everyone
-on it pan with it, the bots carried along (one carried off the card walks on off it; wanderers.js's
-`shift`), the middle at about half the speed and the towers at a fifth (parallax). **ITS CROWD**,
-behind the bots, smaller and darker so the four CPUs stay the ones you see: HOODED figures (eyes
-glowing in the hood), one under a neon UMBRELLA, boxy chrome ROBOTS (a red light on the antenna), tall
-ANDROIDS (an LED strip down the front), hovering DROIDS (a glow under them), and DRONES flying over
-with parcels; they come in, cross, now and then stop under a sign a while, and go. Flying cars cross
-between the towers, headlights and tail lights. What's still is drawn once, the whole street, and
-slid; only what changes is redrawn. REDUCED EFFECTS: no flicker, no steam. Meant to become the
-lane's usual place, the other scenes the occasional ones, once it's ready.
+file's loaded): a long street at night, about four cards long, **seen close up**: the shops about twice
+as tall as the bots, their details plain, and the city beyond showing through every opening (over the
+low roofs, down the alleys, through the big windows, cut out of the wall), panning slower (parallax).
+Always night, a neon haze for a sky, rain and storms suiting it. Far off, black MEGATOWERS (a few
+windows, light strips, masts with red lights blinking); then THE CITY: blocks with window grids, small
+neon words, HOLO BILLBOARDS playing (BYTEFALL, a counting bit, an eye looking about, a beat, scrolling
+words; scanlined, glitching now and then) and an elevated line on pillars, a lit train along it now
+and then. THE STREET, lot by lot: a SHOP lit inside (its panes, shelves, posters, a glass door, OPEN in
+the window, a neon word over it: RAMEN, SOBA, ARCADE, DECRYPT ...), a SHUTTERED shop (lanterns along its
+awning lighting the shutter, a neon sign of glyphs, a ladder of neon rungs up the wall), the METRO (its
+big sign, the line's glyphs, a live clock, arrows, doors of lit mesh), a KIOSK wall (a terminal's
+radar screen, a ticket booth lit inside with its menu, a tall neon tube, pipes, a junction box), a wall
+with a big WINDOW the city shows through (cables hanging inside, a neon sign on the glass), a FOOD
+STALL (striped canopy, a string of bulbs, the pot steaming, its menu lit), LOW buildings (railings, a
+big rooftop sign on legs) and ALLEYS (left open: the city down them, a lit door far in, a dumpster,
+boxes, a sign on a bracket, cables across). Above the shops, a style a building: windows (someone at
+one now and then), slatted blinds lit from inside, balconies (plants, washing), an industrial face of
+vents; AC units, fire escapes, drain pipes, neon banners of glyphs (neon, or a lightbox), cables and
+lanterns strung from roof to roof; tanks, dishes and antennas on the roofs. A few signs are faulty and
+flicker. The sidewalk is wet, the shops' light and the signs' colors spilled in it, puddles; in front,
+bollards, grates (steam rising), bags, a cone. **THE PAN**: every minute or two the view drifts along
+the street, left or right as far as it goes, slowly (about 7px a second, easing in and out): the street
+and everyone on it pan with it, the bots carried along (one carried off the card walks on off it;
+wanderers.js's `shift`), the city at half the speed and the towers at a fifth. **ITS CROWD**, behind the
+bots, at the bots' own pixel size and taller than them, dark (the four CPUs stay the ones you see),
+their eyes and lights glowing: HOODED figures in long coats, one under a neon UMBRELLA, chrome ROBOTS
+(a red light on the antenna), tall ANDROIDS (an LED strip down the coat), hovering DROIDS, DRONES flying
+over with parcels; they come in, cross, now and then stop at a window, a stall or the metro a while,
+and go. Flying cars cross between the towers. What's still is drawn once, the whole street, and slid;
+only what changes is redrawn (a flicker redraws that sign, and only the part of its neighbors under
+it). REDUCED EFFECTS: no flicker, no steam. Meant to become the lane's usual place, the other scenes the
+occasional ones, once it's ready.
 
 **SCENES** (`js/scenes.js`): now and then (a few times an hour, 10-20 minutes each) the lane
 becomes a place, by the time of year: MEADOW (spring, summer), BEACH (summer: the sea's waves
