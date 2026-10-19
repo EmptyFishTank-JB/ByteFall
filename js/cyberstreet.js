@@ -128,19 +128,43 @@ function createCyberStreet(api) {
   };
   const textW = (s, k = 1) => (s.length * 4 - 1) * k;
   const HOT = 'rgba(255, 248, 252, 0.75)';
-  function text(g, s, x, y, col, k = 1, core = true) {
+  // (a word in neon: each stroke a tube, its hot core running unbroken along it where the strokes join)
+  function lettering(g, s, x, y, col, k, core, font, cw, rh, adv) {
     for (let i = 0; i < s.length; i++) {
-      const rows = (FONT[s[i]] || FONT[' ']).split(',');
-      for (let ry = 0; ry < 5; ry++) for (let rx = 0; rx < 3; rx++) {
-        if (rows[ry][rx] !== '#') continue;
-        const px = x + (i * 4 + rx) * k;
+      const rows = (font[s[i]] || font[' ']).split(',');
+      const on = (rx, ry) => ry >= 0 && ry < rh && rx >= 0 && rx < cw && rows[ry][rx] === '#';
+      for (let ry = 0; ry < rh; ry++) for (let rx = 0; rx < cw; rx++) {
+        if (!on(rx, ry)) continue;
+        const px = x + (i * adv + rx) * k;
         const py = y + ry * k;
         g.fillStyle = col;
         g.fillRect(px, py, k, k);
-        if (core && k >= 3) { g.fillStyle = HOT; g.fillRect(px + 1, py + 1, k - 2, k - 2); } // (the tube's hot core)
+        if (core && k >= 3) { g.fillStyle = HOT; g.fillRect(px + 1, py + 1, k - 2 + (on(rx + 1, ry) ? 2 : 0), k - 2 + (on(rx, ry + 1) ? 2 : 0)); } // (the tube's hot core)
       }
     }
   }
+  const text = (g, s, x, y, col, k = 1, core = true) => lettering(g, s, x, y, col, k, core, FONT, 3, 5, 4);
+  // (and a 5x7, for the big signs: the shops' names in their lightboxes, the METRO, the companies,
+  // BYTEFALL up on its roof)
+  const FONT7 = {
+    A: '.###.,#...#,#...#,#####,#...#,#...#,#...#', B: '####.,#...#,#...#,####.,#...#,#...#,####.', C: '.###.,#...#,#....,#....,#....,#...#,.###.',
+    D: '####.,#...#,#...#,#...#,#...#,#...#,####.', E: '#####,#....,#....,####.,#....,#....,#####', F: '#####,#....,#....,####.,#....,#....,#....',
+    G: '.###.,#...#,#....,#.###,#...#,#...#,.####', H: '#...#,#...#,#...#,#####,#...#,#...#,#...#', I: '.###.,..#..,..#..,..#..,..#..,..#..,.###.',
+    J: '..###,...#.,...#.,...#.,...#.,#..#.,.##..', K: '#...#,#..#.,#.#..,##...,#.#..,#..#.,#...#', L: '#....,#....,#....,#....,#....,#....,#####',
+    M: '#...#,##.##,#.#.#,#.#.#,#...#,#...#,#...#', N: '#...#,#...#,##..#,#.#.#,#..##,#...#,#...#', O: '.###.,#...#,#...#,#...#,#...#,#...#,.###.',
+    P: '####.,#...#,#...#,####.,#....,#....,#....', Q: '.###.,#...#,#...#,#...#,#.#.#,#..#.,.##.#', R: '####.,#...#,#...#,####.,#.#..,#..#.,#...#',
+    S: '.####,#....,#....,.###.,....#,....#,####.', T: '#####,..#..,..#..,..#..,..#..,..#..,..#..', U: '#...#,#...#,#...#,#...#,#...#,#...#,.###.',
+    V: '#...#,#...#,#...#,#...#,#...#,.#.#.,..#..', W: '#...#,#...#,#...#,#.#.#,#.#.#,#.#.#,.#.#.', X: '#...#,#...#,.#.#.,..#..,.#.#.,#...#,#...#',
+    Y: '#...#,#...#,.#.#.,..#..,..#..,..#..,..#..', Z: '#####,....#,...#.,..#..,.#...,#....,#####',
+    0: '.###.,#...#,#..##,#.#.#,##..#,#...#,.###.', 1: '..#..,.##..,..#..,..#..,..#..,..#..,.###.', 2: '.###.,#...#,....#,...#.,..#..,.#...,#####',
+    3: '#####,...#.,..#..,...#.,....#,#...#,.###.', 4: '...#.,..##.,.#.#.,#..#.,#####,...#.,...#.', 5: '#####,#....,####.,....#,....#,#...#,.###.',
+    6: '..##.,.#...,#....,####.,#...#,#...#,.###.', 7: '#####,....#,...#.,..#..,.#...,.#...,.#...', 8: '.###.,#...#,#...#,.###.,#...#,#...#,.###.',
+    9: '.###.,#...#,#...#,.####,....#,...#.,.##..', '-': '.....,.....,.....,#####,.....,.....,.....', ' ': '.....,.....,.....,.....,.....,.....,.....',
+    '/': '....#,...#.,...#.,..#..,.#...,.#...,#....', ':': '.....,..#..,..#..,.....,..#..,..#..,.....', '+': '.....,..#..,..#..,#####,..#..,..#..,.....',
+    '.': '.....,.....,.....,.....,.....,.##..,.##..', '>': '#....,.#...,..#..,...#.,..#..,.#...,#....',
+  };
+  const textW7 = (s, k = 1) => (s.length * 6 - 1) * k;
+  const text7 = (g, s, x, y, col, k = 1, core = true) => lettering(g, s, x, y, col, k, core, FONT7, 5, 7, 6);
   // (a pseudo-kanji, 5x5: a few strokes, seeded)
   function glyph(r) {
     const cells = new Set();
@@ -258,6 +282,23 @@ function createCyberStreet(api) {
         L.strings.push({ x0: a.x + Math.floor(a.w * rand01(r, 0.2, 0.6)), x1: b.x + Math.floor(b.w * rand01(r, 0.4, 0.8)), y0: yG - ri(r, 6, 26), y1: yG - ri(r, 6, 26), sag: 3 + r() * 7, cols: [rp(r, ['#ff2a3c', '#ff6a1c', '#ffb000']), rp(r, ['#ff2a3c', '#ff5ec4', '#ffb000', '#fff2b0'])], banner: r() < 0.35, seed: Math.floor(r() * 1e9) });
       }
     }
+    // bundles of cables everywhere but the plaza: wall to wall, a few together, sagging, some spanning a
+    // building (their own random, so the rest of the street stands the same with them or without)
+    const rw = rng(seed ^ 0x2545f491);
+    L.wires = [];
+    if (!V.tall) {
+      const walls = roofs.filter((o) => !OPEN.includes(o.kind));
+      for (let i = 0; i + 1 < walls.length; i++) {
+        for (let k = 0, m = ri(rw, 0, 2); k < m; k++) {
+          const a = walls[i];
+          const b = walls[Math.min(walls.length - 1, i + (rw() < 0.3 ? 2 : 1))];
+          const hi = V.deck ? L.deck.bot + 2 : Math.max(a.top, b.top) + 3;
+          const lo = yG - 3;
+          if (lo - hi < 4) continue;
+          L.wires.push({ x0: a.x + ri(rw, Math.floor(a.w * 0.3), a.w - 2), x1: b.x + ri(rw, 2, Math.floor(b.w * 0.7)), y0: ri(rw, hi, lo), y1: ri(rw, hi, lo), n: ri(rw, 2, 6), sag: 3 + rw() * 10, spread: 0.5 + rw() * 1.1, seed: Math.floor(rw() * 1e9) });
+        }
+      }
+    }
     // puddles, and what's in front: bollards, grates, bags, cones
     for (let i = 0, k = Math.round(Wb / 50); i < k; i++) L.puddles.push({ x: Math.floor(r() * Wb), w: 6 + Math.floor(r() * 10), y: 2 + Math.floor(r() * 2), col: rp(r, NEON), at: r() });
     for (let nx = Math.floor(r() * 30); nx < Wb; nx += 26 + Math.floor(r() * 40)) L.near.push({ x: nx, t: r(), col: rp(r, ['#05d9e8', '#ff2a6d', '#fffb6b']) });
@@ -274,7 +315,7 @@ function createCyberStreet(api) {
     Q = window.CYBER_RES || autoRes();
     C = P / Q;
     world = layout(seed, W, H);
-    Object.assign(world, { Wc: Math.ceil(W / C), WW: u(world.Wb), hT: u(world.hTb), hM: u(world.hMb), hF: u(world.hFb), signs: [], boards: [], lights: [], grates: [], spills: [], stops: [], fires: [] });
+    Object.assign(world, { Wc: Math.ceil(W / C), WW: u(world.Wb), hT: u(world.hTb), hM: u(world.hMb), hF: u(world.hFb), signs: [], boards: [], lights: [], grates: [], spills: [], stops: [], fires: [], glows: [] });
     out = world;
     cam = Math.max(0, Math.min(world.WW - world.Wc, was !== null ? was * world.WW : (world.WW - world.Wc) * rand(0.2, 0.8)));
     crowd.length = 0;
@@ -286,18 +327,25 @@ function createCyberStreet(api) {
     moonKey = '';
     const { Wc, WW, hT, hM, hF } = world;
     const lenOf = (f) => Wc + Math.ceil((WW - Wc) * f) + 2;
+    // (each layer drawn, then lit by its own lights)
     drawTowers(size(els.towers, lenOf(speedOf.towers), hT), hT, 0, Infinity);
+    lightLayer(els.towers, lightsOf('towers-fx'));
     size(els['towers-fx'], lenOf(speedOf.towers), hT);
     drawMid(size(els.mid, lenOf(speedOf.mid), hM), hM, 0, Infinity);
+    lightLayer(els.mid, lightsOf('mid-fx'));
     size(els['mid-fx'], lenOf(speedOf.mid), hM);
     drawFront(size(els.front, WW + 2, hF), hF, 0, Infinity);
+    lightLayer(els.front, lightsOf('front-fx'));
     size(els['front-fx'], WW + 2, hF);
+    for (const s of world.signs) s.on = true;
+    paintFx(performance.now(), true); // (the signs lit before the sidewalk's drawn: it mirrors them)
     const under = Math.ceil((parseFloat(getComputedStyle(api.lane).getPropertyValue('--floor-under')) || 0) / P);
     world.underB = under;
     els.ground.style.bottom = els.near.style.bottom = `${-under * P}px`;
     els.front.style.bottom = els['front-fx'].style.bottom = els.deck.style.bottom = `${4 * P}px`; // (the shops stand at the sidewalk's back edge, not under it)
-    drawGround(size(els.ground, WW + 2, u(5 + under)), u(5 + under), 0, Infinity);
+    drawGround(size(els.ground, WW + 2, u(5 + under)), u(5 + under), 0, Infinity, [els.front, els['front-fx']]);
     drawNear(size(els.near, WW + 2, u(7)), u(7), 0, Infinity);
+    world.tint = tintMap();
     // (the card-wide ones: the moon, the crowd at the sidewalk's back, the steam, the trains, the traffic)
     size(els.moon, Wc + 1, hT);
     size(els.crowd, Wc + 2, u(96));
@@ -306,8 +354,6 @@ function createCyberStreet(api) {
     size(els.rail, Wc + 1, hM);
     size(els.deck, Wc + 1, hF);
     size(els.traffic, Wc + 1, hT);
-    for (const s of world.signs) s.on = true;
-    paintFx(performance.now(), true);
     place();
     api.botEvent(`scene-cyber-${view}`);
   }
@@ -338,16 +384,16 @@ function createCyberStreet(api) {
     }
   }
   function logo(g, t) {
-    const k = Math.round(1.5 * Q);
-    const lw = textW('BYTEFALL', k);
+    const k = Q;
+    const lw = textW7('BYTEFALL', k);
     const lx = Math.round(u(t.x + t.w / 2) - lw / 2);
     const top = u(t.top);
-    const ly = top - u(4) - 5 * k;
-    const base = ly + 5 * k + u(1);
+    const ly = top - u(4) - 7 * k;
+    const base = ly + 7 * k + u(1);
     R(g, lx - u(1), base, lw + u(2), 1, '#2a2440'); // (its scaffold: a rail, legs down to the roof, braces)
     for (let sx = lx; sx <= lx + lw; sx += u(4)) { R(g, sx, base, 1, top - base, '#1e1a34'); if (sx + u(4) <= lx + lw) for (let k2 = 0; k2 < u(4); k2++) R(g, sx + k2, base + Math.round((k2 * (top - base)) / u(4)), 1, 1, '#1a1630'); }
-    R(g, lx - u(1), ly - u(1), lw + u(2), 5 * k + u(2), '#06050c');
-    out.signs.push({ kind: 'logo', x: lx, y: ly, w: lw, h: 5 * k, k, col: '#39ff8f', col2: '#ffb000', on: true, next: 0, faulty: true, layer: 'towers-fx' });
+    R(g, lx - u(1), ly - u(1), lw + u(2), 7 * k + u(2), '#06050c');
+    out.signs.push({ kind: 'logo', x: lx, y: ly, w: lw, h: 7 * k, k, col: '#39ff8f', col2: '#ffb000', on: true, next: 0, faulty: true, layer: 'towers-fx' });
   }
 
   // THE CITY: nearer blocks (what shows over the low roofs, down the alleys, through the windows),
@@ -372,7 +418,7 @@ function createCyberStreet(api) {
         g.globalAlpha = 1;
         if (on && Q >= 3) A(g, wx, wy, 1, u(2), '#ffffff', 0.25); // (a glint at its edge)
       }
-      if (m.word) { R(g, u(m.word.x) - Q, u(m.word.y) - Q, u(textW(m.word.s)) + u(2), u(7), '#07060d'); text(g, m.word.s, u(m.word.x), u(m.word.y), m.word.col, Q); }
+      if (m.word) { R(g, u(m.word.x) - Q, u(m.word.y) - Q, u(textW(m.word.s)) + u(2), u(7), '#07060d'); text(g, m.word.s, u(m.word.x), u(m.word.y), m.word.col, Q); out.glows.push({ x: u(m.word.x), y: u(m.word.y), w: u(textW(m.word.s)), h: u(5), col: m.word.col, r: u(5), a: 0.3, layer: 'mid-fx' }); }
       if (m.board) { const b = m.board; R(g, u(b.x) - Q, u(b.y) - Q, u(b.w) + u(2), u(b.h) + u(2), '#05040c'); out.boards.push({ ...b, x: u(b.x), y: u(b.y), w: u(b.w), h: u(b.h), glitch: 0, layer: 'mid-fx' }); }
       if (m.light) out.lights.push({ x: u(m.light.x), y: top - Q, ph: (m.seed % 628) / 100, layer: 'mid-fx' });
     }
@@ -534,12 +580,35 @@ function createCyberStreet(api) {
       R(g, x, yG - Q, w, 1, '#5a5480');
       DRAW[L.kind](g, x, w, ch, yG, r, d, top);
     }
+    for (const wb of world.wires) if (wb.x1 >= b0 - 2 && wb.x0 <= b1 + 2) wires(g, wb);
     for (const c of world.cables) if (c.x1 >= b0 - 2 && c.x0 <= b1 + 2) cable(g, c, false);
     for (const c of world.strings) if (c.x1 >= b0 - 2 && c.x0 <= b1 + 2) cable(g, c, true);
     if (world.deck) drawDeck(g, ch, b0, b1);
   }
   // (a cable from roof to roof, sagging, lanterns on some; a NIGHT MARKET string: lanterns all along it,
   // a cloth banner hanging off some)
+  // (a bundle of cables: each its own sag and ends, near-black, unbroken however steep; up close, a
+  // sheen along their tops where the light catches them (the lighting adds the light's color))
+  function wires(g, wb) {
+    const r = rng(wb.seed);
+    for (let k = 0; k < wb.n; k++) {
+      const x0 = u(wb.x0) + Math.round(r() * Q * 2);
+      const x1 = u(wb.x1) - Math.round(r() * Q * 2);
+      const y0 = u(wb.y0 + k * wb.spread);
+      const y1 = u(wb.y1 + k * wb.spread * (0.6 + r() * 0.8));
+      const sag = u(wb.sag + k * 0.7 + r() * 2);
+      const col = rp(r, ['#06050b', '#0a0911', '#0d0b16', '#110e1a']);
+      let py = null;
+      for (let cx = x0; cx <= x1; cx++) {
+        const t = (cx - x0) / Math.max(1, x1 - x0);
+        const cy = Math.round(y0 + (y1 - y0) * t + sag * 4 * t * (1 - t));
+        if (py !== null && Math.abs(cy - py) > 1) R(g, cx, Math.min(cy, py) + 1, 1, Math.abs(cy - py), col);
+        R(g, cx, cy, 1, 1, col);
+        if (Q >= 4 && k === 0) A(g, cx, cy - 1, 1, 1, '#8a84b0', 0.18);
+        py = cy;
+      }
+    }
+  }
   function cable(g, c, string) {
     const r = rng(c.seed);
     const x0 = u(c.x0);
@@ -570,11 +639,11 @@ function createCyberStreet(api) {
   // door, OPEN glowing in the window
   function shop(g, x, w, ch, yG, r, d) {
     const L = rp(r, ['#b8d86a', '#ffc46b', '#7fe3ff', '#ff9fd0', '#c8b8ff']);
-    R(g, x + Q, yG + Q, w - u(2), u(5), '#100e18'); // (the fascia)
-    A(g, x + u(2), yG + u(5), w - u(4), Q, L, 0.8);
-    const word = rp(r, WORDS.filter((s) => textW(s, Q) <= w - u(10)));
-    if (word) { const sx = x + Math.floor((w - textW(word, Q)) / 2); R(g, sx - u(2), yG, textW(word, Q) + u(4), u(6), '#07060d'); sign({ kind: 'text', s: word, x: sx, y: yG + Math.floor(Q / 2), w: textW(word, Q), h: u(5), col: rp(r, NEON), faulty: r() < 0.15 }); }
-    const wy = yG + u(8);
+    R(g, x + Q, yG + Q, w - u(2), u(11), '#100e18'); // (the fascia)
+    A(g, x + u(2), yG + u(11), w - u(4), Q, L, 0.8);
+    const word = rp(r, WORDS.filter((s) => textW7(s, Q) <= w - u(12)));
+    if (word) { const sx = x + Math.floor((w - textW7(word, Q)) / 2); R(g, sx - u(2), yG, textW7(word, Q) + u(4), u(11), '#07060d'); sign({ kind: 'text', font: 7, frame: true, s: word, x: sx, y: yG + u(2), w: textW7(word, Q), h: u(7), col: rp(r, NEON), faulty: r() < 0.15 }); }
+    const wy = yG + u(13);
     const wh = ch - wy - u(2);
     R(g, x + u(2), wy - Q, w - u(4), wh + u(2), '#0e0c15'); // (the frame)
     g.globalAlpha = 0.85;
@@ -596,7 +665,7 @@ function createCyberStreet(api) {
     R(g, door + u(7), wy + Math.floor(wh / 2), Q, u(3), '#d8d4e0'); // (its handle)
     const ox = door === x + u(4) ? x + w - u(18) : x + u(8);
     sign({ kind: 'text', s: 'OPEN', x: ox, y: wy + u(3), w: textW('OPEN', Q), h: u(5), col: rp(r, ['#ff2a6d', '#05d9e8']), faulty: r() < 0.3 });
-    out.spills.push({ x: x + u(3), w: w - u(6), col: L, shop: true });
+    out.spills.push({ x: x + u(3), w: w - u(6), y: wy, h: wh, col: L, shop: true });
     out.stops.push(x + Math.floor(w / 2));
     if (r() < 0.6) { R(g, x + w - u(12), yG - u(8), u(8), u(6), '#4a4e5c'); R(g, x + w - u(11), yG - u(7), u(6), u(4), '#2c2f3a'); for (let f = 0; f < u(6); f += 2) R(g, x + w - u(11) + f, yG - u(7), 1, u(4), '#3a3e4a'); R(g, x + w - u(9), yG - u(6), u(2), u(2), '#4a4e5c'); } // (an AC unit)
   }
@@ -635,7 +704,8 @@ function createCyberStreet(api) {
     R(g, x + u(2), yG - u(18), w - u(4), Q, '#3a8a80');
     R(g, x + u(2), yG + u(3), w - u(4), Q, '#3a8a80');
     for (let k = 0; k < 3; k++) { const gl = glyph(r); for (const [gx, gy] of gl) R(g, x + u(5 + k * 7 + gx), yG - u(16 - gy), Q, Q, '#4fb3a8'); }
-    sign({ kind: 'text', s: 'METRO', x: x + Math.floor((w - textW('METRO', u(2))) / 2), y: yG - u(9), w: textW('METRO', u(2)), h: u(10), k: u(2), col: T });
+    const mk7 = Math.round(Q * 1.4); // (the big letters: about a bot pixel and a half)
+    sign({ kind: 'text', font: 7, s: 'METRO', x: x + Math.floor((w - textW7('METRO', mk7)) / 2), y: yG - u(9), w: textW7('METRO', mk7), h: 7 * mk7, k: mk7, col: T });
     sign({ kind: 'screen', mode: 'clock', x: x + w - u(24), y: yG - u(16), w: textW('00:00', Q), h: u(5), col: T });
     sign({ kind: 'text', s: '>>>', x: x + w - u(16), y: yG + u(5), w: textW('>>>', Q), h: u(5), col: '#ff2a6d', faulty: true });
     const dy = yG + u(6);
@@ -742,15 +812,17 @@ function createCyberStreet(api) {
     R(g, x + Q, top - u(3), w - u(2), Q, '#3a3f4e');
     for (let k = x + Q; k < x + w - Q; k += u(3)) R(g, k, top - u(2), Math.max(1, Q - 1), u(2), '#3a3f4e');
     if (r() < 0.6) {
-      const word = rp(r, WORDS.filter((s) => textW(s, u(2)) <= w - u(6))) || 'BAR';
-      const k = textW(word, u(2)) <= w - u(6) ? u(2) : Q;
-      const sx = x + Math.floor((w - textW(word, k)) / 2);
-      const sy = top - u(6) - 5 * k;
-      if (sy < u(2)) return (r() < 0.5 ? shop : shutter)(g, x, w, ch, yG, r, d); // (no room over it for the sign)
-      R(g, sx - u(2), sy - u(2), textW(word, k) + u(4), 5 * k + u(4), '#07060d');
-      R(g, sx + u(2), sy + 5 * k + u(2), Q, top - (sy + 5 * k + u(2)), '#2a2d38');
-      R(g, sx + textW(word, k) - u(3), sy + 5 * k + u(2), Q, top - (sy + 5 * k + u(2)), '#2a2d38');
-      sign({ kind: 'text', s: word, x: sx, y: sy, w: textW(word, k), h: 5 * k, k, col: rp(r, NEON), faulty: r() < 0.2 });
+      // (big letters, a bot pixel and a half or so; what fits and whether there's room judged in bot
+      // pixels, so it's the same street at any RES)
+      const word = rp(r, WORDS.filter((s) => (s.length * 6 - 1) * 1.7 <= w / Q - 6)) || 'BAR';
+      const k = Math.round(Q * 1.5);
+      const sx = x + Math.floor((w - textW7(word, k)) / 2);
+      const sy = top - u(6) - 7 * k;
+      if (top / Q - 6 - 12 < 2) return (r() < 0.5 ? shop : shutter)(g, x, w, ch, yG, r, d); // (no room over it for the sign)
+      R(g, sx - u(2), sy - u(2), textW7(word, k) + u(4), 7 * k + u(4), '#07060d');
+      R(g, sx + u(2), sy + 7 * k + u(2), Q, top - (sy + 7 * k + u(2)), '#2a2d38');
+      R(g, sx + textW7(word, k) - u(3), sy + 7 * k + u(2), Q, top - (sy + 7 * k + u(2)), '#2a2d38');
+      sign({ kind: 'text', font: 7, s: word, x: sx, y: sy, w: textW7(word, k), h: 7 * k, k, col: rp(r, NEON), faulty: r() < 0.2 });
     }
     return (r() < 0.5 ? shop : shutter)(g, x, w, ch, yG, r, d); // (the shop under it, as the shops are)
   }
@@ -778,12 +850,11 @@ function createCyberStreet(api) {
   // their marquees lit and their screens playing, a claw machine
   function arcade(g, x, w, ch, yG, r, d) {
     const col = rp(r, ['#ff2a6d', '#b14aed', '#05d9e8']);
-    const word = textW('ARCADE', u(2)) <= w - u(8) ? 'ARCADE' : 'GAMES';
-    const k = textW(word, u(2)) <= w - u(8) ? u(2) : Q;
-    const sx = x + Math.floor((w - textW(word, k)) / 2);
-    const sy = yG - 5 * k - u(3);
-    R(g, sx - u(2), sy - u(2), textW(word, k) + u(4), 5 * k + u(4), '#07060d');
-    sign({ kind: 'text', s: word, x: sx, y: sy, w: textW(word, k), h: 5 * k, k, col, faulty: r() < 0.25 });
+    const word = textW7('ARCADE', Q) <= w - u(10) ? 'ARCADE' : 'GAMES';
+    const sx = x + Math.floor((w - textW7(word, Q)) / 2);
+    const sy = yG - u(7) - u(4);
+    R(g, sx - u(3), sy - u(3), textW7(word, Q) + u(6), u(13), '#07060d');
+    sign({ kind: 'text', font: 7, frame: true, s: word, x: sx, y: sy, w: textW7(word, Q), h: u(7), col, faulty: r() < 0.25 });
     R(g, x + Q, yG + Q, w - u(2), u(3), '#100a18');
     for (let bx = x + u(3); bx < x + w - u(3); bx += u(3)) sign({ kind: 'lantern', x: bx, y: yG + u(1) + 1, w: Q, h: Q, col: rp(r, ['#fff2b0', col]), faulty: r() < 0.06 });
     const iy = yG + u(4);
@@ -808,19 +879,19 @@ function createCyberStreet(api) {
     A(g, kx + Q, ch - u(22), u(7), u(10), '#cfe8ff', 0.25);
     R(g, kx + u(4), ch - u(22), 1, u(4), '#c8ccd8'); R(g, kx + u(3), ch - u(18), u(3), Q, '#c8ccd8');
     for (let k2 = 0; k2 < 6; k2++) R(g, kx + Q + (k2 % 3) * u(2), ch - u(14) + Math.floor(k2 / 3) * u(2), u(2) - 1, u(2) - 1, rp(r, ['#ff9fd0', '#7fe3ff', '#fffb6b', '#b8e07a']));
-    out.spills.push({ x: x + u(3), w: w - u(6), col, shop: true });
+    out.spills.push({ x: x + u(3), w: w - u(6), y: iy, h: ch - iy, col, shop: true });
     out.stops.push(x + Math.floor(w / 2));
   }
   // A CLINIC (a street doctor's: chrome fitted while you wait): its green cross, a cold-lit window, an
   // x-ray of a hand on a light box, the chair under its lamp
   function clinic(g, x, w, ch, yG, r) {
     const L = '#9fffe0';
-    const word = textW('CLINIC', Q) <= w - u(16) ? 'CLINIC' : 'MEDIC';
-    R(g, x + Q, yG + Q, w - u(2), u(5), '#0a1410');
-    sign({ kind: 'text', s: word, x: x + u(12), y: yG + Math.floor(Q / 2) + Q, w: textW(word, Q), h: u(5), col: '#39ff88', faulty: r() < 0.3 });
-    R(g, x + u(2), yG - u(9), u(9), u(9), '#06100a');
-    sign({ kind: 'cross', x: x + u(3) + Q, y: yG - u(8) + Q, w: u(6), h: u(6), k: u(2), col: '#39ff88', faulty: r() < 0.5 });
-    const wy = yG + u(8);
+    const word = textW7('CLINIC', Q) <= w - u(8) ? 'CLINIC' : 'MEDIC';
+    R(g, x + Q, yG + Q, w - u(2), u(11), '#0a1410');
+    sign({ kind: 'text', font: 7, frame: true, s: word, x: x + Math.floor((w - textW7(word, Q)) / 2), y: yG + u(2), w: textW7(word, Q), h: u(7), col: '#39ff88', faulty: r() < 0.3 });
+    R(g, x + u(2), yG - u(10), u(9), u(9), '#06100a');
+    sign({ kind: 'cross', x: x + u(3) + Q, y: yG - u(9) + Q, w: u(6), h: u(6), k: u(2), col: '#39ff88', faulty: r() < 0.5 });
+    const wy = yG + u(13);
     const wh = ch - wy - u(2);
     R(g, x + u(2), wy - Q, w - u(4), wh + u(2), '#0a1210');
     g.globalAlpha = 0.55; R(g, x + u(3), wy, w - u(6), wh, L); g.globalAlpha = 1;
@@ -835,7 +906,7 @@ function createCyberStreet(api) {
     R(g, x + w - u(12), wy, u(8), wh, '#0a1210'); // (its door: frosted, a cross on it)
     A(g, x + w - u(11), wy + Q, u(6), wh - Q, '#e8fff8', 0.35);
     R(g, x + w - u(9), wy + u(3), Q, u(4), '#39ff88'); R(g, x + w - u(10), wy + u(4), u(3), Q, '#39ff88');
-    out.spills.push({ x: x + u(3), w: w - u(6), col: L, shop: true });
+    out.spills.push({ x: x + u(3), w: w - u(6), y: wy, h: wh, col: L, shop: true });
     out.stops.push(x + Math.floor(w / 2));
   }
   // VENDING MACHINES in a row (lit fronts, rows of cans and bottles, their buttons), a capsule-toy
@@ -854,7 +925,7 @@ function createCyberStreet(api) {
       R(g, vx + Q, ch - u(23), u(7), u(1), rp(r, NEON)); // (its logo strip)
       R(g, vx + u(8), ch - u(20), Q, u(8), '#1a1a22'); for (let b = 0; b < 4; b++) R(g, vx + u(8), ch - u(19) + b * u(2), Q, Q, rp(r, ['#39ff88', '#ff2a6d'])); // (the buttons)
       R(g, vx + u(2), ch - u(7), u(6), u(3), '#0a0a10'); // (the tray)
-      out.spills.push({ x: vx, w: u(10), col: '#cfe8ff' });
+      out.spills.push({ x: vx, w: u(10), y: ch - u(23), h: u(13), col: '#cfe8ff' });
     }
     const gx = x + u(3) + n * u(11) + u(1); // (a capsule-toy machine: a dome of capsules on a red base)
     if (gx + u(7) < x + w) {
@@ -869,10 +940,10 @@ function createCyberStreet(api) {
   // behind the counter, bowls steaming, stools, red lanterns either side
   function noodle(g, x, w, ch, yG, r, d) {
     const warm = '#ffb347';
-    const word = rp(r, ['RAMEN', 'SOBA', 'UDON', 'NOODLE'].filter((s) => textW(s, Q) <= w - u(8)));
-    R(g, x + Q, yG + Q, w - u(2), u(5), '#1a0a08');
-    if (word) sign({ kind: 'text', s: word, x: x + Math.floor((w - textW(word, Q)) / 2), y: yG + Q, w: textW(word, Q), h: u(5), col: rp(r, ['#ff2a3c', '#ffb000']), faulty: r() < 0.2 });
-    const iy = yG + u(7);
+    const word = rp(r, ['RAMEN', 'SOBA', 'UDON', 'NOODLE'].filter((s) => textW7(s, Q) <= w - u(8)));
+    R(g, x + Q, yG + Q, w - u(2), u(11), '#1a0a08');
+    if (word) sign({ kind: 'text', font: 7, frame: true, s: word, x: x + Math.floor((w - textW7(word, Q)) / 2), y: yG + u(2), w: textW7(word, Q), h: u(7), col: rp(r, ['#ff2a3c', '#ffb000']), faulty: r() < 0.2 });
+    const iy = yG + u(13);
     R(g, x + u(3), iy, w - u(6), ch - iy, '#3a1c10');
     A(g, x + u(3), iy, w - u(6), ch - iy, warm, 0.45);
     R(g, x + Math.floor(w / 2) - u(3), ch - u(19), u(6), u(8), '#1a0c06'); // (the cook: a head, a white cap)
@@ -891,9 +962,9 @@ function createCyberStreet(api) {
       for (const [gx, gy] of glyph(r)) R(g, fx + Math.floor((fw - u(5)) / 2) + gx * Q, iy + u(3) + gy * Q, Q, Q, '#f0e8d8');
     }
     R(g, x + u(3), iy - Q, w - u(6), Q, '#2a1a10');
-    sign({ kind: 'lantern', x: x + Q, y: yG + u(7), w: u(3), h: u(5), col: '#ff2a3c', faulty: r() < 0.1 });
-    sign({ kind: 'lantern', x: x + w - u(4), y: yG + u(7), w: u(3), h: u(5), col: '#ff2a3c', faulty: r() < 0.1 });
-    out.spills.push({ x: x + u(3), w: w - u(6), col: warm, shop: true });
+    sign({ kind: 'lantern', x: x + Q, y: yG + u(13), w: u(3), h: u(5), col: '#ff2a3c', faulty: r() < 0.1 });
+    sign({ kind: 'lantern', x: x + w - u(4), y: yG + u(13), w: u(3), h: u(5), col: '#ff2a3c', faulty: r() < 0.1 });
+    out.spills.push({ x: x + u(3), w: w - u(6), y: iy, h: ch - iy, col: warm, shop: true });
     out.stops.push(x + Math.floor(w / 2));
   }
   // A GATE under the tracks: chain-link (barbed wire on top, a hazard sign), the wall behind it tagged
@@ -943,9 +1014,11 @@ function createCyberStreet(api) {
   // A CORPORATE LOBBY: its glass front (mullions, the inside lit cold: a reception desk, the company's
   // mark on the back wall, turnstiles, a guard mech), its name over the entrance
   function corp(g, x, w, ch, yG, r) {
-    const name = rp(r, ['HELIX', 'AXIOM', 'NULLSEC', 'VANTA', 'KESTREL', 'OBLIQ'].filter((s) => textW(s, u(2)) <= w - u(12)));
-    R(g, x + Q, yG - u(12), w - u(2), u(12), '#0c0e18');
-    if (name) sign({ kind: 'text', s: name, x: x + Math.floor((w - textW(name, u(2))) / 2), y: yG - u(11), w: textW(name, u(2)), h: u(10), k: u(2), col: rp(r, ['#e8f4ff', '#05d9e8', '#ff5ec4']) });
+    // (its name in big letters, a bot pixel and a half or so; what fits judged in bot pixels)
+    const name = rp(r, ['HELIX', 'AXIOM', 'NULLSEC', 'VANTA', 'KESTREL', 'OBLIQ'].filter((s) => (s.length * 6 - 1) * 1.5 <= w / Q - 12));
+    const k = Math.round(Q * 1.4);
+    R(g, x + Q, yG - u(13), w - u(2), u(13), '#0c0e18');
+    if (name) sign({ kind: 'text', font: 7, s: name, x: x + Math.floor((w - textW7(name, k)) / 2), y: yG - u(12), w: textW7(name, k), h: 7 * k, k, col: rp(r, ['#e8f4ff', '#05d9e8', '#ff5ec4']) });
     const iy = yG + Q;
     R(g, x + u(2), iy, w - u(4), ch - iy, '#1a2230');
     A(g, x + u(2), iy, w - u(4), ch - iy, '#cfe8ff', 0.3);
@@ -958,7 +1031,7 @@ function createCyberStreet(api) {
     R(g, gx, ch - u(20), u(7), u(8), '#2a2f3e'); R(g, gx + Q, ch - u(23), u(5), u(3), '#2a2f3e'); R(g, gx + Q, ch - u(22), u(5), Q, '#ff2a3c'); R(g, gx + Q, ch - u(12), u(2), u(12), '#2a2f3e'); R(g, gx + u(4), ch - u(12), u(2), u(12), '#2a2f3e');
     for (let k = x + u(2); k < x + w - u(2); k += u(10)) R(g, k, iy, Q, ch - iy, '#3a4458'); // (the mullions)
     for (let k = 0; k < 3; k++) { const sx = x + ri(r, u(4), w - u(10)); for (let i = 0; i < u(8); i++) A(g, sx + i, iy + u(2) + i, 1, 1, '#ffffff', 0.12); }
-    out.spills.push({ x: x + u(2), w: w - u(4), col: '#cfe8ff', shop: true });
+    out.spills.push({ x: x + u(2), w: w - u(4), y: iy, h: ch - iy, col: '#cfe8ff', shop: true });
     out.stops.push(x + Math.floor(w / 2));
   }
   // A HOLO COLUMN on the plaza: open (the city behind), planters of glowing synthetic trees either side,
@@ -975,7 +1048,7 @@ function createCyberStreet(api) {
     const cx = x + Math.floor(w / 2) - u(5);
     R(g, cx - u(1), ch - u(2), u(12), u(2), '#2a2f3e'); A(g, cx, ch - u(3), u(10), Q, '#05d9e8', 0.8);
     sign({ kind: 'holo', x: cx, y: ch - u(34), w: u(10), h: u(31), col: '#05d9e8', col2: rp(r, ['#ff9f1c', '#ff5ec4', '#fff2b0']) });
-    out.spills.push({ x: cx - u(4), w: u(18), col: '#05d9e8' });
+    out.spills.push({ x: cx - u(4), w: u(18), y: ch - u(6), h: u(6), col: '#05d9e8' });
     out.stops.push(x + Math.floor(w / 2));
   }
   // A VIDEO WALL: a building's whole face a screen (an advert playing), a lit lobby under it
@@ -1018,16 +1091,16 @@ function createCyberStreet(api) {
     for (let lb = Math.max(6, Math.floor(b0 / 24) * 24 + 6); lb < Math.min(world.Wb, b1 + 24); lb += 24) {
       const lx = u(lb);
       R(g, lx + Q, bt, 1, u(2), '#2a2a34');
-      sign({ kind: 'lantern', x: lx, y: bt + u(2), w: u(3), h: u(2), col: '#ffa040', faulty: (lb * 7) % 13 === 0 });
+      sign({ kind: 'lantern', x: lx, y: bt + u(2), w: u(3), h: u(2), col: '#ffa040', faulty: (lb * 7) % 13 === 0, cone: true, reach: ch - bt - u(4) }); // (its light falling to the street)
     }
   }
 
   const DRAW = { shop, shutter, metro, kiosk, window: windowLot, stall, low: lowLot, arcade, clinic, vending, noodle, gate, fire, corp, videowall };
 
   // THE SIDEWALK: wet (UNDER THE TRACKS: asphalt, oily; THE PLAZA: polished tiles, light strips in
-  // them), the shops' light and the signs' colors spilled in it (in streaks, as light lies on the wet),
-  // puddles; up close, cracks
-  function drawGround(g, ch, b0, b1) {
+  // them), the street mirrored in it (mirror: the front's canvases, lined up with this one), pools of
+  // the signs' and windows' light on it, their colors streaking down it, puddles; up close, cracks
+  function drawGround(g, ch, b0, b1, mirror) {
     const style = VIEWS[view].ground || 'wet';
     const x0 = u(Math.max(0, b0 - 2));
     const x1 = b1 === Infinity ? g.canvas.width : u(b1 + 2);
@@ -1038,10 +1111,41 @@ function createCyberStreet(api) {
     for (let xb = Math.floor(b0 / 7) * 7; xb < Math.min(world.Wb + 2, b1 + 7); xb += 7) g.fillRect(u(xb), Q, 1, ch - Q);
     g.fillRect(x0, u(3), x1 - x0, 1);
     if (style === 'tiles') for (let xb = Math.floor(b0 / 40) * 40 + 12; xb < Math.min(world.Wb, b1 + 40); xb += 40) A(g, u(xb), u(2), u(18), 1, '#05d9e8', 0.6); // (its light strips)
+    const rows = Math.min(ch, u(5));
+    // (the street mirrored in the wet: its front upside down from the foot of it (a bot pixel down the
+    // sidewalk), squeezed into the sidewalk's depth, rippling, fading; its lit signs brighter in it than
+    // its walls)
+    if (mirror) {
+      const top = u(1);
+      const st = (world.GFb + 8) / 4;
+      const ox = Math.round(b0 * Q);
+      for (let y = top; y < rows; y++) {
+        const sy = mirror[0].height - 1 - Math.floor((y - top) * st);
+        if (sy < 0) break;
+        const off = Math.round(Math.sin(y * 1.9) * Math.max(1, Q / 2));
+        const fade = 1 - (y - top) / (rows - top);
+        mirror.forEach((m, i) => { g.globalAlpha = (i ? 0.6 : 0.32) * fade; g.drawImage(m, 0, sy, m.width, 1, ox + off, y, m.width, 1); });
+      }
+      g.globalAlpha = 1;
+    }
+    // (pools of the lights on it: the lower the light, the brighter its pool)
+    g.save();
+    g.globalCompositeOperation = 'lighter';
+    const foot = u(world.hFb);
+    for (const l of lightsOf('front-fx')) {
+      const cx = l.x + l.w / 2;
+      if (cx + l.w < x0 - u(12) || cx - l.w > x1 + u(12)) continue;
+      const up = foot - (l.y + (l.cone ? 0 : l.h));
+      const a = l.a * Math.max(0.15, 1 - up / u(world.GFb + 30)) * 0.9;
+      for (let i = 0; i < 3; i++) {
+        g.fillStyle = i === 2 ? dither(g, l.col, (2 * a) / 3) : glowCol(l.col, a / 3);
+        ellipse(g, cx, Q, Math.round(l.w / 2) + u(3 + i * 4), u(1 + i));
+      }
+    }
+    g.restore();
     // (the light on the wet: in streaks down from the back edge, as light lies on a wet street, brighter
     // at their heads)
-    const rows = Math.min(ch, u(5));
-    const k = style === 'tiles' ? 1.4 : 1;
+    const k = style === 'tiles' ? 1.4 : 0.7;
     const streaks = (sx, sw, col, dens, a0) => {
       for (let x = sx; x < sx + sw; x++) {
         if (d() > dens * k) continue;
@@ -1069,10 +1173,9 @@ function createCyberStreet(api) {
     }
   }
   // IN FRONT: bollards, grates, bags, a cone (low: the bots' feet show over them)
-  function drawNear(g, ch, b0, b1, skip) {
+  function drawNear(g, ch, b0, b1) {
     for (const it of world.near) {
       if (it.x < b0 - 8 || it.x > b1 + 2) continue;
-      if (skip && it.x + 6 > skip[0] && it.x < skip[1]) continue;
       const x = u(it.x);
       const t = it.t;
       if (t < 0.35) { R(g, x, ch - u(5), u(2), u(5), '#2c2f3c'); R(g, x, ch - u(5), 1, u(5), '#40445a'); R(g, x, ch - u(6), u(2), Q, it.col); if (Q >= 4) { R(g, x, ch - u(3), u(2), Q, '#ffb000'); R(g, x, ch - u(2), u(2), 1, '#101010'); } }
@@ -1084,19 +1187,24 @@ function createCyberStreet(api) {
 
   // ── What flickers and plays: the signs, the screens, the fires, the holo, the billboards, the lights ──
   const LIVE = ['screen', 'fire', 'holo'];
-  function bounds(s) { const m = s.kind === 'fire' || s.kind === 'holo' ? Q * 4 : Q * 2; return [s.x - m, s.y - m, s.w + m * 2, s.h + m * 2]; }
+  function bounds(s) { const m = (s.kind === 'fire' || s.kind === 'holo' ? Q * 4 : Q * 2) + (s.frame ? u(2) : 0); return [s.x - m, s.y - m, s.w + m * 2, s.h + m * 2]; }
+  // (a lightbox's frame: a neon tube round its word)
+  function frame(g, s, col) {
+    const m = u(2);
+    const t = Math.max(1, Math.round(Q * 0.6));
+    const x = s.x - m; const y = s.y - m; const w = s.w + m * 2; const h = s.h + m * 2;
+    R(g, x, y, w, t, col); R(g, x, y + h - t, w, t, col); R(g, x, y, t, h, col); R(g, x + w - t, y, t, h, col);
+    if (t >= 2 && s.on) { const c = Math.floor(t / 2); R(g, x + c, y + c, w - c * 2, 1, HOT); R(g, x + c, y + h - t + c, w - c * 2, 1, HOT); R(g, x + c, y + c, 1, h - c * 2, HOT); R(g, x + w - t + c, y + c, 1, h - c * 2, HOT); } // (its hot core)
+  }
   const meets = (a, b) => a[0] < b[0] + b[2] && b[0] < a[0] + a[2] && a[1] < b[1] + b[3] && b[1] < a[1] + a[3];
   function paintSign(g, s, now) {
     const [bx, by, bw, bh] = bounds(s);
     const on = s.on;
     const col = on ? s.col : '#3a2a3a';
     const k = s.k || Q;
-    if (on && !LIVE.includes(s.kind)) { // (its glow: a soft halo, stepped)
-      A(g, bx, by, bw, bh, s.col, s.kind === 'lantern' ? 0.18 : 0.08);
-      A(g, bx + Q, by + Q, bw - u(2), bh - u(2), s.col, s.kind === 'lantern' ? 0.18 : 0.08);
-    }
-    if (s.kind === 'text') text(g, s.s, s.x, s.y, col, k, on);
-    else if (s.kind === 'logo') { text(g, 'BYTE', s.x, s.y, on ? s.col : '#1a3a2a', k, on); text(g, 'FALL', s.x + 16 * k, s.y, on ? s.col2 : '#3a2a10', k, on); }
+    if (on && s.kind === 'lantern') A(g, bx + Q, by + Q, bw - u(2), bh - u(2), s.col, 0.16); // (a lantern's paper glowing round its frame; the rest's light is the street's own, THE LIGHT)
+    if (s.kind === 'text') { (s.font === 7 ? text7 : text)(g, s.s, s.x, s.y, col, k, on); if (s.frame) frame(g, s, col); }
+    else if (s.kind === 'logo') { text7(g, 'BYTE', s.x, s.y, on ? s.col : '#1a3a2a', k, on); text7(g, 'FALL', s.x + 24 * k, s.y, on ? s.col2 : '#3a2a10', k, on); }
     else if (s.kind === 'glyphs') {
       if (s.box && on) { R(g, s.x - Q, s.y - Q, s.w + u(2), s.h + Q, s.col); A(g, s.x - Q, s.y - Q, s.w + u(2), Q, '#ffffff', 0.3); }
       const gc = s.box ? (on ? '#1a0a14' : '#2a1a24') : col;
@@ -1232,6 +1340,110 @@ function createCyberStreet(api) {
     }
   }
 
+  // ── THE LIGHT ──
+  // What's lit lights what's round it: the walls, the awnings, the sills, the wires, the sidewalk, and
+  // the crowd as it walks under it. In stepped bands, the outermost dithered (a soft light, pixel art's
+  // way), drawn once with each layer and added onto its own pixels only (its gaps stay the city's).
+  const mk = (w, h) => { const c = document.createElement('canvas'); c.width = Math.max(1, Math.ceil(w)); c.height = Math.max(1, Math.ceil(h)); return c; };
+  const pats = new WeakMap(); // (each context's dither patterns, made once a color and strength)
+  function dither(g, col, a) {
+    let m = pats.get(g);
+    if (!m) { m = new Map(); pats.set(g, m); }
+    const key = `${col}|${a.toFixed(3)}`;
+    let p = m.get(key);
+    if (!p) { const c = mk(2, 2); const cg = c.getContext('2d'); cg.fillStyle = glowCol(col, a); cg.fillRect(0, 0, 1, 1); cg.fillRect(1, 1, 1, 1); p = g.createPattern(c, 'repeat'); m.set(key, p); }
+    return p;
+  }
+  function ellipse(g, cx, cy, rx, ry) { for (let dy = -ry; dy <= ry; dy++) { const half = Math.round(rx * Math.sqrt(Math.max(0, 1 - (dy / (ry + 0.5)) ** 2))); g.fillRect(Math.round(cx - half), Math.round(cy + dy), half * 2 + 1, 1); } }
+  const BANDS = 4;
+  function glow(g, l) {
+    const cx = l.x + l.w / 2;
+    const cy = l.y + l.h / 2;
+    for (let i = 0; i < BANDS; i++) {
+      const e = Math.round((l.r * (i + 1)) / BANDS);
+      g.fillStyle = i === BANDS - 1 ? dither(g, l.col, (2 * l.a) / BANDS) : glowCol(l.col, l.a / BANDS);
+      ellipse(g, cx, cy, Math.round(l.w / 2) + e, Math.round(l.h / 2) + e);
+    }
+  }
+  function cone(g, l) { // (a lamp's light falling: wider as it goes down, fading in bands)
+    const dz = dither(g, l.col, (2 * l.a) / BANDS);
+    for (let k = 0; k < l.h; k++) {
+      const t = k / l.h;
+      const lv = Math.ceil((1 - t) * BANDS) / BANDS;
+      g.fillStyle = lv <= 1 / BANDS ? dz : glowCol(l.col, l.a * lv);
+      const half = Math.round(l.w / 2 + l.spread * t);
+      g.fillRect(Math.round(l.x + l.w / 2 - half), l.y + k, half * 2, 1);
+    }
+  }
+  // (a layer's lights: its signs (a lantern's small, a fire's big, a screen's faint, a lightbox's
+  // reaching past its frame), its billboards, whatever else glows on it; on the street's front, its lit
+  // windows and doors too)
+  const REACH = { lantern: 3, fire: 14, holo: 9, screen: 3, glyphs: 6, tube: 6, rungs: 6 };
+  const BRIGHT = { fire: 0.45, screen: 0.16, lantern: 0.17, holo: 0.3 };
+  function lightsOf(layer) {
+    const L = [];
+    for (const s of out.signs) {
+      if (s.layer !== layer) continue;
+      if (s.cone) { L.push({ cone: true, x: s.x, y: s.y + s.h, w: s.w, h: s.reach, spread: u(7), col: s.col, a: 0.32 }); continue; }
+      const r = u(REACH[s.kind] || 9) + (s.frame ? u(2) : 0);
+      const a = BRIGHT[s.kind] || 0.36;
+      if (s.kind === 'logo') { L.push({ x: s.x, y: s.y, w: s.w / 2, h: s.h, col: s.col, r, a }, { x: s.x + s.w / 2, y: s.y, w: s.w / 2, h: s.h, col: s.col2, r, a }); continue; }
+      L.push({ x: s.x, y: s.y, w: s.w, h: s.h, col: s.col, r, a });
+    }
+    for (const b of out.boards) if (b.layer === layer) L.push({ x: b.x, y: b.y, w: b.w, h: b.h, col: b.col, r: u(7), a: 0.22 });
+    for (const gl of out.glows) if (gl.layer === layer) L.push(gl);
+    if (layer === 'front-fx') {
+      const yG = u(world.hFb - world.GFb);
+      for (const sp of out.spills) L.push({ x: sp.x, y: sp.y !== undefined ? sp.y : yG + u(10), w: sp.w, h: sp.h !== undefined ? sp.h : u(world.GFb - 12), col: sp.col, r: u(7), a: 0.18 });
+    }
+    return L;
+  }
+  // (the layer lit: its own pixels with the light added, kept only where it has pixels; a strip at a
+  // time, so the street's long canvases never need another as big all at once)
+  function lightLayer(c, lights, ox = 0) {
+    if (!lights.length) return;
+    const STRIP = 1024;
+    const cg = c.getContext('2d');
+    for (let x0 = 0; x0 < c.width; x0 += STRIP) {
+      const w = Math.min(STRIP, c.width - x0);
+      const near = lights.filter((l) => { const reach = (l.cone ? l.spread : l.r) + 2; return l.x - ox - reach < x0 + w && l.x - ox + l.w + reach > x0; });
+      if (!near.length) continue;
+      const Lc = mk(w, c.height);
+      const lg = Lc.getContext('2d');
+      lg.globalCompositeOperation = 'lighter';
+      lg.translate(-(ox + x0), 0);
+      for (const l of near) (l.cone ? cone : glow)(lg, l);
+      const T = mk(w, c.height);
+      const t = T.getContext('2d');
+      t.drawImage(c, x0, 0, w, c.height, 0, 0, w, c.height);
+      t.globalCompositeOperation = 'lighter';
+      t.drawImage(Lc, 0, 0);
+      t.globalCompositeOperation = 'destination-in';
+      t.drawImage(c, x0, 0, w, c.height, 0, 0, w, c.height);
+      cg.save();
+      cg.setTransform(1, 0, 0, 1, 0, 0);
+      cg.clearRect(x0, 0, w, c.height);
+      cg.drawImage(T, x0, 0);
+      cg.restore();
+    }
+  }
+  // (the light along the street where the crowd walks, a bot pixel at a time: its color and how much)
+  function tintMap() {
+    const n = world.Wb + 2;
+    const t = new Float32Array(n * 4);
+    for (const l of lightsOf('front-fx')) {
+      const cx = (l.x + l.w / 2) / Q;
+      const R0 = (l.w / 2 + (l.cone ? l.spread : l.r)) / Q + 4;
+      const [cr, cg, cb] = hexRgb(l.col);
+      for (let b = Math.max(0, Math.floor(cx - R0)); b < Math.min(n, Math.ceil(cx + R0)); b++) {
+        const k = l.a * (1 - Math.abs(b - cx) / R0);
+        if (k <= 0) continue;
+        t[b * 4] += cr * k; t[b * 4 + 1] += cg * k; t[b * 4 + 2] += cb * k; t[b * 4 + 3] += k;
+      }
+    }
+    return t;
+  }
+
   // ── THE MOON (the weather's, weather.js): behind the towers, its haze round it ──
   function moonTick(now) {
     const m = api.moon ? api.moon() : null;
@@ -1283,7 +1495,31 @@ function createCyberStreet(api) {
     HOOD.rows.forEach((r, i) => { let row = `${r}........`.slice(0, 20); if (i <= 9) row = `${row.slice(0, 12)}s${row.slice(13)}`; rows.push(row); });
     return { w: 20, rows, legs: HOOD.legs.map((f) => f.map((r) => `${r}........`.slice(0, 20))), eyeRow: 7 + 4 };
   })();
+  // THE PEOPLE (not ByteFall's: off unless the sandbox's PEOPLE turns them on; a start on a city's people
+  // for a game of its own): a face, hair, a coat, trousers, each their own (palette letters: f/F skin,
+  // y hair, j/N coat, n trousers); one under a clear umbrella, one lit by the phone in their hands
+  const PERSON = {
+    w: 12,
+    rows: ['....yyyy....', '...yyyyyy...', '...yffffy...', '...fBffBf...', '...ffffff...', '....fFFf....', '.....ff.....', '..jjjjjjjj..', '.jjjjjjjjjj.', '.jjNjjjjNjj.', '.jjNjjjjNjj.', '.fjNjjjjNjf.', '.fjjjjjjjjf.', '..jjjjjjjj..', '..nnnnnnnn..', '..nnn..nnn..'],
+    legs: [['..nn....nn..', '..nn....nn..', '.bbb....bbb.'], ['....nn.nn...', '....nn.nn...', '...bbb.bbb..']],
+  };
+  const PHONE = { ...PERSON, rows: ['....yyyy....', '...yyyyyy...', '...yffffy...', '...ffffff...', '...fBffBf...', '....fFFf....', '.....ff.....', '..jjjjjjjj..', '.jjjjjjjjjj.', '.jjNjjjiijj.', '.jjNjjjffjj.', '.jjNjjjjNjj.', '.jjjjjjjjjj.', '..jjjjjjjj..', '..nnnnnnnn..', '..nnn..nnn..'] };
+  const BROLLY = (() => {
+    const canopy = ['..........VVVV......', '.......VVZZZZZVV....', '.....VVZZZZZZZZZVV..', `....V${'Z'.repeat(13)}V.`, '...VVVVVVVVVVVVVVVVV'];
+    const rows = [...canopy, '............s.......', '............s.......'];
+    PERSON.rows.forEach((r, i) => { let row = `${r}........`.slice(0, 20); if (i <= 9) row = `${row.slice(0, 12)}s${row.slice(13)}`; rows.push(row); });
+    return { w: 20, rows, legs: PERSON.legs.map((f) => f.map((r) => `${r}........`.slice(0, 20))) };
+  })();
+  const SKIN = [['#e0b090', '#c08a6a'], ['#b07850', '#8a5a3a'], ['#7a4a30', '#5a3420'], ['#f0c8a8', '#d0a080']];
+  const HAIR = ['#1a1a20', '#3a2418', '#c8c0b0', '#d04080', '#20a0c0', '#e0c050'];
+  const COAT = [['#3a3046', '#2a2234'], ['#5a2a2a', '#3a1a1a'], ['#2a3a46', '#1a2834'], ['#4a4a30', '#34341e'], ['#a08a68', '#806a4c']];
+  const PANTS = ['#1a1a24', '#2a2a3a', '#34302a'];
+  const PEOPLE_MIX = { person: 4, brolly: 2, phone: 1.5 };
+  let people = !!api.people || !!window.CYBER_PEOPLE;
   const FIG = {
+    person: { ...PERSON, speed: [4, 6.5], human: true },
+    brolly: { ...BROLLY, speed: [4, 6], human: true },
+    phone: { ...PHONE, speed: [3, 4.5], human: true },
     hood: { ...HOOD, eyeRow: 4, speed: [4.5, 7] },
     umbrella: { ...UMB, speed: [4.5, 6.5] },
     robot: { w: 14, rows: ['......r.......', '......a.......', '....MMMMMM....', '...MmmmmmmM...', '...MvvvvvvM...', '...MmmmmmmM...', '....MMMMMM....', '.....QQQQ.....', '.MMQQQQQQQQMM.', 'MmmQqqqqqqQmmM', 'MmmQqLLqqqQmmM', 'Mm.QqLLqqqQ.mM', 'Mm.QqqqqqqQ.mM', 'pp.QQQQQQQQ.pp', '...QQQQQQQQ...', '...Qq....qQ...'], legs: [['...QQ....QQ...', '...QQ....QQ...', '..QQ......QQ..', '..KKK....KKK..'], ['....QQ..QQ....', '....QQ..QQ....', '....QQ..QQ....', '...KKK..KKK...']], speed: [4, 6] },
@@ -1337,10 +1573,10 @@ function createCyberStreet(api) {
     return o;
   }
   const upscale = (g, q) => (q === 2 ? scale2(g) : q === 3 ? scale3(g) : q === 4 ? scale2(scale2(g)) : g);
-  const EMIT = ['e', 'v', 'O', 'R', 'W', 'L'];
+  const EMIT = ['e', 'v', 'O', 'R', 'W', 'L', 'i'];
   const spriteCache = new Map();
   function sprite(e, frame, blink, q = Q) {
-    const key = `${e.kind}|${frame}|${e.dir}|${e.eye}|${e.led}|${blink}|${q}`;
+    const key = `${e.kind}|${frame}|${e.dir}|${e.eye}|${e.led}|${blink}|${q}|${e.palKey || ''}`;
     let c = spriteCache.get(key);
     if (c) return c;
     const f = e.f;
@@ -1354,7 +1590,11 @@ function createCyberStreet(api) {
       const ch = grid[y][x];
       if (ch === '.') continue;
       let col = PAL[ch];
-      if (ch === 'e' || ch === 'v' || ch === 'O') col = e.eye;
+      if (e.pal && e.pal[ch]) col = e.pal[ch];
+      else if (ch === 'V') col = 'rgba(220, 232, 255, 0.75)';
+      else if (ch === 'Z') col = 'rgba(200, 220, 255, 0.16)';
+      else if (ch === 'i') col = '#c8f4ff';
+      else if (ch === 'e' || ch === 'v' || ch === 'O') col = e.eye;
       else if (ch === 'L') col = e.led;
       else if (ch === 'U') col = '#05d9e8';
       else if (ch === 'u') col = 'rgba(5, 217, 232, 0.16)';
@@ -1377,14 +1617,14 @@ function createCyberStreet(api) {
     // (what glows on it glowing: eyes, visors, implants, LEDs, headlights; a soft halo, every lit pixel's
     // own small one adding up)
     const hr = Math.ceil(q / 2);
-    for (let y = 0; y < grid.length; y++) for (let x = 0; x < grid[0].length; x++) if (EMIT.includes(grid[y][x])) { g.fillStyle = grid[y][x] === 'R' ? 'rgba(255, 42, 60, 0.05)' : grid[y][x] === 'W' ? 'rgba(255, 246, 200, 0.05)' : glowCol(grid[y][x] === 'L' ? e.led : e.eye, 0.05); g.fillRect(x - hr, y - hr, hr * 2 + 1, hr * 2 + 1); }
+    for (let y = 0; y < grid.length; y++) for (let x = 0; x < grid[0].length; x++) if (EMIT.includes(grid[y][x])) { g.fillStyle = grid[y][x] === 'R' ? 'rgba(255, 42, 60, 0.05)' : grid[y][x] === 'W' ? 'rgba(255, 246, 200, 0.05)' : grid[y][x] === 'i' ? 'rgba(200, 244, 255, 0.07)' : glowCol(grid[y][x] === 'L' ? e.led : e.eye, 0.05); g.fillRect(x - hr, y - hr, hr * 2 + 1, hr * 2 + 1); }
     if (f.eyeRow !== undefined) { const ex = e.dir > 0 || f.w === 12 ? 3 * q : (f.w - 9) * q; A(g, ex, (f.eyeRow - 1) * q, 6 * q, 3 * q, e.eye, 0.22); } // (the eyes' glow in the hood)
     spriteCache.set(key, c);
     return c;
   }
   function spawnWalker(kind, side, at) {
     if (!world) return null;
-    kind = kind && FIG[kind] ? kind : weighted(Math.random, VIEWS[view].crowd);
+    kind = kind && FIG[kind] ? kind : weighted(Math.random, people ? { ...VIEWS[view].crowd, ...PEOPLE_MIX } : VIEWS[view].crowd);
     const f = FIG[kind];
     const dir = side ? (side === 'left' ? 1 : -1) : (Math.random() < 0.5 ? 1 : -1);
     // (stopping a while at a window, a stall, the metro's doors, part way across: the nearest one ahead;
@@ -1401,6 +1641,11 @@ function createCyberStreet(api) {
       wait: 0,
       seen: new Set(), // (the bots that have noticed it already)
     };
+    if (f.human) { // (a person: their own skin, hair, coat and trousers)
+      const p = [Math.floor(Math.random() * SKIN.length), Math.floor(Math.random() * HAIR.length), Math.floor(Math.random() * COAT.length), Math.floor(Math.random() * PANTS.length)];
+      e.pal = { f: SKIN[p[0]][0], F: SKIN[p[0]][1], y: HAIR[p[1]], j: COAT[p[2]][0], N: COAT[p[2]][1], n: PANTS[p[3]] };
+      e.palKey = p.join('');
+    }
     crowd.push(e);
     return e;
   }
@@ -1408,7 +1653,7 @@ function createCyberStreet(api) {
     if (!world) return;
     if (now > nextWalker && !shot) {
       nextWalker = now + rand(3500, 9000);
-      if (crowd.length < VIEWS[view].most) spawnWalker();
+      if (crowd.length < VIEWS[view].most + (people ? 3 : 0)) spawnWalker();
     }
     for (const e of crowd) {
       e.t += dt;
@@ -1420,6 +1665,23 @@ function createCyberStreet(api) {
       const e = crowd[i];
       if (e.x < cam - u(e.f.w) - u(60) || e.x > cam + world.Wc + u(60)) crowd.splice(i, 1);
     }
+  }
+  // (a figure in the light where it's walking: the street's light there washed over it, on a scratch
+  // canvas so it falls on that figure alone; b: where along the street, in bot pixels, or -1 for none)
+  const scratch = document.createElement('canvas');
+  function lit(img, b) {
+    const t = world.tint;
+    const w = t && b >= 0 && b * 4 + 3 < t.length ? t[b * 4 + 3] : 0;
+    if (w < 0.03) return img;
+    if (scratch.width !== img.width || scratch.height !== img.height) { scratch.width = img.width; scratch.height = img.height; }
+    const g = scratch.getContext('2d');
+    g.globalCompositeOperation = 'source-over';
+    g.clearRect(0, 0, img.width, img.height);
+    g.drawImage(img, 0, 0);
+    g.globalCompositeOperation = 'source-atop';
+    g.fillStyle = `rgba(${Math.round(t[b * 4] / w)}, ${Math.round(t[b * 4 + 1] / w)}, ${Math.round(t[b * 4 + 2] / w)}, ${Math.min(0.34, w * 0.5).toFixed(2)})`;
+    g.fillRect(0, 0, img.width, img.height);
+    return scratch;
   }
   const frameOf = (e) => (e.wait <= 0 ? Math.floor(e.t * (e.kind === 'droid' || e.kind === 'cat' ? 8 : e.kind === 'mech' ? 2.5 : 4)) % 2 : 0);
   const bobOf = (e, q) => (e.f.hover ? Math.round(Math.sin(e.t * 3) * q) : e.f.fly ? Math.round(Math.sin(e.t * 5) * q) : e.kind === 'mech' && e.wait <= 0 ? Math.round(Math.abs(Math.sin(e.t * 8)) * q * 0.5) : 0);
@@ -1433,7 +1695,7 @@ function createCyberStreet(api) {
       const sx = Math.round(e.x - cam);
       const sy = c.height - img.height - u(f.hover || 0) - e.y + bobOf(e, Q);
       if (f.trail && e.wait <= 0) for (let k = 1; k <= 4; k++) A(g, e.dir > 0 ? sx - u(k * 4) : sx + img.width + u((k - 1) * 4), sy + img.height - u(5), u(4), Q, '#05d9e8', 0.25 / k); // (the courier's light trail)
-      g.drawImage(img, sx, sy);
+      g.drawImage(lit(img, f.fly ? -1 : Math.floor((e.x + u(f.w) / 2) / Q)), sx, sy);
       if (e.kind === 'umbrella') A(g, sx + (e.dir > 0 ? u(3) : 0), c.height - img.height - e.y + u(4), u(17), u(6), '#05d9e8', 0.06); // (the light off its rim)
     }
   }
@@ -1452,6 +1714,9 @@ function createCyberStreet(api) {
     courier: [['surprised', '!'], ['hit', '!?'], ['annoyed', 'hey']],
     vendor: [['skeptic', 'hm'], ['tired', '...'], ['annoyed', '...']],
     cat: [['surprised', '?'], ['worried', '...'], ['smug', 'hm']],
+    person: [['skeptic', '...'], ['worried', 'hm'], ['surprised', '!']],
+    brolly: [['skeptic', '...'], ['tired', '...'], ['surprised', '?']],
+    phone: [['skeptic', 'hm'], ['annoyed', '...'], ['worried', '?']],
   };
   function notice(w, mood, words, look, now) {
     if (!api.say) return;
@@ -1766,21 +2031,28 @@ function createCyberStreet(api) {
     const saved = out;
     Q = QC;
     C = P / QC;
-    out = { signs: [], lights: [], boards: [], grates: [], spills: [], stops: [], fires: [] };
+    out = { signs: [], lights: [], boards: [], grates: [], spills: [], stops: [], fires: [], glows: [] };
     const fb = cw / QC + 2;
     const leftAt = (f) => (cam * f * Cm + w.x) / P - bx / QC; // (a layer's left edge in the frame, in its bot pixels)
     const tB = leftAt(speedOf.towers);
     const mB = leftAt(speedOf.mid);
     const sB = leftAt(1);
+    // (each lit as the street is, its signs on)
     const towers = region(world.hTb, tB, fb, drawTowers);
+    lightLayer(towers, lightsOf('towers-fx'), Math.round(tB * QC));
     litUp(towers, tB, 'towers-fx', now);
     const midC = region(world.hMb, mB, fb, drawMid);
+    lightLayer(midC, lightsOf('mid-fx'), Math.round(mB * QC));
     litUp(midC, mB, 'mid-fx', now);
     const front = region(world.hFb, sB, fb, drawFront);
+    lightLayer(front, lightsOf('front-fx'), Math.round(sB * QC));
     litUp(front, sB, 'front-fx', now);
     const underB = world.underB || 0;
-    const ground = region(5 + underB, sB, fb, drawGround);
-    const near = region(7, sB, fb, (g, hh, b0, b1) => drawNear(g, hh, b0, b1, [sB + bx / QC - 2, sB + (bx + bot.w) / QC + 2]));
+    const ground = region(5 + underB, sB, fb, (g, hh, b0, b1) => drawGround(g, hh, b0, b1, [front]));
+    const near = region(7, sB, fb, drawNear);
+    const ng = near.getContext('2d'); // (nothing in front of the bot itself)
+    ng.setTransform(1, 0, 0, 1, 0, 0);
+    ng.clearRect(bx - u(3), 0, bot.w + u(6), near.height);
     const reflect = out.signs.filter((s) => s.layer === 'front-fx' && ['text', 'tube', 'cross', 'glyphs'].includes(s.kind)).map((s) => ({ x: s.x - Math.round(sB * QC), w: s.w, col: s.col }));
     const spills = out.spills.map((s) => ({ x: s.x - Math.round(sB * QC), w: s.w, col: s.col }));
     out = saved;
@@ -1802,6 +2074,16 @@ function createCyberStreet(api) {
     const curb = gTop + ground.height;
     R(g, 0, curb, cw, 3, '#3a3550'); R(g, 0, curb, cw, 1, '#5a5478'); R(g, 0, curb + 3, cw, 2, '#0a0910');
     R(g, 0, curb + 5, cw, ch - curb - 5, '#0b0a13');
+    // (the street mirrored in the road: its front upside down from the curb, squeezed, rippling, fading)
+    const rRows = ch - curb - 5;
+    const st = (world.GFb * QC * 1.1) / Math.max(1, rRows);
+    for (let y = 0; y < rRows; y++) {
+      const sy = front.height - 1 - Math.floor(y * st);
+      if (sy < 0) break;
+      g.globalAlpha = 0.45 * (1 - y / rRows);
+      g.drawImage(front, 0, sy, front.width, 1, Math.round(Math.sin(y * 0.8) * 2), curb + 5 + y, front.width, 1);
+    }
+    g.globalAlpha = 1;
     const d = rng(Math.floor(now));
     for (const s of [...spills, ...reflect]) for (let x = Math.max(0, s.x); x < Math.min(cw, s.x + s.w); x++) { // (the light in the road's wet: long streaks, rippling)
       if (d() > 0.35) continue;
@@ -1962,6 +2244,7 @@ function createCyberStreet(api) {
       if (c === 'closeup') return closeUp();
       if (c.startsWith('res-')) { window.CYBER_RES = c === 'res-auto' ? 0 : Number(c.slice(4)); if (world) build(world.seed); return true; }
       if (c.startsWith('view-')) { const v = c.slice(5); if (!VIEWS[v]) return false; view = v; shot = null; els.shot.style.opacity = '0'; if (world) build(world.seed); return true; }
+      if (c === 'people-on' || c === 'people-off') { people = c === 'people-on'; if (!people) for (let i = crowd.length - 1; i >= 0; i--) if (crowd[i].f.human) crowd.splice(i, 1); return true; } // (THE PEOPLE: not ByteFall's, the sandbox's to see)
       if (c.startsWith('spawn-')) { spawnWalker(c.slice(6)); return true; }
       return false;
     },

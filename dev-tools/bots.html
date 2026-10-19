@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" class="sandbox">
 <head>
-<script src="../js/fonts.js?v=647"></script>
+<script src="../js/fonts.js?v=648"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#020403">
 <title>Bot Sandbox // BYTEFALL</title>
-<link rel="stylesheet" href="../css/style.css?v=647">
+<link rel="stylesheet" href="../css/style.css?v=648">
 <!-- BOT SANDBOX: the wandering bots and everything around them (visitors, viruses, seasons, the fog,
      headphones and the music) running on the game's own code, with every behavior on a button.
      Progress is stubbed: nothing here touches the saved game (no achievements, no unlocks). -->
@@ -170,6 +170,7 @@
         <div class="row" id="cyber"></div>
         <div class="row" id="cyber-views"><b>VIEW</b></div>
         <div class="row" id="cyber-figs"><b>SEND ALONG IT</b></div>
+        <div class="row" id="cyber-people"><b>PEOPLE (NOT BYTEFALL'S: OFF UNLESS TURNED ON HERE; A START ON THEM FOR A GAME OF ITS OWN)</b></div>
         <div class="row" id="cyber-res"><b>RES</b></div>
       </div>
 
@@ -189,34 +190,34 @@
 <canvas id="board-fx" aria-hidden="true"></canvas>
 <div class="stat cpu-face" id="cpu-face" hidden aria-hidden="true"></div>
 
-<script src="../js/bot-svg.js?v=647"></script>
-<script src="../js/music/output.js?v=647"></script>
-<script src="../js/music/mixes.js?v=647"></script>
-<script src="../js/sfx.js?v=647"></script>
-<script src="../js/music/music-bytefall-theme.js?v=647"></script>
-<script src="../js/music/music-sleep-mode.js?v=647"></script>
-<script src="../js/music/music-brute-force.js?v=647"></script>
-<script src="../js/music/music-deep-web.js?v=647"></script>
-<script src="../js/music/music-zero-day.js?v=647"></script>
-<script src="../js/music/music-system-restore.js?v=647"></script>
-<script src="../js/music/music-night-drive.js?v=647"></script>
-<script src="../js/music/music-standby-mode.js?v=647"></script>
-<script src="../js/music/music-core-dump.js?v=647"></script>
-<script src="../js/music/music-handshake.js?v=647"></script>
-<script src="../js/music/music-stack-overflow.js?v=647"></script>
-<script src="../js/music/music.js?v=647"></script>
-<script src="../js/fx.js?v=647"></script>
-<script src="../js/pixel.js?v=647"></script>
-<script src="../js/minibot.js?v=647"></script>
-<script src="../js/seasons.js?v=647"></script>
-<script src="../js/bigart.js?v=647"></script>
-<script src="../js/cyberstreet.js?v=647"></script>
-<script src="../js/scenes.js?v=647"></script>
-<script src="../js/weather.js?v=647"></script>
-<script src="../js/visitors.js?v=647"></script>
-<script src="../js/data/bot-anims.js?v=647"></script>
-<script src="../js/wanderers.js?v=647"></script>
-<script src="../js/grid-bg.js?v=647"></script>
+<script src="../js/bot-svg.js?v=648"></script>
+<script src="../js/music/output.js?v=648"></script>
+<script src="../js/music/mixes.js?v=648"></script>
+<script src="../js/sfx.js?v=648"></script>
+<script src="../js/music/music-bytefall-theme.js?v=648"></script>
+<script src="../js/music/music-sleep-mode.js?v=648"></script>
+<script src="../js/music/music-brute-force.js?v=648"></script>
+<script src="../js/music/music-deep-web.js?v=648"></script>
+<script src="../js/music/music-zero-day.js?v=648"></script>
+<script src="../js/music/music-system-restore.js?v=648"></script>
+<script src="../js/music/music-night-drive.js?v=648"></script>
+<script src="../js/music/music-standby-mode.js?v=648"></script>
+<script src="../js/music/music-core-dump.js?v=648"></script>
+<script src="../js/music/music-handshake.js?v=648"></script>
+<script src="../js/music/music-stack-overflow.js?v=648"></script>
+<script src="../js/music/music.js?v=648"></script>
+<script src="../js/fx.js?v=648"></script>
+<script src="../js/pixel.js?v=648"></script>
+<script src="../js/minibot.js?v=648"></script>
+<script src="../js/seasons.js?v=648"></script>
+<script src="../js/bigart.js?v=648"></script>
+<script src="../js/cyberstreet.js?v=648"></script>
+<script src="../js/scenes.js?v=648"></script>
+<script src="../js/weather.js?v=648"></script>
+<script src="../js/visitors.js?v=648"></script>
+<script src="../js/data/bot-anims.js?v=648"></script>
+<script src="../js/wanderers.js?v=648"></script>
+<script src="../js/grid-bg.js?v=648"></script>
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -380,6 +381,15 @@
     const b = el('button', { type: 'button' }, k === 'hood' ? 'HOODED' : k.toUpperCase());
     b.addEventListener('click', () => W().visit(`cy-spawn-${k}`));
     $('cyber-figs').appendChild(b);
+  }
+  // (THE PEOPLE: off in ByteFall; here, on to see them walk the street among the rest, or one sent along)
+  const peopleBtn = el('button', { type: 'button' }, 'OFF');
+  peopleBtn.addEventListener('click', () => { const on = !peopleBtn.classList.contains('on'); W().visit(on ? 'cy-people-on' : 'cy-people-off'); peopleBtn.classList.toggle('on', on); peopleBtn.textContent = on ? 'ON' : 'OFF'; });
+  $('cyber-people').appendChild(peopleBtn);
+  for (const [label, k] of [['PERSON', 'person'], ['CLEAR UMBRELLA', 'brolly'], ['ON A PHONE', 'phone']]) {
+    const b = el('button', { type: 'button' }, label);
+    b.addEventListener('click', () => W().visit(`cy-spawn-${k}`));
+    $('cyber-people').appendChild(b);
   }
   // (CLOSE-UP: the street up first if it isn't; no CPU on it, one brought in and given a moment to walk on)
   $('cy-closeup').addEventListener('click', () => {

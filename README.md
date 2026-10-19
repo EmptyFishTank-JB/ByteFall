@@ -741,6 +741,23 @@ measured in bot pixels so they stand as tall, the finer pixels spent on detail: 
 glints, brickwork or panel seams, the goods on the shelves, hanging lamps, a scalloped canopy, ribbed
 lanterns, neon tubes with a hot white core. The crowd is scaled up the pixel artist's way (Scale2x /
 Scale3x: smooth diagonals, still pixels), each pose drawn once and kept, a sheen along its top edges.
+**THE LIGHT**: everything lit lights what's round it. Every sign, lightbox, lantern, lit window and door,
+screen, holo, barrel fire and billboard throws its color onto the walls, awnings, sills and wires near
+it, in stepped bands with the outermost dithered (pixel art's soft light); the viaduct's sodium lamps
+throw cones down to the street. It's worked out once when the street is built (a light map per layer,
+added onto the layer's own pixels only, a strip at a time) and costs nothing after. The crowd is lit by
+where it walks: the street's light along the sidewalk, a bot pixel at a time, washed over each figure.
+**THE WET**: the street is mirrored in the sidewalk (its front upside down from its foot, squeezed into
+the sidewalk's depth, rippling, fading, its lit signs brighter in it than its walls), pools of the
+lights lie on it under each (the lower the light, the brighter its pool), their colors streaking down it.
+In the close-up the whole street front is mirrored in the road too. **THE SIGNS**: a 5x7 neon font for the
+big ones, each stroke a tube with an unbroken hot core (no more LED dots): shop names in framed lightboxes
+(the frame a neon tube too), the METRO, the companies' names, the rooftop signs, BYTEFALL up on its roof.
+**THE WIRES**: bundles of cables strung from wall to wall everywhere but the plaza, two to six together,
+each its own sag, some spanning a building (their own random: the rest of the street stands the same).
+**THE PEOPLE** (not ByteFall's: off unless the sandbox's PEOPLE turns them on; a start on a city's people
+for a game of its own): people in coats, each their own skin, hair, coat and trousers, one under a clear
+umbrella, one lit by the phone in their hands; they join the crowd's mix while on.
 **A GLOOMY PLACE**: no cheer on the bots' faces while the street is up (the lane gets 'gloomy',
 wanderers.js): happy turns skeptic, love worried, laugh smug, no cheery emotes (^^, <3, haha), meetings
 drawn from a gloomy set (no grins), and EASY's resting smile shows as a flat look (style.css).
