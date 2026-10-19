@@ -13,6 +13,9 @@
 // game's own part under them, and SHARE (or NEW GAME) once it's over. What it needs of ByteFall's
 // (storage, todayKey, seeded, fillBit ...) is arcade-shell.js; SFX, FX and the themes are ByteFall's own
 // files. ?game=trace puts that one in the middle of the menu; ?today opens the day's game.
+// ?phone: on STORY's phone (bytefall.html, the phone's GAMES, in a frame): straight into the game (?game,
+// FREE PLAY; or ?today), no menu and no BACK of its own: the phone's BACK (a message, 'back') leaves it,
+// saved, and the phone's told ('exit').
 //
 // A game (Arcade.register(id, game)): name, rule() (its line on the cards), make(rand, saved) (its
 // state from a seed, with what was saved), pack(s) (what to save), over(s), status(saved) (TODAY's:
@@ -51,6 +54,8 @@ const Arcade = (() => {
   let demos = []; // (the ARCADE menu's previews: { id, card, el, run, phase, due, seen })
   let demoTimer = 0;
 
+  const PHONE = new URLSearchParams(location.search).has('phone');
+  if (PHONE) document.body.classList.add('in-phone');
   const today = () => DAYS[utcWeekday()];
   const read = (key) => {
     try {
@@ -411,8 +416,14 @@ const Arcade = (() => {
     showMenu();
   }
   window.addEventListener('load', () => setTimeout(() => {
+    const q = new URLSearchParams(location.search);
+    if (PHONE) { // (on the phone: the game at once)
+      if (q.has('today') || !GAMES[q.get('game')]) open();
+      else { showCard(); play(q.get('game'), false); }
+      return;
+    }
     openMenu();
-    if (new URLSearchParams(location.search).has('today')) open();
+    if (q.has('today')) open();
   }, 0));
   todayBtn.addEventListener('click', () => { SFX.play('button'); open(); });
   let scrollFrame = 0;
@@ -432,9 +443,11 @@ const Arcade = (() => {
 
   // BACK (or Esc): from a game to the menu; from the menu out, to the landing page
   function back() {
+    if (PHONE) { if (view === 'game') save(); window.parent.postMessage({ arcade: 'exit' }, '*'); return; } // (the phone's to leave)
     if (view === 'game') { SFX.play('button'); showMenu(); return; }
     close();
   }
+  window.addEventListener('message', (e) => { if (PHONE && e.data && e.data.arcade === 'back') back(); });
   function close() {
     leaveGame();
     location.href = './';

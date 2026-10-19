@@ -283,3 +283,5 @@ body.arcade-page { justify-content: flex-start; }
 .arcade-today.done { border-color: var(--grid-line); background: transparent; box-shadow: none; }
 .arcade-today.done .at-day { color: var(--fg-dim); }
 @media (hover: hover) { .arcade-today:hover:not(:disabled) { background: rgba(var(--accent-rgb), 0.15); } }
+/* ON STORY's PHONE (?phone, in a frame): the game alone, the phone's BACK its way out */
+body.in-phone .arcade .card-back { visibility: hidden; }

@@ -1,7 +1,7 @@
 // ?storytest: a bar at the bottom to review STORY's messages one by one, each played in the
 // message card as the game plays it (its timing and sounds; what it introduces and gives under it).
-// Nothing's recovered or saved: the stories' progress stays as it is. Every season's transmissions,
-// each story's unprompted messages and the terminal intro are on its list. ?storytest=8 opens on GHOSTS 8.
+// Nothing's recovered or saved: the stories' progress stays as it is. Every season's files (with their
+// messages), GHOSTS' intro, unprompted messages and inbox, and the terminal intro are on its list. ?storytest=8 opens on GHOSTS' file 8.
 // WRITE: a message of your own, typed in and played as the real thing, as a FILE, an IM or a CALL. Its
 // lines are written as in docs/STORY-V2.md (pasted from it as they are, the "> " or not):
 //   **moth** 02:14 · text   an IM line (**you** the player); in an IM, moth: text does too
@@ -21,8 +21,10 @@
   const LABEL = { moth: 'MOTH', toll: 'TOLL', unknown: 'UNKNOWN NUMBER', archive: 'THE ARCHIVE' };
   const list = [{ label: 'THE INTRO // TERMINAL', intro: true }];
   STORIES.forEach((s) => {
-    s.items.forEach((it, i) => list.push({ label: `S${s.season} ${s.title} ${pad(i + 1)} // ${Stories.kindLine(it)}`, it, title: `${s.title} // ${pad(i + 1)} OF ${s.items.length}`, shows: it.atStart ? 'pops up as the first STORY game starts' : it.job ? `a JOB later (${it.job.mode}), the cracked card for now` : 'on the cracked card' }));
-    (s.extras || []).forEach((x) => list.push({ label: `S${s.season} ${s.title} OFF THE RECORD // ${x.title}`, it: x, title: `// ${x.kind === 'call' ? 'VOICEMAIL' : 'IM'} // ${LABEL[x.from] || x.from.toUpperCase()}`, shows: `unprompted, on the main menu (after transmission ${x.after})` }));
+    (s.intro || []).forEach((m) => list.push({ label: `S${s.season} ${s.title} INTRO // ${Stories.kindLine(m)}`, it: m, title: `${s.title} // INTRO`, shows: m.kind === 'im' ? 'on the phone after the terminal intro' : 'in the phone\'s MAIL from the intro on' }));
+    s.items.forEach((it, i) => list.push({ label: `S${s.season} ${s.title} FILE ${pad(i + 1)} // ${it.title}${(it.then || []).length ? ` + ${it.then.map((m) => m.kind.toUpperCase()).join(' + ')}` : ''}`, it, title: `${s.title} // FILE ${pad(i + 1)} OF ${s.items.length}`, shows: it.job ? `a JOB later (${it.job.mode}), the cracked card for now` : 'on the cracked card, its IMs on the phone after it' }));
+    (s.extras || []).forEach((x) => list.push({ label: `S${s.season} ${s.title} OFF THE RECORD // ${x.title}`, it: x, title: `// ${x.kind === 'call' ? 'VOICEMAIL' : 'IM'} // ${LABEL[x.from] || x.from.toUpperCase()}`, shows: `unprompted, on the main menu (after file ${x.after})` }));
+    [...(s.inbox || []), ...(s.texts || [])].forEach((x) => list.push({ label: `S${s.season} ${s.title} INBOX // ${x.kind === 'im' ? 'TEXT' : 'MAIL'} // ${x.title}`, it: x, title: `// ${x.kind === 'im' ? 'TEXT' : 'MAIL'} // ${x.title}`, shows: x.at ? `in the phone with file ${x.at}` : 'in the phone from the start' }));
   });
 
   const bar = document.createElement('div');
@@ -39,7 +41,7 @@
 
   let at = 0;
   const n = Number(q.get('storytest'));
-  if (n >= 1 && n <= STORIES[0].items.length) at = n; // (GHOSTS n: the list's n-th, after the intro card)
+  if (n >= 1 && n <= STORIES[0].items.length) at = n + (STORIES[0].intro || []).length; // (GHOSTS' file n: after the terminal intro and the INTRO's)
   else try { at = Math.min(list.length - 1, Number(localStorage.getItem('bytefall-storytest')) || 0); } catch (e) {}
 
   function show() {
@@ -58,7 +60,7 @@
     }
     const chars = x.it.lines.reduce((a, l) => a + (l.t || '').length, 0);
     count.textContent = `${at + 1} OF ${list.length} // ${x.it.lines.length} lines, ${chars} characters // ${x.shows}`;
-    Stories.showCard(x.title, x.it, true);
+    Stories.preview(x.it, x.title);
   }
   bar.addEventListener('click', (e) => {
     const b = e.target.closest('button[data-go]'); // (PREV, PLAY, NEXT; not WRITE's)

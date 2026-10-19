@@ -2,23 +2,25 @@
 // next piece of the story being decrypted, shown on the cracked card and kept in the ARCHIVE; a
 // chapter's pieces only come from keys at least its gate deep (any key, then 256-BIT, then 512-BIT). A
 // story finished opens the next.
-// SEASON 1, GHOSTS: 24 transmissions (FILE, IM, CALL), 8 a chapter. Its words are in
-// js/data/story-ghosts.js, made from docs/STORY-V2.md by tools/story-from-md.js; what each one
-// introduces (exploits, BLACK BOXES, patches, and the stages: 'infections', 'market', 'bring') and the
-// patches MOTH gifts to the kit are here, by transmission number.
+// SEASON 1, GHOSTS: 18 FILES, 6 a chapter, each a document from the archive, some with messages
+// THEN (an IM, a call, an email), and the INTRO's email and IM before them; and the phone's ordinary
+// mail and texts (inbox, texts). Its words are in js/data/story-ghosts.js, made from docs/STORY-V2.md by
+// tools/story-from-md.js; what each file (with its messages) introduces (exploits, BLACK BOXES,
+// patches, and the stages: 'infections', 'market', 'bring') and the patches MOTH gifts to the kit are
+// here, by file number.
 const GHOSTS_RULES = {
-  3: { introduces: ['bitflip'] },
-  5: { introduces: ['head-start'], gifts: { 'head-start': 2 } },
-  7: { introduces: ['rng', 'buffer-overflow'] },
-  8: { introduces: ['infections'] },
-  10: { introduces: ['lookahead', 'trojan'], gifts: { lookahead: 2 } },
-  12: { introduces: ['market'], names: ['moth'] }, // ("Say the moth sent you": an UNKNOWN CONTACT till now)
-  13: { introduces: ['box-1'] },
-  15: { introduces: ['bring'] },
-  18: { introduces: ['pivot', 'swap', 'backdoor', 'second-chance'], gifts: { 'second-chance': 2 } },
-  20: { introduces: ['worm-virus', 'keylogger', 'honeypot', 'box-2', 'box-3'] },
-  21: { introduces: ['antivirus', 'firewall-delay', 'packet-sniffer'], gifts: { antivirus: 2, 'firewall-delay': 2 } },
-  23: { introduces: ['logic-bomb', 'dictionary-attack', 'rainbow-table', 'black-box'] },
+  1: { introduces: ['bitflip'] },
+  2: { introduces: ['head-start'], gifts: { 'head-start': 2 } },
+  4: { introduces: ['rng', 'buffer-overflow'] },
+  6: { introduces: ['infections'] },
+  7: { introduces: ['lookahead', 'trojan'], gifts: { lookahead: 2 } },
+  9: { introduces: ['market'], names: ['moth'] }, // ("Say the moth sent you": an UNKNOWN CONTACT till now)
+  10: { introduces: ['box-1'] },
+  12: { introduces: ['bring'] },
+  13: { introduces: ['pivot', 'swap', 'backdoor', 'second-chance'], gifts: { 'second-chance': 2 } },
+  15: { introduces: ['worm-virus', 'keylogger', 'honeypot', 'box-2', 'box-3'] },
+  16: { introduces: ['antivirus', 'firewall-delay', 'packet-sniffer'], gifts: { antivirus: 2, 'firewall-delay': 2 } },
+  17: { introduces: ['logic-bomb', 'dictionary-attack', 'rainbow-table', 'black-box'] },
 };
 // SEASONS 2 TO 4: the first stories, files of a header line (doc) and lines (text, \n between them);
 // they open after GHOSTS, with everything it introduced. Edit freely: the game counts files, not words.
@@ -100,11 +102,14 @@ const STORIES = [
     title: 'GHOSTS',
     blurb: 'An archive you were never meant to open, and the people who want it closed.',
     chapters: GHOSTS_TEXT.chapters.map((c) => c.name),
-    perChapter: 8,
+    perChapter: 6,
+    intro: GHOSTS_TEXT.intro,
     items: GHOSTS_TEXT.items.map((it) => ({ ...it, ...(GHOSTS_RULES[it.n] || {}) })),
     extras: GHOSTS_TEXT.extras,
+    inbox: GHOSTS_TEXT.inbox,
+    texts: GHOSTS_TEXT.texts,
   },
-  // (the first stories: each file a FILE transmission, a chat log's <handle> lines as a chat's)
+  // (the first stories: each a FILE, a chat log's <handle> lines as a chat's)
   ...OLD_STORIES.map((s) => ({
     ...s,
     perChapter: 4,

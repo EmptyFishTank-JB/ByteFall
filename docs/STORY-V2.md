@@ -19,15 +19,16 @@ wants you to stop.
 ### The progression
 
 You start with nothing: no exploits, no patches, no chain meter, no BLACK MARKET. Just you and the
-board. Every key you crack brings the next **transmission**: a file from the archive, an IM, or a
-call. The IMs bring the tools, one or two at a time, and the story moves through four stages:
+board. Every key you crack brings the next **file** from the archive, and some files bring a message
+after them (an IM, a call or an email). The messages bring the tools, one or two at a time, and the
+story moves through four stages:
 
 | Stage | From | What you can use in a STORY game |
 |---|---|---|
 | **1. Nothing** | the start | Nothing. Chains score, but there's no chain meter yet. |
-| **2. MOTH's kit** | transmission 3 | What MOTH has **introduced**: introduced exploits come from the chain meter (it appears with the first one); introduced patches come as gifts MOTH puts in your kit (2 of each when it's introduced, used from the PATCHES button). |
-| **3. The BLACK MARKET** | transmission 12 | The kit, plus the BLACK MARKET: TOLL's stock of what's been introduced, bought with KEYS and resources, opened from the PATCHES or EXPLOITS button. |
-| **4. Bring your own** | transmission 15 | All that, plus your own: exploits and patches you "compile" (buy in the STORE), but only the ones introduced so far. STORY's main menu gets its PATCHES and EXPLOITS rows back to bring up to 2 of each into a game. |
+| **2. MOTH's kit** | file 1 | What MOTH has **introduced**: introduced exploits come from the chain meter (it appears with the first one); introduced patches come as gifts MOTH puts in your kit (2 of each when it's introduced, used from the PATCHES button). |
+| **3. The BLACK MARKET** | file 9 | The kit, plus the BLACK MARKET: TOLL's stock of what's been introduced, bought with KEYS and resources, opened from the PATCHES or EXPLOITS button. |
+| **4. Bring your own** | file 12 | All that, plus your own: exploits and patches you "compile" (buy in the STORE), but only the ones introduced so far. STORY's main menu gets its PATCHES and EXPLOITS rows back to bring up to 2 of each into a game. |
 
 - **Introduced is the rule.** Owning something (bought in the STORE, or unlocked by level) doesn't
   make it usable in STORY. The story has to have introduced it first. Someone with everything
@@ -37,7 +38,7 @@ call. The IMs bring the tools, one or two at a time, and the story moves through
 - **Limits.** Up to 2 patches and 2 exploits used per key (as now), back after GO DEEPER. The kit's
   gifts don't come back once used; from stage 3 on there's always the market, and from stage 4 the
   STORE.
-- **Infections start when you're noticed.** No INFECTED BITS until the first call (transmission 8):
+- **Infections start when you're noticed.** No INFECTED BITS until the first call (after file 6):
   from then on, every STORY game has them. The Custodian's people are pushing back.
 - **Each file has its own key.** The key being cracked is for the next file, its strength (the points
   it takes) that file's: staggered through the story, mostly a little higher than the last, now and
@@ -51,13 +52,15 @@ call. The IMs bring the tools, one or two at a time, and the story moves through
 
 ### Transmissions
 
-**Where each one shows up.** Transmission 1 pops up over the board as your first STORY game starts
-(MOTH reaching you the moment the files land). Every one after it comes with a key cracked, on the
-cracked card. The three unprompted messages (below) come between games, as a card on the main menu.
-Each transmission's heading in the story says which: *pops up as your first STORY game starts*,
-*on the cracked card*, or a JOB. Each comes in its own form:
+**Where each one shows up.** The INTRO's email (the archive, attached) is in your inbox when the
+terminal intro ends, and its IM pops up on the phone. Every FILE after that comes with a key cracked,
+printed on the cracked card, and its messages THEN: a call or an email on the card after it, an IM
+on the phone. The three unprompted messages (below) come between games, as a card on the main menu.
+Each comes in its own form:
 
-- **FILE**: a document from the archive (memos, chat logs, records), as the files are now.
+- **FILE**: a document from the archive (memos, chat logs, records). Every key brings one.
+- **EMAIL**: mail on your computer: FROM, SUBJECT and its words, printed on the cracked card after
+  its file; kept in the phone's MAIL with the inbox's ordinary emails (### The inbox).
 - **IM**: a thread on a phone screen that pops up over the game (always the same size, a phone's
   shape): each message in a bubble, its sender and time above it on its side (theirs left, yours
   right), each sender's own color, "..." in a bubble while they type, a beat between messages about
@@ -65,7 +68,7 @@ Each transmission's heading in the story says which: *pops up as your first STOR
   shown too, written for you. Only that transmission's messages are on it, and a long thread
   scrolls. The cracked card and the ARCHIVE show it as an inbox does (its last message, OPEN
   THREAD). A time written in the story (`**moth** 02:14 ·`) is kept; the rest get late-night
-  times of their own. **MOTH is an UNKNOWN CONTACT** on your phone until transmission 12, where
+  times of their own. **MOTH is an UNKNOWN CONTACT** on your phone until the message after file 9, where
   they name themselves ("Say the moth sent you"); that card says `CONTACT SAVED // MOTH`, and
   every IM after it is from MOTH (`names` in `js/data/stories.js`'s GHOSTS_RULES).
 - **CALL**: the card rings first, `INCOMING CALL // UNKNOWN NUMBER`, with ANSWER. The call plays as
@@ -101,9 +104,9 @@ ones only) and never touch BEST.
 | **TOLL'S TEST** | DECRYPT | TOLL won't sell to just anyone | reach the score with a fixed set of 40 bits |
 | **THE CUSTODIAN** | VS | his tracing program, head to head | beat it in VS CLASSIC: first to overflow loses (a STORY-only bot, THE CUSTODIAN: patient, never greedy, faster each chapter) |
 
-The jobs, in the story: **4** SEALED FILE, **9** LIVE TRACE, **11** FIREWALL, **13** TOLL'S TEST,
-**17** SEALED FILE, **19** LIVE TRACE, **22** FIREWALL, **24** THE CUSTODIAN (the finale). That's 8
-of the 24; the other 16 come from keys.
+The jobs, in the story (by file): **3** SEALED FILE, **7** LIVE TRACE, **9** FIREWALL, **10** TOLL'S
+TEST, **13** SEALED FILE, **14** LIVE TRACE, **17** FIREWALL, **18** THE CUSTODIAN (the finale). That's 8
+of the 18; the other 10 come from keys.
 
 **Side jobs (optional, later).** The ARCADE's games fit as extra jobs that pay KEYS and resources
 but aren't needed to finish: CODE BREAKER (the lock on one of TOLL's boxes), TRACE (tracing the
@@ -114,11 +117,11 @@ Luna's damaged files) and DECODE (a picture hidden in the archive).
 
 A few short messages come outside the cracks, once each, when something happens:
 
-- **Traced in STORY for the first time** (after transmission 3). IM from MOTH:
+- **Traced in STORY for the first time** (after file 1). IM from MOTH:
   `They nearly had you. You stack too high when you're nervous`
-- **DISCONNECT after a crack** (after transmission 13). IM from TOLL:
+- **DISCONNECT after a crack** (after file 10). IM from TOLL:
   `NICE HAUL. MARKET'S OPEN WHEN YOU ARE.`
-- **Back after 3 days or more** (after transmission 8). Voicemail from UNKNOWN NUMBER:
+- **Back after 3 days or more** (after file 6). Voicemail from UNKNOWN NUMBER:
   `"You stopped. Good. Stay stopped."`
 
 ## The intro: a terminal
@@ -181,9 +184,15 @@ theirs), and a chapter's name stays ENCRYPTED till one of its transmissions is i
 
 ## THE STORY: GHOSTS
 
-### Chapter 1: THE DROP (any key)
+18 files in 3 chapters of 6. Each key cracked recovers the next **FILE**, a document from the archive.
+Some files have messages that come **THEN**, after it's read, reacting to it: an **IM** (on the
+phone), a **CALL** (on the cracked card, ringing), or an **EMAIL** (on the cracked card, then in the
+phone's MAIL). The **INTRO** ones come with the terminal intro, before any key.
 
-**1 // IM // MOTH** · *pops up as your first STORY game starts*
+**INTRO // EMAIL // FROM: (no address) // SUBJECT: (no subject)** · *in your inbox when the terminal intro ends*
+> ATTACHED: archive.enc (4.1 GB)
+
+**INTRO // IM // MOTH** · *pops up as your first STORY game starts*
 > **moth** 02:14 · Hey, it's me
 > **moth** 02:14 · You're not a hard person to find you know?
 > **moth** 02:15 · Anyway, that archive I sent you is around four gigs, all encrypted, about two dozen to go through
@@ -192,13 +201,15 @@ theirs), and a chapter's name stays ENCRYPTED till one of its transmissions is i
 > **moth** 02:16 · Don't worry about that right now
 > **moth** 02:16 · Start with that first file. I'll message you again later
 
-**2 // FILE // HALCYON SYSTEMS // #corrections** · *on the cracked card*
+### Chapter 1: THE DROP (any key)
+
+**FILE 1 // HALCYON SYSTEMS // #corrections**
 > `<ops.reyes>` queue's at 41 tonight. 38 standard, 3 full
 > `<dir.vance>` Fulls go first. The clients are waiting.
 > `<eng.luna>` what's a "full"?
 > `<dir.vance>` Not your department.
 
-**3 // IM // MOTH** · *introduces BITFLIP (exploit)* · *on the cracked card*
+**THEN // IM // MOTH** · *introduces BITFLIP (exploit)*
 > **moth** · Watched you crack that last key. You fight the board too much
 > **moth** · Here. BITFLIP. It turns every column upside down. What was buried comes up top
 > **moth** · Chain your decrypts and the meter beside the board fills. Full, it's yours to use
@@ -207,12 +218,13 @@ theirs), and a chapter's name stays ENCRYPTED till one of its transmissions is i
 
 *The chain meter appears; it earns BITFLIP.*
 
-**4 // FILE // HALCYON // THE LEDGER: PRICE SHEET** · **JOB: SEALED FILE (PUZZLE)** · *on the cracked card for now (a JOB later)*
-> STANDARD CORRECTION (one debt, one record, one conviction): 40,000.
-> FULL CORRECTION: on request.
-> All corrections are permanent. HALCYON keeps no copies.
+**FILE 2 // HALCYON SYSTEMS // CLIENT BROCHURE**
+> HALCYON SYSTEMS. THE CITY'S RECORDS, KEPT CLEAN.
+> A debt you paid twice. A conviction that should have been sealed. A lease in a name you don't use anymore.
+> We correct the record, quietly and permanently.
+> Ask your advisor about our FULL service.
 
-**5 // IM // MOTH** · *introduces HEAD START (patch)* · *on the cracked card*
+**THEN // IM // MOTH** · *introduces HEAD START (patch)*
 > **moth** · You start every key cold. Stop doing that
 > **moth** · HEAD START: your chain meter starts half full and holds until your first decrypt
 > **moth** · I put two in your kit. PATCHES, beside your EXPLOIT button
@@ -220,20 +232,38 @@ theirs), and a chapter's name stays ENCRYPTED till one of its transmissions is i
 
 *The PATCHES button appears, with 2 HEAD STARTs.*
 
-**6 // FILE // HALCYON // #corrections** · *on the cracked card*
+**FILE 3 // HALCYON // THE LEDGER: PRICE SHEET** · **JOB: SEALED FILE (PUZZLE)**
+> STANDARD CORRECTION (one debt, one record, one conviction): 40,000.
+> FULL CORRECTION: on request.
+> All corrections are permanent. HALCYON keeps no copies.
+
+**FILE 4 // HALCYON // ENGINEERING: ERASER v0.9 (eng.luna)**
+> eraser v0.9. one request takes a record out of every registry at once: civil, credit, lease, carrier, court.
+> no backups. no audit trail. vance's spec: "nothing to find, nothing to restore."
+> tested on synthetic records. 40 for 40.
+> note to self: ask what a "full" is before v1.0.
+
+**THEN // IM // MOTH** · *introduces RNG and BUFFER OVERFLOW (exploits)*
+> **moth** · Two more. They're messy. That's the point
+> **moth** · RNG scrambles every bit on the board to a random number. Use it when there's nothing left to lose
+> **moth** · BUFFER OVERFLOW adds 1 to every bit. The top number spills over and gets re-encrypted, so watch your 7s
+> **moth** · The meter picks which one you get. You don't
+
+**FILE 5 // HALCYON // #corrections**
 > `<eng.luna>` pulled a "full" out of the queue to test the eraser. it's a person.
 > `<eng.luna>` name, birth record, bank, lease, phone. all of it. gone.
 > `<dir.vance>` It's a correction. The client asked for it.
 > `<eng.luna>` the person didn't.
 > `<dir.vance>` Log off, Luna.
 
-**7 // IM // MOTH** · *introduces RNG and BUFFER OVERFLOW (exploits)* · *on the cracked card*
-> **moth** · Two more. They're messy. That's the point
-> **moth** · RNG scrambles every bit on the board to a random number. Use it when there's nothing left to lose
-> **moth** · BUFFER OVERFLOW adds 1 to every bit. The top number spills over and gets re-encrypted, so watch your 7s
-> **moth** · The meter picks which one you get. You don't
+**FILE 6 // HALCYON // ACCESS LOG: ARCHIVE NODE 7**
+> 02:14:07 // READ // luna_archive/key_01 // SOURCE: UNRESOLVED
+> 02:51:33 // READ // luna_archive/key_02 // SOURCE: UNRESOLVED
+> 03:09:12 // READ // luna_archive/key_03 // SOURCE: UNRESOLVED
+> FLAG RAISED // PATTERN: ONE KEY AT A TIME
+> ROUTED TO: SECURITY (sec.hale)
 
-**8 // CALL // UNKNOWN NUMBER** · *the first warning; INFECTIONS begin* · *on the cracked card*
+**THEN // CALL // UNKNOWN NUMBER** · *the first warning; INFECTIONS begin*
 > INCOMING CALL // UNKNOWN NUMBER
 > "Good evening. Please don't hang up. This is a courtesy."
 > "You've opened something that doesn't belong to you. You haven't read much of it. That's good. It means this can still end."
@@ -245,52 +275,83 @@ theirs), and a chapter's name stays ENCRYPTED till one of its transmissions is i
 
 ### Chapter 2: THE LIST (256-BIT or deeper)
 
-**9 // FILE // HALCYON // #security** · **JOB: LIVE TRACE (BLITZ, 2:00)** · *on the cracked card for now (a JOB later)*
+**FILE 7 // HALCYON // #security** · **JOB: LIVE TRACE (BLITZ, 2:00)**
 > `<sec.hale>` someone's reading the luna archive. slow. one key at a time.
 > `<dir.vance>` Trace them.
 > `<sec.hale>` tried. they drop the line every time we get close.
 > `<dir.vance>` Then call the Custodian.
 
-**10 // IM // MOTH** · *introduces LOOKAHEAD (patch) and TROJAN (exploit)* · *on the cracked card*
+**THEN // IM // MOTH** · *introduces LOOKAHEAD (patch) and TROJAN (exploit)*
 > **moth** · He called you. Calm voice. Very polite
 > **moth** · That's the Custodian. He doesn't hurt people. He corrects them. It's worse
 > **moth** · LOOKAHEAD: see your next bit for a minute. Two in your kit
 > **moth** · TROJAN wipes out every block touching where it lands. For when it's piled up
 > **moth** · You'll want to see them coming
 
-**11 // FILE // HALCYON // THE LIST (excerpt)** · **JOB: FIREWALL (BREACH)** · *on the cracked card for now (a JOB later)*
+**FILE 8 // HALCYON // CLIENT REQUEST: FULL**
+> CLIENT: [REDACTED]. SERVICE: FULL CORRECTION.
+> SUBJECT: one person. Name, history, and everyone who'd notice.
+> REASON GIVEN: "She knows where the money went."
+> BUDGET: no limit.
+> APPROVED: dir.vance
+
+**THEN // EMAIL // FROM: noreply@halcyon.sys // SUBJECT: A review of your record**
+> Dear resident,
+> A routine review of your public record has been opened.
+> No action is required. You don't need to do anything at all.
+> HALCYON SYSTEMS. The city's records, kept clean.
+
+**FILE 9 // HALCYON // THE LIST (excerpt)** · **JOB: FIREWALL (BREACH)**
 > 0117 // MARSH, D. // STANDARD // DEBT // CORRECTED
 > 0118 // FLORES, I. // FULL // CORRECTED
 > 0119 // NAKASHIMA, R. // FULL // CORRECTED
 > 0120 // [ENCRYPTED DEEPER] // FULL // CORRECTED
 > 2,947 ENTRIES. 309 FULL.
 
-**12 // IM // MOTH** · *introduces the BLACK MARKET* · *on the cracked card*
+**THEN // IM // MOTH** · *introduces the BLACK MARKET*
 > **moth** · I can't keep sending you tools. Every package I send is a door they can follow back
 > **moth** · There's a market. No names, no questions, everything has a price
 > **moth** · Ask for Toll. Say the moth sent you
 > **moth** · And ghost. Don't trust the boxes
 
-*Up to here MOTH's IMs come from an UNKNOWN CONTACT; this card says CONTACT SAVED // MOTH, and every
-IM after it is from MOTH.*
+*Up to here MOTH's IMs come from an UNKNOWN CONTACT; this one says CONTACT SAVED // MOTH, and every IM
+after it is from MOTH.*
 
 *The BLACK MARKET opens from the PATCHES and EXPLOITS buttons. It sells what's been introduced.*
 
-**13 // IM // TOLL** · *introduces BLACK BOX I* · **JOB: TOLL'S TEST (DECRYPT)** · *on the cracked card for now (a JOB later)*
+**FILE 10 // HALCYON // #corrections** · **JOB: TOLL'S TEST (DECRYPT)**
+> `<ops.reyes>` the custodian's been in all week. what does he even do
+> `<dir.vance>` He tidies up after the fulls. Family. Friends. Anyone who remembers.
+> `<ops.reyes>` remembers what
+> `<dir.vance>` Exactly.
+
+**THEN // IM // TOLL** · *introduces BLACK BOX I*
 > **TOLL** · THE MOTH'S FRIEND. YOU PASSED. BARELY.
 > **TOLL** · STOCK TURNS OVER EVERY KEY YOU CRACK. PRICES ARE PRICES.
 > **TOLL** · NEW IN: BLACK BOX I. COULD BE ANYTHING. COULD BE SOMETHING THAT BITES.
 > **TOLL** · NO REFUNDS. NO NAMES. NO EXCEPTIONS.
 
-**14 // CALL // UNKNOWN NUMBER** · *the second call: a threat* · *on the cracked card*
+**FILE 11 // HALCYON // eng.luna: PERSONAL NOTES (not for the server)**
+> they've used it on 309 people. i built it. there's no undo. that was the spec.
+> i'm writing one anyway. at night, off the network.
+> if they find it, they'll run the eraser on me.
+> so it goes where they won't look: under the last key.
+
+**THEN // CALL // UNKNOWN NUMBER** · *the second call: a threat*
 > INCOMING CALL // UNKNOWN NUMBER
-> "You bought from TOLL. TOLL sells to everyone. Including us."
+> "You bought from Toll. Toll sells to everyone. Including us."
 > "I asked nicely. I won't again."
 > "Your router is in the hall closet. Second shelf. The light blinks green while you're on the line."
 > "It's blinking now."
 > CALL ENDED // 0:22
 
-**15 // IM // MOTH** · *bring your own* · *on the cracked card*
+**FILE 12 // HALCYON // #corrections**
+> `<eng.luna>` i'm taking the list out. all of it. every name. every "full."
+> `<dir.vance>` You built the eraser, Elena. You know what it can do.
+> `<eng.luna>` i know. that's why it has to be me.
+> USER eng.luna HAS LEFT THE CHANNEL
+
+**THEN // IM // MOTH** · *bring your own*
 > **moth** · You're still on. Good. Stubborn
 > **moth** · Stop waiting on me and Toll. You can write your own tools
 > **moth** · Compile them at home, bring them in. Anything you've seen work in here
@@ -300,29 +361,30 @@ IM after it is from MOTH.*
 introduced: STORY's main menu gets PATCHES and EXPLOITS rows, and what you own shows in the in-game
 cards too. The STORE marks what STORY has introduced.*
 
-**16 // FILE // HALCYON // #corrections** · *on the cracked card*
-> `<eng.luna>` i'm taking the list out. all of it. every name. every "full."
-> `<dir.vance>` You built the eraser, Elena. You know what it can do.
-> `<eng.luna>` i know. that's why it has to be me.
-> USER eng.luna HAS LEFT THE CHANNEL
-
 ### Chapter 3: CORRECTIONS (512-BIT or deeper)
 
-**17 // FILE // HALCYON // CORRECTION ORDER 0120** · **JOB: SEALED FILE (PUZZLE)** · *on the cracked card for now (a JOB later)*
+**FILE 13 // HALCYON // CORRECTION ORDER 0120** · **JOB: SEALED FILE (PUZZLE)**
 > SUBJECT: LUNA, ELENA. ENGINEER, HALCYON SYSTEMS.
 > TYPE: FULL.
 > REQUESTED BY: HALCYON SYSTEMS.
 > STATUS: CORRECTED.
 > NOTE: the archive she took was never recovered.
 
-**18 // IM // MOTH** · *introduces PIVOT, SWAP, BACKDOOR (exploits) and RESTORE POINT (patch)* · *on the cracked card*
+**THEN // IM // MOTH** · *introduces PIVOT, SWAP, BACKDOOR (exploits) and RESTORE POINT (patch)*
 > **moth** · You read 0120
 > **moth** · Don't. Not yet. Finish it first
 > **moth** · PIVOT swaps a column with its neighbor. SWAP trades any two bits. BACKDOOR deletes the bottom row, layers and all
 > **moth** · And RESTORE POINT. If they finish the trace, the system rolls back and you keep going. Once
 > **moth** · You're going to need once
 
-**19 // CALL // UNKNOWN NUMBER** · *your name on an order* · **JOB: LIVE TRACE (BLITZ, 1:30)** · *on the cracked card for now (a JOB later)*
+**FILE 14 // HALCYON // #security** · **JOB: LIVE TRACE (BLITZ, 1:30)**
+> `<sec.hale>` the reader goes through 41 hops. same hours every night.
+> `<sec.hale>` faster now. three keys a night.
+> `<dir.vance>` How far in?
+> `<sec.hale>` far enough to read 0120.
+> `<dir.vance>` Give the Custodian the order.
+
+**THEN // CALL // UNKNOWN NUMBER** · *your name on an order*
 > INCOMING CALL // UNKNOWN NUMBER
 > "You got away from that trace. You won't twice."
 > "I've been patient."
@@ -331,45 +393,123 @@ cards too. The STORE marks what STORY has introduced.*
 > "No one will remember to miss you. That isn't a threat. It's what the job is."
 > CALL ENDED // 0:35
 
-**20 // IM // TOLL** · *introduces WORM VIRUS, KEYLOGGER, HONEYPOT (exploits), BLACK BOX II and III* · *on the cracked card*
-> **TOLL** · WORD IS YOU'RE ON A LIST.
-> **TOLL** · NOT MY BUSINESS. MONEY'S STILL MONEY.
-> **TOLL** · NEW IN: WORM VIRUS. KEYLOGGER. HONEYPOT, FOR WHOEVER'S FOLLOWING YOU. BOXES II AND III IF YOU FEEL LUCKY.
-> **TOLL** · PAY UP FRONT. CORRECTED PEOPLE DON'T PAY THEIR DEBTS.
+**FILE 15 // HALCYON // CASE FILE: THE READER**
+> SUBJECT: UNKNOWN. CALLED "GHOST" BY THEIR CONTACT.
+> HABITS: works after midnight. Never stays on a line long. Stacks too high when nervous.
+> CONTACTS: one. Writes in short sentences. Thinks she's careful.
+> RECOMMENDATION: FULL CORRECTION. Before they reach the last key.
 
-**21 // IM // MOTH** · *introduces ANTIVIRUS, FIREWALL DELAY (patches) and PACKET SNIFFER (exploit)* · *on the cracked card*
+**THEN // EMAIL // FROM: TOLL // SUBJECT: NEW IN** · *introduces WORM VIRUS, KEYLOGGER, HONEYPOT (exploits), BLACK BOX II and III*
+> WORD IS YOU'RE ON A LIST.
+> NOT MY BUSINESS. MONEY'S STILL MONEY.
+> NEW IN: WORM VIRUS. KEYLOGGER. HONEYPOT, FOR WHOEVER'S FOLLOWING YOU. BOXES II AND III IF YOU FEEL LUCKY.
+> PAY UP FRONT. CORRECTED PEOPLE DON'T PAY THEIR DEBTS.
+
+**FILE 16 // HALCYON // eng.luna: LAST LOG**
+> 0119 done tonight. nakashima. i watched the registries empty one by one.
+> 0120 is on the queue. i know whose name is on it.
+> the undo's finished. 309 restores, queued, waiting for a key.
+> i'm putting everything in one archive and giving it to someone who isn't me.
+> if you're reading this: thank you. keep going.
+
+**THEN // EMAIL // FROM: noreply@halcyon.sys // SUBJECT: Your correction has been scheduled**
+> Dear resident,
+> A correction to your record has been scheduled.
+> You may notice changes to your accounts, your lease and your phone service. This is normal.
+> Thank you for choosing HALCYON.
+
+**THEN // IM // MOTH** · *introduces ANTIVIRUS, FIREWALL DELAY (patches) and PACKET SNIFFER (exploit)*
 > **moth** · Toll's boxes bite. You knew that
 > **moth** · ANTIVIRUS clears whatever's running and catches the next one. FIREWALL DELAY holds the next layer back four drops
 > **moth** · PACKET SNIFFER lets you pick your next three bits. Careful. It's addictive
 > **moth** · They're the last clean tools I wrote. Before
 
-**22 // FILE // HALCYON // THE LIST (complete)** · **JOB: FIREWALL (BREACH)** · *on the cracked card for now (a JOB later)*
+**FILE 17 // HALCYON // THE LIST (complete)** · **JOB: FIREWALL (BREACH)**
 > 2,948 ENTRIES. 310 FULL.
 > 2,947 CORRECTED.
 > 1 PENDING. SUBJECT: [YOU].
 > REQUESTED BY: THE CUSTODIAN.
 
-**23 // IM // MOTH** · *introduces LOGIC BOMB, DICTIONARY ATTACK, RAINBOW TABLE, BLACK BOX (exploits)* · *on the cracked card*
+**THEN // IM // MOTH** · *introduces LOGIC BOMB, DICTIONARY ATTACK, RAINBOW TABLE, BLACK BOX (exploits)*
 > **moth** · It was me. 0120
 > **moth** · I built the eraser. When I tried to undo it, they ran it on me
 > **moth** · No name. No records. A moth. You only see one when there's a light on
 > **moth** · Here's everything I have left. LOGIC BOMB, DICTIONARY ATTACK, RAINBOW TABLE, BLACK BOX
 > **moth** · The eraser has an undo. It's under the last key. Crack it
 
-**24 // CALL // UNKNOWN NUMBER, then IM // MOTH** · *the end* · **JOB: THE CUSTODIAN (VS)** · *on the cracked card for now (a JOB later)*
-> (his program, beaten: THE CUSTODIAN // OVERFLOWED)
+**FILE 18 // THE ERASER // UNDO (eng.luna)** · **JOB: THE CUSTODIAN (VS)** · *the end*
+> UNDO // WRITTEN BY eng.luna // RUN ONCE
+> RESTORE QUEUE // 309 FULL CORRECTIONS // REVERSING...
+> 0118 // FLORES, I. // RESTORED
+> 0119 // NAKASHIMA, R. // RESTORED
+> 0120 // LUNA, E. // RESTORED
+> ORDER // [YOU] // VOID
+
+**THEN // CALL // UNKNOWN NUMBER**
 > INCOMING CALL // UNKNOWN NUMBER
 > "You can't put people back."
 > CALL ENDED // 0:04 (you hung up)
->
-> RESTORE QUEUE // 309 FULL CORRECTIONS // REVERSING...
-> ORDER // [YOU] // VOID
->
+
+**THEN // EMAIL // FROM: noreply@halcyon.sys // SUBJECT: Your correction has been cancelled**
+> Dear resident,
+> The correction scheduled to your record has been cancelled.
+> We apologize for any inconvenience.
+
+**THEN // IM // MOTH**
 > **moth** · My name is Elena Luna
 > **moth** · Say it once. So it's written down somewhere
 
-*STORY complete. Every transmission stays in the ARCHIVE. STORY games go on (keys still pay KEYS),
-with everything introduced.*
+*STORY complete. Every file stays in the ARCHIVE, every message on the phone. STORY games go on (keys
+still pay KEYS), with everything introduced.*
+
+### The inbox
+
+The phone isn't only the story's: a few ordinary emails sit in its MAIL, and a few ordinary texts in
+its MESSAGES, from people and places with nothing to do with any of this, some there from the start,
+some coming in with a file. Short, and never mentioned again.
+
+**MAIL // FROM: Dana Whitfield // SUBJECT: Re: Saturday?** · *there from the start*
+> Still on for Saturday? Bring the good chips this time. Not the sad ones.
+
+**MAIL // FROM: Building Management // SUBJECT: Water shut-off Thursday** · *there from the start*
+> The water will be off Thursday from 9 to 2 for pipe work. Sorry for the short notice.
+
+**MAIL // FROM: PIXEL & PINT // SUBJECT: Two-for-one wings, Thursdays only** · *with file 4*
+> Thursdays are wing night at PIXEL & PINT. Two-for-one on every flavor, 5 to close.
+> Show this email at the bar. Arcade cabinets on the house till 7.
+
+**MAIL // FROM: Rosa Imani // SUBJECT: book club** · *with file 10*
+> We're doing the long one next month. Sorry in advance. Snacks at mine.
+
+**MAIL // FROM: Marcus Bell // SUBJECT: your hoodie** · *with file 14*
+> You left your hoodie at mine. It's hostage until you come get it.
+
+**TEXT // FROM: JULES** · *there from the start*
+> **jules** · are you alive
+> **jules** · you've been "busy" for three weeks
+> **you** · Alive. Busy
+> **jules** · ok. brunch sunday?? say yes
+> **you** · Maybe
+> **jules** · that's a yes
+
+**TEXT // FROM: CITY ALERTS** · *with file 2*
+> **CITY ALERTS** · RECYCLE RIGHT WEEK! Rinse it, sort it, bin it. Your city thanks you. Reply STOP to opt out.
+
+**TEXT // FROM: MOM** · *with file 5*
+> **mom** · Did you eat today
+> **you** · Yes
+> **mom** · Real food?
+> **you** · Define real
+
+**TEXT // FROM: FIRST HARBOR BANK** · *with file 11*
+> **FIRST HARBOR BANK** · Did you make a purchase of $249.99 at NIGHTSHADE ELECTRONICS? Reply YES or NO.
+> **you** · NO
+> **FIRST HARBOR BANK** · Thank you. Your card has been locked. A new card will arrive in 7 to 10 business days.
+
+**TEXT // FROM: +1 (555) 014-2290** · *with file 15*
+> **+1 (555) 014-2290** · hey is this still Derek's number?
+> **you** · No
+> **+1 (555) 014-2290** · oh sorry!!
 
 ## Everything introduced, in order
 

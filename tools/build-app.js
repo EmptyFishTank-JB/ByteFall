@@ -26,6 +26,7 @@ const COPY = ['manifest.webmanifest', 'css', 'js', 'assets/fonts', 'assets/icons
 fs.rmSync(OUT, { recursive: true, force: true });
 for (const p of COPY) fs.cpSync(path.join(ROOT, p), path.join(OUT, p), { recursive: true });
 fs.copyFileSync(path.join(ROOT, 'bytefall.html'), path.join(OUT, 'index.html')); // (the game: the landing page's index.html isn't the app's)
+fs.copyFileSync(path.join(ROOT, 'arcade.html'), path.join(OUT, 'arcade.html')); // (THE ARCADE: its games, played on STORY's phone)
 
 const git = (cmd, fallback) => { try { return execSync(`git ${cmd}`, { cwd: ROOT }).toString().trim(); } catch (e) { return fallback; } };
 let html = fs.readFileSync(path.join(OUT, 'index.html'), 'utf8');

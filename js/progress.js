@@ -1016,6 +1016,7 @@ const Progress = (() => {
     storyPlayed() { this.stories().played = Date.now(); save(); },
     storyLastPlayed() { return this.stories().played || 0; },
     storyPick(id) { this.stories().pick = id; save(); },
+    storyUpdate(fn) { fn(this.stories()); save(); }, // (js/stories.js: an old save brought up to date)
     storyRecover(id) {
       const st = this.stories();
       st.got[id] = (st.got[id] || 0) + 1;

@@ -2960,7 +2960,7 @@ document.addEventListener('keydown', (e) => {
 const storyMsgEl = document.getElementById('story-msg');
 function closeStoryMsg() {
   if (storyMsgEl.classList.contains('hidden')) return;
-  if (typeof Stories !== 'undefined') Stories.stop();
+  if (typeof Stories !== 'undefined') Stories.phoneDown(); // (what was on it gone: a thread coming in, all of it; a game's frame)
   storyMsgEl.classList.add('hidden');
   SFX.play('click');
   if (term && term.stage === 'phone') termLift(); // (STORY's intro: the phone put down, the black lifts off the board)
@@ -4244,12 +4244,12 @@ function updateTopIcons() {
   document.getElementById('records-btn').setAttribute('aria-label', !inGame ? 'Menu: rules, exploits and records' : vsPaused ? 'Resume' : canPause() ? 'Pause' : 'Back to the main menu');
   refreshPhoneBtn();
 }
-// THE PHONE BUTTON (a STORY game, once a message has come in): top left across from PAUSE, PAUSE's
-// size and shape (its width matched here), a little phone in it; your messages to read again, on the
-// phone (Stories.openPhone). Shown only with PAUSE (style.css)
+// THE PHONE BUTTON (a STORY game, once the phone's yours: the intro behind you): top left across from
+// PAUSE, PAUSE's size and shape (its width matched here), a little phone in it; the phone, on its home
+// screen (Stories.openPhone: MESSAGES, MAIL, CALLS, the ARCHIVE, GAMES). Shown only with PAUSE (style.css)
 function refreshPhoneBtn() {
   const btn = document.getElementById('phone-btn');
-  const show = storyOn() && !homeOpen && typeof Stories !== 'undefined' && Stories.hasThread();
+  const show = storyOn() && !homeOpen && typeof Stories !== 'undefined' && Stories.hasPhone();
   const changed = btn.hidden === show;
   btn.hidden = !show;
   const pause = document.getElementById('records-btn');
@@ -4257,7 +4257,7 @@ function refreshPhoneBtn() {
   if (changed && show && !homeOpen) alignHeader(); // (the title kept clear of it)
 }
 document.getElementById('phone-btn').addEventListener('click', () => {
-  if (typeof Stories !== 'undefined' && Stories.openPhone()) return;
+  if (typeof Stories !== 'undefined' && Stories.openPhone()) { SFX.play('click'); return; } // (its home screen)
   SFX.play('denied');
 });
 // Fixed boxes, fitted words: the main menu's buttons and panel keep one size in every mode, font
