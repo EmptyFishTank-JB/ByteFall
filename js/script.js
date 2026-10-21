@@ -1793,7 +1793,9 @@ function updateHud() {
   const preview = mode === 'puzzle' ? Math.min(KEYLOGGER_PREVIEW, Math.max(0, queue.length - 1))
     : keyloggerDrops > 0 ? KEYLOGGER_PREVIEW : DIFFICULTIES[difficulty].showNext || lookaheadLeft > 0 ? 1 : 0;
   nextStatEl.hidden = !preview;
-  nextLabelEl.textContent = keyloggerDrops > 0 ? `KEYLOG ${keyloggerDrops}` : 'NEXT';
+  // (KEYLOGGER: its icon and the drops it has left, [@] : 10, short enough to sit beside its three bits)
+  nextLabelEl.textContent = keyloggerDrops > 0 ? `[${HACKS.keylogger.icon}] : ${keyloggerDrops}` : 'NEXT';
+  nextStatEl.title = keyloggerDrops > 0 ? `KEYLOGGER: your next ${KEYLOGGER_PREVIEW} bits, for ${keyloggerDrops} more drop${keyloggerDrops === 1 ? '' : 's'}` : '';
   nextStatEl.classList.toggle('keylogger', keyloggerDrops > 0);
   const hudBits = document.getElementById('hud-bits');
   if (hudBits.classList.contains('has-next') !== !!preview) {
