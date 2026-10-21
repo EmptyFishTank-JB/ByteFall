@@ -4,6 +4,10 @@
 //   remove_ads           REMOVE ADS
 //   full_access          FULL ACCESS
 //   full_access_upgrade  FULL ACCESS for those who own REMOVE ADS already, at the difference
+// and one that's never sold: Google Play hands it to those who PRE-REGISTERED, once the game's out
+// (Play Console's pre-registration, its reward set to this product), as if they'd bought it, so it
+// comes in with the rest of what's owned:
+//   day_one              DAY ONE: the four DAY ONE themes and the badge on RECORDS
 // MainActivity.java does the billing (window.BytefallAndroid's billingStart, billingBuy and
 // billingRestore) and answers through window.bytefallBilling, an event at a time:
 //   { type: 'products', prices }                   Google Play's prices, in the player's currency
@@ -16,6 +20,7 @@ const Billing = (() => {
   const REMOVE_ADS = 'remove_ads';
   const FULL = 'full_access';
   const UPGRADE = 'full_access_upgrade';
+  const DAY_ONE = 'day_one';
   const app = window.BytefallAndroid;
   const on = !!(window.BYTEFALL_APP && window.BYTEFALL_APP.release && app && app.billingStart);
   const prices = {};
@@ -25,9 +30,10 @@ const Billing = (() => {
   const was = Unlocks.owned();
   if (was.full) owned.add(FULL);
   if (was.noAds) owned.add(REMOVE_ADS);
+  if (was.dayOne) owned.add(DAY_ONE);
   // (bought this session: kept even if a check made as the purchase sheet closed missed it)
   const boughtNow = new Set();
-  const apply = () => Unlocks.own(owned.has(FULL) || owned.has(UPGRADE), owned.has(REMOVE_ADS));
+  const apply = () => Unlocks.own(owned.has(FULL) || owned.has(UPGRADE), owned.has(REMOVE_ADS), owned.has(DAY_ONE));
 
   let why = ''; // (Google Play's word on the products that didn't come back: TEST PURCHASES shows it)
   window.bytefallBilling = (e) => {

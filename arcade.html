@@ -11,7 +11,7 @@
     var theme = localStorage.getItem('bytefall-theme');
     var font = localStorage.getItem('bytefall-font');
     if (['share-tech', 'press-start', 'bitcount', 'bytesized', 'orbitron'].indexOf(font) >= 0) document.documentElement.dataset.font = font;
-    if (['cipher', 'amber-crt', 'monochrome', 'anaglyph', 'synthwave', 'dot-matrix', 'paper', 'glyph', 'spectrum'].indexOf(theme) >= 0) document.documentElement.dataset.theme = theme;
+    if (['cipher', 'amber-crt', 'monochrome', 'anaglyph', 'synthwave', 'dot-matrix', 'paper', 'glyph', 'spectrum', 'zero-day', 'holo-foil', 'blueprint', 'first-light'].indexOf(theme) >= 0) document.documentElement.dataset.theme = theme;
     // (SPECTRUM's page drift: a random place in its 48s cycle to start from, so it isn't always red)
     var hue = Math.random();
     document.documentElement.style.setProperty('--page-hue-at', (-hue * 48).toFixed(2) + 's');
@@ -20,9 +20,9 @@
   } catch (e) {}
 </script>
 <title>THE ARCADE // BYTEFALL</title>
-<script src="js/fonts.js?v=648"></script>
-<link rel="stylesheet" href="css/style.css?v=648">
-<link rel="stylesheet" href="css/arcade.css?v=648">
+<script src="js/fonts.js?v=649"></script>
+<link rel="stylesheet" href="css/style.css?v=649">
+<link rel="stylesheet" href="css/arcade.css?v=649">
 </head>
 <body class="arcade-page">
 <!-- THE ARCADE (arcade.js and a file per game): its games on the bits, on a card of its own, on its way
@@ -91,18 +91,18 @@
   </div>
 </main>
 <canvas id="board-fx" aria-hidden="true"></canvas>
-<script src="js/music/output.js?v=648"></script>
-<script src="js/sfx.js?v=648"></script>
-<script src="js/fx.js?v=648"></script>
-<script src="js/arcade-shell.js?v=648"></script>
-<script src="js/arcade.js?v=648"></script>
-<script src="js/arcade-codebreaker.js?v=648"></script>
-<script src="js/arcade-trace.js?v=648"></script>
-<script src="js/arcade-merge.js?v=648"></script>
-<script src="js/arcade-checksum.js?v=648"></script>
-<script src="js/arcade-defrag.js?v=648"></script>
-<script src="js/arcade-decode.js?v=648"></script>
-<script src="js/arcade-routing.js?v=648"></script>
-<script src="js/grid-bg.js?v=648"></script>
+<script src="js/music/output.js?v=649"></script>
+<script src="js/sfx.js?v=649"></script>
+<script src="js/fx.js?v=649"></script>
+<script src="js/arcade-shell.js?v=649"></script>
+<script src="js/arcade.js?v=649"></script>
+<script src="js/arcade-codebreaker.js?v=649"></script>
+<script src="js/arcade-trace.js?v=649"></script>
+<script src="js/arcade-merge.js?v=649"></script>
+<script src="js/arcade-checksum.js?v=649"></script>
+<script src="js/arcade-defrag.js?v=649"></script>
+<script src="js/arcade-decode.js?v=649"></script>
+<script src="js/arcade-routing.js?v=649"></script>
+<script src="js/grid-bg.js?v=649"></script>
 </body>
 </html>

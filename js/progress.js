@@ -249,6 +249,7 @@ const Progress = (() => {
   let madeTracks = []; // the tracks made so far ({ no, free }): set by script.js from Music.tracks()
   const ALL_TRACKS = 16; // the playlist's full length (the music achievements need all of them)
   let themeCount = 10; // set by script.js from THEMES
+  let themesApart = []; // (the DAY ONE themes, the pre-registration reward: CHAMELEON goes without them)
   let sittingRestarts = 0; // live sessions restarted since the page loaded
   let sittingThemes = 0; // theme changes since the page loaded
   let sittingTracks = 0; // tracks picked since the page loaded
@@ -355,7 +356,7 @@ const Progress = (() => {
     { id: 'in-orbit', name: 'IN ORBIT', desc: 'Play a full session (10+ drops) in the ORBITRON font', value: () => (d.fontsPlayed.orbitron ? 1 : 0), goal: 1 },
     { id: 'dj', name: 'DJ', desc: 'Listen to all 16 tracks', value: () => count(d.tracksHeard), goal: ALL_TRACKS },
     { id: 'audiophile', name: 'AUDIOPHILE', desc: 'Play a full session (10+ drops) on all 16 tracks', value: () => count(d.tracksPlayed), goal: ALL_TRACKS },
-    { id: 'chameleon', name: 'CHAMELEON', desc: 'Play a full session (10+ drops) in every theme', value: () => count(d.themesPlayed), goal: () => themeCount },
+    { id: 'chameleon', name: 'CHAMELEON', desc: 'Play a full session (10+ drops) in every theme', value: () => Object.keys(d.themesPlayed).filter((id) => d.themesPlayed[id] && !themesApart.includes(id)).length, goal: () => themeCount },
     { id: 'lv-40', name: 'LV 40', desc: 'Reach level 40', value: () => (d.decryptor > 0 ? 40 : levelInfo().level), goal: 40 },
     { id: 'gigabit', name: 'GIGABIT', desc: 'Decrypt 1,000,000,000 bits', value: () => d.bits, goal: 1000000000, impossible: true },
     { id: 'insomniac', name: 'INSOMNIAC', desc: 'Play between 2 and 4 AM', value: () => d.lateNight, goal: 1 },
@@ -1054,7 +1055,7 @@ const Progress = (() => {
     },
     setPuzzleCount(n) { puzzleCount = n; },
     setTracks(list) { madeTracks = list.map((t) => ({ no: t.no, free: t.free })); },
-    setThemeCount(n) { themeCount = n; },
+    setThemeCount(n, apart = []) { themeCount = n; themesApart = apart; },
     puzzleSolved: (i) => !!d.puzzles[i],
     runPays: () => !run.noPay,
     solvePuzzle(i) {

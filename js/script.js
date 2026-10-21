@@ -626,7 +626,7 @@ const storyLocked = () => STORY_SOON && storyOn(); // (picked, but COMING SOON: 
 // STORY's pace: each key deeper is harder to crack. Its layers come sooner (every 8 drops at 128-BIT,
 // 7 at 192, 6 at 256 and 384, 5 at 512 and 1024, then 4), and infections get likelier, 4% up to 10%
 const STORY_INTERVALS = [8, 7, 6, 6, 5, 5, 4];
-const storyPace = (k) => ({ interval: STORY_INTERVALS[Math.min(k, STORY_INTERVALS.length - 1)], infect: Math.min(0.1, 0.04 + 0.015 * k) });
+const storyPace = (k) => ({ interval: STORY_INTERVALS[Math.min(k, STORY_INTERVALS.length - 1)], infect: Math.min(0.2, 0.08 + 0.03 * k) });
 // WHAT STORY LETS YOU USE: only what GHOSTS has introduced (Stories.introduced: exploits, BLACK BOXES,
 // patches, and its stages, 'infections', 'market' and 'bring'), whatever's unlocked or owned elsewhere.
 // In a STORY game the side slots are the PATCHES and EXPLOITS buttons, a tap opening a card of what you
@@ -899,12 +899,14 @@ function revealBit(layer) {
   return bit;
 }
 // INFECTED BITS (CLASSIC and BLITZ, not the dailies): a layer broken down to its bit now and then lets
-// out an infected one (EASY 2%, NORMAL 4%, HARD 6%), marked with a virus and pulsing red. Gone from the
-// board by the end of the next drop (decrypted, or wiped by an exploit), it's QUARANTINED: +1 ROOTKIT.
-// Still there after it, it goes off: an INFECTION, any of the six, as a BLACK BOX's (ANTIVIRUS waiting
-// catches it). One at a time, and never two within INFECT_GAP drops
-const INFECT_ODDS = { easy: 0.02, normal: 0.04, hard: 0.06 };
-const INFECT_GAP = 12;
+// out an infected one (EASY 4%, NORMAL 8%, HARD 12%), marked with a virus and pulsing red. While it's on
+// the board EVERY POINT SCORED COUNTS AGAINST YOU (the points that clear it too: addScore), so the score
+// can fall, below 0 even. Gone from the board by the end of the next drop (decrypted, or wiped by an
+// exploit), it's QUARANTINED: +1 ROOTKIT. Still there after it, it goes off: an INFECTION, any of the six,
+// as a BLACK BOX's (ANTIVIRUS waiting catches it), and it's an ordinary bit again. One at a time, and
+// never two within INFECT_GAP drops
+const INFECT_ODDS = { easy: 0.04, normal: 0.08, hard: 0.12 };
+const INFECT_GAP = 8;
 let infectedBit = null; // (the bit on the board now, its .infected the drop it came out on)
 let infectedAt = -Infinity; // (the drop the last one came out on)
 const infectModes = () => !daily && (mode === 'classic' || mode === 'blitz');
@@ -920,8 +922,18 @@ function infect(bit) {
   bit.infected = Progress.runDrops();
   infectedBit = bit;
   infectedAt = bit.infected;
-  setMessage('INFECTED BIT // DECRYPT IT WITH YOUR NEXT DROP OR IT GOES OFF', 'alarm');
+  setMessage('INFECTED BIT // POINTS GO NEGATIVE TILL IT\'S GONE: DECRYPT IT NEXT DROP', 'alarm');
   SFX.play('denied');
+  updateHud();
+}
+// (an infected bit on the board now: what's scored counts against you)
+const infectedLive = () => !!infectedBit && infectedBit.infected !== undefined && columns.some((col) => col.includes(infectedBit));
+// Every point scored goes through here: negative while an infected bit's on the board. n: the points;
+// what was scored (n or -n) comes back
+function addScore(n) {
+  const v = infectedLive() ? -n : n;
+  score += v;
+  return v;
 }
 // (after each drop: gone from the board, quarantined; still there a whole drop on, it goes off)
 function tickInfectedBit() {
@@ -1521,6 +1533,7 @@ function fillBit(el, val) {
 // SPECTRUM: each bit keeps its own random hue speed, direction and phase across re-renders,
 // measured from a shared clock so the cycle carries on smoothly when the board redraws.
 function spinBit(el, cell) {
+  if (themeIs('holo-foil')) { foilBit(el); return; }
   if (!themeIs('spectrum')) return;
   if (!cell.spin) cell.spin = { dur: 3 + Math.random() * 7, phase: Math.random(), reverse: Math.random() < 0.5 };
   const { dur, phase, reverse } = cell.spin;
@@ -1529,6 +1542,16 @@ function spinBit(el, cell) {
   el.style.setProperty('--spin-delay', `${(-(t % 1) * dur).toFixed(2)}s`);
   el.style.setProperty('--spin-dir', reverse ? 'reverse' : 'normal');
   el.style.setProperty('--bit-h', String(Math.round(phase * 360))); // still hue under reduced motion
+}
+
+// HOLO FOIL: the bits' colors run across the board together, teal to violet to gold with a flash of
+// white, as light moving over a foil card: each bit that far along the one cycle by where it sits (a
+// diagonal), measured from a shared clock so a redraw carries straight on
+const FOIL_SECS = 7;
+function foilBit(el) {
+  const [r, c] = (el.dataset.pos || '0,0').split(',').map(Number);
+  const at = (performance.now() / 1000 + (c + r) * 0.4) % FOIL_SECS;
+  el.style.setProperty('--foil-delay', `${(-at).toFixed(2)}s`);
 }
 
 // Exploit icons are text, except where a phone could turn the character into an emoji: those
@@ -1643,7 +1666,7 @@ function render(popped = [], falling = null) {
           if (cell.infected !== undefined) { // (an INFECTED BIT: a virus in its corner, pulsing red)
             div.classList.add('infected');
             div.insertAdjacentHTML('beforeend', `<span class="inf-mark" aria-hidden="true">${VIRUS_SVG}</span>`);
-            div.title = 'INFECTED BIT: decrypt it with your next drop or it goes off';
+            div.title = 'INFECTED BIT: points count against you while it is here. Decrypt it with your next drop or it goes off';
           }
         } else if (cell.type === 'hack') {
           div.classList.add('hack');
@@ -1750,6 +1773,7 @@ function updateHud() {
   scoreEl.textContent = mode === 'vs' && vsMode !== 'classic' && cpu
     ? matchPoints(vsMe, vsThem, score - vsCounted, 0)[0] : score;
   updateGoal();
+  scoreEl.closest('.stat').classList.toggle('infected-score', infectedLive()); // (points counting against you: the score in the virus's red)
   bestEl.textContent = best;
   // VS before START: the first bit stays hidden, so a refresh or an option change can't be
   // used to fish for a good one
@@ -2000,8 +2024,10 @@ function finishTurn() {
   busy = false;
   render();
   Progress.score(score);
-  Progress.addPoints(score - reportedScore);
-  reportedScore = score;
+  if (score > reportedScore) { // (lifetime points: what the run's score climbs to, never counted twice after a fall)
+    Progress.addPoints(score - reportedScore);
+    reportedScore = score;
+  }
   announce(Progress.check());
   if (overflowed()) secondChance();
   renderPatches(); // (a patch used up in this drop: dimmed, its slot sitting out the next)
@@ -2102,8 +2128,8 @@ function hackForMeter() {
 // Hard: 8 bits decrypted by one drop make a byte. Easy and Normal: 4 make a nibble.
 async function awardPackets(kind, count) {
   const packet = PACKETS[kind];
-  chainLog.push({ packet: packet.name, count, points: count * packet.bonus });
-  score += count * packet.bonus;
+  const packetPoints = addScore(count * packet.bonus);
+  chainLog.push({ packet: packet.name, count, points: packetPoints });
   stealPts += count * packet.bonus;
   if (kind === 'byte') Progress.bytes(count);
   else Progress.nibbles(count);
@@ -2274,8 +2300,7 @@ async function resolveChains() {
       links: chain >= 3 ? 1 : 0,
     });
     const linkPoints = pops.reduce((n, pos) => n + blockPoints(grid[pos.row][pos.col]), 0) * chain;
-    chainLog.push({ vals: pops.map((pos) => grid[pos.row][pos.col].val), chain, points: linkPoints });
-    score += linkPoints;
+    chainLog.push({ vals: pops.map((pos) => grid[pos.row][pos.col].val), chain, points: addScore(linkPoints) }); // (still on the board as they score: an infected one among them counts against you)
     if (chain >= 2) stealPts += linkPoints; // (VS ATTRITION takes these from the CPU too)
     chainEl.textContent = `${chain}x`;
     setChainMeter(exploitWaiting() ? 0 : chain); // (an exploit waiting: the meter doesn't charge)
@@ -2380,7 +2405,7 @@ async function tickBombs() {
   render(hits);
   SFX.play('burst');
   SFX.play('denied');
-  score += pointsFor(hits.filter((h) => columns[h.col][h.row].type !== 'bomb'));
+  addScore(pointsFor(hits.filter((h) => columns[h.col][h.row].type !== 'bomb')));
   for (const h of hits) columns[h.col][h.row] = null;
   Progress.bombHits(hits.length - blasts.length);
   await collapse();
@@ -2435,7 +2460,7 @@ async function runHack(id, row, col) {
     FX.burst(cellsAt(hits)); // (no waiting on the bursts, as a chain's)
     render(hits);
     SFX.play('burst');
-    score += pointsFor(hits.filter((h) => !(h.row === row && h.col === col))); // not the exploit itself
+    addScore(pointsFor(hits.filter((h) => !(h.row === row && h.col === col)))); // not the exploit itself
     for (const h of hits) columns[h.col][h.row] = null;
     await collapse();
   } else if (id === 'dictionary-attack') {
@@ -2466,7 +2491,7 @@ async function runHack(id, row, col) {
     FX.burst(cellsAt(hits));
     render(hits);
     SFX.play('burst');
-    score += pointsFor(hits);
+    addScore(pointsFor(hits));
     for (const h of hits) columns[h.col][0] = null;
     await collapse();
   } else if (id === 'rainbow-table') {
@@ -2486,9 +2511,9 @@ async function runHack(id, row, col) {
       FX.burst(cellsAt(hits));
       render(hits);
       SFX.play('burst');
+      addScore(pointsFor(hits)); // (scored before they're gone: an infected one among them counts against you)
       for (const h of hits) columns[h.col][h.row] = null;
       Progress.decrypted(hits.map(() => target), 1);
-      score += pointsFor(hits);
       await collapse();
     } else {
       render();
@@ -4869,7 +4894,9 @@ wanderersBtn.addEventListener('click', () => {
 updateWanderersBtn();
 
 // Color themes: each id matches a [data-theme] block in style.css ('terminal' is the default :root).
-// Every theme but TERMINAL is unlocked by progress.js (theme-<id>). Keep the head script in bytefall.html in sync.
+// Every theme but TERMINAL is unlocked by progress.js (theme-<id>), but the DAY ONE ones (dayOne): Google
+// Play's PRE-REGISTRATION REWARD (Unlocks.hasDayOne), listed above SEASONAL for those who have it and
+// nowhere for those who don't. Keep the head scripts in bytefall.html and arcade.html in sync.
 const THEMES = [
   { id: 'terminal', label: 'TERMINAL', desc: 'green bits, gray layers, amber cracks and exploits.' },
   { id: 'cipher', label: 'CIPHER', desc: 'cyan bits, magenta layers, yellow cracks and exploits.' },
@@ -4881,6 +4908,10 @@ const THEMES = [
   { id: 'paper', label: 'PAPER', desc: 'near-black ink and gray on pale paper with gold accents, for bright rooms and outdoors.' },
   { id: 'glyph', label: 'GLYPH', desc: 'bits become shapes with one corner per point: a teardrop is 1, a triangle 3, an octagon 8.' },
   { id: 'spectrum', label: 'SPECTRUM', desc: 'every bit cycles through the rainbow on its own while the page drifts slowly behind them.' },
+  { id: 'zero-day', label: 'ZERO DAY', dayOne: true, desc: 'gold bits on obsidian, champagne layers and pale gold cracks, a gold glint sweeping the screen now and then.' },
+  { id: 'holo-foil', label: 'HOLO FOIL', dayOne: true, desc: 'bits like a rare foil card, teal to violet to gold as the light moves across the board, on dark pearl.' },
+  { id: 'blueprint', label: 'BLUEPRINT', dayOne: true, desc: 'the game before it shipped: white linework and cyan numbers on blueprint blue, a drafting grid, hatched layers, marker-yellow cracks.' },
+  { id: 'first-light', label: 'FIRST LIGHT', dayOne: true, desc: 'launch dawn: rose-gold bits and lavender layers on deep indigo, the sky warming at the top like a sunrise.' },
   { id: 'seasonal', label: 'SEASONAL', desc: '' }, // (free; its colors follow the time of year: seasonTheme)
 ];
 // SEASONAL: the theme for the time of year (seasons.js): OCTOBER's orange, black and purple (with a
@@ -4902,12 +4933,12 @@ function seasonTheme() {
   for (const [id, theme, desc] of SEASON_THEMES) if (typeof Season !== 'undefined' && Season.is(id)) return { theme, desc };
   return { theme: null, desc: 'TERMINAL\'s colors for now: a holiday brings its own.' };
 }
-const themeAvailable = (t) => t.id === 'terminal' || t.id === 'seasonal' || Progress.isUnlocked(`theme-${t.id}`);
+const themeAvailable = (t) => (t.dayOne ? Unlocks.hasDayOne() : t.id === 'terminal' || t.id === 'seasonal' || Progress.isUnlocked(`theme-${t.id}`));
 const themeListEl = document.getElementById('theme-list');
 const themeNoteEl = document.getElementById('theme-note');
 const themeMeta = document.querySelector('meta[name="theme-color"]');
 // The saved choice is kept even while locked, so it comes back once unlocked.
-Progress.setThemeCount(THEMES.length);
+Progress.setThemeCount(THEMES.filter((t) => !t.dayOne).length, THEMES.filter((t) => t.dayOne).map((t) => t.id)); // (CHAMELEON: not the DAY ONE themes, which not everyone has)
 let themeId = THEMES.some((t) => t.id === storage.get('bytefall-theme')) ? storage.get('bytefall-theme') : 'terminal';
 
 let themeFade = 0; // the timer that brings the screen back from black after a theme change
@@ -4946,10 +4977,17 @@ function applyTheme() {
     render();
     updateHud();
   }
-  themeNoteEl.textContent = `${shown.label}: ${shown.id === 'seasonal' ? `changes with the time of year. Now ${season.desc}` : shown.desc}`;
+  themeNoteEl.textContent = `${shown.label}${shown.dayOne ? ' // PRE-REGISTRATION REWARD' : ''}: ${shown.id === 'seasonal' ? `changes with the time of year. Now ${season.desc}` : shown.desc}`;
 
   themeListEl.innerHTML = '';
   for (const t of THEMES) {
+    if (t.dayOne && !Unlocks.hasDayOne()) continue;
+    if (t.dayOne && !themeListEl.querySelector('.theme-reward')) { // (DAY ONE's four under their own head)
+      const head = document.createElement('p');
+      head.className = 'theme-reward';
+      head.textContent = 'DAY ONE // PRE-REGISTRATION REWARD';
+      themeListEl.appendChild(head);
+    }
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'theme-option';
@@ -4962,6 +5000,7 @@ function applyTheme() {
     swatches.className = 'swatches';
     swatches.dataset.theme = t.id === 'seasonal' ? (season.theme || 'terminal') : t.id;
     if (t.id === 'seasonal') btn.classList.add('theme-seasonal'); // (the full width, under the others)
+    if (t.dayOne) btn.classList.add('theme-day-one');
     swatches.innerHTML = '<i></i><i></i><i></i>';
     btn.appendChild(swatches);
     if (!themeAvailable(t)) {
@@ -7966,6 +8005,16 @@ function applyUnlocks() {
   applyTheme();
   applyFont();
   renderPlaylist();
+  applyDayOne();
+}
+// DAY ONE (Google Play's PRE-REGISTRATION REWARD, Unlocks.hasDayOne): the badge on RECORDS, and the first
+// time it comes, a thank-you on the notice line (not for DEV MODE's preview of everything)
+function applyDayOne() {
+  const on = Unlocks.hasDayOne();
+  document.getElementById('day-one-badge').hidden = !on;
+  if (!on || Unlocks.isDevUnlock() || storage.get('bytefall-day-one-told')) return;
+  storage.set('bytefall-day-one-told', '1');
+  setTimeout(() => showToast('DAY ONE // THANK YOU FOR PRE-REGISTERING', { desc: 'Four themes are yours in SETTINGS, under DAY ONE: ZERO DAY, HOLO FOIL, BLUEPRINT and FIRST LIGHT. And your RECORDS wear the DAY ONE badge.' })); // (once the page is all set up)
 }
 Unlocks.onChange(applyUnlocks);
 applyUnlocks();

@@ -831,8 +831,10 @@ function createVisitors(api) {
         place(t);
         fog.trees.push(t);
       }
-      // (less often, about one forest in three: the HOLLOW, big as they are, somewhere between them)
-      if (Math.random() < 0.35) {
+      // (less often, about one forest in three: the HOLLOW, big as they are, somewhere between them.
+      // Out of the game for now, to be revisited: HOLLOW_ON brings it back)
+      const HOLLOW_ON = false;
+      if (HOLLOW_ON && Math.random() < 0.35) {
         const h = add('hollow', 0, Math.random() < 0.5 ? 1 : -1, { state: 'fogtree' });
         scaleTree(h, ((big ? 3.6 : 1.1) / (SPRITES.hollow.res || 1)) * 0.72); // (at the side trees' scale)
         const hw = parseFloat(h.el.style.width);

@@ -457,6 +457,153 @@ button, input, select, textarea { line-height: inherit; }
   --cracked: #e4e4e4; /* layers stay still: gray, and near-white once cracked */
 }
 
+/* ═══ DAY ONE: Google Play's PRE-REGISTRATION REWARD (script.js's THEMES, dayOne): four themes only those
+   who pre-registered have, listed above SEASONAL. Their touches beyond the colors are further down
+   (DAY ONE's touches) ═══ */
+/* ZERO DAY: gold bits on obsidian, champagne layers, pale gold cracks; a gold glint sweeps the screen */
+[data-theme="zero-day"] {
+  --bg: #0b0a08;
+  --bg-solid: #050403;
+  --bg-center: #1a160c;
+  --panel: #120f08;
+  --panel-text: #f3e3b5;
+  --popup-bg: #110e07;
+  --overlay-bg: #0c0a06;
+  --grid-line: #3a3020;
+  --board-bg: #0b0a08;
+  --cell-bg: #17130a;
+  --fg: #f5c542;
+  --fg-rgb: 245, 197, 66;
+  --fg-dim: #8a7440;
+  --accent: #fff3c4;
+  --accent-rgb: 255, 243, 196;
+  --danger: #ff5a4a;
+  --danger-rgb: 255, 90, 74;
+  --layer-a: #3a3020;
+  --layer-b: #241d12;
+  --layer-border: #8a7440;
+  --layer-text: #c2a668;
+  --layer-rgb: 138, 116, 64;
+  --exploit-bg: #221c0c;
+  --alarm-text: #fffaf0;
+  --byte-text: #fff6dc;
+  --hot-rgb: 255, 215, 110;
+  --burst-hot-rgb: 255, 232, 165;
+  --heat-text: #ffe08a;
+  --heat-bg: #2e2410;
+  --heat-peak-border: #fff6dc;
+  --heat-peak-text: #fffdf5;
+  --heat-peak-bg: #5a4614;
+}
+/* HOLO FOIL: a rare card's foil, the bits running teal to violet to gold (teal standing in for them where
+   a color is still: the HUD, the swatch) on dark pearl; pearl-edged layers, white flash cracks */
+[data-theme="holo-foil"] {
+  --bg: #0d0e16;
+  --bg-solid: #06070c;
+  --bg-center: #1b1d2c;
+  --panel: #12131e;
+  --panel-text: #e2e6ff;
+  --popup-bg: #10111b;
+  --overlay-bg: #0c0d14;
+  --grid-line: #2c3048;
+  --board-bg: #0d0e16;
+  --cell-bg: #151726;
+  --fg: #45f0d6;
+  --fg-rgb: 69, 240, 214;
+  --fg-dim: #4f7f8a;
+  --accent: #ffffff;
+  --accent-rgb: 255, 255, 255;
+  --danger: #ff4f7b;
+  --danger-rgb: 255, 79, 123;
+  --layer-a: #22263a;
+  --layer-b: #171a2a;
+  --layer-border: #c8d0ff;
+  --layer-text: #b2baea;
+  --layer-rgb: 200, 208, 255;
+  --exploit-bg: #1d1f2e;
+  --alarm-text: #ffffff;
+  --byte-text: #effffb;
+  --hot-rgb: 190, 160, 255;
+  --burst-hot-rgb: 225, 215, 255;
+  --heat-text: #b9a4ff;
+  --heat-bg: #241d42;
+  --heat-peak-border: #ffffff;
+  --heat-peak-text: #ffffff;
+  --heat-peak-bg: #45357a;
+}
+/* BLUEPRINT: the game before it shipped. White linework, cyan numbers on blueprint blue with a drafting
+   grid behind the board; hatched layers, marker-yellow cracks */
+[data-theme="blueprint"] {
+  --bg: #0a2148;
+  --bg-solid: #061634;
+  --bg-center: #133466;
+  --panel: #0c2652;
+  --panel-text: #dcecff;
+  --popup-bg: #0b2350;
+  --overlay-bg: #0a1f45;
+  --grid-line: #2a5590;
+  --board-bg: #0b2654;
+  --cell-bg: #0e2d60;
+  --fg: #8fe6ff;
+  --fg-rgb: 143, 230, 255;
+  --fg-dim: #5a8cc0;
+  --accent: #ffd84a;
+  --accent-rgb: 255, 216, 74;
+  --danger: #ff6b6b;
+  --danger-rgb: 255, 107, 107;
+  --layer-a: #1d4580;
+  --layer-b: #12305a;
+  --layer-border: #a9c8ec;
+  --layer-text: #cfe2fa;
+  --layer-rgb: 169, 200, 236;
+  --exploit-bg: #2a2a18;
+  --alarm-text: #fffbe0;
+  --byte-text: #ffffff;
+  --hot-rgb: 160, 225, 255;
+  --burst-hot-rgb: 205, 242, 255;
+  --heat-text: #bfeeff;
+  --heat-bg: #123c70;
+  --heat-peak-border: #ffffff;
+  --heat-peak-text: #ffffff;
+  --heat-peak-bg: #1f5aa0;
+}
+/* FIRST LIGHT: launch dawn. Rose-gold bits, lavender layers on deep indigo, sun-yellow cracks; the sky
+   warming at the top of the screen like a sunrise */
+[data-theme="first-light"] {
+  --bg: #0e0b24;
+  --bg-solid: #07051a;
+  --bg-center: #1d1640;
+  --panel: #141033;
+  --panel-text: #f2dcea;
+  --popup-bg: #120e2e;
+  --overlay-bg: #0f0c26;
+  --grid-line: #352c63;
+  --board-bg: #0d0a25;
+  --cell-bg: #191338;
+  --fg: #ffb59e;
+  --fg-rgb: 255, 181, 158;
+  --fg-dim: #9a6a7a;
+  --accent: #ffe08a;
+  --accent-rgb: 255, 224, 138;
+  --danger: #ff4f6d;
+  --danger-rgb: 255, 79, 109;
+  --layer-a: #2f2856;
+  --layer-b: #211c42;
+  --layer-border: #b8a4ff;
+  --layer-text: #d2c4ff;
+  --layer-rgb: 184, 164, 255;
+  --exploit-bg: #2a2010;
+  --alarm-text: #fff6e6;
+  --byte-text: #fff0ea;
+  --hot-rgb: 255, 190, 170;
+  --burst-hot-rgb: 255, 218, 205;
+  --heat-text: #ffc9b8;
+  --heat-bg: #3a1e36;
+  --heat-peak-border: #fff0ea;
+  --heat-peak-text: #fffaf6;
+  --heat-peak-bg: #6a3050;
+}
+
 * { box-sizing: border-box; }
 
 /* Buttons use the game's font (the chosen one), not the browser's own button font */
@@ -777,6 +924,74 @@ h1 span { color: var(--accent); text-shadow: 0 0 8px var(--accent); }
   /* (held still on a random hue instead, the same one --page-hue-at would start from) */
   [data-theme="spectrum"] :is(.cabinet, footer, .start-screen, .music-player :is(.mp-head, .mp-scroll > :not(.mp-viz))) { filter: hue-rotate(var(--page-hue-deg, 0deg)); }
 }
+
+/* DAY ONE's touches (the pre-registration themes' colors are up top, after SPECTRUM's) */
+/* ZERO DAY: the bits cast in gold, lit from above; now and then a glint of gold light sweeps the screen */
+[data-theme="zero-day"] .cell.disc { background-image: linear-gradient(180deg, rgba(255, 226, 140, 0.14), rgba(255, 226, 140, 0) 60%); }
+[data-theme="zero-day"] body::after {
+  content: ''; position: fixed; top: -20%; bottom: -20%; left: 0; width: 45%; z-index: 9000; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255, 214, 120, 0.07) 35%, rgba(255, 240, 200, 0.16) 50%, rgba(255, 214, 120, 0.07) 65%, transparent);
+  transform: translateX(-120%) skewX(-18deg);
+  animation: gold-glint 12s ease-in-out 2s infinite;
+}
+@keyframes gold-glint { 0% { transform: translateX(-120%) skewX(-18deg); } 16%, 100% { transform: translateX(330%) skewX(-18deg); } }
+/* HOLO FOIL: each bit along the foil's one cycle by where it sits (script.js's foilBit), so the colors
+   run across the board as the light moves; a flash of white as it passes. Infected, scrambling and
+   popping bits keep their own looks */
+@property --foil {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: #45f0d6;
+}
+@keyframes foil { 0%, 100% { --foil: #45f0d6; } 30% { --foil: #b98cff; } 52% { --foil: #ffd57a; } 57% { --foil: #fffbe8; } 62% { --foil: #ffd57a; } 82% { --foil: #ff9fd8; } }
+[data-theme="holo-foil"] .cell.disc:not(.infected, .scrambling, .pop) {
+  color: var(--foil);
+  border-color: var(--foil);
+  text-shadow: 0 0 6px color-mix(in srgb, var(--foil) 60%, transparent);
+  animation: foil 7s linear var(--foil-delay, 0s) infinite;
+}
+[data-theme="holo-foil"] .board-frame { border-color: rgba(200, 208, 255, 0.45); }
+.swatches[data-theme="holo-foil"] i:nth-child(1) { background: linear-gradient(90deg, #45f0d6, #b98cff, #ffd57a); }
+/* BLUEPRINT: the bits drawn, white outlines with a tick on each side's middle; layers hatched; a drafting
+   grid (fine lines, a heavier one every fifth) behind the board */
+[data-theme="blueprint"] .cell.disc:not(.infected, .overflow) {
+  border-color: #ffffff;
+  text-shadow: 0 0 4px rgba(var(--fg-rgb), 0.35);
+  background-image:
+    linear-gradient(#ffffff, #ffffff), linear-gradient(#ffffff, #ffffff),
+    linear-gradient(#ffffff, #ffffff), linear-gradient(#ffffff, #ffffff);
+  background-size: 1px 4px, 1px 4px, 4px 1px, 4px 1px;
+  background-position: 50% 0, 50% 100%, 0 50%, 100% 50%;
+  background-repeat: no-repeat;
+}
+[data-theme="blueprint"] .cell.firewall { background: repeating-linear-gradient(45deg, rgba(207, 226, 250, 0.38) 0 1px, transparent 1px 5px), var(--layer-b); }
+[data-theme="blueprint"] .board-frame {
+  background-image:
+    linear-gradient(rgba(220, 236, 255, 0.10) 1px, transparent 1px), linear-gradient(90deg, rgba(220, 236, 255, 0.10) 1px, transparent 1px),
+    linear-gradient(rgba(220, 236, 255, 0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(220, 236, 255, 0.045) 1px, transparent 1px) !important;
+  background-size: 40px 40px, 40px 40px, 8px 8px, 8px 8px !important;
+}
+[data-theme="blueprint"] .board .cell:empty:not(.overflow) { background: transparent; border-color: rgba(169, 200, 236, 0.16); }
+/* FIRST LIGHT: dawn at the top of the screen, breathing slowly as it comes up */
+[data-theme="first-light"] body::before {
+  content: ''; position: fixed; left: 0; right: 0; top: 0; height: 65vh; z-index: -1; pointer-events: none;
+  background: radial-gradient(130% 60% at 50% -6%, rgba(255, 168, 120, 0.42), rgba(255, 120, 150, 0.17) 45%, rgba(184, 164, 255, 0.05) 70%, transparent 85%);
+  animation: first-light 14s ease-in-out infinite;
+}
+@keyframes first-light { 50% { opacity: 0.7; } }
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="zero-day"] body::after { display: none; }
+  [data-theme="holo-foil"] .cell.disc:not(.infected, .scrambling, .pop),
+  [data-theme="first-light"] body::before { animation: none; }
+}
+.low-fx[data-theme="zero-day"] body::after { display: none; }
+.low-fx[data-theme="first-light"] body::before { animation: none; }
+/* RECORDS' DAY ONE badge (script.js's applyDayOne): those who pre-registered, a small gold-edged tag by the title */
+.day-one-badge { display: inline-block; margin-left: 8px; padding: 1px 6px; vertical-align: middle; border: 1px solid #f5c542; border-radius: 3px; font-size: 11.5px; letter-spacing: 1.5px; color: #ffe08a; background: rgba(245, 197, 66, 0.1); text-shadow: 0 0 6px rgba(245, 197, 66, 0.6); box-shadow: 0 0 6px rgba(245, 197, 66, 0.35); cursor: default; }
+.day-one-badge[hidden] { display: none; }
+[data-theme="paper"] .day-one-badge { color: #8a6200; border-color: #a67c00; box-shadow: none; }
+/* The DAY ONE themes' head in SETTINGS: the full width, over their two rows */
+.theme-list .theme-reward { grid-column: 1 / -1; margin: 4px 0 0; font-size: 11.5px; letter-spacing: 1px; text-align: center; color: var(--accent); }
 
 .cell.overflow {
   background: rgba(var(--danger-rgb), 0.04);
@@ -2614,39 +2829,31 @@ html.no-start .start-screen, .start-screen[hidden] { display: none; }
    width: no scroll bar flickering on as it goes; open above and below, for what they say) */
 :is(.start-walkers, .game-walkers, .saver-lane) { overflow-x: clip; overflow-y: visible; }
 .start-title { position: relative; z-index: 1; } /* (the spider drops behind the title) */
-/* LIVE (the live test app): a neon bar sign hung over the title on two chains from out of sight above,
-   swaying a touch. Its own red whatever the theme (it's a thing in the room, not the screen's): the
-   glass tubes dark and dull till lit, then a near white core in a red glow, the light spilling round it
-   (.ls-halo). It flickers on after the title's intro (.neon, start.js), the frame catching on its own
-   beat; lit, now and then a letter stutters (start.js). Unseen till then, as START is */
+/* LIVE (the live test app): "live" in neon script up in the start card's top right corner, tilted as a
+   sign in a bar's window: one hot-pink tube written out in joined-up letters and a cyan swoosh under it,
+   no plate, no frame, just the bent glass. Its own colors whatever the theme (it's a thing in the room,
+   not the screen's): the glass dark and dull till lit, then a near white core in its color's glow, the
+   light spilling round it (.ls-halo). It flickers on after the title's intro (.neon, start.js), the
+   swoosh catching on its own beat; lit, now and then a letter stutters (start.js). Unseen till then, as
+   START is */
 .live-sign {
-  position: absolute; left: 50%; top: 11%; z-index: 1; width: min(76%, 320px); margin-left: calc(min(76%, 320px) / -2);
-  transform-origin: 50% -320px; transform: rotate(-0.4deg); animation: live-sway 7s ease-in-out infinite alternate;
+  position: absolute; right: 14px; top: 66px; z-index: 1; width: min(30%, 124px);
+  transform: rotate(-9deg); transform-origin: 70% 60%;
   pointer-events: none;
 }
 .live-sign[hidden] { display: none; }
 .live-sign svg { position: relative; display: block; width: 100%; height: auto; overflow: visible; }
-@keyframes live-sway { to { transform: rotate(0.4deg); } }
-.live-sign .ls-chain {
-  position: absolute; bottom: calc(100% - 6px); width: 4px; height: 340px; left: 9%;
-  background: repeating-linear-gradient(to bottom, #4a5058 0 5px, #23272c 5px 7px, #6a7078 7px 9px, #23272c 9px 10px);
-  border-radius: 2px; opacity: 0.85;
-}
-.live-sign .ls-chain + .ls-chain { left: auto; right: 9%; }
-.ls-plate { fill: #0a0c0f; stroke: #20252c; stroke-width: 2; }
-.ls-bolts { fill: #3a4048; }
-.ls-blockout { fill: none; stroke: #120609; stroke-width: 4; stroke-linecap: round; }
 .ls-glass, .ls-lit { fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.ls-glass { stroke: #3d1019; stroke-width: 7.5; }
-.ls-lit { stroke: #ffe1e7; stroke-width: 4.2; filter: drop-shadow(0 0 1.5px #ff2d55) drop-shadow(0 0 5px #ff2d55) drop-shadow(0 0 13px rgba(255, 30, 70, 0.85)); }
-.ls-lit .ls-frame { stroke-width: 3; }
-.ls-glass rect { stroke-width: 6; }
+.ls-glass { stroke: #3a1430; stroke-width: 5.5; }
+.ls-glass path:last-child { stroke: #10303a; }
+.ls-lit { stroke: #ffe4f4; stroke-width: 2.6; filter: drop-shadow(0 0 1px #ff3fae) drop-shadow(0 0 4px #ff3fae) drop-shadow(0 0 10px rgba(255, 50, 170, 0.8)); }
+.ls-lit .ls-frame { stroke: #e2fdff; stroke-width: 2.2; filter: drop-shadow(0 0 1px #2ee6ff) drop-shadow(0 0 4px #2ee6ff) drop-shadow(0 0 10px rgba(40, 220, 255, 0.75)); }
 .live-sign .ls-halo {
-  position: absolute; inset: -40% -18%; border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(255, 40, 80, 0.34), rgba(255, 40, 80, 0.12) 55%, transparent);
+  position: absolute; inset: -30% -20%; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 60, 170, 0.22), rgba(255, 60, 170, 0.08) 55%, transparent);
 }
-/* (flickering on: the tubes catching, dropping out and catching again; the frame on its own beat) */
-.live-sign.neon :is(.ls-l, .ls-halo, .ls-wash) { animation: live-on 1.7s steps(1, end) both; }
+/* (flickering on: the tube catching, dropping out and catching again; the swoosh on its own beat) */
+.live-sign.neon :is(.ls-l, .ls-halo) { animation: live-on 1.7s steps(1, end) both; }
 .live-sign.neon .ls-frame { animation: live-on-frame 2.1s steps(1, end) both; }
 @keyframes live-on {
   0% { opacity: 0; } 6% { opacity: 0.8; } 9% { opacity: 0; } 22% { opacity: 1; } 25% { opacity: 0.1; } 31% { opacity: 0; }
@@ -4464,6 +4671,11 @@ html, body { overflow-x: clip; }
 .cell.infected .inf-mark { position: absolute; top: 1px; right: 1px; width: 38%; height: 38%; display: flex; color: var(--danger); filter: drop-shadow(0 0 2px var(--danger)); pointer-events: none; }
 .cell.infected .inf-mark .ico { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2.4; }
 @keyframes infected-pulse { 0%, 100% { box-shadow: inset 0 0 0 1px var(--danger), 0 0 4px rgba(255, 59, 78, 0.4); } 50% { box-shadow: inset 0 0 0 2px var(--danger), 0 0 12px rgba(255, 59, 78, 0.8); } }
+/* (while one's on the board every point scored counts against you: SCORE in the virus's red, pulsing with it) */
+.stat.infected-score .value { color: var(--danger); text-shadow: 0 0 6px rgba(var(--danger-rgb), 0.6); animation: infected-score 0.8s ease-in-out infinite; }
+.stat.infected-score .label::after { content: ' \2212'; color: var(--danger); }
+@keyframes infected-score { 50% { text-shadow: 0 0 12px rgba(var(--danger-rgb), 0.9); } }
+@media (prefers-reduced-motion: reduce) { .stat.infected-score .value { animation: none; } }
 .inf-screen { position: absolute; inset: 3px; border-radius: 3px; background: #050607; overflow: hidden; box-shadow: inset 0 0 4px rgba(var(--danger-rgb), 0.5); }
 .inf-face, .inf-term { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
 .inf-face { animation: inf-swap 3.2s ease-in-out infinite; }

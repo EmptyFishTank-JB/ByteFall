@@ -274,7 +274,7 @@ const Store = (() => {
     const has = (yes, name) => `${name}: ${yes ? 'OWNED' : 'NOT OWNED'}`;
     const why = Billing.on && Billing.missing(); // (products Google Play didn't hand over, and its reason)
     document.getElementById('buy-test-status').textContent = resetting ? 'Using up the test purchases...'
-      : `${Billing.on ? 'Google Play says' : 'Pretend purchases'}: ${has(Unlocks.hasFullAccess(), 'FULL ACCESS')}, ${has(Unlocks.owned().noAds || Unlocks.hasFullAccess(), 'REMOVE ADS')}.${why ? ` Missing from Google Play: ${why}.` : ''}`;
+      : `${Billing.on ? 'Google Play says' : 'Pretend purchases'}: ${has(Unlocks.hasFullAccess(), 'FULL ACCESS')}, ${has(Unlocks.owned().noAds || Unlocks.hasFullAccess(), 'REMOVE ADS')}${Billing.on ? `, ${has(Unlocks.owned().dayOne, 'DAY ONE (PRE-REGISTRATION)')}` : ''}.${why ? ` Missing from Google Play: ${why}.` : ''}`;
     document.getElementById('buy-test-note').textContent = Billing.on
       ? 'BUY in the STORE is Google Play\'s: on a license tester\'s account, pay with the test card and nothing is charged. RESET uses up what\'s owned so it can be bought again (REMOVE ADS, then FULL ACCESS as the UPGRADE).'
       : 'BUY in the STORE owns it at once here, nothing charged. RESET takes it back, ads and all.';

@@ -162,7 +162,9 @@ public class MainActivity extends BridgeActivity {
     // what the account owns, how a purchase went. Each purchase is acknowledged (Google Play refunds
     // one that isn't, after 3 days); a pending one (paid later, as with cash) unlocks nothing till
     // it's paid; and what's owned is asked again whenever the app comes back to the front, so a
-    // pending purchase paid meanwhile unlocks, and a refunded one is taken back. All on the UI thread
+    // pending purchase paid meanwhile unlocks, and a refunded one is taken back. All on the UI thread.
+    // (PRODUCTS are the ones for sale, their prices asked for. The PRE-REGISTRATION reward, day_one, isn't
+    // sold: Google Play grants it as a purchase, so it comes in with what's owned and is acknowledged too)
     private static final List<String> PRODUCTS = Arrays.asList("remove_ads", "full_access", "full_access_upgrade");
     private BillingClient billing = null;
     private boolean billingSetUp = false; // (connected once: the library reconnects by itself after)

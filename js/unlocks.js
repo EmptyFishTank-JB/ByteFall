@@ -10,11 +10,14 @@
 // store.js): no ads, nothing unlocked; Full Access includes it. The dev page's OWN
 // REMOVE ADS switch previews owning it. In ByteFall Test with test ads, the STORE's BUY
 // pretends (pretend(), kept in bytefall-test-purchases) and SETTINGS' TEST PURCHASES resets it.
+// DAY ONE is Google Play's PRE-REGISTRATION REWARD (billing.js's day_one): the four DAY ONE themes
+// in SETTINGS and the badge on RECORDS. DEV MODE and the dev page's PRE-REGISTERED switch preview it.
 const Unlocks = (() => {
   let full = false;
   let dev = false;
   let noAds = false;
   let devNoAds = false; // (the dev page's OWN REMOVE ADS switch)
+  let dayOne = false; // (pre-registered: Google Play's reward, or the dev page's PRE-REGISTERED switch)
   let purchased = false; // (a real purchase, reported by Google Play: not a dev preview)
   let paidFull = false; // (FULL ACCESS as Google Play says it's owned: the secret tap's unlock apart)
   const OWNED_KEY = 'bytefall-purchases';
@@ -29,12 +32,14 @@ const Unlocks = (() => {
       full = dev || !!pretend.full;
       devNoAds = localStorage.getItem('bytefall-dev-noads') === 'on';
       noAds = devNoAds || !!pretend.noAds;
+      dayOne = localStorage.getItem('bytefall-dev-dayone') === 'on';
     } else {
       const owned = JSON.parse(localStorage.getItem(OWNED_KEY) || '{}');
       dev = localStorage.getItem('bytefall-unlock-key') === 'open'; // (the secret tap: script.js's THE STORY KEY)
       paidFull = !!owned.full;
       full = paidFull || dev;
       noAds = !!owned.noAds;
+      dayOne = !!owned.dayOne;
       purchased = paidFull || noAds; // (the secret unlock isn't a purchase: no INDIE SUPPORTER for it)
     }
   } catch (e) {}
@@ -45,19 +50,23 @@ const Unlocks = (() => {
     hasNoAds: () => full || noAds,
     hasPurchase: () => purchased,
     isDevUnlock: () => dev,
-    owned: () => ({ full: release ? paidFull : full, noAds }),
-    // (Google Play's word on what's owned: FULL ACCESS, REMOVE ADS; kept for the next launch. It comes
-    // at every launch, so the secret tap's unlock is kept whatever it says: without that, the reload
-    // after the tap brought Google Play's "not owned" and locked everything again)
-    own(nowFull, nowNoAds) {
+    // (DAY ONE: the pre-registration reward's themes and badge)
+    hasDayOne: () => dayOne || dev,
+    owned: () => ({ full: release ? paidFull : full, noAds, dayOne }),
+    // (Google Play's word on what's owned: FULL ACCESS, REMOVE ADS, the DAY ONE reward; kept for the next
+    // launch. It comes at every launch, so the secret tap's unlock is kept whatever it says: without that,
+    // the reload after the tap brought Google Play's "not owned" and locked everything again)
+    own(nowFull, nowNoAds, nowDayOne) {
       const wasFull = full;
       const wasNoAds = noAds;
+      const wasDayOne = dayOne;
       paidFull = !!nowFull;
       full = paidFull || dev;
       noAds = !!nowNoAds;
+      dayOne = !!nowDayOne;
       purchased = purchased || paidFull || noAds;
-      try { localStorage.setItem(OWNED_KEY, JSON.stringify({ full: paidFull, noAds })); } catch (e) {}
-      if (full !== wasFull || noAds !== wasNoAds) listeners.forEach((fn) => fn(full));
+      try { localStorage.setItem(OWNED_KEY, JSON.stringify({ full: paidFull, noAds, dayOne })); } catch (e) {}
+      if (full !== wasFull || noAds !== wasNoAds || dayOne !== wasDayOne) listeners.forEach((fn) => fn(full));
     },
     onChange(fn) {
       listeners.push(fn);
