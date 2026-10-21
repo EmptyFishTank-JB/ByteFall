@@ -366,7 +366,7 @@ runs where it lands. With nothing to arm, the button opens the menu's EXPLOITS t
 | RNG `[?]` | 3x | Scrambles every bit to a random number: the bits flicker through random values in place (the squares don't move) for about half a second before the new numbers land (RANSOMWARE's locked bits sit it out: no flicker, same numbers, still locked) |
 | Bitflip `[↕]` (drawn as an arrow icon) | 3x | Turns every column upside down |
 | Dictionary Attack `[#]` * | 4x | Every encryption layer on the board loses one level at once |
-| Keylogger `[@]` * | 3x | Shows your next 3 bits for the next 10 drops (NEXT's panel reads `[@] : 10`, the drops left, beside them; the label shrinks to fit the panel in any font) |
+| Keylogger `[@]` * | 3x | Shows your next 3 bits for the next 10 drops (NEXT's panel reads `[@]:10`, the drops left, beside them, the label shrinking to fit in any font; in VS, where the box is half CURRENT's square, the three bits alone) |
 | Backdoor `[_]` * | 4x | Deletes the entire bottom row, layers included; everything drops by one |
 | Rainbow Table `[*]` * | 5x | Decrypts every bit showing the most common number on the board |
 | Pivot `[⇆]` * | 3x | Swaps the column it lands in with a neighbor: pick the column, then tap ← or → (or press the arrow keys), with no backing out once picked; edge columns swap with their only neighbor |

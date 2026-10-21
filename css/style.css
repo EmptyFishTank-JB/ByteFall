@@ -3398,15 +3398,12 @@ body:not(.vs-mode) .hud-bits #next-stat .bit-sq { width: 20px; height: 20px; mar
    boxes have them) */
 body:not(.vs-mode) .hud-bits :is(#next-stat, #time-stat) > .label { position: static; height: auto; transform: none; flex: none; line-height: 1; }
 body:not(.vs-mode) .hud-bits :is(#next-stat, #time-stat) > :is(.bit-row, .bit-sq, .value) { position: static; transform: none; flex: none; }
-/* KEYLOGGER's [@] : 10 beside its three bits: the label gives way first (script.js's fitStatValues
+/* KEYLOGGER's [@]:10 beside its three bits: the label gives way first (script.js's fitStatValues
    shrinks it to fit), so the row never spills out of the panel */
 body:not(.vs-mode) .hud-bits #next-stat.keylogger { gap: 5px; }
 body:not(.vs-mode) .hud-bits #next-stat.keylogger > .label { flex: 0 1 auto; min-width: 0; white-space: nowrap; letter-spacing: 0; }
-/* (its spaces about half a letter wide, so it fits in the widest fonts too, PRESS START's square letters
-   most of all; on one line in VS's box as well) */
-.stat.keylogger > .label { word-spacing: -0.3em; }
-[data-font="press-start"] .stat.keylogger > .label { word-spacing: -0.55em; }
-body.vs-mode .hud-bits .stat.keylogger > .label { white-space: nowrap; }
+/* (VS's box, half CURRENT's square: room for the three bits alone, no label) */
+body.vs-mode .hud-bits .stat.keylogger > .label { display: none; }
 /* CURRENT's panel in the accent color */
 .hud-bits .stat-current { border-color: var(--accent); }
 /* Bots readable in every theme (audited per theme, bot and level): INSANE's red eyes go light on a
