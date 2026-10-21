@@ -323,6 +323,26 @@ const Tutorial = (() => {
     r = Math.min(r, (R - L) / 2, (B - T) / 2);
     return `M${L + r} ${T}H${R - r}A${r} ${r} 0 0 1 ${R} ${T + r}V${B - r}A${r} ${r} 0 0 1 ${R - r} ${B}H${L + r}A${r} ${r} 0 0 1 ${L} ${B - r}V${T + r}A${r} ${r} 0 0 1 ${L + r} ${T}Z`;
   };
+  // (framed things whose frames would overlap or touch, as a WORM's row of bits does, get one frame:
+  // the rectangle round them all, its opening in the dim the same)
+  function mergeBoxes(boxes) {
+    const out = boxes.slice();
+    for (let grown = true; grown;) { // (till no two overlap: one grown can reach another it didn't before)
+      grown = false;
+      for (let i = 0; i < out.length && !grown; i++) {
+        for (let j = i + 1; j < out.length; j++) {
+          const a = out[i];
+          const b = out[j];
+          if (a.L > b.R || b.L > a.R || a.T > b.B || b.T > a.B) continue;
+          out[i] = { L: Math.min(a.L, b.L), T: Math.min(a.T, b.T), R: Math.max(a.R, b.R), B: Math.max(a.B, b.B) };
+          out.splice(j, 1);
+          grown = true;
+          break;
+        }
+      }
+    }
+    return out;
+  }
   function dimPath() {
     // (from the dim's own corner: with the ad banner at the top the page sits under it, so the
     // window's numbers would put each opening a banner's height off)
@@ -333,6 +353,7 @@ const Tutorial = (() => {
     const parts = bannerEl ? [bannerEl.querySelector('.tut-card'), ...bannerEl.querySelectorAll('.tut-actions button')] : [];
     // (what's left bright: elements, or selectors looked up each frame, so ones drawn later count too)
     const bright = (dimOn || []).flatMap((t) => (typeof t === 'string' ? [...document.querySelectorAll(t)] : [t]));
+    const openings = [];
     for (const el of [...bright, ...parts]) { // (the card and each button: not the empty row beside them)
       if (!el || !el.isConnected) continue;
       const r = el.getBoundingClientRect();
@@ -343,8 +364,10 @@ const Tutorial = (() => {
       const T = r.top - base.top - pad;
       const R = r.right - base.left + pad;
       const B = r.bottom - base.top + pad;
-      d += framed ? roundRect(L, T, R, B, FRAME_R) : `M${L} ${T}H${R}V${B}H${L}Z`;
+      if (framed) openings.push({ L, T, R, B });
+      else d += `M${L} ${T}H${R}V${B}H${L}Z`;
     }
+    for (const o of mergeBoxes(openings)) d += roundRect(o.L, o.T, o.R, o.B, FRAME_R);
     dimEl.style.clipPath = `path(evenodd, '${d}')`;
     if (dimOn) dimRaf = requestAnimationFrame(dimPath);
   }
@@ -389,30 +412,33 @@ const Tutorial = (() => {
       framesEl.setAttribute('aria-hidden', 'true');
       document.body.appendChild(framesEl);
     }
-    while (framesEl.children.length < targets.length) framesEl.appendChild(document.createElement('i'));
-    while (framesEl.children.length > targets.length) framesEl.lastChild.remove();
-    targets.forEach((el, i) => {
-      const f = framesEl.children[i];
+    // (from the layer's own corner, as the dim's openings are: with the ad banner at the top the page
+    // sits under it, so the window's numbers put every frame a banner's height too low)
+    const base = framesEl.getBoundingClientRect();
+    const boxes = [];
+    for (const el of targets) {
       const r = el.getBoundingClientRect();
-      const pad = padOf(el);
-      let L = r.left - pad;
-      let T = r.top - pad;
-      let R = r.right + pad;
-      let B = r.bottom + pad;
       let seen = r.width > 0 && r.height > 0;
       for (const c of clippers(el)) { // (only what's in view of its scrolling box)
         const cr = c.getBoundingClientRect();
         if (r.bottom <= cr.top || r.top >= cr.bottom || r.right <= cr.left || r.left >= cr.right) { seen = false; break; }
       }
-      f.hidden = !seen;
-      if (!seen) return;
-      f.style.transform = `translate(${L}px, ${T}px)`;
-      f.style.width = `${R - L}px`;
-      f.style.height = `${B - T}px`;
+      if (!seen) continue;
+      const pad = padOf(el);
+      boxes.push({ L: r.left - base.left - pad, T: r.top - base.top - pad, R: r.right - base.left + pad, B: r.bottom - base.top + pad });
+    }
+    const shown = mergeBoxes(boxes);
+    while (framesEl.children.length < shown.length) framesEl.appendChild(document.createElement('i'));
+    while (framesEl.children.length > shown.length) framesEl.lastChild.remove();
+    shown.forEach((o, i) => {
+      const f = framesEl.children[i];
+      f.hidden = false;
+      f.style.transform = `translate(${o.L}px, ${o.T}px)`;
+      f.style.width = `${o.R - o.L}px`;
+      f.style.height = `${o.B - o.T}px`;
     });
     // (the narration card and its buttons stay on top: the layer cut round them, so a frame of what's
     // under the card, as the EXPLOITS menu's cards are, never draws across it)
-    const base = framesEl.getBoundingClientRect();
     let d = `M0 0H${base.width}V${base.height}H0Z`;
     const card = bannerEl && !bannerEl.hidden && !targets.some((t) => bannerEl.contains(t)) && bannerEl.querySelector('.tut-card');
     if (card) { // (the card and its row of buttons, as one: no frame showing between the buttons either)

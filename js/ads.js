@@ -66,9 +66,11 @@
       say('banner', `The banner couldn't be asked for: ${why(e)}.`);
     }
   }
+  // (the banner is the app's own view over the page, so it outlives a reload: DEV MODE's switch reloads
+  // the page, and the page after it, with no ads, never put one up. Taken down whether this page showed
+  // it or not, or it sat over the top of the game till the app restarted; with none up, it does nothing)
   function removeBanner() {
     clearTimeout(retry);
-    if (!shown) return;
     shown = false;
     strip(0);
     AdMob.removeBanner().catch(() => {});
@@ -125,7 +127,7 @@
     return readying;
   }
   async function start() {
-    if (owned()) { say('ads', OFF); return; }
+    if (owned()) { removeBanner(); say('ads', OFF); return; }
     if (await ready()) showBanner();
   }
 

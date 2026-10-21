@@ -588,7 +588,10 @@ never an empty gap. On Android 15 and later the ads plugin moves the banner down
 by the status bar's room (though the game hides the bars and the page already
 starts below that room), which put it over the title; `MainActivity` puts its top
 back level with the page's after every layout, so it sits in the strip. Buying
-either purchase takes the banner and the strip away at once. Where consent applies, SETTINGS gets an **// ADS** section with AD
+either purchase takes the banner and the strip away at once. The banner is the app's own view over
+the page, so it outlives a reload (DEV MODE's switch reloads the page): a page with no ads always
+tells the app to take one down, whether it put it up or not (`removeBanner`), so none is left
+covering the top of the game. Where consent applies, SETTINGS gets an **// ADS** section with AD
 PRIVACY OPTIONS, to change the choice made (Google requires it there). While
 `testing` is on, SETTINGS also gets **// TEST ADS**: a line on what the ads are
 doing (started or not, the consent answer, a banner showing, or Google's error
@@ -1264,7 +1267,11 @@ EXPLOITS) and SETTINGS, a lesson's first card on a clean board. STORY isn't in a
 of its page). Over an open menu the banner moves to the bottom or middle of the screen; over the main
 menu it starts at the top of the EXPLOITS / STORE row and grows down. What a card points at is framed in
 one layer over everything (`drawFrames`: nothing covers a frame), 4px out (8px for a roomy one), with the
-narration card's 6px corners, as the dim's openings have. TUTORIAL.md lists every card, written by
+narration card's 6px corners, as the dim's openings have; measured from that layer's own corner, so an
+ad banner over the top (the page moved down under it) never puts them a banner's height off. Framed
+things whose frames would overlap or touch (a WORM's column of bits, two bits side by side, the
+EXPLOITS menu's cards) get one frame, the rectangle round them all (`mergeBoxes`), and one opening in
+the dim the same. TUTORIAL.md lists every card, written by
 `node tools/tutorial-doc.js` from the lesson as it plays.
 BACK (from step 2 on) redoes the step just played, or before a drop goes to the step before, putting
 the board, bits, score, chain and exploit back as they were. EXIT leaves at any
