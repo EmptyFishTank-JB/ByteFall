@@ -1,12 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <!-- DAY ONE, the pre-registration reward's icon in Play Console (512x512, rendered to day-one-icon.png):
-       the app icon's glowing cell in ZERO DAY's gold, [1] for day one, the four DAY ONE themes' colors under it -->
+       the app icon's glowing cell in ZERO DAY's gold, [1] for day one, the four DAY ONE themes' colors under
+       it, DAY ONE below. Play shows it in a pointy-top hexagon badge with a frame round it, so everything
+       sits within 165px of the middle (the circle the badge's opening always keeps) -->
   <defs>
     <filter id="glow" filterUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
-      <feGaussianBlur stdDeviation="7" result="b"/>
+      <feGaussianBlur stdDeviation="5" result="b"/>
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
-    <radialGradient id="warm" cx="50%" cy="40%" r="60%">
+    <radialGradient id="warm" cx="50%" cy="46%" r="52%">
       <stop offset="0" stop-color="#2a2110"/>
       <stop offset="1" stop-color="#0b0a08"/>
     </radialGradient>
@@ -17,13 +19,13 @@
     </linearGradient>
   </defs>
   <rect width="512" height="512" fill="url(#warm)"/>
-  <rect x="121" y="64" width="270" height="270" rx="20" fill="#17130a" stroke="#f5c542" stroke-width="12" filter="url(#glow)"/>
-  <text x="256" y="245" text-anchor="middle" font-family="Courier New, Courier, monospace" font-weight="bold" font-size="124" letter-spacing="-8" fill="#f5c542" filter="url(#glow)">[1]</text>
+  <rect x="171" y="118" width="170" height="170" rx="14" fill="#17130a" stroke="#f5c542" stroke-width="9" filter="url(#glow)"/>
+  <text x="256" y="232" text-anchor="middle" font-family="Courier New, Courier, monospace" font-weight="bold" font-size="80" letter-spacing="-5" fill="#f5c542" filter="url(#glow)">[1]</text>
   <g filter="url(#glow)">
-    <rect x="121" y="366" width="60" height="16" rx="8" fill="#f5c542"/>
-    <rect x="191" y="366" width="60" height="16" rx="8" fill="url(#foil)"/>
-    <rect x="261" y="366" width="60" height="16" rx="8" fill="#8fe6ff"/>
-    <rect x="331" y="366" width="60" height="16" rx="8" fill="#ffb59e"/>
+    <rect x="160" y="308" width="42" height="12" rx="6" fill="#f5c542"/>
+    <rect x="210" y="308" width="42" height="12" rx="6" fill="url(#foil)"/>
+    <rect x="260" y="308" width="42" height="12" rx="6" fill="#8fe6ff"/>
+    <rect x="310" y="308" width="42" height="12" rx="6" fill="#ffb59e"/>
   </g>
-  <text x="256" y="462" text-anchor="middle" font-family="Courier New, Courier, monospace" font-weight="bold" font-size="60" letter-spacing="6" fill="#ffe08a" filter="url(#glow)">DAY ONE</text>
+  <text x="256" y="378" text-anchor="middle" font-family="Courier New, Courier, monospace" font-weight="bold" font-size="42" letter-spacing="3" fill="#ffe08a" filter="url(#glow)">DAY ONE</text>
 </svg>
