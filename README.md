@@ -183,7 +183,10 @@ checks look for). Set up once in the Play Console:
    Everyone who pre-registered gets it as a purchase when they install after launch; the game picks
    it up with the rest of what's owned (at launch and each return to the app) and acknowledges it,
    and it unlocks the four DAY ONE themes and the DAY ONE badge (see THEMES). Nothing else to wire up:
-   MainActivity doesn't ask its price, as it's not for sale.
+   MainActivity doesn't ask its price, as it's not for sale. Its listing: name **DAY ONE: Pre-registration
+   Reward**; description *Thanks for being here from the start. Four exclusive themes (ZERO DAY, HOLO
+   FOIL, BLUEPRINT and FIRST LIGHT) and the DAY ONE badge on your RECORDS.*; icon
+   `assets/play/day-one-icon.png` (512x512, 32-bit; drawn from `day-one-icon.svg` beside it).
 4. **Settings → License testing**: your Google account (the one on the phone's Play Store), so
    your purchases go through Google's test cards and charge nothing. Refund one from **Order
    management** to see the game take it back at the next launch.
