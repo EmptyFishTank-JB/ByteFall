@@ -9,9 +9,9 @@
 // - the settings' DEV link taken out
 // - the build, commit and date baked in (the web version asks GitHub for them on each load)
 // - any dev switches left in storage cleared on launch (VIRUSES: OFTEN, ...): in TEST all but
-//   UNLOCK EVERYTHING (the app's padlock in SETTINGS switches it, for testing); in RELEASE every one,
-//   the padlock taken out of the page, the game told it's the release (BYTEFALL_APP.release: dev
-//   unlocks ignored, js/unlocks.js), and the infection tester and the archived tracks left out
+//   UNLOCK EVERYTHING (DEV MODE, the main menu title's secret tap, for testing); in RELEASE every one,
+//   the game told it's the release (BYTEFALL_APP.release: dev unlocks ignored, js/unlocks.js), and the
+//   infection tester and the archived tracks left out
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
@@ -44,7 +44,7 @@ html = html.replace(devLink, '');
 const boot = `<script>
   // (the app build: tools/build-app.js, the ${EDITION.toUpperCase()} edition)
   window.BYTEFALL_APP = ${JSON.stringify(app)};
-  ${RELEASE ? "// (every dev switch off, UNLOCK EVERYTHING too: players never get them)" : "// (UNLOCK EVERYTHING stays: the test app's own padlock switch)"}
+  ${RELEASE ? "// (every dev switch off, UNLOCK EVERYTHING too: players never get them)" : "// (UNLOCK EVERYTHING stays: DEV MODE, the secret tap's)"}
   try { Object.keys(localStorage).forEach(function (k) { if (k.indexOf('bytefall-dev-') === 0${RELEASE ? '' : " && k !== 'bytefall-dev-unlockall'"}) localStorage.removeItem(k); }); } catch (e) {}
 </script>
 `;
@@ -52,11 +52,7 @@ const first = html.indexOf('<script>');
 if (first < 0) throw new Error('build-app: no inline script in index.html to boot before');
 html = html.slice(0, first) + boot + html.slice(first);
 if (RELEASE) {
-  // (the padlock, its note and all; and the infection, sound and story testers, which only ?inftest,
-  // ?sfxtest and ?storytest wake)
-  const padlock = /\s*<!-- \(the Android test app: DEV MODE[^>]*-->\s*<button type="button" class="dev-link dev-unlock-btn"[\s\S]*?<\/button>/;
-  if (!padlock.test(html)) throw new Error('build-app: the DEV MODE padlock was not found in index.html');
-  html = html.replace(padlock, '');
+  // (the infection, sound and story testers, which only ?inftest, ?sfxtest and ?storytest wake)
   for (const file of ['inf-test', 'sfx-test', 'story-test']) {
     const tester = new RegExp(`\\s*<script src="js\\/${file}\\.js[^"]*"><\\/script>`);
     if (!tester.test(html)) throw new Error(`build-app: ${file}.js's script tag was not found in index.html`);

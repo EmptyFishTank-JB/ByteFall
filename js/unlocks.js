@@ -4,9 +4,9 @@
 // (billing.js) tells own() what the account owns, at each launch and each purchase;
 // what it last said is kept (bytefall-purchases), so the game opens as it was before
 // Google Play answers (no banner flashing up for a FULL ACCESS owner). For testing,
-// ?unlockall in the URL or DEV MODE (the dev page's switch, a flag in this browser; the test app's
-// padlock; or the secret tap on the main menu's title, which the Play release keeps too) preview
-// everything unlocked. REMOVE ADS is the other purchase (the STORE,
+// ?unlockall in the URL or DEV MODE (the dev page's switch, a flag in this browser; or the secret tap
+// on the main menu's title, which the Play release keeps too) preview everything unlocked, switched on
+// and off in the running game (setDevUnlock), no reload. REMOVE ADS is the other purchase (the STORE,
 // store.js): no ads, nothing unlocked; Full Access includes it. The dev page's OWN
 // REMOVE ADS switch previews owning it. In ByteFall Test with test ads, the STORE's BUY
 // pretends (pretend(), kept in bytefall-test-purchases) and SETTINGS' TEST PURCHASES resets it.
@@ -20,6 +20,7 @@ const Unlocks = (() => {
   let dayOne = false; // (pre-registered: Google Play's reward, or the dev page's PRE-REGISTERED switch)
   let purchased = false; // (a real purchase, reported by Google Play: not a dev preview)
   let paidFull = false; // (FULL ACCESS as Google Play says it's owned: the secret tap's unlock apart)
+  let pretendFull = false; // (ByteFall Test's pretend FULL ACCESS: DEV MODE apart)
   const OWNED_KEY = 'bytefall-purchases';
   // (ByteFall Test with test ads: the STORE's BUY pretends, nothing charged, kept here; js/store.js)
   const PRETEND_KEY = 'bytefall-test-purchases';
@@ -29,7 +30,8 @@ const Unlocks = (() => {
     if (!release) {
       dev = new URLSearchParams(location.search).has('unlockall') || localStorage.getItem('bytefall-dev-unlockall') === 'on' || localStorage.getItem('bytefall-unlock-key') === 'open';
       const pretend = window.BYTEFALL_APP ? JSON.parse(localStorage.getItem(PRETEND_KEY) || '{}') : {};
-      full = dev || !!pretend.full;
+      pretendFull = !!pretend.full;
+      full = dev || pretendFull;
       devNoAds = localStorage.getItem('bytefall-dev-noads') === 'on';
       noAds = devNoAds || !!pretend.noAds;
       dayOne = localStorage.getItem('bytefall-dev-dayone') === 'on';
@@ -71,19 +73,26 @@ const Unlocks = (() => {
     onChange(fn) {
       listeners.push(fn);
     },
-    // (DEV MODE switched on or off from wherever it is (the secret tap, the test app's padlock, the dev
-    // page): both of its flags at once, so switching it off from one never leaves the other on)
+    // (DEV MODE switched on or off from wherever it is (the secret tap, the dev page): both of its flags
+    // at once, so switching it off from one never leaves the other on; and the running game told, as a
+    // purchase does, so it changes in place: a reload in the live test app could land on a stale copy)
     setDevUnlock(on) {
       try {
         localStorage.setItem('bytefall-unlock-key', on ? 'open' : 'locked');
         localStorage.setItem('bytefall-dev-unlockall', on ? 'on' : 'off');
       } catch (e) {}
+      const wasFull = full;
+      const wasDev = dev;
+      dev = !!on;
+      full = (release ? paidFull : pretendFull) || dev;
+      if (full !== wasFull || dev !== wasDev) listeners.forEach((fn) => fn(full, 'dev')); // ('dev': nothing announced for it)
     },
     // (ByteFall Test's pretend purchases: owned or not, nothing charged, kept for the next launch)
     pretend(nowFull, nowNoAds) {
       if (release) return;
       const changed = full !== (!!nowFull || dev) || noAds !== (!!nowNoAds || devNoAds);
-      full = !!nowFull || dev;
+      pretendFull = !!nowFull;
+      full = pretendFull || dev;
       noAds = !!nowNoAds || devNoAds;
       try { localStorage.setItem(PRETEND_KEY, JSON.stringify({ full: !!nowFull, noAds: !!nowNoAds })); } catch (e) {}
       if (changed) listeners.forEach((fn) => fn(full));

@@ -4400,10 +4400,9 @@ if (STORY_GATED) {
     if (seq === 'FFFBBB') { // (DEV MODE on, or off again)
       taps = [];
       const on = Unlocks.isDevUnlock();
-      Unlocks.setDevUnlock(!on);
+      Unlocks.setDevUnlock(!on); // (in place: applyUnlocks redraws what it opens or locks)
       SFX.play(on ? 'denied' : 'egg');
       homeNotice(on ? 'DEV MODE // OFF' : 'DEV MODE // ON');
-      setTimeout(() => location.reload(), 1200);
       return;
     }
     if (seq !== 'BBBFFF') return;
@@ -5874,10 +5873,10 @@ function freeExploitId() {
 }
 
 // The footer lives inside SETTINGS and the game card fills the screen: the phone layout, on
-// every screen. (RULES and EXPLOITS are tabs in the MENU, top left.)
+// every screen. (RULES and EXPLOITS are tabs in the MENU, top left.) Its class, cards-in-settings, is
+// on <body> in bytefall.html itself, so nothing (a script stopped short) can ever bring back the old one
 const footerEl = document.querySelector('footer');
 (document.getElementById('settings-panel') || settingsEl).append(footerEl); // (in the box that scrolls)
-document.body.classList.add('cards-in-settings');
 
 // The lower corners: RESTART (QUIT in VS; grayed out until the first drop), and the
 // exploit button
@@ -7894,7 +7893,7 @@ function refreshExploitCards() {
     el.querySelector('.lock-tag').textContent = tag;
   }
 }
-// DEV MODE (the secret tap, the test app's padlock, the dev page's switch): three quick taps on an
+// DEV MODE (the secret tap, the dev page's switch): three quick taps on an
 // exploit's name (its card's title line) make it your next drop, slotted or not, to try it out. A tap on
 // the name waits a moment for more first; one or two then do what a tap always does (equip, unequip, buy),
 // and a tap anywhere else on the card does it at once
@@ -8008,6 +8007,9 @@ function applyUnlocks() {
   applyFont();
   renderPlaylist();
   applyDayOne();
+  // (DEV MODE: its label behind the wanderers, and the exploit cards' quick taps)
+  document.getElementById('dev-badge').hidden = !Unlocks.isDevUnlock();
+  document.body.classList.toggle('dev-unlock', Unlocks.isDevUnlock());
 }
 // DAY ONE (Google Play's PRE-REGISTRATION REWARD, Unlocks.hasDayOne): the badge on RECORDS, and the first
 // time it comes, a thank-you on the notice line (not for DEV MODE's preview of everything)
@@ -8020,25 +8022,12 @@ function applyDayOne() {
 }
 Unlocks.onChange(applyUnlocks);
 applyUnlocks();
-document.getElementById('dev-badge').hidden = !Unlocks.isDevUnlock();
-// DEV MODE in the Android TEST app, where the web's DEV link is (the dev page's switch and the secret
-// tap's, the same flags): the padlock lit while it's on; the game starts over with it. (The RELEASE app
-// has no padlock: tools/build-app.js takes it out)
-const unlockBtn = document.getElementById('dev-unlock-btn');
-if (window.BYTEFALL_APP && !window.BYTEFALL_APP.release && unlockBtn) {
+// (in the app, no DEV link to the dev pages: the live test app loads this page from the site, which has
+// one. DEV MODE there is the main menu title's secret tap)
+if (window.BYTEFALL_APP) {
   const devLink = document.querySelector('a.dev-link');
   if (devLink) devLink.hidden = true;
-  unlockBtn.hidden = false;
-  const on = Unlocks.isDevUnlock();
-  unlockBtn.classList.toggle('on', on);
-  unlockBtn.setAttribute('aria-pressed', String(on));
-  document.getElementById('dev-unlock-state').textContent = on ? 'ON' : 'OFF';
-  unlockBtn.addEventListener('click', () => {
-    Unlocks.setDevUnlock(!on);
-    location.reload();
-  });
 }
-document.body.classList.toggle('dev-unlock', Unlocks.isDevUnlock());
 
 // (the old layout editor's saved edits, locks and panel: gone with it, so the layout is the game's own)
 for (const k of ['bytefall-layout-edits', 'bytefall-layout-locks', 'bytefall-layout-editor', 'bytefall-layout-editor-panel', 'bytefall-pixel-ui', 'bytefall-pixel-icons-2']) {

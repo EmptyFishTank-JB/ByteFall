@@ -1960,10 +1960,7 @@ body.vs-mode header #mode-info { display: none; }
 .settings-sub { margin-top: 12px; }
 .settings .settings-gap { margin-top: 4px; }
 .settings-title + .toggle-btn { margin-top: 0; }
-/* The app's UNLOCK EVERYTHING padlock, where the DEV link is on the web */
-.settings .dev-unlock-btn, .dev-unlock-btn { display: inline-flex; align-items: center; gap: 5px; width: auto; padding: 4px 2px; border: 0; background: none; color: var(--fg); font-family: inherit; font-size: 11px; letter-spacing: 1px; cursor: pointer; }
-.dev-link[hidden], .dev-unlock-btn[hidden] { display: none !important; }
-.dev-unlock-btn.on { opacity: 1; color: var(--accent); filter: drop-shadow(0 0 4px rgba(var(--accent-rgb), 0.6)); }
+.dev-link[hidden] { display: none !important; }
 
 /* Under the game card (inside SETTINGS on phones): the text, then the dev link */
 footer {
@@ -4842,7 +4839,6 @@ html, body { overflow-x: clip; }
 #ad-privacy[hidden] { display: none; } /* (SETTINGS' ADS: only where the law asks for it, in the app: js/ads.js) */
 #ad-test[hidden] { display: none; } /* (SETTINGS' TEST ADS: the app's test-ad builds only: js/ads.js) */
 .settings .toggle-btn { font-size: 12px; }
-.settings .dev-unlock-btn { font-size: 11.5px; }
 .settings button .need { font-size: 10.5px; }
 body.cards-in-settings .settings footer { font-size: 11.5px; }
 .settings .settings-section, .settings .settings-options { border-top: 0; padding-top: 0; }

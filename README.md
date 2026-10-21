@@ -106,15 +106,16 @@ progress.
 
 **SOURCE** (asked when you run it): **live**, the default, is the testing build: it loads the game
 from GitHub Pages each time it opens (its cache off), so every push to main shows up on the phone
-with no new APK; offline it falls back to the copy it was built with (`tools/live-app.js`). It
-has the DEV link, as the site does. **bundled** has its own copy, as players would get it, and is
+with no new APK; offline it falls back to the copy it was built with (`tools/live-app.js`). **bundled** has its own copy, as players would get it, and is
 what the Play Store builds will be (updated through the store). Either one installs over the other;
 only a change to the Android side itself (`tools/android/`, the Capacitor setup) needs a new APK.
 The game knows it's in the app from its user agent (`ByteFallApp`, `capacitor.config.json`).
-In the TEST app, SETTINGS' footer has a padlock where the web has the DEV link: **DEV MODE**
-(the dev page's switch, and the secret tap's: FALL three times then BYTE three times on the main menu's title,
-which the Play release keeps too; switched off from any of them, it's off; the game reloads with it). It's
-for testing, kept through launches. The RELEASE edition (below) has no padlock.
+The app has no DEV link (the site's footer does). **DEV MODE** there is the secret tap: FALL three
+times then BYTE three times on the main menu's title (the Play release keeps it too, till launch), the
+same flags as the dev page's switch; switched off from either, it's off. It switches in place, no reload
+(`Unlocks.setDevUnlock` tells the game, as a purchase does): a reload in the live app could land on a
+stale copy. For testing, kept through launches. The page's layout class (`cards-in-settings`) is on
+`<body>` in the HTML itself, so a script that stops short can never bring back the old layout.
 
 To build it locally instead: `npm ci && node tools/build-app.js && npx cap add
 android && node tools/setup-android.js`, then open `android/` in Android Studio (the debug build
@@ -126,8 +127,8 @@ The Play Store gets the **RELEASE edition**: **ByteFall** (`com.emptyfishtank.by
 package name in the Play Console), built by **Actions → Android release bundle → Run workflow** as
 an Android App Bundle (`.aab`, under the run's Artifacts) to upload in the Play Console (Testing →
 Internal testing, or another track → Create new release). It's the game with every dev piece out
-(`tools/build-app.js release`): no UNLOCK EVERYTHING padlock (nor the dev unlocks, whatever's in
-storage or the URL: `js/unlocks.js`), every dev switch cleared, no infection or sound tester or archived
+(`tools/build-app.js release`): no dev unlocks (whatever's in storage or the URL: `js/unlocks.js`;
+only the secret tap, till launch), every dev switch cleared, no infection or sound tester or archived
 tracks. Nor the music player's other sources, OTHER APPS and MICROPHONE: its visualizer shows
 ByteFall's own music only, with no SOURCE button (`js/extsource.js`), and its own manifest
 (`android/app/src/release/`, written by `tools/setup-android.js`) takes out the capture service,

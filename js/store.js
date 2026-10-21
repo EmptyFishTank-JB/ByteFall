@@ -316,10 +316,12 @@ const Store = (() => {
 
   menu.querySelectorAll('[data-buy]').forEach((b) => b.addEventListener('click', () => buy(b.dataset.buy)));
   document.getElementById('store-restore').addEventListener('click', restore);
-  // A purchase (or a restore) redraws the store and earns INDIE SUPPORTER
-  Unlocks.onChange(() => {
+  // A purchase (or a restore) redraws the store and earns INDIE SUPPORTER; DEV MODE switched records what
+  // it opens quietly, as a launch does, not a notice for each
+  Unlocks.onChange((full, why) => {
     render();
-    announce(Progress.check());
+    if (why === 'dev') Progress.check(true);
+    else announce(Progress.check());
   });
   // Google Play's answers (billing.js): the prices, and how a purchase or a restore went
   Billing.onEvent((e) => {
