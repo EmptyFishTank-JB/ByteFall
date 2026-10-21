@@ -2,7 +2,9 @@
   <!-- DAY ONE, the pre-registration reward's icon in Play Console (512x512, rendered to day-one-icon.png):
        the app icon's glowing cell in ZERO DAY's gold, [1] for day one, the four DAY ONE themes' colors under
        it, DAY ONE below. Play shows it in a pointy-top hexagon badge with a frame round it, so everything
-       sits within 165px of the middle (the circle the badge's opening always keeps) -->
+       sits within 165px of the middle (the circle the badge's opening always keeps). Its words are in the
+       game's default font, COURIER: rendered with Monotype's Courier New Bold (Windows' own), not a
+       look-alike, the [1] centered in its cell by its ink -->
   <defs>
     <filter id="glow" filterUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
       <feGaussianBlur stdDeviation="5" result="b"/>
@@ -20,7 +22,7 @@
   </defs>
   <rect width="512" height="512" fill="url(#warm)"/>
   <rect x="171" y="118" width="170" height="170" rx="14" fill="#17130a" stroke="#f5c542" stroke-width="9" filter="url(#glow)"/>
-  <text x="253.5" y="223.5" text-anchor="middle" font-family="Courier New, Courier, monospace" font-weight="bold" font-size="80" letter-spacing="-5" fill="#f5c542" filter="url(#glow)">[1]</text>
+  <text x="253.5" y="222.5" text-anchor="middle" font-family="Courier New, Courier, monospace" font-weight="bold" font-size="80" letter-spacing="-5" fill="#f5c542" filter="url(#glow)">[1]</text>
   <g filter="url(#glow)">
     <rect x="160" y="308" width="42" height="12" rx="6" fill="#f5c542"/>
     <rect x="210" y="308" width="42" height="12" rx="6" fill="url(#foil)"/>

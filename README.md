@@ -187,7 +187,9 @@ checks look for). Set up once in the Play Console:
    Reward**; description *Thanks for being here from the start. Four exclusive themes (ZERO DAY, HOLO
    FOIL, BLUEPRINT and FIRST LIGHT) and the DAY ONE badge on your RECORDS.*; icon
    `assets/play/day-one-icon.png` (512x512, 32-bit; drawn from `day-one-icon.svg` beside it), everything
-   within 165px of the middle: Play shows it cut to a hexagon badge with a frame round it.
+   within 165px of the middle: Play shows it cut to a hexagon badge with a frame round it. Its words are
+   in the game's default font, Courier New Bold (a render needs the real Courier New installed, as on
+   Windows: a machine without it swaps in a look-alike).
 4. **Settings → License testing**: your Google account (the one on the phone's Play Store), so
    your purchases go through Google's test cards and charge nothing. Refund one from **Order
    management** to see the game take it back at the next launch.
