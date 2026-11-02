@@ -211,13 +211,14 @@ checks look for). Set up once in the Play Console:
    PRODUCT`, and `// TEST PURCHASES` lists each missing one with Google Play's own reason (its
    status code, or the query's error). Gone with `testing: false`: a release's purchases are never used up.
 
-**Terms and conditions** (`terms.html`, at https://emptyfishtank-jb.github.io/ByteFall/terms.html, the Play
-Console's Terms of Service field; the privacy policy lives on the studio's site). A first draft meant to hold
-until a lawyer reviews it. For the reviewer: it assumes TEXAS law and courts (the studio's address on the
-upload key; change section 14 if it's elsewhere), a minimum age of 13, a US $50 liability floor, a one-year
-claims limit, and no mandatory arbitration (left out on purpose: a lawyer can add one properly). Contact is
-the Play listing and the GitHub page: add an email in section 17 once there's one to publish. Check it again
-when STORY, accounts, online play, or anything that collects data is added.
+**Terms and conditions** (the Play Console's Terms of Service field): https://emptyfishtank-jb.github.io/bytefall/terms.html,
+on the studio's site beside the privacy policy (the EmptyFishTank-JB.github.io repo, `bytefall/terms.html`,
+linked from its home page; `terms.html` here just sends anyone to it). A first draft meant to hold until a
+lawyer reviews it. For the reviewer: it assumes TEXAS law and courts (the studio's address on the upload
+key; change section 14 if it's elsewhere), a minimum age of 13, a US $50 liability floor, a one-year claims
+limit, and no mandatory arbitration (left out on purpose: a lawyer can add one properly). It mentions the
+Steam version as the privacy policy does. Check it again when STORY, accounts, online play, or anything
+that collects data is added, and keep it in step with the privacy policy.
 
 ## Keys, resources and patches
 
