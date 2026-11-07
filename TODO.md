@@ -2,6 +2,20 @@
 
 Ideas queued for later (not built yet).
 
+## Before and after launch
+
+- **STORY stays gated** (COMING SOON in every build, `STORY_GATED` in `js/script.js`) until it's ready.
+- Once the app is live on the Play Store: take out the main menu title's secret tap sequences (BYTE×3 then FALL×3 for the STORY key, FALL×3 then BYTE×3 for DEV MODE; `js/script.js`'s THE STORY KEY, and the release branch of `js/unlocks.js` that reads `bytefall-unlock-key`). Till then anyone who learns the DEV MODE sequence gets everything unlocked for free. (The test app's DEV MODE padlock is gone: the tap is the only way in.)
+- **Codex's review** (`docs/reviews/to-claude/2026-10-29-codex-review.md`): three real but small
+  races, none a launch blocker: a pending microphone request that outlives a cancel (test app and
+  website only: the release has no microphone), the session's purchase cache outliving a refund until
+  the page reloads (`js/billing.js`), and a wake lock that arrives after fullscreen ended
+  (`js/player.js`). Fix with a generation token each, and test them with a deferred promise.
+- **A mailbox address** for the Play payments profile and trader details, so the developer's home address
+  isn't on the listing (a UPS Store or virtual mailbox with a street address).
+
+## Ideas for ByteFall
+
 - **THE ARCADE on STORY's phone** (a maybe, for later): an app on the phone (a home screen, or beside
   MESSAGES) opening the ARCADE's games, so they can be played from the story's phone.
 - **New tracks**, in the spirit of (not copies of): Cutting Crew's *(I Just) Died in Your Arms*,
@@ -10,25 +24,27 @@ Ideas queued for later (not built yet).
   (that super funky bass line too), and an upbeat synthwave track.
 - **Sound themes**: more unlockable sets of game sound effects (like the color themes and fonts), each
   in the style of one of the tracks. Done: TERMINAL (the first, free) and HANDSHAKE (with TRACK 10).
-- **CPU customization**: simple things for the bots to wear, e.g. retro-futuristic glasses.
 - **The tutorial becomes STORY's intro** (from a tester: the tutorial was too long, its first cards
   forgotten by the end): the game's mechanics taught through the story, the person texting the player
   (MOTH, an UNKNOWN CONTACT then) walking them through decrypting bits as they play, a few things at a
   time and in context. It's the intro to STORY, before GHOSTS' chapter 1 (which stays as it is). The
   narration cards (BOT) stay for specific topics, opened from RULES & RECORDS (layers, exploits,
   patches, infections, the STORE...) rather than one long lesson.
-- **The layers' look**: a tester found the encrypted bits' [-] and [=] confusing: worth a clearer
-  look or a word on what they are. (The same tester's other note, the column numbers read as part of
-  the rule, is done: the columns are lettered A to G now.)
-- **Negative scoring**: the score can go down. Infected bits come up more often and take points for
-  every drop they're left on the grid, so clearing them matters.
-- **CPUs reacting to the gameplay**: the bots (wandering, and VS's) reacting to what happens in a game.
-  Exactly how, to be worked out.
-- **A pre-registration theme**: a color theme (maybe a matching font or sound theme) given to everyone
-  who pre-registers on Google Play, as Play Console's pre-registration reward. Needs an in-app product
-  for it and the game granting purchases made outside the app (checked at launch and on resume).
-- **The walking tree** (October's haunted forest, and the pushed scary tree): to come back once its
-  walking frames are drawn (the frame editor's TREE-, BARETREE- and PINE-WALKING are a start).
+- **The layers' look**: a tester found the encrypted bits' [-] and [=] confusing (the columns' letters
+  fixed the other note). The trouble is what they *mean*, not the symbols. Options: a padlock on the
+  block (closed with two rings for two layers, one ring or cracked for the last), a crack line across the
+  block once it's peeled once, or the hidden bit showing faintly through the stripes. Keep the stripes
+  and the dashed border (MONOCHROME relies on them), and then teach it once, in the tutorial. The text
+  that names [=] and [-] (RULES, the tutorial, README) changes with the look.
+- **The bot lane, reworked** (replaces the separate "CPU customization" and "CPUs reacting to the
+  gameplay" ideas): one bigger bot of the player's own, always in view, the world moving around it (or
+  free to roam a middle band, the view following it near the edges), other bots and visitors dropping in
+  now and then to interact with it. The bot reacts to the game (a good chain, a near miss, a trace) and
+  is customized with layered accessories (glasses, hats, faces, held items) from unlocks and KEYS.
+  Measured (headless desktop Chromium, so a phone is slower): the lane adds only about 0.4 MB of JS heap,
+  650 DOM nodes and under 1 MB of canvas; its real cost is animation CPU, about 8% of a core. So the
+  work is smaller sprites per frame, a lower frame rate when idle, and fewer things on screen at once,
+  not memory. The lane is a fixed 192px tall, so "bigger" is limited by that height. After launch.
 
 See [WANDERERS.md](WANDERERS.md) for the season-by-season chart and the full ideas list.
 
@@ -250,7 +266,6 @@ the Play Store, Steam and a trademark search before settling on it.
   tunnels, a PAC-MAN JUGGERNAUT variant, a lights-out maze. (As a game for sale it would need its
   own maze theme: Pac-Man is Bandai Namco's.)
 
-- Once the app is live on the Play Store: take out the main menu title's secret tap sequences (BYTE×3 then FALL×3 for the STORY key, FALL×3 then BYTE×3 for DEV MODE; `js/script.js`'s THE STORY KEY, and the release branch of `js/unlocks.js` that reads `bytefall-unlock-key`). Till then anyone who learns the DEV MODE sequence gets everything unlocked for free. (The test app's DEV MODE padlock is gone: the tap is the only way in.)
 - **The CYBERPUNK STREET as the lane's usual place**: in the bot sandbox now (`js/cyberstreet.js`).
   Before it goes in the game: the bots reacting to the crowd (a look at a hooded figure passing, a
   wave to a droid), more of the crowd (a big mech, a street vendor's stall), the street at other
