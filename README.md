@@ -581,7 +581,26 @@ the STORE's prices for you (below), so bits thrown in fast to lose don't. New un
 and achievements pop up as they happen (achievements stay up about 5.5 seconds, like a console's, before crumbling; the rest about 2). Progress is saved in the browser
 (`bytefall-progress`).
 
-**STORE** (`js/store.js`, the cart tab): two purchases, **REMOVE ADS** (no ads,
+**BOT ITEMS AND CUSTOMIZE** (`js/bot-items.js`; the hanger button, a square one between EXPLOITS and STORE
+on the main menu, opens the CUSTOMIZE card): the player picks **their own bot**, one of the four they
+have open (BOT, GRIFTER, BUNKER, GLITCH; a locked one says its level), and dresses it: a **HAT**, **EYES**
+and a **NECK** piece, one of each, from 14 items bought once with KEYS in the STORE's BOT tab (CAP,
+BEANIE, TOP HAT, WIZARD HAT, HALO, CROWN; GLASSES, SHADES, MONOCLE, VISOR; BOW TIE, TIE, SCARF, CHAIN;
+40 to 300 KEYS, a price kind of its own in `Progress.cost('bot', n)`, so sales and HIGH DEMAND reach
+them). Each is drawn like the seasonal costumes, in the bots' 16x17 grid, so one set fits all four
+bodies (`BotItems.TOP`, where each head starts; the hat and neck piece go under the face, the eyes' piece
+over it; a hat hides the antennas). Owned and worn are Progress's `botItems` and `botLook` (a look is read
+back only as far as it's still true: a bot that's open, items that are owned). A new item goes on at once
+if its place is empty; in the STORE a row's button is BUY, then WEAR and TAKE OFF. The wandering bots
+(`wanderers.js`, the start screen's and the game's) show **your bot**: it's the first to walk in whenever
+it's not on the card, wearing its items in place of a seasonal costume (`redress` when the look
+changes); VS and the narrator's bots stay as they are.
+
+**STORE** (`js/store.js`, the cart tab) is four tabs under the prices gauge (`store-tabs`; the one open is
+kept while the page is, and `Store.show(sec)` and the tutorial's `storeTab` switch to the one a section
+is on): **PATCHES** (the DAILY DROP, then the patches), **EXPLOITS** (the tiers and the BLACK BOXES),
+**BOT** (below) and **SUPPORT**, whose O is the game's currency sign (the 0 struck through twice,
+`CURRENCY_SVG`). SUPPORT has two purchases, **REMOVE ADS** (no ads,
 nothing unlocked) and **FULL ACCESS** (everything that unlocks by level, and no
 ads), each with its price and BUY (OWNED once bought), and **RESTORE PURCHASES**
 for another device or a reinstall. For a REMOVE ADS owner, FULL ACCESS is the

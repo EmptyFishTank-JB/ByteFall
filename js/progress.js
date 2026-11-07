@@ -98,6 +98,8 @@ const Progress = (() => {
     keyBits: 0, // bits decrypted toward the next key (one every KEY_BITS)
     boosters: {}, // booster id -> how many owned
     starters: {}, // STARTER EXPLOITS: exploit id -> how many owned
+    botItems: {}, // BOT ITEMS bought in the STORE's BOT tab (bot-items.js): item id -> 1
+    botLook: { bot: 'bot', hat: '', eyes: '', neck: '' }, // the player's own bot and what it wears (the CUSTOMIZE card)
     puzzlePaid: {}, // puzzle key -> the day a solve of it last paid XP and KEYS (a replay pays once a day)
     startersTaken: [], // the 2 the player takes into each game (one a side slot; two of one kind, or one each of two)
     res: { bugs: 0, cache: 0, crypto: 0, rootkits: 0, master: 0 }, // the RESOURCES (ECONOMY.md), beside KEYS
@@ -680,8 +682,8 @@ const Progress = (() => {
   const PAR = 45; // (KEYS and resources a real game earns, ROOTKITS at 3 each, MASTER KEYS at 10: a typical CLASSIC game is about 57)
   const DEAL_MAX = 0.25;
   const DEAL_GAMES = 3;
-  const PRICE_KINDS = ['patch', 'exploit', 'box'];
-  const KIND_NAMES = { patch: 'PATCHES', exploit: 'EXPLOITS', box: 'BLACK BOXES' };
+  const PRICE_KINDS = ['patch', 'exploit', 'box', 'bot'];
+  const KIND_NAMES = { patch: 'PATCHES', exploit: 'EXPLOITS', box: 'BLACK BOXES', bot: 'BOT ITEMS' };
   const seeded = (str) => { // (mulberry32 from the string's FNV hash)
     let h = 0x811c9dc5;
     for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193); }
@@ -1334,6 +1336,23 @@ const Progress = (() => {
       save();
       return true;
     },
+    // BOT ITEMS (bot-items.js): bought once with KEYS in the STORE's BOT tab, worn from the CUSTOMIZE card.
+    // The look is kept as picked but read back only as far as it's still true: a bot that's open to
+    // the player, and items that are owned
+    botItemOwned: (id) => !!d.botItems[id],
+    buyBotItem(id, price) {
+      if (d.botItems[id] || !this.spendKeys(price)) return false;
+      d.botItems[id] = 1;
+      save();
+      return true;
+    },
+    botLook() {
+      const l = d.botLook || {};
+      const bot = l.bot === 'bot' || isUnlocked(`bot-${l.bot}`) ? l.bot : 'bot';
+      const own = (s) => (l[s] && d.botItems[l[s]] && typeof BotItems !== 'undefined' && BotItems.ITEMS[l[s]] && BotItems.ITEMS[l[s]].slot === s ? l[s] : '');
+      return { bot, hat: own('hat'), eyes: own('eyes'), neck: own('neck') };
+    },
+    setBotLook(change) { d.botLook = { ...this.botLook(), ...change }; save(); },
     boosters: (id) => d.boosters[id] || 0,
     addBooster(id, n = 1) { d.boosters[id] = (d.boosters[id] || 0) + n; save(); },
     useBooster(id) {

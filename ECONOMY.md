@@ -89,7 +89,7 @@ from the UTC date as the dailies:
 | Day | How often | Prices |
 |---|---|---|
 | WEEKEND SALE | every Saturday and Sunday | 15% off everything (`WEEKEND_OFF`) |
-| FLASH SALE | about 1 weekday in 4 (`FLASH_ODDS`) | 20 to 35% off one kind: PATCHES, EXPLOITS or BLACK BOXES (`FLASH_OFF`) |
+| FLASH SALE | about 1 weekday in 4 (`FLASH_ODDS`) | 20 to 35% off one kind: PATCHES, EXPLOITS, BLACK BOXES or BOT ITEMS (`FLASH_OFF`) |
 | HIGH DEMAND | 3 weekdays a month, scattered, never within 3 days of each other (`HIGH_DAYS`) | 10 to 20% up on everything (`HIGH_UP`) |
 | any other day | | the base price |
 

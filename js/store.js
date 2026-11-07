@@ -20,9 +20,24 @@ const Store = (() => {
   const msgEl = document.getElementById('store-msg');
   let msgTimer = 0;
 
-  // (a section brought into view at the top of the STORE's list: patches, starters, boxes)
+  // THE TABS: PATCHES (with the DAILY DROP), EXPLOITS (the tiers and the BLACK BOXES), BOT and SUPPORT, each
+  // its own page under them; the one open is kept while the page is
+  const TABS = ['patches', 'exploits', 'bot', 'support'];
+  const tabOfSec = (sec) => (/^(starters|boxes|tier-)/.test(sec || '') ? 'exploits' : TABS.includes(sec) ? sec : null);
+  let tab = 'patches';
+  function setTab(t) {
+    if (!TABS.includes(t)) return;
+    tab = t;
+    menu.querySelectorAll('[data-store-tab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.storeTab === t)));
+    menu.querySelectorAll('[data-store-pane]').forEach((p) => { p.hidden = p.dataset.storePane !== t; });
+    const scroll = menu.querySelector('.store-scroll');
+    if (scroll) scroll.scrollTop = 0;
+  }
+  menu.querySelectorAll('[data-store-tab]').forEach((b) => b.addEventListener('click', () => { SFX.play('click'); setTab(b.dataset.storeTab); }));
+  // (a section brought into view at the top of the STORE's list: patches, starters, boxes, bot; its tab first)
   function show(sec) {
     const scroll = menu.querySelector('.store-scroll');
+    if (tabOfSec(sec)) setTab(tabOfSec(sec));
     const head = sec && menu.querySelector(`.store-sub[data-sec="${sec}"]`);
     if (!scroll) return;
     requestAnimationFrame(() => {
@@ -41,10 +56,10 @@ const Store = (() => {
     el.innerHTML = `<span class="pg-row"><span class="pg-label">PRICES</span><span class="pg-end">LOW</span><span class="pg-bar">${[0, 1, 2, 3, 4].map((i) => `<i${i === pos ? ' class="on"' : ''}></i>`).join('')}</span><span class="pg-end">HIGH</span></span><span class="pg-why">${why}${rank}</span>`;
     el.setAttribute('aria-label', `Prices today: ${why}`);
     // (each item its own -n% / +n% badge, its kind's change today: PATCHES, EXPLOITS, BLACK BOXES)
-    for (const item of menu.querySelectorAll('.booster-item')) {
+    for (const item of menu.querySelectorAll('.booster-item, .bot-item')) {
       const tag = item.querySelector('.sale-tag');
       if (!tag) continue;
-      const kind = item.dataset.booster ? 'patch' : Progress.isBox(item.dataset.starter) ? 'box' : 'exploit';
+      const kind = item.classList.contains('bot-item') ? 'bot' : item.dataset.booster ? 'patch' : Progress.isBox(item.dataset.starter) ? 'box' : 'exploit';
       const pct = Math.round((p.mults[kind] - 1) * 100);
       tag.hidden = !pct;
       tag.textContent = pct ? `${pct > 0 ? '+' : ''}${pct}%` : '';
@@ -180,8 +195,65 @@ const Store = (() => {
   }
   const boxShop = document.getElementById('box-shop');
   for (const id of Progress.boxIds()) shopItem(id, boxShop);
+  // BOT ITEMS (bot-items.js): a hat, eyes and a neck piece for your own bot, each bought once with KEYS. Its
+  // picture is your bot (the one picked on the CUSTOMIZE card) wearing it; once it's yours the button is WEAR
+  // (WORN: tap to take it off). A new one goes straight on if its place is empty
+  const botShop = document.getElementById('bot-shop');
+  const botNow = document.getElementById('bot-now');
+  for (const [slot, label] of BotItems.SLOTS) {
+    botShop.insertAdjacentHTML('beforeend', `<p class="bot-slot">${label}</p>`);
+    for (const id of BotItems.ids(slot)) {
+      const it = BotItems.ITEMS[id];
+      const item = document.createElement('div');
+      item.className = 'store-item bot-item';
+      item.dataset.botItem = id;
+      item.innerHTML = `<h3><span class="store-ico bot-ico"></span><span class="store-name">${it.name}</span><b class="sale-tag" hidden></b></h3><p class="store-desc">${it.desc}</p>`
+        + '<div class="store-deal"><div class="store-terms"><span class="booster-owned"></span></div><div class="store-btns"><button type="button" class="store-buy store-pay"></button></div></div>';
+      item.querySelector('.store-pay').addEventListener('click', () => {
+        const look = Progress.botLook();
+        if (Progress.botItemOwned(id)) { // (owned: put on, or taken off)
+          Progress.setBotLook({ [it.slot]: look[it.slot] === id ? '' : id });
+          SFX.play('click');
+        } else if (Progress.buyBotItem(id, Progress.cost('bot', it.price))) {
+          if (!look[it.slot]) Progress.setBotLook({ [it.slot]: id });
+          SFX.play('egg');
+          say(`BOUGHT // ${it.name}${look[it.slot] ? ': WEAR IT FROM ITS BUTTON OR THE HANGER' : ': YOUR BOT IS WEARING IT'}`);
+          if (typeof showKeys === 'function') showKeys();
+        } else {
+          SFX.play('denied');
+          flashShort(item);
+          return;
+        }
+        if (typeof botLookChanged === 'function') botLookChanged();
+        render();
+      });
+      botShop.appendChild(item);
+    }
+  }
+  function renderBot() {
+    const look = Progress.botLook();
+    const keys = Progress.keys();
+    const name = (id) => (id ? BotItems.ITEMS[id].name : '');
+    const wearing = [look.hat, look.eyes, look.neck].filter(Boolean).map(name).join(', ') || 'NOTHING YET';
+    botNow.innerHTML = `<span class="bn-pic">${BotItems.preview(look, look.bot)}</span><span class="bn-text">YOUR BOT // ${look.bot.toUpperCase()}<br><small>WEARING ${wearing}</small></span><button type="button" class="store-buy bn-open">CUSTOMIZE</button>`;
+    botNow.querySelector('.bn-open').addEventListener('click', () => { SFX.play('click'); setRecordsOpen(true, 'customize'); });
+    menu.querySelectorAll('.bot-item').forEach((item) => {
+      const id = item.dataset.botItem;
+      const it = BotItems.ITEMS[id];
+      const owned = Progress.botItemOwned(id);
+      const worn = look[it.slot] === id;
+      const cost = Progress.cost('bot', it.price);
+      item.classList.toggle('owned', owned);
+      item.querySelector('.bot-ico').innerHTML = BotItems.preview(id, look.bot);
+      item.querySelector('.booster-owned').textContent = worn ? 'WORN' : owned ? 'OWNED' : '';
+      const btn = item.querySelector('.store-pay');
+      btn.innerHTML = owned ? (worn ? 'TAKE OFF' : 'WEAR') : BUY_HTML(cost);
+      btn.classList.toggle('short', !owned && keys < cost);
+    });
+  }
   // (the BLACK MARKET's look: the currency sign's tilted, glowing sign in the corner)
   document.getElementById('store-sign').innerHTML = CURRENCY_SVG.repeat(3);
+  menu.querySelector('.store-tabs .cur-o').innerHTML = CURRENCY_SVG; // (SUPPORT's O: the game's currency sign, the 0 struck through twice)
   const claimBtn = document.getElementById('daily-claim');
   claimBtn.addEventListener('click', () => {
     const got = !!(window.dailyDrop && window.dailyDrop.claim());
@@ -196,6 +268,7 @@ const Store = (() => {
 
   function render() {
     renderPrices();
+    renderBot();
     const keys = Progress.keys();
     menu.querySelectorAll('.booster-item:not(.starter-item)').forEach((item) => {
       const b = boosters[item.dataset.booster];
@@ -362,5 +435,6 @@ const Store = (() => {
   render();
   // (js/ads-config.js, which says whether this build has test ads, loads after this)
   document.addEventListener('DOMContentLoaded', renderBuyTest);
-  return { render, show };
+  setTab(tab);
+  return { render, show, tab: setTab };
 })();

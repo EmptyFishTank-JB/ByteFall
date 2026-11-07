@@ -74,13 +74,13 @@ const Tutorial = (() => {
   // LAYERS AND THE LINE (the meter at 3 bars, as the chain lesson leaves it: on its own too)
   const LAYERS = [
     {
-      get text() { return LAYER_LOOK === 'padlock' ? 'This padlocked block is an ENCRYPTION LAYER, two dashed rings on it, one for each peel. Decrypt a bit right next to it to peel it.' : 'This [=] is an ENCRYPTION LAYER. Decrypt a bit right next to it to peel it.'; },
+      get text() { return LAYER_LOOK === 'padlock' ? 'This padlocked block is an ENCRYPTION LAYER, two dashed rings on it, one for each peel. Decrypt a bit right next to it to peel it.' : 'This [=] is an ENCRYPTION LAYER, with two dashed rings: one for each peel. Decrypt a bit right next to it to peel it.'; },
       board: [[], [], [], ['L2:1'], [], [], []], bits: [2, 2], cells: [[0, 3]], next: true, holdMeter: true, meter: 3,
     },
     {
       text: 'Drop the [2] into column C, D or E: beside the layer or on top of it, the two of them make a line of 2.',
       drop: [2, 3, 4], cells: [[0, 3]], holdMeter: true,
-      explain: () => `The [2] decrypted and peeled the layer once: ${LAYER_LOOK === 'padlock' ? 'one ring gone and the padlock open, cracked' : '[=] is cracked now, [-]'}. That was one more link for the CHAIN METER: 4 bars lit.`,
+      explain: () => `The [2] decrypted and peeled the layer once: ${LAYER_LOOK === 'padlock' ? 'one ring gone and the padlock open, cracked' : '[=] is cracked now, [-], with one ring left'}. That was one more link for the CHAIN METER: 4 bars lit.`,
     },
     {
       text: 'Drop the next [2] into column C, D or E to peel the layer a second time.',
@@ -144,11 +144,12 @@ const Tutorial = (() => {
     { text: 'The STORE isn’t on the pause screen: it’s on the MAIN MENU. Here’s a look inside.', paused: true, pane: 'store', float: 'middle', next: true },
     { text: 'YOUR RESOURCES are at the top: KEYS, BUGS, CACHE, CRYPTO, ROOTKITS and MASTER KEYS, all earned by playing. The [i] shows how.', paused: true, pane: 'store', focus: ['#store-res'], float: 'middle', next: true },
     { text: 'Under them, PRICES TODAY: sales, holidays and busy days move the prices up and down.', paused: true, pane: 'store', focus: ['#price-gauge'], float: 'middle', next: true },
-    { text: 'The DAILY DROP: a free exploit, KEYS and resources, once a day. Every 7th day in a row you play, MASTER KEYS too.', paused: true, pane: 'store', scroll: '.store-daily', focus: ['.store-daily'], float: true, next: true },
-    { text: 'PATCHES, bought with KEYS, give a game an edge. Switch on up to two from the main menu before a game.', paused: true, pane: 'store', scroll: '.store-sub[data-sec="patches"]', focus: ['.store-sub[data-sec="patches"]'], float: true, next: true },
-    { text: 'EXPLOITS of your own, in TIER I, II and III, to bring into a game from the main menu, up to two.', paused: true, pane: 'store', scroll: '.store-sub[data-sec="starters"]', focus: ['.store-sub[data-sec="starters"]'], float: true, next: true },
-    { text: 'BLACK BOXES hold a random exploit for less, but some are INFECTED. The warning under them says what each infection does.', paused: true, pane: 'store', scroll: '.store-sub[data-sec="boxes"]', focus: ['.store-sub[data-sec="boxes"]'], float: true, next: true, mood: 'devious' },
-    { text: 'And at the bottom, REMOVE ADS and FULL ACCESS. Everything else can be earned by playing.', paused: true, pane: 'store', scroll: '#store-support', focus: ['#store-support'], float: true, next: true },
+    { text: 'The DAILY DROP: a free exploit, KEYS and resources, once a day. Every 7th day in a row you play, MASTER KEYS too.', paused: true, pane: 'store', storeTab: 'patches', scroll: '.store-daily', focus: ['.store-daily'], float: true, next: true },
+    { text: 'PATCHES, bought with KEYS, give a game an edge. Switch on up to two from the main menu before a game.', paused: true, pane: 'store', storeTab: 'patches', scroll: '.store-sub[data-sec="patches"]', focus: ['.store-sub[data-sec="patches"]'], float: true, next: true },
+    { text: 'EXPLOITS of your own, in TIER I, II and III, to bring into a game from the main menu, up to two.', paused: true, pane: 'store', storeTab: 'exploits', scroll: '.store-sub[data-sec="starters"]', focus: ['.store-sub[data-sec="starters"]'], float: true, next: true },
+    { text: 'BLACK BOXES hold a random exploit for less, but some are INFECTED. The warning under them says what each infection does.', paused: true, pane: 'store', storeTab: 'exploits', scroll: '.store-sub[data-sec="boxes"]', focus: ['.store-sub[data-sec="boxes"]'], float: true, next: true, mood: 'devious' },
+    { text: 'The BOT tab sells hats, eyewear and neck pieces for your own bot. Wear them from the hanger button on the main menu.', paused: true, pane: 'store', storeTab: 'bot', scroll: '.store-sub[data-sec="bot"]', focus: ['.store-sub[data-sec="bot"]'], float: true, next: true },
+    { text: 'And under SUPPORT, REMOVE ADS and FULL ACCESS. Everything else can be earned by playing.', paused: true, pane: 'store', storeTab: 'support', scroll: '#store-support', focus: ['#store-support'], float: true, next: true },
     { text: 'Tap ← BACK to close the STORE.', paused: true, pane: 'store', tap: '.card-back[data-close="records"]', pass: true, float: 'middle' },
     RESUME,
     { text: 'Before a game, PATCHES and EXPLOITS on the main menu let you bring an edge in (up to two of each), once you have some.', home: true, focus: ['#booster-row', '#starter-row'], float: true, next: true },
@@ -478,6 +479,7 @@ const Tutorial = (() => {
     if (s.recTab) recordsTab = s.recTab; // (RECORDS on its own tab, not the one last left open)
     if (s.pane === 'archive' && typeof Stories !== 'undefined') Stories.toList(); // (its list of stories)
     if (s.pane) setRecordsOpen(true, s.pane);
+    if (s.storeTab && typeof Store !== 'undefined') Store.tab(s.storeTab); // (the STORE's page this step is about)
     if (s.settings) setSettingsOpen(true);
     if (s.closeMenus) {
       setRecordsOpen(false);

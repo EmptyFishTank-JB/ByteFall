@@ -36,9 +36,9 @@ Ideas queued for later (not built yet).
   roam a middle band, the view following it near the edges), other bots and visitors dropping in now
   and then to interact with it. The bot reacts to the game (a good chain, a near miss, a trace) and is
   customized with layered accessories (glasses, hats, faces, held items) from unlocks and KEYS; the
-  items are another section in the STORE. Whose bot it is is open: the player picks one of the four
-  bots they already know (the leaning: all four share one 16x17 grid, so one set of accessories fits
-  with a small offset per body shape) or a fifth, blank one is added.
+  items are another section in the STORE (done, v665: the BOT tab, the CUSTOMIZE card from the hanger
+  button, 14 items in three places, the player's own bot picked from the four and first into the lane; README
+  has it). Still to come: held items, accessories by level or KEYS rewards, the bot reacting to the game.
   **The bot stays its size and the lane its height**: the lane is a fixed 192px, already a narrow strip
   behind the game's own controls (the drop buttons, the exploit row and the message sit over it), and a
   bigger main bot would end up partly hidden behind them on some phones. So the work is in what the bot

@@ -19,7 +19,8 @@ const HACK_COMBO = 5;
 const BASE_INTERVAL = 8; // drops between firewall rows
 // An encryption layer's face: 'symbols', [=] for two peels left and [-] for the last one (the cracked
 // color), or 'padlock', a padlock in brackets (the symbols are in bytefall.html), closed with two dashed
-// rings for two peels left and open with one for the last. SYMBOLS is the game's look; the padlock is
+// rings for two peels left and open with one for the last. (Either look, a layer with two peels left
+// has two dashed rings and the cracked one has one: style.css.) SYMBOLS is the game's look; the padlock is
 // kept for trying (add ?layers=padlock to the address) and is switched here, by this one line
 const LAYER_LOOK = /[?&]layers=padlock/.test(location.search) ? 'padlock' : 'symbols';
 const lockSvg = (open) => `<svg class="lock" viewBox="0 0 10 12" aria-hidden="true"><use href="#lock-${open ? 'open' : 'closed'}"/></svg>`;
@@ -30,7 +31,7 @@ document.body.classList.toggle('layers-padlock', LAYER_LOOK === 'padlock');
   const l2 = document.getElementById('rules-l2'); const l1 = document.getElementById('rules-l1'); const ring = document.getElementById('rules-ring');
   if (l2) l2.innerHTML = layerMarkup(2);
   if (l1) l1.innerHTML = layerMarkup(1);
-  if (ring && LAYER_LOOK === 'padlock') ring.textContent = 'Each dashed ring is a layer. ';
+  if (ring) ring.textContent = 'Each dashed ring is a layer. ';
 }
 const HARD_MIN_INTERVAL = 4;
 const HARD_POINTS_PER_STEP = 700; // hard mode loses one drop per this many points
@@ -7703,7 +7704,76 @@ function renderRecords() {
 
 // RULES & RECORDS (its tabs: RULES, RECORDS, NOTICES, ARCHIVE), EXPLOITS and STORE: one card, opened on its own by each's
 // button (main menu, pause screen); EXPLOITS and STORE show alone, under their own title
-const SOLO_PANES = { exploits: '// EXPLOITS', store: '// STORE', puzzles: '// PUZZLES' };
+// CUSTOMIZE (the hanger on the main menu): your own bot, picked from the four, and what it wears (bot-items.js;
+// the items are bought in the STORE's BOT tab). The wandering bots show it (wanderers.js: first in, dressed)
+const czBotEl = document.getElementById('cz-bot');
+const czNameEl = document.getElementById('cz-name');
+let czTimer = 0;
+let czNameTimer = 0;
+const czBotLabel = (id) => (CpuBoard.BOTS[id] ? CpuBoard.BOTS[id].label : id.toUpperCase());
+function botLookChanged() { // (a bot picked or something put on or taken off: the lane, this card and the STORE's rows follow)
+  gameWalkers.redress();
+  if (window.startWalkers) window.startWalkers.redress();
+  if (!recordsEl.hidden && menuPane === 'customize') renderCustomize();
+  if (typeof Store !== 'undefined') Store.render();
+}
+function czSay(text) { // (a word in the name's place, for a moment)
+  czNameEl.textContent = text;
+  clearTimeout(czNameTimer);
+  czNameTimer = setTimeout(() => { czNameEl.textContent = czBotLabel(Progress.botLook().bot); }, 2200);
+}
+function renderCustomize() {
+  const look = Progress.botLook();
+  const mb = miniBot(look.bot, 'normal');
+  BotItems.dress(mb, look.bot, look);
+  czBotEl.replaceChildren(mb);
+  czNameEl.textContent = czBotLabel(look.bot);
+  clearInterval(czTimer); // (it passes the time: a face now and then, as the bots on the card do)
+  const MOODS = look.bot === 'glitch' ? ['smug', 'devious', 'surprised', 'annoyed'] : ['happy', 'smug', 'surprised', 'love', 'devious'];
+  czTimer = setInterval(() => {
+    if (recordsEl.hidden || menuPane !== 'customize' || !mb.isConnected) { clearInterval(czTimer); return; }
+    mb.dataset.mood = mb.dataset.mood === 'idle' ? MOODS[Math.floor(Math.random() * MOODS.length)] : 'idle';
+  }, 1800);
+  const bots = document.getElementById('cz-bots');
+  bots.replaceChildren();
+  for (const id of ['bot', 'grifter', 'bunker', 'glitch']) {
+    const open = vsBotOpen(id);
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = `cz-chip${id === look.bot ? ' on' : ''}${open ? '' : ' locked'}`;
+    b.setAttribute('aria-pressed', String(id === look.bot));
+    b.innerHTML = `${BotItems.preview(look, id)}<span>${czBotLabel(id)}</span>${open ? '' : `<small>${Progress.unlock(`bot-${id}`).need.toUpperCase()}</small>`}`;
+    b.addEventListener('click', () => {
+      if (!open) { SFX.play('denied'); czSay(`${czBotLabel(id)} LOCKED // ${Progress.unlock(`bot-${id}`).need.toUpperCase()}`); return; }
+      SFX.play('click');
+      Progress.setBotLook({ bot: id });
+      botLookChanged();
+    });
+    bots.appendChild(b);
+  }
+  const slots = document.getElementById('cz-slots');
+  slots.replaceChildren();
+  for (const [slot, label] of BotItems.SLOTS) {
+    const sec = document.createElement('div');
+    sec.innerHTML = `<h3 class="cz-sub">${label}</h3><div class="cz-chips"></div>`;
+    const chips = sec.querySelector('.cz-chips');
+    const owned = BotItems.ids(slot).filter((id) => Progress.botItemOwned(id));
+    for (const id of ['', ...owned]) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = `cz-chip${look[slot] === id ? ' on' : ''}`;
+      b.setAttribute('aria-pressed', String(look[slot] === id));
+      b.innerHTML = `${BotItems.preview({ ...look, [slot]: id }, look.bot)}<span>${id ? BotItems.ITEMS[id].name : 'NONE'}</span>`;
+      b.addEventListener('click', () => { SFX.play('click'); Progress.setBotLook({ [slot]: id }); botLookChanged(); });
+      chips.appendChild(b);
+    }
+    if (!owned.length) sec.insertAdjacentHTML('beforeend', `<p class="cz-none">NONE OWNED YET // THE STORE'S BOT TAB SELLS ${{ hat: 'HATS', eyes: 'EYEWEAR', neck: 'NECK PIECES' }[slot] || label}</p>`);
+    slots.appendChild(sec);
+  }
+}
+document.getElementById('cz-store').addEventListener('click', () => { SFX.play('click'); setRecordsOpen(true, 'store'); Store.show('bot'); });
+document.getElementById('home-customize').addEventListener('click', () => { SFX.play('click'); setRecordsOpen(true, 'customize'); });
+const SOLO_PANES = { exploits: '// EXPLOITS', store: '// STORE', customize: '// CUSTOMIZE', puzzles: '// PUZZLES' };
 let rulesPane = 'rules'; // (the RULES & RECORDS tab last open)
 function showMenuPane(pane) {
   menuPane = pane;
@@ -7720,6 +7790,7 @@ function showMenuPane(pane) {
   if (pane === 'notices') { renderNotices(); markNoticesRead(); } // (seen: the dots go)
   if (pane === 'archive' && typeof Stories !== 'undefined') Stories.render();
   if (pane === 'puzzles') { puzzleListTier = puzzleTier; renderPuzzleSelect(); }
+  if (pane === 'customize') renderCustomize();
   if (typeof Store !== 'undefined') Store.render();
   const box = menuScroller();
   if (box) box.scrollTop = 0;

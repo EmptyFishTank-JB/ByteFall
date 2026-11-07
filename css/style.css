@@ -873,11 +873,11 @@ h1 span { color: var(--accent); text-shadow: 0 0 8px var(--accent); }
   border-color: var(--cracked);
   color: var(--cracked);
 }
-/* The padlock look (script.js's LAYER_LOOK, body.layers-padlock; the game's own is [=] and [-]): a
-   padlock in the brackets, and a ring for each peel: two dashed borders, one within the other, while
-   two are left; the cracked layer, one, and its padlock open */
-.layers-padlock .cell.firewall { position: relative; }
-.layers-padlock .cell.firewall:not(.cracked)::after {
+/* A ring for each peel: a layer with two left ([=]) has two dashed borders, one within the other; the
+   cracked one ([-]), one. (script.js's LAYER_LOOK 'padlock', body.layers-padlock, draws a padlock in the
+   brackets as well; the game's own is the symbols) */
+.cell.firewall { position: relative; }
+.cell.firewall:not(.cracked)::after {
   content: '';
   position: absolute;
   inset: 3px;
@@ -1377,6 +1377,8 @@ body.vs-mode .stat-best { display: none; }
 /* Layers colored like yours: [=] in the layer gray, [-] (cracked) in the cracked color */
 .cpu-grid i.layer { background: repeating-linear-gradient(45deg, var(--layer-a), var(--layer-a) 2px, var(--layer-b) 2px, var(--layer-b) 4px); border: 1px dashed var(--layer-border); color: var(--layer-text); }
 .cpu-grid i.layer.cracked { border-color: var(--cracked); color: var(--cracked); }
+.cpu-grid i.layer { position: relative; }
+.cpu-grid i.layer:not(.cracked)::after { content: ''; position: absolute; inset: 2px; border: 1px dashed var(--layer-border); pointer-events: none; }
 .cpu-grid i.over.bit, .cpu-grid i.over.layer { border-color: var(--danger); color: var(--danger); }
 .cpu-grid i .glyph { width: 78%; height: 78%; }
 /* The preview's effects, lighter than your board's: a flash as a bit decrypts, a small drop as one
@@ -5208,3 +5210,53 @@ body.storytest .phone-screen { height: min(600px, calc(100vh - 250px)); height: 
 #story-test .st-text { resize: vertical; max-height: 40vh; }
 /* (STORY picked while it's COMING SOON, the Play release: PLAY says so, dimmed) */
 #home-play.soon { color: var(--fg-dim); border-style: dashed; box-shadow: none; }
+
+/* CUSTOMIZE's button: a square one between EXPLOITS and STORE on the main menu, a clothes hanger */
+.home-row .home-square { flex: 0 0 32px; width: 32px; min-width: 32px; padding: 0; }
+.home-row .home-square svg { width: 20px; height: 20px; display: block; }
+
+/* The STORE's tabs (store.js): PATCHES, EXPLOITS, BOT, SUPPORT, each its own page under them. SUPPORT's O is
+   the game's currency sign (the 0 struck through twice) */
+.store-tabs { display: flex; gap: 4px; margin: var(--gap) 0 0; }
+.store-tabs button {
+  flex: 1; min-width: 0; padding: 6px 2px; background: none; border: 1px solid var(--grid-line); border-radius: 4px;
+  color: var(--fg-dim); font-family: inherit; font-size: 10px; letter-spacing: 1px; cursor: pointer; white-space: nowrap;
+}
+.store-tabs button[aria-selected="true"] { color: var(--accent); border-color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+@media (hover: hover) { .store-tabs button:hover { background: rgba(var(--accent-rgb), 0.08); } }
+.store-tabs .cur-o { display: inline-block; line-height: 1; }
+.store-tabs .cur-o .cur-ico { width: 1.15em; height: 1.15em; vertical-align: -0.2em; margin: 0 -0.05em; }
+.store-pane[hidden] { display: none; }
+.store-pane > .store-item:first-child, .store-pane > .store-sub:first-child { margin-top: var(--gap); }
+
+/* BOT ITEMS in the STORE: your bot's own row on top, a label for each place it's worn, each item with
+   your bot wearing it */
+.bot-now { display: flex; align-items: center; gap: 10px; margin: 0 0 var(--gap); padding: 8px 10px; border: 1px dashed rgba(var(--accent-rgb), 0.45); border-radius: 6px; font-size: 13px; letter-spacing: 1px; color: var(--fg); }
+.bot-now .bn-pic { flex: none; width: 36px; color: var(--accent); }
+.bot-now .bn-text { flex: 1; min-width: 0; line-height: 1.35; }
+.bot-now small { color: var(--fg-dim); font-size: 11px; letter-spacing: 0.5px; }
+.bot-now .bn-open { flex: none; }
+.bot-slot { margin: 12px 0 0; font-size: 12px; letter-spacing: 3px; color: var(--fg-dim); }
+.bot-pic { display: block; width: 100%; height: auto; }
+.store-ico.bot-ico { width: 38px; height: 44px; margin-right: 10px; color: var(--accent); flex: none; }
+.store-ico.bot-ico .bot-pic { width: 100%; height: 100%; }
+.bot-item.owned .store-name { color: var(--accent); }
+
+/* The CUSTOMIZE card: your bot on a stage, the four to pick from, and a row of what's owned for each place */
+.panel-customize { padding-bottom: 12px; }
+.cz-stage { display: flex; justify-content: center; align-items: center; padding: 14px 0 6px; border: 1px dashed var(--grid-line); border-radius: 8px; background: var(--inset-bg, transparent); }
+.cz-bot { width: 120px; }
+.cz-bot .cpu-face.mini-bot { width: 100%; }
+.cz-name { margin: 8px 0 0; text-align: center; font-size: 15px; letter-spacing: 3px; color: var(--accent); min-height: 1.3em; }
+.cz-sub { margin: 14px 0 6px; font-size: 12px; letter-spacing: 3px; color: var(--fg-dim); }
+.cz-bots, .cz-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.cz-chip {
+  flex: 1 1 0; min-width: 64px; max-width: 110px; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 4px 5px;
+  background: none; border: 1px solid var(--grid-line); border-radius: 6px; color: var(--fg-dim); font-family: inherit; font-size: 10px; letter-spacing: 1px; cursor: pointer;
+}
+.cz-chip .bot-pic { width: 34px; height: auto; color: currentColor; }
+.cz-chip.on { color: var(--accent); border-color: var(--accent); text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5); }
+.cz-chip.locked { opacity: 0.45; border-style: dashed; }
+.cz-chip small { font-size: 9px; letter-spacing: 0.5px; }
+.cz-none { margin: 6px 0 0; font-size: 11px; color: var(--fg-dim); }
+.cz-store { display: block; width: 100%; margin-top: 14px; padding: 9px; background: none; border: 1px solid var(--accent); border-radius: 4px; color: var(--accent); font-family: inherit; font-size: 12px; letter-spacing: 2px; cursor: pointer; }

@@ -224,7 +224,17 @@ function createWanderers(lane, active = () => true, suspended = () => false) {
     nye: PARTY.map((c) => hat('party', ...c)),
     newyear: PARTY.map((c) => hat('party', ...c)),
   };
+  // THE PLAYER'S OWN BOT (the CUSTOMIZE card, bot-items.js): the first to walk in whenever it's not on the
+  // card, wearing what it's been dressed in (in place of a seasonal costume, if it wears anything)
+  const mine = () => (typeof Progress !== 'undefined' && Progress.botLook && typeof BotItems !== 'undefined' ? Progress.botLook() : null);
+  function redress() { // (the look just changed: whoever's on the card now)
+    const my = mine();
+    if (!my) return;
+    for (const w of walkers) BotItems.dress(w.el, w.bot, w.bot === my.bot ? my : {});
+  }
   function dress(el, bot, always = false) {
+    const my = mine();
+    if (!always && my && my.bot === bot && BotItems.dress(el, bot, my)) return;
     const seasons = typeof Season !== 'undefined' ? Season.active() : [];
     const offers = seasons.flatMap((id) => {
       const c = COSTUMES[id];
@@ -618,7 +628,8 @@ function createWanderers(lane, active = () => true, suspended = () => false) {
     pushBit = null;
     const free = BOTS.filter((b) => !walkers.some((w) => w.bot === b));
     if (!free.length && !o.bot) return;
-    const bot = o.bot || pick(free);
+    const my = mine();
+    const bot = o.bot || (my && free.includes(my.bot) ? my.bot : pick(free));
     const fromLeft = o.enter === 'left' ? true : o.enter === 'right' ? false : Math.random() < 0.5;
     const kept = !o.level && BOT_MINDS[bot] ? cameBack(bot, BOT_MINDS[bot]) : null; // (back again: as it left, eased by the time away)
     const el = miniBot(bot, o.level || (kept ? temperLevel({ bot }, kept.temper) : pickLevel(bot)));
@@ -1275,7 +1286,7 @@ function createWanderers(lane, active = () => true, suspended = () => false) {
   }
   start();
   // (start: after being switched back on; list / startle / crowd / dress / visit / snack / push: for the dev tests)
-  return { start, poseFrames: (w, kind, P = 632) => { // (the dev page's animation editor: a pose's frames as pixels, and how long each shows)
+  return { start, redress, poseFrames: (w, kind, P = 632) => { // (the dev page's animation editor: a pose's frames as pixels, and how long each shows)
     const svg = w.el.querySelector('svg');
     pose(w, kind, P);
     const fr = w.pose.frames;
