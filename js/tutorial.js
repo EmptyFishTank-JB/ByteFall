@@ -74,13 +74,13 @@ const Tutorial = (() => {
   // LAYERS AND THE LINE (the meter at 3 bars, as the chain lesson leaves it: on its own too)
   const LAYERS = [
     {
-      text: 'This padlocked block is an ENCRYPTION LAYER, two dashed rings on it, one for each peel. Decrypt a bit right next to it to peel it.',
+      get text() { return LAYER_LOOK === 'padlock' ? 'This padlocked block is an ENCRYPTION LAYER, two dashed rings on it, one for each peel. Decrypt a bit right next to it to peel it.' : 'This [=] is an ENCRYPTION LAYER. Decrypt a bit right next to it to peel it.'; },
       board: [[], [], [], ['L2:1'], [], [], []], bits: [2, 2], cells: [[0, 3]], next: true, holdMeter: true, meter: 3,
     },
     {
       text: 'Drop the [2] into column C, D or E: beside the layer or on top of it, the two of them make a line of 2.',
       drop: [2, 3, 4], cells: [[0, 3]], holdMeter: true,
-      explain: () => 'The [2] decrypted and peeled the layer once: one ring gone and the padlock open, cracked. That was one more link for the CHAIN METER: 4 bars lit.',
+      explain: () => `The [2] decrypted and peeled the layer once: ${LAYER_LOOK === 'padlock' ? 'one ring gone and the padlock open, cracked' : '[=] is cracked now, [-]'}. That was one more link for the CHAIN METER: 4 bars lit.`,
     },
     {
       text: 'Drop the next [2] into column C, D or E to peel the layer a second time.',

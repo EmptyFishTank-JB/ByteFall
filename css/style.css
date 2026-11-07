@@ -873,10 +873,11 @@ h1 span { color: var(--accent); text-shadow: 0 0 8px var(--accent); }
   border-color: var(--cracked);
   color: var(--cracked);
 }
-/* The padlock in the brackets (script.js's layerMarkup), and a ring for each peel: two dashed borders,
-   one within the other, while two are left; the cracked layer, one, and its padlock open */
-.cell.firewall { position: relative; }
-.cell.firewall:not(.cracked)::after {
+/* The padlock look (script.js's LAYER_LOOK, body.layers-padlock; the game's own is [=] and [-]): a
+   padlock in the brackets, and a ring for each peel: two dashed borders, one within the other, while
+   two are left; the cracked layer, one, and its padlock open */
+.layers-padlock .cell.firewall { position: relative; }
+.layers-padlock .cell.firewall:not(.cracked)::after {
   content: '';
   position: absolute;
   inset: 3px;
@@ -885,7 +886,7 @@ h1 span { color: var(--accent); text-shadow: 0 0 8px var(--accent); }
   pointer-events: none;
 }
 .lock { display: block; flex: none; width: 0.86em; height: 1.04em; margin: 0 0.12em; overflow: visible; }
-.rules-lock .lock { display: inline-block; vertical-align: -0.12em; }
+b > .lock { display: inline-block; vertical-align: -0.12em; }
 
 /* GLYPH: a bit is a shape with one corner per point of its number, plus a small number */
 .cell .glyph,

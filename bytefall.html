@@ -47,8 +47,8 @@
   } catch (e) {}
 </script>
 <title>BYTEFALL // decryption terminal</title>
-<script src="js/fonts.js?v=662"></script>
-<link rel="stylesheet" href="css/style.css?v=662">
+<script src="js/fonts.js?v=663"></script>
+<link rel="stylesheet" href="css/style.css?v=663">
 </head>
 <body class="cards-in-settings"> <!-- (the layout: here, not added by script.js, so a script stopped short can't bring back the old one) -->
 <!-- The padlocks on the encryption layers (script.js's layerMarkup, the RULES, the VS setup's LAYERS button):
@@ -236,7 +236,7 @@
             </section>
             <section class="rules-sec" data-sec="layers" hidden>
               <h3 class="rules-sub">// LAYERS AND THE LINE <button type="button" class="tut-open" data-lesson="layers">TUTORIAL</button></h3>
-              <p>Encryption layers <b class="rules-lock">[<svg class="lock" viewBox="0 0 10 12" aria-hidden="true"><use href="#lock-closed"/></svg>]</b> rise from below <span id="rules-pulse">every 8 drops</span>. Each dashed ring is a layer: decrypt a bit beside one to peel a ring off, and the padlock opens <b class="rules-lock">[<svg class="lock" viewBox="0 0 10 12" aria-hidden="true"><use href="#lock-open"/></svg>]</b>; the second peel breaks it and reveals the bit hidden underneath.</p>
+              <p>Encryption layers <b id="rules-l2">[=]</b> rise from below <span id="rules-pulse">every 8 drops</span>. <span id="rules-ring"></span>Decrypt a bit beside one to peel a layer off; the second peel (<b id="rules-l1">[-]</b>) reveals the bit hidden underneath.</p>
               <p>Keep your columns below the <b>========</b> line. If anything is still above it once the decrypting stops, the trace completes and you're caught.</p>
             </section>
             <section class="rules-sec" data-sec="exploits" hidden>
@@ -1063,62 +1063,62 @@
     </div>
   </div>
 
-  <script src="js/bot-svg.js?v=662"></script>
-  <script src="js/unlocks.js?v=662"></script>
-  <script src="js/progress.js?v=662"></script>
-  <script src="js/music/output.js?v=662"></script>
-  <script src="js/music/mixes.js?v=662"></script>
-  <script src="js/sfx.js?v=662"></script>
-  <script src="js/music/music-bytefall-theme.js?v=662"></script>
-  <script src="js/music/music-sleep-mode.js?v=662"></script>
-  <script src="js/music/music-brute-force.js?v=662"></script>
-  <script src="js/music/music-deep-web.js?v=662"></script>
-  <script src="js/music/music-zero-day.js?v=662"></script>
-  <script src="js/music/music-system-restore.js?v=662"></script>
-  <script src="js/music/music-night-drive.js?v=662"></script>
-  <script src="js/music/music-standby-mode.js?v=662"></script>
-  <script src="js/music/music-core-dump.js?v=662"></script>
-  <script src="js/music/music-handshake.js?v=662"></script>
-  <script src="js/music/music-stack-overflow.js?v=662"></script>
-  <script src="js/music/music-generated.js?v=662"></script>
-  <script src="js/music/music.js?v=662"></script>
-  <script src="js/data/puzzles.js?v=662"></script>
-  <script src="js/data/daily-puzzles.js?v=662"></script>
-  <script src="js/data/hint-riddles.js?v=662"></script>
-  <script src="js/cpu.js?v=662"></script>
-  <script src="js/fx.js?v=662"></script>
-  <script src="js/viz.js?v=662"></script>
-  <script src="js/pixel.js?v=662"></script>
-  <script src="js/minibot.js?v=662"></script>
-  <script src="js/seasons.js?v=662"></script>
-  <script src="js/bigart.js?v=662"></script>
-  <script src="js/scenes.js?v=662"></script>
-  <script src="js/weather.js?v=662"></script>
-  <script src="js/visitors.js?v=662"></script>
-  <script src="js/data/bot-anims.js?v=662"></script>
-<script src="js/wanderers.js?v=662"></script>
-  <script src="js/tutorial.js?v=662"></script>
-  <script src="js/puzzle-sim.js?v=662"></script>
-  <script src="js/led-banner.js?v=662"></script>
-  <script src="js/infections.js?v=662"></script>
-  <script src="js/script.js?v=662"></script>
-  <script src="js/grid-bg.js?v=662"></script>
-  <script src="js/lights.js?v=662"></script>
-  <script src="js/inf-test.js?v=662"></script>
-  <script src="js/sfx-test.js?v=662"></script>
-  <script src="js/extsource.js?v=662"></script>
-  <script src="js/player.js?v=662"></script>
-  <script src="js/billing.js?v=662"></script>
-  <script src="js/store.js?v=662"></script>
-  <script src="js/data/story-ghosts.js?v=662"></script>
-  <script src="js/data/stories.js?v=662"></script>
-  <script src="js/stories.js?v=662"></script>
-  <script src="js/story-test.js?v=662"></script>
-  <script src="js/ads-config.js?v=662"></script>
-  <script src="js/ads.js?v=662"></script>
-  <script src="js/app-update.js?v=662"></script>
-  <script src="js/start.js?v=662"></script>
-  <script src="js/place.js?v=662"></script>
-  <script src="js/saver.js?v=662"></script>
+  <script src="js/bot-svg.js?v=663"></script>
+  <script src="js/unlocks.js?v=663"></script>
+  <script src="js/progress.js?v=663"></script>
+  <script src="js/music/output.js?v=663"></script>
+  <script src="js/music/mixes.js?v=663"></script>
+  <script src="js/sfx.js?v=663"></script>
+  <script src="js/music/music-bytefall-theme.js?v=663"></script>
+  <script src="js/music/music-sleep-mode.js?v=663"></script>
+  <script src="js/music/music-brute-force.js?v=663"></script>
+  <script src="js/music/music-deep-web.js?v=663"></script>
+  <script src="js/music/music-zero-day.js?v=663"></script>
+  <script src="js/music/music-system-restore.js?v=663"></script>
+  <script src="js/music/music-night-drive.js?v=663"></script>
+  <script src="js/music/music-standby-mode.js?v=663"></script>
+  <script src="js/music/music-core-dump.js?v=663"></script>
+  <script src="js/music/music-handshake.js?v=663"></script>
+  <script src="js/music/music-stack-overflow.js?v=663"></script>
+  <script src="js/music/music-generated.js?v=663"></script>
+  <script src="js/music/music.js?v=663"></script>
+  <script src="js/data/puzzles.js?v=663"></script>
+  <script src="js/data/daily-puzzles.js?v=663"></script>
+  <script src="js/data/hint-riddles.js?v=663"></script>
+  <script src="js/cpu.js?v=663"></script>
+  <script src="js/fx.js?v=663"></script>
+  <script src="js/viz.js?v=663"></script>
+  <script src="js/pixel.js?v=663"></script>
+  <script src="js/minibot.js?v=663"></script>
+  <script src="js/seasons.js?v=663"></script>
+  <script src="js/bigart.js?v=663"></script>
+  <script src="js/scenes.js?v=663"></script>
+  <script src="js/weather.js?v=663"></script>
+  <script src="js/visitors.js?v=663"></script>
+  <script src="js/data/bot-anims.js?v=663"></script>
+<script src="js/wanderers.js?v=663"></script>
+  <script src="js/tutorial.js?v=663"></script>
+  <script src="js/puzzle-sim.js?v=663"></script>
+  <script src="js/led-banner.js?v=663"></script>
+  <script src="js/infections.js?v=663"></script>
+  <script src="js/script.js?v=663"></script>
+  <script src="js/grid-bg.js?v=663"></script>
+  <script src="js/lights.js?v=663"></script>
+  <script src="js/inf-test.js?v=663"></script>
+  <script src="js/sfx-test.js?v=663"></script>
+  <script src="js/extsource.js?v=663"></script>
+  <script src="js/player.js?v=663"></script>
+  <script src="js/billing.js?v=663"></script>
+  <script src="js/store.js?v=663"></script>
+  <script src="js/data/story-ghosts.js?v=663"></script>
+  <script src="js/data/stories.js?v=663"></script>
+  <script src="js/stories.js?v=663"></script>
+  <script src="js/story-test.js?v=663"></script>
+  <script src="js/ads-config.js?v=663"></script>
+  <script src="js/ads.js?v=663"></script>
+  <script src="js/app-update.js?v=663"></script>
+  <script src="js/start.js?v=663"></script>
+  <script src="js/place.js?v=663"></script>
+  <script src="js/saver.js?v=663"></script>
 </body>
 </html>

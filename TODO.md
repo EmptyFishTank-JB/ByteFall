@@ -25,6 +25,12 @@ Ideas queued for later (not built yet).
   time and in context. It's the intro to STORY, before GHOSTS' chapter 1 (which stays as it is). The
   narration cards (BOT) stay for specific topics, opened from RULES & RECORDS (layers, exploits,
   patches, infections, the STORE...) rather than one long lesson.
+- **The layers' look**: a tester found the encrypted bits' [-] and [=] confusing (the columns' letters
+  fixed the other note). A padlock in the brackets with a dashed ring for each peel is built and kept
+  (`LAYER_LOOK` in script.js; `?layers=padlock` shows it) but isn't the game's look: it changes the
+  game's character, so the symbols stay. Other options if it's picked up again: a crack line across the
+  block once it's peeled once, or the hidden bit showing faintly through the stripes; teach it once, in
+  the tutorial.
 - **The bot lane, reworked** (replaces the separate "CPU customization" and "CPUs reacting to the
   gameplay" ideas): one bot of the player's own, always in view, the world moving around it (or free to
   roam a middle band, the view following it near the edges), other bots and visitors dropping in now
@@ -86,7 +92,7 @@ puzzles.
 ### PURGE (a falling-pieces game after Pac-Attack)
 
 - **The well**: about 7 wide and 11 tall (squares a little smaller than ByteFall's).
-- **Pieces of three squares** (straight or bent) fall: **encryption layers** (padlocks) and **viruses**
+- **Pieces of three squares** (straight or bent) fall: **encryption layers** [=] and **viruses**
   (the infected bit's little virus). Move, rotate and drop them: drag to move, tap to rotate, swipe
   down to drop on touch; keys and a controller on PC.
 - **A full row of layers clears**; viruses don't clear with rows.

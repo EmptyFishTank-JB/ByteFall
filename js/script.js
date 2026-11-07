@@ -17,10 +17,21 @@ const STEP_MS = 35; // per-row fall speed
 const HACK_COMBO = 5;
 
 const BASE_INTERVAL = 8; // drops between firewall rows
-// An encryption layer's face, a padlock in brackets (the symbols are in bytefall.html): closed with two
-// rings for two peels left, open with one ring (and the cracked color) for the last peel
+// An encryption layer's face: 'symbols', [=] for two peels left and [-] for the last one (the cracked
+// color), or 'padlock', a padlock in brackets (the symbols are in bytefall.html), closed with two dashed
+// rings for two peels left and open with one for the last. SYMBOLS is the game's look; the padlock is
+// kept for trying (add ?layers=padlock to the address) and is switched here, by this one line
+const LAYER_LOOK = /[?&]layers=padlock/.test(location.search) ? 'padlock' : 'symbols';
 const lockSvg = (open) => `<svg class="lock" viewBox="0 0 10 12" aria-hidden="true"><use href="#lock-${open ? 'open' : 'closed'}"/></svg>`;
-const layerMarkup = (level) => `[${lockSvg(level < 2)}]`;
+const layerMarkup = (level) => (LAYER_LOOK === 'padlock' ? `[${lockSvg(level < 2)}]` : level < 2 ? '[-]' : '[=]');
+document.body.classList.toggle('layers-padlock', LAYER_LOOK === 'padlock');
+// (RULES says it too: the two symbols, and for the padlock a word on the rings)
+{
+  const l2 = document.getElementById('rules-l2'); const l1 = document.getElementById('rules-l1'); const ring = document.getElementById('rules-ring');
+  if (l2) l2.innerHTML = layerMarkup(2);
+  if (l1) l1.innerHTML = layerMarkup(1);
+  if (ring && LAYER_LOOK === 'padlock') ring.textContent = 'Each dashed ring is a layer. ';
+}
 const HARD_MIN_INTERVAL = 4;
 const HARD_POINTS_PER_STEP = 700; // hard mode loses one drop per this many points
 const BYTE_BITS = 8; // Hard: every 8 bits decrypted by one drop is a byte...
@@ -1687,7 +1698,6 @@ function render(popped = [], falling = null) {
           div.classList.add('firewall');
           if (cell.level < 2) div.classList.add('cracked');
           div.innerHTML = layerMarkup(cell.level);
-          div.title = cell.level < 2 ? 'ENCRYPTION LAYER: one peel left' : 'ENCRYPTION LAYER: two peels left';
         }
       }
       if (!cell && malwareLeft > 0 && !gameOver && Infections.mosaicOn()) { // (MALWARE's big picture: the empty spots show their piece too, in the grid's colors)
