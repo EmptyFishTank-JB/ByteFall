@@ -143,7 +143,8 @@
   const lane = document.createElement('div');
   lane.className = 'start-walkers';
   screen.querySelector('.start-card').appendChild(lane);
-  window.startWalkers = createWanderers(lane, () => !screen.hidden && !document.documentElement.classList.contains('saver-on'));
+  // (SETTINGS → WANDERING BOTS governs this lane too: off, the start screen's bots and scenery go with the game's)
+  window.startWalkers = createWanderers(lane, () => !screen.hidden && !document.documentElement.classList.contains('saver-on') && (!window.wanderersEnabled || window.wanderersEnabled()));
 
   const startBtn = document.getElementById('start-btn');
   startBtn.addEventListener('click', start);

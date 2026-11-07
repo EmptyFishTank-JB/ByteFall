@@ -873,6 +873,19 @@ h1 span { color: var(--accent); text-shadow: 0 0 8px var(--accent); }
   border-color: var(--cracked);
   color: var(--cracked);
 }
+/* The padlock in the brackets (script.js's layerMarkup), and a ring for each peel: two dashed borders,
+   one within the other, while two are left; the cracked layer, one, and its padlock open */
+.cell.firewall { position: relative; }
+.cell.firewall:not(.cracked)::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border: 1px dashed var(--layer-border);
+  border-radius: 2px;
+  pointer-events: none;
+}
+.lock { display: block; flex: none; width: 0.86em; height: 1.04em; margin: 0 0.12em; overflow: visible; }
+.rules-lock .lock { display: inline-block; vertical-align: -0.12em; }
 
 /* GLYPH: a bit is a shape with one corner per point of its number, plus a small number */
 .cell .glyph,
@@ -3220,6 +3233,10 @@ html.page-twinkle .page-bg { display: block; }
 .visitor.v-fly .f-c { display: inline; }
 .visitor.v-fly.step .f-c { display: none; }
 .visitor.v-fly.step .f-d { display: inline; }
+/* (the migrating birds' wing, level between the up and the down: f-e) */
+.visitor .f-e { display: none; }
+.visitor.v-fly.mid :is(.f-c, .f-d) { display: none; }
+.visitor.v-fly.mid .f-e { display: inline; }
 .visitor-reindeer.v-rudolph svg { filter: drop-shadow(0 0 1px rgba(220, 225, 240, 0.4)) drop-shadow(0 0 2px #ff2a2a); }
 /* Snow, in pixel flakes; fireworks, a rocket and its sparks (all in the bots' pixels) */
 :is(.visitor-flake, .visitor-spark) { position: absolute; left: 0; bottom: 0; width: calc(34px / 16); height: calc(34px / 16); pointer-events: none; z-index: 2; }
@@ -4929,7 +4946,7 @@ body.vs-setup-up #vs-setup { position: relative; inset: auto; }
 #vs-setup #vs-options-row button { height: 32px; padding: 0 6px; font-size: 12px; }
 #vs-setup .vs-one button { height: 32px; }
 /* (LAYERS between a layer's [=]s, dimmed while it's OFF; EXPLOITS with their terminal) */
-#vs-layers-btn .lay-ico { margin: 0 0.6em; }
+#vs-layers-btn .lay-ico { display: inline-flex; align-items: center; margin: 0 0.6em; }
 #vs-layers-btn:not(.active) .lay-ico { opacity: 0.35; }
 #vs-exploits-btn .term-ico { width: 1em; height: 1em; margin-right: 0.45em; flex: none; }
 #vs-setup .vs-goal-row { gap: var(--gap); }

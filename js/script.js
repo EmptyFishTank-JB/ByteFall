@@ -17,6 +17,10 @@ const STEP_MS = 35; // per-row fall speed
 const HACK_COMBO = 5;
 
 const BASE_INTERVAL = 8; // drops between firewall rows
+// An encryption layer's face, a padlock in brackets (the symbols are in bytefall.html): closed with two
+// rings for two peels left, open with one ring (and the cracked color) for the last peel
+const lockSvg = (open) => `<svg class="lock" viewBox="0 0 10 12" aria-hidden="true"><use href="#lock-${open ? 'open' : 'closed'}"/></svg>`;
+const layerMarkup = (level) => `[${lockSvg(level < 2)}]`;
 const HARD_MIN_INTERVAL = 4;
 const HARD_POINTS_PER_STEP = 700; // hard mode loses one drop per this many points
 const BYTE_BITS = 8; // Hard: every 8 bits decrypted by one drop is a byte...
@@ -1682,7 +1686,8 @@ function render(popped = [], falling = null) {
         } else {
           div.classList.add('firewall');
           if (cell.level < 2) div.classList.add('cracked');
-          div.textContent = cell.level < 2 ? '[-]' : '[=]';
+          div.innerHTML = layerMarkup(cell.level);
+          div.title = cell.level < 2 ? 'ENCRYPTION LAYER: one peel left' : 'ENCRYPTION LAYER: two peels left';
         }
       }
       if (!cell && malwareLeft > 0 && !gameOver && Infections.mosaicOn()) { // (MALWARE's big picture: the empty spots show their piece too, in the grid's colors)
@@ -3422,7 +3427,7 @@ function applyModeUi() {
   document.getElementById('daily-kinds').hidden = !daily;
   document.getElementById('daily-pips').hidden = !daily;
   centerDaily(); // (the pick in the middle of its row)
-  vsLayersBtn.innerHTML = `<span class="lay-ico" aria-hidden="true">[=]</span>LAYERS: ${vsLayers ? 'ON' : 'OFF'}<span class="lay-ico" aria-hidden="true">[=]</span>`;
+  vsLayersBtn.innerHTML = `<span class="lay-ico" aria-hidden="true">${layerMarkup(2)}</span>LAYERS: ${vsLayers ? 'ON' : 'OFF'}<span class="lay-ico" aria-hidden="true">${layerMarkup(2)}</span>`;
   vsLayersBtn.classList.toggle('active', vsLayers);
   vsExploitsBtn.innerHTML = `${TERMINAL_SVG}EXPLOITS: ${vsExploits ? 'ON' : 'OFF'}`;
   vsExploitsBtn.classList.toggle('active', vsExploits);
@@ -3891,7 +3896,7 @@ function drawCpuFull(view = cpuPlaying ? null : { columns: cpu.columns() }, fall
       } else if (b && b.type === 'firewall') {
         div.classList.add('firewall');
         if (b.level < 2) div.classList.add('cracked');
-        div.textContent = b.level < 2 ? '[-]' : '[=]';
+        div.innerHTML = layerMarkup(b.level);
       }
       if (cpuHas(view.pops, r, c)) {
         div.classList.add('pop');
@@ -4864,6 +4869,7 @@ musicLayersBtn.addEventListener('click', () => {
 updateMusicLayersBtn();
 const wanderersBtn = document.getElementById('wanderers-btn');
 let wanderersOn = storage.get('bytefall-wanderers') !== 'off';
+window.wanderersEnabled = () => wanderersOn; // (start.js: the start screen's bots and scenery follow the setting too)
 // (not while the start screen covers the card: start.js starts them when it goes)
 const startScreenUp = () => { const el = document.getElementById('start-screen'); return !!el && !el.hidden && !document.documentElement.classList.contains('no-start'); };
 // The game card's lane runs from the card's bottom up to meet the grid's card's bottom edge: the drop
@@ -4890,7 +4896,7 @@ function updateWanderersBtn() {
 wanderersBtn.addEventListener('click', () => {
   wanderersOn = !wanderersOn;
   storage.set('bytefall-wanderers', wanderersOn ? 'on' : 'off');
-  if (wanderersOn) gameWalkers.start();
+  if (wanderersOn) { gameWalkers.start(); if (window.startWalkers) window.startWalkers.start(); } // (off: each lane clears itself on its next frame)
   updateWanderersBtn();
 });
 updateWanderersBtn();

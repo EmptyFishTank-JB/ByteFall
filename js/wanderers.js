@@ -1,5 +1,5 @@
 // WANDERERS: the CPUs strolling along the bottom of a card (the start screen's, and the game
-// card's with SETTINGS → WANDERING BOTS on). createWanderers(lane, active) runs them in `lane` (a
+// card's, both with SETTINGS → WANDERING BOTS on: off, the start screen's bots and scenery go too). createWanderers(lane, active) runs them in `lane` (a
 // strip along the card's bottom) for as long as active() says so, and returns { start, list,
 // startle }: start() brings them back after active() turned false.
 // (each bot's mind kept between visits: one of each bot, so it's the same one coming back; shared

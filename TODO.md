@@ -25,21 +25,19 @@ Ideas queued for later (not built yet).
   time and in context. It's the intro to STORY, before GHOSTS' chapter 1 (which stays as it is). The
   narration cards (BOT) stay for specific topics, opened from RULES & RECORDS (layers, exploits,
   patches, infections, the STORE...) rather than one long lesson.
-- **The layers' look**: a tester found the encrypted bits' [-] and [=] confusing (the columns' letters
-  fixed the other note). The trouble is what they *mean*, not the symbols. Options: a padlock on the
-  block (closed with two rings for two layers, one ring or cracked for the last), a crack line across the
-  block once it's peeled once, or the hidden bit showing faintly through the stripes. Keep the stripes
-  and the dashed border (MONOCHROME relies on them), and then teach it once, in the tutorial. The text
-  that names [=] and [-] (RULES, the tutorial, README) changes with the look.
 - **The bot lane, reworked** (replaces the separate "CPU customization" and "CPUs reacting to the
-  gameplay" ideas): one bigger bot of the player's own, always in view, the world moving around it (or
-  free to roam a middle band, the view following it near the edges), other bots and visitors dropping in
-  now and then to interact with it. The bot reacts to the game (a good chain, a near miss, a trace) and
-  is customized with layered accessories (glasses, hats, faces, held items) from unlocks and KEYS.
-  Measured (headless desktop Chromium, so a phone is slower): the lane adds only about 0.4 MB of JS heap,
-  650 DOM nodes and under 1 MB of canvas; its real cost is animation CPU, about 8% of a core. So the
-  work is smaller sprites per frame, a lower frame rate when idle, and fewer things on screen at once,
-  not memory. The lane is a fixed 192px tall, so "bigger" is limited by that height. After launch.
+  gameplay" ideas): one bot of the player's own, always in view, the world moving around it (or free to
+  roam a middle band, the view following it near the edges), other bots and visitors dropping in now
+  and then to interact with it. The bot reacts to the game (a good chain, a near miss, a trace) and is
+  customized with layered accessories (glasses, hats, faces, held items) from unlocks and KEYS.
+  **The bot stays its size and the lane its height**: the lane is a fixed 192px, already a narrow strip
+  behind the game's own controls (the drop buttons, the exploit row and the message sit over it), and a
+  bigger main bot would end up partly hidden behind them on some phones. So the work is in what the bot
+  *does and wears*, not how big it is: more poses, reactions and accessories drawn to fit the same
+  sprite box. Measured (headless desktop Chromium, so a phone is slower): the lane adds only about
+  0.4 MB of JS heap, 650 DOM nodes and under 1 MB of canvas; its real cost is animation CPU, about 8% of
+  a core. So the work is smaller sprites per frame, a lower frame rate when idle, and fewer things on
+  screen at once, not memory. After launch.
 
 See [WANDERERS.md](WANDERERS.md) for the season-by-season chart and the full ideas list.
 
@@ -88,7 +86,7 @@ puzzles.
 ### PURGE (a falling-pieces game after Pac-Attack)
 
 - **The well**: about 7 wide and 11 tall (squares a little smaller than ByteFall's).
-- **Pieces of three squares** (straight or bent) fall: **encryption layers** [=] and **viruses**
+- **Pieces of three squares** (straight or bent) fall: **encryption layers** (padlocks) and **viruses**
   (the infected bit's little virus). Move, rotate and drop them: drag to move, tap to rotate, swipe
   down to drop on touch; keys and a controller on PC.
 - **A full row of layers clears**; viruses don't clear with rows.

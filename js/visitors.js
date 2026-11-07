@@ -35,6 +35,7 @@ function createVisitors(api) {
   const sky = (lo, hi, low) => (tall() ? rand(lo, hi) * api.laneH() : low());
   const ceiling = () => (tall() ? api.laneH() : 100);
   const U = 34 / 16; // (a pixel of the bots' 16-wide grid, in screen pixels)
+  const headroom = (rows, n) => [...Array(n).fill('.'.repeat(rows[0].length)), ...rows]; // (blank rows added on top: room above for a wing raised)
   const swap = (rows, map) => rows.map((r) => r.replace(/./g, (c) => map[c] || c)); // (blinking: colors traded)
   const EVERGREEN = ['........y........', '.......yYy.......', '........y........', '........g........', '.......gwG.......', '......gggaG......', '.....grggggG.....', '......gggwG......', '.....gaggggG.....', '....ggggrgggG....', '...gwgggggaggG...', '.....gggwgGG.....', '....grgggggaG....', '...ggggwgggggG...', '..gagggggrggggG..', '....ggwgggggG....', '...ggggggaggrG...', '..grggggggggwgG..', '.gggaggwggggggrG.', 'ggwggggrggggaggGG', '.......ttT.......', '.RRxRR.ttT.BBxBB.', '.xxxxx.ttT.xxxxx.', '.RRxRR.....BBxBB.'];
   const SPRITES = {
@@ -293,35 +294,40 @@ function createVisitors(api) {
     },
     // The little ghost shaken out of a POSSESSED bot
     spirit: { pal: { p: '#e8f0ff', k: '#1a1f2a' }, a: ['..ppp..', '.ppppp.', 'pkpppkp', 'ppppppp', 'ppkkppp', 'ppppppp', '.p.p.p.', 'p..p..p'], b: { 6: 'p.p.p.p', 7: '.p..p..' } },
-    // NOVEMBER's migrating birds: a and b on the ground (standing, pecking), c and d flying (wings
-    // up, wings down)
+    // NOVEMBER's migrating birds: a and b on the ground (standing, pecking); flying, the wing goes
+    // c, e, d, e (up and back, level, down and forward, level): a stroke that reads as a bird's, the
+    // crow's way. Their frames stand on the same floor, with room above for the wing raised
     goose: {
       pal: { g: '#8b7d6b', G: '#5e5245', k: '#1b1b1b', w: '#eeeeee' },
-      a: ['.........kk.', '.........kw.', '.........k..', '.........k..', '..gggggggk..', '.GGGGgggg...', '..wwwwwww...', '....k..k....'],
-      b: ['............', '............', '............', '............', '..gggggggk..', '.GGGGggggkk.', '..wwwwwwwkw.', '....k..k....'],
-      c: ['............', '............', '....GGG.....', '.....GGG....', 'GgggggggkkkK', '..wwwww...w.', '............', '............'],
-      d: ['............', '............', '............', '............', 'GgggggggkkkK', '..wwGGG...w.', '.....GGG....', '............'],
+      a: headroom(['.........kk.', '.........kw.', '.........k..', '.........k..', '..gggggggk..', '.GGGGgggg...', '..wwwwwww...', '....k..k....'], 3),
+      b: headroom(['............', '............', '............', '............', '..gggggggk..', '.GGGGggggkk.', '..wwwwwwwkw.', '....k..k....'], 3),
+      c: ['.G..........', '.GGG........', '..GGGG......', '..GGGGG.....', '...GGGGG....', '....GGGGG.kk', '.Ggggggggkkw', '..wwwwwww...', '............', '............', '............'],
+      e: ['............', '............', '............', '............', '..GGGGGG....', 'GGGGGGGGG.kk', '.Ggggggggkkw', '..wwwwwww...', '............', '............', '............'],
+      d: ['............', '............', '............', '............', '............', '..........kk', '.Ggggggggkkw', '..wwGGGGw...', '.....GGGGG..', '......GGGGG.', '.......GGG..'],
     },
     duck: {
       pal: { h: '#2f8f4e', y: '#e8b923', b: '#9a8f80', B: '#6d6458', w: '#f2f2f2', c: '#7a4a32', o: '#e8902a' },
-      a: ['.......hh.', '.......hhy', '.......w..', '.bbbbbcc..', 'BBBBbbbc..', '.bbbbbb...', '...o..o...'],
-      b: ['..........', '..........', '..........', '.bbbbbcc..', 'BBBBbbbchh', '.bbbbbb.hy', '...o..o...'],
-      c: ['..........', '...BB.....', '....BB....', 'Bbbbbcwhhy', '.bbbbb....', '..........', '..........'],
-      d: ['..........', '..........', '..........', 'Bbbbbcwhhy', '.bbBBb....', '....BB....', '..........'],
+      a: headroom(['.......hh.', '.......hhy', '.......w..', '.bbbbbcc..', 'BBBBbbbc..', '.bbbbbb...', '...o..o...'], 3),
+      b: headroom(['..........', '..........', '..........', '.bbbbbcc..', 'BBBBbbbchh', '.bbbbbb.hy', '...o..o...'], 3),
+      c: ['.BB.......', '.BBB......', '..BBB.....', '..BBBB....', '...BBBB...', '....BBB...', 'Bbbbbcwhhy', '.bbbbc....', '..........', '..........'],
+      e: ['..........', '..........', '..........', '..........', '..BBBB....', 'BBBBBBB...', 'Bbbbbcwhhy', '.bbbbc....', '..........', '..........'],
+      d: ['..........', '..........', '..........', '..........', '..........', '..........', 'Bbbbbcwhhy', '.bbBBBc...', '....BBBB..', '.....BBBB.'],
     },
     songbird: { // (its colors by kind: SONGBIRDS below)
       pal: { b: '#6b5a4e', c: '#e0662b', k: '#111111', y: '#e8b923', o: '#8a6a4a' },
-      a: ['...bb.', '..bkby', 'bbbcc.', '.bccc.', '..o.o.'],
-      b: ['......', '...bb.', 'bbbbky', '.bccc.', '..o.o.'],
-      c: ['.bb...', '..bb..', 'bbbbky', '.ccc..', '......'],
-      d: ['......', '......', 'bbbbky', '.cbb..', '..bb..'],
+      a: headroom(['...bb.', '..bkby', 'bbbcc.', '.bccc.', '..o.o.'], 3),
+      b: headroom(['......', '...bb.', 'bbbbky', '.bccc.', '..o.o.'], 3),
+      c: ['......', '......', '.b....', '.bb...', '..bbb.', 'bbbbky', '.ccc..', '......'],
+      e: ['......', '......', '......', '.bbb..', 'bbbbb.', 'bbbbky', '.ccc..', '......'],
+      d: ['......', '......', '......', '......', '......', 'bbbbky', '.cbbb.', '..bbb.'],
     },
     swallow: {
       pal: { n: '#24366b', r: '#c2462e', w: '#efe6d6', k: '#222222' },
-      a: ['......nn.', '.....nnr.', 'nnnnnnnr.', 'n..wwww..', '....k.k..'],
-      b: ['.........', '......nn.', 'nnnnnnnnr', 'n..wwww..', '....k.k..'],
-      c: ['...nn....', '....nn...', 'n.nnnnnnr', '.n.www...', '.........'],
-      d: ['.........', '.........', 'n.nnnnnnr', '.nwnnw...', '....nn...'],
+      a: headroom(['......nn.', '.....nnr.', 'nnnnnnnr.', 'n..wwww..', '....k.k..'], 3),
+      b: headroom(['.........', '......nn.', 'nnnnnnnnr', 'n..wwww..', '....k.k..'], 3),
+      c: ['n........', '.nn......', '..nnn....', '...nnnn..', '....nnn..', 'n.nnnnnnr', '.n.www...', '.........'],
+      e: ['.........', '.........', '.........', '..nnnn...', 'nnnnnnn..', 'n.nnnnnnr', '.n.www...', '.........'],
+      d: ['.........', '.........', '.........', '.........', '.........', 'n.nnnnnnr', '.nwnnnn..', '...nnnn..'],
     },
     penguin: { // (c: on its belly, sliding)
       pal: { k: '#1b1f27', w: '#f2f4f8', o: '#ff9a1f' },
@@ -440,7 +446,7 @@ function createVisitors(api) {
     el.style.width = `${w * U}px`;
     el.innerHTML = `<svg viewBox="0 0 ${w} ${h}" width="${w * U}" height="${h * U}" shape-rendering="crispEdges" aria-hidden="true">`
       + `<g class="f-a">${rects(def.a, def.pal)}</g><g class="f-b">${rects(frameB, def.pal)}</g>`
-      + `${def.c ? `<g class="f-c">${rects(def.c, def.pal)}</g>` : ''}${def.d ? `<g class="f-d">${rects(def.d, def.pal)}</g>` : ''}</svg>`
+      + `${def.c ? `<g class="f-c">${rects(def.c, def.pal)}</g>` : ''}${def.d ? `<g class="f-d">${rects(def.d, def.pal)}</g>` : ''}${def.e ? `<g class="f-e">${rects(def.e, def.pal)}</g>` : ''}</svg>`
       + '<span class="walker-emote"></span>';
     return el;
   }
@@ -525,8 +531,9 @@ function createVisitors(api) {
     const el = spriteEl(kind, extra.pal);
     const v = {
       kind, el, emote: el.querySelector('.walker-emote'), x, y: 0, dir, age: 0, speed: KINDS[kind].speed * rand(0.85, 1.15),
-      state: 'go', frame: 0, frameAt: 0, scared: new Set(), phase: rand(0, 6.28), ...extra,
+      state: 'go', frame: 0, frameAt: 0, scared: new Set(), phase: rand(0, 6.28), rise: 0, ...extra,
     };
+    if (v.bolt && v.boltAt === undefined) v.boltAt = -1e9; // (one that starts out bolting is at its full pace from the first frame)
     el.addEventListener('pointerdown', (e) => {
       e.stopPropagation();
       poke(v);
@@ -2124,12 +2131,36 @@ function createVisitors(api) {
     for (const b of api.walkers()) if (Math.abs(b.x - v.x) < 70 && (!near || Math.abs(b.x - v.x) < Math.abs(near.x - v.x))) near = b;
     if (near) setTimeout(() => { if (!near.leaving) api.say(near, pick(['happy', 'surprised', 'love']), true); }, 450);
   }
+  // A wingbeat. A flyer drawn with a level wing too (e) goes up, level, down, level (the beat time
+  // a stroke, up to down, so each phase takes half of it); the crow's the two, up and down
   function wingbeat(v, now, ms) {
-    if (now - v.frameAt < ms) return;
+    const four = !!SPRITES[v.kind].e;
+    if (now - v.frameAt < (four ? ms / 2 : ms)) return;
     v.frameAt = now;
-    v.frame = 1 - v.frame;
-    v.el.classList.toggle('step', !!v.frame);
+    v.frame = (v.frame + 1) % (four ? 4 : 2);
+    v.el.classList.toggle('step', four ? v.frame === 2 : v.frame === 1);
+    v.el.classList.toggle('mid', four && v.frame % 2 === 1);
   }
+  // A poked flyer eases into its escape: its pace builds up and it climbs at a steady rate from the
+  // spot it's at, so nothing about it ever jumps (it once climbed by its age at the poke, in one
+  // frame). boltAt, when the poke came; boost, the pace it ends up at (times its own)
+  const BOLT_EASE = 450; // (ms to full pace)
+  function bolt(v, boost) {
+    if (v.bolt) return; // (already off: a second poke changes nothing)
+    v.bolt = true;
+    v.boost = boost;
+    v.boltAt = performance.now();
+  }
+  const boltEase = (v, now) => (v.bolt ? Math.min(1, Math.max(0, (now - v.boltAt) / BOLT_EASE)) : 0);
+  const paceOf = (v, now) => v.speed * (1 + ((v.boost || 1) - 1) * boltEase(v, now));
+  // A flyer leaving the ground or taking off from its walk (the crow, 'fly'; the migrating birds,
+  // 'up'): wings going at once, its pace and climb easing in over half a second
+  function takeoff(v, state) {
+    v.state = state;
+    v.liftAt = performance.now();
+    v.el.classList.add('v-fly');
+  }
+  const liftEase = (v, now) => Math.min(1, Math.max(0.25, (now - (v.liftAt || 0)) / 500));
   // The season's scenery, for a wanderer to push in (wanderers.js): off the card until it's moved.
   // Its spot is clear of any already standing (and of the path to them: it never passes through)
   const standing = () => list.filter((v) => v.state === 'scenery');
@@ -2383,17 +2414,16 @@ function createVisitors(api) {
       setTimeout(() => v.el.classList.add('v-fade'), 500);
       setTimeout(() => { v.gone = true; }, 1300);
     } else if (k.poke === 'scatter') { // (the whole flock bolts, up and away)
-      for (const b of list) if (b.kind === 'bat') { b.speed *= 2; b.bolt = true; }
+      for (const b of list) if (b.kind === 'bat') bolt(b, 2);
     } else if (k.poke === 'caw') {
       say(v, 'CAW!', 900);
-      v.state = 'fly';
+      takeoff(v, 'fly');
     } else if (k.poke === 'flush') { // (a call, and the whole flock bolts up and away)
       say(v, k.call, 900);
       for (const b of list) {
         if (b.flock !== v.flock) continue;
-        b.bolt = true;
-        b.speed *= 1.6;
-        if (b.state !== 'go') { b.state = 'up'; b.el.classList.add('v-fly'); }
+        bolt(b, 1.6);
+        if (b.state !== 'go') takeoff(b, 'up');
       }
     } else if (k.poke === 'gobble') { // (a flustered shake, then off at a run)
       say(v, 'GOBBLE!', 1000);
@@ -2705,8 +2735,9 @@ function createVisitors(api) {
         }
       } else if (k.bird) {
         if (v.state === 'go') { // (with the flock, across the sky)
-          v.x += v.dir * v.speed * dt;
-          v.y = v.fly + Math.sin(v.age / k.waveMs + v.phase) * k.wave + (v.bolt ? v.age / 50 : 0);
+          v.x += v.dir * paceOf(v, now) * dt;
+          v.rise += boltEase(v, now) * 20 * dt;
+          v.y = v.fly + Math.sin(v.age / k.waveMs + v.phase) * k.wave + v.rise;
           wingbeat(v, now, k.beatMs);
           if (v.kind === 'goose' && Math.random() < dt * 0.15) say(v, k.call, 800); // (the odd honk)
           if (v.lands && !v.bolt && ((v.dir > 0 && v.x >= v.stopAt) || (v.dir < 0 && v.x <= W - v.stopAt))) v.state = 'down';
@@ -2718,7 +2749,8 @@ function createVisitors(api) {
             v.y = 0;
             v.state = 'peck';
             v.until = now + v.life;
-            v.el.classList.remove('v-fly', 'step');
+            v.el.classList.remove('v-fly', 'step', 'mid');
+            v.frame = 0;
             greet(v);
           }
         } else if (v.state === 'peck') { // (pecks about, now and then turning around)
@@ -2728,26 +2760,28 @@ function createVisitors(api) {
             v.el.classList.toggle('step', !!v.frame);
             if (!v.frame && Math.random() < 0.2) v.dir = -v.dir;
           }
-          if (now > v.until) { v.state = 'up'; v.el.classList.add('v-fly'); }
+          if (now > v.until) takeoff(v, 'up');
         } else if (v.state === 'up') { // (off up and away)
-          v.x += v.dir * v.speed * dt;
-          v.y += (tall() ? 0.25 * api.laneH() : 40) * dt;
+          const e = liftEase(v, now);
+          v.x += v.dir * paceOf(v, now) * e * dt;
+          v.y += (tall() ? 0.25 * api.laneH() : 40) * e * dt;
           wingbeat(v, now, k.beatMs);
         }
       } else if (k.fly) { // (bats: a wavering line through the air)
-        v.x += v.dir * v.speed * dt;
-        v.y = v.fly + Math.sin(v.age / 260 + v.phase) * 5 + (v.bolt ? v.age / 60 : 0);
+        v.x += v.dir * paceOf(v, now) * dt;
+        v.rise += boltEase(v, now) * 1000 / 60 * dt;
+        v.y = v.fly + Math.sin(v.age / 260 + v.phase) * 5 + v.rise;
       } else if (v.kind === 'crow') {
         if (v.state === 'go') {
           v.x += v.dir * v.speed * dt;
           v.y = Math.abs(Math.sin(v.age / 110)) * 3; // (hopping)
           if ((v.dir > 0 && v.x >= v.stopAt) || (v.dir < 0 && v.x <= W - v.stopAt)) { v.state = 'peck'; v.until = now + v.life; v.y = 0; }
         } else if (v.state === 'peck') {
-          if (now > v.until) v.state = 'fly';
+          if (now > v.until) takeoff(v, 'fly');
         } else if (v.state === 'fly') { // (off up and away)
-          v.x += v.dir * 60 * dt;
-          v.y += (tall() ? 0.22 * api.laneH() : 55) * dt; // (up across the card, and out)
-          v.el.classList.add('v-fly');
+          const e = liftEase(v, now);
+          v.x += v.dir * (20 + 40 * e) * dt; // (from its walking pace up to a flier's)
+          v.y += (tall() ? 0.22 * api.laneH() : 55) * e * dt; // (up across the card, and out)
           if (now - v.frameAt > 110) { // (a wingbeat)
             v.frameAt = now;
             v.frame = 1 - v.frame;
