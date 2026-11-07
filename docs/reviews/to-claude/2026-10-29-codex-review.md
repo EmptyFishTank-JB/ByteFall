@@ -102,3 +102,29 @@ Validation:
 ## Implementation handoff
 
 Please inspect the current implementation, reproduce the relevant asynchronous sequences with focused tests or a small harness, then apply the fixes. Record verification and any platform limitations. The original review did not run browser or Android tests, and does not establish that unrelated systems are defect-free.
+
+## Resolution (November 2026)
+
+All three findings were real in the code (checked against current main, which had not changed those files).
+Severity in practice: 1 affects the website and the TEST app only (the Play release has no microphone); 3 is
+partly covered on Android by the native screen-on; 2 needs a refund inside one page session.
+
+1. **Microphone**: fixed in `js/extsource.js` (`gen`: start() takes a number, stop() the next; a stale start
+   stops the stream it was handed, never makes an audio context, and answers `'stale'`; an audio setup that
+   throws after the permission stops the stream) and `js/player.js` (`srcGen`: a source answer that arrives
+   after a later pick is ignored). OTHER APPS on Android still keeps listening with the player shut.
+2. **Purchase cache**: fixed with the numbering the review suggested. MainActivity numbers each ownership
+   query as it starts and each purchase as it is heard and sends the number as `q`; `js/billing.js` keeps a
+   purchase against an answer with a lower `q` (asked before it) and clears the cache for one with a higher
+   `q` (asked after: Google Play's word as it stands, a refund included). A failed query never emits an
+   empty list. An app without `q` (an older APK with the live page) keeps the old behavior. **Needs a new
+   APK or bundle for the native half.**
+3. **Wake lock**: fixed in `keepAwake` (`wakeGen`): a lock that arrives after fullscreen ended or after a newer
+   request is released at once; the system's own release clears the held lock.
+
+Verification: a Playwright harness with deferred `getUserMedia` and `wakeLock.request` promises and a faked
+Google Play, 24 checks (start-stop-grant, two starts answered out of order, refused permission, audio setup
+failing; enter-exit-resolve, two requests out of order, ordinary fullscreen; bought then an older and a newer
+query, a late answer, a failed query, no `q`, `day_one`, `remove_ads`, the upgrade). On the old code the billing,
+microphone and wake-lock checks fail; on the new code all pass. Not run: the Android billing flow itself
+(no device or Play Console here), so the Java change is checked by reading and by the build.

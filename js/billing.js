@@ -11,9 +11,13 @@
 // MainActivity.java does the billing (window.BytefallAndroid's billingStart, billingBuy and
 // billingRestore) and answers through window.bytefallBilling, an event at a time:
 //   { type: 'products', prices }                   Google Play's prices, in the player's currency
-//   { type: 'owned', owned, pending, restore }     all the account owns: as the game opens, when the
+//   { type: 'owned', owned, pending, restore, q } all the account owns: as the game opens, when the
 //                                                  app comes back to the front, RESTORE PURCHASES
-//   { type: 'bought', owned, pending }             a purchase just made (or paid at last)
+//   { type: 'bought', owned, pending, q }          a purchase just made (or paid at last)
+// q numbers the native side's ownership queries and purchases in the order they happened: an 'owned' whose
+// q is higher than the last 'bought''s was asked after that purchase, so it's Google Play's word as it
+// stands, and a refund shows in it; a lower q was asked before it and may leave the new purchase out.
+// An older app without q keeps the purchase for the session, as before.
 //   { type: 'failed', reason }                     'canceled', 'unavailable' or 'error'
 // What's owned goes to Unlocks (unlocks.js), which ads.js and the STORE follow.
 const Billing = (() => {
@@ -31,8 +35,10 @@ const Billing = (() => {
   if (was.full) owned.add(FULL);
   if (was.noAds) owned.add(REMOVE_ADS);
   if (was.dayOne) owned.add(DAY_ONE);
-  // (bought this session: kept even if a check made as the purchase sheet closed missed it)
+  // (bought this session: kept even if a check asked before the purchase, answering after it, missed it; a
+  // check asked after it clears them: Google Play's word then is the account as it stands, a refund too)
   const boughtNow = new Set();
+  let boughtQ = -1; // (the q of the last purchase heard)
   const apply = () => Unlocks.own(owned.has(FULL) || owned.has(UPGRADE), owned.has(REMOVE_ADS), owned.has(DAY_ONE));
 
   let why = ''; // (Google Play's word on the products that didn't come back: TEST PURCHASES shows it)
@@ -42,10 +48,12 @@ const Billing = (() => {
       why = e.why || '';
     } else if (e.type === 'failed' && e.why) why = e.why;
     else if (e.type === 'owned') {
+      if (typeof e.q === 'number' && e.q > boughtQ) boughtNow.clear(); // (asked after the last purchase: the whole truth)
       owned = new Set([...e.owned, ...boughtNow]);
       apply();
     } else if (e.type === 'bought') {
       e.owned.forEach((id) => { owned.add(id); boughtNow.add(id); });
+      if (typeof e.q === 'number') boughtQ = Math.max(boughtQ, e.q);
       apply();
     }
     listeners.forEach((fn) => fn(e));

@@ -220,6 +220,16 @@ limit, and no mandatory arbitration (left out on purpose: a lawyer can add one p
 Steam version as the privacy policy does. Check it again when STORY, accounts, online play, or anything
 that collects data is added, and keep it in step with the privacy policy.
 
+**Races guarded** (from Codex's review, `docs/reviews/to-claude/2026-10-29-codex-review.md`; each reproduced
+with a deferred promise before it was fixed). *Purchases*: the app numbers its ownership queries and purchases
+(`q`, MainActivity's `queryCounter`), so `js/billing.js` keeps a purchase against an answer to a question asked
+before it, and takes it back when a question asked after it leaves it out (a refund); an older app without `q`
+keeps the old behavior. *The microphone* (`js/extsource.js`): each start takes a number and stop() the next, so a
+permission granted after a cancel gives its stream back instead of switching the microphone on behind a closed
+player, and `js/player.js` ignores a source answer that arrives after a later pick. *The wake lock*
+(`js/player.js`'s `keepAwake`): a lock that arrives after fullscreen ended, or after a newer request, is
+released at once. The native change needs a new APK or bundle; the page's side works with the old one.
+
 ## Keys, resources and patches
 
 **[ECONOMY.md](ECONOMY.md) has the whole economy in tables**: every resource, how and where it's

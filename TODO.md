@@ -6,11 +6,6 @@ Ideas queued for later (not built yet).
 
 - **STORY stays gated** (COMING SOON in every build, `STORY_GATED` in `js/script.js`) until it's ready.
 - Once the app is live on the Play Store: take out the main menu title's secret tap sequences (BYTE×3 then FALL×3 for the STORY key, FALL×3 then BYTE×3 for DEV MODE; `js/script.js`'s THE STORY KEY, and the release branch of `js/unlocks.js` that reads `bytefall-unlock-key`). Till then anyone who learns the DEV MODE sequence gets everything unlocked for free. (The test app's DEV MODE padlock is gone: the tap is the only way in.)
-- **Codex's review** (`docs/reviews/to-claude/2026-10-29-codex-review.md`): three real but small
-  races, none a launch blocker: a pending microphone request that outlives a cancel (test app and
-  website only: the release has no microphone), the session's purchase cache outliving a refund until
-  the page reloads (`js/billing.js`), and a wake lock that arrives after fullscreen ended
-  (`js/player.js`). Fix with a generation token each, and test them with a deferred promise.
 - **A mailbox address** for the Play payments profile and trader details, so the developer's home address
   isn't on the listing (a UPS Store or virtual mailbox with a street address).
 

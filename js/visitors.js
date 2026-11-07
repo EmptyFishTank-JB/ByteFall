@@ -957,54 +957,6 @@ function createVisitors(api) {
       setTimeout(() => { v.gone = true; }, 900);
     }
   }
-  // THE WALKING TREE's legs (not in the game for now: its frames are in the frame editor, to draw
-  // from): its own pixel art with the foot of its trunk turned into roots, in
-  // four frames: planted (spread wide), the back root lifted and swung forward, passing (gathered
-  // under the trunk), the front root lifted and reaching ahead. Made from each kind's sprite: the
-  // trunk found a few rows up, the roots grown out of it (thicker on a thick trunk)
-  const ROOT_ROWS = 6;
-  const ROOT_PAD = 5;
-  function rootFrames(kind) {
-    const rows = SPRITES[kind].a;
-    const h = rows.length;
-    const probe = rows[h - 4];
-    let c0 = probe.search(/[^.]/);
-    let c1 = probe.length - 1 - [...probe].reverse().join('').search(/[^.]/);
-    const ch = probe[Math.floor((c0 + c1) / 2)];
-    const body = rows.slice(0, h - 2).map((r) => '.'.repeat(ROOT_PAD) + r + '.'.repeat(ROOT_PAD));
-    c0 += ROOT_PAD;
-    c1 += ROOT_PAD;
-    const width = body[0].length;
-    const thick = c1 - c0 >= 3 ? 2 : 1;
-    const R = ROOT_ROWS;
-    const out = (n) => Math.round(n);
-    // (each leg: its x on each root row, or null where it's off the ground; + is forward)
-    const FRAMES = [
-      [(r) => c0 - out(r * 0.9), (r) => c1 + out(r * 0.9)], // planted
-      [(r) => (r <= 3 ? c0 + out(r * 0.8) : null), (r) => c1 + out(r * 0.45)], // back root swung forward
-      [(r) => c0 - out(r * 0.3), (r) => c1 + out(r * 0.3)], // passing
-      [(r) => c0 - out(r * 0.45), (r) => (r <= 3 ? c1 + 1 + out(r * 1.1) : null)], // front root reaching
-    ];
-    return FRAMES.map(([left, right], f) => {
-      const roots = [];
-      for (let r = 0; r < R; r++) {
-        const row = Array(width).fill('.');
-        if (r === 0) for (let x = c0; x <= c1; x++) row[x] = ch; // (the trunk, on into its roots)
-        else {
-          for (const [leg, inward] of [[left, 1], [right, -1]]) {
-            const x = leg(r);
-            if (x === null) continue;
-            for (let k = 0; k < thick; k++) if (row[x + k * inward] !== undefined) row[x + k * inward] = ch;
-            const planted = (f === 0 || f === 2 || (f === 1 && leg === right) || (f === 3 && leg === left));
-            if (planted && r === R - 1 && row[x - inward] !== undefined) row[x - inward] = ch; // (a toe, gripping)
-            if (r === 2 && row[x - inward] !== undefined && f !== 2) row[x - inward] = ch; // (a rootlet off it)
-          }
-        }
-        roots.push(row.join(''));
-      }
-      return body.concat(roots);
-    });
-  }
   function drawFog(c, f, maxA, seed, low) {
     const cell = low ? 6 : 4;
     const W = c.clientWidth;
@@ -2854,10 +2806,6 @@ function createVisitors(api) {
   function art() {
     const sprites = { ...SPRITES, menorah: menorah(8), kinara: kinara(7), sign: sign(new Date().getFullYear()), 'moon-full': moonSprite(false), 'moon-blood': moonSprite(true) };
     delete sprites.bit;
-    for (const kind of ['tree', 'baretree', 'pine']) { // (the walking trees' four steps)
-      const [a, b, c, d] = rootFrames(kind);
-      sprites[`${kind}-walking`] = { pal: SPRITES[kind].pal, a, b, c, d };
-    }
     // (the frame-by-frame ones: each animation as it is, at its own resolution)
     const anims = {};
     for (const [kind, d] of Object.entries(ART)) {
@@ -2873,7 +2821,7 @@ function createVisitors(api) {
         };
       }
     }
-    return { sprites, anims, kinds: { ...KINDS, 'tree-walking': { frameMs: 190 }, 'baretree-walking': { frameMs: 190 }, 'pine-walking': { frameMs: 190 } } };
+    return { sprites, anims, kinds: KINDS };
   }
   return { frame, clear, visit, list: () => list, makeScenery, moveTree, foggy, spirit, art, weather: () => (weather ? weather.current() : null), scene: () => (scenes ? scenes.current() : null) };
 }

@@ -171,6 +171,10 @@ public class MainActivity extends BridgeActivity {
     private boolean billingConnecting = false;
     private final List<Runnable> billingWaiting = new ArrayList<>();
     private final Map<String, ProductDetails> products = new HashMap<>();
+    // (each ownership query takes the next number as it starts, and so does each purchase as it's heard, sent
+    // with the event as "q": the page can tell an answer to a question asked before a purchase, which may leave
+    // it out, from one asked after, which is Google Play's word as it stands now, a refund included. UI thread)
+    private int queryCounter = 0;
 
     // (an event for the page, as JSON)
     private void tellPage(String json) {
@@ -257,14 +261,15 @@ public class MainActivity extends BridgeActivity {
 
     // (everything the account owns; restore: for RESTORE PURCHASES, which says how it went)
     private void queryOwned(boolean restore) {
+        final int q = ++queryCounter;
         billing.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build(), (result, purchases) -> runOnUiThread(() -> {
-            if (result.getResponseCode() == BillingClient.BillingResponseCode.OK) tellPurchases("owned", purchases, restore);
+            if (result.getResponseCode() == BillingClient.BillingResponseCode.OK) tellPurchases("owned", purchases, restore, q);
             else if (restore) tellFailed("unavailable");
         }));
     }
 
     // (what's paid for, acknowledged if it wasn't yet, and what's still pending)
-    private void tellPurchases(String type, List<Purchase> purchases, boolean restore) {
+    private void tellPurchases(String type, List<Purchase> purchases, boolean restore, int q) {
         List<String> owned = new ArrayList<>();
         List<String> pending = new ArrayList<>();
         for (Purchase p : purchases) {
@@ -277,7 +282,7 @@ public class MainActivity extends BridgeActivity {
                 pending.addAll(p.getProducts());
             }
         }
-        tellPage("{\"type\":" + JSONObject.quote(type) + ",\"owned\":" + jsonList(owned) + ",\"pending\":" + jsonList(pending) + ",\"restore\":" + restore + "}");
+        tellPage("{\"type\":" + JSONObject.quote(type) + ",\"owned\":" + jsonList(owned) + ",\"pending\":" + jsonList(pending) + ",\"restore\":" + restore + ",\"q\":" + q + "}");
     }
 
     // TEST PURCHASES (SETTINGS, builds with test ads only: js/store.js): everything the account owns
@@ -300,7 +305,7 @@ public class MainActivity extends BridgeActivity {
     private void onPurchasesUpdated(BillingResult result, List<Purchase> purchases) {
         runOnUiThread(() -> {
             int code = result.getResponseCode();
-            if (code == BillingClient.BillingResponseCode.OK && purchases != null) tellPurchases("bought", purchases, false);
+            if (code == BillingClient.BillingResponseCode.OK && purchases != null) tellPurchases("bought", purchases, false, ++queryCounter);
             else if (code == BillingClient.BillingResponseCode.USER_CANCELED) tellFailed("canceled");
             else if (code == BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED) queryOwned(true);
             else tellFailed("error");

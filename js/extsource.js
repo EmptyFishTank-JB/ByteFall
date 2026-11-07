@@ -23,6 +23,10 @@ const ExtSource = (() => {
   let lastLoud = 0; // (the loudest raw level in the last frame)
   let lastPeak = 0; // (by capture: the loudest sample, 0 to 1, for the readout in dB: even a faint sound shows)
   let state = 'off'; // (off, asking, on, denied, error)
+  // (each start() takes a number and stop() takes the next: a start that was waiting on a permission prompt
+  // or on Android's questions when it was stopped finds itself out of date, and gives back what it got
+  // instead of switching the microphone on behind a closed player)
+  let gen = 0;
   // (the app's: frames from Android, as an analyser)
   let fft = null;
   let wave = null;
@@ -165,14 +169,24 @@ const ExtSource = (() => {
   };
   // (the web's: the microphone through Web Audio)
   let mic = null;
-  async function startMic() {
+  // (false: this start was stopped while it waited, and nothing of it is kept)
+  async function startMic(mine) {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const an = ctx.createAnalyser();
-    an.fftSize = 2048;
-    an.smoothingTimeConstant = 0.8;
-    ctx.createMediaStreamSource(stream).connect(an);
-    mic = { stream, ctx, an };
+    if (mine !== gen) { stream.getTracks().forEach((tr) => tr.stop()); return false; }
+    let ctx = null;
+    try {
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const an = ctx.createAnalyser();
+      an.fftSize = 2048;
+      an.smoothingTimeConstant = 0.8;
+      ctx.createMediaStreamSource(stream).connect(an);
+      mic = { stream, ctx, an };
+    } catch (e) { // (the audio setup failed after the permission: the microphone isn't left open)
+      stream.getTracks().forEach((tr) => tr.stop());
+      if (ctx) ctx.close().catch(() => {});
+      throw e;
+    }
+    return true;
   }
   return {
     label,
@@ -203,8 +217,10 @@ const ExtSource = (() => {
       for (let i = 0; i < d.length; i++) loud = Math.max(loud, Math.abs(d[i] - 128));
       return `IN: ${loud > 1 ? `LEVEL ${loud}` : 'SILENT'}`;
     },
-    // (start listening to a source, 'apps' or 'mic': resolves 'on', or 'denied' / 'error')
+    // (start listening to a source, 'apps' or 'mic': resolves 'on', or 'denied' / 'error', or 'stale' when
+    // it was stopped, or another start came, while it waited: then it has changed nothing)
     async start(which = kinds()[0]) {
+      const mine = ++gen;
       kind = which;
       on = true;
       frames = 0;
@@ -212,15 +228,21 @@ const ExtSource = (() => {
         state = window.BytefallAndroid.extStart();
         for (let i = 0; i < 400 && state === 'asking'; i++) { // (waiting on Android's questions)
           await new Promise((res) => setTimeout(res, 150));
+          if (mine !== gen) return 'stale';
           state = window.BytefallAndroid.extState();
         }
       } else {
-        try { if (!mic) await startMic(); state = 'on'; } catch (e) { state = e && e.name === 'NotAllowedError' ? 'denied' : 'error'; }
+        let result = 'on';
+        try { if (!mic && !(await startMic(mine))) return 'stale'; } catch (e) { result = e && e.name === 'NotAllowedError' ? 'denied' : 'error'; }
+        if (mine !== gen) return 'stale';
+        state = result;
       }
+      if (mine !== gen) return 'stale';
       if (state !== 'on') on = false;
       return state;
     },
     stop() {
+      gen++;
       on = false;
       state = 'off';
       if (app()) { try { window.BytefallAndroid.extStop(); } catch (e) {} }

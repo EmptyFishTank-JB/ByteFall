@@ -264,11 +264,24 @@
     clearTimeout(calmTimer);
     calmTimer = setTimeout(() => { if (isFull()) el.classList.add('viz-calm'); }, 2500);
   }
+  // (each request takes a number and every release takes the next: a lock that arrives after fullscreen
+  // ended, or after a newer request, is let go of at once instead of keeping the screen on)
+  let wakeGen = 0;
   async function keepAwake(on) {
+    const mine = ++wakeGen;
+    if (!on) {
+      const held = wake;
+      wake = null;
+      if (held) { try { await held.release(); } catch (e) {} }
+      return;
+    }
+    if (wake || !navigator.wakeLock) return;
     try {
-      if (on && !wake && navigator.wakeLock) wake = await navigator.wakeLock.request('screen');
-      if (!on && wake) { await wake.release(); wake = null; }
-    } catch (e) { wake = null; }
+      const lock = await navigator.wakeLock.request('screen');
+      if (mine !== wakeGen) { try { await lock.release(); } catch (e) {} return; } // (out of date: let it go)
+      wake = lock;
+      if (lock.addEventListener) lock.addEventListener('release', () => { if (wake === lock) wake = null; }); // (the system let go of it)
+    } catch (e) { if (mine === wakeGen) wake = null; }
   }
   // (it turns with the phone: the app's portrait lock let go while it's up, tools/android/
   // MainActivity.java; a browser in its own full screen turns anyway, an installed web app's
@@ -321,13 +334,16 @@
     sourceBtn.classList.toggle('other', other);
     if (!other) hintEl.textContent = 'TAP TO SWITCH';
   }
+  let srcGen = 0; // (each pick takes a number: an answer that arrives after a later pick is ignored)
   async function useSource(kind) {
+    const mine = ++srcGen;
     want = kind;
     ExtSource.stop();
     if (!kind) { showSource(); return; }
     if (Music.isEnabled()) { Music.toggle(); after(); }
     showSource('ASKING...');
     const st = await ExtSource.start(kind);
+    if (st === 'stale' || mine !== srcGen) return; // (stopped, or another source picked, while it asked)
     if (st === 'on') { showSource(); return; }
     want = null;
     showSource(st === 'denied' ? 'NO ACCESS' : 'UNAVAILABLE');
